@@ -3,19 +3,22 @@ title: "Lecture 07 - Computational Tools for Bioengineers"
 subtitle: "R and RStudio"
 date: "Monday, November 9, 2026"
 author: "Bill Cresko"
-format: 
-  revealjs:
-    footer: BioE_Comp_Tools_2026 - Knight Campus 
-    transition: fade
-    transition-speed: slow
-editor: visual
 ---
 
 ```{r}
+#| label: setup
+#| include: false
+
+# Packages used in the lecture examples
 library(tidyverse)
 library(gt)
 library(readxl)
-theme_set(theme_minimal())
+
+# Consistent theme for all plots
+theme_set(theme_minimal(base_size = 14))
+
+# Reproducible random numbers
+set.seed(2026)
 ```
 
 
@@ -26,7 +29,7 @@ theme_set(theme_minimal())
 -   Vibe Coding with LLMs
 -   Git and GitHub
 
-## What is a Shell Script? {.smaller}
+## What is a Shell Script?
 
 -   Text file containing Unix commands
 -   Automates repetitive tasks
@@ -39,7 +42,7 @@ theme_set(theme_minimal())
     -   Functions
     -   Command-line arguments
 
-## Creating Your First Script {.smaller}
+## Creating Your First Script
 
 ``` bash
 #!/bin/bash
@@ -64,7 +67,7 @@ echo "Double of $COUNT is $DOUBLE"
 
 Save as `first_script.sh` and run with `bash first_script.sh`
 
-## Making Scripts Executable {.smaller}
+## Making Scripts Executable
 
 ``` bash
 # Check current permissions
@@ -81,7 +84,7 @@ Best practice: Always use `chmod +x` for your scripts
 
 # R statistical programming language
 
-## Why use `R`? {.smaller}
+## Why use `R`?
 
 -   Good general scripting tool for statistics and mathematics
 -   Powerful and flexible and free
@@ -95,14 +98,14 @@ Best practice: Always use `chmod +x` for your scripts
 -   Can embed your `R` analyses in dynamic, polished files using `Quarto Markdown`
 -   Quarto Markdown can be reused for websites, papers, books, presentations...
 
-## `R scripts` and `Quarto Markdown` {.smaller}
+## `R scripts` and `Quarto Markdown`
 
 -   Often we want to write scripts that can just be run - `R scripts`
 -   We can also embed code in Quarto Markdown files that provide more annotations
 -   This improves interpertability and reproducibility
 -   You can insert `R code chunks` into `Quarto Markdown` documents
 
-## `R script` basics {.smaller}
+## `R script` basics
 
 -   A series of R commands that will be executed\
 
@@ -110,7 +113,7 @@ Best practice: Always use `chmod +x` for your scripts
 
 -   Can have pipes (`|>`) to connect one step to the next\
 
-## BASICS of `R` {.flexbox .vcenter .smaller}
+## BASICS of `R`
 
 -   Commands can be submitted through the terminal, console or scripts
 -   Notice on these slides I'm evaluating the code chunks and showing output
@@ -119,24 +122,35 @@ Best practice: Always use `chmod +x` for your scripts
 \
 \
 
-```{r basic multiplication, echo=TRUE}
+```{r}
+#| label: lec07-basic-multiplication
+#| echo: true
+#| eval: true
+
 4*4
 ```
 
-```{r more multiplication, echo=TRUE}
+```{r}
+#| label: lec07-more-multiplication
+#| echo: true
+#| eval: true
+
 (4+3*2^2)
 ```
 
-## Assigning Variables {.flexbox .vcenter}
+## Assigning Variables
 
 -   A better way to do this is to assign variables
 -   Variables are assigned values using the `<-` operator.
 -   Variable names must begin with a letter, but other than that, just about anything goes.
 -   Do keep in mind that `R` is case sensitive.
 
-## Assigning Variables {.flexbox .vcenter}
+## Assigning Variables
 
-```{r assigning variables, echo=TRUE, tidy=TRUE}
+```{r}
+#| label: lec07-assigning-variables
+#| echo: true
+#| eval: true
 
 x <- 2
 x*3
@@ -147,17 +161,25 @@ y-2
 
 These do not work
 
-```{r eval=FALSE, echo=TRUE}
+```{r}
+#| label: lec07-assigning-variables-2
+#| echo: true
+#| eval: false
+
 3y <- 3
 3*y <- 3
 ```
 
-## Arithmetic operations on functions {.smaller}
+## Arithmetic operations on functions
 
 -   Arithmetic operations can be performed easily on functions as well as numbers.
 -   Try the following, and then your own.
 
-```{r functions, eval = FALSE, echo = TRUE}
+```{r}
+#| label: lec07-functions
+#| echo: true
+#| eval: false
+
 x+2
 x^2
 log(x)
@@ -167,9 +189,13 @@ log(x)
 -   These parentheses will be important, and we'll come back to them later when we add arguments after the object in the parentheses\
 -   The outcome of calculations can be assigned to new variables as well, and the results can be checked using the 'print' command
 
-## Arithmetic operations on functions {.smaller}
+## Arithmetic operations on functions
 
-```{r, echo=TRUE}
+```{r}
+#| label: lec07-arithmetic-operations-on-functions
+#| echo: true
+#| eval: true
+
 y <- 67
 print(y)
 
@@ -178,7 +204,7 @@ z <- (x*y)^2
 print(z)
 ```
 
-## STRINGS {.smaller}
+## STRINGS
 
 -   Variables and operations can be performed on characters as well
 -   Note that characters need to be set off by quotation marks to differentiate them from numbers
@@ -186,9 +212,13 @@ print(z)
 -   Note that we are using the same variable names as we did previously, which means that we're overwriting our previous assignment
 -   A good rule of thumb is to use new names for each variable, and make them short but still descriptive
 
-## STRINGS {.smaller}
+## STRINGS
 
-```{r, echo=TRUE}
+```{r}
+#| label: lec07-strings
+#| echo: true
+#| eval: true
+
 x <- "I Love"
 print (x)
 y <- "Bioengineering"
@@ -197,37 +227,54 @@ z <- c(x,y)
 print (z)
 ```
 
-## VECTORS {.smaller}
+## VECTORS
 
 -   In general `R` thinks in terms of vectors (a list of characters, factors or numerical values).
 -   It will benefit any `R` user to try to write programs with that in mind, as it will simplify most things.
 -   Vectors can be assigned directly using the `c()` function and then entering the exact values.
 
-## VECTORS {.smaller}
+## VECTORS
 
-```{r Example vectors, echo=TRUE}
+```{r}
+#| label: lec07-example-vectors
+#| echo: true
+#| eval: true
+
 x <- c(2,3,4,2,1,2,4,5,10,8,9)
 print(x)
 ```
 
-```{r Example vector multiplication, echo=TRUE}
+```{r}
+#| label: lec07-example-vector-multiplication
+#| echo: true
+#| eval: true
+
 x <- c(2,3,4,2,1,2,4,5,10,8,9)
 y <- x^2
 print(x)
 print(y)
 ```
 
-```{r Example vector plot, echo=TRUE}
+```{r}
+#| label: fig-lec07-example-vector-plot
+#| fig-cap: "Each value of x plotted against its square (y = x^2)"
+#| echo: true
+#| eval: true
+
 plot(x,y)
 ```
 
-## Basic Statistics {.smaller}
+## Basic Statistics
 
 -   Many functions exist to operate on vectors.
 -   Combine these with your previous variable to see what happens.
 -   Also, try to find other functions (e.g. standard deviation).
 
-```{r, eval = FALSE, echo = TRUE}
+```{r}
+#| label: lec07-basic-statistics
+#| echo: true
+#| eval: false
+
 mean(x)
 median(x)
 var(x)
@@ -243,7 +290,7 @@ sample(x, replace = T)
 -   Arguments simply modify or direct the function in some way
 -   There are many arguments for each function, some of which are defaults
 
-## Getting Help {.smaller}
+## Getting Help
 
 -   Getting Help on any function is very easy - just type a question mark and the name of the function.
 -   There are functions for just about anything within `R` and it is easy enough to write your own functions if none already exist to do what you want to do.
@@ -253,7 +300,11 @@ sample(x, replace = T)
 
 ## Getting Help
 
-```{r, eval = FALSE, echo = TRUE}
+```{r}
+#| label: lec07-getting-help
+#| echo: true
+#| eval: false
+
 - help(mean)
 - ?mean
 - example(mean)
@@ -262,7 +313,7 @@ sample(x, replace = T)
 - args(mean)
 ```
 
-## Creating vectors {.smaller}
+## Creating vectors
 
 -   Creating vector of new data by entering it by hand can be a drag
 -   However, it is also very easy to use functions such as `seq` and `sample`
@@ -270,30 +321,42 @@ sample(x, replace = T)
 -   Try varying the arguments to see what happens.
 -   Don't go too crazy with the last one or your computer might slow way down
 
-## Creating vectors {.smaller}
+## Creating vectors
 
-```{r, echo = TRUE}
+```{r}
+#| label: lec07-creating-vectors
+#| echo: true
+#| eval: true
+
 seq_1 <- seq(0.0, 10.0, by = 0.1)
 print(seq_1)
 seq_2 <- seq(10.0, 0.0, by = -0.1)
 print(seq_2)
 ```
 
-## Creating vectors {.smaller}
+## Creating vectors
 
-```{r, echo = TRUE}
+```{r}
+#| label: lec07-creating-vectors-2
+#| echo: true
+#| eval: true
+
 seq_square <- (seq_2)*(seq_2)
 print(seq_square)
 ```
 
-## Creating vectors {.smaller}
+## Creating vectors
 
-```{r, echo = TRUE}
+```{r}
+#| label: lec07-creating-vectors-3
+#| echo: true
+#| eval: true
+
 seq_square_new <- (seq_2)^2
 print(seq_square_new)
 ```
 
-## Types of vectors of data {.smaller}
+## Types of vectors of data
 
 -   `int` stands for integers
 
@@ -314,7 +377,7 @@ print(seq_square_new)
 -   Integer and double vectors are known collectively as numeric vectors.
 -   In `R` numbers are doubles by default.
 
-## Types of vectors of data {.smaller}
+## Types of vectors of data
 
 -   Logical vectors can take only three possible values:
     -   `FALSE`
@@ -324,7 +387,10 @@ print(seq_square_new)
     -   `NA`
     -   `NaN` which is 'not a number'
     -   `Inf`
-    -   `-Inf`\## Reading in Data Frames in R {.smaller}
+    -   `-Inf`
+
+## Reading in Data Frames in R
+
 -   A strength of `R` is being able to import data from an external source
 -   Create the same table that you did above in a spreadsheet like Excel
 -   Export it to comma separated and tab separated text files for importing into `R`.
@@ -332,47 +398,71 @@ print(seq_square_new)
 -   In both cases the header and row.names arguments indicate that there is a header row and row label column
 -   Note that the name of the file by itself will have R look in the CWD, whereas a full path can also be used
 
-## Drawing samples from distributions {.smaller}
+## Drawing samples from distributions
 
 -   Here is a way to create your own data sets that are random samples.
 -   Again, play around with the arguments in the parentheses to see what happens.
 
-## Drawing samples from distributions {.smaller}
+## Drawing samples from distributions
 
-```{r Samples from distributions 1, out.width='100%', echo = TRUE}
+```{r}
+#| label: fig-lec07-samples-from-distributions-1
+#| fig-cap: "10,000 normal draws (x) plotted against 10,000 uniform draws (y)"
+#| out-width: "100%"
+#| echo: true
+#| eval: true
+
 x <- rnorm (10000, 0, 10)
 y <- sample (1:10000, 10000, replace = T)
 xy <- cbind(x,y)
 plot(x,y) 
 ```
 
-## Drawing samples from distributions {.smaller}
+## Drawing samples from distributions
 
-```{r Samples from distributions 2, out.width='100%', echo = TRUE}
+```{r}
+#| label: fig-lec07-samples-from-distributions-2
+#| fig-cap: "The same samples plotted from a two-column matrix made with cbind()"
+#| out-width: "100%"
+#| echo: true
+#| eval: true
+
 x <- rnorm (10000, 0, 10)
 y <- sample (1:10000, 10000, replace = T)
 xy <- cbind(x,y)
 plot(xy)
 ```
 
-## Drawing samples from distributions {.smaller}
+## Drawing samples from distributions
 
-```{r Samples from distributions 3, out.width='100%', echo = TRUE}
+```{r}
+#| label: fig-lec07-samples-from-distributions-3
+#| fig-cap: "Histogram of 10,000 draws from a normal distribution (mean 0, sd 10)"
+#| out-width: "100%"
+#| echo: true
+#| eval: true
+
 x <- rnorm (10000, 0, 10)
 y <- sample (1:10000, 10000, replace = T)
 xy <- cbind(x,y)
 hist(x)
 ```
 
-## Drawing samples from distributions {.smaller}
+## Drawing samples from distributions
 
 -   You’ve probably figured out that y from the last example is drawing numbers with equal probability.
 -   What if you want to draw from a distribution?
 -   Again, play around with the arguments in the parentheses to see what happens.
 
-## Drawing samples from distributions {out.width="50%"}
+## Drawing samples from distributions
 
-```{r, out.width='100%', echo = TRUE}
+```{r}
+#| label: fig-lec07-drawing-samples-from-distributions
+#| fig-cap: "Histogram of normal draws with the theoretical density curve overlaid"
+#| out-width: "100%"
+#| echo: true
+#| eval: true
+
 x <-rnorm(1000, 0, 100)
 hist(x, xlim = c(-500,500))
 curve(50000*dnorm(x, 0, 100), xlim = c(-500,500), add=TRUE, col='Red')
@@ -381,7 +471,7 @@ curve(50000*dnorm(x, 0, 100), xlim = c(-500,500), add=TRUE, col='Red')
 -   `dnorm()` generates the probability density, which can be plotted using the `curve()` function.
 -   Note that is curve is added to the plot using `add=TRUE`
 
-## Visualizing Data {.smaller}
+## Visualizing Data
 
 -   So far you've been visualizing just the list of output numbers
 -   Except for the last example where I snuck in a `hist` function.
@@ -389,34 +479,52 @@ curve(50000*dnorm(x, 0, 100), xlim = c(-500,500), add=TRUE, col='Red')
 -   Each of these is called a `high level` plotting function, which sets the stage
 -   `Low level` plotting functions will tweak the plots and make them beautiful
 
-## Visualizing Data {.smaller}
+## Visualizing Data
 
 -   What do you think that each of the arguments means for the plot function?
 -   A cool thing about `R` is that the options for the arguments make sense.
 -   Try adjusting an argument and see if it works
 -   Note- most people use the package `GGPlot2` for nice scientific graphics
 
-## Visualizing Data {.smaller}
+## Visualizing Data
 
-```{r, echo = TRUE}
+```{r}
+#| label: fig-lec07-visualizing-data
+#| fig-cap: "A sequence from 0 to 10 plotted as points"
+#| echo: true
+#| eval: true
+
 seq_1 <- seq(0.0, 10.0, by = 0.1) 
 plot (seq_1, xlab="space", ylab ="function of space", type = "p", col = "red")
 ```
 
-## Putting plots in a single figure {.smaller}
+## Putting plots in a single figure
 
 -   On the next slide
 -   The first line of the lower script tells R that you are going to create a composite figure that has two rows and two columns. Can you tell how?
 -   Now, modify the code to add two more variables and add one more row of two panels.
 
-```{r, echo=TRUE, outwidth="50%", out.height="20%"}
+```{r}
+#| label: lec07-putting-plots-in-a-single
+#| out-width: "50%"
+#| out-height: "20%"
+#| echo: true
+#| eval: true
+
 seq_1 <- seq(0.0, 10.0, by = 0.1)
 seq_2 <- seq(10.0, 0.0, by = -0.1)
 ```
 
-## Putting plots in a single figure {.smaller}
+## Putting plots in a single figure
 
-```{r, echo=TRUE, outwidth="50%", out.height="50%"}
+```{r}
+#| label: fig-lec07-composite-figure
+#| fig-cap: "Four plots arranged in a 2 x 2 grid with par(mfrow)"
+#| out-width: "50%"
+#| out-height: "50%"
+#| echo: true
+#| eval: true
+
 par(mfrow=c(2,2))
 plot (seq_1, xlab="time", ylab ="p in population 1", type = "p", col = 'red')
 plot (seq_2, xlab="time", ylab ="p in population 2", type = "p", col = 'green')
@@ -424,14 +532,18 @@ plot (seq_square, xlab="time", ylab ="p2 in population 2", type = "p", col = 'bl
 plot (seq_square_new, xlab="time", ylab ="p in population 1", type = "l", col = 'yellow')
 ```
 
-## Creating Data Frames in R {.smaller}
+## Creating Data Frames in R
 
 -   As you have seen, in R you can generate your own random data set drawn from nearly any distribution very easily.
 -   Often we will want to use collected data.
 -   Now, let’s make a dummy dataset to get used to dealing with data frames
 -   Set up three variables (hydrogel_concentration, compression and conductivity) as vectors
 
-```{r, echo=TRUE}
+```{r}
+#| label: lec07-creating-data-frames-in-r
+#| echo: true
+#| eval: true
+
 hydrogel_concentration <- factor(c("low", "high", "high", "high", "medium", "medium", "medium","low"))
 compression <- c(3.4, 3.4, 8.4, 3, 5.6, 8.1, 8.3, 4.5)
 conductivity <- c(0, 9.2, 3.8, 5, 5.6, 4.1, 7.1, 5.3)
@@ -439,7 +551,11 @@ conductivity <- c(0, 9.2, 3.8, 5, 5.6, 4.1, 7.1, 5.3)
 
 -   Create a data frame where vectors become columns
 
-```{r, echo=TRUE}
+```{r}
+#| label: lec07-creating-data-frames-in-r-2
+#| echo: true
+#| eval: true
+
 mydata <- data.frame(hydrogel_concentration, compression, conductivity)
 row.names(mydata) <- c("Sample_1", "Sample_2", "Sample_3", "Sample_4", 
                        "Sample_5", "Sample_6", "Sample_7", "Sample_8")
@@ -452,14 +568,22 @@ row.names(mydata) <- c("Sample_1", "Sample_2", "Sample_3", "Sample_4",
 
 \
 
-```{r, eval = FALSE, echo = TRUE}
+```{r}
+#| label: lec07-reading-in-and-exporting-data
+#| echo: true
+#| eval: false
+
 YourFile <- read.table('yourfile.csv', header=T, row.names=1, sep=',')
 YourFile <- read.table('yourfile.txt', header=T, row.names=1, sep='\t')
 ```
 
 \
 
-```{r, eval = FALSE, echo = TRUE}
+```{r}
+#| label: lec07-reading-in-and-exporting-data-2
+#| echo: true
+#| eval: false
+
 write.table(YourFile, "yourfile.csv", quote=F, row.names=T, sep=",")
 write.table(YourFile, "yourfile.txt", quote=F, row.names=T, sep="\t")
 ```
@@ -470,16 +594,24 @@ write.table(YourFile, "yourfile.txt", quote=F, row.names=T, sep="\t")
 -   This is a very important idea in R, that you can analyze just a subset of the data.
 -   This is analyzing only the data in the file you made that has the factor value 'mixed'.
 
-```{r, echo=TRUE, eval=FALSE}
+```{r}
+#| label: lec07-indexing-in-data-frames
+#| echo: true
+#| eval: false
+
 print (YourFile[,2])
 print (YourFile$variable)
 print (YourFile[2,])
 plot (YourFile$variable1, YourFile$variable2)
 ```
 
-## Practice reading in transcriptomic data {.smaller}
+## Practice reading in transcriptomic data
 
-```{r, eval = FALSE, echo = TRUE}
+```{r}
+#| label: lec07-practice-reading-in-transcriptomic-data
+#| echo: true
+#| eval: false
+
 RNAseq_Data <- read.table('<name_of_file>', header=TRUE, sep=',')
 
 print (RNAseq_Data)
@@ -493,9 +625,13 @@ print (RNAseq_Data$ENSGACG00000000010)
 print (RNAseq_Data$ENSGACG00000000010>45.0)
 ```
 
-## Summary stats and figures {.smaller}
+## Summary stats and figures
 
-```{r, eval = FALSE, echo = TRUE}
+```{r}
+#| label: lec07-summary-stats-and-figures
+#| echo: true
+#| eval: false
+
 summary1 <- summary(RNAseq_Data $ENSGACG00000000003)
 print (summary1)
 
@@ -510,3 +646,88 @@ boxplot(RNAseq_Data $ENSGACG00000000003~RNAseq_Data$Treatment,
         main = "Boxplot of variation in gene expression across microbiota treatments")
 ```
 
+# Going further with R
+
+## Installing vs. loading packages
+
+``` r
+install.packages("tidyverse")   # download & install - ONCE per computer
+library(tidyverse)              # load - EVERY new R session
+```
+
+::: incremental
+-   **`install.packages()`** puts a package on your computer (from CRAN)
+-   **`library()`** makes it available in *this* session - restarting R means re-running `library()`
+-   "there is no package called ..." means you never installed it
+-   Bioconductor packages (genomics) use `BiocManager::install("name")`
+-   Use one function without loading the package: `readxl::read_excel("file.xlsx")`
+:::
+
+## Inspecting objects and getting help
+
+``` r
+str(mydata)        # structure: type, dimensions, first values - your #1 tool
+summary(mydata)    # quick summary of every column
+class(mydata)      # what kind of object is this?
+dim(mydata)        # rows x columns
+names(mydata)      # column names
+?mean              # help page for a function
+??"linear model"   # search help across all packages
+sessionInfo()      # R version + loaded package versions - put at the end of reports
+```
+
+::: callout-tip
+When an object surprises you, run `str()` on it first. In **Positron** or **RStudio**, the Variables/Environment pane shows the same information.
+:::
+
+## Common gotchas that bite everyone
+
+::: incremental
+-   **R counts from 1**, and `x[-1]` *drops* the first element (it is not "the last" as in Python)
+-   **`=` vs `==`**: `=` assigns or names an argument; `==` tests equality
+-   **`NA` is contagious**: `mean(c(1, NA, 3))` is `NA` - use `na.rm = TRUE`
+-   **Floating point**: `0.1 + 0.2 == 0.3` is `FALSE` - use `all.equal()`
+-   **Case matters**: `Data` and `data` are different objects
+-   **Working directory**: "cannot open file" usually means R is looking in the wrong folder - check `getwd()` and use project-relative paths
+:::
+
+## A taste of the tidyverse: the pipe `|>`
+
+``` r
+library(tidyverse)
+
+mydata |>
+  filter(compression > 4) |>                            # keep rows
+  mutate(ratio = conductivity / compression) |>         # add a column
+  group_by(hydrogel_concentration) |>                   # define groups
+  summarise(n = n(), mean_ratio = mean(ratio))          # one row per group
+```
+
+| Verb          | What it does                       |
+|---------------|------------------------------------|
+| `filter()`    | Keep rows matching a condition     |
+| `select()`    | Keep or drop columns               |
+| `mutate()`    | Add or change columns              |
+| `arrange()`   | Sort rows                          |
+| `group_by()` + `summarise()` | Summaries per group |
+
+::: callout-note
+Read `|>` as **"and then"**. The older `%>%` pipe does the same thing.
+:::
+
+## A taste of ggplot2: the grammar of graphics
+
+``` r
+ggplot(mydata, aes(x = hydrogel_concentration, y = compression)) +
+  geom_boxplot() +
+  geom_jitter(width = 0.1) +
+  labs(x = "Hydrogel concentration", y = "Compression") +
+  theme_minimal()
+```
+
+::: incremental
+-   **Data** + **aesthetic mappings** (`aes()`: which column goes to x, y, color...) + **geoms** (points, boxes, lines)
+-   Layers are added with `+`
+-   Same pattern for every plot type - learn it once
+-   More in [Appendix D (R primer)](../Resources_Folder/Appendix_D_R_and_RStudio.qmd) and [Appendix E (R command reference)](../Resources_Folder/Appendix_E_Core_R_Commands.qmd)
+:::

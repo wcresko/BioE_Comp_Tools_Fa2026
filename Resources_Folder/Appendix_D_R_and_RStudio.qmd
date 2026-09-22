@@ -1,0 +1,830 @@
+---
+title: "Appendix D - R Primer: RStudio, Positron & the R Language"
+author: "Bill Cresko"
+format:
+  html:
+    toc: true
+    toc-depth: 3
+    toc-location: left
+    code-overflow: wrap
+engine: knitr
+execute:
+  eval: false
+---
+
+R is a free, open-source language and environment for statistical computing and graphics (R Core Team, <https://www.r-project.org>). This appendix is a gentle primer for beginners: what R is, how to pick and use an IDE (RStudio, Positron, or VS Code), R's core data structures, writing and calling functions, and the tidyverse grammar you will see in most modern R code. The shell and command line are covered in [Appendix A](Appendix_A_Computer_Systems_Command_Line.qmd).
+
+::: {.callout-tip title="How this appendix maps to Lecture 07 (R and RStudio)"}
+| Lecture 07 topic | Section of this appendix |
+|---|---|
+| Choosing and using an IDE | [Choosing an IDE](#choosing-an-ide-rstudio-positron-or-vs-code) |
+| Variables, assignment, basic math | [R Basics](#r-basics) |
+| Vectors and basic statistics | [Vectors](#vectors) |
+| Sampling distributions (`rnorm()`) | [Sampling from Distributions](#sampling-from-distributions) |
+| Base R plots | [Base R Visualization](#base-r-visualization) |
+| Data frames and reading data (including the stickleback RNA-seq practice table) | [Data Frames](#data-frames) and [Reading and Writing Data](#reading-and-writing-data) |
+| Going further: factors, functions, packages, tidyverse | The later sections |
+
+Everything here is display-only. Open an R session (in RStudio, Positron, or VS Code) and type the examples yourself; that is how the syntax sticks. For a compact look-it-up list of commands, see [Appendix E - Core R Commands Reference](Appendix_E_Core_R_Commands.qmd).
+:::
+
+::: callout-tip
+**Keep a cheat sheet open.** The course [Resources](../Resources.qmd) page and the Posit cheatsheets (<https://posit.co/resources/cheatsheets/>) have one-page Base R, dplyr, and ggplot2 references that pair well with this appendix.
+:::
+
+# Why R?
+
+R is one of the most widely used languages for statistics and data analysis in the life sciences and engineering.
+
+-   Good general scripting tool for statistics and mathematics
+-   Powerful, flexible, and free
+-   Runs on all computer platforms (macOS, Windows, Linux, and HPC clusters such as Talapas)
+-   New packages and enhancements coming out all the time
+-   Superb data management and graphics capabilities
+-   **Reproducibility**: keep your scripts to see exactly what was done
+-   You can write your own functions
+-   Lots of online help available
+-   Can use a friendly IDE such as **RStudio** or **Positron**
+-   Can embed your R analyses in dynamic, polished documents using **Quarto** (see [Appendix F](Appendix_F_Quarto_Markdown.qmd))
+
+# Choosing an IDE: RStudio, Positron, or VS Code
+
+An **IDE** (integrated development environment) is the program you use to write and run code. R itself is just the language and its interpreter; the IDE gives you an editor, a console, plot viewers, and help all in one window. In this course you may use any of the three below. They all run the same R underneath, so code written in one works in the others.
+
+## RStudio: the four-pane interface
+
+RStudio (from Posit) is the long-standing standard IDE for R. When it opens you see four panes:
+
+-   **Source** (top-left): where you edit scripts (`.R`) and Quarto documents (`.qmd`). Run a line or selection with *Ctrl/Cmd + Enter*.
+-   **Console** (bottom-left): the live R session. Type here and press Enter to run immediately.
+-   **Environment / History** (top-right): every object (variable, data frame) you have created this session.
+-   **Files / Plots / Packages / Help** (bottom-right): file browser, your plots, installed packages, and help pages.
+
+## Positron: Posit's data-science IDE
+
+Positron is a newer IDE from Posit built on Code OSS (the open-source core of VS Code). It supports both **R and Python** out of the box, which is convenient in a course that uses both languages. Key panes:
+
+-   **Editor**: scripts, Quarto documents, and notebooks, with *Ctrl/Cmd + Enter* to send code to the console.
+-   **Console**: an interactive R or Python session. Use the interpreter picker (top-right of the window) to choose which language and version to start.
+-   **Variables**: lists the objects in your session, much like RStudio's Environment pane.
+-   **Plots**: shows the history of plots you have made.
+-   **Data Explorer**: click a data frame in the Variables pane to open a spreadsheet-like view with sorting, filtering, and column summaries.
+-   **Help**: renders R and Python help pages.
+
+Because it is built on Code OSS, Positron also has VS Code-style extensions, an integrated terminal, and Git support. Documentation: <https://positron.posit.co/>.
+
+## VS Code with the R extension
+
+VS Code is a general-purpose editor. To use it for R, install the **R** extension (REditorSupport) from the Extensions view, and install the `languageserver` package in R (`install.packages("languageserver")`) for autocompletion and inline help. You then run code from an `.R` file into an R terminal with *Ctrl/Cmd + Enter*. VS Code is a good choice if you already use it for Python, Markdown, or shell scripting and prefer one editor for everything.
+
+::: callout-note
+**Which should I use?** If you are brand new, RStudio or Positron will feel the most guided: the Environment/Variables and Plots panes show you what R is doing. Whatever you choose, **write code in a script or Quarto file, not only in the console**, so your work is saved and reproducible. Use the console for quick throwaway experiments.
+:::
+
+## R Scripts and Quarto Documents
+
+-   Often we want scripts that can just be run from top to bottom: **R scripts** (`.R` files).
+-   We can also embed code in **Quarto** (`.qmd`) documents, which mix prose, code, and output for richer annotation (see [Appendix F](Appendix_F_Quarto_Markdown.qmd)).
+-   Both improve interpretability and reproducibility.
+-   Within code, comments start with `#`; R ignores everything after it on that line.
+-   Steps can be chained with the pipe `|>` (explained in the [tidyverse section](#the-tidyverse-dplyr-data-manipulation)).
+
+# R Basics
+
+## Basic Math in R
+
+``` r
+4 * 4
+(4 + 3 * 2^2)
+```
+
+-   Commands can be submitted through the console or from a script.
+-   R follows the normal priority of mathematical evaluation (PEMDAS), so the second line gives `16`.
+-   Parentheses control order of operations just as in algebra.
+
+## Assigning Variables
+
+``` r
+x <- 2
+x * 3
+y <- x * 3
+y - 2
+```
+
+-   Variables are assigned values using the `<-` operator (shortcut: *Alt/Option + -* in RStudio and Positron).
+-   Variable names must begin with a letter (or a dot not followed by a number).
+-   R is case sensitive (`x` and `X` are different variables).
+-   The result of a calculation can be assigned to a new variable.
+-   Names like `3y <- 3` will not work.
+
+::: {.callout-note title="Key concept: assignment and the R workspace"}
+Every object you create with `<-` lives in the **global environment** for the duration of your R session. When you restart R, the workspace is cleared. This is why a well-written script starts with its `library(...)` calls and data-loading lines: the session always starts fresh, so scripts must be self-contained. A good habit is to restart R now and then and re-run your script from the top to confirm it still works.
+:::
+
+## Arithmetic Operations and Functions
+
+``` r
+# Common math functions
+x + 2
+x^2
+log(x)              # natural log (built-in function)
+sqrt(x)
+log(x, base = 10)   # arguments modify behavior
+
+# Assigning results
+y <- 67
+print(y)
+x <- 124
+z <- (x * y)^2
+print(z)
+```
+
+-   `log` is a built-in function; the object goes in parentheses.
+-   Functions can take arguments that modify behavior (e.g., `log(x, base = 10)`).
+-   The outcome of calculations can be assigned to new variables.
+-   Use `print()` to display values explicitly.
+
+## Getting Help in R
+
+``` r
+help(mean)           # open help page
+?mean                # same as help()
+example(mean)        # run the examples from the help page
+help.search("mean")  # search help pages
+apropos("mean")      # find functions with "mean" in the name
+args(mean)           # show function arguments
+```
+
+-   Help pages exist for all functions, explaining arguments and usage.
+-   The `example()` function is especially useful for seeing how a function works.
+-   When in doubt, check the help page. It shows up in the Help pane in RStudio and Positron.
+
+# Data Types and Structures
+
+## Strings
+
+``` r
+x <- "I Love"
+print(x)
+y <- "Bioengineering"
+print(y)
+z <- c(x, y)    # c() stands for combine (or concatenate)
+print(z)
+```
+
+-   Character values must be set off by quotation marks.
+-   The `c()` function combines values into a vector.
+-   Reusing a variable name overwrites the previous value.
+
+## Vectors
+
+::: {.callout-note title="Key concept: vectorization"}
+R "thinks in vectors": a vector is an ordered set of values of one type. Mathematical operations and most built-in functions apply **element-wise** to every value at once, with no loop needed. For example, `viability > 0.9` on a vector of 500 measurements returns a 500-element TRUE/FALSE vector in one expression, which you can then use to pick out the matching values. Whenever you see code that processes thousands of measurements in one line, vectorization is doing the work.
+:::
+
+``` r
+# Create a vector with c()
+x <- c(2, 3, 4, 2, 1, 2, 4, 5, 10, 8, 9)
+print(x)
+
+# Operations work element-wise
+y <- x^2
+print(y)
+
+# Plot vectors
+plot(x, y)
+```
+
+### Types of Vectors
+
+| Type   | Description                     | Example                    |
+|--------|---------------------------------|----------------------------|
+| `int`  | Integers                        | `1L, 2L, 3L`               |
+| `dbl`  | Doubles (real numbers)          | `3.14, 2.718`              |
+| `chr`  | Character strings               | `"hello", "DNA"`           |
+| `lgl`  | Logical (TRUE/FALSE)            | `TRUE, FALSE, NA`          |
+| `fctr` | Factors (categorical variables) | `factor(c("a","b","a"))`   |
+| `dttm` | Date-times                      | `Sys.time()`               |
+| `date` | Dates                           | `Sys.Date()`               |
+
+(The short type names in the first column are the abbreviations tibbles print above each column.)
+
+Special values to know:
+
+-   Logical vectors can take `FALSE`, `TRUE`, or `NA` (not available).
+-   Doubles have four special values: `NA`, `NaN` (not a number), `Inf`, `-Inf`.
+-   Integer and double vectors are collectively known as **numeric** vectors.
+-   In R, numbers are doubles by default; add `L` (`5L`) to make an integer.
+
+``` r
+# Character and logical vectors
+genes     <- c("GAPDH", "ACTB", "COL1A1", "SOX9")   # character
+expressed <- c(TRUE, TRUE, FALSE, TRUE)             # logical
+
+genes[expressed]    # keep only elements where TRUE: logical subsetting
+# [1] "GAPDH" "ACTB"  "SOX9"
+```
+
+### Basic Statistics on Vectors
+
+``` r
+mean(x)
+median(x)
+var(x)
+sd(x)                      # standard deviation
+log(x)
+sqrt(x)
+sum(x)
+length(x)
+sample(x, replace = TRUE)  # random sample with replacement
+```
+
+-   Many built-in functions operate on entire vectors.
+-   `sample()` takes an argument `replace = TRUE`; arguments modify function behavior.
+-   Use `?function_name` to see the help page for any function.
+
+### Creating Vectors with Sequences
+
+``` r
+# Ascending sequence
+seq_1 <- seq(0.0, 10.0, by = 0.1)
+print(seq_1)
+
+# Descending sequence
+seq_2 <- seq(10.0, 0.0, by = -0.1)
+
+# Integer shorthand
+1:10            # same values as seq(1, 10, by = 1)
+
+# Element-wise operations
+seq_square <- (seq_2)^2
+print(seq_square)
+```
+
+-   `seq()` creates sequences with a specified start, end, and step size.
+-   Operations on sequences work element-wise, just like any other vector.
+
+## Sampling from Distributions
+
+``` r
+# Draw 10,000 values from a normal distribution with mean 0 and sd 10
+x <- rnorm(10000, mean = 0, sd = 10)
+hist(x)
+
+# Overlay the theoretical density curve on a histogram
+x <- rnorm(1000, mean = 0, sd = 100)
+hist(x, xlim = c(-500, 500), probability = TRUE)
+curve(dnorm(x, mean = 0, sd = 100), xlim = c(-500, 500),
+      add = TRUE, col = "red", lwd = 2)
+
+# Draw a second variable of the same length and plot one against the other
+y <- rnorm(1000, mean = 50, sd = 10)
+xy <- cbind(x, y)     # a 1000 x 2 matrix
+plot(x, y)
+
+# Uniform random integers between 1 and 100
+z <- sample(1:100, 20, replace = TRUE)
+```
+
+-   `rnorm(n, mean, sd)` draws `n` random values from a normal distribution.
+-   `dnorm()` gives the normal probability density, handy for overlaying the theoretical curve.
+-   `curve()` plots a function; `add = TRUE` overlays it on the existing plot.
+-   `cbind()` binds vectors of the same length together as columns of a matrix.
+-   Random draws differ each time. Call `set.seed(42)` (any number) first to make them reproducible.
+
+## Data Frames
+
+::: {.callout-note title="Key concept: what a data frame is"}
+A **data frame** is the workhorse for tabular data in R. It is a rectangular table where each **column** is a vector (all one type) and each **row** is an observation. Unlike a matrix, different columns can hold different types: one column of sample IDs (character), one of treatments (factor), one of cell counts (numeric). Almost every experimental data set you will analyze, from a plate-reader export to the stickleback RNA-seq practice table in Lecture 07, arrives in R as a data frame.
+:::
+
+### Creating Data Frames
+
+``` r
+# Build a data frame from individual vectors
+samples <- data.frame(
+  sample_id  = c("S1", "S2", "S3", "S4"),
+  treatment  = c("control", "control", "drug", "drug"),
+  cell_count = c(52000, 48500, 31000, 35500),
+  viability  = c(0.95, 0.93, 0.81, 0.78)
+)
+
+samples                      # print the whole thing
+str(samples)                 # structure: column names, types, first values
+summary(samples)             # per-column summary statistics
+nrow(samples); ncol(samples)
+colnames(samples)
+```
+
+-   `data.frame()` takes named vectors (all the same length) as columns.
+-   `str()` is your first diagnostic: it shows column types and a preview.
+-   `summary()` gives the min, quartiles, mean, max, and NA count of each numeric column.
+-   In Positron, click `samples` in the Variables pane to open it in the Data Explorer; in RStudio, `View(samples)` opens a spreadsheet view.
+
+The `hydrogel_concentration` example below shows a data frame with a `factor` column, a common pattern for experimental design variables:
+
+``` r
+hydrogel_concentration <- factor(c("low", "high", "high", "high",
+                                   "medium", "medium", "medium", "low"),
+                                 levels = c("low", "medium", "high"))
+compression  <- c(3.4, 3.4, 8.4, 3, 5.6, 8.1, 8.3, 4.5)
+conductivity <- c(0, 9.2, 3.8, 5, 5.6, 4.1, 7.1, 5.3)
+
+mydata <- data.frame(hydrogel_concentration, compression, conductivity)
+row.names(mydata) <- c("Sample_1", "Sample_2", "Sample_3", "Sample_4",
+                       "Sample_5", "Sample_6", "Sample_7", "Sample_8")
+print(mydata)
+```
+
+(The `levels =` argument puts the concentrations in their natural low-medium-high order; see [Factors](#factors-categorical-variables-with-fixed-levels) below for why that matters.)
+
+### Reading and Writing Data
+
+``` r
+# Comma-separated files (base R)
+YourFile <- read.table("yourfile.csv", header = TRUE, sep = ",")
+# OR use the convenience function:
+YourFile <- read.csv("yourfile.csv")
+
+# Tab-separated files (base R)
+YourFile <- read.table("yourfile.txt", header = TRUE, sep = "\t")
+# If the first column holds row names (e.g., gene IDs), add row.names = 1
+YourFile <- read.table("yourfile.txt", header = TRUE, row.names = 1, sep = "\t")
+
+# Tidyverse versions (readr package; return tibbles)
+library(readr)
+YourFile <- read_csv("yourfile.csv")
+YourFile <- read_tsv("yourfile.txt")
+
+# Excel files
+library(readxl)
+YourFile <- read_excel("yourfile.xlsx")
+```
+
+::: {.callout-note title="Key parameter: read_csv() column types"}
+`read_csv()` (from `readr`) guesses column types from the first 1,000 rows and prints a message showing what it guessed. To override, for example to force a sample-ID column to stay as text rather than become a number, use the `col_types` argument:
+
+``` r
+read_csv("plate_data.csv",
+         col_types = cols(sample_id = col_character(),
+                          absorbance = col_double()))
+```
+
+This matters whenever IDs look numeric (e.g., `"001"`, `"002"`, where a number would drop the leading zeros) but should remain text.
+:::
+
+``` r
+# Write to CSV
+write.csv(YourFile, "yourfile.csv", row.names = FALSE)
+
+# Write to TSV
+write.table(YourFile, "yourfile.txt", quote = FALSE, row.names = FALSE, sep = "\t")
+
+# Tidyverse version
+write_csv(YourFile, "yourfile.csv")
+```
+
+-   `header = TRUE` indicates the first row contains column names.
+-   `row.names = 1` indicates the first column contains row names.
+-   `sep` specifies the delimiter (`","` for CSV, `"\t"` for TSV). See [Appendix G](Appendix_G_Data_Formats_Repositories.qmd) for more on file formats.
+-   `read_csv()` / `read_tsv()` return **tibbles**, enhanced data frames with friendlier printing.
+-   File paths are relative to your **working directory** (`getwd()`). Working inside an RStudio Project or a Positron/VS Code folder keeps paths simple.
+
+### Indexing Data Frames
+
+``` r
+# Access by column number
+print(mydata[, 2])
+
+# Access by column name (preferred)
+print(mydata$compression)
+
+# Access by row number
+print(mydata[2, ])
+
+# Access a specific cell (row 2, column 3)
+print(mydata[2, 3])
+
+# Subset rows based on a numeric condition
+mydata[mydata$compression > 5, ]
+
+# Subset rows using a character condition
+samples[samples$treatment == "drug", ]
+
+# Plot two columns against each other
+plot(mydata$compression, mydata$conductivity)
+```
+
+-   `[row, column]` notation accesses specific elements.
+-   `$` notation accesses columns by name (preferred: more readable, and it tab-completes).
+-   Leaving a dimension empty selects all (e.g., `[, 2]` = all rows, column 2).
+-   Logical conditions return `TRUE`/`FALSE` vectors for subsetting, the same vectorization as above.
+
+# Other R Data Structures
+
+Vectors and data frames carry most everyday work. Three other structures appear regularly and you should recognize them on sight.
+
+## Lists: the "pocket that holds anything"
+
+A **list** is the most flexible R container: each slot can hold a different kind of thing, such as a vector of numbers, a string, another list, a data frame, or a function. The output of many statistical functions (for example, the result of `lm()` or `t.test()`) is a list under the hood.
+
+``` r
+experiment <- list(
+  experiment_id = "scaffold_run_07",
+  temperature_C = 37,
+  materials     = c("PEG", "alginate", "collagen"),
+  measurements  = data.frame(
+    metric = c("stiffness_kPa", "swelling_ratio", "viability"),
+    median = c(12.5, 1.8, 0.91)
+  )
+)
+
+# Access by name with $:
+experiment$experiment_id
+experiment$materials
+experiment$measurements$median
+
+# Or by [[index]]:
+experiment[[3]]              # third element (materials)
+experiment[["materials"]]    # same, by name: clearer
+```
+
+::: callout-note
+**`[]` vs `[[]]` on a list.** `experiment[1]` returns a length-1 list (a sub-list); `experiment[[1]]` returns the **content** of the first slot. The double-bracket form is what you usually want when accessing list elements in code.
+:::
+
+## Matrices: like data frames, but one type only
+
+A **matrix** is a 2-D structure where every element is the same type, typically all numeric. It is faster than a data frame for math but more limited, because you cannot mix text and numbers. Gene-expression count tables (genes in rows, samples in columns) are often stored as numeric matrices.
+
+``` r
+m <- matrix(1:12, nrow = 3, ncol = 4)
+m
+#      [,1] [,2] [,3] [,4]
+# [1,]    1    4    7   10
+# [2,]    2    5    8   11
+# [3,]    3    6    9   12
+
+# Indexing: same [row, col] notation as data frames
+m[2, 3]     # 8
+m[, 2]      # column 2 as a vector: 4 5 6
+m[1, ]      # row 1 as a vector: 1 4 7 10
+
+dim(m)      # 3 4
+t(m)        # transpose: 4 rows x 3 columns
+```
+
+Note that `matrix()` fills **column by column** by default; use `byrow = TRUE` to fill row by row.
+
+::: {.callout-tip title="Sparse matrices"}
+Some data sets are mostly zeros (for example, very large count tables or network adjacency matrices). Storing every zero wastes memory, so R's `Matrix` package provides **sparse** matrix classes that store only the non-zero values and their positions. You will not need them in this course, but if you ever see a class like `dgCMatrix`, that is what it is.
+:::
+
+## Factors: categorical variables with fixed levels
+
+::: {.callout-note title="Key concept: factors and reference levels"}
+A **factor** is R's representation of categorical data: a set of values plus a defined, ordered set of allowed values called **levels**. With a factor, the **first level is the reference** in a statistical model. In a linear model or ANOVA such as `lm(compression ~ hydrogel_concentration)`, the intercept is the mean of the reference group and every other coefficient is a difference *from* that reference. If you let R choose the order, it sorts alphabetically, so `"high"` would become the reference for `c("low", "medium", "high")`. That is not an error, but it makes the coefficients much harder to interpret.
+:::
+
+``` r
+# Plain character vector: no reference concept
+treatment_chars <- c("control", "drug", "control", "drug", "drug")
+
+# As a factor with explicit levels: control is the reference
+treatment <- factor(treatment_chars, levels = c("control", "drug"))
+treatment
+# [1] control drug    control drug    drug
+# Levels: control drug
+
+table(treatment)
+levels(treatment)
+nlevels(treatment)
+```
+
+::: {.callout-note title="Key parameter: factor(levels = )"}
+`factor(x, levels = c("control", "drug"))` sets the reference to `"control"`. Omit `levels` and R sorts alphabetically, which may or may not be what you want.
+
+``` r
+# Change the reference after creation
+treatment <- relevel(treatment, ref = "control")
+
+# Drop levels that are no longer present (after subsetting)
+treatment <- droplevels(treatment)
+
+# Ordered factor for ordinal data
+dose <- factor(c("low", "med", "high"), levels = c("low", "med", "high"),
+               ordered = TRUE)
+```
+:::
+
+Here is the reference level at work in a model with the hydrogel data:
+
+``` r
+fit <- lm(compression ~ hydrogel_concentration, data = mydata)
+coef(fit)
+# (Intercept)                    = mean compression of the "low" group
+# hydrogel_concentrationmedium   = medium minus low
+# hydrogel_concentrationhigh     = high minus low
+anova(fit)   # one-way ANOVA table for the same model
+```
+
+Factors also control the order of groups on plot axes and in legends, so setting the levels once makes both your statistics and your figures read in a sensible order.
+
+# Tidy Data Principles
+
+::: {.callout-note title="Rules of thumb for data organization"}
+-   Store data in nonproprietary formats (plain text / flat files such as CSV).
+-   Leave an uncorrected original file when doing analyses.
+-   Use descriptive names for your data files and variables.
+-   Include a header line with descriptive variable names.
+-   Maintain effective metadata about the data (a data dictionary).
+-   When you add observations, add rows.
+-   When you add variables, add columns.
+-   A column of data should contain only one data type.
+:::
+
+### Types of Data
+
+| Class | Subtype | Example | R type |
+|---|---|---|---|
+| Categorical | Ordinal (ordered) | small, medium, large | ordered `factor` |
+| Categorical | Nominal (unordered) | apples, oranges | `factor` / `character` |
+| Quantitative | Ratio (true zero) | kilograms, cell counts | `numeric` |
+| Quantitative | Interval (no true zero) | temperature in °C, calendar year | `numeric` / `integer` |
+
+`factor` is the R type for categorical variables with a fixed, known set of possible values.
+
+# Base R Visualization
+
+## Basic Plotting
+
+``` r
+seq_1 <- seq(0.0, 10.0, by = 0.1)
+plot(seq_1,
+     xlab = "space",
+     ylab = "function of space",
+     type = "p",        # "p" = points, "l" = lines, "b" = both
+     col  = "red",
+     main = "Basic R Plot")
+```
+
+-   `plot()` is the main high-level plotting function in base R. Given one vector, it plots the values against their position (index).
+-   `type` options: `"p"` (points), `"l"` (lines), `"b"` (both), `"h"` (vertical spike lines; not a histogram, use `hist()` for that).
+-   For publication-quality figures, most people use `ggplot2` (see below).
+
+## Multi-Panel Figures
+
+``` r
+par(mfrow = c(2, 2))   # 2 rows, 2 columns
+plot(seq_1,      xlab = "time", ylab = "pop 1",    type = "p", col = "red")
+plot(seq_2,      xlab = "time", ylab = "pop 2",    type = "p", col = "green")
+plot(seq_square, xlab = "time", ylab = "pop 2 ^2", type = "p", col = "blue")
+plot(seq_1^2,    xlab = "time", ylab = "pop 1 ^2", type = "l", col = "orange")
+par(mfrow = c(1, 1))   # reset to a single panel
+```
+
+-   `par(mfrow = c(rows, cols))` sets up a multi-panel layout.
+-   Subsequent `plot()` calls fill panels left-to-right, top-to-bottom.
+
+## Summary Statistics and Figures
+
+``` r
+# Summary statistics
+summary(mydata$compression)
+
+# Histogram
+hist(mydata$compression)
+
+# Boxplot by group: formula notation y ~ x
+boxplot(compression ~ hydrogel_concentration, data = mydata,
+        col  = "steelblue",
+        ylab = "Compression",
+        xlab = "Hydrogel Concentration",
+        main = "Compression by Hydrogel Concentration")
+```
+
+-   The formula `y ~ x` means "y grouped by (or modeled by) x". The same notation is used by `boxplot()`, `lm()`, `aov()`, `t.test()`, and many others.
+-   Boxplots show the median, interquartile range (IQR), and potential outliers.
+-   Because we set the factor levels, the boxes appear in low, medium, high order.
+
+# Functions in Depth
+
+You have already used many R functions (`mean()`, `c()`, `read.csv()`, ...). Two practical points are worth knowing.
+
+## Named vs. positional arguments
+
+``` r
+# Positional: values are matched to arguments in declaration order
+round(3.14159, 2)            # 3.14
+round(2, 3.14159)            # 2  (argument order matters!)
+
+# Named: explicit, order-independent, far more readable
+round(x = 3.14159, digits = 2)
+round(digits = 2, x = 3.14159)   # same result: 3.14
+
+# Recommended in real code: positional for the first one or two obvious
+# arguments, named for the rest
+seq(from = 1, to = 10, by = 0.5)
+rnorm(n = 100, mean = 37, sd = 0.5)
+```
+
+The rule: **use named arguments whenever there is any ambiguity**. They are self-documenting, survive package updates better, and are easier for someone (including future-you) to read.
+
+## Defining your own functions
+
+``` r
+# A function that computes the coefficient of variation of a numeric vector
+cv <- function(x, na.rm = TRUE) {
+  if (na.rm) x <- x[!is.na(x)]
+  sd(x) / mean(x)
+}
+
+cv(c(1, 2, 3, 4, 5))         # 0.527
+cv(c(1, 2, NA, 4, 5))        # 0.609 (after dropping the NA)
+```
+
+A function is `name <- function(arguments) { body }`, and the value of the last expression is returned. Whenever you find yourself copying and pasting the same few lines with small changes (for example, normalizing each plate of a plate-reader experiment), that is a sign to write a function.
+
+# `library()` vs. `install.packages()`
+
+This is the single most common point of confusion for new R users:
+
+> **You *install* a package once; you *load* it every session.**
+
+-   **`install.packages("pkg")`** downloads the package from CRAN onto your machine. Do it **once** (and again only to update).
+-   **`library(pkg)`** makes that installed package's functions available in your **current** R session. Do it **every time you start R**, usually at the top of your script.
+
+``` r
+install.packages("tidyverse")   # ONCE: downloads and installs
+library(tidyverse)              # EVERY SESSION: makes its functions usable
+```
+
+Restarting R does **not** require re-installing, but it **does** require re-running `library()`. You can also call one function without loading the whole package using `package::function()`, e.g. `readr::read_csv("file.csv")`.
+
+::: {.callout-note title="Bioconductor packages"}
+Many biology-specific packages (for genomics, sequencing, and bioimaging) are distributed through **Bioconductor** (<https://bioconductor.org>) rather than CRAN. Install them with the `BiocManager` helper:
+
+``` r
+install.packages("BiocManager")        # once
+BiocManager::install("Biostrings")     # then install Bioconductor packages
+library(Biostrings)                    # and load as usual
+```
+:::
+
+::: callout-tip
+Install packages from the console, not inside a script or Quarto document that you run repeatedly. Leaving `install.packages()` in a script re-downloads the package every time the script runs.
+:::
+
+# The tidyverse: `dplyr` Data Manipulation
+
+Much modern R is written in **tidyverse** style (Wickham et al. 2019, "Welcome to the tidyverse", *Journal of Open Source Software*, <https://doi.org/10.21105/joss.01686>): a coherent family of packages (`dplyr`, `tidyr`, `ggplot2`, `readr`, and more) that share a consistent, pipe-friendly grammar. Six `dplyr` verbs cover most of what you will do with data frames:
+
+| Verb | What it does |
+|---|---|
+| `filter()` | Keep rows that match a condition |
+| `select()` | Keep / drop / reorder columns |
+| `mutate()` | Add or modify columns |
+| `arrange()` | Sort rows |
+| `summarise()` | Collapse to one row per group (paired with `group_by()`) |
+| `group_by()` | Set the grouping for downstream `summarise()` / `mutate()` |
+
+::: {.callout-note title="Key concept: the pipe |>"}
+The **pipe** `|>` (built into R since version 4.1) passes the result of one expression as the first argument of the next. You will also see the older `%>%` pipe from the `magrittr` package (loaded by the tidyverse); for everyday use the two are equivalent. This appendix uses `|>` throughout. In RStudio and Positron, *Ctrl/Cmd + Shift + M* inserts a pipe (in RStudio, tick *Tools > Global Options > Code > Use native pipe operator* to get `|>` instead of `%>%`).
+
+``` r
+result <- data |>
+  filter(condition) |>
+  mutate(new_col = ...) |>
+  group_by(group_var) |>
+  summarise(n = n())
+```
+
+Read it as: "take `data`, then filter, then add a column, then group, then summarise." Without the pipe you would either nest calls inside each other (hard to read) or create many intermediate variables (clutters the environment).
+:::
+
+Here is a worked example with the Palmer penguins data (a friendly built-in-style dataset of body measurements; install once with `install.packages("palmerpenguins")`):
+
+``` r
+library(tidyverse)
+library(palmerpenguins)
+
+penguins |>
+  filter(!is.na(body_mass_g)) |>                  # drop rows with missing mass
+  mutate(body_mass_kg = body_mass_g / 1000) |>    # add a derived column
+  group_by(species, sex) |>
+  summarise(
+    n            = n(),
+    mean_mass_kg = mean(body_mass_kg),
+    sd_mass_kg   = sd(body_mass_kg),
+    .groups      = "drop"
+  ) |>
+  arrange(desc(mean_mass_kg))
+```
+
+Read top-to-bottom: "take `penguins`, drop missing masses, convert grams to kilograms, group by species and sex, summarise each group, and sort from heaviest to lightest."
+
+The same verbs work on your own experimental data:
+
+``` r
+samples |>
+  filter(viability > 0.8) |>
+  mutate(live_cells = cell_count * viability) |>
+  select(sample_id, treatment, live_cells)
+
+mydata |>
+  group_by(hydrogel_concentration) |>
+  summarise(mean_compression = mean(compression),
+            mean_conductivity = mean(conductivity))
+```
+
+The canonical free reference is *R for Data Science (2e)* by Wickham, Çetinkaya-Rundel & Grolemund (<https://r4ds.hadley.nz/>).
+
+# Visualization with `ggplot2`
+
+The base R `plot()` examples above work, but **`ggplot2`** is the standard for publication-quality figures. The key idea is the **grammar of graphics**: a plot is built from layered components.
+
+| Component | What it is | Examples |
+|---|---|---|
+| **Data** | The data frame | `penguins`, `mydata`, ... |
+| **Aesthetics** (`aes()`) | Mappings: which column goes to which visual property | `aes(x = flipper_length_mm, y = body_mass_g, color = species)` |
+| **Geoms** | The visual mark | `geom_point()`, `geom_boxplot()`, `geom_violin()`, `geom_col()` |
+| **Stats** | Pre-plot transformations | `stat_smooth()`, `stat_summary()` |
+| **Scales** | Color, axis, and size scales | `scale_color_brewer()`, `scale_x_log10()` |
+| **Facets** | Sub-plots by group | `facet_wrap(~ island)`, `facet_grid(sex ~ species)` |
+| **Themes** | Non-data display | `theme_minimal()`, `theme(legend.position = "bottom")` |
+
+A minimum-viable `ggplot`:
+
+``` r
+library(ggplot2)
+library(palmerpenguins)
+
+# A scatter plot: one point per penguin, colored by species
+ggplot(penguins, aes(x = flipper_length_mm, y = body_mass_g, color = species)) +
+  geom_point(alpha = 0.7) +
+  labs(title = "Body mass vs flipper length",
+       x     = "Flipper length (mm)",
+       y     = "Body mass (g)") +
+  theme_minimal()
+```
+
+Build up by **adding layers with `+`**:
+
+``` r
+# Add a linear fit per species and one panel per island
+ggplot(penguins, aes(x = flipper_length_mm, y = body_mass_g, color = species)) +
+  geom_point(alpha = 0.5) +
+  geom_smooth(method = "lm", se = FALSE) +
+  facet_wrap(~ island) +
+  labs(title = "Body mass vs flipper length by island") +
+  theme_bw(base_size = 12)
+```
+
+And the hydrogel data as a boxplot with the raw points on top:
+
+``` r
+ggplot(mydata, aes(x = hydrogel_concentration, y = compression)) +
+  geom_boxplot(fill = "lightblue") +
+  geom_jitter(width = 0.1) +
+  labs(x = "Hydrogel concentration", y = "Compression") +
+  theme_minimal()
+```
+
+(Missing values in `penguins` produce a harmless "Removed 2 rows containing missing values" warning.)
+
+::: {.callout-tip title="Five geoms that cover most plotting"}
+-   `geom_point()`: scatter plots
+-   `geom_boxplot()` / `geom_violin()` + `geom_jitter()`: distributions by group
+-   `geom_histogram()` / `geom_density()`: the distribution of one variable
+-   `geom_col()`: bar charts of values you have already computed (e.g., group means)
+-   `geom_line()` / `geom_smooth()`: time courses and fitted trends
+:::
+
+Save a figure with `ggsave("figure.png", width = 6, height = 4, dpi = 300)`.
+
+# Skills Summary
+
+::: {.callout-tip title="R skills in this appendix and where they come up in the course"}
+| Skill covered here | Where you will use it |
+|---|---|
+| Assignment, vectors, basic math | Lecture 07 and every later R exercise |
+| `rnorm()`, `sample()`, `hist()` | Lecture 07 sampling-distribution exercises |
+| Data frames, `read.csv()` / `read_csv()`, indexing | Lecture 07 stickleback RNA-seq practice table |
+| `factor()` / `relevel()` | Any linear model, ANOVA, or grouped plot |
+| `filter()`, `mutate()`, `group_by()` + `summarise()`, the pipe `\|>` | Cleaning and summarizing your own experimental data |
+| `ggplot2` | Figures in Quarto reports (Lecture 08, [Appendix F](Appendix_F_Quarto_Markdown.qmd)) |
+| `install.packages()` once vs `library()` every session | Your own machine and Talapas (Lecture 10) |
+:::
+
+# Further reading
+
+-   *R for Data Science (2e)*, Wickham, Çetinkaya-Rundel & Grolemund: <https://r4ds.hadley.nz/> (the standard free book for the tidyverse workflow).
+-   *Advanced R*, Wickham: <https://adv-r.hadley.nz/> (how R really works, for when you are ready to go deeper).
+-   *ggplot2: Elegant Graphics for Data Analysis*, Wickham, Navarro & Pedersen: <https://ggplot2-book.org/>.
+-   Software Carpentry, *Programming with R*: <https://swcarpentry.github.io/r-novice-inflammation/> (gentle, hands-on lessons).
+-   Posit cheatsheets (Base R, dplyr, ggplot2, RStudio, and more): <https://posit.co/resources/cheatsheets/>.
+-   Positron documentation: <https://positron.posit.co/>.
+-   The R Project (R Core Team): <https://www.r-project.org>.
+-   Wickham et al. (2019), "Welcome to the tidyverse", *Journal of Open Source Software* 4(43): 1686, <https://doi.org/10.21105/joss.01686>.
+
+**Related appendices:** [Appendix E - Core R Commands Reference](Appendix_E_Core_R_Commands.qmd), [Appendix F - Quarto & Markdown Syntax](Appendix_F_Quarto_Markdown.qmd), [Appendix G - Data Formats & Repositories](Appendix_G_Data_Formats_Repositories.qmd), [Appendix C - Git, GitHub & Version Control](Appendix_C_Git_GitHub.qmd), the [Glossary](Glossary.qmd), and the course [Resources](../Resources.qmd) hub.

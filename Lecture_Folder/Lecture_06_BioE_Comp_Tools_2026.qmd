@@ -3,19 +3,22 @@ title: "Lecture 06 - Computational Tools for Bioengineers"
 subtitle: "Shell Scripting"
 date: "Monday, November 2, 2026"
 author: "Bill Cresko"
-format: 
-  revealjs:
-    footer: BioE_Comp_Tools_2026 - Knight Campus 
-    transition: fade
-    transition-speed: slow
-editor: visual
 ---
 
 ```{r}
+#| label: setup
+#| include: false
+
+# Packages used in the lecture examples
 library(tidyverse)
 library(gt)
 library(readxl)
-theme_set(theme_minimal())
+
+# Consistent theme for all plots
+theme_set(theme_minimal(base_size = 14))
+
+# Reproducible random numbers
+set.seed(2026)
 ```
 
 
@@ -29,13 +32,11 @@ theme_set(theme_minimal())
 
 # Scripting in Unix, R and Python
 
-```{r, echo=FALSE, out.width='75%', fig.align='center'}
-knitr::include_graphics("images/RStudio_Screenshot.png")
-```
+![](images/RStudio_Screenshot.png){fig-align="center" width="75%"}
 
 ------------------------------------------------------------------------
 
-## What is a Shell Script? {.smaller}
+## What is a Shell Script?
 
 -   Text file containing Unix commands
 -   Automates repetitive tasks
@@ -48,7 +49,7 @@ knitr::include_graphics("images/RStudio_Screenshot.png")
     -   Functions
     -   Command-line arguments
 
-## Creating Your First Script {.smaller}
+## Creating Your First Script
 
 ``` bash
 #!/bin/bash
@@ -73,7 +74,7 @@ echo "Double of $COUNT is $DOUBLE"
 
 Save as `first_script.sh` and run with `bash first_script.sh`
 
-## Making Scripts Executable {.smaller}
+## Making Scripts Executable
 
 ``` bash
 # Check current permissions
@@ -88,7 +89,7 @@ chmod +x first_script.sh
 
 Best practice: Always use `chmod +x` for your scripts
 
-## Command-Line Arguments {.smaller}
+## Command-Line Arguments
 
 ``` bash
 #!/bin/bash
@@ -121,7 +122,7 @@ echo "All arguments: $@"
 
 Run as: `./process_fasta.sh input.fa results.txt`
 
-## Variables and Arrays {.smaller}
+## Variables and Arrays
 
 ``` bash
 #!/bin/bash
@@ -148,7 +149,7 @@ NAME="${FILE%.fastq.gz}"     # Remove suffix
 echo "Sample name: $NAME"
 ```
 
-## Conditionals (if/then/else) {.smaller}
+## Conditionals (if/then/else)
 
 ``` bash
 #!/bin/bash
@@ -181,7 +182,22 @@ else
 fi
 ```
 
-## Loops in Shell Scripts {.smaller}
+## Test operators for `[ ]`
+
+| Operator | Meaning                  | Operator | Meaning               |
+|----------|--------------------------|----------|-----------------------|
+| `-eq`    | Equal (numbers)          | `=`      | Strings are equal     |
+| `-ne`    | Not equal (numbers)      | `!=`     | Strings differ        |
+| `-gt`    | Greater than             | `-z`     | String is empty       |
+| `-lt`    | Less than                | `-f`     | File exists           |
+| `-ge`    | Greater than or equal    | `-d`     | Directory exists      |
+| `-le`    | Less than or equal       | `-s`     | File exists, not empty|
+
+::: callout-tip
+Always put **spaces inside the brackets** (`[ $x -gt 5 ]`, not `[$x -gt 5]`) and **quote your variables** (`"$FILE"`) so file names with spaces don't break your script.
+:::
+
+## Loops in Shell Scripts
 
 ``` bash
 #!/bin/bash
@@ -215,7 +231,7 @@ while read LINE; do
 done < input.txt
 ```
 
-## Functions in Scripts {.smaller}
+## Functions in Scripts
 
 ``` bash
 #!/bin/bash
@@ -243,7 +259,7 @@ count_sequences "proteins.fasta"
 process_fasta "input.fasta" "headers.txt"
 ```
 
-## Error Handling {.smaller}
+## Error Handling
 
 ``` bash
 #!/bin/bash
@@ -274,7 +290,7 @@ if ! grep "pattern" file.txt > /dev/null 2>&1; then
 fi
 ```
 
-## Real Bioinformatics Script Example {.smaller}
+## Real Bioinformatics Script Example
 
 ``` bash
 #!/bin/bash
@@ -315,7 +331,7 @@ GC_PERCENT=$((GC_COUNT * 100 / TOTAL_LENGTH))
 echo "GC content: $GC_PERCENT%"
 ```
 
-## Best Practices for Shell Scripts {.smaller}
+## Best Practices for Shell Scripts
 
 1.  **Always include a shebang**: `#!/bin/bash`
 2.  **Comment your code**: Explain what and why

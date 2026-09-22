@@ -3,19 +3,22 @@ title: "Lecture 10 - Computational Tools for Bioengineers"
 subtitle: "Talapas and High Performance Computing"
 date: "Monday, November 30, 2026"
 author: "Bill Cresko"
-format: 
-  revealjs:
-    footer: BioE_Comp_Tools_2026 - Knight Campus 
-    transition: fade
-    transition-speed: slow
-editor: visual
 ---
 
 ```{r}
+#| label: setup
+#| include: false
+
+# Packages used in the lecture examples
 library(tidyverse)
 library(gt)
 library(readxl)
-theme_set(theme_minimal())
+
+# Consistent theme for all plots
+theme_set(theme_minimal(base_size = 14))
+
+# Reproducible random numbers
+set.seed(2026)
 ```
 
 
@@ -30,7 +33,7 @@ theme_set(theme_minimal())
 
 # Talapas and High Performance Computing
 
-## What is Talapas? {.smaller}
+## What is Talapas?
 
 -   **Talapas** is UO's high-performance computing (HPC) cluster
 -   Named from Chinook word for coyote (educator and keeper of knowledge)
@@ -45,48 +48,11 @@ theme_set(theme_minimal())
 -   89 GPUs (including A100, H100, V100)
 -   3+ Petabytes of storage
 
-## Talapas Architecture {.smaller}
+## Talapas Architecture
 
-```{mermaid}
-%%| fig-width: 10
-%%| fig-height: 6
-%%{init: {'theme': 'base', 'themeVariables': {'fontSize': '18px', 'fontFamily': 'arial', 'primaryTextColor': '#000000'}}}%%
-flowchart TB
-    U[Your Computer] --> SSH([SSH])
-    SSH --> L1[login1]
-    SSH --> L2[login2]
-    SSH --> L3[login3]
-    SSH --> L4[login4]
-    L1 --> S[SLURM Scheduler]
-    L2 --> S
-    L3 --> S
-    L4 --> S
-    S --> SB([sbatch])
-    S --> SR([srun])
-    SB --> C1[CPU Nodes]
-    SR --> C1
-    SB --> C2[GPU Nodes]
-    SB --> C3[Fat Nodes]
-    C1 --> ST[(Storage)]
-    C2 --> ST
-    C3 --> ST
-    
-    style U fill:#e3f2fd,stroke:#333,stroke-width:2px,color:#000000
-    style L1 fill:#87ceeb,stroke:#333,stroke-width:2px,color:#000000
-    style L2 fill:#87ceeb,stroke:#333,stroke-width:2px,color:#000000
-    style L3 fill:#87ceeb,stroke:#333,stroke-width:2px,color:#000000
-    style L4 fill:#87ceeb,stroke:#333,stroke-width:2px,color:#000000
-    style S fill:#f9d71c,stroke:#333,stroke-width:2px,color:#000000
-    style C1 fill:#98fb98,stroke:#333,stroke-width:2px,color:#000000
-    style C2 fill:#ffa07a,stroke:#333,stroke-width:2px,color:#000000
-    style C3 fill:#dda0dd,stroke:#333,stroke-width:2px,color:#000000
-    style ST fill:#c8e6c9,stroke:#333,stroke-width:2px,color:#000000
-    style SSH fill:#ffffff,stroke:#333,stroke-width:2px,color:#000000
-    style SB fill:#ffffff,stroke:#333,stroke-width:2px,color:#000000
-    style SR fill:#ffffff,stroke:#333,stroke-width:2px,color:#000000
-```
+![](images/appendix_F_S03_talapas_architecture.svg){fig-align="center" width="95%"}
 
-## Login Nodes vs Compute Nodes {.smaller}
+## Login Nodes vs Compute Nodes
 
 ### Login Nodes (Head Nodes)
 
@@ -104,7 +70,7 @@ flowchart TB
     -   GPU nodes
     -   High-memory ("fat") nodes
 
-## Node Types on Talapas {.smaller}
+## Node Types on Talapas
 
 | Node Type      | Cores   | Memory     | Purpose                |
 |----------------|---------|------------|------------------------|
@@ -122,7 +88,7 @@ flowchart TB
 -   `fat` / `longfat` - High-memory nodes
 -   `preempt` - Access to all nodes (may be interrupted)
 
-## Getting Access to Talapas {.smaller}
+## Getting Access to Talapas
 
 ### Step 1: Join or Create a PIRG
 
@@ -136,7 +102,7 @@ flowchart TB
 -   Your username = your Duck ID
 -   Your password = your UO password
 
-## Logging Into Talapas - web browser {.smaller}
+## Logging Into Talapas - web browser
 
 [ondemand.talapas.uoregon.edu](https://ondemand.talapas.uoregon.edu)
 
@@ -155,7 +121,7 @@ flowchart TB
 -   Interactive data analysis
 -   Running GUI applications
 
-## Logging Into Talapas - command line {.smaller}
+## Logging Into Talapas - command line
 
 ### From Mac/Linux Terminal:
 
@@ -182,30 +148,17 @@ ssh yourduckid@login4.talapas.uoregon.edu
 -   First connect to UO VPN
 -   Then SSH as normal
 
-## Storage on Talapas {.smaller}
+## Connecting VS Code to Talapas (Remote-SSH)
 
-```{mermaid}
-%%| fig-width: 10
-%%| fig-height: 4
-%%{init: {'theme': 'base', 'themeVariables': {'fontSize': '18px', 'fontFamily': 'arial', 'primaryTextColor': '#000000'}}}%%
-flowchart LR
-    R["/"] --> H["/home"]
-    R --> P["/projects"]
-    R --> T["/tmp"]
-    H --> HD["/home/duckid"]
-    P --> PG["/projects/PIRG"]
-    PG --> PGU["/projects/PIRG/duckid"]
-    PG --> PGS["/projects/PIRG/shared"]
-    
-    style R fill:#ffffff,stroke:#333,stroke-width:2px,color:#000000
-    style H fill:#ffffff,stroke:#333,stroke-width:2px,color:#000000
-    style P fill:#ffffff,stroke:#333,stroke-width:2px,color:#000000
-    style PG fill:#ffffff,stroke:#333,stroke-width:2px,color:#000000
-    style HD fill:#87ceeb,stroke:#333,stroke-width:2px,color:#000000
-    style PGU fill:#98fb98,stroke:#333,stroke-width:2px,color:#000000
-    style PGS fill:#f9d71c,stroke:#333,stroke-width:2px,color:#000000
-    style T fill:#ffa07a,stroke:#333,stroke-width:2px,color:#000000
-```
+![](images/vscode_talapas_remote_ssh.svg){fig-align="center" width="100%"}
+
+::: callout-tip
+With **Remote - SSH**, VS Code (or Positron) runs its editor on your laptop while the files, terminal, and code live on Talapas - it feels just like working locally.
+:::
+
+## Storage on Talapas
+
+![](images/appendix_F_S09_storage_structure.svg){fig-align="center" width="85%"}
 
 ### Directory Structure:
 
@@ -228,33 +181,14 @@ df -h ~
 du -sh /projects/myPIRG/myusername
 ```
 
-## What is SLURM? {.smaller}
+## What is SLURM?
 
 -   **S**imple **L**inux **U**tility for **R**esource **M**anagement
 -   Job scheduler and workload manager
 -   Allocates resources fairly among users
 -   Ensures efficient cluster utilization
 
-```{mermaid}
-%%| fig-width: 10
-%%| fig-height: 4
-%%{init: {'theme': 'base', 'themeVariables': {'fontSize': '18px', 'fontFamily': 'arial', 'primaryTextColor': '#000000'}}}%%
-flowchart LR
-    A[Submit Job] --> SB([sbatch])
-    SB --> B[SLURM Queue]
-    B --> W([Waits])
-    W --> C[Job Runs on Compute Node]
-    C --> CO([Completes])
-    CO --> D[Output Files]
-    
-    style A fill:#f9d71c,stroke:#333,stroke-width:2px,color:#000000
-    style B fill:#87ceeb,stroke:#333,stroke-width:2px,color:#000000
-    style C fill:#98fb98,stroke:#333,stroke-width:2px,color:#000000
-    style D fill:#ffa07a,stroke:#333,stroke-width:2px,color:#000000
-    style SB fill:#ffffff,stroke:#333,stroke-width:2px,color:#000000
-    style W fill:#ffffff,stroke:#333,stroke-width:2px,color:#000000
-    style CO fill:#ffffff,stroke:#333,stroke-width:2px,color:#000000
-```
+![](images/appendix_F_S10_slurm_workflow.svg){fig-align="center" width="95%"}
 
 ### Key Concepts:
 
@@ -262,7 +196,7 @@ flowchart LR
 -   **Partitions**: Queues with different properties
 -   **Accounts**: Your PIRG for resource tracking
 
-## Essential SLURM Commands {.smaller}
+## Essential SLURM Commands
 
 ``` bash
 # Submit a batch job
@@ -294,7 +228,7 @@ sacct -j JOBID --format=JobID,Elapsed,MaxRSS
 sinfo -p short
 ```
 
-## Interactive Jobs {.smaller}
+## Interactive Jobs
 
 ### For testing and development:
 
@@ -317,7 +251,7 @@ srun --pty --partition=compute --account=myPIRG \
 
 **Note**: Your prompt will change from `login1` to something like `n049`
 
-## Writing a SLURM Batch Script {.smaller}
+## Writing a SLURM Batch Script
 
 ``` bash
 #!/bin/bash
@@ -341,7 +275,7 @@ module load R/4.3.3
 Rscript my_analysis.R
 ```
 
-## Understanding SLURM Directives {.smaller}
+## Understanding SLURM Directives
 
 | Directive         | Description         | Example                           |
 |-------------------|---------------------|-----------------------------------|
@@ -356,7 +290,7 @@ Rscript my_analysis.R
 
 **Tip**: Request only what you need - smaller jobs run sooner!
 
-## GPU Jobs {.smaller}
+## GPU Jobs
 
 ``` bash
 #!/bin/bash
@@ -392,7 +326,7 @@ python train_model.py
 /packages/racs/bin/slurm-show-gpus
 ```
 
-## Talapas Uses Software Modules (LMOD) {.smaller}
+## Talapas Uses Software Modules (LMOD)
 
 ``` bash
 # List all available modules
@@ -420,7 +354,7 @@ module purge
 In your batch scripts, always load modules after the SBATCH directives!
 :::
 
-## Monitoring Your Jobs {.smaller}
+## Monitoring Your Jobs
 
 ``` bash
 # Check job status
@@ -449,7 +383,7 @@ sacct -j JOBID --format=JobID,JobName,Elapsed,MaxRSS,State
 | CD   | Completed         |
 | F    | Failed            |
 
-## Best Practices for Talapas {.smaller}
+## Best Practices for Talapas
 
 ### Do:
 
@@ -466,7 +400,7 @@ sacct -j JOBID --format=JobID,JobName,Elapsed,MaxRSS,State
 -   Store sensitive data without encryption
 -   Forget to acknowledge RACS in publications
 
-## Getting Help with Talapas {.smaller}
+## Getting Help with Talapas
 
 ### Resources:
 

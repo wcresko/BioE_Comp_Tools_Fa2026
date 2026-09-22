@@ -3,19 +3,22 @@ title: "Lecture 05 - Computational Tools for Bioengineers"
 subtitle: "GREP and Regular Expressions"
 date: "Monday, October 26, 2026"
 author: "Bill Cresko"
-format: 
-  revealjs:
-    footer: BioE_Comp_Tools_2026 - Knight Campus 
-    transition: fade
-    transition-speed: slow
-editor: visual
 ---
 
 ```{r}
+#| label: setup
+#| include: false
+
+# Packages used in the lecture examples
 library(tidyverse)
 library(gt)
 library(readxl)
-theme_set(theme_minimal())
+
+# Consistent theme for all plots
+theme_set(theme_minimal(base_size = 14))
+
+# Reproducible random numbers
+set.seed(2026)
 ```
 
 
@@ -27,14 +30,14 @@ theme_set(theme_minimal())
 
 # Working with Large Genomic Data Files
 
-## Human Chromosome Data {.smaller}
+## Human Chromosome Data
 
 -   Genomic data files can be massive (human genome \~6 billion base pairs)
 -   FASTA format is standard for sequence data
 -   Perfect use case for Unix pipes and redirection
 -   Let's work with human genome assembly version 38 (\~3.1 GB)
 
-## Downloading Genomic Data {.smaller}
+## Downloading Genomic Data
 
 Download version 38 of the human genome from NCBI:
 
@@ -57,7 +60,7 @@ GCF_000001405.40_GRCh38.p14/GCF_000001405.40_GRCh38.p14_genomic.fna.gz
 
 # GREP and Regular Expressions
 
-## What is GREP? {.smaller}
+## What is GREP?
 
 -   **GREP** = Global Regular Expression Print
 -   Powerful text search tool in Unix
@@ -71,7 +74,7 @@ Basic syntax:
 grep [options] pattern [file...]
 ```
 
-## Basic GREP Usage {.smaller}
+## Basic GREP Usage
 
 ``` bash
 # Search for a simple pattern
@@ -93,7 +96,7 @@ grep -v "^#" data.txt    # Skip comment lines
 grep "mutation" *.txt
 ```
 
-## Introduction to Regular Expressions {.smaller}
+## Introduction to Regular Expressions
 
 Regular expressions (regex) are patterns for matching text:
 
@@ -107,7 +110,7 @@ Regular expressions (regex) are patterns for matching text:
 -   **`[^abc]`** = any character NOT in set
 -   **`\`** = escape special characters
 
-## Basic Regex Examples {.smaller}
+## Basic Regex Examples
 
 ``` bash
 # Match DNA sequences
@@ -127,7 +130,7 @@ grep "T\{2,4\}" sequence.txt  # 2 to 4 T's
 grep "GC*" sequence.txt       # G followed by 0+ C's
 ```
 
-## Extended Regular Expressions {.smaller}
+## Extended Regular Expressions
 
 Use `grep -E` or `egrep` for extended regex:
 
@@ -149,7 +152,7 @@ grep -E "^>sp\|[A-Z0-9]+\|" uniprot.fasta  # UniProt headers
 grep -E "[ACGT]{20,}" primers.txt          # Sequences 20bp+
 ```
 
-## Combining GREP with Pipes {.smaller}
+## Combining GREP with Pipes
 
 ``` bash
 # Count unique sequence headers
@@ -169,7 +172,7 @@ zcat reads.fastq.gz | grep -A1 "^@" | grep -v "^--" |
 grep "gene" data.txt | sed 's/gene/GENE/g'
 ```
 
-## Analyzing Sequence Content {.smaller}
+## Analyzing Sequence Content
 
 Combine Unix tools to analyze genomic data:
 
@@ -193,7 +196,7 @@ grep -v "^>" human_genome.fa | tr -d '\n' |
 grep -v "^>" human_genome.fa | grep -oE "(AT){5,}"
 ```
 
-## Working with Compressed Files {.smaller}
+## Working with Compressed Files
 
 Most genomic data is compressed to save space:
 
@@ -219,7 +222,7 @@ zcat reads.fastq.gz | grep "^@" | wc -l
 zcat file1.gz file2.gz | gzip > combined.gz
 ```
 
-## Examining Large Files Efficiently {.smaller}
+## Examining Large Files Efficiently
 
 Don't use `cat` on huge files! Use these approaches:
 
@@ -243,7 +246,47 @@ grep "^>" human_genome.fa | wc -l
 grep "^>" human_genome.fa | less
 ```
 
-## Homework - microbial genome analysis {.smaller}
+## Beyond grep: `sed` for search-and-replace
+
+``` bash
+# Substitute the first match on each line (s/pattern/replacement/)
+sed 's/chr/Chr/' regions.bed
+
+# Substitute every match on each line (g = global)
+sed 's/T/U/g' dna.txt > rna.txt
+
+# Delete lines matching a pattern (e.g. comment lines)
+sed '/^#/d' annotation.gff
+
+# Print only lines 10-20
+sed -n '10,20p' big_file.txt
+```
+
+::: callout-warning
+`sed -i` edits a file **in place** - and the syntax differs between Linux (`sed -i 's/a/b/' f`) and macOS (`sed -i '' 's/a/b/' f`). Write to a new file until you're confident.
+:::
+
+## Beyond grep: `awk` for columns
+
+``` bash
+# Print columns 1 and 3 of a tab- or space-separated file
+awk '{print $1, $3}' data.tsv
+
+# Keep rows where column 5 is greater than 30
+awk '$5 > 30' measurements.tsv
+
+# Comma-separated file: set the field separator, skip the header
+awk -F',' 'NR > 1 {print $2}' samples.csv
+
+# Sum and average a column
+awk -F',' 'NR > 1 {sum += $3; n++} END {print sum, sum/n}' samples.csv
+```
+
+::: callout-tip
+Rule of thumb: **`grep`** finds lines, **`sed`** edits text, **`awk`** works with columns. More in [Appendix B](../Resources_Folder/Appendix_B_GREP_Regex_Shell.qmd).
+:::
+
+## Homework - microbial genome analysis
 
 With a sample FASTA file:
 

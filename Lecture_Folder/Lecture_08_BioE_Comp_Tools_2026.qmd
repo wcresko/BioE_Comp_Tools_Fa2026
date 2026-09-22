@@ -3,19 +3,22 @@ title: "Lecture 08 - Computational Tools for Bioengineers"
 subtitle: "Quarto Markdown, LaTeX, Vibe Coding and Git"
 date: "Monday, November 16, 2026"
 author: "Bill Cresko"
-format: 
-  revealjs:
-    footer: BioE_Comp_Tools_2026 - Knight Campus 
-    transition: fade
-    transition-speed: slow
-editor: visual
 ---
 
 ```{r}
+#| label: setup
+#| include: false
+
+# Packages used in the lecture examples
 library(tidyverse)
 library(gt)
 library(readxl)
-theme_set(theme_minimal())
+
+# Consistent theme for all plots
+theme_set(theme_minimal(base_size = 14))
+
+# Reproducible random numbers
+set.seed(2026)
 ```
 
 
@@ -27,7 +30,7 @@ theme_set(theme_minimal())
 
 # Markdown and Quarto Markdown
 
-## What is Markdown? {.smaller}
+## What is Markdown?
 
 ::: {.incremental}
 -   a very light weight but flexible editing language
@@ -37,7 +40,7 @@ theme_set(theme_minimal())
 -   similar to `html` but simpler
 :::
 
-## What is Quarto Markdown? {.smaller}
+## What is Quarto Markdown?
 
 Quarto `(https://quarto.org/)` provides a next-generation authoring framework for data science.
 
@@ -47,13 +50,13 @@ Quarto `(https://quarto.org/)` provides a next-generation authoring framework fo
 
 When you save your document, the output will be in the format indicated in your YAML header. This could be an html document, Word document, pdf, website, book, etc.
 
-## Getting started {.smaller}
+## Getting started
 
 -   Open a new Quarto Markdown document from RStudio
 
 -   You should see a document that is already populated with some example text and code
 
-## This is Quarto Markdown {.smaller}
+## This is Quarto Markdown
 
 ```markdown
 ---
@@ -66,7 +69,7 @@ output: html_document
 -   This controls document-level settings and rendering.
 -   There are a lot of options that you can put in the `yaml header`
 
-## This is Quarto Markdown {.smaller}
+## This is Quarto Markdown
 
 ```markdown
 # Header size 1
@@ -78,27 +81,30 @@ I can write text and it will look normal!
 I can still run code!
 ```
 
-## This is Quarto Markdown {.smaller}
+## This is Quarto Markdown
 
-```{r, eval=FALSE, echo=TRUE}
-# ```{r code_chunk_name option1 option 2}
-# x <- 5
-# print(x^2)
-# ```
+````markdown
+```{{r}}
+#| label: my-first-chunk
+#| echo: true
+
+x <- 5
+print(x^2)
 ```
+````
 
 -   By default, the code and output will print to your document
 -   Note the back tick marks - these delineate the code
 -   The {r} indicates this is r code
 
-## Navigating chunks {.smaller}
+## Navigating chunks
 
 -   Easy to run chunks - a few ways to do this
 -   Top right of each chunk - just run, run all above, etc.
 -   Cog wheel at the top of the Quarto Markdown document - run options
 -   Keyboard shortcuts
 
-## Chunk options {.smaller}
+## Chunk options
 
 -   `include = FALSE` prevents code and results from appearing in the finished file. R Markdown still runs the code in the chunk, and the results can be used by other chunks.
 -   `echo = FALSE` prevents code, but not the results from appearing in the finished file. This is a useful way to embed figures.
@@ -110,7 +116,68 @@ I can still run code!
 -   `fig.height, fig.width` set the dimensions of plots
 -   `cache = TRUE` saves the results of a code chunk, can be helpful if a particular code chunk is intensive
 
-## Quarto Markdown formatting {.smaller}
+## Chunk options, Quarto style
+
+Quarto puts chunk options *inside* the chunk with `#|` - one per line:
+
+````markdown
+```{{r}}
+#| label: fig-stiffness
+#| echo: false
+#| fig-cap: "Stiffness by hydrogel concentration"
+#| fig-width: 6
+boxplot(compression ~ hydrogel_concentration, data = mydata)
+```
+````
+
+| Option                | Effect                                        |
+|-----------------------|-----------------------------------------------|
+| `echo: false`         | Run the code, **hide** the code               |
+| `eval: false`         | **Show** the code, don't run it               |
+| `include: false`      | Run it, show **nothing** (setup chunks)       |
+| `warning: false`      | Hide warnings (`message: false` for messages) |
+| `fig-cap:`            | Figure caption                                |
+| `cache: true`         | Don't re-run slow chunks unless they change   |
+
+::: callout-tip
+Set defaults for the whole document in the YAML header under `execute:` and override chunk-by-chunk only where needed.
+:::
+
+## Rendering your document
+
+``` bash
+quarto render report.qmd              # default format from the YAML
+quarto render report.qmd --to pdf     # PDF (needs LaTeX / TinyTeX)
+quarto render report.qmd --to docx    # Word document
+quarto preview report.qmd             # live preview - re-renders every time you save
+quarto render                         # render a whole project/website (_quarto.yml)
+```
+
+::: incremental
+-   In **VS Code** (Quarto extension) or **Positron**: the **Preview** button or `Cmd/Ctrl-Shift-K`
+-   In **RStudio**: the **Render** button
+-   Same source, many outputs: HTML, PDF, Word, slides, websites
+:::
+
+## Callouts and cross-references
+
+``` markdown
+::: {.callout-tip title="Pro tip"}
+Callouts come in five types: note, tip, warning, important, caution.
+:::
+
+![Scaffold under SEM](images/scaffold.png){#fig-sem width=60%}
+
+As shown in @fig-sem, the pores are uniform.
+```
+
+::: incremental
+-   A **callout** is a colored box - great for tips, warnings, and definitions (you've seen many in these slides)
+-   **Cross-references**: label a figure `#fig-...`, a table `#tbl-...`, or an equation `#eq-...`, then refer to it with `@fig-...` - Quarto numbers them automatically
+-   Full syntax reference: [Appendix F](../Resources_Folder/Appendix_F_Quarto_Markdown.qmd)
+:::
+
+## Quarto Markdown formatting
 
 ``` markdown
 *italic*
@@ -124,7 +191,7 @@ $A = \pi \times r^{2}$
 
 $A = \pi \times r^{2}$
 
-## Quarto Markdown lists {.smaller}
+## Quarto Markdown lists
 
 ``` markdown
 * Item 1
@@ -138,7 +205,7 @@ $A = \pi \times r^{2}$
     -   Item 2a
     -   Item 2b
 
-## Quarto Markdown lists {.smaller}
+## Quarto Markdown lists
 
 ``` markdown
 1. Item 1
@@ -166,37 +233,37 @@ $A = \pi \times r^{2}$
 
 Poisson Sampling Equation
 
-```{r, eval=FALSE, echo=TRUE}
+``` markdown
 $$\large Pr(Y=r) = \frac{e^{-\mu}\mu^r}{r!}$$
 ```
 
 $$\large Pr(Y=r) = \frac{e^{-\mu}\mu^r}{r!}$$
 
-## Differential Equations {.smaller}
+## Differential Equations
 
-```{r, eval=FALSE, echo=TRUE}
+``` markdown
 $$\int xy^2\,dx\,dy =\frac{1}{6}x^2y^3$$
 ```
 
 $$\iint xy^2\,dx\,dy =\frac{1}{6}x^2y^3$$
 
-## In-line versus fenced {.smaller}
+## In-line versus fenced
 
-```{r, eval=FALSE, echo=TRUE}
+``` markdown
 This equation, $y=\frac{1}{2}$, is included inline
 ```
 
 This equation, $y=\frac{1}{2}$, is included inline
 
-```{r, eval=FALSE, echo=TRUE}
+``` markdown
 Whereas this equation, $$y=\frac{1}{2}$$, is put on a separate line
 ```
 
 Whereas this equation $$y=\frac{1}{2}$$ is put on a separate line
 
-## Matrix formulations {.smaller}
+## Matrix formulations
 
-```{r, eval=FALSE, echo=TRUE}
+``` markdown
 $$	\begin{matrix}
 		-2 & 1 & 0 & 0 & \cdots & 0  \\
 		1 & -2 & 1 & 0 & \cdots & 0  \\
@@ -216,7 +283,7 @@ $$  \begin{matrix}
         0 & 0 & 0 & \cdots & 1 & -2
     \end{matrix} $$
 
-## Quarto Markdown is very flexible {.smaller}
+## Quarto Markdown is very flexible
 
 -   You can use Quarto templates and open as a new Quarto Markdown file
 -   Better yet there are extensions that add functionality
@@ -225,7 +292,7 @@ $$  \begin{matrix}
     -   slide shows (these slides!)
     -   interactive exercises
 
-## More on Quarto Markdown {.smaller}
+## More on Quarto Markdown
 
 -   https://quarto.org/docs/authoring/
 -   https://quarto.org/docs/reference/
@@ -239,7 +306,7 @@ $$  \begin{matrix}
 
 # Git and GitHub
 
-## What is Git? {.smaller}
+## What is Git?
 
 -   **Git** is a distributed version control system
 -   Tracks changes in your code over time
@@ -248,7 +315,7 @@ $$  \begin{matrix}
 -   Essential tool for reproducible research
 -   Works locally on your computer
 
-## What is GitHub? {.smaller}
+## What is GitHub?
 
 -   **GitHub** is a web-based hosting service for Git repositories
 -   Provides cloud storage for your code
@@ -259,7 +326,7 @@ $$  \begin{matrix}
 -   Hosts documentation and websites (GitHub Pages)
 -   Free for public repositories
 
-## Git Workflow Concept {.smaller}
+## Git Workflow Concept
 
 ```{mermaid}
 %%| fig-width: 10
@@ -281,7 +348,7 @@ flowchart LR
 -   **Backup**: Your code is safe in multiple places
 -   **Experimentation**: Try new things without breaking working code
 
-## Setting Up Git {.smaller}
+## Setting Up Git
 
 ### 1. Install Git
 
@@ -311,7 +378,7 @@ git config --list
 
 # GitHub
 
-## GitHub for Scientific Collaboration {.smaller}
+## GitHub for Scientific Collaboration
 
 ### Perfect for Research Projects:
 
@@ -322,7 +389,7 @@ git config --list
 -   **Releases**: Tag specific versions for publications
 -   **DOI Integration**: Link with Zenodo for citations
 
-## Resources and Help {.smaller}
+## Resources and Help
 
 ### Learning Resources:
 
@@ -342,7 +409,7 @@ git <command> --help
 git help everyday
 ```
 
-## Creating a GitHub Account {.smaller}
+## Creating a GitHub Account
 
 ### Steps to Get Started:
 
@@ -356,7 +423,7 @@ git help everyday
     -   Access to development tools
     -   Apply at [education.github.com](https://education.github.com)
 
-## Basic Git Commands {.smaller}
+## Basic Git Commands
 
 ### Initialize a Repository
 
@@ -382,7 +449,7 @@ git add .                   # Add all changes
 git commit -m "Descriptive message about changes"
 ```
 
-## Working with Remotes {.smaller}
+## Working with Remotes
 
 ``` bash
 # Add a remote repository
@@ -401,7 +468,7 @@ git pull origin main
 git fetch origin
 ```
 
-## Branching and Merging {.smaller}
+## Branching and Merging
 
 ```{mermaid}
 %%| fig-width: 10
@@ -430,7 +497,7 @@ git checkout main
 git merge feature-branch
 ```
 
-## Common Git Workflow {.smaller}
+## Common Git Workflow
 
 ### Daily Development Cycle
 
@@ -451,7 +518,7 @@ git push origin new-feature
 # 5. Create pull request on GitHub (via website)
 ```
 
-## Viewing History {.smaller}
+## Viewing History
 
 ``` bash
 # View commit history
@@ -470,7 +537,7 @@ git log -p
 git log -3
 ```
 
-## GitHub Pages {.smaller}
+## GitHub Pages
 
 ### Host Your Research Website for Free!
 
@@ -494,7 +561,7 @@ flowchart LR
 3.  Enable Pages in repository settings
 4.  Your site is live at `https://username.github.io`
 
-## GitHub Pages Configuration {.smaller}
+## GitHub Pages Configuration
 
 ### In your repository:
 
@@ -521,7 +588,7 @@ publish:
 quarto publish gh-pages
 ```
 
-## Best Practices {.smaller}
+## Best Practices
 
 ### Commit Messages
 
@@ -540,7 +607,7 @@ project/
 └── docs/              # Documentation
 ```
 
-## .gitignore File {.smaller}
+## .gitignore File
 
 ### Exclude files from version control:
 

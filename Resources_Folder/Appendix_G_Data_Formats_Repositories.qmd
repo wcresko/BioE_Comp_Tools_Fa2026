@@ -1,0 +1,317 @@
+---
+title: "Appendix G - Common Data Formats & Public Repositories"
+author: "Bill Cresko"
+format:
+  html:
+    toc: true
+    toc-depth: 3
+    code-overflow: wrap
+---
+
+This appendix is a **field guide** to the file formats you will meet most often as a bioengineer working with data, and to the public repositories where published datasets, sequences, genomes, and structures live. It is meant to be scanned in about 15 minutes and returned to whenever you open an unfamiliar file or need to find a published dataset.
+
+::: callout-note
+**Why an appendix and not a tutorial?** Recognizing file formats and navigating data repositories is a **skill** more than a procedure: every repository's interface evolves, and the right portal depends on your question. The command-line tools used here (`head`, `zcat`, `grep`, `wc`, `wget`) are introduced in [Appendix A](Appendix_A_Computer_Systems_Command_Line.qmd) and Lectures 03-05; see [Appendix B](Appendix_B_GREP_Regex_Shell.qmd) for more `grep`. Terms are defined in the [Glossary](Glossary.qmd).
+:::
+
+# Part 1 - Common file formats {#file-formats}
+
+A useful first question for any file: **is it plain text or binary?** Plain-text files can be inspected with `head`, `less`, and `grep`, versioned with Git, and read by any language decades from now. Binary files are smaller and faster but need specific software to open.
+
+```bash
+file mystery_data.dat     # the `file` command guesses the type
+head -n 5 mystery_data.dat  # plain text shows readable lines; binary shows gibberish
+```
+
+## Plain-text tables: CSV and TSV
+
+The workhorse of scientific data exchange. Each line is a row; columns are separated by commas (**CSV**, `.csv`) or tab characters (**TSV**, `.tsv` or `.txt`).
+
+```
+sample_id,material,stiffness_kPa,temp_C
+S01,PEG_hydrogel,12.4,37
+S02,PEG_hydrogel,13.1,37
+S03,alginate,8.7,37
+```
+
+- The first line is usually a **header** with column names.
+- Follow **tidy data** conventions (Lecture 03): one variable per column, one observation per row, one value per cell.
+- TSV is safer when text fields might contain commas (e.g., gene descriptions).
+- Read in R with `readr::read_csv()` / `read_tsv()`; in Python with `pandas.read_csv()` (add `sep="\t"` for TSV).
+- Quick shell checks: `head file.csv`, `wc -l file.csv` (rows + header), `cut -d, -f3 file.csv | sort | uniq -c` (tabulate column 3).
+
+## Spreadsheets: Excel (.xlsx) and its caveats
+
+Excel is fine for viewing and data entry, but it is risky as the *only* copy of your data:
+
+- **Automatic conversion**: Excel silently converts some values. Gene symbols such as *SEPT2*, *MARCH1*, and *DEC1* have been turned into dates ("2-Sep", "1-Mar"), and long numeric IDs are converted to scientific notation, losing digits. A 2016 survey found these errors in roughly one-fifth of papers with supplementary Excel gene lists (Ziemann et al., *Genome Biology*, https://doi.org/10.1186/s13059-016-1044-7); HGNC later renamed several genes partly because of this.
+- **Hidden structure**: merged cells, colors used as data, multiple tables per sheet, and formulas make files hard to read programmatically.
+- **Proprietary binary format**: `.xlsx` is a zipped XML bundle, so Git cannot show meaningful diffs.
+
+::: callout-tip
+**Keep a CSV copy.** Treat raw data as read-only, store a plain-text CSV (one sheet = one CSV) alongside any `.xlsx`, and do analysis in code. If you must import into Excel, use **Data → From Text/CSV** and set gene-name or ID columns to **Text**. In R, `readxl::read_excel()` reads `.xlsx` directly without Excel.
+:::
+
+## Sequences: FASTA
+
+Plain text for DNA, RNA, or protein sequences. Each record is a **header line starting with `>`** followed by one or more lines of sequence:
+
+```
+>NM_000546.6 Homo sapiens tumor protein p53 (TP53), mRNA
+CTCAAAAGTCTAGAGCCACCGTCCAGGGAGCAGGTAGCTGCTGGGCTCCGGGGACACTTTGCGTTCGGGC
+TGGGAGCGTGCTTTCCACGACGGTGACACGCTTCCCTGGATTGGCAGCCAGACTGCCTTCCGGGTCACTG
+>sp|P04637|P53_HUMAN Cellular tumor antigen p53
+MEEPQSDPSVEPPLSQETFSDLWKLLPENNVLSPLPSQAMDDLMLSPDDIEQWFTEDPGP
+```
+
+- Extensions: `.fa`, `.fasta`, `.fna` (nucleotide), `.faa` (amino acid), often gzipped (`.fa.gz`).
+- Used for reference genomes, transcripts, primers, and protein sequences.
+- No quality scores (contrast with FASTQ).
+- Count records: `grep -c '>' file.fasta`. List headers: `grep '>' file.fasta | head`.
+
+## Raw sequencing reads: FASTQ
+
+Plain text with a strict **4-line-per-read** structure:
+
+```
+@SRR12345.1 NS500126:1:H7TG3BGXY:1:11101:18923:1057
+NCATGCAGCGTACGGTAATTGGCAGGCATTAGCAGCATCC
++
+#AAAAFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
+```
+
+| Line | Content |
+|---|---|
+| 1 | Header: read ID plus instrument, run, lane, tile, and x/y position. Starts with `@` |
+| 2 | The **sequence** (A/C/G/T/N) |
+| 3 | A `+` separator (sometimes repeats the header) |
+| 4 | **Per-base quality scores**, one ASCII character per base, same length as line 2 |
+
+::: {.callout-note title="Key concept - Phred quality scores"}
+Each quality character encodes a **Phred score** $Q = -10 \log_{10}(P)$, where $P$ is the probability that the base call is wrong:
+
+| Phred Q | Error probability | Base-call accuracy |
+|---|---|---|
+| 10 | 1 in 10 | 90% |
+| 20 | 1 in 100 | 99% |
+| 30 | 1 in 1,000 | 99.9% |
+| 40 | 1 in 10,000 | 99.99% |
+
+Modern Illumina data use **Phred+33** encoding: the character's ASCII code minus 33 gives Q. So `!` (ASCII 33) is Q0, `+` (43) is Q10, `5` (53) is Q20, `?` (63) is Q30, and `I` (73) is Q40. In the example above, the leading `#` (Q2) on the `N` base signals a very low-confidence call.
+:::
+
+- Paired-end runs produce two files per sample, typically `..._R1_001.fastq.gz` and `..._R2_001.fastq.gz`; the reads in each file are in the same order.
+- Because each read is exactly 4 lines, **number of reads = lines / 4**: `echo $(( $(zcat reads.fastq.gz | wc -l) / 4 ))`.
+- Quality-control tools such as FastQC summarize quality scores across a whole file.
+
+## Compressed files (.gz) and streaming
+
+Sequencing and other large text files are almost always stored **gzip-compressed** (`.gz`), often 3-5x smaller. You rarely need to decompress them to disk; instead **stream** them through a pipe:
+
+```bash
+zcat reads.fastq.gz | head -n 8          # first two reads
+zcat reads.fastq.gz | wc -l              # total lines
+zcat genome.fa.gz | grep -c '>'          # number of sequences
+zless annotation.gtf.gz                  # page through interactively
+
+gzip results.tsv                         # compress (creates results.tsv.gz, removes original)
+gunzip results.tsv.gz                    # decompress
+gzip -k results.tsv                      # -k keeps the original
+```
+
+On macOS, the built-in `zcat` expects `.Z` files; use `gzcat file.gz` or `zcat < file.gz` instead. Some genomics files use **bgzip** (block gzip), which is still readable with `zcat` but also allows indexed random access (e.g., with `tabix` or `samtools`). Other archive types you will see: `.zip` (`unzip`), `.tar.gz`/`.tgz` (`tar -xzf file.tar.gz`), and `.bz2` (`bzcat`).
+
+## Alignments: SAM and BAM
+
+When reads are aligned to a reference genome, the result is stored as **SAM** (Sequence Alignment/Map; tab-delimited text with a `@` header section and one line per alignment) or its compressed binary equivalent **BAM** (`.bam`, with an index `.bai`). Use `samtools` to work with them:
+
+```bash
+samtools view -H sample.bam | head       # header lines
+samtools view sample.bam | head -n 3     # first 3 alignments as SAM text
+samtools flagstat sample.bam             # summary: how many reads mapped
+```
+
+## Genomic annotation and interval formats
+
+All are tab-delimited text, one feature per line; chromosome names must match the reference genome you use.
+
+- **GFF3 / GTF** (`.gff3`, `.gtf`): nine columns describing genes, transcripts, exons, and CDS features, 1-based coordinates.
+
+  ```
+  chr17  HAVANA  gene  7661779  7687538  .  -  .  gene_id "ENSG00000141510"; gene_name "TP53";
+  ```
+
+- **BED** (`.bed`): at minimum chromosome, start, end; used for regions, peaks, and targets. **0-based, half-open** coordinates (start is counted from 0 and the end position is excluded).
+
+  ```
+  chr17  7661778  7687538  TP53  0  -
+  ```
+
+- **VCF** (`.vcf`, `.vcf.gz`): genetic variants (SNPs, indels) relative to a reference, with `##` metadata lines, a `#CHROM` header, and optional per-sample genotype columns.
+
+  ```
+  #CHROM  POS      ID         REF  ALT  QUAL  FILTER  INFO
+  chr17   7675088  rs28934578 C    T    60    PASS    DP=42
+  ```
+
+## Hierarchical binary data: HDF5, .h5, and .h5ad
+
+**HDF5** (Hierarchical Data Format 5; `.h5`, `.hdf5`) stores many large numerical arrays and their metadata inside a single binary file organized like a file system (groups and datasets). It supports compression and lets programs read just the slice they need without loading the whole file, so it is common for microscopy and imaging data, simulation output, instrument data, and large matrices. `.h5ad` is the HDF5-based file format for Python's **AnnData** package, widely used for large annotated matrices (e.g., samples/cells by genes).
+
+- Inspect from the shell with `h5ls -r file.h5` (from the HDF5 tools).
+- Read in Python with `h5py` (or `anndata.read_h5ad()` for `.h5ad`); in R with the Bioconductor `rhdf5` package.
+
+## R objects: .rds and .RData vs plain text
+
+- `saveRDS(obj, "file.rds")` / `readRDS("file.rds")` saves and restores **one** R object exactly (including factor levels, attributes, and complex objects such as model fits).
+- `save(a, b, file = "file.RData")` / `load("file.RData")` stores **several** objects and restores them under their original names (which can silently overwrite objects in your session).
+
+Both are convenient for **work in progress** and for passing results between steps of your own pipeline, but they are **not good archival or sharing formats**: they are readable only by R, can break across major package versions, and cannot be diffed in Git. For anything you will share, publish, or keep long-term, **also write a plain-text version** (`readr::write_csv()`) and keep the code that regenerates the R object. Avoid saving your whole workspace to `.RData` at exit (RStudio: *Tools → Global Options → General*, set "Save workspace" to **Never**). See [Appendix D](Appendix_D_R_and_RStudio.qmd) and [Appendix E](Appendix_E_Core_R_Commands.qmd).
+
+## Structured text: JSON and YAML
+
+Both represent nested key-value data in plain text and are common for configuration files, metadata, pipeline parameters, and web APIs.
+
+**JSON** (`.json`) uses braces, brackets, and quoted keys:
+
+```json
+{
+  "experiment": "hydrogel_swelling",
+  "temperature_C": 37,
+  "replicates": [1, 2, 3],
+  "instrument": {"name": "rheometer", "geometry": "parallel plate"}
+}
+```
+
+**YAML** (`.yml`, `.yaml`) expresses the same structure with indentation, and is what Quarto uses for document headers and `_quarto.yml` project files ([Appendix F](Appendix_F_Quarto_Markdown.qmd)):
+
+```yaml
+experiment: hydrogel_swelling
+temperature_C: 37
+replicates: [1, 2, 3]
+instrument:
+  name: rheometer
+  geometry: parallel plate
+```
+
+YAML is whitespace-sensitive: use spaces (never tabs) and keep indentation consistent. Read JSON with `jsonlite` in R or the `json` module in Python; `jq` is a handy command-line JSON tool. Many pipelines write a `params.json` or `config.yaml` describing a run; archive it with your outputs as the "lab notebook entry" for your computational analysis.
+
+## Format quick reference
+
+| Extension | Type | What it holds | Look inside with |
+|---|---|---|---|
+| `.csv`, `.tsv` | text | Tables | `head`, `less`, R/Python |
+| `.xlsx` | binary (zipped XML) | Spreadsheets | Excel, `readxl`; keep a CSV copy |
+| `.fa`, `.fasta` | text | Sequences (no qualities) | `head`, `grep -c '>'` |
+| `.fastq.gz` | compressed text | Reads + quality scores | `zcat \| head` |
+| `.sam` / `.bam` | text / binary | Read alignments | `samtools view` |
+| `.gtf`, `.gff3`, `.bed`, `.vcf` | text | Annotations, intervals, variants | `head`, `grep`, `zless` |
+| `.h5`, `.h5ad` | binary | Large arrays / annotated matrices | `h5ls`, `h5py`, `rhdf5` |
+| `.rds`, `.RData` | binary | R objects | `readRDS()`, `load()` |
+| `.json`, `.yaml` | text | Configuration, metadata | `cat`, `jq` |
+
+# Part 2 - Public data repositories
+
+Journals and funders increasingly require that data be deposited in a public repository, and published data are a free resource for learning, method development, and comparison with your own results. Most biological repositories belong to a small set of international organizations that mirror each other.
+
+## NCBI (US National Center for Biotechnology Information)
+
+- [**GEO**](https://www.ncbi.nlm.nih.gov/geo/) (Gene Expression Omnibus): processed functional-genomics data (expression tables, count matrices, sample metadata) from microarray and sequencing studies. Series have `GSE######` accessions, and each sample has a `GSM######` record. When a paper says *"data are available at GEO under GSE#####"*, open the series page, check the sample list, and scroll to **Supplementary file** to download. In R, the Bioconductor **GEOquery** package (`getGEO()`, `getGEOSuppFiles()`) retrieves these directly.
+- [**SRA**](https://www.ncbi.nlm.nih.gov/sra) (Sequence Read Archive): **raw** sequencing reads (FASTQ/BAM). Accessions: `SRR` (run), `SRX` (experiment), `SRP` (study). Use it when you need to re-process data from scratch. Files are **big** (often several to tens of GB per sample), so plan storage (e.g., Talapas project or scratch space, Lecture 10) before downloading.
+- [**GenBank / RefSeq**](https://www.ncbi.nlm.nih.gov/nuccore): GenBank is the archive of all submitted nucleotide sequences; **RefSeq** is NCBI's curated, non-redundant set of reference sequences (accessions like `NM_` for mRNA, `NP_` for protein, `NC_` for chromosomes). Download records as FASTA from the page's **Send to** menu or with NCBI's `datasets` command-line tool.
+- [**BioProject / BioSample**](https://www.ncbi.nlm.nih.gov/bioproject/): the umbrella records that tie a study (`PRJNA…`) and its biological samples (`SAMN…`) to the associated GEO, SRA, and GenBank entries.
+
+::: callout-tip
+**Getting raw reads.** Two practical routes:
+
+-   **`sra-tools`** on the command line: `prefetch SRR12345678` then `fasterq-dump --split-files SRR12345678` (gives paired `_1.fastq` and `_2.fastq`). On Talapas, look for it with `module spider sra-tools`, or install it with conda/Bioconda.
+-   **[SRA Explorer](https://sra-explorer.info/)**: paste in an accession and it returns ready-to-use `wget`/`curl` download commands, usually pointing at the ENA mirror.
+:::
+
+## EBI / ENA (Europe)
+
+The [European Bioinformatics Institute](https://www.ebi.ac.uk/) runs the European counterparts: the [**European Nucleotide Archive (ENA)**](https://www.ebi.ac.uk/ena/browser/) mirrors SRA and GenBank (the same `SRR…` accessions work) and often provides direct FTP/HTTPS links to FASTQ files that you can `wget` without `sra-tools`. [**BioStudies / ArrayExpress**](https://www.ebi.ac.uk/biostudies/) is the European counterpart to GEO, and [**UniProt**](https://www.uniprot.org/) is the central resource for protein sequences and functional annotation.
+
+## Reference genomes and annotations: UCSC and Ensembl
+
+- [**UCSC Genome Browser**](https://genome.ucsc.edu/): interactive browser for genomes and annotation tracks, plus bulk downloads of genome FASTA, annotation files, and the Table Browser for exporting regions as BED/GTF. Assemblies are named like `hg38` (human) or `mm39` (mouse).
+- [**Ensembl**](https://www.ensembl.org/): genome browser and annotation database with stable gene IDs (`ENSG…`) and a public [FTP site](https://ftp.ensembl.org/pub/) for genome FASTA and GTF/GFF3 files for hundreds of vertebrate species (plus [Ensembl Genomes](https://ensemblgenomes.org/) for plants, fungi, bacteria, and invertebrates).
+
+Always record **which assembly and annotation release** you used (e.g., GRCh38, Ensembl release number), because coordinates and gene models change between versions. Note also that UCSC names chromosomes `chr1` while Ensembl uses `1`.
+
+## Protein structures: Protein Data Bank
+
+The [**RCSB Protein Data Bank (PDB)**](https://www.rcsb.org/) archives experimentally determined 3D structures of proteins, nucleic acids, and complexes, each with a four-character ID (e.g., `1TUP`). Download coordinates as `.pdb` or the newer `.cif` (mmCIF) text formats; view them in the browser, or in tools like PyMOL or ChimeraX. The [AlphaFold Protein Structure Database](https://alphafold.ebi.ac.uk/) provides predicted structures for most known proteins.
+
+## General-purpose repositories: Zenodo, Figshare, Dryad
+
+For data that do not fit a specialized repository (imaging, mechanical testing, simulation output, code, and supplementary tables), general-purpose repositories assign each deposit a permanent **DOI** so it can be cited:
+
+- [**Zenodo**](https://zenodo.org/) (run by CERN): free; integrates with GitHub to archive a tagged release of a code repository with a DOI.
+- [**Figshare**](https://figshare.com/): used by many journals for supplementary data.
+- [**Dryad**](https://datadryad.org/): curated repository for data underlying publications, common in ecology, evolution, and biology.
+
+## How to choose
+
+| If you want... | Go to... |
+|---|---|
+| Processed expression data / count tables from a paper | **GEO** (or BioStudies/ArrayExpress) |
+| Raw sequencing reads (FASTQ) | **SRA** or **ENA** (via `sra-tools` or SRA Explorer) |
+| A specific gene, mRNA, or protein sequence | **GenBank/RefSeq**, **UniProt** |
+| A reference genome FASTA + GTF annotation | **Ensembl** or **UCSC** |
+| To see what samples belong to a study | **BioProject / BioSample** |
+| A 3D protein structure | **PDB** (experimental), **AlphaFold DB** (predicted) |
+| Imaging, mechanical, simulation, or other non-sequence data with a DOI | **Zenodo**, **Figshare**, **Dryad** |
+| To publish and cite your own code | GitHub + **Zenodo** release ([Appendix C](Appendix_C_Git_GitHub.qmd)) |
+
+## FAIR data principles
+
+The **FAIR** principles (Wilkinson et al. 2016, "The FAIR Guiding Principles for scientific data management and stewardship," *Scientific Data*, https://doi.org/10.1038/sdata.2016.18) describe what makes data genuinely reusable by people and machines:
+
+- **Findable**: data and metadata have a globally unique, persistent identifier (accession or DOI) and are indexed in a searchable resource.
+- **Accessible**: they can be retrieved by that identifier using a standard, open protocol (e.g., HTTPS), and metadata remain available even if the data no longer are.
+- **Interoperable**: they use formal, shared formats and vocabularies (e.g., CSV/FASTA rather than a proprietary format; standard units and ontology terms).
+- **Reusable**: they are richly described, with clear provenance and a clear license.
+
+In practice for your own work: keep raw data read-only, use open plain-text formats where possible, write a README describing every column and unit, record software versions, and deposit data and code in an appropriate repository when you publish. See also the [GO FAIR initiative](https://www.go-fair.org/fair-principles/).
+
+# Part 3 - A short hands-on exercise
+
+::: {.callout-tip title="Exercise 1 - download a FASTA file and count sequences"}
+Run these commands in a terminal (macOS, Linux, WSL, or Talapas). They download the complete set of predicted protein sequences for baker's yeast (*Saccharomyces cerevisiae*) from Ensembl, a small (about 2 MB) gzipped FASTA file. (On macOS, replace `zcat` with `gzcat`, and use `curl -L -O <url>` if `wget` is not installed.)
+
+```bash
+mkdir -p ~/data_practice && cd ~/data_practice
+
+wget https://ftp.ensembl.org/pub/current_fasta/saccharomyces_cerevisiae/pep/Saccharomyces_cerevisiae.R64-1-1.pep.all.fa.gz
+
+ls -lh                                   # how big is the compressed file?
+zcat Saccharomyces_cerevisiae.R64-1-1.pep.all.fa.gz | head -n 5
+zcat Saccharomyces_cerevisiae.R64-1-1.pep.all.fa.gz | grep -c '>'
+```
+
+1.  How many protein sequences are in the file?
+2.  Use `grep` to find the header line(s) for a gene you know (e.g., `grep 'CDC28'`). What information does the header contain?
+3.  Decompress with `gunzip -k` and compare file sizes with `ls -lh`. What is the compression ratio?
+
+If the URL has changed, browse <https://ftp.ensembl.org/pub/current_fasta/> to find the current file name; checking and adapting a URL like this is a normal part of working with public data.
+:::
+
+::: {.callout-tip title="Exercise 2 - explore a GEO series"}
+1.  Go to <https://www.ncbi.nlm.nih.gov/geo/> and search for a topic related to your research (e.g., *"hydrogel mesenchymal stem cells"* or *"cardiomyocyte mechanical stretch"*). Filter to **Series**.
+2.  Open one `GSE` record. What organism and platform were used? How many samples (`GSM` records)?
+3.  Scroll to **Supplementary file**. What formats are the processed data in (`.csv.gz`, `.txt.gz`, `.xlsx`, `.h5`)? Download one with `wget` (right-click the **(http)** link to copy its URL) and inspect it with `zcat file | head`.
+4.  Follow the **SRA Run Selector** link. How many runs are there, and how large is the raw data in total? Paste one `SRR` accession into [SRA Explorer](https://sra-explorer.info/) to see the download commands (you do not need to run them).
+5.  Is the dataset FAIR? Note one thing the authors did well and one thing that made reuse harder (missing units, unclear column names, Excel-only files, etc.).
+:::
+
+# Further reading
+
+-   [Appendix A - Computer Systems & the Command Line](Appendix_A_Computer_Systems_Command_Line.qmd) and [Appendix B - GREP, Regex & Shell Scripting](Appendix_B_GREP_Regex_Shell.qmd) for the shell commands used here.
+-   [Glossary](Glossary.qmd) and the [Resources hub](../Resources.qmd).
+-   The [hts-specs](https://samtools.github.io/hts-specs/) pages: official specifications for SAM/BAM, VCF, and related formats.
+-   UCSC, [Data file formats FAQ](https://genome.ucsc.edu/FAQ/FAQformat.html): concise descriptions of BED, GFF/GTF, and many other genomics formats.
+-   NCBI, [GEO documentation](https://www.ncbi.nlm.nih.gov/geo/info/) and [SRA documentation](https://www.ncbi.nlm.nih.gov/sra/docs/).
+-   Broman & Woo, "Data Organization in Spreadsheets," *The American Statistician* (2018), https://doi.org/10.1080/00031305.2017.1375989: practical rules for spreadsheets that stay analyzable.
+-   Wilson et al., "Good enough practices in scientific computing," *PLOS Computational Biology* (2017), https://doi.org/10.1371/journal.pcbi.1005510.
+-   Wilkinson et al., "The FAIR Guiding Principles for scientific data management and stewardship," *Scientific Data* (2016), https://doi.org/10.1038/sdata.2016.18.

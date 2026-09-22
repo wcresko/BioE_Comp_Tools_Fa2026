@@ -3,19 +3,22 @@ title: "Lecture 04 - Computational Tools for Bioengineers"
 subtitle: "Unix Data Streams and Large Genomic Data Files"
 date: "Monday, October 19, 2026"
 author: "Bill Cresko"
-format: 
-  revealjs:
-    footer: BioE_Comp_Tools_2026 - Knight Campus 
-    transition: fade
-    transition-speed: slow
-editor: visual
 ---
 
 ```{r}
+#| label: setup
+#| include: false
+
+# Packages used in the lecture examples
 library(tidyverse)
 library(gt)
 library(readxl)
-theme_set(theme_minimal())
+
+# Consistent theme for all plots
+theme_set(theme_minimal(base_size = 14))
+
+# Reproducible random numbers
+set.seed(2026)
 ```
 
 
@@ -28,11 +31,9 @@ theme_set(theme_minimal())
 
 # The Command Line
 
-```{r, echo=FALSE, out.width='90%', fig.asp=.75, fig.align='center'}
-knitr::include_graphics("images/w1_code.jpeg")
-```
+![](images/w1_code.jpeg){fig-align="center" width="90%"}
 
-## Making new files {.smaller}
+## Making new files
 
 -   Make new folders: `mkdir`
 -   Make new files: `nano`, `touch`
@@ -45,7 +46,7 @@ knitr::include_graphics("images/w1_code.jpeg")
 -   Reading files: `cat`
 -   Looking at beginning or end: `head` or `tail`
 
-## Things to keep in mind {.smaller}
+## Things to keep in mind
 
 -   The shell trusts you
     -   It will delete files you say to delete
@@ -57,7 +58,7 @@ knitr::include_graphics("images/w1_code.jpeg")
 -   Use appropriate file extensions in file names
     -   Some software expect files with certain extensions (.fasta, .txt, etc.)
 
-## Practice making files and directories {.smaller}
+## Practice making files and directories
 
 -   Make a new directory called whatever you'd like.
 -   Add a file named `Practice.txt` to the directory and add some text to it
@@ -70,7 +71,7 @@ knitr::include_graphics("images/w1_code.jpeg")
 
 # Reading and Writing Files in Unix
 
-## Commands for Reading Files {.smaller}
+## Commands for Reading Files
 
 -   **`cat`** = concatenate and display files
     -   Shows entire file at once
@@ -86,7 +87,7 @@ knitr::include_graphics("images/w1_code.jpeg")
     -   `tail -n 20 file.txt` shows last 20 lines
     -   `tail -f file.txt` follows file as it grows (useful for logs)
 
-## Input Redirection {.smaller}
+## Input Redirection
 
 -   **`<`** = redirect input from a file
     -   `command < input.txt`
@@ -97,7 +98,7 @@ knitr::include_graphics("images/w1_code.jpeg")
     -   `wc -l < data.txt` counts lines in data.txt
     -   `sort < names.txt` sorts contents of names.txt
 
-## Output Redirection {.smaller}
+## Output Redirection
 
 -   **`>`** = redirect output to a file (overwrites)
     -   `ls -l > filelist.txt`
@@ -111,7 +112,7 @@ knitr::include_graphics("images/w1_code.jpeg")
 -   **`&>`** = redirect both output and errors
     -   `command &> all_output.txt`
 
-## Unix Three Standard Streams {.smaller}
+## Unix Three Standard Streams
 
 -   **stdin (0)** = Standard Input
     -   Where programs read input from
@@ -123,7 +124,7 @@ knitr::include_graphics("images/w1_code.jpeg")
     -   Where programs write error messages
     -   Default: terminal screen (same as stdout)
 
-## Visualizing Data Streams {.smaller}
+## Visualizing Data Streams
 
 ``` bash
 # Every Unix program has these three streams
@@ -139,7 +140,7 @@ stdin ───>│              │───> stdout
 -   Programs don't know if streams are redirected
 -   This abstraction is key to Unix philosophy
 
-## Basic Stream Redirection {.smaller}
+## Basic Stream Redirection
 
 ``` bash
 # Redirect stdout to file (equivalent ways)
@@ -156,7 +157,7 @@ ls /nonexistent 2> errors.txt
 ls -l /nonexistent &> all_output.txt
 ```
 
-## Bioinformatics Example {.smaller}
+## Bioinformatics Example
 
 Processing sequence data with stream control:
 
@@ -175,9 +176,9 @@ samtools index - 2> index_errors.log
 cat *_errors.log | grep -E "ERROR|WARNING"
 ```
 
-# Unix Pipes {.flexbox .vcenter}
+# Unix Pipes
 
-## What are Pipes? {.smaller}
+## What are Pipes?
 
 -   **`|`** = the pipe operator
     -   Takes output from one command as input to another
@@ -189,7 +190,7 @@ cat *_errors.log | grep -E "ERROR|WARNING"
     -   Small tools that do one thing well
     -   Combine them to do complex tasks
 
-## Common Pipe Patterns {.smaller}
+## Common Pipe Patterns
 
 -   **Counting patterns:**
     -   `grep "pattern" file.txt | wc -l`
@@ -204,7 +205,7 @@ cat *_errors.log | grep -E "ERROR|WARNING"
     -   `ls -l | grep ".txt" | awk '{print $5, $9}'`
     -   List txt files with sizes
 
-## Advanced Pipe Examples {.smaller}
+## Advanced Pipe Examples
 
 -   **Multi-step data processing:**
     -   `cat data.csv | cut -d',' -f2 | sort | uniq -c | sort -rn`
@@ -216,7 +217,7 @@ cat *_errors.log | grep -E "ERROR|WARNING"
     -   `tail -f logfile.txt | grep ERROR`
     -   Watch log file for errors in real-time
 
-## Tips for Working with Files and Pipes {.smaller}
+## Tips for Working with Files and Pipes
 
 -   Test pipes step by step
     -   Build complex pipes incrementally
@@ -229,16 +230,53 @@ cat *_errors.log | grep -E "ERROR|WARNING"
 -   Save intermediate results when debugging complex pipes \# Unix Data Streams
 
 
+## Sequence file formats: FASTA and FASTQ
+
+::::: columns
+::: {.column width="50%"}
+**FASTA** - sequences (genomes, genes, proteins)
+
+``` bash
+>chr21 Homo sapiens chromosome 21
+NNNNNNNNNNGATCCTTGAAGCGCCCCCAAGG
+GCATCTTCTCTACTTTCACCTAACAGATCCCA
+```
+
+-   Header line starts with `>`
+-   Sequence on one or more lines
+-   Count sequences: `grep -c "^>" file.fa`
+:::
+
+::: {.column width="50%"}
+**FASTQ** - raw sequencing reads
+
+``` bash
+@SRR12345.1 read_1
+NCATGCAGCGTACGGTAATTGGCAG
++
+#AAAAFFFFFFFFFFFFFFFFFFFF
+```
+
+-   **4 lines per read**: `@` header, sequence, `+`, per-base quality
+-   Quality letters encode Phred scores (`!` = lowest, `I` = Q40)
+-   Count reads: `echo $(( $(wc -l < reads.fastq) / 4 ))`
+:::
+:::::
+
+::: callout-tip
+Both are usually gzip-compressed (`.fa.gz`, `.fastq.gz`) - use `zcat` / `zless` / `zgrep` to read them without unpacking. More formats (CSV/TSV, GFF, BED, VCF, HDF5) in [Appendix G](../Resources_Folder/Appendix_G_Data_Formats_Repositories.qmd).
+:::
+
 # Working with Large Genomic Data Files
 
-## Human Chromosome Data {.smaller}
+## Human Chromosome Data
 
 -   Genomic data files can be massive (human genome \~6 billion base pairs)
 -   FASTA format is standard for sequence data
 -   Perfect use case for Unix pipes and redirection
 -   Let's work with human genome assembly version 38 (\~3.1 GB)
 
-## Downloading Genomic Data {.smaller}
+## Downloading Genomic Data
 
 Download version 38 of the human genome from NCBI:
 
@@ -259,7 +297,7 @@ GCF_000001405.40_GRCh38.p14/GCF_000001405.40_GRCh38.p14_genomic.fna.gz
 -   The backslash allows long URLs to span multiple lines
 -   `.gz` extension means the file is compressed
 
-## Examining Large Files Efficiently {.smaller}
+## Examining Large Files Efficiently
 
 Don't use `cat` on huge files! Use these approaches:
 
@@ -283,7 +321,7 @@ grep "^>" human_genome.fa.gz | wc -l
 grep "^>" human_genome.fa.gz | less
 ```
 
-## Creating a Subset for Analysis {.smaller}
+## Creating a Subset for Analysis
 
 Make a smaller working file for testing:
 
@@ -306,7 +344,7 @@ grep "^>" human_genome.fa | \
   done > random_sample.fa
 ```
 
-## Processing FASTA Files with Pipes {.smaller}
+## Processing FASTA Files with Pipes
 
 Extract specific regions or sequences:
 
@@ -332,7 +370,7 @@ sed -n '1000,2000p' human_genome.fa > gene_region.fa
 -   `tr -d '\n'` removes newlines
 -   `fold -w1` puts each character on its own line
 
-## Finding Patterns in Genomic Data {.smaller}
+## Finding Patterns in Genomic Data
 
 Search for specific sequences and motifs:
 
@@ -358,7 +396,7 @@ grep -v "^>" human_genome.fa | \
   head -20
 ```
 
-## Combining Downloads with Processing {.smaller}
+## Combining Downloads with Processing
 
 Stream processing without saving intermediate files:
 
@@ -384,7 +422,7 @@ wget -O - https://url/to/genome.fa.gz | \
 -   This approach saves disk space and time
 :::
 
-## Key Takeaways {.smaller}
+## Key Takeaways
 
 -   **Real bioinformatics often involves gigabytes of data - these Unix tools scale beautifully!**
 -   **Never load entire genome files into memory** - use streaming
@@ -394,7 +432,7 @@ wget -O - https://url/to/genome.fa.gz | \
 -   **Use compression** - work with .gz files directly when possible
 -   **Think in streams** - data flows through pipes without intermediate files
 
-## Practice Exercise: Genomic Data Pipeline {.smaller}
+## Practice Exercise: Genomic Data Pipeline
 
 Build a complete analysis pipeline:
 
