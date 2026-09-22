@@ -1,0 +1,865 @@
+---
+title: "Week 7 Computational Tools for Bioengineers"
+author: "Bill Cresko"
+format: 
+  revealjs:
+    footer: BioE_Comp_Tools_2025 - Knight Campus 
+    transition: fade
+    transition-speed: slow
+editor: visual
+---
+
+```{r}
+library(tidyverse)
+library(gt)
+library(readxl)
+theme_set(theme_minimal())
+```
+
+## Goals for today
+
+-   Finish Git and GitHub
+-   Basics of working with Talapas
+-   <https://wcresko.github.io/computational_tools_book/>
+
+## Git and GitHub
+
+### What is Git? {.smaller}
+
+-   **Git** is a distributed version control system
+-   Tracks changes in your code over time
+-   Allows collaboration with others
+-   Maintains complete history of all changes
+
+### What is GitHub? {.smaller}
+
+-   **GitHub** is a web-based hosting service for Git repositories
+-   Provides cloud storage for your code
+-   Enables collaboration features
+-   Hosts documentation and websites (GitHub Pages)
+-   Free for public repositories
+
+## Git Workflow Concept {.smaller}
+
+```{mermaid}
+%%| fig-width: 10
+%%| fig-height: 6
+%%{init: {'theme': 'base', 'themeVariables': {'fontSize': '18px', 'fontFamily': 'arial', 'primaryTextColor': '#000000'}}}%%
+flowchart LR
+    A[Working Directory] --> GA([git add])
+    GA --> B[Staging Area]
+    B --> GC([git commit])
+    GC --> C[Local Repository]
+    C --> GP([git push])
+    GP --> D[Remote Repository]
+    D --> GPL([git pull])
+    GPL --> A
+    
+    style A fill:#f9d71c,stroke:#333,stroke-width:2px,color:#000000
+    style B fill:#87ceeb,stroke:#333,stroke-width:2px,color:#000000
+    style C fill:#98fb98,stroke:#333,stroke-width:2px,color:#000000
+    style D fill:#ffa07a,stroke:#333,stroke-width:2px,color:#000000
+    style GA fill:#ffffff,stroke:#333,stroke-width:2px,color:#000000
+    style GC fill:#ffffff,stroke:#333,stroke-width:2px,color:#000000
+    style GP fill:#ffffff,stroke:#333,stroke-width:2px,color:#000000
+    style GPL fill:#ffffff,stroke:#333,stroke-width:2px,color:#000000
+```
+
+-   **Track Changes**: Every modification is recorded
+-   **Collaboration**: Multiple people can work simultaneously
+-   **Backup**: Your code is safe in multiple places
+-   **Experimentation**: Try new things without breaking working code
+
+## Setting Up Git {.smaller}
+
+### 1. Install Git
+
+``` bash
+# Check if Git is installed
+
+git --version
+
+# macOS (with Homebrew)
+
+brew install git
+
+# Ubuntu/Debian
+
+sudo apt-get install git
+
+# Windows: Download from git-scm.com
+```
+
+### 2. Configure Git
+
+``` bash
+# Set your name and email
+
+git config --global user.name "Your Name"
+git config --global user.email "your.email@example.com"
+
+# Check your settings
+
+git config --list
+```
+
+# GitHub
+
+## GitHub for Scientific Collaboration {.smaller}
+
+### Perfect for Research Projects:
+
+-   **Reproducibility**: Complete history of analysis development
+-   **Collaboration**: Work with colleagues worldwide
+-   **Documentation**: README files, wikis, and GitHub Pages
+-   **Issues**: Track bugs, ideas, and to-dos
+-   **Releases**: Tag specific versions for publications
+-   **DOI Integration**: Link with Zenodo for citations
+
+## Resources and Help {.smaller}
+
+### Learning Resources:
+
+-   **GitHub Docs** `(https://docs.github.com)`
+-   **Pro Git Book** `(https://git-scm.com/book) (free online)`
+-   **GitHub Learning Lab** `(https://github.com/apps/github-learning-lab)`
+-   **Quarto + GitHub Pages** `(https://quarto.org/docs/publishing/github-pages.html)`
+
+## Creating a GitHub Account {.smaller}
+
+### Steps to Get Started:
+
+1.  Go to [github.com](https://github.com)
+2.  Click "Sign up"
+3.  Choose a username (professional, memorable)
+4.  Add your university email
+5.  Verify your account
+6.  Consider GitHub Student Developer Pack:
+    -   Free GitHub Pro while you're a student
+    -   Access to development tools
+    -   Apply at [education.github.com](https://education.github.com)
+
+## Basic Git Commands {.smaller}
+
+### Initialize a Repository
+
+There are two ways to do this: create a new repository, or clone an existing repository
+
+``` bash
+# Create a new repository
+
+git init
+
+# Clone an existing repository
+
+git clone https://github.com/username/repository.git
+```
+
+## Creating a template repo on GitHub {.smaller}
+
+I created a template website repository for you to clone and edit
+
+-   Open GitHub and log into it (important that you're logged in)
+-   Go to this repository in my GitHub account:
+
+`https://github.com/wcresko/academic_website_template`
+
+-   Click the green button in the upper right hand corner that says 'Use this template'
+-   This will clone the template into your GitHub account.
+
+## Cloning the template repository to your local machine {.smaller}
+
+-   Now you can clone the repository to you local machine
+
+-   Open your terminal and `cd` to a location where you want to clone the repository
+
+``` bash
+## type the following command
+
+git clone << Link to your repository on GitHub >>
+```
+
+-   I'll show you how to find the link on GitHub to use
+
+## Track Changes
+
+``` bash
+# Check status
+
+git status
+
+# Add files to staging
+
+git add filename.txt        # Add specific file
+git add .                   # Add all changes
+
+# Commit changes
+
+git commit -m "Descriptive message about changes"
+```
+
+## Working with Remotes {.smaller}
+
+``` bash
+# Add a remote repository
+
+git remote add origin https://github.com/username/repo.git
+
+# View remotes
+
+git remote -v
+
+# Push changes to GitHub
+
+git push origin main
+
+# Pull changes from GitHub
+
+git pull origin main
+
+# Fetch without merging
+
+git fetch origin
+```
+
+## Branching and Merging {.smaller}
+
+```{mermaid}
+%%| fig-width: 10
+%%| fig-height: 6
+%%{init: {'theme': 'base', 'themeVariables': {'fontSize': '16px', 'fontFamily': 'arial'}}}%%
+gitGraph
+    commit id: "Initial commit"
+    commit id: "Add README"
+    branch feature
+    checkout feature
+    commit id: "New feature"
+    commit id: "Fix bug"
+    checkout main
+    commit id: "Update docs"
+    merge feature
+    commit id: "Continue work"
+```
+
+``` bash
+# Create and switch to new branch
+
+git checkout -b feature-branch
+
+# Switch branches
+
+git checkout main
+
+# Merge branch
+
+git merge feature-branch
+```
+
+## Common Git Workflow {.smaller}
+
+### Daily Development Cycle
+
+``` bash
+# 1. Start your day - update your local copy
+
+git pull origin main
+
+# 2. Create a feature branch
+
+git checkout -b new-feature
+
+# 3. Make changes and commit regularly
+
+git add .
+git commit -m "Add new analysis function"
+
+# 4. Push your branch
+
+git push origin new-feature
+
+# 5. Create pull request on GitHub (via website)
+```
+
+## Viewing Commit History {.smaller}
+
+``` bash
+# View commit history
+
+git log
+
+# Prettier one-line format
+
+git log --oneline
+
+# With graph
+
+git log --graph --oneline --all
+
+# Show changes in commits
+
+git log -p
+
+# Show last n commits
+
+git log -3
+```
+
+## .gitignore File {.smaller}
+
+### Exclude files from version control:
+
+``` bash
+# Create .gitignore file
+touch .gitignore
+```
+
+### Common patterns to exclude:
+
+``` bash
+# Data files
+*.fastq
+*.fasta
+*.bam
+*.vcf
+data/raw/*
+
+# R files
+.Rhistory
+.RData
+.Rproj.user
+
+# Output files
+results/temp/*
+*.log
+
+# System files
+.DS_Store
+```
+
+## Best Practices {.smaller}
+
+### Commit Messages
+
+-   Be descriptive and concise
+-   Use present tense: "Add feature" not "Added feature"
+-   Reference issues: "Fix bug #123"
+
+### Repository Organization
+
+```         
+project/
+├── README.md          # Project description
+├── data/              # Raw data (consider .gitignore)
+├── analysis/          # Analysis scripts
+├── results/           # Output files
+└── docs/              # Documentation
+```
+
+## GitHub Pages {.smaller}
+
+### Host Your Research Website for Free!
+
+```{mermaid}
+%%| fig-width: 10
+%%| fig-height: 5
+%%{init: {'theme': 'base', 'themeVariables': {'fontSize': '18px', 'fontFamily': 'arial', 'primaryTextColor': '#000000'}}}%%
+flowchart LR
+    A[Quarto Documents] --> R([Render])
+    R --> B[HTML Files]
+    B --> GP([git push])
+    GP --> C[GitHub Repository]
+    C --> AU([Automatic])
+    AU --> D[GitHub Pages Website]
+    D --> E[yourname.github.io/project]
+    
+    style A fill:#e3f2fd,stroke:#333,stroke-width:2px,color:#000000
+    style B fill:#ffffff,stroke:#333,stroke-width:2px,color:#000000
+    style C fill:#ffffff,stroke:#333,stroke-width:2px,color:#000000
+    style D fill:#ffffff,stroke:#333,stroke-width:2px,color:#000000
+    style E fill:#c8e6c9,stroke:#333,stroke-width:2px,color:#000000
+    style R fill:#ffffff,stroke:#333,stroke-width:2px,color:#000000
+    style GP fill:#ffffff,stroke:#333,stroke-width:2px,color:#000000
+    style AU fill:#ffffff,stroke:#333,stroke-width:2px,color:#000000
+```
+
+### Setup Steps:
+
+1.  Create repository
+2.  Clone to your local computer
+3.  Make changes in RStudio
+4.  Add and Commit your changes
+5.  Push your changes and files to the remote repository
+6.  Enable Pages in repository settings
+7.  Your site is live at `https://username.github.io/repo_name`
+
+## GitHub Pages Configuration {.smaller}
+
+### In your repository:
+
+1.  Go to Settings → Pages
+2.  Source: Deploy from a branch
+3.  Branch: main (or gh-pages)
+4.  Folder: `/docs` (preferable) or `/` (root)
+
+### For Quarto projects:
+
+``` yaml
+# In _quarto.yml
+
+project:
+  type: website
+  output-dir: docs
+```
+
+# BREAK
+
+# Talapas and High Performance Computing
+
+## What is Talapas? {.smaller}
+
+-   **Talapas** is UO's high-performance computing (HPC) cluster
+-   Named from Chinook word for coyote (educator and keeper of knowledge)
+-   Managed by Research Advanced Computing Services (RACS)
+-   Located in the Allen Hall Data Center
+-   https://uoracs.github.io/talapas2-knowledge-base/
+
+### Key Resources:
+
+-   Over 14,520 CPU cores
+-   129 TB of memory
+-   89 GPUs (including A100, H100, V100)
+-   3+ Petabytes of storage
+
+## Talapas Architecture {.smaller}
+
+```{mermaid}
+%%| fig-width: 10
+%%| fig-height: 6
+%%{init: {'theme': 'base', 'themeVariables': {'fontSize': '18px', 'fontFamily': 'arial', 'primaryTextColor': '#000000'}}}%%
+flowchart TB
+    U[Your Computer] --> SSH([SSH])
+    SSH --> L1[login1]
+    SSH --> L2[login2]
+    SSH --> L3[login3]
+    SSH --> L4[login4]
+    L1 --> S[SLURM Scheduler]
+    L2 --> S
+    L3 --> S
+    L4 --> S
+    S --> SB([sbatch])
+    S --> SR([srun])
+    SB --> C1[CPU Nodes]
+    SR --> C1
+    SB --> C2[GPU Nodes]
+    SB --> C3[Fat Nodes]
+    C1 --> ST[(Storage)]
+    C2 --> ST
+    C3 --> ST
+    
+    style U fill:#e3f2fd,stroke:#333,stroke-width:2px,color:#000000
+    style L1 fill:#87ceeb,stroke:#333,stroke-width:2px,color:#000000
+    style L2 fill:#87ceeb,stroke:#333,stroke-width:2px,color:#000000
+    style L3 fill:#87ceeb,stroke:#333,stroke-width:2px,color:#000000
+    style L4 fill:#87ceeb,stroke:#333,stroke-width:2px,color:#000000
+    style S fill:#f9d71c,stroke:#333,stroke-width:2px,color:#000000
+    style C1 fill:#98fb98,stroke:#333,stroke-width:2px,color:#000000
+    style C2 fill:#ffa07a,stroke:#333,stroke-width:2px,color:#000000
+    style C3 fill:#dda0dd,stroke:#333,stroke-width:2px,color:#000000
+    style ST fill:#c8e6c9,stroke:#333,stroke-width:2px,color:#000000
+    style SSH fill:#ffffff,stroke:#333,stroke-width:2px,color:#000000
+    style SB fill:#ffffff,stroke:#333,stroke-width:2px,color:#000000
+    style SR fill:#ffffff,stroke:#333,stroke-width:2px,color:#000000
+```
+
+## Login Nodes vs Compute Nodes {.smaller}
+
+### Login Nodes (Head Nodes)
+
+-   Where you land when you SSH into Talapas
+-   For **light tasks only**: file management, editing, job submission
+-   Shared by all users - be considerate!
+-   Heavy processes will be killed
+
+### Compute Nodes
+
+-   Where your actual work runs
+-   Accessed through the SLURM scheduler
+-   Different types for different needs:
+    -   Standard CPU nodes
+    -   GPU nodes
+    -   High-memory ("fat") nodes
+
+## Node Types on Talapas {.smaller}
+
+| Node Type      | Cores   | Memory     | Purpose                |
+|----------------|---------|------------|------------------------|
+| Standard CPU   | 28-128  | 128-512 GB | General computation    |
+| Large Memory   | 56      | 1-4 TB     | Memory-intensive work  |
+| GPU (K80/A100) | 28-48   | 256-512 GB | Machine learning, CUDA |
+| Interactive    | Various | Various    | Testing, development   |
+
+## Partitions (Queues):
+
+-   `compute` - General purpose CPU partition (default)
+-   `short` - Jobs up to 24 hours
+-   `long` - Jobs up to 14 days
+-   `gpu` / `longgpu` - GPU-enabled nodes
+-   `fat` / `longfat` - High-memory nodes
+-   `preempt` - Access to all nodes (may be interrupted)
+
+## Getting Access to Talapas {.smaller}
+
+### Step 1: Join or Create a PIRG
+
+-   **PIRG** = Principal Investigator Research Group
+-   Contact your PI to be added to their PIRG
+-   Or contact RACS to create a new PIRG
+
+### Step 2: Request Access
+
+-   Visit [racs.uoregon.edu/request-access](https://racs.uoregon.edu/request-access)
+-   Your username = your Duck ID
+-   Your password = your UO password
+
+## Logging Into Talapas - web browser {.smaller}
+
+[ondemand.talapas.uoregon.edu](https://ondemand.talapas.uoregon.edu)
+
+-   No command line needed!
+-   File browser for uploads/downloads
+-   Interactive applications:
+    -   JupyterLab/Notebooks
+    -   RStudio
+    -   MATLAB
+    -   Remote desktop
+
+### Great for:
+
+-   Beginners learning HPC
+-   Quick file management
+-   Interactive data analysis
+-   Running GUI applications
+
+## Logging Into Talapas - command line {.smaller}
+
+### From Mac/Linux Terminal:
+
+``` bash
+# Basic SSH connection
+
+ssh yourduckid@login.talapas.uoregon.edu
+
+# Or specific login node
+
+ssh yourduckid@login1.talapas.uoregon.edu
+ssh yourduckid@login2.talapas.uoregon.edu
+ssh yourduckid@login3.talapas.uoregon.edu
+ssh yourduckid@login4.talapas.uoregon.edu
+```
+
+### From Windows:
+
+-   Use PuTTY, MobaXterm, or Windows Terminal
+-   Or use VS Code with Remote-SSH extension
+
+### Off Campus?
+
+-   First connect to UO VPN
+-   Then SSH as normal
+
+## Storage on Talapas {.smaller}
+
+```{mermaid}
+%%| fig-width: 10
+%%| fig-height: 4
+%%{init: {'theme': 'base', 'themeVariables': {'fontSize': '18px', 'fontFamily': 'arial', 'primaryTextColor': '#000000'}}}%%
+flowchart LR
+    R["/"] --> H["/home"]
+    R --> P["/projects"]
+    R --> T["/tmp"]
+    H --> HD["/home/duckid"]
+    P --> PG["/projects/PIRG"]
+    PG --> PGU["/projects/PIRG/duckid"]
+    PG --> PGS["/projects/PIRG/shared"]
+    
+    style R fill:#ffffff,stroke:#333,stroke-width:2px,color:#000000
+    style H fill:#ffffff,stroke:#333,stroke-width:2px,color:#000000
+    style P fill:#ffffff,stroke:#333,stroke-width:2px,color:#000000
+    style PG fill:#ffffff,stroke:#333,stroke-width:2px,color:#000000
+    style HD fill:#87ceeb,stroke:#333,stroke-width:2px,color:#000000
+    style PGU fill:#98fb98,stroke:#333,stroke-width:2px,color:#000000
+    style PGS fill:#f9d71c,stroke:#333,stroke-width:2px,color:#000000
+    style T fill:#ffa07a,stroke:#333,stroke-width:2px,color:#000000
+```
+
+### Directory Structure:
+
+| Location                | Quota                 | Purpose                     |
+|-------------------------|-----------------------|-----------------------------|
+| `/home/duckid`          | 250 GB                | Config files, small scripts |
+| `/projects/PIRG/duckid` | Shared (2 TB default) | Large data, analysis        |
+| `/projects/PIRG/shared` | Shared                | Files shared with group     |
+| `/tmp`                  | Local to node         | Temporary scratch space     |
+
+## Important Notes:
+
+-   **Data is NOT automatically backed up!**
+-   Use `/projects` for large files
+-   Clean up when done
+
+``` bash
+# Check your storage usage
+df -h ~
+du -sh /projects/myPIRG/myusername
+```
+
+## What is SLURM? {.smaller}
+
+-   **S**imple **L**inux **U**tility for **R**esource **M**anagement
+-   Job scheduler and workload manager
+-   Allocates resources fairly among users
+-   Ensures efficient cluster utilization
+
+```{mermaid}
+%%| fig-width: 10
+%%| fig-height: 4
+%%{init: {'theme': 'base', 'themeVariables': {'fontSize': '18px', 'fontFamily': 'arial', 'primaryTextColor': '#000000'}}}%%
+flowchart LR
+    A[Submit Job] --> SB([sbatch])
+    SB --> B[SLURM Queue]
+    B --> W([Waits])
+    W --> C[Job Runs on Compute Node]
+    C --> CO([Completes])
+    CO --> D[Output Files]
+    
+    style A fill:#f9d71c,stroke:#333,stroke-width:2px,color:#000000
+    style B fill:#87ceeb,stroke:#333,stroke-width:2px,color:#000000
+    style C fill:#98fb98,stroke:#333,stroke-width:2px,color:#000000
+    style D fill:#ffa07a,stroke:#333,stroke-width:2px,color:#000000
+    style SB fill:#ffffff,stroke:#333,stroke-width:2px,color:#000000
+    style W fill:#ffffff,stroke:#333,stroke-width:2px,color:#000000
+    style CO fill:#ffffff,stroke:#333,stroke-width:2px,color:#000000
+```
+
+### Key Concepts:
+
+-   **Jobs**: Units of work you submit
+-   **Partitions**: Queues with different properties
+-   **Accounts**: Your PIRG for resource tracking
+
+## Essential SLURM Commands {.smaller}
+
+``` bash
+# Submit a batch job
+
+sbatch myscript.sh
+
+# Check your jobs in the queue
+
+squeue -u $USER
+
+# Check all jobs on a partition
+
+squeue -p short
+
+# Cancel a job
+
+scancel JOBID
+
+# Get detailed job info
+
+scontrol show job JOBID
+
+# Check job history and resource usage
+
+sacct -j JOBID --format=JobID,Elapsed,MaxRSS
+
+# View partition information
+
+sinfo -p short
+```
+
+## Interactive Jobs {.smaller}
+
+### For testing and development:
+
+``` bash
+# Start an interactive session
+
+srun --pty --partition=compute --account=myPIRG \
+     --time=2:00:00 --cpus-per-task=4 --mem=8G /bin/bash
+```
+
+\
+\
+
+### When to use interactive jobs:
+
+-   Testing your workflow before batch submission
+-   Debugging code
+-   Quick data exploration
+-   Running GUI applications
+
+**Note**: Your prompt will change from `login1` to something like `n049`
+
+## Writing a SLURM Batch Script {.smaller}
+
+``` bash
+#!/bin/bash
+#SBATCH --job-name=my_analysis      # Job name
+#SBATCH --partition=compute         # Partition (queue)
+#SBATCH --account=myPIRG            # Your PIRG name
+#SBATCH --output=output_%j.log      # Standard output (%j = job ID)
+#SBATCH --error=error_%j.log        # Standard error
+#SBATCH --time=04:00:00             # Time limit (HH:MM:SS)
+#SBATCH --nodes=1                   # Number of nodes
+#SBATCH --ntasks-per-node=1         # Tasks per node
+#SBATCH --cpus-per-task=4           # CPUs per task
+#SBATCH --mem=16G                   # Memory per node
+
+# Load required modules
+
+module load R/4.3.3
+
+# Run your program
+
+Rscript my_analysis.R
+```
+
+## Understanding SLURM Directives {.smaller}
+
+| Directive         | Description         | Example                           |
+|-------------------|---------------------|-----------------------------------|
+| `--partition`     | Queue to use        | `compute`, `short`, `long`, `gpu` |
+| `--account`       | PIRG for accounting | `nereus`                          |
+| `--time`          | Max runtime         | `1-12:00:00` (1 day, 12 hrs)      |
+| `--nodes`         | Number of nodes     | `1`                               |
+| `--cpus-per-task` | Cores per task      | `8`                               |
+| `--mem`           | Memory per node     | `32G`                             |
+| `--mem-per-cpu`   | Memory per CPU      | `4G`                              |
+| `--gres`          | Generic resources   | `gpu:1`                           |
+
+**Tip**: Request only what you need - smaller jobs run sooner!
+
+## GPU Jobs {.smaller}
+
+``` bash
+#!/bin/bash
+#SBATCH --job-name=gpu_job
+#SBATCH --partition=gpu             # GPU partition
+#SBATCH --account=myPIRG
+#SBATCH --time=1-00:00:00           # 1 day
+#SBATCH --nodes=1
+#SBATCH --ntasks-per-node=1
+#SBATCH --gres=gpu:1                # Request 1 GPU
+#SBATCH --mem=32G
+
+# Load CUDA and your software
+
+module load cuda/12.4
+module load miniconda3/20240410
+
+# Activate your conda environment
+
+conda activate my_ml_env
+
+# Run your GPU code
+
+python train_model.py
+```
+
+\
+\
+
+### Check available GPUs:
+
+``` bash
+/packages/racs/bin/slurm-show-gpus
+```
+
+## Talapas Uses Software Modules (LMOD) {.smaller}
+
+``` bash
+# List all available modules
+module avail
+
+# Search for specific software
+module spider R
+module spider python
+
+# Load a module
+module load R/4.3.3
+module load miniconda3/20240410
+
+# See what's loaded
+module list
+
+# Unload a module
+module unload R
+
+# Reset to default
+module purge
+```
+
+::: callout-note
+In your batch scripts, always load modules after the SBATCH directives!
+:::
+
+## Monitoring Your Jobs {.smaller}
+
+``` bash
+# Check job status
+
+squeue -u $USER
+
+# Detailed job information
+
+scontrol show job JOBID
+
+# After job completes - see resource usage
+
+sacct -j JOBID --format=JobID,JobName,Elapsed,MaxRSS,State
+```
+
+\
+\
+
+### Common Status Codes:
+
+| Code | Meaning           |
+|------|-------------------|
+| PD   | Pending (waiting) |
+| R    | Running           |
+| CG   | Completing        |
+| CD   | Completed         |
+| F    | Failed            |
+
+## Best Practices for Talapas {.smaller}
+
+### Do:
+
+-   Request only resources you need
+-   Test with small datasets first
+-   Use `--time` conservatively
+-   Clean up old files regularly
+-   Use `/projects` for large data
+
+### Don't:
+
+-   Run heavy computation on login nodes
+-   Leave jobs running indefinitely
+-   Store sensitive data without encryption
+-   Forget to acknowledge RACS in publications
+
+## Getting Help with Talapas {.smaller}
+
+### Resources:
+
+-   Documentation: [uoracs.github.io/talapas2-knowledge-base](https://uoracs.github.io/talapas2-knowledge-base/)
+-   Service Desk: [hpcrcf.atlassian.net/servicedesk](https://hpcrcf.atlassian.net/servicedesk/customer/portal/1)
+-   Email: racs\@uoregon.edu
+-   Office Hours: Knight Library, Dream Lab 122E (Wednesdays 1-3pm)
+
+### Acknowledgment Text:
+
+> "The authors acknowledge Research Advanced Computing Services (RACS) at the University of Oregon for providing computing resources that have contributed to the research results reported within this publication."

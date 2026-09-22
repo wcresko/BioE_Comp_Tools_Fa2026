@@ -1,0 +1,780 @@
+---
+title: "Week 1 Computational Tools for Bioengineers"
+author: "Bill Cresko"
+format: 
+  revealjs:
+    footer: BioE_Comp_Tools_2025 - Knight Campus 
+    transition: fade
+    transition-speed: slow
+editor: visual
+---
+
+```{r}
+library(tidyverse)
+library(gt)
+library(readxl)
+theme_set(theme_minimal())
+```
+
+## Goals of the course
+
+::: {.callout-tip title="This is a practical course and we will learn by doing"}
+-   Teach fundamental skills for your scientific careers
+-   Provide you with the computational tools necessary to carry out your work
+-   To prepare you for more advanced statistics and programming education
+:::
+
+## 
+
+```{r, echo=FALSE, out.width='100%', fig.align='center'}
+knitr::include_graphics("images/week_01.002.jpeg")
+```
+
+## 
+
+```{r, echo=FALSE, out.width='100%', fig.align='center'}
+knitr::include_graphics("images/week_01.003.jpeg")
+```
+
+## Class Introductions
+
+::: {.callout-tip title="Who are you?"}
+-   Your name
+-   Year in grad school
+-   Home lab or rotation lab
+-   What has your experience with programming/statistics been like?
+-   What is your good news this week?
+:::
+
+## 
+
+::: {.callout-tip title="What will you learn?"}
+-   What is local, cluster and cloud computing
+-   Unix paths, commands and scripts
+-   Read and write basic scripts in R and Python
+-   Implement reproducible research practices
+-   Markdown and LaTeX
+-   GitHub and GitHub Pages
+-   Talapas and Amazon Web Services (AWS)
+:::
+
+## Class Logistics
+
+-   Meet Mondays from 2:30pm - 3:50pm in KC106
+    -   Most of class time will be hands-on coding practice, less time lecturing
+-   Coding practice via two homeworks later in the term
+    -   Available Tuesday of that week, due before class on Tuesday in two weeks
+-   Weeks 10-11 you will complete a final coding project
+    -   Design script(s) that works with your research and interests using the skills you've learned this term
+
+## Required Materials
+
+-   No textbooks or purchases required
+-   Access to a laptop or computer running Windows, MacOS, or Linux operating systems
+-   An account on Talapas (through your lab, or through CBDS)
+-   Announcements and assignments posted on Canvas
+-   The majority of course material on our class website `https://wcresko.github.io/BioE_Comp_Tools/`
+
+# Installing Programs
+
+## Computational Tools {.smaller}
+
+::: {.callout-note title="Mac vs. Linux vs. Windows"}
+-   Mac and Linux systems run using the same language, but previous versions of Windows lacks some of the basic features found on other systems
+-   To help you practice and learn how to code in Unix, we will help you install some programs on your computer for running Unix
+-   R and RStudio should work on any computer
+-   Visual Studio Code will also work on any computer
+-   Similarly, LaTeX and Git will work on any computer
+:::
+
+## Computational Tools {.smaller}
+
+-   Need to make sure that you have `R` installed
+    -   locally or on a server
+    -   https://www.r-project.org
+-   Can run R from the command line
+    -   just type `R`
+    -   can run it locally as well as on clusters
+
+## Computational Tools {.smaller}
+
+-   Install an R *Integrated Development Environment* (IDE)
+    -   RStudio: http://www.rstudio.com
+    -   Makes working with R much easier, particularly for a new R user
+    -   Run on Windows, Mac or Linux OS
+    -   Use the RStudio Desktop Open Source (Free)
+-   Other IDEs
+    -   We will also use an IDE called Visual Studio Code
+    -   You will also use Jupyter Notebooks
+
+# Accessing the Shell
+
+## Accessing the shell - Mac and Linux {.smaller}
+
+-   Mac users: open the "Terminal" app, or use another app like 'iTerm2'
+
+-   Linux users: open one of several "Terminal" apps
+
+    ::: callout-caution
+    ## Windows users have a little more work to do
+
+    See the next slides
+    :::
+
+## Accessing the shell - Windows {.smaller}
+
+-   Guide: `https://ubuntu.com/tutorials/install-ubuntu-on-wsl2-on-windows-10#1-overview`
+-   Run Windows PowerShell as administrator
+-   Install WSL2 by typing `wsl --install`
+-   Restart your computer
+-   Search for and install Ubuntu from Microsoft store app
+-   ***OR*** type `wsl --install -d ubuntu` on PowerShell to do both at once
+
+## Accessing the shell - Windows {.smaller}
+
+-   Open Ubuntu and set up a username and password
+-   Does not have to match your login info for Windows
+-   Run `sudo apt update` then `sudo apt upgrade` to ensure everything is up to date
+-   Will need to create folders and files within your Ubuntu folder on your computer
+
+# Coding and Scripting
+
+## Why do we need coding and scripting? {.smaller}
+
+-   It is incredibly fast and powerful, particularly for repeated actions
+-   It allows you to do thousands of ‘clicks’ with single commands
+-   Ability to analyze large datasets that Excel and other GUIs can't handle well
+-   Access to thousands of free programs made for and by scientists
+-   The commands work almost identically across platforms
+-   Ability to use computer clusters like Talapas
+
+## What is the difference between coding and scripting? {.smaller}
+
+::: incremental
+-   `coding` generally involves computer languages that use `compilers`
+    -   C++, Fortran, Basic, etc
+-   `scripting` generally involves computer languages that are `interpreted` on the fly
+    -   Unix, Python, R, Julia, etc.
+-   coding - faster but less flexible; scripting - flexible but slower
+-   The distinction between the two has become somewhat fuzzy and most modern analytical pipelines contain a combination of both
+:::
+
+# Computer Systems
+
+## What is a Computer System?
+
+::::: columns
+::: {.column width="60%"}
+-   **Hardware**: Physical components
+-   **Software**: Programs and instructions
+-   **Firmware**: Low-level software in hardware
+-   **Data**: Information being processed
+:::
+
+::: {.column width="40%"}
+```{mermaid}
+graph TD
+    A[Input Devices] --> B[CPU]
+    B --> C[Memory]
+    C --> B
+    B --> D[Output Devices]
+    E[Storage] --> C
+    C --> E
+```
+:::
+:::::
+
+## The Fetch-Decode-Execute Cycle
+
+```{mermaid}
+graph LR
+    A[Fetch Instruction] --> B[Decode Instruction]
+    B --> C[Execute Instruction]
+    C --> D[Store Results]
+    D --> A
+```
+
+### 
+
+1.  **Fetch**: Retrieve instruction from memory
+2.  **Decode**: Interpret what the instruction means
+3.  **Execute**: Perform the operation
+4.  **Store**: Save results to memory or register
+
+::: notes
+This is the fundamental cycle that every CPU performs billions of times per second
+:::
+
+# Hardware Components
+
+## Central Processing Unit (CPU) {.smaller}
+
+::::: columns
+::: {.column width="50%"}
+**Core Components**
+
+-   **Control Unit (CU)**: Directs operations
+-   **Arithmetic Logic Unit (ALU)**: Performs calculations
+-   **Registers**: Ultra-fast temporary storage
+-   **Cache**: High-speed memory buffer
+:::
+
+::: {.column width="50%"}
+**Key Concepts**
+
+-   **Clock Speed**: Cycles per second (GHz)
+-   **Cores**: Independent processing units
+-   **Threads**: Virtual cores for parallel processing
+-   **Instruction Set**: CPU's language (x86, ARM)
+:::
+:::::
+
+## Graphics Processing Unit (GPU) {.smaller}
+
+::::: columns
+::: {.column width="50%"}
+**Core Components**
+
+-   **Streaming Multiprocessors (SMs)**: Processing clusters
+-   **CUDA Cores/Stream Processors**: Parallel compute units
+-   **Video Memory (VRAM)**: Dedicated high-bandwidth memory
+-   **Memory Controller**: Manages data flow to/from VRAM
+:::
+
+::: {.column width="50%"}
+**Key Concepts**
+
+-   **Parallel Architecture**: Thousands of cores for simultaneous tasks
+-   **Memory Bandwidth**: Data throughput (GB/s)
+-   **Compute Units**: Groups of processing cores
+-   **APIs**: Programming interfaces (CUDA, OpenCL, Vulkan)
+:::
+:::::
+
+------------------------------------------------------------------------
+
+## CPU vs GPU Comparison {.smaller}
+
+::::: columns
+::: {.column width="50%"}
+**CPU Characteristics**
+
+-   **Design Focus**: Sequential processing & complex tasks
+-   **Core Count**: 4-64 powerful cores
+-   **Architecture**: Optimized for single-thread performance
+-   **Memory**: Large cache, lower bandwidth
+-   **Best For**:
+    -   Operating systems & general computing
+    -   Complex branching logic
+    -   Low-latency operations
+    -   Serial tasks
+:::
+
+::: {.column width="50%"}
+**GPU Characteristics**
+
+-   **Design Focus**: Parallel processing & high throughput
+-   **Core Count**: Thousands of smaller cores
+-   **Architecture**: Optimized for massive parallelism
+-   **Memory**: Smaller cache, higher bandwidth
+-   **Best For**:
+    -   Graphics rendering
+    -   Machine learning/AI
+    -   Scientific simulations
+    -   Parallel computations
+:::
+:::::
+
+# Types of computer memory
+
+## Random Access Memory (RAM) {.smaller}
+
+::::: columns
+::: {.column width="50%"}
+***Types of RAM***
+
+**DRAM (Dynamic RAM)**
+
+-   Main system memory
+-   Needs constant refresh
+-   Cheaper, higher density
+-   DDR4, DDR5 standards
+
+**SRAM (Static RAM)**
+
+-   Used in CPU cache
+-   No refresh needed
+-   Faster but expensive
+-   Lower density
+:::
+
+::: {.column width="50%"}
+***Key Characteristics***
+
+-   **Volatile**: Data lost when power off
+-   **Random Access**: Any location equally fast
+-   **Bandwidth**: Data transfer rate
+-   **Latency**: Access delay
+-   **Dual Channel**: Parallel data paths
+:::
+:::::
+
+## Persistent Storage Systems {.smaller}
+
+::::: columns
+::: {.column width="50%"}
+**Hard Disk Drives (HDD)**
+
+-   Mechanical spinning platters
+-   Magnetic storage
+-   Large capacity, low cost
+-   \~100-200 MB/s throughput
+-   Higher latency (\~10ms)
+:::
+
+::: {.column width="50%"}
+**Solid State Drives (SSD)**
+
+-   No moving parts (NAND Flash)
+-   Electronic storage
+-   Faster access (\~0.1ms)
+-   500-7000 MB/s throughput
+-   More expensive per GB
+:::
+:::::
+
+## Input/Output (I/O) Systems {.smaller}
+
+::::: columns
+::: {.column width="50%"}
+**Input Devices**
+
+-   Keyboard & Mouse
+-   Touchscreen
+-   Microphone
+-   Camera
+-   Sensors
+-   Network Interface
+:::
+
+::: {.column width="50%"}
+**Output Devices**
+
+-   Monitor/Display
+-   Printer
+-   Speakers
+-   Network Interface
+-   Actuators
+:::
+:::::
+
+Operating Systems
+
+## What is an Operating System? {.smaller}
+
+An OS is system software that manages computer hardware, software resources, and provides common services for computer programs.
+
+::::: columns
+::: {.column width="40%"}
+**Key Roles**
+
+-   Resource Manager
+-   Extended Machine
+-   User Interface Provider
+-   Security Enforcer
+:::
+
+::: {.column width="60%"}
+**Common Operating Systems**
+
+-   **Desktop**: Windows, macOS, Unix, Linux
+-   **Mobile**: Android, iOS
+-   **Server**: Unix, Linux, Windows Server
+-   **Specialized**: Supercomputers, IoT
+:::
+:::::
+
+## Operating System Architecture {.smaller}
+
+```{mermaid}
+graph TD
+    A[User Applications] --> B[System Calls Interface]
+    B --> C[Kernel]
+    C --> D[Device Drivers]
+    D --> E[Hardware]
+    
+    C --> F[Process Management]
+    C --> G[Memory Management]
+    C --> H[File System]
+    C --> I[I/O Management]
+```
+
+## Core OS Functions {.smaller}
+
+::::: columns
+::: {.column width="50%"}
+***1. Process Management***
+
+-   **Process Creation & Termination**
+-   **Process Scheduling**: CPU time allocation
+-   **Inter-Process Communication (IPC)**
+-   **Synchronization**
+-   **Deadlock Handling**
+
+------------------------------------------------------------------------
+
+***3. File System Management***
+
+-   **File Operations**: Create, read, write, delete
+-   **Directory Structure**
+-   **Access Control & Permissions**
+-   **File Allocation Methods**
+-   **Disk Space Management**
+:::
+
+::: {.column width="50%"}
+***2. Memory Management***
+
+-   **Memory Allocation/Deallocation**
+-   **Virtual Memory**
+-   **Paging & Segmentation**
+-   **Memory Protection**
+-   **Swap Space Management**
+
+------------------------------------------------------------------------
+
+***4. Device Management***
+
+-   **Device Drivers**: Hardware abstraction
+-   **I/O Scheduling**
+-   **Buffering & Caching**
+-   **Interrupt Handling**
+-   **Plug and Play Support**
+:::
+:::::
+
+## CPU Scheduling {.smaller}
+
+::::: columns
+::: {.column width="50%"}
+**Scheduling Algorithms**
+
+-   **First-Come-First-Served (FCFS)**
+    -   Simple but can cause long waits
+-   **Shortest Job First (SJF)**
+    -   Optimal average wait time
+-   **Round Robin (RR)**
+    -   Fair time slices for all
+-   **Priority Scheduling**
+    -   Important tasks first
+:::
+
+::: {.column width="50%"}
+**Performance Metrics**
+
+-   **CPU Utilization**: Keep CPU busy
+-   **Throughput**: Jobs completed/time
+-   **Turnaround Time**: Total completion time
+-   **Waiting Time**: Time in ready queue
+-   **Response Time**: First response delay
+:::
+:::::
+
+## Security & Protection {.smaller}
+
+::::: columns
+::: {.column width="50%"}
+**Protection Mechanisms**
+
+-   **Access Control Lists (ACLs)**
+-   **User/Group Permissions**
+-   **Memory Protection**: Segmentation
+-   **CPU Modes**: User vs Kernel
+-   **Sandboxing**: Isolate processes
+:::
+
+::: {.column width="50%"}
+**Security Features**
+
+-   **Authentication**: User verification
+-   **Encryption**: Data protection
+-   **Firewall**: Network protection
+-   **Antivirus**: Malware detection
+-   **Updates**: Patch vulnerabilities
+:::
+:::::
+
+> "Every program and user should operate using the least amount of privilege necessary"
+
+# Computing Evolution
+
+##  {.smaller}
+
+```{mermaid}
+graph LR
+    A[1960s-70s<br/>Mainframes] --> B[1980s-90s<br/>Personal Computers]
+    B --> C[1990s-2000s<br/>Client-Server]
+    C --> D[2000s<br/>Clusters/Grids]
+    D --> E[2006+<br/>Cloud Computing]
+    E --> F[2020s<br/>Edge/Hybrid]
+```
+
+### Key Drivers of Change
+
+-   **Performance Needs**: Growing computational demands
+-   **Economics**: Cost optimization and economies of scale
+-   **Connectivity**: Internet bandwidth improvements
+-   **Virtualization**: Hardware abstraction technologies
+
+# Local Computing
+
+## Local Computing Overview {.smaller}
+
+:::: callout-note
+::: callout-important
+Computing resources that are physically present and directly controlled by the user or organization
+:::
+::::
+
+::::: columns
+::: {.column width="50%"}
+**Characteristics**
+
+-   [x] Complete control over hardware
+-   [x] Data stays on-premises
+-   [x] No network dependency for compute
+-   [x] Predictable performance
+-   [x] One-time purchase model
+:::
+
+::: {.column width="50%"}
+**Common Setups**
+
+-   Desktop workstations
+-   Laptop computers
+-   On-premises servers
+-   Local development machines
+:::
+:::::
+
+## Local Computing Architecture
+
+```{mermaid}
+%%{init: {'theme':'base'}}%%
+graph TB
+    A[Applications] --> B[Operating System]
+    B --> C[Hardware Abstraction Layer]
+    C --> D[CPU]
+    C --> E[Memory]
+    C --> F[Storage]
+    C --> G[GPU]
+    C --> H[Network Card]
+    H --> I[Internet/LAN]
+```
+
+## Local Computing: Pros and Cons {.smaller}
+
+::::: columns
+::: {.column width="50%"}
+### Advantages ✓
+
+-   **Low Latency**: No network overhead
+-   **Data Control**: Complete ownership
+-   **Privacy**: Data never leaves premises
+-   **Predictable Costs**: One-time investment
+-   **Offline Capability**: Works without internet
+-   **Customization**: Full hardware/software control
+:::
+
+::: {.column width="50%"}
+### Disadvantages ✗
+
+-   **Limited Scale**: Hardware constraints
+-   **Maintenance**: User responsibility
+-   **Upfront Costs**: High initial investment
+-   **Disaster Recovery**: Manual backup needed
+-   **Resource Waste**: Idle during off-hours
+-   **Upgrade Complexity**: Physical intervention
+:::
+:::::
+
+# Cluster Computing
+
+## Cluster Computing Overview {.smaller}
+
+A collection of interconnected computers working together as a single system
+
+```{mermaid}
+%%{init: {'theme':'base'}}%%
+graph TB
+    M[Master/Head Node] --> N1[Node 1]
+    M --> N2[Node 2]
+    M --> N3[Node 3]
+    M --> N4[Node N]
+    N1 -.-> S[Shared Storage]
+    N2 -.-> S
+    N3 -.-> S
+    N4 -.-> S
+    U[Users] --> M
+```
+
+**Key Components**
+
+-   **Head Node**: Job scheduling and management
+-   **Compute Nodes**: Worker machines
+-   **Interconnect**: High-speed network (InfiniBand, 10GbE+)
+-   **Shared Storage**: Parallel file systems (Lustre, GPFS)
+
+## Resource Managers {.smaller}
+
+**These are used to schedule computing jobs on computer clusters.**
+
+| System     | Use Case        | Key Features                          |
+|------------|-----------------|---------------------------------------|
+| SLURM      | HPC             | Advanced scheduling, power management |
+| PBS/Torque | Traditional HPC | Mature, stable, wide support          |
+| SGE/UGE    | Mixed workloads | Flexible policies                     |
+| Kubernetes | Containers      | Microservices, auto-scaling           |
+
+::: callout-important
+We use SLURM on Talapas at the University of Oregon for scheduling compute jobs
+:::
+
+## Cluster Computing: Pros and Cons {.smaller}
+
+::::: columns
+::: {.column width="50%"}
+### Advantages ✓
+
+-   **Scalability**: Add nodes as needed
+-   **Performance**: Parallel processing power
+-   **Cost-Effective**: Commodity hardware
+-   **Fault Tolerance**: Node redundancy
+-   **Resource Sharing**: Multiple users/projects
+-   **Specialized Hardware**: GPUs, high-mem nodes
+:::
+
+::: {.column width="50%"}
+### Disadvantages ✗
+
+-   **Complexity**: Requires expertise
+-   **Infrastructure**: Space, power, cooling
+-   **Network Dependency**: Interconnect bottlenecks
+-   **Software Licenses**: Per-node costs
+-   **Maintenance**: Hardware failures
+-   **Initial Setup**: Complex configuration
+:::
+:::::
+
+# Cloud Computing
+
+## Cloud Computing Overview {.smaller}
+
+On-demand delivery of computing resources over the internet with pay-as-you-go pricing
+
+```{mermaid}
+%%{init: {'theme':'base'}}%%
+graph TB
+    R[Region 1] --> AZ1[Availability Zone 1]
+    R --> AZ2[Availability Zone 2]
+    AZ1 --> C[Compute]
+    AZ1 --> S[Storage]
+    AZ1 --> N[Networking]
+    AZ2 --> C2[Compute]
+    AZ2 --> S2[Storage]
+    AZ2 --> N2[Networking]
+    U[Users] -.Internet.-> R
+```
+
+### Major Providers
+
+-   **Amazon Web Services (AWS)**: Market leader, 200+ services
+-   **Microsoft Azure**: Enterprise integration
+-   **Google Cloud Platform**: AI/ML focus
+-   **Others**: IBM Cloud, Oracle Cloud, Alibaba Cloud
+
+## Cloud Computing: Pros and Cons {.smaller}
+
+::::: columns
+::: {.column width="50%"}
+### Advantages ✓
+
+-   **Elastic Scaling**: Instant resource adjustment
+-   **Pay-per-Use**: No idle resource costs
+-   **Global Reach**: Multiple regions
+-   **Managed Services**: Reduced operations
+-   **Innovation Speed**: Latest technologies
+-   **Disaster Recovery**: Built-in redundancy
+-   **No CAPEX**: Operating expense model
+:::
+
+::: {.column width="50%"}
+### Disadvantages ✗
+
+-   **Ongoing Costs**: Can exceed on-prem
+-   **Vendor Lock-in**: Proprietary services
+-   **Internet Dependency**: Connectivity required
+-   **Data Transfer Costs**: Egress fees
+-   **Compliance Complexity**: Data residency
+-   **Less Control**: Shared responsibility
+-   **Performance Variability**: Noisy neighbors
+:::
+:::::
+
+# BREAK
+
+# Computational Tools - The Command Line
+
+```{r, echo=FALSE, out.width='90%', fig.asp=.75, fig.align='center'}
+knitr::include_graphics("images/w1_code.jpeg")
+```
+
+## What is Unix? {.smaller}
+
+::: incremental
+-   A scripting language developed in 1969, released in 1973
+-   Serves as the base language for many programs and computers
+-   Runs both locally on your computer and on large clusters like Talapas
+-   Linux is an open-source version of the same language
+:::
+
+## What is a shell? {data-background="images/w1_shell.jpeg"}
+
+-   The ‘shell’ is a program that runs UNIX and takes in commands and gives them to the operating system
+
+-   **`Bash`** acts as the shell in macs, linux, and now windows
+
+-   You can access the shell via a **`terminal window`**
+
+##  {data-background="images/w1_shell.jpeg"}
+
+![](images/week_01.010.jpeg){width="90%" fig-align="center"}
+
+## Recipes for a shell command {.smaller}
+
+-   **Prompt**: notation used to indicate your computer is ready to accept a new command
+-   **Command**: the building blocks of programming, tell computer to do a specific task
+-   **Options**: change the behavior of a command
+-   **Argument**: what the command should operate on
+
+![](images/w1_shell_command.jpeg){width="150%" fig-align="center"}
+
+## Why use the shell?
+
+::: incremental
+-   Speed
+-   Can handle extremely large file sizes
+-   Use programs only available via shell
+-   The commands work almost identically across platforms
+-   You can even use them on a large computer cluster like Talapas and AWS
+-   It is incredibly powerful particularly for repeated actions
+-   It allows you to do thousands of ‘clicks’ with single commands
+:::
+
+## Where do you get help?
+
+-   Manual pages!
+    -   The shell has manuals for all basic commands
+    -   Type `man [command_name]` to access the manual for a specific command
+    -   Type `q` to exit
+-   Also...the internet!

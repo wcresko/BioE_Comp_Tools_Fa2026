@@ -1,0 +1,342 @@
+---
+title: "Homework 1- Computational Tools for Bioengineers 2025"
+---
+
+## Due: Submit your work via Canvas by the end of the day (midnight) on Wednesday, November 19th.
+
+## Learning Objectives
+
+::: callout
+-   Download genomic data from NCBI using command-line tools
+-   Work with compressed genomic files efficiently
+-   Apply GREP and regular expressions to analyze biological sequences
+-   Use Unix pipes to create analysis workflows
+-   Write shell scripts to automate genome analysis
+-   Run the shell scripts and create output files
+:::
+
+## Background
+
+::: callout-note
+-   In this exercise, you'll download and analyze two bacterial genomes with very different characteristics:
+
+    1.  ***Escherichia coli*** **K-12 MG1655**: A well-studied model organism with a typical-sized bacterial genome (\~4.6 Mb)
+    2.  ***Mycoplasma genitalium*** **G37**: One of the smallest known genomes of any free-living organism (\~0.58 Mb)
+
+-   Your goal is to write all of the commands below and include them into executable shell scripts. Note that you'll probably have several scripts, one for each exercise or task.
+
+-   In this exercises I've given you a lot of hints, but you'll have to modify most commands just a little bit to make sure that they work on your computer.
+
+-   The goal is for you to think about and understand what is happening with each step of the script.
+:::
+
+------------------------------------------------------------------------
+
+## Part 1: Setup and Data Download
+
+### Task 1.1: Create your workspace
+
+-   Create a working directory structure using `mkdir`
+-   Organize your directories into those named something like: `input`, `output` and `scripts`
+-   Remember that throughout the rest of the exercise you'll either need to be in the appropriate directory, or use paths to point to the appropriate directory
+-   In the examples below I use names for directories in paths but of course they won't be the same as yours
+-   You'll need to make sure that you use your directory names in your paths
+
+### Task 1.2: Download the *E. coli* and *M. genitalium* genomes
+
+-   Navigate into the 'input' directory
+-   Download the *E. coli* and *M. genitalium* genomes and CDS files
+-   hint - you may want to make more subdirectories for each genome
+
+``` bash
+
+# Download E. coli K-12 MG1655 genome using curl
+
+curl -o ecoli_genome.fna.gz \
+  https://ftp.ncbi.nlm.nih.gov/genomes/all/GCF/000/005/845/GCF_000005845.2_ASM584v2/GCF_000005845.2_ASM584v2_genomic.fna.gz
+
+# Download the CDS (coding sequences) file
+
+curl -o ecoli_cds.fna.gz \
+  https://ftp.ncbi.nlm.nih.gov/genomes/all/GCF/000/005/845/GCF_000005845.2_ASM584v2/GCF_000005845.2_ASM584v2_cds_from_genomic.fna.gz
+
+
+# Download M. genitalium G37 genome using curl
+
+curl -o mycoplasma_genome.fna.gz \
+  https://ftp.ncbi.nlm.nih.gov/genomes/all/GCF/000/027/325/GCF_000027325.1_ASM2732v1/GCF_000027325.1_ASM2732v1_genomic.fna.gz
+
+# Download the CDS file
+
+curl -o mycoplasma_cds.fna.gz \
+  https://ftp.ncbi.nlm.nih.gov/genomes/all/GCF/000/027/325/GCF_000027325.1_ASM2732v1/GCF_000027325.1_ASM2732v1_cds_from_genomic.fna.gz
+
+# Verify downloads
+
+ls -lh *.gz
+```
+::: callout-note
+- Remind yourself of how `curl` works and the structure of the command
+- Also, you can write this into your first executable script (maybe `download_genomes.sh` or something like that)
+- Once you do run this command: `chmod +x download_genomes.sh`
+- `chmod` means 'change mode' and makes your shell script directly executable without even having to call `bash`
+- You'll want to do this for each of the scripts that you write
+:::
+
+### Task 1.3: Initial exploration of compressed files
+
+-   use the command `ls -lh */*.gz` to compare the size of each file
+
+-   Preview each genome without decompressing
+
+``` bash
+
+echo "=== E. coli genome preview ==="
+zcat ecoli/ecoli_genome.fna.gz | head -10
+
+echo -e "\n=== Mycoplasma genome preview ==="
+zcat mycoplasma/mycoplasma_genome.fna.gz | head -10
+
+# Count sequence records in each compressed file
+
+echo -e "\nE. coli sequences: $(zgrep -c '^>' ecoli/ecoli_genome.fna.gz)"
+echo "Mycoplasma sequences: $(zgrep -c '^>' mycoplasma/mycoplasma_genome.fna.gz)"
+```
+
+::: callout-note
+- We didn't cover this in class, but a number of the standard Unix commands work the same way on compressed files if you use the 'z' version of them (e.g. `zcat` and `zgrep`)
+- You can always unzip first and then use `cat` and `grep`, but sometimes it helps to save disk space
+- You can run these commands in the command line to begin, but then write a script with the appending redirects `>>` to write the output to the file
+- This will be your first script from this exercise
+:::
+
+## Part 2: Basic Genome Statistics
+
+### Task 2.1: Decompress and prepare files
+
+``` bash
+# Decompress all files (keeping originals using the option `-k`)
+
+# E. coli files
+
+gunzip -k ecoli/*.gz
+
+# Mycoplasma files
+
+gunzip -k mycoplasma/*.gz
+
+# Check uncompressed sizes
+
+ls -lh */*.fna
+```
+
+::: callout-note
+- Remind yourself what the `*` wild card is doing
+- Also, I forgot about this `-k` option in class - that would have saved time!
+:::
+
+### Task 2.2: Count genes in each organism
+
+``` bash
+
+# Count genes in CDS files
+
+echo "E. coli genes: $(grep -c '^>' ecoli/ecoli_cds.fna)"
+echo "Mycoplasma genes: $(grep -c '^>' mycoplasma/mycoplasma_cds.fna)"
+```
+
+::: callout-note
+- Note that in the `cds` files, each gene entry starts with the character `>`
+- Just one more reminder - the paths I wrote above won't be the same as yours if you use different directory names
+- Also, take the time to remind yourself what `grep` does and the structure
+:::
+
+## Part 3: Nucleotide Composition Analysis
+
+### Task 3.1: Create a nucleotide composition analyzer
+
+``` bash
+
+#!/bin/bash
+# Analyze nucleotide composition of a genome
+
+if [ $# -ne 2 ]; then
+    echo "Usage: $0 <fasta_file> <organism_name>"
+    exit 1
+fi
+
+FASTA=$1
+NAME=$2
+
+echo "=== Nucleotide Composition for $NAME ==="
+
+# Count each nucleotide
+
+echo "Nucleotide counts:"
+grep -v "^>" "$FASTA" | tr -d '\n' | fold -w1 | \
+  tr '[:lower:]' '[:upper:]' | sort | uniq -c
+
+# Calculate total
+
+TOTAL=$(grep -v "^>" "$FASTA" | tr -d '\n' | wc -c)
+echo -e "\nTotal nucleotides: $TOTAL"
+
+# Calculate GC content
+
+GC_COUNT=$(grep -v "^>" "$FASTA" | tr -d '\n' | grep -o "[GCgc]" | wc -l)
+GC_PERCENT=$(echo "scale=2; $GC_COUNT * 100 / $TOTAL" | bc)
+echo "GC content: $GC_PERCENT%"
+
+# Calculate AT content
+
+AT_COUNT=$(grep -v "^>" "$FASTA" | tr -d '\n' | grep -o "[ATat]" | wc -l)
+AT_PERCENT=$(echo "scale=2; $AT_COUNT * 100 / $TOTAL" | bc)
+echo "AT content: $AT_PERCENT%"
+
+```
+
+:::callout-note
+- This script is allowing you to point it to a file
+- The script also allows you to input a name of the organism
+- The file is then input and analyzed (which is what you'll do in the next section)
+:::
+
+### Task 3.2: Compare nucleotide composition
+
+``` bash
+
+# Analyze E. coli
+
+../scripts/nucleotide_stats.sh ecoli/ecoli_genome.fna "E. coli" \
+  > ../results/ecoli_nucleotides.txt
+
+# Analyze Mycoplasma
+
+../scripts/nucleotide_stats.sh mycoplasma/mycoplasma_genome.fna "Mycoplasma" \
+  > ../results/mycoplasma_nucleotides.txt
+
+# Display results
+
+cat ../results/ecoli_nucleotides.txt
+echo ""
+cat ../results/mycoplasma_nucleotides.txt
+echo ""
+```
+::: callout-note
+- In this case you're running your scripts and redirecting the results into a new file
+- OK, one last time - the names of your files and directories will be different!
+:::
+
+
+## Part 4: Biological Feature Analysis
+
+### Task 4.1: Search for restriction enzyme sites
+
+``` bash
+
+#!/bin/bash
+# Count common restriction enzyme sites
+
+if [ $# -ne 2 ]; then
+    echo "Usage: $0 <fasta_file> <organism_name>"
+    exit 1
+fi
+
+FASTA=$1
+NAME=$2
+
+echo "=== Restriction Sites in $NAME ==="
+echo "Enzyme  | Site    | Count"
+echo "--------|---------|-------"
+
+# Common 6-cutters
+echo -n "EcoRI   | GAATTC  | "
+grep -v "^>" "$FASTA" | tr -d '\n' | grep -o "GAATTC" | wc -l
+
+echo -n "BamHI   | GGATCC  | "
+grep -v "^>" "$FASTA" | tr -d '\n' | grep -o "GGATCC" | wc -l
+
+echo -n "HindIII | AAGCTT  | "
+grep -v "^>" "$FASTA" | tr -d '\n' | grep -o "AAGCTT" | wc -l
+
+echo -n "PstI    | CTGCAG  | "
+grep -v "^>" "$FASTA" | tr -d '\n' | grep -o "CTGCAG" | wc -l
+
+echo -n "SalI    | GTCGAC  | "
+grep -v "^>" "$FASTA" | tr -d '\n' | grep -o "GTCGAC" | wc -l
+
+echo -n "XbaI    | TCTAGA  | "
+grep -v "^>" "$FASTA" | tr -d '\n' | grep -o "TCTAGA" | wc -l
+
+```
+
+Reminder, if you want to make this script executable:
+
+``` bash
+chmod +x restriction_sites.sh
+```
+
+### Task 4.2 Compare restriction sites
+
+``` bash
+../scripts/restriction_sites.sh ecoli/ecoli_genome.fna "E. coli" \
+  > ../results/ecoli_restriction.txt
+  
+../scripts/restriction_sites.sh mycoplasma/mycoplasma_genome.fna "Mycoplasma" \
+  > ../results/mycoplasma_restriction.txt
+
+cat ../results/ecoli_restriction.txt
+echo ""
+cat ../results/mycoplasma_restriction.txt
+echo ""
+```
+
+::: callout-note
+Just like above, this shows you how to execute your script and redirect the results to output files
+:::
+
+
+### Task 4.3: Search for promoter elements
+
+``` bash
+# Search for bacterial promoter elements
+echo "=== Promoter Elements ==="
+
+# -10 box (Pribnow box) TATAAT
+echo "Pribnow box (TATAAT) counts:"
+echo -n "E. coli: "
+grep -v "^>" ecoli/ecoli_genome.fna | tr -d '\n' | grep -o "TATAAT" | wc -l
+
+echo -n "Mycoplasma: "
+grep -v "^>" mycoplasma/mycoplasma_genome.fna | tr -d '\n' | grep -o "TATAAT" | wc -l
+
+# Shine-Dalgarno sequence (AGGAGG)
+echo -e "Shine-Dalgarno (AGGAGG) counts:"
+echo -n "E. coli: "
+grep -v "^>" ecoli/ecoli_genome.fna | tr -d '\n' | grep -o "AGGAGG" | wc -l
+
+echo -n "Mycoplasma: "
+grep -v "^>" mycoplasma/mycoplasma_genome.fna | tr -d '\n' | grep -o "AGGAGG" | wc -l
+```
+
+### Task 4.4 Compare promoter elements
+
+- On your own execute the scripts and redirect the output of the analyses to files
+- This is the same structure as you've used on the previous tasks (e.g. look at Task 4.2)
+- Don't forget to make your scripts executable!
+
+## Tips for Success
+
+-   Always verify file downloads completed successfully
+-   Test scripts on small test files before running on full genomes
+-   Use meaningful variable names in your scripts
+-   Add error checking to scripts (verify files exist, etc.)
+-   Comment your code to explain what each section does
+-   Save intermediate results in case you need to re-run analyses
+-   If a command is taking too long, you might be able to optimize it
+
+## Common Issues and Solutions
+
+**Problem**: Script permissions denied **Solution**: Remember to use `chmod +x script_name.sh`
+
+**Problem**: Very slow GREP on large files **Solution**: Ensure you're not using unnecessary wildcards

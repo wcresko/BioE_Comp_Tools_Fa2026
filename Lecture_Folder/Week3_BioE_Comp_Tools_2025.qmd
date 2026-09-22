@@ -1,0 +1,403 @@
+---
+title: "Week 3 Computational Tools for Bioengineers"
+author: "Bill Cresko"
+format: 
+  revealjs:
+    footer: BioE_Comp_Tools_2025 - Knight Campus 
+    transition: fade
+    transition-speed: slow
+editor: visual
+---
+
+```{r}
+library(tidyverse)
+library(gt)
+library(readxl)
+theme_set(theme_minimal())
+```
+
+## Goals for today
+
+-   Finish advanced Unix
+-   Work with human chromosome 1 sequence data
+-   Tidy Data
+-   R and RStudio
+
+# The Command Line
+
+```{r, echo=FALSE, out.width='90%', fig.asp=.75, fig.align='center'}
+knitr::include_graphics("images/w1_code.jpeg")
+```
+
+## Making new files {.smaller}
+
+-   Make new folders: `mkdir`
+-   Make new files: `nano`, `touch`
+-   Rename files: `mv`
+-   Move files: `mv`
+-   Copy files: `cp`
+-   Delete files: `rm`
+-   Delete directories: `rmdir`
+-   Examining file length: `wc`
+-   Reading files: `cat`
+-   Looking at beginning or end: `head` or `tail`
+
+## Things to keep in mind {.smaller}
+
+-   The shell trusts you
+    -   It will delete files you say to delete
+    -   It will override files if you name 2 things the same
+-   Naming conventions
+    -   Avoid spaces
+    -   Don’t start with a –
+    -   Stick to letters, numbers, . , -, and \_
+-   Use appropriate file extensions in file names
+    -   Some software expect files with certain extensions (.fasta, .txt, etc.)
+
+## Practice making files and directories {.smaller}
+
+-   Make a new directory called whatever you'd like.
+-   Add a file named `Practice.txt` to the directory and add some text to it
+-   Read the contents of the file and get its length
+-   Rename the file to `Super_practice.txt`
+-   Move the file to a new folder named `Testing`
+-   Make a copy of the file named `Super_practice_copy.txt`
+-   Read the contents of the file and get its length to make sure it’s the same as `Super_practice.txt`
+-   Delete the original `Super_practice.txt`
+
+# Reading and Writing Files in Unix
+
+## Commands for Reading Files {.smaller}
+
+-   **`cat`** = concatenate and display files
+    -   Shows entire file at once
+    -   Good for small files
+-   **`less`** = view file page by page
+    -   Navigate with `space` (forward), `b` (back), `q` (quit)
+    -   Search with `/pattern`
+-   **`more`** = similar to less but simpler
+    -   Space to go forward, `q` to quit
+-   **`head`** = display first 10 lines (default)
+    -   `head -n 20 file.txt` shows first 20 lines
+-   **`tail`** = display last 10 lines (default)
+    -   `tail -n 20 file.txt` shows last 20 lines
+    -   `tail -f file.txt` follows file as it grows (useful for logs)
+
+## Input Redirection {.smaller}
+
+-   **`<`** = redirect input from a file
+    -   `command < input.txt`
+    -   Sends contents of file as input to command
+-   **`<<`** = here document (multi-line input)
+    -   Allows you to provide multi-line input directly in the terminal
+-   Example uses:
+    -   `wc -l < data.txt` counts lines in data.txt
+    -   `sort < names.txt` sorts contents of names.txt
+
+## Output Redirection {.smaller}
+
+-   **`>`** = redirect output to a file (overwrites)
+    -   `ls -l > filelist.txt`
+    -   Creates new file or overwrites existing
+-   **`>>`** = append output to a file
+    -   `echo "new line" >> existing.txt`
+    -   Adds to the end of existing file
+-   **`2>`** = redirect error messages
+    -   `command 2> errors.txt`
+    -   Captures error messages separately
+-   **`&>`** = redirect both output and errors
+    -   `command &> all_output.txt`
+
+## Unix Three Standard Streams {.smaller}
+
+-   **stdin (0)** = Standard Input
+    -   Where programs read input from
+    -   Default: keyboard
+-   **stdout (1)** = Standard Output
+    -   Where programs write normal output
+    -   Default: terminal screen
+-   **stderr (2)** = Standard Error
+    -   Where programs write error messages
+    -   Default: terminal screen (same as stdout)
+
+## Visualizing Data Streams {.smaller}
+
+``` bash
+# Every Unix program has these three streams
+         ┌──────────────┐
+stdin ───>│              │───> stdout
+    (0)  │   Program    │      (1)
+         │              │───> stderr
+         └──────────────┘      (2)
+```
+
+-   File descriptor numbers: 0, 1, 2
+-   Can redirect each stream independently
+-   Programs don't know if streams are redirected
+-   This abstraction is key to Unix philosophy
+
+## Basic Stream Redirection {.smaller}
+
+``` bash
+# Redirect stdout to file (equivalent ways)
+
+ls -l > files.txt
+ls -l 1> files.txt      # Explicitly using fd 1
+
+# Redirect stderr to file
+
+ls /nonexistent 2> errors.txt
+
+# Redirect both stdout and stderr to same file
+
+ls -l /nonexistent &> all_output.txt
+```
+
+## Bioinformatics Example {.smaller}
+
+Processing sequence data with stream control:
+
+``` bash
+# FASTQ processing pipeline with error handling
+
+zcat reads.fastq.gz 2> unzip_errors.log | 
+fastqc stdin 2> qc_errors.log | 
+trimmomatic 2> trim_errors.log | 
+bowtie2 -x genome - 2> alignment_stats.txt | 
+samtools sort 2> sort_errors.log | 
+samtools index - 2> index_errors.log
+
+# Check all error logs at once
+
+cat *_errors.log | grep -E "ERROR|WARNING"
+```
+
+# Unix Pipes {.flexbox .vcenter}
+
+## What are Pipes? {.smaller}
+
+-   **`|`** = the pipe operator
+    -   Takes output from one command as input to another
+    -   Chains commands together
+    -   No intermediate files needed!
+-   Basic syntax:
+    -   `command1 | command2 | command3`
+-   Power of Unix philosophy:
+    -   Small tools that do one thing well
+    -   Combine them to do complex tasks
+
+## Common Pipe Patterns {.smaller}
+
+-   **Counting patterns:**
+    -   `grep "pattern" file.txt | wc -l`
+    -   Count lines matching a pattern
+-   **Sorting and uniqueness:**
+    -   `cat file.txt | sort | uniq`
+    -   Sort lines and remove duplicates
+-   **Finding top/bottom items:**
+    -   `sort data.txt | head -5`
+    -   Get top 5 after sorting
+-   **Filtering and processing:**
+    -   `ls -l | grep ".txt" | awk '{print $5, $9}'`
+    -   List txt files with sizes
+
+## Advanced Pipe Examples {.smaller}
+
+-   **Multi-step data processing:**
+    -   `cat data.csv | cut -d',' -f2 | sort | uniq -c | sort -rn`
+    -   Extract column 2, count unique values, sort by frequency
+-   **Complex transformations:**
+    -   `find . -name "*.txt" | xargs wc -l | sort -n`
+    -   Find all txt files and sort by line count
+-   **Real-time monitoring:**
+    -   `tail -f logfile.txt | grep ERROR`
+    -   Watch log file for errors in real-time
+
+## Tips for Working with Files and Pipes {.smaller}
+
+-   Test pipes step by step
+    -   Build complex pipes incrementally
+    -   Check output at each stage
+-   Use `less` for large files instead of `cat`
+-   Remember: `>` overwrites, `>>` appends
+-   Pipe efficiency:
+    -   Filter early in the pipeline
+    -   Reduces data passed between commands
+-   Save intermediate results when debugging complex pipes \# Unix Data Streams
+
+
+# Working with Large Genomic Data Files
+
+## Human Chromosome Data {.smaller}
+
+-   Genomic data files can be massive (human genome \~6 billion base pairs)
+-   FASTA format is standard for sequence data
+-   Perfect use case for Unix pipes and redirection
+-   Let's work with human genome assembly version 38 (\~3.1 GB)
+
+## Downloading Genomic Data {.smaller}
+
+Download version 38 of the human genome from NCBI:
+
+``` bash
+
+# Using `wget` to download human genome
+
+wget https://ftp.ncbi.nlm.nih.gov/genomes/all/GCF/000/001/405/\
+GCF_000001405.40_GRCh38.p14/GCF_000001405.40_GRCh38.p14_genomic.fna.gz
+
+# Or using `curl` and save with specific name
+
+curl -o human_genome.fa.gz https://ftp.ncbi.nlm.nih.gov/genomes/all/GCF/000/001/405/\
+GCF_000001405.40_GRCh38.p14/GCF_000001405.40_GRCh38.p14_genomic.fna.gz
+```
+
+-   `wget` and `curl` are both tools for downloading files
+-   The backslash allows long URLs to span multiple lines
+-   `.gz` extension means the file is compressed
+
+## Examining Large Files Efficiently {.smaller}
+
+Don't use `cat` on huge files! Use these approaches:
+
+``` bash
+# Decompress and look at first 10 lines
+
+gunzip -c human_genome.fa.gz | head -10
+
+# Check file size before and after decompression
+
+ls -lh human_genome.fa.gz
+gunzip human_genome.fa.gz
+ls -lh human_genome.fa
+
+# Count sequences in FASTA file (lines starting with >)
+
+grep "^>" human_genome.fa.gz | wc -l
+
+# View sequence headers only
+
+grep "^>" human_genome.fa.gz | less
+```
+
+## Creating a Subset for Analysis {.smaller}
+
+Make a smaller working file for testing:
+
+``` bash
+# Extract first 1MB of sequence for testing
+
+head -n 20000 human_genome.fa.gz > human_genome_subset.fa
+
+# Or extract specific scaffold/contig by name
+
+awk '/^>chr21:1000000-2000000/,/^>/' human_genome.fa | \
+  head -n -1 > region_of_interest.fa
+
+# Create a random sample of sequences
+
+grep "^>" human_genome.fa | \
+  shuf -n 10 | \
+  while read header; do
+    grep -A 1000 "$header" human_genome.fa
+  done > random_sample.fa
+```
+
+## Processing FASTA Files with Pipes {.smaller}
+
+Extract specific regions or sequences:
+
+``` bash
+# Extract just the sequence (no headers) and count bases
+
+grep -v "^>" human_genome.fa | tr -d '\n' | wc -c
+
+# Count each type of nucleotide
+
+grep -v "^>" human_genome.fa | \
+  tr -d '\n' | \
+  fold -w1 | \
+  sort | \
+  uniq -c
+
+# Extract a specific gene region (lines 1000-2000)
+
+sed -n '1000,2000p' human_genome.fa > gene_region.fa
+```
+
+-   `grep -v` inverts the match (excludes lines)
+-   `tr -d '\n'` removes newlines
+-   `fold -w1` puts each character on its own line
+
+## Finding Patterns in Genomic Data {.smaller}
+
+Search for specific sequences and motifs:
+
+``` bash
+# Find all instances of a restriction enzyme site (EcoRI: GAATTC)
+
+grep -v "^>" human_genome.fa | \
+  tr -d '\n' | \
+  grep -o "GAATTC" | \
+  wc -l
+
+# Extract 100 bases around each EcoRI site
+
+grep -v "^>" human_genome.fa | \
+  tr -d '\n' | \
+  grep -oE ".{100}GAATTC.{100}" > ecori_contexts.txt
+
+# Find all start codons (ATG) and their positions
+
+grep -v "^>" human_genome.fa | \
+  tr -d '\n' | \
+  grep -b -o "ATG" | \
+  head -20
+```
+
+## Combining Downloads with Processing {.smaller}
+
+Stream processing without saving intermediate files:
+
+``` bash
+# Download, decompress, and process in one pipeline
+curl -s https://url/to/genome.fa.gz | \
+  gunzip -c | \
+  grep -v "^>" | \
+  tr -d '\n' | \
+  cut -c1-1000000 > first_megabase.txt
+
+# Download and immediately analyze GC content
+wget -O - https://url/to/genome.fa.gz | \
+  gunzip -c | \
+  grep -v "^>" | \
+  tr -d '\n' | \
+  tr 'ATGC' '0011' | \
+  awk '{s+=gsub(/1/,"")} END {print "GC%:", s/length*100}'
+```
+
+::: notes
+-   The `-O -` flag tells wget to output to stdout
+-   This approach saves disk space and time
+:::
+
+## Key Takeaways {.smaller}
+
+-   **Real bioinformatics often involves gigabytes of data - these Unix tools scale beautifully!**
+-   **Never load entire genome files into memory** - use streaming
+-   **Combine tools** - each does one thing well
+-   **Test on subsets first** - extract small portions for development
+-   **Document your pipelines** - save commands in scripts
+-   **Use compression** - work with .gz files directly when possible
+-   **Think in streams** - data flows through pipes without intermediate files
+
+## Practice Exercise: Genomic Data Pipeline {.smaller}
+
+Build a complete analysis pipeline:
+
+1.  Download a bacterial genome (smaller, \~5 MB)
+2.  Count the total number of genes (hint: count headers)
+3.  Calculate the genome size in base pairs
+4.  Find the 10 most common 6-base sequences
+5.  Extract all genes with "ribosomal" in the header
+6.  Save your pipeline as a shell script for reproducibility
