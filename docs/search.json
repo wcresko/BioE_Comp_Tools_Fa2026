@@ -37,56 +37,56 @@
   {
     "objectID": "Homework_Folder/HW1_2025.html#learning-objectives",
     "href": "Homework_Folder/HW1_2025.html#learning-objectives",
-    "title": "Homework 1- Computational Tools for Bioengineers 2025",
+    "title": "Homework 1- Computational Tools for Bioengineers 2026",
     "section": "Learning Objectives",
     "text": "Learning Objectives\n\n\n\n\n\n\n\nDownload genomic data from NCBI using command-line tools\nWork with compressed genomic files efficiently\nApply GREP and regular expressions to analyze biological sequences\nUse Unix pipes to create analysis workflows\nWrite shell scripts to automate genome analysis\nRun the shell scripts and create output files"
   },
   {
     "objectID": "Homework_Folder/HW1_2025.html#background",
     "href": "Homework_Folder/HW1_2025.html#background",
-    "title": "Homework 1- Computational Tools for Bioengineers 2025",
+    "title": "Homework 1- Computational Tools for Bioengineers 2026",
     "section": "Background",
     "text": "Background\n\n\n\n\n\n\nNote\n\n\n\n\nIn this exercise, you’ll download and analyze two bacterial genomes with very different characteristics:\n\nEscherichia coli K-12 MG1655: A well-studied model organism with a typical-sized bacterial genome (~4.6 Mb)\nMycoplasma genitalium G37: One of the smallest known genomes of any free-living organism (~0.58 Mb)\n\nYour goal is to write all of the commands below and include them into executable shell scripts. Note that you’ll probably have several scripts, one for each exercise or task.\nIn this exercises I’ve given you a lot of hints, but you’ll have to modify most commands just a little bit to make sure that they work on your computer.\nThe goal is for you to think about and understand what is happening with each step of the script."
   },
   {
     "objectID": "Homework_Folder/HW1_2025.html#part-1-setup-and-data-download",
     "href": "Homework_Folder/HW1_2025.html#part-1-setup-and-data-download",
-    "title": "Homework 1- Computational Tools for Bioengineers 2025",
+    "title": "Homework 1- Computational Tools for Bioengineers 2026",
     "section": "Part 1: Setup and Data Download",
     "text": "Part 1: Setup and Data Download\n\nTask 1.1: Create your workspace\n\nCreate a working directory structure using mkdir\nOrganize your directories into those named something like: input, output and scripts\nRemember that throughout the rest of the exercise you’ll either need to be in the appropriate directory, or use paths to point to the appropriate directory\nIn the examples below I use names for directories in paths but of course they won’t be the same as yours\nYou’ll need to make sure that you use your directory names in your paths\n\n\n\nTask 1.2: Download the E. coli and M. genitalium genomes\n\nNavigate into the ‘input’ directory\nDownload the E. coli and M. genitalium genomes and CDS files\nhint - you may want to make more subdirectories for each genome\n\n\n# Download E. coli K-12 MG1655 genome using curl\n\ncurl -o ecoli_genome.fna.gz \\\n  https://ftp.ncbi.nlm.nih.gov/genomes/all/GCF/000/005/845/GCF_000005845.2_ASM584v2/GCF_000005845.2_ASM584v2_genomic.fna.gz\n\n# Download the CDS (coding sequences) file\n\ncurl -o ecoli_cds.fna.gz \\\n  https://ftp.ncbi.nlm.nih.gov/genomes/all/GCF/000/005/845/GCF_000005845.2_ASM584v2/GCF_000005845.2_ASM584v2_cds_from_genomic.fna.gz\n\n\n# Download M. genitalium G37 genome using curl\n\ncurl -o mycoplasma_genome.fna.gz \\\n  https://ftp.ncbi.nlm.nih.gov/genomes/all/GCF/000/027/325/GCF_000027325.1_ASM2732v1/GCF_000027325.1_ASM2732v1_genomic.fna.gz\n\n# Download the CDS file\n\ncurl -o mycoplasma_cds.fna.gz \\\n  https://ftp.ncbi.nlm.nih.gov/genomes/all/GCF/000/027/325/GCF_000027325.1_ASM2732v1/GCF_000027325.1_ASM2732v1_cds_from_genomic.fna.gz\n\n# Verify downloads\n\nls -lh *.gz\n\n\n\n\n\n\nNote\n\n\n\n\nRemind yourself of how curl works and the structure of the command\nAlso, you can write this into your first executable script (maybe download_genomes.sh or something like that)\nOnce you do run this command: chmod +x download_genomes.sh\nchmod means ‘change mode’ and makes your shell script directly executable without even having to call bash\nYou’ll want to do this for each of the scripts that you write\n\n\n\n\n\nTask 1.3: Initial exploration of compressed files\n\nuse the command ls -lh */*.gz to compare the size of each file\nPreview each genome without decompressing\n\n\necho \"=== E. coli genome preview ===\"\nzcat ecoli/ecoli_genome.fna.gz | head -10\n\necho -e \"\\n=== Mycoplasma genome preview ===\"\nzcat mycoplasma/mycoplasma_genome.fna.gz | head -10\n\n# Count sequence records in each compressed file\n\necho -e \"\\nE. coli sequences: $(zgrep -c '^&gt;' ecoli/ecoli_genome.fna.gz)\"\necho \"Mycoplasma sequences: $(zgrep -c '^&gt;' mycoplasma/mycoplasma_genome.fna.gz)\"\n\n\n\n\n\n\nNote\n\n\n\n\nWe didn’t cover this in class, but a number of the standard Unix commands work the same way on compressed files if you use the ‘z’ version of them (e.g. zcat and zgrep)\nYou can always unzip first and then use cat and grep, but sometimes it helps to save disk space\nYou can run these commands in the command line to begin, but then write a script with the appending redirects &gt;&gt; to write the output to the file\nThis will be your first script from this exercise"
   },
   {
     "objectID": "Homework_Folder/HW1_2025.html#part-2-basic-genome-statistics",
     "href": "Homework_Folder/HW1_2025.html#part-2-basic-genome-statistics",
-    "title": "Homework 1- Computational Tools for Bioengineers 2025",
+    "title": "Homework 1- Computational Tools for Bioengineers 2026",
     "section": "Part 2: Basic Genome Statistics",
     "text": "Part 2: Basic Genome Statistics\n\nTask 2.1: Decompress and prepare files\n# Decompress all files (keeping originals using the option `-k`)\n\n# E. coli files\n\ngunzip -k ecoli/*.gz\n\n# Mycoplasma files\n\ngunzip -k mycoplasma/*.gz\n\n# Check uncompressed sizes\n\nls -lh */*.fna\n\n\n\n\n\n\nNote\n\n\n\n\nRemind yourself what the * wild card is doing\nAlso, I forgot about this -k option in class - that would have saved time!\n\n\n\n\n\nTask 2.2: Count genes in each organism\n\n# Count genes in CDS files\n\necho \"E. coli genes: $(grep -c '^&gt;' ecoli/ecoli_cds.fna)\"\necho \"Mycoplasma genes: $(grep -c '^&gt;' mycoplasma/mycoplasma_cds.fna)\"\n\n\n\n\n\n\nNote\n\n\n\n\nNote that in the cds files, each gene entry starts with the character &gt;\nJust one more reminder - the paths I wrote above won’t be the same as yours if you use different directory names\nAlso, take the time to remind yourself what grep does and the structure"
   },
   {
     "objectID": "Homework_Folder/HW1_2025.html#part-3-nucleotide-composition-analysis",
     "href": "Homework_Folder/HW1_2025.html#part-3-nucleotide-composition-analysis",
-    "title": "Homework 1- Computational Tools for Bioengineers 2025",
+    "title": "Homework 1- Computational Tools for Bioengineers 2026",
     "section": "Part 3: Nucleotide Composition Analysis",
     "text": "Part 3: Nucleotide Composition Analysis\n\nTask 3.1: Create a nucleotide composition analyzer\n\n#!/bin/bash\n# Analyze nucleotide composition of a genome\n\nif [ $# -ne 2 ]; then\n    echo \"Usage: $0 &lt;fasta_file&gt; &lt;organism_name&gt;\"\n    exit 1\nfi\n\nFASTA=$1\nNAME=$2\n\necho \"=== Nucleotide Composition for $NAME ===\"\n\n# Count each nucleotide\n\necho \"Nucleotide counts:\"\ngrep -v \"^&gt;\" \"$FASTA\" | tr -d '\\n' | fold -w1 | \\\n  tr '[:lower:]' '[:upper:]' | sort | uniq -c\n\n# Calculate total\n\nTOTAL=$(grep -v \"^&gt;\" \"$FASTA\" | tr -d '\\n' | wc -c)\necho -e \"\\nTotal nucleotides: $TOTAL\"\n\n# Calculate GC content\n\nGC_COUNT=$(grep -v \"^&gt;\" \"$FASTA\" | tr -d '\\n' | grep -o \"[GCgc]\" | wc -l)\nGC_PERCENT=$(echo \"scale=2; $GC_COUNT * 100 / $TOTAL\" | bc)\necho \"GC content: $GC_PERCENT%\"\n\n# Calculate AT content\n\nAT_COUNT=$(grep -v \"^&gt;\" \"$FASTA\" | tr -d '\\n' | grep -o \"[ATat]\" | wc -l)\nAT_PERCENT=$(echo \"scale=2; $AT_COUNT * 100 / $TOTAL\" | bc)\necho \"AT content: $AT_PERCENT%\"\n\n\n\n\n\n\nNote\n\n\n\n\nThis script is allowing you to point it to a file\nThe script also allows you to input a name of the organism\nThe file is then input and analyzed (which is what you’ll do in the next section)\n\n\n\n\n\nTask 3.2: Compare nucleotide composition\n\n# Analyze E. coli\n\n../scripts/nucleotide_stats.sh ecoli/ecoli_genome.fna \"E. coli\" \\\n  &gt; ../results/ecoli_nucleotides.txt\n\n# Analyze Mycoplasma\n\n../scripts/nucleotide_stats.sh mycoplasma/mycoplasma_genome.fna \"Mycoplasma\" \\\n  &gt; ../results/mycoplasma_nucleotides.txt\n\n# Display results\n\ncat ../results/ecoli_nucleotides.txt\necho \"\"\ncat ../results/mycoplasma_nucleotides.txt\necho \"\"\n\n\n\n\n\n\nNote\n\n\n\n\nIn this case you’re running your scripts and redirecting the results into a new file\nOK, one last time - the names of your files and directories will be different!"
   },
   {
     "objectID": "Homework_Folder/HW1_2025.html#part-4-biological-feature-analysis",
     "href": "Homework_Folder/HW1_2025.html#part-4-biological-feature-analysis",
-    "title": "Homework 1- Computational Tools for Bioengineers 2025",
+    "title": "Homework 1- Computational Tools for Bioengineers 2026",
     "section": "Part 4: Biological Feature Analysis",
     "text": "Part 4: Biological Feature Analysis\n\nTask 4.1: Search for restriction enzyme sites\n\n#!/bin/bash\n# Count common restriction enzyme sites\n\nif [ $# -ne 2 ]; then\n    echo \"Usage: $0 &lt;fasta_file&gt; &lt;organism_name&gt;\"\n    exit 1\nfi\n\nFASTA=$1\nNAME=$2\n\necho \"=== Restriction Sites in $NAME ===\"\necho \"Enzyme  | Site    | Count\"\necho \"--------|---------|-------\"\n\n# Common 6-cutters\necho -n \"EcoRI   | GAATTC  | \"\ngrep -v \"^&gt;\" \"$FASTA\" | tr -d '\\n' | grep -o \"GAATTC\" | wc -l\n\necho -n \"BamHI   | GGATCC  | \"\ngrep -v \"^&gt;\" \"$FASTA\" | tr -d '\\n' | grep -o \"GGATCC\" | wc -l\n\necho -n \"HindIII | AAGCTT  | \"\ngrep -v \"^&gt;\" \"$FASTA\" | tr -d '\\n' | grep -o \"AAGCTT\" | wc -l\n\necho -n \"PstI    | CTGCAG  | \"\ngrep -v \"^&gt;\" \"$FASTA\" | tr -d '\\n' | grep -o \"CTGCAG\" | wc -l\n\necho -n \"SalI    | GTCGAC  | \"\ngrep -v \"^&gt;\" \"$FASTA\" | tr -d '\\n' | grep -o \"GTCGAC\" | wc -l\n\necho -n \"XbaI    | TCTAGA  | \"\ngrep -v \"^&gt;\" \"$FASTA\" | tr -d '\\n' | grep -o \"TCTAGA\" | wc -l\nReminder, if you want to make this script executable:\nchmod +x restriction_sites.sh\n\n\nTask 4.2 Compare restriction sites\n../scripts/restriction_sites.sh ecoli/ecoli_genome.fna \"E. coli\" \\\n  &gt; ../results/ecoli_restriction.txt\n  \n../scripts/restriction_sites.sh mycoplasma/mycoplasma_genome.fna \"Mycoplasma\" \\\n  &gt; ../results/mycoplasma_restriction.txt\n\ncat ../results/ecoli_restriction.txt\necho \"\"\ncat ../results/mycoplasma_restriction.txt\necho \"\"\n\n\n\n\n\n\nNote\n\n\n\nJust like above, this shows you how to execute your script and redirect the results to output files\n\n\n\n\nTask 4.3: Search for promoter elements\n# Search for bacterial promoter elements\necho \"=== Promoter Elements ===\"\n\n# -10 box (Pribnow box) TATAAT\necho \"Pribnow box (TATAAT) counts:\"\necho -n \"E. coli: \"\ngrep -v \"^&gt;\" ecoli/ecoli_genome.fna | tr -d '\\n' | grep -o \"TATAAT\" | wc -l\n\necho -n \"Mycoplasma: \"\ngrep -v \"^&gt;\" mycoplasma/mycoplasma_genome.fna | tr -d '\\n' | grep -o \"TATAAT\" | wc -l\n\n# Shine-Dalgarno sequence (AGGAGG)\necho -e \"Shine-Dalgarno (AGGAGG) counts:\"\necho -n \"E. coli: \"\ngrep -v \"^&gt;\" ecoli/ecoli_genome.fna | tr -d '\\n' | grep -o \"AGGAGG\" | wc -l\n\necho -n \"Mycoplasma: \"\ngrep -v \"^&gt;\" mycoplasma/mycoplasma_genome.fna | tr -d '\\n' | grep -o \"AGGAGG\" | wc -l\n\n\nTask 4.4 Compare promoter elements\n\nOn your own execute the scripts and redirect the output of the analyses to files\nThis is the same structure as you’ve used on the previous tasks (e.g. look at Task 4.2)\nDon’t forget to make your scripts executable!"
   },
   {
     "objectID": "Homework_Folder/HW1_2025.html#tips-for-success",
     "href": "Homework_Folder/HW1_2025.html#tips-for-success",
-    "title": "Homework 1- Computational Tools for Bioengineers 2025",
+    "title": "Homework 1- Computational Tools for Bioengineers 2026",
     "section": "Tips for Success",
     "text": "Tips for Success\n\nAlways verify file downloads completed successfully\nTest scripts on small test files before running on full genomes\nUse meaningful variable names in your scripts\nAdd error checking to scripts (verify files exist, etc.)\nComment your code to explain what each section does\nSave intermediate results in case you need to re-run analyses\nIf a command is taking too long, you might be able to optimize it"
   },
   {
     "objectID": "Homework_Folder/HW1_2025.html#common-issues-and-solutions",
     "href": "Homework_Folder/HW1_2025.html#common-issues-and-solutions",
-    "title": "Homework 1- Computational Tools for Bioengineers 2025",
+    "title": "Homework 1- Computational Tools for Bioengineers 2026",
     "section": "Common Issues and Solutions",
     "text": "Common Issues and Solutions\nProblem: Script permissions denied Solution: Remember to use chmod +x script_name.sh\nProblem: Very slow GREP on large files Solution: Ensure you’re not using unnecessary wildcards"
   },
@@ -170,7 +170,7 @@
   {
     "objectID": "index.html",
     "href": "index.html",
-    "title": "Computational Tools for Bioengineers 2025",
+    "title": "Computational Tools for Bioengineers 2026",
     "section": "",
     "text": "The goal of this 1 credit course is to provide graduate students in bioengineering and biosciences with foundational understanding of modern computational tools to aid in their research. The target audience is graduate students who have little or no experience with computational tools, or who would like a refresher and exposure to a broad quiver of resources."
   },
