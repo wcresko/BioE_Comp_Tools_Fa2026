@@ -1,0 +1,435 @@
+# Computer Systems Architecture {#sec-computer-systems}
+
+```{r}
+#| label: ch02-setup
+#| include: false
+library(tidyverse)
+library(gt)
+theme_set(theme_minimal())
+```
+
+::: {.callout-note title="Learning Objectives"}
+After completing this chapter, you will be able to:
+
+- Describe the major components of a computer system
+- Explain the fetch-decode-execute cycle
+- Compare CPU and GPU architectures and their appropriate use cases
+- Distinguish between different types of memory and storage
+- Understand the role of operating systems
+- Compare local, cluster, and cloud computing approaches
+:::
+
+Understanding how computers work at a fundamental level will help you make better decisions about computational resources, write more efficient code, and troubleshoot problems effectively. This chapter provides the conceptual foundation for everything that follows.
+
+## What Is a Computer System? {#sec-what-is-computer}
+
+A computer system consists of four major components working together:
+
+**Hardware.** The physical components you can touch—processors, memory chips, storage devices, and input/output peripherals.
+
+**Software.** Programs and instructions that tell the hardware what to do. This includes operating systems, applications, and your own scripts.
+
+**Firmware.** Low-level software embedded directly in hardware components, providing basic control functions.
+
+**Data.** The information being processed, stored, and transmitted by the system.
+
+@fig-computer-components shows how data flows between these components.
+
+```{mermaid}
+%%| label: fig-computer-components
+%%| echo: false
+%%| fig-cap: "Basic computer system architecture showing the flow of data between components"
+graph TD
+    A[Input Devices] --> B[CPU]
+    B --> C[Memory]
+    C --> B
+    B --> D[Output Devices]
+    E[Storage] --> C
+    C --> E
+```
+
+At the heart of every computation is the **fetch-decode-execute cycle**, which the CPU performs billions of times per second.
+
+## The Fetch-Decode-Execute Cycle {#sec-fetch-decode-execute}
+
+Every instruction your programs execute follows the same fundamental pattern (@fig-fetch-decode-execute):
+
+```{mermaid}
+%%| label: fig-fetch-decode-execute
+%%| echo: false
+%%| fig-cap: "The fundamental cycle underlying all computer operations"
+graph LR
+    A[Fetch Instruction] --> B[Decode Instruction]
+    B --> C[Execute Instruction]
+    C --> D[Store Results]
+    D --> A
+```
+
+1. **Fetch**: The CPU retrieves the next instruction from memory
+2. **Decode**: The CPU interprets what the instruction means
+3. **Execute**: The CPU performs the specified operation
+4. **Store**: Results are saved to memory or a register
+
+This cycle repeats continuously, with modern processors executing billions of cycles per second. Understanding this cycle helps explain why some operations are fast (data already in registers) while others are slow (waiting for data from disk).
+
+## The Central Processing Unit (CPU) {#sec-cpu}
+
+The CPU is often called the "brain" of the computer, though this metaphor oversimplifies its function. The CPU is really a very fast calculator that follows instructions precisely.
+
+### CPU Components {#sec-cpu-components}
+
+The CPU contains several critical components:
+
+**Control Unit (CU).** Directs the operation of the processor, managing the fetch-decode-execute cycle.
+
+**Arithmetic Logic Unit (ALU).** Performs mathematical calculations and logical comparisons.
+
+**Registers.** Ultra-fast temporary storage locations (typically 64 bits each) for data being actively processed.
+
+**Cache.** High-speed memory buffer that stores frequently accessed data to reduce trips to main memory.
+
+### Key CPU Concepts {#sec-key-cpu-concepts}
+
+Several metrics describe CPU performance:
+
+**Clock Speed.** Measured in gigahertz (GHz), this indicates how many cycles the CPU can perform per second. A 3.5 GHz processor performs 3.5 billion cycles per second.
+
+**Cores.** Modern CPUs contain multiple independent processing units (cores). An 8-core processor can theoretically perform 8 operations simultaneously.
+
+**Threads.** Virtual cores that allow better utilization of physical cores through simultaneous multithreading (SMT) or hyper-threading.
+
+**Instruction Set.** The low-level language the CPU understands. Common architectures include x86-64 (Intel/AMD) and ARM (Apple Silicon, most phones).
+
+::: {.callout-note}
+More cores and higher clock speeds don't always mean faster performance for your specific task. Many analyses are limited by memory access speed or storage I/O rather than raw CPU power.
+:::
+
+## Graphics Processing Units (GPUs) {#sec-gpus}
+
+While CPUs are designed for complex sequential tasks, **GPUs** excel at simple parallel operations. Originally designed for rendering graphics (where millions of pixels need similar calculations), GPUs have become essential for:
+
+- Machine learning and deep neural networks
+- Scientific simulations
+- Cryptocurrency mining
+- Image and video processing
+
+### GPU Architecture {#sec-gpu-architecture}
+
+GPUs differ fundamentally from CPUs:
+
+**Streaming Multiprocessors (SMs).** Processing clusters containing many smaller cores.
+
+**CUDA Cores / Stream Processors.** Thousands of simple processing units optimized for parallel computation.
+
+**Video Memory (VRAM).** Dedicated high-bandwidth memory separate from system RAM.
+
+### CPU vs. GPU: When to Use Each {#sec-cpu-vs-gpu-when-to-use-each}
+
+@tbl-cpu-gpu contrasts the two processor types.
+
+| Characteristic | CPU | GPU |
+|:---------------|:----|:----|
+| Design Focus | Sequential, complex tasks | Parallel, simple tasks |
+| Core Count | 4-64 powerful cores | Thousands of smaller cores |
+| Memory | Large cache, lower bandwidth | Smaller cache, higher bandwidth |
+| Best For | Operating systems, complex logic, serial tasks | Graphics, ML/AI, simulations |
+
+: Comparison of CPU and GPU characteristics {#tbl-cpu-gpu}
+
+::: {.callout-tip}
+If your computation involves applying the same operation to millions of data points (like image processing or matrix multiplication), GPUs can provide dramatic speedups. If your computation requires complex branching logic and sequential dependencies, CPUs are more appropriate.
+:::
+
+## Types of Computer Memory {#sec-memory-types}
+
+Understanding the memory hierarchy helps explain performance characteristics of different operations.
+
+### Random Access Memory (RAM) {#sec-random-access-memory}
+
+RAM provides temporary working space for programs and data currently in use. Key characteristics:
+
+**Volatile.** Contents are lost when power is removed.
+
+**Random Access.** Any memory location can be accessed with equal speed (unlike sequential access).
+
+**Types.** There are two main kinds of RAM:
+
+- **DRAM (Dynamic RAM)**: Main system memory, requires constant refresh
+- **SRAM (Static RAM)**: Used in CPU caches, faster but more expensive
+
+Modern systems typically have 8-64 GB of RAM, though scientific workstations and servers may have much more. For a concrete sense of scale, @tbl-laptop-vs-talapas in @sec-computing-at-uo compares a typical laptop (8-16 GB) with a single Talapas node (512 GB) and the cluster's large-memory nodes (up to 4 TB).
+
+::: {.callout-tip title="The usual bottleneck is RAM"}
+For data analysis, the most common limit is not processor speed but memory: your data must fit in RAM while you work on it. When a program dies with "out of memory," or your laptop grinds to a halt swapping to disk, the remedy is more RAM or a move to the cluster (@sec-hpc-talapas), not a faster CPU.
+:::
+
+### Persistent Storage {#sec-persistent-storage}
+
+Unlike RAM, storage devices retain data without power:
+
+**Hard Disk Drives (HDDs)**
+
+- Mechanical spinning platters with magnetic storage
+- Large capacities at low cost (many terabytes)
+- Slower access (~10ms latency, 100-200 MB/s throughput)
+- Susceptible to physical damage
+
+**Solid State Drives (SSDs)**
+
+- No moving parts (NAND flash memory)
+- Much faster access (~0.1ms latency, 500-7000 MB/s throughput)
+- More expensive per gigabyte than HDDs
+- More durable and energy-efficient
+
+::: {.callout-important}
+The memory hierarchy creates significant performance differences. Data in CPU registers can be accessed in nanoseconds, data in RAM in tens of nanoseconds, but data on disk takes milliseconds—a difference of six orders of magnitude!
+:::
+
+### The Memory Hierarchy {#sec-the-memory-hierarchy}
+
+@fig-memory-hierarchy illustrates the tradeoffs between speed, capacity, and cost:
+
+```{r}
+#| label: fig-memory-hierarchy
+#| fig-cap: "The memory hierarchy: faster storage is smaller and more expensive"
+#| echo: false
+
+memory_data <- tibble(
+  Level = factor(c("Registers", "L1 Cache", "L2 Cache", "L3 Cache", "RAM", "SSD", "HDD"),
+                 levels = c("Registers", "L1 Cache", "L2 Cache", "L3 Cache", "RAM", "SSD", "HDD")),
+  Capacity = c(1, 64, 256, 8192, 32768, 1e6, 4e6),  # KB
+  Access_ns = c(0.5, 1, 4, 20, 100, 25000, 5e6)
+)
+
+ggplot(memory_data, aes(x = Level, y = Access_ns)) +
+  geom_col(fill = "#154733", alpha = 0.8) +
+  scale_y_log10(labels = scales::comma) +
+  labs(
+    title = "Memory Access Times",
+    x = "Memory Type",
+    y = "Access Time (nanoseconds, log scale)"
+  ) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+```
+
+## Operating Systems {#sec-operating-systems}
+
+An **operating system (OS)** is the software layer that manages hardware resources and provides services to applications. Think of it as a translator between your programs and the physical computer.
+
+### Core Functions {#sec-core-functions}
+
+Operating systems handle:
+
+**Process Management.** Creating, scheduling, and terminating programs. Managing how CPU time is shared among competing processes.
+
+**Memory Management.** Allocating RAM to programs, implementing virtual memory, protecting programs from interfering with each other's memory.
+
+**File System Management.** Organizing data on storage devices, managing directories and permissions, handling read/write operations.
+
+**Device Management.** Providing standardized interfaces to diverse hardware through device drivers.
+
+**Security.** User authentication, access control, protection against malicious software.
+
+### Common Operating Systems {#sec-common-operating-systems}
+
+For scientific computing, you'll encounter:
+
+**Linux.** Open-source Unix-like OS dominant in servers and clusters, and heir to the design philosophy of the original Unix [@kernighan1984unix]. Most bioinformatics tools assume Linux.
+
+**macOS.** Apple's Unix-based desktop OS. Provides native access to Unix tools.
+
+**Windows.** Microsoft's desktop OS. Now supports Linux tools through WSL (see @sec-windows-setup).
+
+::: {.callout-note title="The Principle of Least Privilege"}
+A fundamental security concept: every program and user should operate using the minimum permissions necessary to accomplish their task. This limits the damage that can occur from mistakes or malicious actions.
+:::
+
+## Computing Environments {#sec-computing-environments}
+
+Research computing happens across a spectrum of environments, from your laptop to massive cloud data centers.
+
+### Local Computing {#sec-local-computing}
+
+**Local computing** refers to resources physically present and directly controlled by you—your laptop, desktop, or lab workstation.
+
+**Advantages:**
+
+- Complete control over hardware and software
+- Data stays on your premises
+- No network dependency for computation
+- Predictable performance
+- One-time purchase cost
+
+**Disadvantages:**
+
+- Limited scale (constrained by hardware)
+- You're responsible for maintenance and backups
+- High upfront cost for powerful machines
+- Resources sit idle during off-hours
+
+### Cluster Computing {#sec-cluster-computing}
+
+A **computing cluster** is a collection of interconnected computers (nodes) working together as a single system. The University of Oregon's Talapas is an example; @fig-cluster-architecture shows the basic layout, and @sec-hpc-talapas covers using it.
+
+```{mermaid}
+%%| label: fig-cluster-architecture
+%%| echo: false
+%%| fig-cap: "Simplified cluster architecture with head node, compute nodes, and shared storage"
+graph TB
+    M[Head/Login Node] --> N1[Compute Node 1]
+    M --> N2[Compute Node 2]
+    M --> N3[Compute Node 3]
+    M --> N4[Compute Node N]
+    N1 -.-> S[(Shared Storage)]
+    N2 -.-> S
+    N3 -.-> S
+    N4 -.-> S
+    U[Users] --> M
+```
+
+Key components include:
+
+**Head/Login Node.** Where users log in and submit jobs. Not for running computations!
+
+**Compute Nodes.** Worker machines that actually run your analyses.
+
+**Resource Manager.** Software (like SLURM [@yoo2003slurm]) that schedules jobs and allocates resources fairly (see @sec-appendix-slurm for a command reference).
+
+**Shared Storage.** Parallel file systems accessible from all nodes.
+
+**Advantages:**
+
+- Massive scalability (add nodes as needed)
+- Specialized hardware (GPUs, high-memory nodes)
+- Shared among many users and projects
+- Professional management and maintenance
+
+**Disadvantages:**
+
+- Requires learning job scheduling systems
+- Jobs may wait in queue
+- Shared resources mean competition for access
+- Less control over software environment
+
+### Cloud Computing {#sec-cloud-computing}
+
+**Cloud computing** provides on-demand computing resources over the internet, with pay-as-you-go pricing. Major providers include Amazon Web Services (AWS), Google Cloud Platform (GCP), and Microsoft Azure. @fig-cloud-architecture sketches how a provider organizes its resources.
+
+```{mermaid}
+%%| label: fig-cloud-architecture
+%%| echo: false
+%%| fig-cap: "Cloud computing architecture with multiple availability zones"
+graph TB
+    R[Region] --> AZ1[Availability Zone 1]
+    R --> AZ2[Availability Zone 2]
+    AZ1 --> C[Compute]
+    AZ1 --> S[Storage]
+    AZ2 --> C2[Compute]
+    AZ2 --> S2[Storage]
+    U[Users] -.Internet.-> R
+```
+
+**Advantages:**
+
+- Elastic scaling (instantly add or remove resources)
+- No upfront hardware investment
+- Global availability
+- Managed services reduce operational burden
+- Built-in redundancy and disaster recovery
+
+**Disadvantages:**
+
+- Ongoing costs can exceed on-premises solutions
+- Vendor lock-in with proprietary services
+- Requires reliable internet connectivity
+- Data transfer costs (especially egress fees)
+- Less control compared to local systems
+
+### Choosing the Right Environment {#sec-choosing-the-right-environment}
+
+@tbl-computing-environments summarizes the tradeoffs between the three environments.
+
+| Factor | Local | Cluster | Cloud |
+|:-------|:------|:--------|:------|
+| Scale | Small | Large | Unlimited |
+| Control | Complete | Moderate | Limited |
+| Cost Model | Capital expense | Shared allocation | Pay-per-use |
+| Learning Curve | Low | Moderate | Moderate-High |
+| Best For | Development, small analyses | Large batch jobs | Burst computing, web services |
+
+: Comparison of computing environments {#tbl-computing-environments}
+
+::: {.callout-tip}
+A common workflow: develop and test locally, run production analyses on a cluster, use cloud resources for specialized needs or when cluster queues are full.
+:::
+
+## The Evolution of Scientific Computing {#sec-computing-evolution}
+
+Computing infrastructure has evolved dramatically over the past several decades (@fig-computing-evolution):
+
+```{mermaid}
+%%| label: fig-computing-evolution
+%%| echo: false
+%%| fig-cap: "Evolution of computing paradigms from mainframes to modern hybrid approaches"
+graph LR
+    A[1960s-70s<br/>Mainframes] --> B[1980s-90s<br/>Personal Computers]
+    B --> C[1990s-2000s<br/>Client-Server]
+    C --> D[2000s<br/>Clusters/Grids]
+    D --> E[2006+<br/>Cloud Computing]
+    E --> F[2020s<br/>Edge/Hybrid]
+```
+
+Key drivers of this evolution include:
+
+- **Performance Needs**: Ever-increasing computational demands from research
+- **Economics**: Pursuit of cost optimization and economies of scale
+- **Connectivity**: Internet bandwidth improvements enabling remote computing
+- **Virtualization**: Technologies that abstract hardware from software
+
+Modern research computing increasingly uses **hybrid approaches**, combining local development with cluster and cloud resources based on the specific needs of each project.
+
+## Summary {#sec-cs-summary}
+
+This chapter provided foundational knowledge about computer systems:
+
+- Computers consist of hardware, software, firmware, and data working together
+- The CPU executes instructions through the fetch-decode-execute cycle
+- GPUs excel at parallel tasks; CPUs excel at sequential, complex operations
+- Memory hierarchy creates significant performance differences
+- Operating systems manage resources and provide services to applications
+- Computing environments range from local to cluster to cloud, each with tradeoffs
+
+Understanding these concepts will help you choose appropriate resources for your analyses, interpret performance characteristics, and communicate effectively with system administrators.
+
+## Additional Reading {#sec-cs-additional-reading .unnumbered}
+
+To deepen your understanding of computer systems architecture:
+
+- **"Code: The Hidden Language of Computer Hardware and Software"** by Charles Petzold — An accessible introduction to how computers work from first principles
+- **"Computer Organization and Design"** by Patterson and Hennessy — The classic textbook on computer architecture
+- **[Putting the "You" in CPU](https://cpu.land/)** — A free, interactive online guide to how processors work
+- **[How Computers Really Work](https://nostarch.com/how-computers-really-work)** by Matthew Justice — A practical guide covering hardware, software, and everything in between
+- **AWS, GCP, and Azure Documentation** — Each cloud provider offers extensive free training on cloud computing concepts
+
+For GPU computing and parallel processing:
+
+- **NVIDIA CUDA Documentation** — Comprehensive guides for GPU programming
+- **[An Even Easier Introduction to CUDA](https://developer.nvidia.com/blog/even-easier-introduction-cuda/)** — NVIDIA's beginner-friendly CUDA tutorial
+
+## Exercises {#sec-cs-exercises .unnumbered}
+
+::: {.callout-tip title="Practice Exercises"}
+1. **System Exploration**: On your computer, find out:
+   - How many CPU cores does your system have?
+   - How much RAM is installed?
+   - What type of storage (SSD or HDD) do you have?
+   - What operating system and version are you running?
+
+2. **Memory Hierarchy**: Explain why reading data from disk is so much slower than reading from RAM. What implications does this have for analyzing large datasets?
+
+3. **Computing Environment Selection**: For each scenario, which computing environment (local, cluster, or cloud) would you recommend and why?
+   - Testing a new analysis script on a small dataset
+   - Running a genome assembly requiring 256 GB of RAM
+   - Hosting a web application for your lab's research tools
+   - Training a deep learning model requiring multiple GPUs for two weeks
+:::

@@ -164,9 +164,12 @@ grep -v "^#" annotation.gff | cut -f9 | grep -oE "gene=[^;]+"
 # Find sequences without stop codons
 grep -v -E "(TAA|TAG|TGA)" orfs.txt
 
-# Quality control pipeline
-zcat reads.fastq.gz | grep -A1 "^@" | grep -v "^--" | 
-  grep -E "^[ACGTN]+$" | grep -c "N"
+# Quality control pipeline: count reads containing an N
+# FASTQ records are 4 lines; the sequence is always line 2 of each,
+# so awk 'NR % 4 == 2' pulls out sequence lines. (grep "^@" is NOT
+# safe here - quality lines can start with @ too, since @ is a valid
+# quality character.)
+zcat reads.fastq.gz | awk 'NR % 4 == 2' | grep -c "N"
 
 # Search and replace with sed (uses regex)
 grep "gene" data.txt | sed 's/gene/GENE/g'
@@ -214,8 +217,9 @@ gunzip file.txt.gz     # Restores file.txt
 gzip -k file.txt       # Keep original file
 
 # Work directly with compressed files
+# (count reads: every 4th line is a header; don't grep "^@" - quality lines can start with @)
 
-zcat reads.fastq.gz | grep "^@" | wc -l
+zcat reads.fastq.gz | awk 'NR % 4 == 1' | wc -l
 
 # Concatenate compressed files
 
@@ -283,7 +287,7 @@ awk -F',' 'NR > 1 {sum += $3; n++} END {print sum, sum/n}' samples.csv
 ```
 
 ::: callout-tip
-Rule of thumb: **`grep`** finds lines, **`sed`** edits text, **`awk`** works with columns. More in [Appendix B](../Resources_Folder/Appendix_B_GREP_Regex_Shell.qmd).
+Rule of thumb: **`grep`** finds lines, **`sed`** edits text, **`awk`** works with columns. More in the course book's [GREP chapter](../book/chapters/05-grep-regex.html) and [Regular Expression Reference](../book/chapters/appendix-regex.html).
 :::
 
 ## Homework - microbial genome analysis

@@ -41,30 +41,101 @@ set.seed(2026)
 
 ## Plan for the morning
 
-| Time          | Block                                             |
-|---------------|---------------------------------------------------|
-| 9:00 - 9:50   | **Part 1** - The UO computing ecosystem           |
-| 9:50 - 10:00  | *Break*                                           |
-| 10:00 - 10:50 | **Part 2** - Your computer, the shell, and paths  |
-| 10:50 - 11:00 | *Break*                                           |
-| 11:00 - 11:50 | **Part 3** - Installing your toolkit              |
-| 11:50 - 12:00 | *Break*                                           |
-| 12:00 - 1:00  | **Part 4** - Markdown and rendering               |
+| Time          | Block                                                              | Install along the way                |
+|---------------|--------------------------------------------------------------------|--------------------------------------|
+| 9:00 - 9:50   | **Part 1** - Why computing? Why scripting? Where computing happens  | Start WSL (Windows), Xcode tools (Mac) |
+| 9:50 - 10:00  | *Break*                                                            |                                      |
+| 10:00 - 10:50 | **Part 2** - The shell and paths                                   | Finish Ubuntu (Windows)              |
+| 10:50 - 11:00 | *Break*                                                            |                                      |
+| 11:00 - 11:50 | **Part 3** - The UO computing ecosystem                            | VS Code, R, Python                   |
+| 11:50 - 12:00 | *Break*                                                            |                                      |
+| 12:00 - 1:00  | **Part 4** - IDEs, Markdown, and rendering                          | Quarto, TinyTeX, Positron            |
 
-## Where the bootcamp fits
+::: callout-tip
+Installs are **spread through the morning** so downloads can run while we talk. Work with your neighbors - if you finish early, help someone else!
+:::
 
-Today is a **first pass**. Almost everything we touch will come back in more depth:
+## Before we start - is your laptop ready?
 
-| Today's topic                          | Revisited in                              |
-|----------------------------------------|-------------------------------------------|
-| Computers, operating systems, storage  | Lecture 01 - 02                           |
-| The shell and paths                    | Lecture 02 - 03                           |
-| Files, pipes, streams, large data      | Lecture 03 - 05                           |
-| Scripting                              | Lecture 06 (shell), Lecture 07 (R)        |
-| IDEs (VS Code, Positron, RStudio)      | Lecture 06 - 07                           |
-| Markdown, Quarto, LaTeX                | Lecture 08                                |
-| Git, GitHub, GitHub Pages              | Lecture 08 - 09                           |
-| Talapas (UO's supercomputer)           | Lecture 10                                |
+::: incremental
+-   **RAM:** at least 8 GB (16 GB recommended)
+-   **Free disk space:** at least **20 GB** - we'll install several GB of software today
+-   **Operating system:** an up-to-date macOS, Windows 10/11, or Linux
+-   **Administrator rights** to install software (a lab- or department-managed laptop may need IT's help)
+-   **Chromebooks and iPads won't work** for this course
+-   **Plug in** - installs drain batteries
+:::
+
+::: callout-note
+Don't have a suitable laptop? Talk to me today - we'll find a solution.
+:::
+
+## What kind of computer do I have?
+
+Some installers (like R) come in different versions for different processors.
+
+| System  | How to check                                             | You'll see                        |
+|---------|----------------------------------------------------------|-----------------------------------|
+| macOS   | Apple menu  → **About This Mac**                        | **Chip: Apple M1/M2/M3/M4** (Apple silicon) or **Processor: Intel** |
+| Windows | **Settings → System → About**                            | Processor, RAM, "64-bit operating system" |
+| Any Unix shell | `uname -m`                                        | `arm64` (Apple silicon/ARM) or `x86_64` (Intel/AMD) |
+
+::: callout-tip
+Write down your chip type, RAM, and free disk space - you'll use them in a few minutes when we compare your laptop to Talapas.
+:::
+
+## Start these installs now (they take a while)
+
+::::: columns
+::: {.column width="50%"}
+**Windows users - start WSL now**
+
+1.  Right-click **Windows PowerShell** → **Run as administrator**
+2.  Type `wsl --install` and press Enter
+3.  When it finishes, **restart** your computer (at the break is fine)
+
+We'll finish setting up Ubuntu in Part 2.
+:::
+
+::: {.column width="50%"}
+**Mac users - install the developer tools**
+
+1.  Open **Terminal** (`Cmd-Space`, type "Terminal")
+2.  Type:
+
+``` bash
+xcode-select --install
+```
+
+3.  Click **Install** in the pop-up and let it run
+
+(If it says they're already installed, you're done!)
+:::
+:::::
+
+## Where the bootcamp fits - the 10-week roadmap
+
+```{mermaid}
+flowchart LR
+  B["<b>00 Bootcamp</b><br/>setup + first look<br/>at everything"] --> C
+  subgraph C["Computers & the shell"]
+    direction TB
+    L1["01 Computer systems"] --> L2["02 Local / cluster / cloud<br/>+ command line"] --> L3["03 Files, pipes,<br/>tidy data"] --> L4["04 Streams &<br/>big genomic files"] --> L5["05 grep &<br/>regular expressions"]
+  end
+  C --> S
+  subgraph S["Scripting"]
+    direction TB
+    L6["06 Shell scripts"] --> L7["07 R and Python"]
+  end
+  S --> R
+  subgraph R["Reproducibility"]
+    direction TB
+    L8["08 Quarto, LaTeX,<br/>AI assistants, Git"] --> L9["09 Git, GitHub,<br/>GitHub Pages"]
+  end
+  R --> H["<b>10 Talapas</b><br/>HPC & SLURM"]
+```
+
+Almost everything today is a **first look** - each topic comes back in more depth later.
 
 ## Why computational literacy matters
 
@@ -91,178 +162,140 @@ You do not need to become a software engineer. You need to know your tools well 
 -   **Institutional services** - Microsoft 365, Dropbox, site-licensed software
 :::
 
-# Part 1 - The UO Computing Ecosystem {background-color="#2c3e50"}
+# Part 1 - Why Computing? Why Scripting? {background-color="#2c3e50"}
 
-## Your UO digital identity
+## Why script instead of point-and-click?
 
 ::: incremental
--   **Duck ID** - your UO username and password; it is the key to almost everything today
-    -   Manage it at <https://duckid.uoregon.edu>
--   **Two-step login (Duo)** - required for most UO services; set it up on your phone *before* you need it
--   **UO email** (`you@uoregon.edu`) - also your sign-in name for Microsoft 365 and Dropbox
--   **UO VPN (Cisco Secure Client)** - only needed off-campus for campus-restricted resources (some library databases, departmental file shares, some licensed software)
-    -   Download from <https://uovpn.uoregon.edu>
+-   **Reproducibility** - a script is an exact, re-runnable record of what you did (your lab notebook for data)
+-   **Scale** - the same command works on 1 file or 10,000 files
+-   **Automation** - rerun the whole analysis when new data arrive, with one command
+-   **Fewer errors** - no mis-clicks, no copy-paste slips, no forgotten steps
+-   **Sharing** - collaborators, reviewers, and future-you can see and rerun every step
+-   **Access** - many scientific tools *only* run from the command line, and clusters like Talapas have no mouse
 :::
-
-::: callout-note
-Most UO services - email, Canvas, Microsoft 365, Teams, Zoom - work from anywhere **without** the VPN.
-:::
-
-## Where to get help at UO
-
--   **UO Service Portal** - <https://service.uoregon.edu> - knowledge base articles and help tickets for everything on the next few slides
--   **Technology Service Desk** - phone 541-346-4357 or live chat
--   **Research Advanced Computing Services (RACS)** - Talapas and research computing
--   **Center for Biomedical Data Science (CBDS)** - Knight Campus data science support and training
--   **UO Libraries - Research Data Management** - data management plans, storage, and sharing
 
 ::: callout-tip
-When something doesn't work, search the Service Portal knowledge base first - most questions already have an article.
+Imagine renaming 500 microscope images, or re-making 12 figures after a reviewer asks for a different normalization. By hand: an afternoon. With a script: seconds.
 :::
 
-## The Microsoft 365 stack
-
-UO students and employees all have a **Microsoft 365 A5** license:
-
-| Tool                     | What it's for                                                   |
-|--------------------------|-----------------------------------------------------------------|
-| **Outlook**              | UO email and calendar (100 GB mailbox)                          |
-| **Word, Excel, PowerPoint, OneNote** | Desktop, web, and mobile apps - install on your own devices |
-| **Teams**                | Chat, meetings, and shared files for groups and labs            |
-| **OneDrive**             | Your personal cloud storage (1 TB)                              |
-| **SharePoint / Teams files** | Shared storage owned by a group, not one person             |
-| **Copilot Chat**         | UO-protected generative AI assistant (sign in with UO account)  |
-
-::: callout-note
-Sign in at <https://office.uoregon.edu> with your **UO email address**. Install the Office desktop apps from there.
-:::
-
-## OneDrive - your personal cloud storage
+## A cautionary tale: Excel changed the genes
 
 ::: incremental
--   Available **at no cost to all UO students and employees** - **1 TB** each
--   Sync app on Mac and Windows puts a `OneDrive` folder on your computer - files you save there are backed up automatically
--   Share files and folders with UO colleagues and outside collaborators
--   Approved for **FERPA** and **HIPAA** data
--   Individual files can be up to **250 GB**
+-   Spreadsheets "helpfully" auto-convert text: gene **SEPT2** becomes the date **2-Sep**, **MARCH1** becomes **1-Mar**
+-   A 2016 survey found gene-name errors in the supplementary Excel files of **about 1 in 5** genomics papers that shared gene lists (Ziemann, Eren & El-Osta, *Genome Biology*)
+-   The problem was so persistent that in 2020 the official gene nomenclature committee **renamed the genes** (SEPT2 → *SEPTIN2*, MARCH1 → *MARCHF1*)
 :::
 
-::: callout-warning
-OneDrive belongs to **you**. Data that belongs to a **lab** should live in shared storage (SharePoint/Teams, a lab Dropbox team folder, or Talapas project space) so it doesn't leave when you do.
+::: callout-important
+**The lessons:** keep raw data in **plain-text** files (CSV/TSV), never "fix" data by hand in a spreadsheet, and let **scripts** do the transformations so every step is recorded. Much more on tidy data in **Lecture 03**.
 :::
 
-## UO Dropbox
+## A taste of scripting (just watch - you'll write these later!)
 
-::: incremental
--   UO has an institutional Dropbox contract (renewed through March 2028)
--   **Who has access:** faculty, staff, officers of administration, and **graduate employees (GEs)**
-    -   Students who are *not* UO employees lost access in March 2026 - use OneDrive instead
-    -   Your lab may also share a **Dropbox team folder** with you
--   **2 TB** of individual storage; team storage is purchased by departments/labs
--   Sign in with your UO email; install the **desktop app** so files sync to a local folder
--   Upload files up to 50 GB on the web, larger via the desktop app
-:::
-
-::: callout-warning
-Dropbox is approved for **green** and **amber** data (including FERPA) but **not** for HIPAA or **red** (high-risk) data.
-:::
-
-## A note on synced folders and paths
-
-Both Dropbox and OneDrive create a **real folder** on your computer - which means it has a **path** you can use from the command line:
+::::: columns
+::: {.column width="50%"}
+**Shell (Lecture 06)** - rename 500 images at once
 
 ``` bash
-# macOS - examples (yours will look similar)
-~/Library/CloudStorage/OneDrive-UniversityofOregon
-~/University\ of\ Oregon\ Dropbox/Your\ Name
+for f in IMG_*.tif; do
+  mv "$f" "scaffold_day3_${f#IMG_}"
+done
+```
 
-# Windows - the same folders seen from Ubuntu/WSL
-/mnt/c/Users/yourname/OneDrive\ -\ University\ of\ Oregon
+Count the lines in every data file:
+
+``` bash
+for f in data/raw/*.csv; do
+  echo "$f: $(wc -l < "$f") lines"
+done
+```
+:::
+
+::: {.column width="50%"}
+**R (Lecture 07)** - summarize every file
+
+``` r
+files <- list.files("data/raw",
+                    pattern = "\\.csv$",
+                    full.names = TRUE)
+for (f in files) {
+  d <- read.csv(f)
+  cat(f, "mean stiffness:",
+      mean(d$stiffness), "\n")
+}
+```
+:::
+:::::
+
+::: callout-note
+Different languages, same idea: **describe the task once, let the computer repeat it**.
+:::
+
+## Coding vs. scripting: compiled and interpreted languages
+
+| | **Compiled** languages | **Interpreted** (scripting) languages |
+|---|---|---|
+| Examples | C, C++, Fortran, Rust | Bash, R, Python, MATLAB |
+| How they run | Translated to machine code **before** running | Read and run **line by line** |
+| Speed | Very fast | Slower (but often fast enough) |
+| Flexibility | Write → compile → run | Try things interactively, one line at a time |
+| Typical use | Simulation engines, core libraries | Data analysis, automation, figures |
+
+::: callout-note
+The line is blurry - Julia compiles "just in time", and fast R and Python packages are usually compiled C/C++ underneath. Most modern pipelines **mix** both.
+:::
+
+## Languages you'll meet as a bioengineer
+
+| Language | What it's great for | In this course |
+|---|---|---|
+| **Bash** (the shell) | Moving and inspecting files, running programs, gluing tools together, clusters | Lectures 02 - 06, 10 |
+| **R** | Statistics, data wrangling, publication-quality figures, Bioconductor genomics | Lecture 07 (and BioE stats) |
+| **Python** | General programming, image analysis, machine learning, instrument control | Lecture 07, side by side with R |
+| **MATLAB** | Signal processing, modeling, many engineering labs (UO site license) | - |
+| **Markdown / LaTeX** | Writing documents, reports, slides, and equations | Today and Lecture 08 |
+
+::: callout-tip
+**Learn one well, and the next is much easier.** The concepts - variables, loops, functions, files - transfer between languages. And like a spoken language: use it or lose it!
+:::
+
+# Good Habits From Day One {background-color="#2c3e50"}
+
+## Organizing a project
+
+``` bash
+my_project/
+├── data/
+│   ├── raw/          # original data - never modify these!
+│   └── processed/    # cleaned / intermediate data
+├── scripts/          # .R, .py, .sh, .qmd files
+├── output/
+│   ├── figures/      # plots made by your scripts
+│   └── tables/       # result tables
+└── docs/             # notes, manuscripts, reports
 ```
 
 ::: incremental
--   Names like `University of Oregon Dropbox` contain **spaces** - we'll see why that matters in Part 2
--   Your exact path may differ - we'll find yours together with `pwd` and `ls`
--   Synced folders are great for documents; **large or rapidly-changing analysis files** are better on Talapas or local disk
+-   **`data/raw/` is read-only** - always read from it, never write to it
+-   **`output/` is expendable** - it can be regenerated from `scripts/` + `data/raw/`
+-   Use **relative paths** inside your scripts so the project is portable
 :::
 
-## Data classification - what can go where?
 
-UO classifies data by risk. **Know the class of your data before you choose where to put it.**
-
-| Class      | Examples                                                    | OK in                              |
-|------------|-------------------------------------------------------------|------------------------------------|
-| **Green** (low)  | Published data, your code, most de-identified research data | Almost anywhere, including AI tools |
-| **Amber** (medium) | FERPA student records, unpublished research data       | OneDrive, Dropbox, Teams/SharePoint |
-| **Red** (high)   | HIPAA / protected health information, SSNs, credit cards | Only approved systems (e.g., OneDrive for HIPAA) - ask first! |
-
-::: callout-important
-Only **green** data may be entered into AI tools that are not officially supported by UO. Microsoft Copilot Chat signed in with your UO account is approved for more.
-:::
-
-## Choosing where to store your work
-
-| Storage                 | Best for                                                | Revisited |
-|-------------------------|---------------------------------------------------------|-----------|
-| Your laptop's disk      | Active work - fast, but **not backed up** by itself     | Lec 01    |
-| OneDrive                | Personal documents, drafts, backups                     | -         |
-| Dropbox (if eligible)   | Lab-shared folders, collaboration                       | -         |
-| Teams / SharePoint      | Group-owned documents                                   | -         |
-| **GitHub**              | **Code** and small text files, with full version history | Lec 08-09 |
-| **Talapas**             | Large datasets and heavy computation                    | Lec 10    |
-
-::: callout-tip
-Rule of thumb: **code → GitHub, documents → OneDrive/Dropbox, big data → Talapas.** And always keep your raw data somewhere backed up and untouched.
-:::
-
-## Site-licensed software
-
-UO pays for a number of software licenses you can install for free:
+## Naming conventions that save headaches
 
 ::: incremental
--   **UO Software Downloads** - <https://software.uoregon.edu> (log in with Duck ID)
-    -   **MATLAB**, **Mathematica**, **LabVIEW**, **SPSS / SPSS Amos**, **ESRI ArcGIS**, and more
-    -   Some titles need a license code or a UO network/VPN connection to activate
--   **Microsoft 365 apps** - install from <https://office.uoregon.edu>
--   **Adobe** - students get **Adobe Express** on personal devices; full **Creative Cloud** is available in campus computer labs
--   UO-managed computers (not your personal laptop) use the **Software Center** app to install approved software
+-   **No spaces** - use `_` or `-` (`cell_counts.csv`, not `cell counts.csv`)
+-   **No special characters** - avoid `& ? * / \ : ( ) ' "`
+-   **Be consistent with case** - Unix treats `Data.csv` and `data.csv` as *different* files
+-   **Dates as `YYYY-MM-DD`** so they sort correctly: `2026-09-24_plate_reader.csv`
+-   **Number scripts** to show their order: `01_clean.R`, `02_analyze.R`, `03_plot.R`
+-   **Descriptive, not "final"**: `figure2_v3_final_FINAL.png` is a cry for help (and for Git - Lecture 08)
 :::
 
-::: callout-note
-Check the Software Downloads site for the current list and eligibility - availability can differ for students and employees.
-:::
 
-## Free and open-source tools - the core of this course
-
-Almost everything we use this term is **free, open-source, and cross-platform**:
-
-| Tool                  | What it does                              | Where to get it                        |
-|-----------------------|-------------------------------------------|----------------------------------------|
-| Unix shell (bash/zsh) | Command-line control of your computer     | Built in (Mac/Linux) or WSL (Windows)  |
-| R                     | Statistics and data analysis              | <https://cran.r-project.org>           |
-| Python                | General-purpose programming               | <https://www.python.org>               |
-| VS Code               | Code editor / IDE                         | <https://code.visualstudio.com>        |
-| Positron              | Data-science IDE for R and Python         | <https://positron.posit.co>            |
-| Quarto                | Renders Markdown + code documents         | <https://quarto.org>                   |
-| LaTeX (TinyTeX)       | Math typesetting and PDF output           | via Quarto (Part 3)                    |
-| Git / GitHub          | Version control and collaboration         | Lectures 08 - 09                       |
-
-## Research computing at UO - a preview
-
-::: incremental
--   **Talapas** - UO's high-performance computing (HPC) cluster: thousands of CPU cores, GPUs, and very large storage
--   Accounts are tied to a **PIRG** (a PI's research group) - ask your PI, or CBDS for course access
--   You log in over **SSH** from the same shell we will use today
--   Documentation: <https://uoracs.github.io/talapas2-knowledge-base/>
-:::
-
-::: callout-tip
-Everything you learn in the shell today works **unchanged** on Talapas - same commands, much bigger machine. Full details in **Lecture 10**.
-:::
-
-# BREAK - back at 10:00 {background-color="#2c3e50"}
-
-# Part 2 - Your Computer, the Shell, and Paths {background-color="#2c3e50"}
+# Where Computing Happens {background-color="#2c3e50"}
 
 ## The three parts of a computer that matter most
 
@@ -276,19 +309,95 @@ Everything you learn in the shell today works **unchanged** on Talapas - same co
 The most common bottleneck for data analysis is **RAM**. "Out of memory" usually means *get more RAM or move to the cluster*, not "get a faster CPU." More on this in **Lecture 01**.
 :::
 
-## What an operating system does
+## Where can computation happen?
 
-::: incremental
--   The OS is the **manager** between you and the hardware
--   Runs many programs (**processes**) at once, sharing the CPU cores
--   Hands out **memory** and keeps programs from clobbering each other
--   Organizes storage into a **file system** of files and directories
--   Enforces **security** - users, groups, and permissions
+::: panel-tabset
+### Local
+
+![](images/appendix_A_S21_local_computing_arch.svg){fig-align="center" width="60%"}
+
+Your **laptop or lab workstation**: fast to start, fully under your control - but limited RAM, storage, and uptime.
+
+### Cluster
+
+![](images/appendix_A_S24_cluster_computing.svg){fig-align="center" width="60%"}
+
+Many computers (**nodes**) working together, shared by many users through a scheduler - this is **Talapas**.
+
+### Cloud
+
+![](images/appendix_A_S27_cloud_computing.svg){fig-align="center" width="60%"}
+
+Rented computing (AWS, Azure, Google Cloud): scales up on demand, pay by the hour.
 :::
 
 ::: callout-note
-macOS and Linux are both **Unix**-like. Windows is not - which is why Windows users will install a Linux environment (Ubuntu via WSL) in a few minutes.
+Much more in **Lecture 02** (local, cluster, cloud) and **Lecture 10** (Talapas).
 :::
+
+## Your laptop vs. Talapas
+
+|                     | Typical laptop        | One standard Talapas node | Talapas large-memory node | All of Talapas     |
+|---------------------|-----------------------|---------------------------|---------------------------|--------------------|
+| **CPU cores**       | 8 - 12                | **128**                   | varies                    | **14,500+**        |
+| **RAM**             | 8 - 16 GB             | **512 GB**                | **up to 4 TB**            | **~129 TB**        |
+| **GPUs**            | integrated            | -                         | -                         | **89** (NVIDIA A100, H100, V100) |
+| **Storage**         | 0.5 - 1 TB SSD        | shared                    | shared                    | **~3 PB** (3,000 TB) |
+
+::: incremental
+-   One standard node has roughly **30x the RAM** and **10x the cores** of your laptop - and Talapas has *hundreds* of nodes
+-   Your storage on Talapas: **250 GB** in your home directory, plus your lab's **project space** (2 TB by default)
+-   When an analysis says "out of memory" or would take days on your laptop - that's a job for Talapas
+:::
+
+## Research Advanced Computing Services (RACS)
+
+**RACS** runs Talapas and helps UO researchers with computing of all kinds - <https://racs.uoregon.edu>
+
+::: incremental
+-   **Talapas HPC cluster** - CPU, GPU, and large-memory nodes, 225+ scientific software packages
+-   **Research data storage** - large-scale storage (about \$35/TB/year) beyond what Talapas includes
+-   **Globus** - fast, reliable transfer of very large datasets (e.g. from a sequencing core or collaborator)
+-   **Consulting** - software installs, optimizing code, data security, choosing hardware
+-   **Grant support** - help writing the computing and data-management parts of proposals
+-   **Beyond UO** - access to national supercomputers (NSF ACCESS) and cloud (AWS, Azure) consulting
+:::
+
+::: callout-tip
+Contact: **racs\@uoregon.edu** or the [RACS service desk](https://hpcrcf.atlassian.net/servicedesk/customer/portal/1). They are there to help - ask early!
+:::
+
+## Getting on Talapas - and Open OnDemand
+
+::::: columns
+::: {.column width="50%"}
+**Getting an account**
+
+-   Every Talapas user belongs to at least one **PIRG** (Principal Investigator Research Group) - your PI is responsible for it
+-   **Ask your PI (or rotation PI) to add you** - setup can take a few days, so do it early
+-   For this course, we'll arrange class access through CBDS before Lecture 10
+-   Documentation: [Talapas Knowledge Base](https://uoracs.github.io/talapas2-knowledge-base/)
+:::
+
+::: {.column width="50%"}
+**Open OnDemand - Talapas in your web browser**
+
+-   Go to <https://ondemand.talapas.uoregon.edu> and log in with your **Duck ID** (Chrome or Firefox; a private window avoids login glitches)
+-   **Jupyter Lab** notebooks running on Talapas
+-   A full **remote desktop** with **RStudio**, **MATLAB**, and Stata
+-   A **shell** in the browser
+-   A **file explorer** - drag-and-drop files between your laptop and Talapas
+-   A **job composer** for submitting jobs
+:::
+:::::
+
+::: callout-note
+OnDemand apps run as jobs on compute nodes - they **keep running even if you close your browser**, so remember to end sessions you no longer need. Command-line access (SSH) and job scheduling come in **Lecture 10**.
+:::
+
+# BREAK - back at 10:00 {background-color="#2c3e50"}
+
+# Part 2 - The Shell and Paths {background-color="#2c3e50"}
 
 ## What is a shell?
 
@@ -318,23 +427,20 @@ whoami           # who am I?
 ```
 
 ::: callout-tip
-On macOS, the first time you use some developer tools you may be asked to install the **Xcode Command Line Tools**. Say **yes** - we'll need them.
+Mac users: if the `xcode-select --install` you started in Part 1 is still running, let it finish - you can use Terminal in the meantime.
 :::
 
-## Getting a shell - Windows (WSL + Ubuntu)
+## Getting a shell - Windows (finish setting up WSL + Ubuntu)
 
-Windows users install the **Windows Subsystem for Linux (WSL 2)**, which runs a real Ubuntu Linux alongside Windows:
+You started this in Part 1. If you haven't yet:
 
-1.  Right-click **Windows PowerShell** → **Run as administrator**
-2.  Type:
+1.  Right-click **Windows PowerShell** → **Run as administrator**, type `wsl --install`, and **restart**
 
-``` powershell
-wsl --install
-```
+Then:
 
-3.  **Restart** your computer when asked
-4.  Open **Ubuntu** from the Start menu; wait while it finishes installing
-5.  Create a **Linux username and password** (they do *not* need to match your Windows login - but remember them!)
+2.  Open **Ubuntu** from the Start menu; wait while it finishes installing
+3.  Create a **Linux username and password** (they do *not* need to match your Windows login - but remember them!)
+4.  When you type your password, **nothing appears on screen** - that's normal; just type it and press Enter
 
 ::: callout-note
 `wsl --install` installs Ubuntu by default. Requires Windows 11 or an up-to-date Windows 10.
@@ -354,6 +460,22 @@ sudo apt upgrade -y
     -   e.g. `/mnt/c/Users/yourname/Documents`
 -   From Windows File Explorer, Ubuntu files appear under **Linux** in the sidebar
 -   Tip: install **Windows Terminal** from the Microsoft Store for a nicer terminal with tabs
+:::
+
+## Windows: which side am I on?
+
+With WSL you have **two operating systems** on one computer - it matters which one you're typing into.
+
+|                       | **Windows side**                    | **Ubuntu (WSL) side**                   |
+|-----------------------|-------------------------------------|-----------------------------------------|
+| Terminal              | PowerShell / Command Prompt         | **Ubuntu** app, or VS Code "WSL: Ubuntu" |
+| Prompt looks like     | `PS C:\Users\you>`                  | `you@laptop:~$`                          |
+| Your home folder      | `C:\Users\you`                      | `/home/you` (`~`)                        |
+| The *other* side's files | `\\wsl$\Ubuntu\home\you`         | `/mnt/c/Users/you`                       |
+| Unix commands (`ls`, `grep`...) | mostly **no**              | **yes**                                  |
+
+::: callout-tip
+**In this course:** type shell commands in **Ubuntu**. Install R, Python, VS Code, and Positron on the **Windows** side (today). In VS Code, the green **WSL: Ubuntu** badge (bottom-left) tells you it is connected to Ubuntu.
 :::
 
 ## The file system is a tree
@@ -399,10 +521,6 @@ ls -la              # long format + hidden "dot" files (.zshrc, .config ...)
 ls -lh              # human-readable file sizes (K, M, G)
 ```
 
-::: callout-tip
-Getting help: `man ls` opens the manual page for `ls` (press `q` to quit). Many commands also accept `--help`.
-:::
-
 ## Moving around with `cd`
 
 ``` bash
@@ -419,6 +537,21 @@ pwd                    # confirm where you landed
 
 ::: callout-tip
 Press **Tab** to auto-complete file and directory names. Press it twice to see all the options. This saves typing *and* typos.
+:::
+
+## Time-savers and getting help
+
+| Key / command      | What it does                                          |
+|--------------------|-------------------------------------------------------|
+| **Tab**            | Auto-complete a file or directory name (press twice to see options) |
+| **↑ / ↓**          | Scroll back through commands you've already typed      |
+| `history`          | List your recent commands                              |
+| **Ctrl-C**         | Stop the command that's running (your emergency exit)  |
+| **Ctrl-A / Ctrl-E**| Jump to the start / end of the line                    |
+| `clear` or **Ctrl-L** | Clear the screen                                    |
+
+::: callout-tip
+**Getting help:** `man ls` opens the manual page for `ls` (`q` quits, `/word` searches). Many commands also accept `--help`. And the internet - or a UO-supported AI assistant - is fine for "how do I...?" questions.
 :::
 
 ## Spaces in names are trouble
@@ -474,6 +607,92 @@ less big_file.txt       # page through: SPACE = down, b = up, /word = search, q 
 Never `cat` a huge file - a 3 GB sequence file will flood your terminal. Use `head`, `tail`, or `less`.
 :::
 
+## Hidden files and the special directories `.` and `..`
+
+``` bash
+ls -a
+# .   ..   .zshrc   .gitignore   data   scripts
+```
+
+::: incremental
+-   Names that start with a **`.`** are **hidden** - usually settings files (`.zshrc`, `.bashrc`, `.gitignore`)
+-   Every directory contains two special entries:
+    -   **`.`** - this directory itself (e.g. `./myscript.sh` = "the script right here")
+    -   **`..`** - the parent directory, one level up
+-   So `cd ..` isn't magic - you're moving into the entry named `..`
+:::
+
+## Wildcards - one command, many files
+
+``` bash
+ls *.csv              # every file ending in .csv
+ls sample_*           # everything starting with sample_
+ls sample_0?.csv      # ? matches exactly one character
+cp data/raw/*.csv backup/     # copy every CSV at once
+```
+
+| Pattern | Matches                                   |
+|---------|-------------------------------------------|
+| `*`     | Any number of characters (including none) |
+| `?`     | Exactly one character                     |
+| `[abc]` | Any one of the listed characters          |
+
+::: callout-warning
+The shell expands wildcards *before* running the command - `rm *.csv` deletes every CSV instantly. Run `ls *.csv` first to see what will be affected.
+:::
+
+## Redirection - send output to a file
+
+::::: columns
+::: {.column width="50%"}
+![Normally output prints to the screen](images/w1_pipes_3.jpeg){width="100%"}
+:::
+
+::: {.column width="50%"}
+![`>` sends it to a file instead](images/w1_pipes_4.jpeg){width="100%"}
+:::
+:::::
+
+``` bash
+ls -l > listing.txt              # write output to a file (OVERWRITES it)
+echo "run on $(date)" >> log.txt # append to the end of a file
+wc -l < samples.csv              # feed a file in as input
+```
+
+::: callout-warning
+`>` silently replaces an existing file. Use `>>` when you want to add to it.
+:::
+
+## Pipes - chain commands together
+
+![Each command's output becomes the next command's input](images/w1_pipes_5.jpeg){fig-align="center" width="85%"}
+
+``` bash
+ls | wc -l                         # how many files are here?
+head -n 50 big_file.txt | tail -n 5   # lines 46-50
+sort names.txt | uniq -c           # count how many times each name appears
+history | grep cd                  # which cd commands did I run?
+```
+
+::: callout-tip
+This is the **Unix philosophy**: small tools that each do one thing well, snapped together with `|`. Build pipelines one step at a time, checking the output as you go.
+:::
+
+## Practice - redirection and pipes
+
+``` bash
+cd ~/bootcamp
+printf "7\n3\n12\n3\n9\n12\n1\n" > numbers.txt   # make a small file
+cat numbers.txt
+```
+
+::: incremental
+1.  Sort the numbers **numerically** (`sort -n`) and save them to `sorted.txt`
+2.  Show only the **three largest** numbers (hint: `sort -n`, then `tail`)
+3.  Count how many **unique** numbers there are (hint: `sort -n | uniq | wc -l`)
+4.  **Append** that count to `sorted.txt` with `>>`, then check it with `cat`
+:::
+
 ## Paths practice
 
 You are in `/home/you/bootcamp/data`. The layout is:
@@ -514,37 +733,6 @@ ls -R            # list recursively
 4.  Find the path to your **OneDrive** (or Dropbox) folder and `cd` into it
 :::
 
-## Organizing a project
-
-``` bash
-my_project/
-├── data/
-│   ├── raw/          # original data - never modify these!
-│   └── processed/    # cleaned / intermediate data
-├── scripts/          # .R, .py, .sh, .qmd files
-├── output/
-│   ├── figures/      # plots made by your scripts
-│   └── tables/       # result tables
-└── docs/             # notes, manuscripts, reports
-```
-
-::: incremental
--   **`data/raw/` is read-only** - always read from it, never write to it
--   **`output/` is expendable** - it can be regenerated from `scripts/` + `data/raw/`
--   Use **relative paths** inside your scripts so the project is portable
-:::
-
-## Naming conventions that save headaches
-
-::: incremental
--   **No spaces** - use `_` or `-` (`cell_counts.csv`, not `cell counts.csv`)
--   **No special characters** - avoid `& ? * / \ : ( ) ' "`
--   **Be consistent with case** - Unix treats `Data.csv` and `data.csv` as *different* files
--   **Dates as `YYYY-MM-DD`** so they sort correctly: `2026-09-24_plate_reader.csv`
--   **Number scripts** to show their order: `01_clean.R`, `02_analyze.R`, `03_plot.R`
--   **Descriptive, not "final"**: `figure2_v3_final_FINAL.png` is a cry for help (and for Git - Lecture 08)
-:::
-
 ## A command-line reference card
 
 | Task             | Command              |
@@ -561,102 +749,17 @@ my_project/
 | Peek at a file   | `head` / `tail` / `less` |
 | Count lines      | `wc -l file`         |
 | Get help         | `man command`        |
+| Many files at once | `*.csv`, `sample_?` |
+| Save output      | `cmd > file` / `cmd >> file` |
+| Chain commands   | `cmd1 \| cmd2`       |
 
 ::: callout-note
-Much more in Lectures 02 - 05: pipes, redirection, wildcards, `grep`, and working with large files.
+Much more in Lectures 02 - 06: streams and error output, working with large files, `grep` and regular expressions, and writing shell scripts.
 :::
 
 # BREAK - back at 11:00 {background-color="#2c3e50"}
 
-# Part 3 - Installing Your Toolkit {background-color="#2c3e50"}
-
-## The installation checklist
-
-| \#  | Tool             | Why we need it                            | Check it works              |
-|-----|------------------|-------------------------------------------|-----------------------------|
-| 1   | A shell          | Command line (Part 2)                     | `echo $SHELL`               |
-| 2   | **R**            | Statistics and data analysis              | `R --version`               |
-| 3   | **Python**       | General-purpose programming               | `python3 --version`         |
-| 4   | **Quarto**       | Render Markdown + code documents          | `quarto --version`          |
-| 5   | **LaTeX** (TinyTeX) | Math and PDF output                    | `quarto check`              |
-| 6   | **VS Code**      | General-purpose code editor               | open it                     |
-| 7   | **Positron**     | Data-science IDE for R and Python         | open it                     |
-
-::: callout-tip
-Install in this order. Work with your neighbors - if you finish early, help someone else!
-:::
-
-## Installing R
-
-::: incremental
--   Go to **CRAN**: <https://cran.r-project.org>
--   Choose your operating system:
-    -   **macOS** - download the `.pkg` that matches your chip (**Apple silicon / arm64** for M1-M4 Macs, **Intel / x86_64** for older Macs)
-    -   **Windows** - "base" → download and run the installer
-    -   **Linux / Ubuntu** - follow the Ubuntu instructions on CRAN (uses `apt`)
--   Accept the defaults
-:::
-
-``` bash
-R --version        # in your terminal
-```
-
-::: callout-note
-**Windows users:** install the **Windows** version of R (for Positron/VS Code). You can also install R inside Ubuntu later with `sudo apt install r-base`, but it isn't needed today.
-:::
-
-## Installing Python
-
-::: incremental
--   **macOS** - download the installer from <https://www.python.org/downloads/> and run it
-    -   (The `python3` that ships with macOS is a stub tied to Xcode tools - use the python.org version)
--   **Windows** - download from <https://www.python.org/downloads/>
-    -   **Check the box "Add python.exe to PATH"** on the first installer screen!
--   **Ubuntu / WSL** - Python 3 is already installed; add the extras:
-:::
-
-``` bash
-sudo apt install -y python3-pip python3-venv     # Ubuntu / WSL only
-python3 --version                                # everyone
-```
-
-::: callout-tip
-On Talapas and for bigger projects we will manage Python with **environments** (e.g. `conda` or `uv`) so that each project gets its own packages. More on this later in the term.
-:::
-
-## Installing Quarto
-
-::: incremental
--   **Quarto** turns Markdown + code into HTML pages, PDFs, Word documents, and slides - including these slides!
--   Download the installer from <https://quarto.org/docs/get-started/>
--   Run it and accept the defaults
-:::
-
-``` bash
-quarto --version
-quarto check          # checks for R, Python, and LaTeX
-```
-
-::: callout-note
-Positron and RStudio include a copy of Quarto, but installing it yourself means it also works from the **terminal** and in **VS Code**.
-:::
-
-## Installing LaTeX
-
-::: incremental
--   **LaTeX** is a typesetting system - the standard for mathematical notation, and what Quarto uses to make **PDFs**
--   Full LaTeX distributions (MacTeX, MiKTeX, TeX Live) are several GB
--   **TinyTeX** is a small LaTeX distribution that installs extra pieces only when needed - and Quarto installs it for you:
-:::
-
-``` bash
-quarto install tinytex
-quarto check          # should now report a LaTeX installation
-```
-
-::: callout-tip
-If you already have MacTeX, MiKTeX, or TeX Live, you can skip this - Quarto will find it.
-:::
+# Part 3 - Your Editor and the UO Computing Ecosystem {background-color="#2c3e50"}
 
 ## What is an IDE?
 
@@ -729,6 +832,502 @@ You can add or remove extensions any time. Start with this short list.
 The backtick (`` ` ``) is usually on the key above **Tab** - *not* the apostrophe. These same shortcuts work in Positron.
 :::
 
+## Install R and Python now
+
+Start both downloads now - they can install while we talk about UO resources.
+
+::::: columns
+::: {.column width="50%"}
+**R** - <https://cran.r-project.org>
+
+-   **macOS**: the `.pkg` that matches your chip (**arm64** for Apple silicon, **x86_64** for Intel)
+-   **Windows**: "base" → download and run the installer
+-   Accept the defaults
+:::
+
+::: {.column width="50%"}
+**Python** - <https://www.python.org/downloads/>
+
+-   **macOS**: run the python.org installer
+-   **Windows**: **check "Add python.exe to PATH"** on the first screen!
+-   **Ubuntu/WSL**: Python is already there; add the extras:
+
+``` bash
+sudo apt install -y python3-pip python3-venv
+```
+:::
+:::::
+
+::: callout-note
+**Windows users:** install R and Python on the **Windows** side (for VS Code and Positron). We'll check that they work at the end of Part 3.
+:::
+
+## Your UO digital identity
+
+::: incremental
+-   **Duck ID** - your UO username and password; it is the key to almost everything today
+    -   Manage it at <https://duckid.uoregon.edu>
+-   **Two-step login (Duo)** - required for most UO services; set it up on your phone *before* you need it
+-   **UO email** (`you@uoregon.edu`) - also your sign-in name for Microsoft 365 and Dropbox
+-   **UO VPN (Cisco Secure Client)** - only needed off-campus for campus-restricted resources (some library databases, departmental file shares, some licensed software)
+    -   Download from <https://uovpn.uoregon.edu>
+:::
+
+::: callout-note
+Most UO services - email, Canvas, Microsoft 365, Teams, Zoom - work from anywhere **without** the VPN.
+:::
+
+## Where to get help at UO
+
+-   **UO Service Portal** - <https://service.uoregon.edu> - knowledge base and help tickets for everything in this section
+-   **Technology Service Desk** - phone 541-346-4357 or live chat
+-   **UO Libraries Data Services** - <https://library.uoregon.edu/data-services>
+    -   **Free workshops** on R, Python, data analysis, and more
+    -   **One-on-one consultations** (in person or Zoom): statistics, R, Python, version control, data management plans
+    -   **Drop-in help desk** in Knight Library, Monday - Friday, 11am - 4pm
+-   **RACS** - Talapas and research computing - racs\@uoregon.edu
+-   **CBDS** and **Knight Campus** support - next slide
+
+::: callout-tip
+When something doesn't work, search the Service Portal knowledge base first - most questions already have an article.
+:::
+
+## Knight Campus computing support and CBDS
+
+<!-- TODO (Bill): fill in details for CBDS and Knight Campus IT support -->
+
+::::: columns
+::: {.column width="50%"}
+**Center for Biomedical Data Science (CBDS)**
+
+-   *Details to be added*
+-   What CBDS offers graduate students (training, consulting, events)
+-   How to get in touch
+:::
+
+::: {.column width="50%"}
+**Knight Campus computing support**
+
+-   *Details to be added*
+-   Who to contact for IT help at the Knight Campus
+-   Shared lab storage and computing resources
+:::
+:::::
+
+## How to ask for help (and get a fast answer)
+
+::: incremental
+-   **Say what you were trying to do** - "I'm trying to install R on my M2 Mac"
+-   **Copy the exact error message** - as text, not a blurry photo (a screenshot is OK if you can't copy it)
+-   **Show the command or code you ran**, and what you expected to happen
+-   **Say what you've already tried** - restarted? searched the error? checked the path with `pwd`?
+-   **Include your system** - macOS/Windows/Ubuntu, chip type
+-   For code problems, make a **minimal example** - the smallest piece of code that still shows the problem
+:::
+
+::: callout-tip
+Half the time, writing a good question makes you solve it yourself. The other half, it lets someone else answer in one reply.
+:::
+
+## The Microsoft 365 stack
+
+UO students and employees all have a **Microsoft 365 A5** license:
+
+| Tool                     | What it's for                                                   |
+|--------------------------|-----------------------------------------------------------------|
+| **Outlook**              | UO email and calendar (100 GB mailbox)                          |
+| **Word, Excel, PowerPoint, OneNote** | Desktop, web, and mobile apps - install on your own devices |
+| **Teams**                | Chat, meetings, and shared files for groups and labs            |
+| **OneDrive**             | Your personal cloud storage (1 TB)                              |
+| **SharePoint / Teams files** | Shared storage owned by a group, not one person             |
+| **Copilot Chat**         | UO-protected generative AI assistant (sign in with UO account)  |
+
+::: callout-note
+Sign in at <https://office.uoregon.edu> with your **UO email address**. Install the Office desktop apps from there.
+:::
+
+## OneDrive - your personal cloud storage
+
+::: incremental
+-   Available **at no cost to all UO students and employees** - **1 TB** each
+-   Sync app on Mac and Windows puts a `OneDrive` folder on your computer - files you save there are backed up automatically
+-   Share files and folders with UO colleagues and outside collaborators
+-   Approved for **FERPA** and **HIPAA** data
+-   Individual files can be up to **250 GB**
+:::
+
+::: callout-warning
+OneDrive belongs to **you**. Data that belongs to a **lab** should live in shared storage (SharePoint/Teams, a lab Dropbox team folder, or Talapas project space) so it doesn't leave when you do.
+:::
+
+## UO Dropbox
+
+::: incremental
+-   UO has an institutional Dropbox contract (renewed through March 2028)
+-   **Who has access:** faculty, staff, officers of administration, and **graduate employees (GEs)**
+    -   Students who are *not* UO employees lost access in March 2026 - use OneDrive instead
+    -   Your lab may also share a **Dropbox team folder** with you
+-   **2 TB** of individual storage; team storage is purchased by departments/labs
+-   Sign in with your UO email; install the **desktop app** so files sync to a local folder
+-   Upload files up to 50 GB on the web, larger via the desktop app
+:::
+
+::: callout-warning
+Dropbox is approved for **green** and **amber** data (including FERPA) but **not** for HIPAA or **red** (high-risk) data.
+:::
+
+## A note on synced folders and paths
+
+Both Dropbox and OneDrive create a **real folder** on your computer - which means it has a **path** you can use from the command line:
+
+``` bash
+# macOS - examples (yours will look similar)
+~/Library/CloudStorage/OneDrive-UniversityofOregon
+~/University\ of\ Oregon\ Dropbox/Your\ Name
+
+# Windows - the same folders seen from Ubuntu/WSL
+/mnt/c/Users/yourname/OneDrive\ -\ University\ of\ Oregon
+```
+
+::: incremental
+-   Names like `University of Oregon Dropbox` contain **spaces** - remember the trouble with spaces from Part 2 - quote or escape them
+-   Your exact path may differ - find yours with `cd`, `ls`, and Tab completion
+-   Synced folders are great for documents; **large or rapidly-changing analysis files** are better on Talapas or local disk
+:::
+
+## Data classification - what can go where?
+
+UO classifies data by risk. **Know the class of your data before you choose where to put it.**
+
+| Class      | Examples                                                    | OK in                              |
+|------------|-------------------------------------------------------------|------------------------------------|
+| **Green** (low)  | Published data, your code, most de-identified research data | Almost anywhere, including AI tools |
+| **Amber** (medium) | FERPA student records, unpublished research data       | OneDrive, Dropbox, Teams/SharePoint |
+| **Red** (high)   | HIPAA / protected health information, SSNs, credit cards | Only approved systems (e.g., OneDrive for HIPAA) - ask first! |
+
+::: callout-important
+Only **green** data may be entered into AI tools that are not officially supported by UO. Microsoft Copilot Chat signed in with your UO account is approved for more.
+:::
+
+## Protecting research data
+
+::: incremental
+-   **Human-subjects data** (anything covered by your **IRB** protocol) and **protected health information (HIPAA)** are **red / high-risk** data
+    -   Store them only where your IRB protocol and UO approve - e.g. UO **OneDrive/Teams** is approved for HIPAA; **Dropbox is not**
+    -   Never put them on personal cloud accounts (personal Google Drive, iCloud), in email attachments, or in AI tools that UO doesn't support
+-   **De-identify** data as early as possible, and keep the linking key separately and securely
+-   **Encrypt your laptop** (FileVault on Mac, BitLocker/Device Encryption on Windows) and use a screen lock
+-   **Unpublished data and code** are valuable - don't post them publicly until your PI agrees
+:::
+
+::: callout-important
+When in doubt, **ask before you store or share** - your PI, the IRB, or the UO Service Portal. It is much easier than fixing a data breach.
+:::
+
+## Back up your work: the 3-2-1 rule
+
+::::: columns
+::: {.column width="45%"}
+**3** copies of anything important
+
+**2** different kinds of storage
+
+**1** copy off-site (i.e., in the cloud)
+:::
+
+::: {.column width="55%"}
+**For example:**
+
+-   Your laptop (working copy)
+-   An external drive with **Time Machine** (Mac) or **File History** (Windows)
+-   **OneDrive** or your lab's Dropbox/server (off-site)
+-   **Code** on **GitHub** (Lectures 08 - 09) - every commit is a backup
+:::
+:::::
+
+::: callout-warning
+A **synced folder is not a backup by itself** - if you delete or overwrite a file, the change syncs everywhere. Keep versioned backups, and **test that you can restore** a file before you need to. Every year, someone loses a thesis chapter to a dead laptop or a stolen backpack.
+:::
+
+## Choosing where to store your work
+
+| Storage                 | Best for                                                | Revisited |
+|-------------------------|---------------------------------------------------------|-----------|
+| Your laptop's disk      | Active work - fast, but **not backed up** by itself     | Lec 01    |
+| OneDrive                | Personal documents, drafts, backups                     | -         |
+| Dropbox (if eligible)   | Lab-shared folders, collaboration                       | -         |
+| Teams / SharePoint      | Group-owned documents                                   | -         |
+| **GitHub**              | **Code** and small text files, with full version history | Lec 08-09 |
+| **Talapas**             | Large datasets and heavy computation                    | Lec 10    |
+
+::: callout-tip
+Rule of thumb: **code → GitHub, documents → OneDrive/Dropbox, big data → Talapas.** And always keep your raw data somewhere backed up and untouched.
+:::
+
+## Managing references: Zotero
+
+::: incremental
+-   **Zotero** (<https://www.zotero.org>) - a free, open-source reference manager
+-   **Browser connector**: one click saves a paper's citation (and PDF) from a journal page or PubMed
+-   **Group libraries** - share a reading list with your lab or rotation group
+-   Inserts citations and bibliographies in **Word**, and in **Quarto** documents (Insert → Citation in the visual editor)
+-   Start now - by your qualifying exam you'll have hundreds of papers
+:::
+
+::: callout-note
+We'll use citations in Quarto in **Lecture 08** - a Zotero library makes that painless.
+:::
+
+## Generative AI at UO
+
+::: incremental
+-   **Microsoft Copilot Chat** - sign in with your **UO account** for a UO-protected AI assistant (<https://copilot.microsoft.com>)
+-   UO-supported AI tools are approved for specific **data classifications**; unsupported tools are approved for **green (low-risk) data only** - see UO's [AI Service Offerings](https://service.uoregon.edu/TDClient/2030/Portal/KB/Article/140911/AI-Service-Offerings)
+-   **Course policy** (see the [Policies](../Policies.qmd) page): you *may* use AI to help you learn, debug, and get suggestions - but the work you submit must be **your own**
+-   AI assistants are great at explaining error messages and suggesting code - and **confidently wrong** surprisingly often. Always read, run, and understand the code
+:::
+
+::: callout-note
+We'll look at AI coding assistants ("vibe coding") in depth in **Lecture 08**.
+:::
+
+## Site-licensed software
+
+UO pays for a number of software licenses you can install for free:
+
+::: incremental
+-   **UO Software Downloads** - <https://software.uoregon.edu> (log in with Duck ID)
+    -   **MATLAB**, **Mathematica**, **LabVIEW**, **SPSS / SPSS Amos**, **ESRI ArcGIS**, and more
+    -   Some titles need a license code or a UO network/VPN connection to activate
+-   **Microsoft 365 apps** - install from <https://office.uoregon.edu>
+-   **Adobe** - students get **Adobe Express** on personal devices; full **Creative Cloud** is available in campus computer labs
+-   UO-managed computers (not your personal laptop) use the **Software Center** app to install approved software
+:::
+
+::: callout-note
+Check the Software Downloads site for the current list and eligibility - availability can differ for students and employees.
+:::
+
+## Checkpoint: R and Python
+
+Open a terminal in **VS Code** (``Ctrl-` ``) and run:
+
+``` bash
+R --version
+python3 --version     # Windows PowerShell: try  py --version
+```
+
+::: incremental
+-   Each should print a version number - **not** "command not found"
+-   Didn't work? Close and reopen VS Code (the terminal only sees programs installed before it opened)
+-   Still stuck? See the **troubleshooting** slide in Part 4 - or raise your hand
+:::
+
+## A preview: Python environments
+
+::: incremental
+-   Different projects need different package **versions** - installing everything into one Python eventually breaks something
+-   An **environment** is an isolated set of packages for one project:
+:::
+
+``` bash
+python3 -m venv .venv            # create an environment in this project folder
+source .venv/bin/activate        # turn it on (Windows PowerShell: .venv\Scripts\activate)
+pip install numpy pandas         # install packages into it
+deactivate                       # turn it off
+```
+
+::: callout-note
+On Talapas you'll use **conda** environments (Lecture 10); `uv` is a fast modern alternative; R has the same idea in the **renv** package. Nothing to do today - just know the word "environment".
+:::
+
+## R and Python side by side: running code
+
+Both languages work the same way - type into a **console** to experiment, or save commands in a **script** and run the whole file.
+
+::: panel-tabset
+### R
+
+``` bash
+R                          # interactive console  (quit with q())
+Rscript hello.R            # run a script file, top to bottom
+Rscript -e '2 + 2'         # one line, no file
+```
+
+```{r}
+#| label: lec00-hello-r
+#| echo: true
+#| eval: true
+
+# hello.R
+x <- 2 + 2
+print(x)
+```
+
+### Python
+
+``` bash
+python3                    # interactive console / REPL  (quit with exit() or Ctrl-D)
+python3 hello.py           # run a script file, top to bottom
+python3 -c 'print(2 + 2)'  # one line, no file
+```
+
+```{python}
+#| label: lec00-hello-py
+#| echo: true
+#| eval: false
+
+# hello.py
+x = 2 + 2
+print(x)
+# 4
+```
+:::
+
+::: callout-tip
+In **Positron** or **VS Code**, open the script, put the cursor on a line, and press `Cmd/Ctrl-Enter` to send it to the console - same shortcut for both languages.
+:::
+
+## R and Python side by side: variables, vectors and a function
+
+::: panel-tabset
+### R
+
+```{r}
+#| label: lec00-basics-r
+#| echo: true
+#| eval: true
+
+stiffness <- c(12.5, 14.1, 9.8, 11.2)   # a vector  (R counts from 1)
+stiffness[1]                            # first value
+mean(stiffness)
+
+to_mpa <- function(kpa) {               # define a function
+  kpa / 1000
+}
+to_mpa(stiffness)                       # works on the whole vector
+```
+
+### Python
+
+```{python}
+#| label: lec00-basics-py
+#| echo: true
+#| eval: false
+
+stiffness = [12.5, 14.1, 9.8, 11.2]     # a list  (Python counts from 0)
+stiffness[0]                            # first value
+# 12.5
+sum(stiffness) / len(stiffness)
+# 11.9
+
+def to_mpa(kpa):                        # define a function - note the : and indentation
+    return kpa / 1000
+
+[to_mpa(s) for s in stiffness]          # apply it to every value
+# [0.0125, 0.0141, 0.0098, 0.0112]
+```
+:::
+
+-   `<-` vs `=`, `c()` vs `[ ]`, curly braces vs indentation - the **ideas** are identical
+-   For R-style whole-vector math in Python, use `numpy`: `np.array(stiffness) / 1000`
+
+## R and Python side by side: reading a CSV and summarising it
+
+`samples.csv` has columns `sample`, `treatment`, `stiffness`. Read it and get the mean stiffness per treatment.
+
+::: panel-tabset
+### R (readr + dplyr)
+
+```{r}
+#| label: lec00-csv-r
+#| echo: true
+#| eval: false
+
+library(tidyverse)
+
+samples <- read_csv("data/raw/samples.csv")
+samples |>
+  group_by(treatment) |>
+  summarise(n = n(), mean_stiffness = mean(stiffness))
+```
+
+### Python (pandas)
+
+```{python}
+#| label: lec00-csv-py
+#| echo: true
+#| eval: false
+
+import pandas as pd
+
+samples = pd.read_csv("data/raw/samples.csv")
+(samples
+   .groupby("treatment")
+   .agg(n=("stiffness", "size"), mean_stiffness=("stiffness", "mean")))
+#            n  mean_stiffness
+# treatment
+# control    4           11.90
+# drug       4            8.45
+```
+:::
+
+-   A **data frame** (R) and a **DataFrame** (pandas) are the same idea: one row per sample, one column per variable
+-   R chains steps with the pipe `|>`; pandas chains **methods** with `.`
+
+## R and Python side by side: installing packages
+
+::: panel-tabset
+### R
+
+``` r
+install.packages("tidyverse")   # download & install - once per computer (from CRAN)
+library(tidyverse)              # load - in every script or session that uses it
+```
+
+-   Genomics packages come from **Bioconductor**: `BiocManager::install("DESeq2")`
+-   Packages install into one shared library; `renv` can pin versions per project
+
+### Python
+
+``` bash
+python3 -m venv .venv && source .venv/bin/activate   # make + activate a project environment
+pip install pandas matplotlib                        # download & install - once per environment
+# alternatives:  uv add pandas      conda install pandas
+```
+
+``` python
+import pandas as pd             # load - in every script or session that uses it
+```
+
+-   `pip` installs from **PyPI**; `conda` also installs compiled tools (bioconda); `uv` is a fast newer all-in-one
+-   Always install *inside* an environment - "which Python did that go into?" is the #1 Python headache
+:::
+
+::: callout-note
+That's the whole tour for today. **Lecture 07** goes deep on both languages - every example there is shown in R *and* Python.
+:::
+
+# BREAK - back at 12:00 {background-color="#2c3e50"}
+
+# Part 4 - Positron, Markdown, and Rendering {background-color="#2c3e50"}
+
+## Install Quarto and LaTeX now
+
+**Quarto** turns Markdown + code into HTML pages, PDFs, Word documents, and slides - including these slides!
+
+1.  Download and run the installer from <https://quarto.org/docs/get-started/>
+2.  Then, in a terminal, install **TinyTeX** - a small LaTeX distribution Quarto uses to make PDFs:
+
+``` bash
+quarto --version
+quarto install tinytex     # takes several minutes - let it run while we continue
+```
+
+::: callout-tip
+**LaTeX** is the standard for typesetting mathematics. Full distributions (MacTeX, MiKTeX) are several GB - TinyTeX installs only what's needed. If you already have one, Quarto will find it.
+:::
+
 ## Installing Positron
 
 ::: incremental
@@ -793,28 +1392,19 @@ Write code in the **editor** (so it's saved in a file) and send lines to the **c
 You don't have to choose forever. They share a lot of muscle memory - learn one and you mostly know the other. This term we will use both.
 :::
 
-## Checkpoint - does everything work?
-
-Open a terminal (in VS Code or Positron) and run:
-
-``` bash
-echo $SHELL
-R --version
-python3 --version     # Windows (not WSL): try  python --version  or  py --version
-quarto --version
-quarto check
-```
+## AI assistants inside your editor
 
 ::: incremental
--   Every command should print a version (or a list of checks) - **not** "command not found"
--   "command not found" usually means the program isn't on your **PATH** - the list of directories the shell searches for programs
--   Try closing and re-opening the terminal (or restarting the IDE) after installing
--   Still stuck? Raise your hand - we'll fix it together
+-   **GitHub Copilot** in VS Code - suggests code as you type and answers questions in a chat panel (free for verified students through the GitHub Student Developer Pack)
+-   **Positron Assistant** - an AI chat built into Positron that can see your console, variables, and plots
+-   Both are useful for explaining errors, writing boilerplate, and learning unfamiliar syntax
+-   Both can be **confidently wrong** - read and test everything, and never paste sensitive data
+-   Follow the course [AI policy](../Policies.qmd) and UO's data-classification rules
 :::
 
-# BREAK - back at 12:00 {background-color="#2c3e50"}
-
-# Part 4 - Markdown and Rendering {background-color="#2c3e50"}
+::: callout-note
+We'll try these (carefully!) in **Lecture 08** - no need to set them up today.
+:::
 
 ## What is Markdown?
 
@@ -1013,6 +1603,32 @@ $$
 Much more on Quarto, chunk options, and LaTeX math in **Lecture 08**.
 :::
 
+## Jupyter notebooks vs. Quarto documents
+
+::::: columns
+::: {.column width="50%"}
+**Jupyter notebook (`.ipynb`)**
+
+-   Cells of code + Markdown, with output saved **inside** the file
+-   Very popular for **Python**, machine learning, image analysis
+-   Runs in JupyterLab, VS Code, Positron - and on Talapas via **Open OnDemand**
+-   Stored as JSON - hard to read and diff in Git
+:::
+
+::: {.column width="50%"}
+**Quarto document (`.qmd`)**
+
+-   **Plain text** - easy to read, edit, and track with Git
+-   Runs **R, Python, Julia, and Bash**
+-   Renders to HTML, PDF, Word, slides, websites
+-   Output is regenerated every time you render
+:::
+:::::
+
+::: callout-tip
+You don't have to choose: Quarto can **render Jupyter notebooks** too (`quarto render notebook.ipynb`). This course uses Quarto; many of your labs may use Jupyter.
+:::
+
 ## Why literate programming for science?
 
 ::: incremental
@@ -1023,17 +1639,50 @@ Much more on Quarto, chunk options, and LaTeX math in **Lecture 08**.
 -   Think of a Quarto document as an **electronic lab notebook for your analyses**
 :::
 
+## Checkpoint - does everything work?
+
+Open a terminal (in VS Code or Positron) and run:
+
+``` bash
+echo $SHELL
+R --version
+python3 --version     # Windows (not WSL): try  py --version
+quarto --version
+quarto check          # checks for R, Python, and LaTeX
+```
+
+::: incremental
+-   Every command should print a version (or a list of checks) - **not** "command not found"
+-   Open **Positron** and start an **R** console and a **Python** console
+-   Still stuck? The next slide has common fixes
+:::
+
+## Troubleshooting installs
+
+| Symptom | Likely cause | Try this |
+|---|---|---|
+| `command not found` | Program not on your **PATH**, or terminal opened before install | Close and reopen the terminal (or restart VS Code/Positron) |
+| Windows: `python` opens the Microsoft Store | The "app execution alias" is intercepting it | Use `py`, or reinstall Python with **Add to PATH** checked |
+| "Permission denied" | Need admin rights, or file isn't executable | Run installer as administrator; on Unix use `sudo` only when told to |
+| Installer fails / "disk full" | Not enough free space | Check with `df -h ~`; free up at least 20 GB |
+| Mac: "cannot be opened because the developer cannot be verified" | Gatekeeper security | Right-click the app → **Open**, or System Settings → Privacy & Security |
+| Download is crawling | 20 people on the same Wi-Fi | Pair up, or finish this one at home tonight |
+
+::: callout-tip
+Still stuck? Copy the **exact error message** and raise your hand - see "How to ask for help" from Part 3.
+:::
+
 # Wrap-up {background-color="#2c3e50"}
 
 ## What to remember from today
 
 ::: incremental
--   **Duck ID + Duo** unlock UO services; **VPN** only when off-campus resources require it
--   **Microsoft 365**: Outlook, Teams, Office apps, **OneDrive (1 TB)** - for everyone
--   **Dropbox**: faculty, staff, and **graduate employees** (2 TB); mind the data classification
--   **Site-licensed software** at <https://software.uoregon.edu>
--   **Paths**: absolute (from `/`) vs relative (from here); `pwd`, `ls`, `cd`, `mkdir`, `cp`, `mv`, `rm`
--   **Toolkit**: shell, R, Python, Quarto, LaTeX, VS Code, Positron
+-   **Scripts beat clicks** for reproducibility, scale, and fewer errors
+-   **Talapas** = hundreds of nodes, each far bigger than your laptop; **RACS** helps; **Open OnDemand** gets you in through a browser
+-   **Duck ID + Duo** unlock UO services; **OneDrive (1 TB)** for everyone, **Dropbox** for faculty/staff/GEs; know your **data classification** and follow **3-2-1** backups
+-   **Help:** Service Portal, Libraries Data Services, RACS, CBDS - and ask good questions
+-   **Paths**: absolute (from `/`) vs relative (from here); `pwd`, `ls`, `cd`, `mkdir`, `cp`, `mv`, `rm`; wildcards, `>`, `|`
+-   **Toolkit**: shell, VS Code, R, Python, Quarto, LaTeX, Positron
 -   **Markdown** is plain text; **Quarto renders** it (with code!) into HTML, PDF, and more
 :::
 
@@ -1043,10 +1692,25 @@ Much more on Quarto, chunk options, and LaTeX math in **Lecture 08**.
 -   Practice moving around your file system with `pwd`, `ls`, and `cd` for 10 minutes
 -   Create and render one more `.qmd` document about your research
 -   Confirm you can sign in to **OneDrive** (and **Dropbox**, if you are a GE) with your UO account
--   Bookmark the course [Resources](../Resources.qmd) page - [Appendix A](../Resources_Folder/Appendix_A_Computer_Systems_Command_Line.qmd) (the shell) and [Appendix F](../Resources_Folder/Appendix_F_Quarto_Markdown.qmd) (Markdown and Quarto) go deeper on today's topics
+-   Set up a **backup** for your laptop, and install **Zotero** if you don't use a reference manager
+-   Ask your PI about being added to a **Talapas PIRG**
+-   Bookmark the course [Resources](../Resources.qmd) page - the online **course book** ([Unix Fundamentals](../book/chapters/03-unix-fundamentals.html) and [Reproducible Documents with Quarto](../book/chapters/12-quarto-documents.html)) goes deeper on today's topics
 
 ::: callout-tip
 Stuck on an install? Email me or come to office hours (Tuesday 3:00 - 4:00, KC Connector) **before** Monday's class.
+:::
+
+## Coming later: SSH keys and GitHub
+
+::: incremental
+-   An **SSH key** is a matched pair of files - a **public** key (the lock, safe to share) and a **private** key (the key, never share it)
+-   You give the public key to a server once; after that it recognizes your computer - no password typing
+-   You'll use SSH keys to connect to **GitHub** (Lecture 09) and **Talapas** (Lecture 10)
+-   We'll create them together with one command: `ssh-keygen -t ed25519`
+:::
+
+::: callout-note
+No need to set up Git, GitHub, or SSH keys today - we'll do it together in Lectures 08 - 10.
 :::
 
 ## Coming up

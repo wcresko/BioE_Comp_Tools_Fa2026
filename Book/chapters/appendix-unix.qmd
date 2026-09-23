@@ -1,0 +1,308 @@
+# Unix Command Reference {#sec-appendix-unix}
+
+This appendix provides a comprehensive reference for Unix/Linux commands covered throughout the book, chiefly in @sec-unix-fundamentals, @sec-files-pipes, @sec-grep-regex, and @sec-shell-scripting.
+
+## Navigation Commands {#sec-unix-nav}
+
+| Command | Description | Example |
+|:--------|:------------|:--------|
+| `pwd` | Print working directory | `pwd` |
+| `ls` | List directory contents | `ls -la` |
+| `ls -l` | Long format listing | `ls -l *.txt` |
+| `ls -a` | Show hidden files | `ls -a` |
+| `ls -h` | Human-readable sizes | `ls -lh` |
+| `ls -R` | Recursive listing | `ls -R projects/` |
+| `ls -t` | Sort by modification time | `ls -lt` |
+| `ls -S` | Sort by file size (largest first) | `ls -lS` |
+| `ls -F` | Mark directories with `/`, executables with `*` | `ls -F` |
+| `cd` | Change directory | `cd ~/projects` |
+| `cd ..` | Go up one directory | `cd ..` |
+| `cd -` | Go to previous directory | `cd -` |
+| `cd ~` | Go to home directory | `cd ~` |
+| `mkdir` | Create directory | `mkdir data` |
+| `mkdir -p` | Create nested directories | `mkdir -p data/raw/2024` |
+| `rmdir` | Remove empty directory | `rmdir old_folder` |
+| `tree` | Display directory tree | `tree -L 2` |
+
+: Navigation commands {#tbl-nav-commands}
+
+## File Operations {#sec-unix-files}
+
+| Command | Description | Example |
+|:--------|:------------|:--------|
+| `cp` | Copy files | `cp file.txt backup/` |
+| `cp -r` | Copy directories recursively | `cp -r data/ backup/` |
+| `cp -i` | Interactive (prompt before overwrite) | `cp -i *.txt dest/` |
+| `cp -v` | Verbose output | `cp -v file.txt backup/` |
+| `mv` | Move or rename files | `mv old.txt new.txt` |
+| `mv -i` | Interactive move | `mv -i *.txt archive/` |
+| `rm` | Remove files | `rm unwanted.txt` |
+| `rm -r` | Remove directories recursively | `rm -r old_directory/` |
+| `rm -i` | Interactive removal | `rm -i *.log` |
+| `rm -f` | Force removal (no prompts) | `rm -f temp*.txt` |
+| `touch` | Create empty file / update timestamp | `touch notes.txt` |
+| `ln -s` | Create symbolic link | `ln -s /path/to/file link_name` |
+| `file` | Determine file type | `file mystery_file` |
+| `stat` | Display file status | `stat data.csv` |
+
+: File operation commands {#tbl-file-commands}
+
+## Viewing File Contents {#sec-unix-view}
+
+| Command | Description | Example |
+|:--------|:------------|:--------|
+| `cat` | Display entire file | `cat data.csv` |
+| `cat -n` | Display with line numbers | `cat -n script.sh` |
+| `head` | Show first lines (default 10) | `head file.txt` |
+| `head -n` | Show first n lines | `head -n 20 file.txt` |
+| `tail` | Show last lines (default 10) | `tail file.txt` |
+| `tail -n` | Show last n lines | `tail -n 50 log.txt` |
+| `tail -f` | Follow file (live updates) | `tail -f server.log` |
+| `less` | Page through file | `less huge_file.txt` |
+| `more` | Simple pager | `more file.txt` |
+| `diff` | Compare files | `diff file1.txt file2.txt` |
+| `diff -u` | Unified diff format | `diff -u old.txt new.txt` |
+| `cmp` | Compare files byte by byte | `cmp file1 file2` |
+| `md5sum` | Calculate MD5 checksum | `md5sum file.txt` |
+| `sha256sum` | Calculate SHA256 checksum | `sha256sum file.txt` |
+
+: File viewing commands {#tbl-view-commands}
+
+## Text Processing {#sec-unix-text}
+
+| Command | Description | Example |
+|:--------|:------------|:--------|
+| `grep` | Search for patterns | `grep "error" log.txt` |
+| `grep -E` | Extended regex | `grep -E "gene[0-9]+" data.txt` |
+| `grep -v` | Invert match (exclude) | `grep -v "^#" data.txt` |
+| `grep -c` | Count matches | `grep -c ">" sequences.fa` |
+| `grep -i` | Case insensitive | `grep -i "warning" log.txt` |
+| `grep -n` | Show line numbers | `grep -n "TODO" code.py` |
+| `grep -l` | List matching files only | `grep -l "error" *.log` |
+| `grep -r` | Recursive search | `grep -r "function" src/` |
+| `grep -A n` | Show n lines after match | `grep -A 3 "error" log.txt` |
+| `grep -B n` | Show n lines before match | `grep -B 2 "error" log.txt` |
+| `sort` | Sort lines | `sort names.txt` |
+| `sort -n` | Numeric sort | `sort -n numbers.txt` |
+| `sort -r` | Reverse sort | `sort -r names.txt` |
+| `sort -k` | Sort by column | `sort -k2 data.tsv` |
+| `sort -u` | Sort and remove duplicates | `sort -u list.txt` |
+| `uniq` | Remove adjacent duplicates | `sort file | uniq` |
+| `uniq -c` | Count occurrences | `sort file | uniq -c` |
+| `uniq -d` | Show only duplicates | `sort file | uniq -d` |
+| `cut -f` | Extract fields (tab-delimited) | `cut -f2 data.tsv` |
+| `cut -d` | Specify delimiter | `cut -d',' -f1,3 data.csv` |
+| `cut -c` | Extract characters | `cut -c1-10 file.txt` |
+| `tr` | Translate characters | `tr 'a-z' 'A-Z'` |
+| `tr -d` | Delete characters | `tr -d '\r' < file.txt` |
+| `tr -s` | Squeeze repeats | `tr -s ' '` |
+| `sed` | Stream editor | `sed 's/old/new/g' file.txt` |
+| `sed -i` | Edit file in place (Linux/WSL; overwrites the file, so test first) | `sed -i 's/old/new/g' file.txt` |
+| `sed -i ''` | Edit file in place on macOS (BSD `sed` requires a backup suffix; `''` means none) | `sed -i '' 's/old/new/g' file.txt` |
+| `sed -n` | Suppress output | `sed -n '10,20p' file.txt` |
+| `awk` | Pattern processing | `awk '{print $1}' file.txt` |
+| `awk -F` | Specify field separator | `awk -F',' '{print $2}' data.csv` |
+| `wc` | Count lines, words, bytes | `wc file.txt` |
+| `wc -l` | Count lines only | `wc -l data.csv` |
+| `wc -w` | Count words only | `wc -w essay.txt` |
+| `wc -c` | Count bytes only | `wc -c file.bin` |
+| `paste` | Merge files line by line | `paste file1.txt file2.txt` |
+| `join` | Join files on common field | `join file1.txt file2.txt` |
+| `split` | Split file into pieces | `split -l 1000 large.txt` |
+| `shuf` | Randomly shuffle lines (or sample n lines) | `shuf -n 100 reads.txt` |
+
+: Text processing commands {#tbl-text-commands}
+
+## Redirection and Pipes {#sec-unix-redirect}
+
+| Operator | Description | Example |
+|:---------|:------------|:--------|
+| `>` | Redirect output (overwrite) | `ls > files.txt` |
+| `>>` | Redirect output (append) | `echo "done" >> log.txt` |
+| `<` | Redirect input | `wc -l < data.txt` |
+| `2>` | Redirect stderr | `cmd 2> errors.txt` |
+| `2>&1` | Redirect stderr to stdout | `cmd > out.txt 2>&1` |
+| `&>` | Redirect both stdout and stderr | `cmd &> all.txt` |
+| `\|` | Pipe to next command | `cat file \| sort \| uniq` |
+| `\|&` | Pipe stdout and stderr | `cmd \|& less` |
+| `tee` | Write to file and stdout | `cmd \| tee output.txt` |
+| `xargs` | Build commands from input | `find . -name "*.txt" \| xargs grep "pattern"` |
+
+: Redirection operators {#tbl-redirect-commands}
+
+## File Compression {#sec-unix-compress}
+
+| Command | Description | Example |
+|:--------|:------------|:--------|
+| `gzip` | Compress file | `gzip large_file.txt` |
+| `gzip -k` | Keep original file | `gzip -k file.txt` |
+| `gzip -d` | Decompress | `gzip -d file.txt.gz` |
+| `gunzip` | Decompress .gz file | `gunzip file.txt.gz` |
+| `zcat` | View compressed file | `zcat data.gz \| head` |
+| `zgrep` | Search compressed file | `zgrep "pattern" file.gz` |
+| `zless` | Page through compressed file | `zless data.gz` |
+| `bzip2` | Compress (better ratio) | `bzip2 large_file.txt` |
+| `bunzip2` | Decompress .bz2 file | `bunzip2 file.txt.bz2` |
+| `tar -c` | Create archive | `tar -cvf archive.tar dir/` |
+| `tar -x` | Extract archive | `tar -xvf archive.tar` |
+| `tar -z` | Use gzip compression | `tar -czvf archive.tar.gz dir/` |
+| `tar -j` | Use bzip2 compression | `tar -cjvf archive.tar.bz2 dir/` |
+| `tar -t` | List archive contents | `tar -tvf archive.tar.gz` |
+| `zip` | Create zip archive | `zip -r archive.zip dir/` |
+| `unzip` | Extract zip archive | `unzip archive.zip` |
+| `unzip -l` | List zip contents | `unzip -l archive.zip` |
+
+: Compression commands {#tbl-compress-commands}
+
+## File Permissions {#sec-unix-permissions}
+
+| Command | Description | Example |
+|:--------|:------------|:--------|
+| `chmod` | Change file permissions | `chmod +x script.sh` |
+| `chmod u+x` | Add execute for owner | `chmod u+x script.sh` |
+| `chmod go-w` | Remove write for group/others | `chmod go-w file.txt` |
+| `chmod 755` | Set rwxr-xr-x | `chmod 755 script.sh` |
+| `chmod 644` | Set rw-r--r-- | `chmod 644 data.txt` |
+| `chmod -R` | Recursive permission change | `chmod -R 755 scripts/` |
+| `chown` | Change file owner | `chown user file.txt` |
+| `chown user:group` | Change owner and group | `chown user:group file.txt` |
+| `chown -R` | Recursive ownership change | `chown -R user:group dir/` |
+| `chgrp` | Change group ownership | `chgrp group file.txt` |
+
+: Permission commands {#tbl-perm-commands}
+
+### Permission Codes {#sec-perm-codes}
+
+| Mode | Meaning | Numeric |
+|:-----|:--------|:--------|
+| `r` | Read | 4 |
+| `w` | Write | 2 |
+| `x` | Execute | 1 |
+| `rwx` | Read, write, execute | 7 |
+| `rw-` | Read, write | 6 |
+| `r-x` | Read, execute | 5 |
+| `r--` | Read only | 4 |
+
+: Permission codes {#tbl-permissions}
+
+### Common Permission Settings {#sec-common-perms}
+
+| Setting | Meaning | Use Case |
+|:--------|:--------|:---------|
+| `755` | rwxr-xr-x | Executable scripts |
+| `644` | rw-r--r-- | Regular files |
+| `700` | rwx------ | Private scripts |
+| `600` | rw------- | Private files |
+| `777` | rwxrwxrwx | (Avoid - too permissive) |
+
+: Common permission settings {#tbl-common-perms}
+
+## System Information {#sec-unix-system}
+
+| Command | Description | Example |
+|:--------|:------------|:--------|
+| `whoami` | Current username | `whoami` |
+| `id` | User and group IDs | `id` |
+| `hostname` | Computer name | `hostname` |
+| `uname -a` | System information | `uname -a` |
+| `uname -m` | Machine architecture (e.g. `x86_64`, `arm64`) | `uname -m` |
+| `date` | Current date/time | `date` |
+| `date +%Y-%m-%d` | Formatted date | `date +%Y-%m-%d` |
+| `cal` | Display calendar | `cal` |
+| `uptime` | System uptime | `uptime` |
+| `df -h` | Disk space usage | `df -h` |
+| `df -h ~` | Free space on the filesystem holding your home directory | `df -h ~` |
+| `du -sh` | Directory size | `du -sh folder/` |
+| `du -h --max-depth=1` | Subdirectory sizes | `du -h --max-depth=1` |
+| `free -h` | Memory usage | `free -h` |
+| `top` | Running processes (interactive) | `top` |
+| `htop` | Enhanced process viewer | `htop` |
+| `ps` | Process status | `ps aux` |
+| `ps -ef` | All processes | `ps -ef` |
+| `pgrep` | Find process by name | `pgrep python` |
+| `kill` | Terminate process | `kill PID` |
+| `kill -9` | Force terminate | `kill -9 PID` |
+| `killall` | Kill by name | `killall process_name` |
+| `nohup` | Run immune to hangups | `nohup script.sh &` |
+| `bg` | Send to background | `bg` |
+| `fg` | Bring to foreground | `fg` |
+| `jobs` | List background jobs | `jobs` |
+| `which` | Locate command | `which python` |
+| `whereis` | Locate binary and man page | `whereis python` |
+| `type` | Display command type | `type ls` |
+| `history` | Show previously run commands | `history \| tail -20` |
+
+: System information commands {#tbl-system-commands}
+
+## Finding Files {#sec-unix-find}
+
+| Command | Description | Example |
+|:--------|:------------|:--------|
+| `find` | Find files by criteria | `find . -name "*.txt"` |
+| `find -type f` | Find files only | `find . -type f -name "*.py"` |
+| `find -type d` | Find directories only | `find . -type d -name "data"` |
+| `find -mtime` | Find by modification time | `find . -mtime -7` (last 7 days) |
+| `find -size` | Find by size | `find . -size +100M` |
+| `find -exec` | Execute command on results | `find . -name "*.tmp" -exec rm {} \;` |
+| `find -delete` | Delete matching files | `find . -name "*.tmp" -delete` |
+| `locate` | Fast file search (uses database) | `locate filename` |
+| `updatedb` | Update locate database | `sudo updatedb` |
+
+: File finding commands {#tbl-find-commands}
+
+## Network and Remote {#sec-unix-network}
+
+| Command | Description | Example |
+|:--------|:------------|:--------|
+| `ssh` | Secure shell connection | `ssh user@host` |
+| `ssh -p` | Specify port | `ssh -p 2222 user@host` |
+| `ssh -i` | Use identity file | `ssh -i key.pem user@host` |
+| `ssh -L` | Local port forwarding | `ssh -L 8080:localhost:80 user@host` |
+| `scp` | Secure copy to remote | `scp file user@host:path/` |
+| `scp -r` | Copy directory recursively | `scp -r dir/ user@host:path/` |
+| `scp` | Copy from remote | `scp user@host:file local_path` |
+| `rsync` | Sync files efficiently | `rsync -avz src/ dest/` |
+| `rsync --delete` | Sync and delete extra files | `rsync -avz --delete src/ dest/` |
+| `wget` | Download file | `wget URL` |
+| `wget -O` | Download with custom name | `wget -O output.txt URL` |
+| `wget -c` | Continue interrupted download | `wget -c URL` |
+| `curl` | Transfer data | `curl URL` |
+| `curl -O` | Save with remote filename | `curl -O URL` |
+| `curl -o` | Save with custom filename | `curl -o output.txt URL` |
+| `ping` | Test network connectivity | `ping host` |
+| `traceroute` | Show network path | `traceroute host` |
+| `netstat` | Network statistics | `netstat -an` |
+| `ifconfig` | Network interface config | `ifconfig` |
+| `ip addr` | Show IP addresses | `ip addr` |
+
+: Network commands {#tbl-network-commands}
+
+## Environment Variables {#sec-unix-env}
+
+| Command | Description | Example |
+|:--------|:------------|:--------|
+| `echo $VAR` | Display variable value | `echo $PATH` |
+| `export VAR=value` | Set environment variable | `export PATH=$PATH:/new/path` |
+| `env` | Display all environment variables | `env` |
+| `printenv` | Print environment variables | `printenv HOME` |
+| `unset VAR` | Remove variable | `unset MYVAR` |
+| `source` | Execute script in current shell | `source ~/.bashrc` |
+| `.` | Same as source | `. ~/.bashrc` |
+
+: Environment variable commands {#tbl-env-commands}
+
+### Common Environment Variables {#sec-common-env}
+
+| Variable | Description |
+|:---------|:------------|
+| `$HOME` | Home directory |
+| `$USER` | Current username |
+| `$PATH` | Executable search path |
+| `$PWD` | Current directory |
+| `$SHELL` | Current shell |
+| `$EDITOR` | Default text editor |
+| `$HOSTNAME` | Computer hostname |
+| `$?` | Exit status of last command |
+| `$$` | Current process ID |
+
+: Common environment variables {#tbl-common-env}

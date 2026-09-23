@@ -1,0 +1,1984 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.9.38">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+<meta name="description" content="A comprehensive guide to essential computational tools for graduate students in bioengineering and life sciences, covering Unix/Linux, R and Python, editors and IDEs, computing resources at the University of Oregon, AI-assisted coding, reproducible documents, version control with Git/GitHub, and high-performance computing.">
+<title>13&nbsp; Writing Functions in R – Foundational Computational Tools for Bioengineers</title>
+<style>
+/* Default styles provided by pandoc.
+** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+*/
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+/* CSS for citations */
+div.csl-bib-body { }
+div.csl-entry {
+  clear: both;
+  margin-bottom: 0em;
+}
+.hanging-indent div.csl-entry {
+  margin-left:2em;
+  text-indent:-2em;
+}
+div.csl-left-margin {
+  min-width:2em;
+  float:left;
+}
+div.csl-right-inline {
+  margin-left:2em;
+  padding-left:1em;
+}
+div.csl-indent {
+  margin-left: 2em;
+}</style>
+
+<script src="../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../">
+<link href="../chapters/14-parallel-computing.html" rel="next">
+<link href="../chapters/09-data-visualization.html" rel="prev">
+<script src="../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../site_libs/quarto-html/popper.min.js"></script>
+<script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-3836fb1e46d4cb83c75cfb618a44b85e.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-text-highlighting-styles">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-dark-4234edb6284ff370703ce34fde7cc7c8.css" rel="stylesheet" class="quarto-color-scheme quarto-color-alternate" id="quarto-text-highlighting-styles">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-3836fb1e46d4cb83c75cfb618a44b85e.css" rel="stylesheet" class="quarto-color-scheme-extra" id="quarto-text-highlighting-styles">
+<script src="../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../site_libs/bootstrap/bootstrap-882387fc1d6267d1b7263d283c4866b5.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
+<link href="../site_libs/bootstrap/bootstrap-dark-814ca0c199338aa1abdb5ae469f0d636.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
+<link href="../site_libs/bootstrap/bootstrap-882387fc1d6267d1b7263d283c4866b5.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light"><script id="quarto-search-options" type="application/json">{
+  "location": "sidebar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "start",
+  "type": "textbox",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+</head>
+<body class="nav-sidebar docked quarto-light"><script id="quarto-html-before-body" type="application/javascript">
+    const toggleBodyColorMode = (bsSheetEl) => {
+      const mode = bsSheetEl.getAttribute("data-mode");
+      const bodyEl = window.document.querySelector("body");
+      if (mode === "dark") {
+        bodyEl.classList.add("quarto-dark");
+        bodyEl.classList.remove("quarto-light");
+      } else {
+        bodyEl.classList.add("quarto-light");
+        bodyEl.classList.remove("quarto-dark");
+      }
+    }
+    const toggleBodyColorPrimary = () => {
+      const bsSheetEl = window.document.querySelector("link#quarto-bootstrap:not([rel=disabled-stylesheet])");
+      if (bsSheetEl) {
+        toggleBodyColorMode(bsSheetEl);
+      }
+    }
+    const setColorSchemeToggle = (alternate) => {
+      const toggles = window.document.querySelectorAll('.quarto-color-scheme-toggle');
+      for (let i=0; i < toggles.length; i++) {
+        const toggle = toggles[i];
+        if (toggle) {
+          if (alternate) {
+            toggle.classList.add("alternate");
+          } else {
+            toggle.classList.remove("alternate");
+          }
+        }
+      }
+    };
+    const toggleColorMode = (alternate) => {
+      // Switch the stylesheets
+      const primaryStylesheets = window.document.querySelectorAll('link.quarto-color-scheme:not(.quarto-color-alternate)');
+      const alternateStylesheets = window.document.querySelectorAll('link.quarto-color-scheme.quarto-color-alternate');
+      manageTransitions('#quarto-margin-sidebar .nav-link', false);
+      if (alternate) {
+        // note: dark is layered on light, we don't disable primary!
+        enableStylesheet(alternateStylesheets);
+        for (const sheetNode of alternateStylesheets) {
+          if (sheetNode.id === "quarto-bootstrap") {
+            toggleBodyColorMode(sheetNode);
+          }
+        }
+      } else {
+        disableStylesheet(alternateStylesheets);
+        enableStylesheet(primaryStylesheets)
+        toggleBodyColorPrimary();
+      }
+      manageTransitions('#quarto-margin-sidebar .nav-link', true);
+      // Switch the toggles
+      setColorSchemeToggle(alternate)
+      // Hack to workaround the fact that safari doesn't
+      // properly recolor the scrollbar when toggling (#1455)
+      if (navigator.userAgent.indexOf('Safari') > 0 && navigator.userAgent.indexOf('Chrome') == -1) {
+        manageTransitions("body", false);
+        window.scrollTo(0, 1);
+        setTimeout(() => {
+          window.scrollTo(0, 0);
+          manageTransitions("body", true);
+        }, 40);
+      }
+    }
+    const disableStylesheet = (stylesheets) => {
+      for (let i=0; i < stylesheets.length; i++) {
+        const stylesheet = stylesheets[i];
+        stylesheet.rel = 'disabled-stylesheet';
+      }
+    }
+    const enableStylesheet = (stylesheets) => {
+      for (let i=0; i < stylesheets.length; i++) {
+        const stylesheet = stylesheets[i];
+        if(stylesheet.rel !== 'stylesheet') { // for Chrome, which will still FOUC without this check
+          stylesheet.rel = 'stylesheet';
+        }
+      }
+    }
+    const manageTransitions = (selector, allowTransitions) => {
+      const els = window.document.querySelectorAll(selector);
+      for (let i=0; i < els.length; i++) {
+        const el = els[i];
+        if (allowTransitions) {
+          el.classList.remove('notransition');
+        } else {
+          el.classList.add('notransition');
+        }
+      }
+    }
+    const isFileUrl = () => {
+      return window.location.protocol === 'file:';
+    }
+    const hasAlternateSentinel = () => {
+      let styleSentinel = getColorSchemeSentinel();
+      if (styleSentinel !== null) {
+        return styleSentinel === "alternate";
+      } else {
+        return false;
+      }
+    }
+    const setStyleSentinel = (alternate) => {
+      const value = alternate ? "alternate" : "default";
+      if (!isFileUrl()) {
+        window.localStorage.setItem("quarto-color-scheme", value);
+      } else {
+        localAlternateSentinel = value;
+      }
+    }
+    const getColorSchemeSentinel = () => {
+      if (!isFileUrl()) {
+        const storageValue = window.localStorage.getItem("quarto-color-scheme");
+        return storageValue != null ? storageValue : localAlternateSentinel;
+      } else {
+        return localAlternateSentinel;
+      }
+    }
+    const toggleGiscusIfUsed = (isAlternate, darkModeDefault) => {
+      const baseTheme = document.querySelector('#giscus-base-theme')?.value ?? 'light';
+      const alternateTheme = document.querySelector('#giscus-alt-theme')?.value ?? 'dark';
+      let newTheme = '';
+      if(authorPrefersDark) {
+        newTheme = isAlternate ? baseTheme : alternateTheme;
+      } else {
+        newTheme = isAlternate ? alternateTheme : baseTheme;
+      }
+      const changeGiscusTheme = () => {
+        // From: https://github.com/giscus/giscus/issues/336
+        const sendMessage = (message) => {
+          const iframe = document.querySelector('iframe.giscus-frame');
+          if (!iframe) return;
+          iframe.contentWindow.postMessage({ giscus: message }, 'https://giscus.app');
+        }
+        sendMessage({
+          setConfig: {
+            theme: newTheme
+          }
+        });
+      }
+      const isGiscussLoaded = window.document.querySelector('iframe.giscus-frame') !== null;
+      if (isGiscussLoaded) {
+        changeGiscusTheme();
+      }
+    };
+    const authorPrefersDark = false;
+    const darkModeDefault = authorPrefersDark;
+      document.querySelector('link#quarto-text-highlighting-styles.quarto-color-scheme-extra').rel = 'disabled-stylesheet';
+      document.querySelector('link#quarto-bootstrap.quarto-color-scheme-extra').rel = 'disabled-stylesheet';
+    let localAlternateSentinel = darkModeDefault ? 'alternate' : 'default';
+    // Dark / light mode switch
+    window.quartoToggleColorScheme = () => {
+      // Read the current dark / light value
+      let toAlternate = !hasAlternateSentinel();
+      toggleColorMode(toAlternate);
+      setStyleSentinel(toAlternate);
+      toggleGiscusIfUsed(toAlternate, darkModeDefault);
+      window.dispatchEvent(new Event('resize'));
+    };
+    // Switch to dark mode if need be
+    if (hasAlternateSentinel()) {
+      toggleColorMode(true);
+    } else {
+      toggleColorMode(false);
+    }
+  </script>
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top"><nav class="quarto-secondary-nav"><div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../chapters/13-writing-functions.html"><span class="chapter-number">13</span>&nbsp; <span class="chapter-title">Writing Functions in R</span></a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+      <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
+        <i class="bi bi-search"></i>
+      </button>
+    </div>
+  </nav></header><!-- content --><div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation docked overflow-auto"><div class="pt-lg-2 mt-2 text-left sidebar-header">
+    <div class="sidebar-title mb-0 py-0">
+      <a href="../">Foundational Computational Tools for Bioengineers</a> 
+        <div class="sidebar-tools-main">
+    <a href="https://github.com/wcresko/BioE_Comp_Tools_Fa2026/tree/main/Book/" title="Source Code" class="quarto-navigation-tool px-1" aria-label="Source Code"><i class="bi bi-github"></i></a>
+  <a href="" class="quarto-color-scheme-toggle quarto-navigation-tool  px-1" onclick="window.quartoToggleColorScheme(); return false;" title="Toggle dark mode"><i class="bi"></i></a>
+</div>
+    </div>
+      </div>
+        <div class="mt-2 flex-shrink-0 align-items-center">
+        <div class="sidebar-search">
+        <div id="quarto-search" class="" title="Search"></div>
+        </div>
+        </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+<li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Preface</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/01-introduction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">Introduction to Computational Tools</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/02-your-toolkit.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">Your Computational Toolkit: Installing and Using Editors and IDEs</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/03-computing-at-uo.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Computing Resources at the University of Oregon</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/02-computer-systems.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Computer Systems Architecture</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/03-unix-fundamentals.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Unix Fundamentals</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/04-files-pipes.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Files, Pipes, and Redirection</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/05-grep-regex.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">GREP and Regular Expressions</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/06-shell-scripting.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">8</span>&nbsp; <span class="chapter-title">Shell Scripting</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/07-r-programming.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">9</span>&nbsp; <span class="chapter-title">R Programming Fundamentals</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/18-python-programming.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">10</span>&nbsp; <span class="chapter-title">Python Programming Fundamentals</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/08-tidy-data.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">11</span>&nbsp; <span class="chapter-title">Tidy Data Principles</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/09-data-visualization.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">12</span>&nbsp; <span class="chapter-title">Data Visualization with ggplot2</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/13-writing-functions.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text"><span class="chapter-number">13</span>&nbsp; <span class="chapter-title">Writing Functions in R</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/14-parallel-computing.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">14</span>&nbsp; <span class="chapter-title">Parallel Computing in R</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/15-databases.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">15</span>&nbsp; <span class="chapter-title">Working with Databases</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/12-quarto-documents.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">16</span>&nbsp; <span class="chapter-title">Reproducible Documents with Quarto</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/16-latex-basics.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">17</span>&nbsp; <span class="chapter-title">LaTeX for Scientific Documents</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/17-ai-assisted-coding.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">18</span>&nbsp; <span class="chapter-title">Coding with AI Assistants</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/10-git-github.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">19</span>&nbsp; <span class="chapter-title">Version Control with Git and GitHub</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/11-hpc-talapas.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">20</span>&nbsp; <span class="chapter-title">High-Performance Computing with Talapas</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../references.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">References</span></a>
+  </div>
+</li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="false">
+ <span class="menu-text">Appendices</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="false" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 ">
+<li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/appendix-unix.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">A</span>&nbsp; <span class="chapter-title">Unix Command Reference</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/appendix-git.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">B</span>&nbsp; <span class="chapter-title">Git Command Reference</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/appendix-r.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">C</span>&nbsp; <span class="chapter-title">R Command Reference</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/appendix-python.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">D</span>&nbsp; <span class="chapter-title">Python Quick Reference</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/appendix-latex.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">E</span>&nbsp; <span class="chapter-title">LaTeX Command Reference</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/appendix-slurm.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">F</span>&nbsp; <span class="chapter-title">SLURM Command Reference</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/appendix-regex.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">G</span>&nbsp; <span class="chapter-title">Regular Expression Reference</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/appendix-shortcuts.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">H</span>&nbsp; <span class="chapter-title">Keyboard Shortcuts Reference</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/appendix-data-formats.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">I</span>&nbsp; <span class="chapter-title">Common Data Formats &amp; Public Repositories</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/appendix-glossary.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">J</span>&nbsp; <span class="chapter-title">Glossary</span></span></a>
+  </div>
+</li>
+      </ul>
+</li>
+    </ul>
+</div>
+</nav><div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active"><h2 id="toc-title">Table of contents</h2>
+   
+  <ul>
+<li><a href="#sec-why-functions" id="toc-sec-why-functions" class="nav-link active" data-scroll-target="#sec-why-functions"><span class="header-section-number">13.1</span> Why Write Your Own Functions?</a></li>
+  <li><a href="#sec-function-syntax" id="toc-sec-function-syntax" class="nav-link" data-scroll-target="#sec-function-syntax"><span class="header-section-number">13.2</span> Basic Function Syntax</a></li>
+  <li>
+<a href="#sec-gc-example" id="toc-sec-gc-example" class="nav-link" data-scroll-target="#sec-gc-example"><span class="header-section-number">13.3</span> A Simple Example: GC Content Calculator</a>
+  <ul class="collapse">
+<li><a href="#sec-specifying-return-values" id="toc-sec-specifying-return-values" class="nav-link" data-scroll-target="#sec-specifying-return-values">Specifying Return Values</a></li>
+  <li><a href="#sec-returning-multiple-values" id="toc-sec-returning-multiple-values" class="nav-link" data-scroll-target="#sec-returning-multiple-values">Returning Multiple Values</a></li>
+  <li><a href="#sec-default-argument-values" id="toc-sec-default-argument-values" class="nav-link" data-scroll-target="#sec-default-argument-values">Default Argument Values</a></li>
+  </ul>
+</li>
+  <li><a href="#sec-lexical-scoping" id="toc-sec-lexical-scoping" class="nav-link" data-scroll-target="#sec-lexical-scoping"><span class="header-section-number">13.4</span> Environments and Lexical Scoping</a></li>
+  <li>
+<a href="#sec-control-flow" id="toc-sec-control-flow" class="nav-link" data-scroll-target="#sec-control-flow"><span class="header-section-number">13.5</span> Control Flow in Functions</a>
+  <ul class="collapse">
+<li><a href="#sec-using-if-else" id="toc-sec-using-if-else" class="nav-link" data-scroll-target="#sec-using-if-else">Using if/else</a></li>
+  <li><a href="#sec-fn-case-when" id="toc-sec-fn-case-when" class="nav-link" data-scroll-target="#sec-fn-case-when">Using case_when for Multiple Conditions</a></li>
+  </ul>
+</li>
+  <li>
+<a href="#sec-iteration" id="toc-sec-iteration" class="nav-link" data-scroll-target="#sec-iteration"><span class="header-section-number">13.6</span> Iteration and Functional Programming</a>
+  <ul class="collapse">
+<li><a href="#sec-the-problem-with-for-loops" id="toc-sec-the-problem-with-for-loops" class="nav-link" data-scroll-target="#sec-the-problem-with-for-loops">The Problem with for Loops</a></li>
+  <li><a href="#sec-lapply" id="toc-sec-lapply" class="nav-link" data-scroll-target="#sec-lapply">Functional Programming with lapply</a></li>
+  <li><a href="#sec-purrr-map" id="toc-sec-purrr-map" class="nav-link" data-scroll-target="#sec-purrr-map">Using purrr for Iteration</a></li>
+  <li><a href="#sec-creating-and-reusing-named-functions" id="toc-sec-creating-and-reusing-named-functions" class="nav-link" data-scroll-target="#sec-creating-and-reusing-named-functions">Creating and Reusing Named Functions</a></li>
+  </ul>
+</li>
+  <li>
+<a href="#sec-multiple-inputs" id="toc-sec-multiple-inputs" class="nav-link" data-scroll-target="#sec-multiple-inputs"><span class="header-section-number">13.7</span> Iterating Over Multiple Inputs</a>
+  <ul class="collapse">
+<li><a href="#sec-pmap" id="toc-sec-pmap" class="nav-link" data-scroll-target="#sec-pmap">Using pmap for Multiple Arguments</a></li>
+  <li><a href="#sec-using-a-data-frame-of-inputs" id="toc-sec-using-a-data-frame-of-inputs" class="nav-link" data-scroll-target="#sec-using-a-data-frame-of-inputs">Using a Data Frame of Inputs</a></li>
+  </ul>
+</li>
+  <li>
+<a href="#sec-function-best-practices" id="toc-sec-function-best-practices" class="nav-link" data-scroll-target="#sec-function-best-practices"><span class="header-section-number">13.8</span> Best Practices for Writing Functions</a>
+  <ul class="collapse">
+<li><a href="#sec-fn-descriptive-names" id="toc-sec-fn-descriptive-names" class="nav-link" data-scroll-target="#sec-fn-descriptive-names">1. Use Descriptive Names</a></li>
+  <li><a href="#sec-fn-document" id="toc-sec-fn-document" class="nav-link" data-scroll-target="#sec-fn-document">2. Document Your Functions</a></li>
+  <li><a href="#sec-fn-validate-inputs" id="toc-sec-fn-validate-inputs" class="nav-link" data-scroll-target="#sec-fn-validate-inputs">3. Validate Inputs</a></li>
+  <li><a href="#sec-fn-focused" id="toc-sec-fn-focused" class="nav-link" data-scroll-target="#sec-fn-focused">4. Keep Functions Focused</a></li>
+  </ul>
+</li>
+  <li><a href="#sec-functions-summary" id="toc-sec-functions-summary" class="nav-link" data-scroll-target="#sec-functions-summary"><span class="header-section-number">13.9</span> Summary</a></li>
+  <li><a href="#sec-fn-additional-reading" id="toc-sec-fn-additional-reading" class="nav-link" data-scroll-target="#sec-fn-additional-reading">Additional Reading</a></li>
+  <li><a href="#sec-fn-exercises" id="toc-sec-fn-exercises" class="nav-link" data-scroll-target="#sec-fn-exercises">Exercises</a></li>
+  </ul><div class="toc-actions"><ul><li><a href="https://github.com/wcresko/BioE_Comp_Tools_Fa2026/edit/main/Book/chapters/13-writing-functions.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li><li><a href="https://github.com/wcresko/BioE_Comp_Tools_Fa2026/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content"><header id="title-block-header" class="quarto-title-block default"><div class="quarto-title">
+<h1 class="title"><span id="sec-writing-functions" class="quarto-section-identifier"><span class="chapter-number">13</span>&nbsp; <span class="chapter-title">Writing Functions in R</span></span></h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header><div class="callout callout-style-default callout-note callout-titled" title="Learning Objectives">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>Learning Objectives
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>After completing this chapter, you will be able to:</p>
+<ul>
+<li>Write your own R functions using proper syntax</li>
+<li>Specify function arguments with default values</li>
+<li>Return single or multiple values from functions</li>
+<li>Use control flow (if/else, case_when) within functions</li>
+<li>Understand lexical scoping and function environments</li>
+<li>Apply functional programming principles with lapply and purrr</li>
+<li>Iterate over single and multiple inputs efficiently</li>
+<li>Choose between for loops and functional approaches</li>
+</ul>
+</div>
+</div>
+<section id="sec-why-functions" class="level2" data-number="13.1"><h2 data-number="13.1" class="anchored" data-anchor-id="sec-why-functions">
+<span class="header-section-number">13.1</span> Why Write Your Own Functions?</h2>
+<p>Throughout this book, we’ve used many functions: some from base R <span class="citation" data-cites="rproject2024">(<a href="../references.html#ref-rproject2024" role="doc-biblioref">R Core Team, 2024</a>)</span> (like <code><a href="https://rdrr.io/r/base/mean.html">mean()</a></code> and <code><a href="https://rdrr.io/r/base/sum.html">sum()</a></code>), others from packages (like <code><a href="https://dplyr.tidyverse.org/reference/filter.html">dplyr::filter()</a></code> and <code><a href="https://ggplot2.tidyverse.org/reference/ggplot.html">ggplot2::ggplot()</a></code>) <span class="citation" data-cites="wickham2019tidyverse">(<a href="../references.html#ref-wickham2019tidyverse" role="doc-biblioref">Wickham et al., 2019</a>)</span>. But the real power of programming comes from writing your own functions. (<a href="07-r-programming.html#sec-writing-simple-functions" class="quarto-xref"><span>Section 9.16.4</span></a> gave a first taste; here we go further.)</p>
+<p>Functions allow you to <strong>avoid repetition</strong> by writing code once and using it many times. When you find yourself copying and pasting the same block of code with minor changes, that’s a sign you should write a function. This also <strong>reduces errors</strong>—if you find a bug, you fix it in one place rather than tracking down every copy. Functions <strong>improve readability</strong> by letting you give meaningful names to complex operations; <code>calculate_gc_content(sequence)</code> is far clearer than the five lines of code it might contain. And functions make it easy to <strong>share code</strong> with colleagues or package your solutions for the broader community.</p>
+<p>In biosciences, you’ll often need custom functions for domain-specific tasks: calculating enzyme kinetics parameters, normalizing gene expression data, computing population genetics statistics, or processing experimental replicates according to your lab’s specific protocols.</p>
+</section><section id="sec-function-syntax" class="level2" data-number="13.2"><h2 data-number="13.2" class="anchored" data-anchor-id="sec-function-syntax">
+<span class="header-section-number">13.2</span> Basic Function Syntax</h2>
+<p>All R functions follow the same basic syntax:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1"></a>function_name <span class="ot">=</span> <span class="cf">function</span>(ARGUMENTS) {</span>
+<span id="cb1-2"><a href="#cb1-2"></a>  OPERATIONS</span>
+<span id="cb1-3"><a href="#cb1-3"></a>  <span class="fu">return</span>(VALUE)</span>
+<span id="cb1-4"><a href="#cb1-4"></a>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Let’s break this down:</p>
+<ul>
+<li>
+<strong>function_name</strong>: A descriptive name for your function</li>
+<li>
+<strong>ARGUMENTS</strong>: Input values the function accepts</li>
+<li>
+<strong>OPERATIONS</strong>: What the function does</li>
+<li>
+<strong>return(VALUE)</strong>: What the function gives back</li>
+</ul>
+<p>For short functions, you can write everything on one line:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1"></a>my_short_func <span class="ot">=</span> <span class="cf">function</span>(x) x<span class="sc">^</span><span class="dv">2</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="callout callout-style-default callout-tip callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Tip
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Give your functions short, descriptive names that indicate what they do. <code>calculate_gc_content</code> is better than <code>func1</code> or <code>cgc</code>.</p>
+</div>
+</div>
+</section><section id="sec-gc-example" class="level2" data-number="13.3"><h2 data-number="13.3" class="anchored" data-anchor-id="sec-gc-example">
+<span class="header-section-number">13.3</span> A Simple Example: GC Content Calculator</h2>
+<p>Let’s write a function that calculates the GC content of a DNA sequence — the proportion of guanine (G) and cytosine (C) bases. (The same function is written in Python in <a href="18-python-programming.html#sec-py-functions" class="quarto-xref"><span>Section 10.10</span></a>.)</p>
+<div class="cell" data-layout-align="center">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1"></a>gc_content <span class="ot">=</span> <span class="cf">function</span>(sequence) {</span>
+<span id="cb3-2"><a href="#cb3-2"></a>  <span class="co"># Convert to uppercase for consistency</span></span>
+<span id="cb3-3"><a href="#cb3-3"></a>  seq_upper <span class="ot">=</span> <span class="fu">toupper</span>(sequence)</span>
+<span id="cb3-4"><a href="#cb3-4"></a></span>
+<span id="cb3-5"><a href="#cb3-5"></a>  <span class="co"># Count G and C bases</span></span>
+<span id="cb3-6"><a href="#cb3-6"></a>  gc_count <span class="ot">=</span> <span class="fu">str_count</span>(seq_upper, <span class="st">"[GC]"</span>)</span>
+<span id="cb3-7"><a href="#cb3-7"></a></span>
+<span id="cb3-8"><a href="#cb3-8"></a>  <span class="co"># Calculate total length (excluding any non-ATGC characters)</span></span>
+<span id="cb3-9"><a href="#cb3-9"></a>  total_bases <span class="ot">=</span> <span class="fu">str_count</span>(seq_upper, <span class="st">"[ATGC]"</span>)</span>
+<span id="cb3-10"><a href="#cb3-10"></a></span>
+<span id="cb3-11"><a href="#cb3-11"></a>  <span class="co"># Return GC proportion</span></span>
+<span id="cb3-12"><a href="#cb3-12"></a>  gc_count <span class="sc">/</span> total_bases</span>
+<span id="cb3-13"><a href="#cb3-13"></a>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p>Test it:</p>
+<div class="cell" data-layout-align="center">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1"></a><span class="fu">gc_content</span>(<span class="st">"ATGCGATCGATCG"</span>)</span>
+<span id="cb4-2"><a href="#cb4-2"></a><span class="co">#&gt; [1] 0.5384615</span></span>
+<span id="cb4-3"><a href="#cb4-3"></a><span class="fu">gc_content</span>(<span class="st">"atgcGATCgatcg"</span>)  <span class="co"># Works with mixed case</span></span>
+<span id="cb4-4"><a href="#cb4-4"></a><span class="co">#&gt; [1] 0.5384615</span></span>
+<span id="cb4-5"><a href="#cb4-5"></a><span class="fu">gc_content</span>(<span class="st">"AAAAAATTTTTT"</span>)   <span class="co"># Low GC content</span></span>
+<span id="cb4-6"><a href="#cb4-6"></a><span class="co">#&gt; [1] 0</span></span>
+<span id="cb4-7"><a href="#cb4-7"></a><span class="fu">gc_content</span>(<span class="st">"GGGGGGCCCCCC"</span>)   <span class="co"># High GC content</span></span>
+<span id="cb4-8"><a href="#cb4-8"></a><span class="co">#&gt; [1] 1</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<section id="sec-specifying-return-values" class="level3"><h3 class="anchored" data-anchor-id="sec-specifying-return-values">Specifying Return Values</h3>
+<p>In the example above, R automatically returned the last evaluated expression. However, it’s good practice to use explicit <code><a href="https://rdrr.io/r/base/function.html">return()</a></code> statements, especially for complex functions:</p>
+<div class="cell" data-layout-align="center">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1"></a>gc_content <span class="ot">=</span> <span class="cf">function</span>(sequence) {</span>
+<span id="cb5-2"><a href="#cb5-2"></a>  seq_upper <span class="ot">=</span> <span class="fu">toupper</span>(sequence)</span>
+<span id="cb5-3"><a href="#cb5-3"></a>  gc_count <span class="ot">=</span> <span class="fu">str_count</span>(seq_upper, <span class="st">"[GC]"</span>)</span>
+<span id="cb5-4"><a href="#cb5-4"></a>  total_bases <span class="ot">=</span> <span class="fu">str_count</span>(seq_upper, <span class="st">"[ATGC]"</span>)</span>
+<span id="cb5-5"><a href="#cb5-5"></a>  gc_proportion <span class="ot">=</span> gc_count <span class="sc">/</span> total_bases</span>
+<span id="cb5-6"><a href="#cb5-6"></a></span>
+<span id="cb5-7"><a href="#cb5-7"></a>  <span class="fu">return</span>(gc_proportion)  <span class="co"># Explicit return</span></span>
+<span id="cb5-8"><a href="#cb5-8"></a>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+</section><section id="sec-returning-multiple-values" class="level3"><h3 class="anchored" data-anchor-id="sec-returning-multiple-values">Returning Multiple Values</h3>
+<p>What if we want to return more than one piece of information? Use a list or data frame:</p>
+<div class="cell" data-layout-align="center">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1"></a>gc_content_detailed <span class="ot">=</span> <span class="cf">function</span>(sequence) {</span>
+<span id="cb6-2"><a href="#cb6-2"></a>  seq_upper <span class="ot">=</span> <span class="fu">toupper</span>(sequence)</span>
+<span id="cb6-3"><a href="#cb6-3"></a></span>
+<span id="cb6-4"><a href="#cb6-4"></a>  <span class="co"># Count each base</span></span>
+<span id="cb6-5"><a href="#cb6-5"></a>  a_count <span class="ot">=</span> <span class="fu">str_count</span>(seq_upper, <span class="st">"A"</span>)</span>
+<span id="cb6-6"><a href="#cb6-6"></a>  t_count <span class="ot">=</span> <span class="fu">str_count</span>(seq_upper, <span class="st">"T"</span>)</span>
+<span id="cb6-7"><a href="#cb6-7"></a>  g_count <span class="ot">=</span> <span class="fu">str_count</span>(seq_upper, <span class="st">"G"</span>)</span>
+<span id="cb6-8"><a href="#cb6-8"></a>  c_count <span class="ot">=</span> <span class="fu">str_count</span>(seq_upper, <span class="st">"C"</span>)</span>
+<span id="cb6-9"><a href="#cb6-9"></a></span>
+<span id="cb6-10"><a href="#cb6-10"></a>  total <span class="ot">=</span> a_count <span class="sc">+</span> t_count <span class="sc">+</span> g_count <span class="sc">+</span> c_count</span>
+<span id="cb6-11"><a href="#cb6-11"></a>  gc_prop <span class="ot">=</span> (g_count <span class="sc">+</span> c_count) <span class="sc">/</span> total</span>
+<span id="cb6-12"><a href="#cb6-12"></a></span>
+<span id="cb6-13"><a href="#cb6-13"></a>  <span class="co"># Return as a data frame</span></span>
+<span id="cb6-14"><a href="#cb6-14"></a>  result <span class="ot">=</span> <span class="fu">tibble</span>(</span>
+<span id="cb6-15"><a href="#cb6-15"></a>    <span class="at">sequence =</span> sequence,</span>
+<span id="cb6-16"><a href="#cb6-16"></a>    <span class="at">length =</span> total,</span>
+<span id="cb6-17"><a href="#cb6-17"></a>    <span class="at">A =</span> a_count,</span>
+<span id="cb6-18"><a href="#cb6-18"></a>    <span class="at">T =</span> t_count,</span>
+<span id="cb6-19"><a href="#cb6-19"></a>    <span class="at">G =</span> g_count,</span>
+<span id="cb6-20"><a href="#cb6-20"></a>    <span class="at">C =</span> c_count,</span>
+<span id="cb6-21"><a href="#cb6-21"></a>    <span class="at">gc_content =</span> <span class="fu">round</span>(gc_prop, <span class="dv">4</span>)</span>
+<span id="cb6-22"><a href="#cb6-22"></a>  )</span>
+<span id="cb6-23"><a href="#cb6-23"></a></span>
+<span id="cb6-24"><a href="#cb6-24"></a>  <span class="fu">return</span>(result)</span>
+<span id="cb6-25"><a href="#cb6-25"></a>}</span>
+<span id="cb6-26"><a href="#cb6-26"></a></span>
+<span id="cb6-27"><a href="#cb6-27"></a><span class="fu">gc_content_detailed</span>(<span class="st">"ATGCGATCGATCGATCG"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div class="kable-table">
+<table class="caption-top table table-sm table-striped small">
+<thead><tr class="header">
+<th style="text-align: left;">sequence</th>
+<th style="text-align: right;">length</th>
+<th style="text-align: right;">A</th>
+<th style="text-align: right;">T</th>
+<th style="text-align: right;">G</th>
+<th style="text-align: right;">C</th>
+<th style="text-align: right;">gc_content</th>
+</tr></thead>
+<tbody><tr class="odd">
+<td style="text-align: left;">ATGCGATCGATCGATCG</td>
+<td style="text-align: right;">17</td>
+<td style="text-align: right;">4</td>
+<td style="text-align: right;">4</td>
+<td style="text-align: right;">5</td>
+<td style="text-align: right;">4</td>
+<td style="text-align: right;">0.5294</td>
+</tr></tbody>
+</table>
+</div>
+</div>
+</div>
+</section><section id="sec-default-argument-values" class="level3"><h3 class="anchored" data-anchor-id="sec-default-argument-values">Default Argument Values</h3>
+<p>You can specify default values for arguments. This is useful when most calls will use the same value:</p>
+<div class="cell" data-layout-align="center">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1"></a>gc_content <span class="ot">=</span> <span class="cf">function</span>(sequence, <span class="at">digits =</span> <span class="dv">4</span>) {</span>
+<span id="cb7-2"><a href="#cb7-2"></a>  seq_upper <span class="ot">=</span> <span class="fu">toupper</span>(sequence)</span>
+<span id="cb7-3"><a href="#cb7-3"></a>  gc_count <span class="ot">=</span> <span class="fu">str_count</span>(seq_upper, <span class="st">"[GC]"</span>)</span>
+<span id="cb7-4"><a href="#cb7-4"></a>  total_bases <span class="ot">=</span> <span class="fu">str_count</span>(seq_upper, <span class="st">"[ATGC]"</span>)</span>
+<span id="cb7-5"><a href="#cb7-5"></a>  gc_proportion <span class="ot">=</span> gc_count <span class="sc">/</span> total_bases</span>
+<span id="cb7-6"><a href="#cb7-6"></a></span>
+<span id="cb7-7"><a href="#cb7-7"></a>  <span class="fu">return</span>(<span class="fu">round</span>(gc_proportion, digits))</span>
+<span id="cb7-8"><a href="#cb7-8"></a>}</span>
+<span id="cb7-9"><a href="#cb7-9"></a></span>
+<span id="cb7-10"><a href="#cb7-10"></a><span class="fu">gc_content</span>(<span class="st">"ATGCGATCGATCG"</span>)       <span class="co"># Uses default 4 digits</span></span>
+<span id="cb7-11"><a href="#cb7-11"></a><span class="co">#&gt; [1] 0.5385</span></span>
+<span id="cb7-12"><a href="#cb7-12"></a><span class="fu">gc_content</span>(<span class="st">"ATGCGATCGATCG"</span>, <span class="dv">2</span>)    <span class="co"># Override to 2 digits</span></span>
+<span id="cb7-13"><a href="#cb7-13"></a><span class="co">#&gt; [1] 0.54</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+</section></section><section id="sec-lexical-scoping" class="level2" data-number="13.4"><h2 data-number="13.4" class="anchored" data-anchor-id="sec-lexical-scoping">
+<span class="header-section-number">13.4</span> Environments and Lexical Scoping</h2>
+<p>An important concept to understand is that functions operate in their own <strong>environment</strong>. Objects created inside a function don’t appear in your global environment:</p>
+<div class="cell" data-layout-align="center">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1"></a>test_function <span class="ot">=</span> <span class="cf">function</span>(x) {</span>
+<span id="cb8-2"><a href="#cb8-2"></a>  internal_var <span class="ot">=</span> x <span class="sc">*</span> <span class="dv">2</span>  <span class="co"># This stays inside the function</span></span>
+<span id="cb8-3"><a href="#cb8-3"></a>  <span class="fu">return</span>(internal_var)</span>
+<span id="cb8-4"><a href="#cb8-4"></a>}</span>
+<span id="cb8-5"><a href="#cb8-5"></a></span>
+<span id="cb8-6"><a href="#cb8-6"></a>result <span class="ot">=</span> <span class="fu">test_function</span>(<span class="dv">5</span>)</span>
+<span id="cb8-7"><a href="#cb8-7"></a>result</span>
+<span id="cb8-8"><a href="#cb8-8"></a><span class="co">#&gt; [1] 10</span></span>
+<span id="cb8-9"><a href="#cb8-9"></a></span>
+<span id="cb8-10"><a href="#cb8-10"></a><span class="co"># Try to access internal_var - it doesn't exist in the global environment</span></span>
+<span id="cb8-11"><a href="#cb8-11"></a><span class="co"># internal_var  # Would produce an error</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p>This is called <strong>lexical scoping</strong>. R looks for objects in this order:</p>
+<ol type="1">
+<li>Inside the function</li>
+<li>In the environment where the function was defined</li>
+<li>In parent environments, up to the global environment</li>
+</ol>
+<div class="callout callout-style-default callout-important callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Important
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Functions are “sandboxed” — they don’t pollute your global environment with intermediate variables. This makes code cleaner and reduces the risk of naming conflicts.</p>
+</div>
+</div>
+</section><section id="sec-control-flow" class="level2" data-number="13.5"><h2 data-number="13.5" class="anchored" data-anchor-id="sec-control-flow">
+<span class="header-section-number">13.5</span> Control Flow in Functions</h2>
+<section id="sec-using-if-else" class="level3"><h3 class="anchored" data-anchor-id="sec-using-if-else">Using if/else</h3>
+<p>Control flow allows your functions to behave differently based on conditions:</p>
+<div class="cell" data-layout-align="center">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1"></a><span class="co"># Calculate enzyme velocity using Michaelis-Menten kinetics</span></span>
+<span id="cb9-2"><a href="#cb9-2"></a>enzyme_velocity <span class="ot">=</span> <span class="cf">function</span>(substrate, vmax, km, <span class="at">inhibitor =</span> <span class="cn">NULL</span>, <span class="at">ki =</span> <span class="cn">NULL</span>) {</span>
+<span id="cb9-3"><a href="#cb9-3"></a></span>
+<span id="cb9-4"><a href="#cb9-4"></a>  <span class="cf">if</span> (<span class="fu">is.null</span>(inhibitor)) {</span>
+<span id="cb9-5"><a href="#cb9-5"></a>    <span class="co"># No inhibitor: standard Michaelis-Menten</span></span>
+<span id="cb9-6"><a href="#cb9-6"></a>    velocity <span class="ot">=</span> (vmax <span class="sc">*</span> substrate) <span class="sc">/</span> (km <span class="sc">+</span> substrate)</span>
+<span id="cb9-7"><a href="#cb9-7"></a>  } <span class="cf">else</span> {</span>
+<span id="cb9-8"><a href="#cb9-8"></a>    <span class="co"># Competitive inhibition</span></span>
+<span id="cb9-9"><a href="#cb9-9"></a>    <span class="cf">if</span> (<span class="fu">is.null</span>(ki)) {</span>
+<span id="cb9-10"><a href="#cb9-10"></a>      <span class="fu">stop</span>(<span class="st">"If inhibitor concentration is provided, ki must also be specified"</span>)</span>
+<span id="cb9-11"><a href="#cb9-11"></a>    }</span>
+<span id="cb9-12"><a href="#cb9-12"></a>    apparent_km <span class="ot">=</span> km <span class="sc">*</span> (<span class="dv">1</span> <span class="sc">+</span> inhibitor <span class="sc">/</span> ki)</span>
+<span id="cb9-13"><a href="#cb9-13"></a>    velocity <span class="ot">=</span> (vmax <span class="sc">*</span> substrate) <span class="sc">/</span> (apparent_km <span class="sc">+</span> substrate)</span>
+<span id="cb9-14"><a href="#cb9-14"></a>  }</span>
+<span id="cb9-15"><a href="#cb9-15"></a></span>
+<span id="cb9-16"><a href="#cb9-16"></a>  <span class="fu">return</span>(velocity)</span>
+<span id="cb9-17"><a href="#cb9-17"></a>}</span>
+<span id="cb9-18"><a href="#cb9-18"></a></span>
+<span id="cb9-19"><a href="#cb9-19"></a><span class="co"># Test without inhibitor</span></span>
+<span id="cb9-20"><a href="#cb9-20"></a><span class="fu">enzyme_velocity</span>(<span class="at">substrate =</span> <span class="dv">10</span>, <span class="at">vmax =</span> <span class="dv">100</span>, <span class="at">km =</span> <span class="dv">5</span>)</span>
+<span id="cb9-21"><a href="#cb9-21"></a><span class="co">#&gt; [1] 66.66667</span></span>
+<span id="cb9-22"><a href="#cb9-22"></a></span>
+<span id="cb9-23"><a href="#cb9-23"></a><span class="co"># Test with inhibitor</span></span>
+<span id="cb9-24"><a href="#cb9-24"></a><span class="fu">enzyme_velocity</span>(<span class="at">substrate =</span> <span class="dv">10</span>, <span class="at">vmax =</span> <span class="dv">100</span>, <span class="at">km =</span> <span class="dv">5</span>, <span class="at">inhibitor =</span> <span class="dv">2</span>, <span class="at">ki =</span> <span class="dv">3</span>)</span>
+<span id="cb9-25"><a href="#cb9-25"></a><span class="co">#&gt; [1] 54.54545</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+</section><section id="sec-fn-case-when" class="level3"><h3 class="anchored" data-anchor-id="sec-fn-case-when">Using case_when for Multiple Conditions</h3>
+<p>When you have many conditions, nested <code>if/else</code> statements become hard to read. Use <code><a href="https://dplyr.tidyverse.org/reference/case-and-replace-when.html">dplyr::case_when()</a></code> instead:</p>
+<div class="cell" data-layout-align="center">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb10"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1"></a><span class="co"># Classify gene expression fold changes</span></span>
+<span id="cb10-2"><a href="#cb10-2"></a>classify_expression <span class="ot">=</span> <span class="cf">function</span>(fold_change) {</span>
+<span id="cb10-3"><a href="#cb10-3"></a>  category <span class="ot">=</span> <span class="fu">case_when</span>(</span>
+<span id="cb10-4"><a href="#cb10-4"></a>    fold_change <span class="sc">&gt;=</span> <span class="dv">2</span> <span class="sc">~</span> <span class="st">"strongly_upregulated"</span>,</span>
+<span id="cb10-5"><a href="#cb10-5"></a>    fold_change <span class="sc">&gt;=</span> <span class="fl">1.5</span> <span class="sc">~</span> <span class="st">"upregulated"</span>,</span>
+<span id="cb10-6"><a href="#cb10-6"></a>    fold_change <span class="sc">&lt;=</span> <span class="fl">0.5</span> <span class="sc">~</span> <span class="st">"strongly_downregulated"</span>,</span>
+<span id="cb10-7"><a href="#cb10-7"></a>    fold_change <span class="sc">&lt;=</span> <span class="fl">0.67</span> <span class="sc">~</span> <span class="st">"downregulated"</span>,</span>
+<span id="cb10-8"><a href="#cb10-8"></a>    <span class="cn">TRUE</span> <span class="sc">~</span> <span class="st">"unchanged"</span></span>
+<span id="cb10-9"><a href="#cb10-9"></a>  )</span>
+<span id="cb10-10"><a href="#cb10-10"></a>  <span class="fu">return</span>(category)</span>
+<span id="cb10-11"><a href="#cb10-11"></a>}</span>
+<span id="cb10-12"><a href="#cb10-12"></a></span>
+<span id="cb10-13"><a href="#cb10-13"></a><span class="co"># Test with a vector of fold changes</span></span>
+<span id="cb10-14"><a href="#cb10-14"></a>fold_changes <span class="ot">=</span> <span class="fu">c</span>(<span class="fl">0.3</span>, <span class="fl">0.6</span>, <span class="fl">1.0</span>, <span class="fl">1.6</span>, <span class="fl">2.5</span>)</span>
+<span id="cb10-15"><a href="#cb10-15"></a><span class="fu">classify_expression</span>(fold_changes)</span>
+<span id="cb10-16"><a href="#cb10-16"></a><span class="co">#&gt; [1] "strongly_downregulated" "downregulated"          "unchanged"             </span></span>
+<span id="cb10-17"><a href="#cb10-17"></a><span class="co">#&gt; [4] "upregulated"            "strongly_upregulated"</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p>The equivalent <code><a href="https://rdrr.io/pkg/data.table/man/fcase.html">data.table::fcase()</a></code> function works similarly:</p>
+<div class="cell" data-layout-align="center">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb11"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1"></a>classify_expression_dt <span class="ot">=</span> <span class="cf">function</span>(fold_change) {</span>
+<span id="cb11-2"><a href="#cb11-2"></a>  <span class="fu">fcase</span>(</span>
+<span id="cb11-3"><a href="#cb11-3"></a>    fold_change <span class="sc">&gt;=</span> <span class="dv">2</span>, <span class="st">"strongly_upregulated"</span>,</span>
+<span id="cb11-4"><a href="#cb11-4"></a>    fold_change <span class="sc">&gt;=</span> <span class="fl">1.5</span>, <span class="st">"upregulated"</span>,</span>
+<span id="cb11-5"><a href="#cb11-5"></a>    fold_change <span class="sc">&lt;=</span> <span class="fl">0.5</span>, <span class="st">"strongly_downregulated"</span>,</span>
+<span id="cb11-6"><a href="#cb11-6"></a>    fold_change <span class="sc">&lt;=</span> <span class="fl">0.67</span>, <span class="st">"downregulated"</span>,</span>
+<span id="cb11-7"><a href="#cb11-7"></a>    <span class="at">default =</span> <span class="st">"unchanged"</span></span>
+<span id="cb11-8"><a href="#cb11-8"></a>  )</span>
+<span id="cb11-9"><a href="#cb11-9"></a>}</span>
+<span id="cb11-10"><a href="#cb11-10"></a></span>
+<span id="cb11-11"><a href="#cb11-11"></a><span class="fu">classify_expression_dt</span>(fold_changes)</span>
+<span id="cb11-12"><a href="#cb11-12"></a><span class="co">#&gt; [1] "strongly_downregulated" "downregulated"          "unchanged"             </span></span>
+<span id="cb11-13"><a href="#cb11-13"></a><span class="co">#&gt; [4] "upregulated"            "strongly_upregulated"</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+</section></section><section id="sec-iteration" class="level2" data-number="13.6"><h2 data-number="13.6" class="anchored" data-anchor-id="sec-iteration">
+<span class="header-section-number">13.6</span> Iteration and Functional Programming</h2>
+<section id="sec-the-problem-with-for-loops" class="level3"><h3 class="anchored" data-anchor-id="sec-the-problem-with-for-loops">The Problem with for Loops</h3>
+<p>You’ll often need to apply the same operation to many inputs. The traditional approach uses <code>for</code> loops (<a href="07-r-programming.html#sec-r-for-loops" class="quarto-xref"><span>Section 9.16.3</span></a>):</p>
+<div class="cell" data-layout-align="center">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb12"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1"></a><span class="co"># Calculate GC content for multiple sequences</span></span>
+<span id="cb12-2"><a href="#cb12-2"></a>sequences <span class="ot">=</span> <span class="fu">c</span>(<span class="st">"ATGCGATCG"</span>, <span class="st">"GGGGCCCC"</span>, <span class="st">"AAAATTTT"</span>, <span class="st">"ATATATAT"</span>)</span>
+<span id="cb12-3"><a href="#cb12-3"></a></span>
+<span id="cb12-4"><a href="#cb12-4"></a><span class="co"># Using a for loop</span></span>
+<span id="cb12-5"><a href="#cb12-5"></a>gc_results <span class="ot">=</span> <span class="cn">NULL</span></span>
+<span id="cb12-6"><a href="#cb12-6"></a><span class="cf">for</span> (i <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span><span class="fu">length</span>(sequences)) {</span>
+<span id="cb12-7"><a href="#cb12-7"></a>  gc_results[i] <span class="ot">=</span> <span class="fu">gc_content</span>(sequences[i])</span>
+<span id="cb12-8"><a href="#cb12-8"></a>}</span>
+<span id="cb12-9"><a href="#cb12-9"></a>gc_results</span>
+<span id="cb12-10"><a href="#cb12-10"></a><span class="co">#&gt; [1] 0.5556 1.0000 0.0000 0.0000</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p>This works, but has several problems:</p>
+<ol type="1">
+<li>
+<strong>Verbose</strong>: Lots of boilerplate code</li>
+<li>
+<strong>Error-prone</strong>: Easy to make off-by-one errors</li>
+<li>
+<strong>Pollutes environment</strong>: The loop variable <code>i</code> persists after the loop</li>
+<li>
+<strong>Not R-like</strong>: R is designed for vectorized operations</li>
+</ol></section><section id="sec-lapply" class="level3"><h3 class="anchored" data-anchor-id="sec-lapply">Functional Programming with lapply</h3>
+<p>The <strong>functional programming</strong> approach treats iteration as applying a function across elements:</p>
+<div class="cell" data-layout-align="center">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb13"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1"></a><span class="co"># Much cleaner!</span></span>
+<span id="cb13-2"><a href="#cb13-2"></a>gc_results <span class="ot">=</span> <span class="fu">lapply</span>(sequences, gc_content)</span>
+<span id="cb13-3"><a href="#cb13-3"></a>gc_results</span>
+<span id="cb13-4"><a href="#cb13-4"></a><span class="co">#&gt; [[1]]</span></span>
+<span id="cb13-5"><a href="#cb13-5"></a><span class="co">#&gt; [1] 0.5556</span></span>
+<span id="cb13-6"><a href="#cb13-6"></a><span class="co">#&gt; </span></span>
+<span id="cb13-7"><a href="#cb13-7"></a><span class="co">#&gt; [[2]]</span></span>
+<span id="cb13-8"><a href="#cb13-8"></a><span class="co">#&gt; [1] 1</span></span>
+<span id="cb13-9"><a href="#cb13-9"></a><span class="co">#&gt; </span></span>
+<span id="cb13-10"><a href="#cb13-10"></a><span class="co">#&gt; [[3]]</span></span>
+<span id="cb13-11"><a href="#cb13-11"></a><span class="co">#&gt; [1] 0</span></span>
+<span id="cb13-12"><a href="#cb13-12"></a><span class="co">#&gt; </span></span>
+<span id="cb13-13"><a href="#cb13-13"></a><span class="co">#&gt; [[4]]</span></span>
+<span id="cb13-14"><a href="#cb13-14"></a><span class="co">#&gt; [1] 0</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p>The result is a list. To get a vector instead:</p>
+<div class="cell" data-layout-align="center">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb14"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1"></a>gc_results <span class="ot">=</span> <span class="fu">sapply</span>(sequences, gc_content)</span>
+<span id="cb14-2"><a href="#cb14-2"></a>gc_results</span>
+<span id="cb14-3"><a href="#cb14-3"></a><span class="co">#&gt; ATGCGATCG  GGGGCCCC  AAAATTTT  ATATATAT </span></span>
+<span id="cb14-4"><a href="#cb14-4"></a><span class="co">#&gt;    0.5556    1.0000    0.0000    0.0000</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p>To combine results into a data frame, use our detailed function with <code>bind_rows()</code>:</p>
+<div class="cell" data-layout-align="center">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb15"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1"></a><span class="fu">lapply</span>(sequences, gc_content_detailed) <span class="sc">%&gt;%</span></span>
+<span id="cb15-2"><a href="#cb15-2"></a>  <span class="fu">bind_rows</span>()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div class="kable-table">
+<table class="caption-top table table-sm table-striped small">
+<thead><tr class="header">
+<th style="text-align: left;">sequence</th>
+<th style="text-align: right;">length</th>
+<th style="text-align: right;">A</th>
+<th style="text-align: right;">T</th>
+<th style="text-align: right;">G</th>
+<th style="text-align: right;">C</th>
+<th style="text-align: right;">gc_content</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">ATGCGATCG</td>
+<td style="text-align: right;">9</td>
+<td style="text-align: right;">2</td>
+<td style="text-align: right;">2</td>
+<td style="text-align: right;">3</td>
+<td style="text-align: right;">2</td>
+<td style="text-align: right;">0.5556</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">GGGGCCCC</td>
+<td style="text-align: right;">8</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">4</td>
+<td style="text-align: right;">4</td>
+<td style="text-align: right;">1.0000</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">AAAATTTT</td>
+<td style="text-align: right;">8</td>
+<td style="text-align: right;">4</td>
+<td style="text-align: right;">4</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0.0000</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">ATATATAT</td>
+<td style="text-align: right;">8</td>
+<td style="text-align: right;">4</td>
+<td style="text-align: right;">4</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0.0000</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+</section><section id="sec-purrr-map" class="level3"><h3 class="anchored" data-anchor-id="sec-purrr-map">Using purrr for Iteration</h3>
+<p>The <strong>purrr</strong> package provides a consistent and powerful set of mapping functions (base R’s <code><a href="https://rdrr.io/r/base/apply.html">apply()</a></code> family, <a href="07-r-programming.html#sec-apply-family" class="quarto-xref"><span>Section 9.15.3</span></a>, plays the same role):</p>
+<div class="cell" data-layout-align="center">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb16"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1"></a><span class="co"># map() returns a list (like lapply)</span></span>
+<span id="cb16-2"><a href="#cb16-2"></a><span class="fu">map</span>(sequences, gc_content)</span>
+<span id="cb16-3"><a href="#cb16-3"></a><span class="co">#&gt; [[1]]</span></span>
+<span id="cb16-4"><a href="#cb16-4"></a><span class="co">#&gt; [1] 0.5556</span></span>
+<span id="cb16-5"><a href="#cb16-5"></a><span class="co">#&gt; </span></span>
+<span id="cb16-6"><a href="#cb16-6"></a><span class="co">#&gt; [[2]]</span></span>
+<span id="cb16-7"><a href="#cb16-7"></a><span class="co">#&gt; [1] 1</span></span>
+<span id="cb16-8"><a href="#cb16-8"></a><span class="co">#&gt; </span></span>
+<span id="cb16-9"><a href="#cb16-9"></a><span class="co">#&gt; [[3]]</span></span>
+<span id="cb16-10"><a href="#cb16-10"></a><span class="co">#&gt; [1] 0</span></span>
+<span id="cb16-11"><a href="#cb16-11"></a><span class="co">#&gt; </span></span>
+<span id="cb16-12"><a href="#cb16-12"></a><span class="co">#&gt; [[4]]</span></span>
+<span id="cb16-13"><a href="#cb16-13"></a><span class="co">#&gt; [1] 0</span></span>
+<span id="cb16-14"><a href="#cb16-14"></a></span>
+<span id="cb16-15"><a href="#cb16-15"></a><span class="co"># map_dbl() returns a numeric vector</span></span>
+<span id="cb16-16"><a href="#cb16-16"></a><span class="fu">map_dbl</span>(sequences, gc_content)</span>
+<span id="cb16-17"><a href="#cb16-17"></a><span class="co">#&gt; [1] 0.5556 1.0000 0.0000 0.0000</span></span>
+<span id="cb16-18"><a href="#cb16-18"></a></span>
+<span id="cb16-19"><a href="#cb16-19"></a><span class="co"># map_df() returns a data frame</span></span>
+<span id="cb16-20"><a href="#cb16-20"></a><span class="fu">map_df</span>(sequences, gc_content_detailed)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div class="kable-table">
+<table class="caption-top table table-sm table-striped small">
+<thead><tr class="header">
+<th style="text-align: left;">sequence</th>
+<th style="text-align: right;">length</th>
+<th style="text-align: right;">A</th>
+<th style="text-align: right;">T</th>
+<th style="text-align: right;">G</th>
+<th style="text-align: right;">C</th>
+<th style="text-align: right;">gc_content</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">ATGCGATCG</td>
+<td style="text-align: right;">9</td>
+<td style="text-align: right;">2</td>
+<td style="text-align: right;">2</td>
+<td style="text-align: right;">3</td>
+<td style="text-align: right;">2</td>
+<td style="text-align: right;">0.5556</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">GGGGCCCC</td>
+<td style="text-align: right;">8</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">4</td>
+<td style="text-align: right;">4</td>
+<td style="text-align: right;">1.0000</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">AAAATTTT</td>
+<td style="text-align: right;">8</td>
+<td style="text-align: right;">4</td>
+<td style="text-align: right;">4</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0.0000</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">ATATATAT</td>
+<td style="text-align: right;">8</td>
+<td style="text-align: right;">4</td>
+<td style="text-align: right;">4</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0.0000</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+</section><section id="sec-creating-and-reusing-named-functions" class="level3"><h3 class="anchored" data-anchor-id="sec-creating-and-reusing-named-functions">Creating and Reusing Named Functions</h3>
+<p>For complex analyses, separate the function definition from iteration:</p>
+<div class="cell" data-layout-align="center">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb17"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1"></a><span class="co"># Define a function for processing protein sequences</span></span>
+<span id="cb17-2"><a href="#cb17-2"></a>analyze_protein <span class="ot">=</span> <span class="cf">function</span>(sequence) {</span>
+<span id="cb17-3"><a href="#cb17-3"></a>  seq_upper <span class="ot">=</span> <span class="fu">toupper</span>(sequence)</span>
+<span id="cb17-4"><a href="#cb17-4"></a>  length <span class="ot">=</span> <span class="fu">nchar</span>(seq_upper)</span>
+<span id="cb17-5"><a href="#cb17-5"></a></span>
+<span id="cb17-6"><a href="#cb17-6"></a>  <span class="co"># Count hydrophobic residues (simplified)</span></span>
+<span id="cb17-7"><a href="#cb17-7"></a>  hydrophobic <span class="ot">=</span> <span class="fu">str_count</span>(seq_upper, <span class="st">"[AILMFVPW]"</span>)</span>
+<span id="cb17-8"><a href="#cb17-8"></a></span>
+<span id="cb17-9"><a href="#cb17-9"></a>  <span class="co"># Count charged residues</span></span>
+<span id="cb17-10"><a href="#cb17-10"></a>  charged <span class="ot">=</span> <span class="fu">str_count</span>(seq_upper, <span class="st">"[DEKRH]"</span>)</span>
+<span id="cb17-11"><a href="#cb17-11"></a></span>
+<span id="cb17-12"><a href="#cb17-12"></a>  <span class="fu">tibble</span>(</span>
+<span id="cb17-13"><a href="#cb17-13"></a>    <span class="at">sequence =</span> sequence,</span>
+<span id="cb17-14"><a href="#cb17-14"></a>    <span class="at">length =</span> length,</span>
+<span id="cb17-15"><a href="#cb17-15"></a>    <span class="at">hydrophobic_pct =</span> <span class="fu">round</span>(hydrophobic <span class="sc">/</span> length <span class="sc">*</span> <span class="dv">100</span>, <span class="dv">1</span>),</span>
+<span id="cb17-16"><a href="#cb17-16"></a>    <span class="at">charged_pct =</span> <span class="fu">round</span>(charged <span class="sc">/</span> length <span class="sc">*</span> <span class="dv">100</span>, <span class="dv">1</span>)</span>
+<span id="cb17-17"><a href="#cb17-17"></a>  )</span>
+<span id="cb17-18"><a href="#cb17-18"></a>}</span>
+<span id="cb17-19"><a href="#cb17-19"></a></span>
+<span id="cb17-20"><a href="#cb17-20"></a><span class="co"># Some sample protein sequences</span></span>
+<span id="cb17-21"><a href="#cb17-21"></a>proteins <span class="ot">=</span> <span class="fu">c</span>(</span>
+<span id="cb17-22"><a href="#cb17-22"></a>  <span class="st">"MKTAYIAKQRQISFVKSHFSRQLEERLGLIEVQAPILSRVGDGTQDNLSGAEKAVQVKVKALPDAQFEVVHSLAKWKRQQIAAALEHHHHHH"</span>,</span>
+<span id="cb17-23"><a href="#cb17-23"></a>  <span class="st">"MVLSPADKTNVKAAWGKVGAHAGEYGAEALERMFLSFPTTKTYFPHFDLSH"</span>,</span>
+<span id="cb17-24"><a href="#cb17-24"></a>  <span class="st">"GLSDGEWQQVLNVWGKVEADIAGHGQEVLIRLFTGHPETLEKFDKFKHLKTEAEMKASEDLKKHGTVVLTALGGILKKKGHHEAELKPLAQSHATKHKIPIKYLEFISDAIIHVLHSKHPGDFGADAQGAMTKALELFRNDIAAKYKELGFQG"</span></span>
+<span id="cb17-25"><a href="#cb17-25"></a>)</span>
+<span id="cb17-26"><a href="#cb17-26"></a></span>
+<span id="cb17-27"><a href="#cb17-27"></a><span class="co"># Apply to all proteins</span></span>
+<span id="cb17-28"><a href="#cb17-28"></a><span class="fu">map_df</span>(proteins, analyze_protein)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div class="kable-table">
+<table class="caption-top table table-sm table-striped small">
+<colgroup>
+<col style="width: 81%">
+<col style="width: 3%">
+<col style="width: 8%">
+<col style="width: 6%">
+</colgroup>
+<thead><tr class="header">
+<th style="text-align: left;">sequence</th>
+<th style="text-align: right;">length</th>
+<th style="text-align: right;">hydrophobic_pct</th>
+<th style="text-align: right;">charged_pct</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">MKTAYIAKQRQISFVKSHFSRQLEERLGLIEVQAPILSRVGDGTQDNLSGAEKAVQVKVKALPDAQFEVVHSLAKWKRQQIAAALEHHHHHH</td>
+<td style="text-align: right;">92</td>
+<td style="text-align: right;">42.4</td>
+<td style="text-align: right;">32.6</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">MVLSPADKTNVKAAWGKVGAHAGEYGAEALERMFLSFPTTKTYFPHFDLSH</td>
+<td style="text-align: right;">51</td>
+<td style="text-align: right;">47.1</td>
+<td style="text-align: right;">25.5</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">GLSDGEWQQVLNVWGKVEADIAGHGQEVLIRLFTGHPETLEKFDKFKHLKTEAEMKASEDLKKHGTVVLTALGGILKKKGHHEAELKPLAQSHATKHKIPIKYLEFISDAIIHVLHSKHPGDFGADAQGAMTKALELFRNDIAAKYKELGFQG</td>
+<td style="text-align: right;">153</td>
+<td style="text-align: right;">41.2</td>
+<td style="text-align: right;">34.6</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+</section></section><section id="sec-multiple-inputs" class="level2" data-number="13.7"><h2 data-number="13.7" class="anchored" data-anchor-id="sec-multiple-inputs">
+<span class="header-section-number">13.7</span> Iterating Over Multiple Inputs</h2>
+<p>Sometimes you need to iterate over multiple inputs simultaneously.</p>
+<section id="sec-pmap" class="level3"><h3 class="anchored" data-anchor-id="sec-pmap">Using pmap for Multiple Arguments</h3>
+<div class="cell" data-layout-align="center">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb18"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1"></a><span class="co"># Simulate growth curves with different parameters</span></span>
+<span id="cb18-2"><a href="#cb18-2"></a>simulate_growth <span class="ot">=</span> <span class="cf">function</span>(time, k, n0, carrying_capacity) {</span>
+<span id="cb18-3"><a href="#cb18-3"></a>  <span class="co"># Logistic growth model</span></span>
+<span id="cb18-4"><a href="#cb18-4"></a>  n <span class="ot">=</span> carrying_capacity <span class="sc">/</span> (<span class="dv">1</span> <span class="sc">+</span> ((carrying_capacity <span class="sc">-</span> n0) <span class="sc">/</span> n0) <span class="sc">*</span> <span class="fu">exp</span>(<span class="sc">-</span>k <span class="sc">*</span> time))</span>
+<span id="cb18-5"><a href="#cb18-5"></a></span>
+<span id="cb18-6"><a href="#cb18-6"></a>  <span class="fu">tibble</span>(</span>
+<span id="cb18-7"><a href="#cb18-7"></a>    <span class="at">time =</span> time,</span>
+<span id="cb18-8"><a href="#cb18-8"></a>    <span class="at">k =</span> k,</span>
+<span id="cb18-9"><a href="#cb18-9"></a>    <span class="at">n0 =</span> n0,</span>
+<span id="cb18-10"><a href="#cb18-10"></a>    <span class="at">K =</span> carrying_capacity,</span>
+<span id="cb18-11"><a href="#cb18-11"></a>    <span class="at">population =</span> <span class="fu">round</span>(n, <span class="dv">0</span>)</span>
+<span id="cb18-12"><a href="#cb18-12"></a>  )</span>
+<span id="cb18-13"><a href="#cb18-13"></a>}</span>
+<span id="cb18-14"><a href="#cb18-14"></a></span>
+<span id="cb18-15"><a href="#cb18-15"></a><span class="co"># Parameters for different bacterial strains</span></span>
+<span id="cb18-16"><a href="#cb18-16"></a>params <span class="ot">=</span> <span class="fu">tibble</span>(</span>
+<span id="cb18-17"><a href="#cb18-17"></a>  <span class="at">k =</span> <span class="fu">c</span>(<span class="fl">0.5</span>, <span class="fl">0.8</span>, <span class="fl">0.3</span>),              <span class="co"># Growth rates</span></span>
+<span id="cb18-18"><a href="#cb18-18"></a>  <span class="at">n0 =</span> <span class="fu">c</span>(<span class="dv">100</span>, <span class="dv">50</span>, <span class="dv">200</span>),              <span class="co"># Initial populations</span></span>
+<span id="cb18-19"><a href="#cb18-19"></a>  <span class="at">carrying_capacity =</span> <span class="fu">c</span>(<span class="dv">10000</span>, <span class="dv">15000</span>, <span class="dv">8000</span>)  <span class="co"># Carrying capacities</span></span>
+<span id="cb18-20"><a href="#cb18-20"></a>)</span>
+<span id="cb18-21"><a href="#cb18-21"></a></span>
+<span id="cb18-22"><a href="#cb18-22"></a><span class="co"># Run simulations for each strain at time = 10</span></span>
+<span id="cb18-23"><a href="#cb18-23"></a><span class="fu">pmap_df</span>(params, <span class="sc">~</span><span class="fu">simulate_growth</span>(<span class="at">time =</span> <span class="dv">10</span>, <span class="at">k =</span> ..<span class="dv">1</span>, <span class="at">n0 =</span> ..<span class="dv">2</span>, <span class="at">carrying_capacity =</span> ..<span class="dv">3</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div class="kable-table">
+<table class="caption-top table table-sm table-striped small">
+<thead><tr class="header">
+<th style="text-align: right;">time</th>
+<th style="text-align: right;">k</th>
+<th style="text-align: right;">n0</th>
+<th style="text-align: right;">K</th>
+<th style="text-align: right;">population</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: right;">10</td>
+<td style="text-align: right;">0.5</td>
+<td style="text-align: right;">100</td>
+<td style="text-align: right;">10000</td>
+<td style="text-align: right;">5999</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">10</td>
+<td style="text-align: right;">0.8</td>
+<td style="text-align: right;">50</td>
+<td style="text-align: right;">15000</td>
+<td style="text-align: right;">13633</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">10</td>
+<td style="text-align: right;">0.3</td>
+<td style="text-align: right;">200</td>
+<td style="text-align: right;">8000</td>
+<td style="text-align: right;">2720</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+</section><section id="sec-using-a-data-frame-of-inputs" class="level3"><h3 class="anchored" data-anchor-id="sec-using-a-data-frame-of-inputs">Using a Data Frame of Inputs</h3>
+<p>A cleaner approach for complex cases is to pass a data frame of input combinations (<a href="#fig-df-inputs" class="quarto-xref">Figure&nbsp;<span>13.1</span></a> shows the result):</p>
+<div class="cell" data-layout-align="center">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb19"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1"></a><span class="co"># Create all parameter combinations</span></span>
+<span id="cb19-2"><a href="#cb19-2"></a>simulation_params <span class="ot">=</span> <span class="fu">expand.grid</span>(</span>
+<span id="cb19-3"><a href="#cb19-3"></a>  <span class="at">time =</span> <span class="fu">seq</span>(<span class="dv">0</span>, <span class="dv">20</span>, <span class="at">by =</span> <span class="dv">2</span>),</span>
+<span id="cb19-4"><a href="#cb19-4"></a>  <span class="at">strain =</span> <span class="fu">c</span>(<span class="st">"wild_type"</span>, <span class="st">"mutant_A"</span>, <span class="st">"mutant_B"</span>)</span>
+<span id="cb19-5"><a href="#cb19-5"></a>) <span class="sc">%&gt;%</span></span>
+<span id="cb19-6"><a href="#cb19-6"></a>  <span class="fu">as_tibble</span>() <span class="sc">%&gt;%</span></span>
+<span id="cb19-7"><a href="#cb19-7"></a>  <span class="fu">mutate</span>(</span>
+<span id="cb19-8"><a href="#cb19-8"></a>    <span class="at">k =</span> <span class="fu">case_when</span>(</span>
+<span id="cb19-9"><a href="#cb19-9"></a>      strain <span class="sc">==</span> <span class="st">"wild_type"</span> <span class="sc">~</span> <span class="fl">0.5</span>,</span>
+<span id="cb19-10"><a href="#cb19-10"></a>      strain <span class="sc">==</span> <span class="st">"mutant_A"</span> <span class="sc">~</span> <span class="fl">0.8</span>,</span>
+<span id="cb19-11"><a href="#cb19-11"></a>      strain <span class="sc">==</span> <span class="st">"mutant_B"</span> <span class="sc">~</span> <span class="fl">0.3</span></span>
+<span id="cb19-12"><a href="#cb19-12"></a>    ),</span>
+<span id="cb19-13"><a href="#cb19-13"></a>    <span class="at">n0 =</span> <span class="dv">100</span>,</span>
+<span id="cb19-14"><a href="#cb19-14"></a>    <span class="at">carrying_capacity =</span> <span class="dv">10000</span></span>
+<span id="cb19-15"><a href="#cb19-15"></a>  )</span>
+<span id="cb19-16"><a href="#cb19-16"></a></span>
+<span id="cb19-17"><a href="#cb19-17"></a><span class="co"># Function that takes a row of parameters</span></span>
+<span id="cb19-18"><a href="#cb19-18"></a>run_simulation <span class="ot">=</span> <span class="cf">function</span>(row_data) {</span>
+<span id="cb19-19"><a href="#cb19-19"></a>  <span class="fu">simulate_growth</span>(</span>
+<span id="cb19-20"><a href="#cb19-20"></a>    <span class="at">time =</span> row_data<span class="sc">$</span>time,</span>
+<span id="cb19-21"><a href="#cb19-21"></a>    <span class="at">k =</span> row_data<span class="sc">$</span>k,</span>
+<span id="cb19-22"><a href="#cb19-22"></a>    <span class="at">n0 =</span> row_data<span class="sc">$</span>n0,</span>
+<span id="cb19-23"><a href="#cb19-23"></a>    <span class="at">carrying_capacity =</span> row_data<span class="sc">$</span>carrying_capacity</span>
+<span id="cb19-24"><a href="#cb19-24"></a>  ) <span class="sc">%&gt;%</span></span>
+<span id="cb19-25"><a href="#cb19-25"></a>    <span class="fu">mutate</span>(<span class="at">strain =</span> row_data<span class="sc">$</span>strain)</span>
+<span id="cb19-26"><a href="#cb19-26"></a>}</span>
+<span id="cb19-27"><a href="#cb19-27"></a></span>
+<span id="cb19-28"><a href="#cb19-28"></a><span class="co"># Run all simulations</span></span>
+<span id="cb19-29"><a href="#cb19-29"></a>results <span class="ot">=</span> <span class="fu">map_df</span>(<span class="dv">1</span><span class="sc">:</span><span class="fu">nrow</span>(simulation_params), <span class="cf">function</span>(i) {</span>
+<span id="cb19-30"><a href="#cb19-30"></a>  <span class="fu">run_simulation</span>(simulation_params[i, ])</span>
+<span id="cb19-31"><a href="#cb19-31"></a>})</span>
+<span id="cb19-32"><a href="#cb19-32"></a></span>
+<span id="cb19-33"><a href="#cb19-33"></a><span class="co"># Plot the results</span></span>
+<span id="cb19-34"><a href="#cb19-34"></a><span class="fu">ggplot</span>(results, <span class="fu">aes</span>(<span class="at">x =</span> time, <span class="at">y =</span> population, <span class="at">color =</span> strain)) <span class="sc">+</span></span>
+<span id="cb19-35"><a href="#cb19-35"></a>  <span class="fu">geom_line</span>(<span class="at">linewidth =</span> <span class="dv">1</span>) <span class="sc">+</span></span>
+<span id="cb19-36"><a href="#cb19-36"></a>  <span class="fu">geom_point</span>() <span class="sc">+</span></span>
+<span id="cb19-37"><a href="#cb19-37"></a>  <span class="fu">labs</span>(</span>
+<span id="cb19-38"><a href="#cb19-38"></a>    <span class="at">title =</span> <span class="st">"Bacterial Growth Curves"</span>,</span>
+<span id="cb19-39"><a href="#cb19-39"></a>    <span class="at">x =</span> <span class="st">"Time (hours)"</span>,</span>
+<span id="cb19-40"><a href="#cb19-40"></a>    <span class="at">y =</span> <span class="st">"Population Size"</span>,</span>
+<span id="cb19-41"><a href="#cb19-41"></a>    <span class="at">color =</span> <span class="st">"Strain"</span></span>
+<span id="cb19-42"><a href="#cb19-42"></a>  ) <span class="sc">+</span></span>
+<span id="cb19-43"><a href="#cb19-43"></a>  <span class="fu">scale_y_continuous</span>(<span class="at">labels =</span> scales<span class="sc">::</span>comma)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div id="fig-df-inputs" class="quarto-float quarto-figure quarto-figure-center anchored" data-fig-align="center">
+<figure class="quarto-float quarto-float-fig figure"><div aria-describedby="fig-df-inputs-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="13-writing-functions_files/figure-html/fig-df-inputs-1.png" class="img-fluid quarto-figure quarto-figure-center figure-img" style="width:100.0%">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-df-inputs-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;13.1: Simulated bacterial growth curves for three strains, produced by mapping a function over a data frame of parameter combinations
+</figcaption></figure>
+</div>
+</div>
+</div>
+</section></section><section id="sec-function-best-practices" class="level2" data-number="13.8"><h2 data-number="13.8" class="anchored" data-anchor-id="sec-function-best-practices">
+<span class="header-section-number">13.8</span> Best Practices for Writing Functions</h2>
+<section id="sec-fn-descriptive-names" class="level3"><h3 class="anchored" data-anchor-id="sec-fn-descriptive-names">1. Use Descriptive Names</h3>
+<div class="cell" data-layout-align="center">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb20"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1"></a><span class="co"># Good names</span></span>
+<span id="cb20-2"><a href="#cb20-2"></a><span class="fu">calculate_gc_content</span>()</span>
+<span id="cb20-3"><a href="#cb20-3"></a><span class="fu">normalize_expression</span>()</span>
+<span id="cb20-4"><a href="#cb20-4"></a><span class="fu">fit_growth_curve</span>()</span>
+<span id="cb20-5"><a href="#cb20-5"></a></span>
+<span id="cb20-6"><a href="#cb20-6"></a><span class="co"># Bad names</span></span>
+<span id="cb20-7"><a href="#cb20-7"></a><span class="fu">func1</span>()</span>
+<span id="cb20-8"><a href="#cb20-8"></a><span class="fu">do_stuff</span>()</span>
+<span id="cb20-9"><a href="#cb20-9"></a><span class="fu">f</span>()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+</section><section id="sec-fn-document" class="level3"><h3 class="anchored" data-anchor-id="sec-fn-document">2. Document Your Functions</h3>
+<p>Add comments explaining what the function does, its arguments, and return value:</p>
+<div class="cell" data-layout-align="center">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb21"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1"></a><span class="co"># Calculate the melting temperature of a DNA primer</span></span>
+<span id="cb21-2"><a href="#cb21-2"></a><span class="co">#</span></span>
+<span id="cb21-3"><a href="#cb21-3"></a><span class="co"># Uses the Wallace rule for short oligonucleotides (&lt;14 bp)</span></span>
+<span id="cb21-4"><a href="#cb21-4"></a><span class="co"># or the nearest-neighbor method for longer sequences</span></span>
+<span id="cb21-5"><a href="#cb21-5"></a><span class="co">#</span></span>
+<span id="cb21-6"><a href="#cb21-6"></a><span class="co"># Arguments:</span></span>
+<span id="cb21-7"><a href="#cb21-7"></a><span class="co">#   sequence: DNA sequence (string of A, T, G, C)</span></span>
+<span id="cb21-8"><a href="#cb21-8"></a><span class="co">#   method: "wallace" or "nearest_neighbor"</span></span>
+<span id="cb21-9"><a href="#cb21-9"></a><span class="co">#</span></span>
+<span id="cb21-10"><a href="#cb21-10"></a><span class="co"># Returns:</span></span>
+<span id="cb21-11"><a href="#cb21-11"></a><span class="co">#   Melting temperature in degrees Celsius</span></span>
+<span id="cb21-12"><a href="#cb21-12"></a></span>
+<span id="cb21-13"><a href="#cb21-13"></a>calculate_tm <span class="ot">=</span> <span class="cf">function</span>(sequence, <span class="at">method =</span> <span class="st">"wallace"</span>) {</span>
+<span id="cb21-14"><a href="#cb21-14"></a>  seq_upper <span class="ot">=</span> <span class="fu">toupper</span>(sequence)</span>
+<span id="cb21-15"><a href="#cb21-15"></a>  length <span class="ot">=</span> <span class="fu">nchar</span>(seq_upper)</span>
+<span id="cb21-16"><a href="#cb21-16"></a></span>
+<span id="cb21-17"><a href="#cb21-17"></a>  a_count <span class="ot">=</span> <span class="fu">str_count</span>(seq_upper, <span class="st">"A"</span>)</span>
+<span id="cb21-18"><a href="#cb21-18"></a>  t_count <span class="ot">=</span> <span class="fu">str_count</span>(seq_upper, <span class="st">"T"</span>)</span>
+<span id="cb21-19"><a href="#cb21-19"></a>  g_count <span class="ot">=</span> <span class="fu">str_count</span>(seq_upper, <span class="st">"G"</span>)</span>
+<span id="cb21-20"><a href="#cb21-20"></a>  c_count <span class="ot">=</span> <span class="fu">str_count</span>(seq_upper, <span class="st">"C"</span>)</span>
+<span id="cb21-21"><a href="#cb21-21"></a></span>
+<span id="cb21-22"><a href="#cb21-22"></a>  <span class="cf">if</span> (method <span class="sc">==</span> <span class="st">"wallace"</span> <span class="sc">||</span> length <span class="sc">&lt;</span> <span class="dv">14</span>) {</span>
+<span id="cb21-23"><a href="#cb21-23"></a>    <span class="co"># Wallace rule: Tm = 2(A+T) + 4(G+C)</span></span>
+<span id="cb21-24"><a href="#cb21-24"></a>    tm <span class="ot">=</span> <span class="dv">2</span> <span class="sc">*</span> (a_count <span class="sc">+</span> t_count) <span class="sc">+</span> <span class="dv">4</span> <span class="sc">*</span> (g_count <span class="sc">+</span> c_count)</span>
+<span id="cb21-25"><a href="#cb21-25"></a>  } <span class="cf">else</span> {</span>
+<span id="cb21-26"><a href="#cb21-26"></a>    <span class="co"># Simplified nearest-neighbor approximation</span></span>
+<span id="cb21-27"><a href="#cb21-27"></a>    tm <span class="ot">=</span> <span class="fl">64.9</span> <span class="sc">+</span> <span class="dv">41</span> <span class="sc">*</span> (g_count <span class="sc">+</span> c_count <span class="sc">-</span> <span class="fl">16.4</span>) <span class="sc">/</span> length</span>
+<span id="cb21-28"><a href="#cb21-28"></a>  }</span>
+<span id="cb21-29"><a href="#cb21-29"></a></span>
+<span id="cb21-30"><a href="#cb21-30"></a>  <span class="fu">return</span>(tm)</span>
+<span id="cb21-31"><a href="#cb21-31"></a>}</span>
+<span id="cb21-32"><a href="#cb21-32"></a></span>
+<span id="cb21-33"><a href="#cb21-33"></a><span class="fu">calculate_tm</span>(<span class="st">"ATGCGATCGATCG"</span>)</span>
+<span id="cb21-34"><a href="#cb21-34"></a><span class="co">#&gt; [1] 40</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+</section><section id="sec-fn-validate-inputs" class="level3"><h3 class="anchored" data-anchor-id="sec-fn-validate-inputs">3. Validate Inputs</h3>
+<p>Check that inputs are valid before processing:</p>
+<div class="cell" data-layout-align="center">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb22"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1"></a>gc_content_safe <span class="ot">=</span> <span class="cf">function</span>(sequence) {</span>
+<span id="cb22-2"><a href="#cb22-2"></a>  <span class="co"># Check input type</span></span>
+<span id="cb22-3"><a href="#cb22-3"></a>  <span class="cf">if</span> (<span class="sc">!</span><span class="fu">is.character</span>(sequence)) {</span>
+<span id="cb22-4"><a href="#cb22-4"></a>    <span class="fu">stop</span>(<span class="st">"Sequence must be a character string"</span>)</span>
+<span id="cb22-5"><a href="#cb22-5"></a>  }</span>
+<span id="cb22-6"><a href="#cb22-6"></a></span>
+<span id="cb22-7"><a href="#cb22-7"></a>  <span class="co"># Check for valid DNA characters</span></span>
+<span id="cb22-8"><a href="#cb22-8"></a>  seq_upper <span class="ot">=</span> <span class="fu">toupper</span>(sequence)</span>
+<span id="cb22-9"><a href="#cb22-9"></a>  invalid_chars <span class="ot">=</span> <span class="fu">str_remove_all</span>(seq_upper, <span class="st">"[ATGCN]"</span>)</span>
+<span id="cb22-10"><a href="#cb22-10"></a>  <span class="cf">if</span> (<span class="fu">nchar</span>(invalid_chars) <span class="sc">&gt;</span> <span class="dv">0</span>) {</span>
+<span id="cb22-11"><a href="#cb22-11"></a>    <span class="fu">warning</span>(<span class="fu">paste</span>(<span class="st">"Invalid characters removed:"</span>, invalid_chars))</span>
+<span id="cb22-12"><a href="#cb22-12"></a>  }</span>
+<span id="cb22-13"><a href="#cb22-13"></a></span>
+<span id="cb22-14"><a href="#cb22-14"></a>  gc_count <span class="ot">=</span> <span class="fu">str_count</span>(seq_upper, <span class="st">"[GC]"</span>)</span>
+<span id="cb22-15"><a href="#cb22-15"></a>  total_bases <span class="ot">=</span> <span class="fu">str_count</span>(seq_upper, <span class="st">"[ATGC]"</span>)</span>
+<span id="cb22-16"><a href="#cb22-16"></a></span>
+<span id="cb22-17"><a href="#cb22-17"></a>  <span class="cf">if</span> (total_bases <span class="sc">==</span> <span class="dv">0</span>) {</span>
+<span id="cb22-18"><a href="#cb22-18"></a>    <span class="fu">stop</span>(<span class="st">"No valid DNA bases found in sequence"</span>)</span>
+<span id="cb22-19"><a href="#cb22-19"></a>  }</span>
+<span id="cb22-20"><a href="#cb22-20"></a></span>
+<span id="cb22-21"><a href="#cb22-21"></a>  <span class="fu">return</span>(gc_count <span class="sc">/</span> total_bases)</span>
+<span id="cb22-22"><a href="#cb22-22"></a>}</span>
+<span id="cb22-23"><a href="#cb22-23"></a></span>
+<span id="cb22-24"><a href="#cb22-24"></a><span class="fu">gc_content_safe</span>(<span class="st">"ATGCGATCG"</span>)     <span class="co"># Works fine</span></span>
+<span id="cb22-25"><a href="#cb22-25"></a><span class="co">#&gt; [1] 0.5555556</span></span>
+<span id="cb22-26"><a href="#cb22-26"></a><span class="fu">gc_content_safe</span>(<span class="st">"ATGCXYZGATCG"</span>)  <span class="co"># Warning about invalid characters</span></span>
+<span id="cb22-27"><a href="#cb22-27"></a><span class="co">#&gt; [1] 0.5555556</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+</section><section id="sec-fn-focused" class="level3"><h3 class="anchored" data-anchor-id="sec-fn-focused">4. Keep Functions Focused</h3>
+<p>Each function should do one thing well. Break complex operations into smaller functions:</p>
+<div class="cell" data-layout-align="center">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb23"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1"></a><span class="co"># Instead of one giant function, break it up:</span></span>
+<span id="cb23-2"><a href="#cb23-2"></a></span>
+<span id="cb23-3"><a href="#cb23-3"></a><span class="co"># Step 1: Clean the sequence</span></span>
+<span id="cb23-4"><a href="#cb23-4"></a>clean_sequence <span class="ot">=</span> <span class="cf">function</span>(seq) {</span>
+<span id="cb23-5"><a href="#cb23-5"></a>  seq <span class="sc">%&gt;%</span></span>
+<span id="cb23-6"><a href="#cb23-6"></a>    <span class="fu">toupper</span>() <span class="sc">%&gt;%</span></span>
+<span id="cb23-7"><a href="#cb23-7"></a>    <span class="fu">str_remove_all</span>(<span class="st">"[^ATGC]"</span>)</span>
+<span id="cb23-8"><a href="#cb23-8"></a>}</span>
+<span id="cb23-9"><a href="#cb23-9"></a></span>
+<span id="cb23-10"><a href="#cb23-10"></a><span class="co"># Step 2: Calculate base composition</span></span>
+<span id="cb23-11"><a href="#cb23-11"></a>base_composition <span class="ot">=</span> <span class="cf">function</span>(seq) {</span>
+<span id="cb23-12"><a href="#cb23-12"></a>  <span class="fu">tibble</span>(</span>
+<span id="cb23-13"><a href="#cb23-13"></a>    <span class="at">A =</span> <span class="fu">str_count</span>(seq, <span class="st">"A"</span>),</span>
+<span id="cb23-14"><a href="#cb23-14"></a>    <span class="at">T =</span> <span class="fu">str_count</span>(seq, <span class="st">"T"</span>),</span>
+<span id="cb23-15"><a href="#cb23-15"></a>    <span class="at">G =</span> <span class="fu">str_count</span>(seq, <span class="st">"G"</span>),</span>
+<span id="cb23-16"><a href="#cb23-16"></a>    <span class="at">C =</span> <span class="fu">str_count</span>(seq, <span class="st">"C"</span>)</span>
+<span id="cb23-17"><a href="#cb23-17"></a>  )</span>
+<span id="cb23-18"><a href="#cb23-18"></a>}</span>
+<span id="cb23-19"><a href="#cb23-19"></a></span>
+<span id="cb23-20"><a href="#cb23-20"></a><span class="co"># Step 3: Derive statistics</span></span>
+<span id="cb23-21"><a href="#cb23-21"></a>sequence_stats <span class="ot">=</span> <span class="cf">function</span>(composition) {</span>
+<span id="cb23-22"><a href="#cb23-22"></a>  total <span class="ot">=</span> <span class="fu">sum</span>(composition)</span>
+<span id="cb23-23"><a href="#cb23-23"></a>  composition <span class="sc">%&gt;%</span></span>
+<span id="cb23-24"><a href="#cb23-24"></a>    <span class="fu">mutate</span>(</span>
+<span id="cb23-25"><a href="#cb23-25"></a>      <span class="at">total =</span> total,</span>
+<span id="cb23-26"><a href="#cb23-26"></a>      <span class="at">gc_content =</span> (G <span class="sc">+</span> C) <span class="sc">/</span> total,</span>
+<span id="cb23-27"><a href="#cb23-27"></a>      <span class="at">at_content =</span> (A <span class="sc">+</span> T) <span class="sc">/</span> total</span>
+<span id="cb23-28"><a href="#cb23-28"></a>    )</span>
+<span id="cb23-29"><a href="#cb23-29"></a>}</span>
+<span id="cb23-30"><a href="#cb23-30"></a></span>
+<span id="cb23-31"><a href="#cb23-31"></a><span class="co"># Combine them in a pipeline</span></span>
+<span id="cb23-32"><a href="#cb23-32"></a><span class="st">"atgcGATCgatcgNNNN"</span> <span class="sc">%&gt;%</span></span>
+<span id="cb23-33"><a href="#cb23-33"></a>  <span class="fu">clean_sequence</span>() <span class="sc">%&gt;%</span></span>
+<span id="cb23-34"><a href="#cb23-34"></a>  <span class="fu">base_composition</span>() <span class="sc">%&gt;%</span></span>
+<span id="cb23-35"><a href="#cb23-35"></a>  <span class="fu">sequence_stats</span>()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div class="kable-table">
+<table class="caption-top table table-sm table-striped small">
+<thead><tr class="header">
+<th style="text-align: right;">A</th>
+<th style="text-align: right;">T</th>
+<th style="text-align: right;">G</th>
+<th style="text-align: right;">C</th>
+<th style="text-align: right;">total</th>
+<th style="text-align: right;">gc_content</th>
+<th style="text-align: right;">at_content</th>
+</tr></thead>
+<tbody><tr class="odd">
+<td style="text-align: right;">3</td>
+<td style="text-align: right;">3</td>
+<td style="text-align: right;">4</td>
+<td style="text-align: right;">3</td>
+<td style="text-align: right;">13</td>
+<td style="text-align: right;">0.5384615</td>
+<td style="text-align: right;">0.4615385</td>
+</tr></tbody>
+</table>
+</div>
+</div>
+</div>
+</section></section><section id="sec-functions-summary" class="level2" data-number="13.9"><h2 data-number="13.9" class="anchored" data-anchor-id="sec-functions-summary">
+<span class="header-section-number">13.9</span> Summary</h2>
+<p>Writing functions is a fundamental programming skill that will dramatically improve your data analysis workflows:</p>
+<ul>
+<li>
+<strong>Basic syntax</strong>: <code>function_name = function(args) { body; return(value) }</code>
+</li>
+<li>
+<strong>Return values</strong>: Use explicit <code><a href="https://rdrr.io/r/base/function.html">return()</a></code> statements; return lists or data frames for multiple values</li>
+<li>
+<strong>Default arguments</strong>: Provide sensible defaults for commonly-used parameter values</li>
+<li>
+<strong>Lexical scoping</strong>: Functions operate in their own environment, keeping your global environment clean</li>
+<li>
+<strong>Control flow</strong>: Use <code>if/else</code> and <code>case_when()</code> to handle different conditions</li>
+<li>
+<strong>Functional programming</strong>: Prefer <code><a href="https://rdrr.io/r/base/lapply.html">lapply()</a></code>/<code>map()</code> over for loops for iteration</li>
+<li>
+<strong>Multiple inputs</strong>: Use <code>pmap()</code> or data frame inputs for complex parameter combinations</li>
+</ul>
+<p>The next chapter (<a href="14-parallel-computing.html" class="quarto-xref"><span>Chapter 14</span></a>) will show you how to run functions in parallel, catch errors gracefully (<a href="14-parallel-computing.html#sec-parallel-errors" class="quarto-xref"><span>Section 14.7</span></a>), and cache results for expensive computations (<a href="14-parallel-computing.html#sec-caching" class="quarto-xref"><span>Section 14.8</span></a>).</p>
+<div class="callout callout-style-default callout-tip callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Tip
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>For quick reference on R function syntax and functional programming tools like <code><a href="https://rdrr.io/r/base/lapply.html">lapply()</a></code> and <code>purrr</code>, see <a href="appendix-r.html" class="quarto-xref"><span>Appendix C</span></a>.</p>
+</div>
+</div>
+</section><section id="sec-fn-additional-reading" class="level2 unnumbered"><h2 class="unnumbered anchored" data-anchor-id="sec-fn-additional-reading">Additional Reading</h2>
+<p>To deepen your understanding of functions and functional programming in R:</p>
+<ul>
+<li>
+<strong><a href="https://r4ds.hadley.nz/functions">R for Data Science: Functions</a></strong> <span class="citation" data-cites="wickham2023r">(<a href="../references.html#ref-wickham2023r" role="doc-biblioref">Wickham et al., 2023</a>)</span> — Excellent introduction to writing functions</li>
+<li>
+<strong><a href="https://adv-r.hadley.nz/functions.html">Advanced R: Functions</a></strong> by Hadley Wickham — Deep dive into function mechanics</li>
+<li>
+<strong><a href="https://purrr.tidyverse.org/">purrr Documentation</a></strong> — Complete guide to functional programming with purrr</li>
+<li>
+<strong><a href="https://r4ds.hadley.nz/iteration">R for Data Science: Iteration</a></strong> — More on map functions and iteration</li>
+</ul>
+<p>For advanced function development:</p>
+<ul>
+<li>
+<strong><a href="https://adv-r.hadley.nz/fp.html">Advanced R: Functional Programming</a></strong> — Closures, function factories, and more</li>
+<li>
+<strong><a href="https://r-pkgs.org/">R Packages</a></strong> by Wickham and Bryan — When you’re ready to package your functions</li>
+</ul></section><section id="sec-fn-exercises" class="level2 unnumbered"><h2 class="unnumbered anchored" data-anchor-id="sec-fn-exercises">Exercises</h2>
+<div class="callout callout-style-default callout-tip callout-titled" title="Practice Exercises">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Tip</span>Practice Exercises
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p><strong>Exercise 1: Basic Function</strong></p>
+<p>Write a function called <code>count_codons()</code> that takes a DNA sequence and returns the number of complete codons (groups of 3 nucleotides). For example, “ATGCGA” has 2 complete codons.</p>
+<p><strong>Exercise 2: Function with Multiple Returns</strong></p>
+<p>Write a function <code>analyze_sequence()</code> that takes a DNA sequence and returns a data frame with: - The sequence length - GC content - Number of each base (A, T, G, C) - Whether it starts with a start codon (ATG) - Whether it ends with a stop codon (TAA, TAG, or TGA)</p>
+<p><strong>Exercise 3: Control Flow</strong></p>
+<p>Write a function <code>translate_codon()</code> that takes a three-letter codon and returns the corresponding amino acid (use a simplified table with just 5-10 codons). Include error handling for invalid inputs.</p>
+<p><strong>Exercise 4: Iteration</strong></p>
+<p>You have a vector of 10 DNA sequences. Use <code>map_df()</code> to apply your <code>analyze_sequence()</code> function from Exercise 2 to all of them and combine the results into a single data frame.</p>
+<p><strong>Exercise 5: Multiple Inputs</strong></p>
+<p>Write a function <code>dilution_series()</code> that takes an initial concentration and dilution factor, then returns a data frame showing the concentration at each step for a specified number of dilutions. Use <code>pmap()</code> to apply this to multiple starting conditions.</p>
+<p><strong>Exercise 6: Refactoring</strong></p>
+<p>Take the following for loop and rewrite it using functional programming:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb24"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1"></a>results <span class="ot">=</span> <span class="fu">c</span>()</span>
+<span id="cb24-2"><a href="#cb24-2"></a><span class="cf">for</span> (i <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span><span class="fu">length</span>(sequences)) {</span>
+<span id="cb24-3"><a href="#cb24-3"></a>  gc <span class="ot">=</span> <span class="fu">gc_content</span>(sequences[i])</span>
+<span id="cb24-4"><a href="#cb24-4"></a>  <span class="cf">if</span> (gc <span class="sc">&gt;</span> <span class="fl">0.5</span>) {</span>
+<span id="cb24-5"><a href="#cb24-5"></a>    results <span class="ot">=</span> <span class="fu">c</span>(results, <span class="st">"high"</span>)</span>
+<span id="cb24-6"><a href="#cb24-6"></a>  } <span class="cf">else</span> {</span>
+<span id="cb24-7"><a href="#cb24-7"></a>    results <span class="ot">=</span> <span class="fu">c</span>(results, <span class="st">"low"</span>)</span>
+<span id="cb24-8"><a href="#cb24-8"></a>  }</span>
+<span id="cb24-9"><a href="#cb24-9"></a>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+</div>
+
+
+<div id="refs" class="references csl-bib-body hanging-indent" data-entry-spacing="0" data-line-spacing="2" role="list" style="display: none">
+<div id="ref-rproject2024" class="csl-entry" role="listitem">
+R Core Team (2024). <a href="https://www.R-project.org/">R: A language and environment for statistical computing</a>.
+</div>
+<div id="ref-wickham2019tidyverse" class="csl-entry" role="listitem">
+Wickham, H., Averick, M., Bryan, J., Chang, W., McGowan, L. D., François, R., Grolemund, G., Hayes, A., Henry, L., Hester, J., Kuhn, M., Pedersen, T. L., Miller, E., Bache, S. M., Müller, K., Ooms, J., Robinson, D., Seidel, D. P., Spinu, V., et al. (2019). <a href="https://doi.org/10.21105/joss.01686">Welcome to the tidyverse</a>.
+</div>
+<div id="ref-wickham2023r" class="csl-entry" role="listitem">
+Wickham, H., Çetinkaya-Rundel, M., &amp; Grolemund, G. (2023). <em><a href="https://r4ds.hadley.nz/">R for data science: Import, tidy, transform, visualize, and model data</a></em>.
+</div>
+</div>
+</section></main><!-- /main --><script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    // Ensure there is a toggle, if there isn't float one in the top right
+    if (window.document.querySelector('.quarto-color-scheme-toggle') === null) {
+      const a = window.document.createElement('a');
+      a.classList.add('top-right');
+      a.classList.add('quarto-color-scheme-toggle');
+      a.href = "";
+      a.onclick = function() { try { window.quartoToggleColorScheme(); } catch {} return false; };
+      const i = window.document.createElement("i");
+      i.classList.add('bi');
+      a.appendChild(i);
+      window.document.body.appendChild(a);
+    }
+    setColorSchemeToggle(hasAlternateSentinel())
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+            // target, if specified
+            link.setAttribute("target", "_blank");
+            if (link.getAttribute("rel") === null) {
+              link.setAttribute("rel", "noopener");
+            }
+            // default icon
+            link.classList.add("external");
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        const annoteTargets = window.document.querySelectorAll('.code-annotation-anchor');
+        for (let i=0; i<annoteTargets.length; i++) {
+          const annoteTarget = annoteTargets[i];
+          const targetCell = annoteTarget.getAttribute("data-target-cell");
+          const targetAnnotation = annoteTarget.getAttribute("data-target-annotation");
+          const contentFn = () => {
+            const content = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+            if (content) {
+              const tipContent = content.cloneNode(true);
+              tipContent.classList.add("code-annotation-tip-content");
+              return tipContent.outerHTML;
+            }
+          }
+          const config = {
+            allowHTML: true,
+            content: contentFn,
+            onShow: (instance) => {
+              selectCodeLines(instance.reference);
+              instance.reference.classList.add('code-annotation-active');
+              window.tippy.hideAll();
+            },
+            onHide: (instance) => {
+              unselectCodeLines();
+              instance.reference.classList.remove('code-annotation-active');
+            },
+            maxWidth: 300,
+            delay: [50, 0],
+            duration: [200, 0],
+            offset: [5, 10],
+            arrow: true,
+            appendTo: function(el) {
+              return el.parentElement.parentElement.parentElement;
+            },
+            interactive: true,
+            interactiveBorder: 10,
+            theme: 'quarto',
+            placement: 'right',
+            popperOptions: {
+              modifiers: [
+              {
+                name: 'flip',
+                options: {
+                  flipVariations: false, // true by default
+                  allowedAutoPlacements: ['right'],
+                  fallbackPlacements: ['right', 'top', 'top-start', 'top-end', 'bottom', 'bottom-start', 'bottom-end', 'left'],
+                },
+              },
+              {
+                name: 'preventOverflow',
+                options: {
+                  mainAxis: false,
+                  altAxis: false
+                }
+              }
+              ]        
+            }      
+          };
+          window.tippy(annoteTarget, config); 
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script><nav class="page-navigation"><div class="nav-page nav-page-previous">
+      <a href="../chapters/09-data-visualization.html" class="pagination-link" aria-label="Data Visualization with ggplot2">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">12</span>&nbsp; <span class="chapter-title">Data Visualization with ggplot2</span></span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+      <a href="../chapters/14-parallel-computing.html" class="pagination-link" aria-label="Parallel Computing in R">
+        <span class="nav-page-text"><span class="chapter-number">14</span>&nbsp; <span class="chapter-title">Parallel Computing in R</span></span> <i class="bi bi-arrow-right-short"></i>
+      </a>
+  </div>
+</nav>
+</div> <!-- /content -->
+<footer class="footer"><div class="nav-footer">
+    <div class="nav-footer-left">
+<p>© 2026 William A. Cresko | Knight Campus for Accelerating Scientific Impact</p>
+</div>   
+    <div class="nav-footer-center">
+      &nbsp;
+    <div class="toc-actions d-sm-block d-md-none"><ul><li><a href="https://github.com/wcresko/BioE_Comp_Tools_Fa2026/edit/main/Book/chapters/13-writing-functions.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li><li><a href="https://github.com/wcresko/BioE_Comp_Tools_Fa2026/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></div>
+    <div class="nav-footer-right">
+<p><a href="https://wcresko.github.io/BioE_Comp_Tools_Fa2026/">Course website</a> | Built with <a href="https://quarto.org/">Quarto</a></p>
+</div>
+  </div>
+</footer>
+
+
+</body></html>

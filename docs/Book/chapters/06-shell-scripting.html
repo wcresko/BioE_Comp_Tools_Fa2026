@@ -1,0 +1,2148 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.9.38">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+<meta name="description" content="A comprehensive guide to essential computational tools for graduate students in bioengineering and life sciences, covering Unix/Linux, R and Python, editors and IDEs, computing resources at the University of Oregon, AI-assisted coding, reproducible documents, version control with Git/GitHub, and high-performance computing.">
+<title>8&nbsp; Shell Scripting – Foundational Computational Tools for Bioengineers</title>
+<style>
+/* Default styles provided by pandoc.
+** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+*/
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+/* CSS for citations */
+div.csl-bib-body { }
+div.csl-entry {
+  clear: both;
+  margin-bottom: 0em;
+}
+.hanging-indent div.csl-entry {
+  margin-left:2em;
+  text-indent:-2em;
+}
+div.csl-left-margin {
+  min-width:2em;
+  float:left;
+}
+div.csl-right-inline {
+  margin-left:2em;
+  padding-left:1em;
+}
+div.csl-indent {
+  margin-left: 2em;
+}</style>
+
+<script src="../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../">
+<link href="../chapters/07-r-programming.html" rel="next">
+<link href="../chapters/05-grep-regex.html" rel="prev">
+<script src="../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../site_libs/quarto-html/popper.min.js"></script>
+<script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-3836fb1e46d4cb83c75cfb618a44b85e.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-text-highlighting-styles">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-dark-4234edb6284ff370703ce34fde7cc7c8.css" rel="stylesheet" class="quarto-color-scheme quarto-color-alternate" id="quarto-text-highlighting-styles">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-3836fb1e46d4cb83c75cfb618a44b85e.css" rel="stylesheet" class="quarto-color-scheme-extra" id="quarto-text-highlighting-styles">
+<script src="../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../site_libs/bootstrap/bootstrap-882387fc1d6267d1b7263d283c4866b5.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
+<link href="../site_libs/bootstrap/bootstrap-dark-814ca0c199338aa1abdb5ae469f0d636.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
+<link href="../site_libs/bootstrap/bootstrap-882387fc1d6267d1b7263d283c4866b5.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light"><script id="quarto-search-options" type="application/json">{
+  "location": "sidebar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "start",
+  "type": "textbox",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+</head>
+<body class="nav-sidebar docked quarto-light"><script id="quarto-html-before-body" type="application/javascript">
+    const toggleBodyColorMode = (bsSheetEl) => {
+      const mode = bsSheetEl.getAttribute("data-mode");
+      const bodyEl = window.document.querySelector("body");
+      if (mode === "dark") {
+        bodyEl.classList.add("quarto-dark");
+        bodyEl.classList.remove("quarto-light");
+      } else {
+        bodyEl.classList.add("quarto-light");
+        bodyEl.classList.remove("quarto-dark");
+      }
+    }
+    const toggleBodyColorPrimary = () => {
+      const bsSheetEl = window.document.querySelector("link#quarto-bootstrap:not([rel=disabled-stylesheet])");
+      if (bsSheetEl) {
+        toggleBodyColorMode(bsSheetEl);
+      }
+    }
+    const setColorSchemeToggle = (alternate) => {
+      const toggles = window.document.querySelectorAll('.quarto-color-scheme-toggle');
+      for (let i=0; i < toggles.length; i++) {
+        const toggle = toggles[i];
+        if (toggle) {
+          if (alternate) {
+            toggle.classList.add("alternate");
+          } else {
+            toggle.classList.remove("alternate");
+          }
+        }
+      }
+    };
+    const toggleColorMode = (alternate) => {
+      // Switch the stylesheets
+      const primaryStylesheets = window.document.querySelectorAll('link.quarto-color-scheme:not(.quarto-color-alternate)');
+      const alternateStylesheets = window.document.querySelectorAll('link.quarto-color-scheme.quarto-color-alternate');
+      manageTransitions('#quarto-margin-sidebar .nav-link', false);
+      if (alternate) {
+        // note: dark is layered on light, we don't disable primary!
+        enableStylesheet(alternateStylesheets);
+        for (const sheetNode of alternateStylesheets) {
+          if (sheetNode.id === "quarto-bootstrap") {
+            toggleBodyColorMode(sheetNode);
+          }
+        }
+      } else {
+        disableStylesheet(alternateStylesheets);
+        enableStylesheet(primaryStylesheets)
+        toggleBodyColorPrimary();
+      }
+      manageTransitions('#quarto-margin-sidebar .nav-link', true);
+      // Switch the toggles
+      setColorSchemeToggle(alternate)
+      // Hack to workaround the fact that safari doesn't
+      // properly recolor the scrollbar when toggling (#1455)
+      if (navigator.userAgent.indexOf('Safari') > 0 && navigator.userAgent.indexOf('Chrome') == -1) {
+        manageTransitions("body", false);
+        window.scrollTo(0, 1);
+        setTimeout(() => {
+          window.scrollTo(0, 0);
+          manageTransitions("body", true);
+        }, 40);
+      }
+    }
+    const disableStylesheet = (stylesheets) => {
+      for (let i=0; i < stylesheets.length; i++) {
+        const stylesheet = stylesheets[i];
+        stylesheet.rel = 'disabled-stylesheet';
+      }
+    }
+    const enableStylesheet = (stylesheets) => {
+      for (let i=0; i < stylesheets.length; i++) {
+        const stylesheet = stylesheets[i];
+        if(stylesheet.rel !== 'stylesheet') { // for Chrome, which will still FOUC without this check
+          stylesheet.rel = 'stylesheet';
+        }
+      }
+    }
+    const manageTransitions = (selector, allowTransitions) => {
+      const els = window.document.querySelectorAll(selector);
+      for (let i=0; i < els.length; i++) {
+        const el = els[i];
+        if (allowTransitions) {
+          el.classList.remove('notransition');
+        } else {
+          el.classList.add('notransition');
+        }
+      }
+    }
+    const isFileUrl = () => {
+      return window.location.protocol === 'file:';
+    }
+    const hasAlternateSentinel = () => {
+      let styleSentinel = getColorSchemeSentinel();
+      if (styleSentinel !== null) {
+        return styleSentinel === "alternate";
+      } else {
+        return false;
+      }
+    }
+    const setStyleSentinel = (alternate) => {
+      const value = alternate ? "alternate" : "default";
+      if (!isFileUrl()) {
+        window.localStorage.setItem("quarto-color-scheme", value);
+      } else {
+        localAlternateSentinel = value;
+      }
+    }
+    const getColorSchemeSentinel = () => {
+      if (!isFileUrl()) {
+        const storageValue = window.localStorage.getItem("quarto-color-scheme");
+        return storageValue != null ? storageValue : localAlternateSentinel;
+      } else {
+        return localAlternateSentinel;
+      }
+    }
+    const toggleGiscusIfUsed = (isAlternate, darkModeDefault) => {
+      const baseTheme = document.querySelector('#giscus-base-theme')?.value ?? 'light';
+      const alternateTheme = document.querySelector('#giscus-alt-theme')?.value ?? 'dark';
+      let newTheme = '';
+      if(authorPrefersDark) {
+        newTheme = isAlternate ? baseTheme : alternateTheme;
+      } else {
+        newTheme = isAlternate ? alternateTheme : baseTheme;
+      }
+      const changeGiscusTheme = () => {
+        // From: https://github.com/giscus/giscus/issues/336
+        const sendMessage = (message) => {
+          const iframe = document.querySelector('iframe.giscus-frame');
+          if (!iframe) return;
+          iframe.contentWindow.postMessage({ giscus: message }, 'https://giscus.app');
+        }
+        sendMessage({
+          setConfig: {
+            theme: newTheme
+          }
+        });
+      }
+      const isGiscussLoaded = window.document.querySelector('iframe.giscus-frame') !== null;
+      if (isGiscussLoaded) {
+        changeGiscusTheme();
+      }
+    };
+    const authorPrefersDark = false;
+    const darkModeDefault = authorPrefersDark;
+      document.querySelector('link#quarto-text-highlighting-styles.quarto-color-scheme-extra').rel = 'disabled-stylesheet';
+      document.querySelector('link#quarto-bootstrap.quarto-color-scheme-extra').rel = 'disabled-stylesheet';
+    let localAlternateSentinel = darkModeDefault ? 'alternate' : 'default';
+    // Dark / light mode switch
+    window.quartoToggleColorScheme = () => {
+      // Read the current dark / light value
+      let toAlternate = !hasAlternateSentinel();
+      toggleColorMode(toAlternate);
+      setStyleSentinel(toAlternate);
+      toggleGiscusIfUsed(toAlternate, darkModeDefault);
+      window.dispatchEvent(new Event('resize'));
+    };
+    // Switch to dark mode if need be
+    if (hasAlternateSentinel()) {
+      toggleColorMode(true);
+    } else {
+      toggleColorMode(false);
+    }
+  </script>
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top"><nav class="quarto-secondary-nav"><div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../chapters/06-shell-scripting.html"><span class="chapter-number">8</span>&nbsp; <span class="chapter-title">Shell Scripting</span></a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+      <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
+        <i class="bi bi-search"></i>
+      </button>
+    </div>
+  </nav></header><!-- content --><div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation docked overflow-auto"><div class="pt-lg-2 mt-2 text-left sidebar-header">
+    <div class="sidebar-title mb-0 py-0">
+      <a href="../">Foundational Computational Tools for Bioengineers</a> 
+        <div class="sidebar-tools-main">
+    <a href="https://github.com/wcresko/BioE_Comp_Tools_Fa2026/tree/main/Book/" title="Source Code" class="quarto-navigation-tool px-1" aria-label="Source Code"><i class="bi bi-github"></i></a>
+  <a href="" class="quarto-color-scheme-toggle quarto-navigation-tool  px-1" onclick="window.quartoToggleColorScheme(); return false;" title="Toggle dark mode"><i class="bi"></i></a>
+</div>
+    </div>
+      </div>
+        <div class="mt-2 flex-shrink-0 align-items-center">
+        <div class="sidebar-search">
+        <div id="quarto-search" class="" title="Search"></div>
+        </div>
+        </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+<li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Preface</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/01-introduction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">Introduction to Computational Tools</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/02-your-toolkit.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">Your Computational Toolkit: Installing and Using Editors and IDEs</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/03-computing-at-uo.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Computing Resources at the University of Oregon</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/02-computer-systems.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Computer Systems Architecture</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/03-unix-fundamentals.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Unix Fundamentals</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/04-files-pipes.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Files, Pipes, and Redirection</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/05-grep-regex.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">GREP and Regular Expressions</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/06-shell-scripting.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text"><span class="chapter-number">8</span>&nbsp; <span class="chapter-title">Shell Scripting</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/07-r-programming.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">9</span>&nbsp; <span class="chapter-title">R Programming Fundamentals</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/18-python-programming.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">10</span>&nbsp; <span class="chapter-title">Python Programming Fundamentals</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/08-tidy-data.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">11</span>&nbsp; <span class="chapter-title">Tidy Data Principles</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/09-data-visualization.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">12</span>&nbsp; <span class="chapter-title">Data Visualization with ggplot2</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/13-writing-functions.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">13</span>&nbsp; <span class="chapter-title">Writing Functions in R</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/14-parallel-computing.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">14</span>&nbsp; <span class="chapter-title">Parallel Computing in R</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/15-databases.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">15</span>&nbsp; <span class="chapter-title">Working with Databases</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/12-quarto-documents.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">16</span>&nbsp; <span class="chapter-title">Reproducible Documents with Quarto</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/16-latex-basics.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">17</span>&nbsp; <span class="chapter-title">LaTeX for Scientific Documents</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/17-ai-assisted-coding.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">18</span>&nbsp; <span class="chapter-title">Coding with AI Assistants</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/10-git-github.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">19</span>&nbsp; <span class="chapter-title">Version Control with Git and GitHub</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/11-hpc-talapas.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">20</span>&nbsp; <span class="chapter-title">High-Performance Computing with Talapas</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../references.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">References</span></a>
+  </div>
+</li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="false">
+ <span class="menu-text">Appendices</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="false" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 ">
+<li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/appendix-unix.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">A</span>&nbsp; <span class="chapter-title">Unix Command Reference</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/appendix-git.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">B</span>&nbsp; <span class="chapter-title">Git Command Reference</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/appendix-r.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">C</span>&nbsp; <span class="chapter-title">R Command Reference</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/appendix-python.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">D</span>&nbsp; <span class="chapter-title">Python Quick Reference</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/appendix-latex.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">E</span>&nbsp; <span class="chapter-title">LaTeX Command Reference</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/appendix-slurm.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">F</span>&nbsp; <span class="chapter-title">SLURM Command Reference</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/appendix-regex.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">G</span>&nbsp; <span class="chapter-title">Regular Expression Reference</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/appendix-shortcuts.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">H</span>&nbsp; <span class="chapter-title">Keyboard Shortcuts Reference</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/appendix-data-formats.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">I</span>&nbsp; <span class="chapter-title">Common Data Formats &amp; Public Repositories</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/appendix-glossary.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">J</span>&nbsp; <span class="chapter-title">Glossary</span></span></a>
+  </div>
+</li>
+      </ul>
+</li>
+    </ul>
+</div>
+</nav><div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active"><h2 id="toc-title">Table of contents</h2>
+   
+  <ul>
+<li><a href="#sec-why-shell-scripting" id="toc-sec-why-shell-scripting" class="nav-link active" data-scroll-target="#sec-why-shell-scripting"><span class="header-section-number">8.1</span> Why Shell Scripting?</a></li>
+  <li>
+<a href="#sec-first-script" id="toc-sec-first-script" class="nav-link" data-scroll-target="#sec-first-script"><span class="header-section-number">8.2</span> Your First Shell Script</a>
+  <ul class="collapse">
+<li><a href="#sec-the-shebang-line" id="toc-sec-the-shebang-line" class="nav-link" data-scroll-target="#sec-the-shebang-line">The Shebang Line</a></li>
+  <li><a href="#sec-running-scripts" id="toc-sec-running-scripts" class="nav-link" data-scroll-target="#sec-running-scripts">Running Scripts</a></li>
+  </ul>
+</li>
+  <li>
+<a href="#sec-shell-variables" id="toc-sec-shell-variables" class="nav-link" data-scroll-target="#sec-shell-variables"><span class="header-section-number">8.3</span> Variables</a>
+  <ul class="collapse">
+<li><a href="#sec-assigning-variables" id="toc-sec-assigning-variables" class="nav-link" data-scroll-target="#sec-assigning-variables">Assigning Variables</a></li>
+  <li><a href="#sec-command-substitution" id="toc-sec-command-substitution" class="nav-link" data-scroll-target="#sec-command-substitution">Command Substitution</a></li>
+  <li><a href="#sec-arithmetic-operations" id="toc-sec-arithmetic-operations" class="nav-link" data-scroll-target="#sec-arithmetic-operations">Arithmetic Operations</a></li>
+  <li><a href="#sec-string-operations" id="toc-sec-string-operations" class="nav-link" data-scroll-target="#sec-string-operations">String Operations</a></li>
+  </ul>
+</li>
+  <li><a href="#sec-shell-arrays" id="toc-sec-shell-arrays" class="nav-link" data-scroll-target="#sec-shell-arrays"><span class="header-section-number">8.4</span> Arrays</a></li>
+  <li>
+<a href="#sec-shell-conditionals" id="toc-sec-shell-conditionals" class="nav-link" data-scroll-target="#sec-shell-conditionals"><span class="header-section-number">8.5</span> Conditional Statements</a>
+  <ul class="collapse">
+<li><a href="#sec-basic-if-then-else" id="toc-sec-basic-if-then-else" class="nav-link" data-scroll-target="#sec-basic-if-then-else">Basic if/then/else</a></li>
+  <li><a href="#sec-test-operators" id="toc-sec-test-operators" class="nav-link" data-scroll-target="#sec-test-operators">Test Operators</a></li>
+  <li><a href="#sec-shell-examples" id="toc-sec-shell-examples" class="nav-link" data-scroll-target="#sec-shell-examples">Examples</a></li>
+  </ul>
+</li>
+  <li>
+<a href="#sec-shell-loops" id="toc-sec-shell-loops" class="nav-link" data-scroll-target="#sec-shell-loops"><span class="header-section-number">8.6</span> Loops</a>
+  <ul class="collapse">
+<li><a href="#sec-shell-for-loops" id="toc-sec-shell-for-loops" class="nav-link" data-scroll-target="#sec-shell-for-loops">For Loops</a></li>
+  <li><a href="#sec-shell-while-loops" id="toc-sec-shell-while-loops" class="nav-link" data-scroll-target="#sec-shell-while-loops">While Loops</a></li>
+  <li><a href="#sec-loop-control" id="toc-sec-loop-control" class="nav-link" data-scroll-target="#sec-loop-control">Loop Control</a></li>
+  </ul>
+</li>
+  <li>
+<a href="#sec-cli-arguments" id="toc-sec-cli-arguments" class="nav-link" data-scroll-target="#sec-cli-arguments"><span class="header-section-number">8.7</span> Command-Line Arguments</a>
+  <ul class="collapse">
+<li><a href="#sec-argument-validation" id="toc-sec-argument-validation" class="nav-link" data-scroll-target="#sec-argument-validation">Argument Validation</a></li>
+  </ul>
+</li>
+  <li>
+<a href="#sec-shell-functions" id="toc-sec-shell-functions" class="nav-link" data-scroll-target="#sec-shell-functions"><span class="header-section-number">8.8</span> Functions</a>
+  <ul class="collapse">
+<li><a href="#sec-shell-return-values" id="toc-sec-shell-return-values" class="nav-link" data-scroll-target="#sec-shell-return-values">Return Values</a></li>
+  </ul>
+</li>
+  <li>
+<a href="#sec-error-handling" id="toc-sec-error-handling" class="nav-link" data-scroll-target="#sec-error-handling"><span class="header-section-number">8.9</span> Error Handling</a>
+  <ul class="collapse">
+<li><a href="#sec-exit-status" id="toc-sec-exit-status" class="nav-link" data-scroll-target="#sec-exit-status">Exit Status</a></li>
+  <li><a href="#sec-strict-mode" id="toc-sec-strict-mode" class="nav-link" data-scroll-target="#sec-strict-mode">Strict Mode</a></li>
+  <li><a href="#sec-custom-error-handling" id="toc-sec-custom-error-handling" class="nav-link" data-scroll-target="#sec-custom-error-handling">Custom Error Handling</a></li>
+  <li><a href="#sec-cleanup-on-exit" id="toc-sec-cleanup-on-exit" class="nav-link" data-scroll-target="#sec-cleanup-on-exit">Cleanup on Exit</a></li>
+  </ul>
+</li>
+  <li>
+<a href="#sec-rscript" id="toc-sec-rscript" class="nav-link" data-scroll-target="#sec-rscript"><span class="header-section-number">8.10</span> Running R Scripts from the Shell</a>
+  <ul class="collapse">
+<li><a href="#sec-shell-basic-usage" id="toc-sec-shell-basic-usage" class="nav-link" data-scroll-target="#sec-shell-basic-usage">Basic Usage</a></li>
+  <li><a href="#sec-passing-arguments-to-r-scripts" id="toc-sec-passing-arguments-to-r-scripts" class="nav-link" data-scroll-target="#sec-passing-arguments-to-r-scripts">Passing Arguments to R Scripts</a></li>
+  <li><a href="#sec-combining-shell-and-r" id="toc-sec-combining-shell-and-r" class="nav-link" data-scroll-target="#sec-combining-shell-and-r">Combining Shell and R</a></li>
+  </ul>
+</li>
+  <li><a href="#sec-scripts-other-languages" id="toc-sec-scripts-other-languages" class="nav-link" data-scroll-target="#sec-scripts-other-languages"><span class="header-section-number">8.11</span> Scripts in Other Languages</a></li>
+  <li><a href="#sec-complete-script" id="toc-sec-complete-script" class="nav-link" data-scroll-target="#sec-complete-script"><span class="header-section-number">8.12</span> A Complete Bioinformatics Script</a></li>
+  <li><a href="#sec-scripting-best-practices" id="toc-sec-scripting-best-practices" class="nav-link" data-scroll-target="#sec-scripting-best-practices"><span class="header-section-number">8.13</span> Best Practices Summary</a></li>
+  <li><a href="#sec-scripting-summary" id="toc-sec-scripting-summary" class="nav-link" data-scroll-target="#sec-scripting-summary"><span class="header-section-number">8.14</span> Summary</a></li>
+  <li><a href="#sec-shell-additional-reading" id="toc-sec-shell-additional-reading" class="nav-link" data-scroll-target="#sec-shell-additional-reading">Additional Reading</a></li>
+  <li><a href="#sec-shell-exercises" id="toc-sec-shell-exercises" class="nav-link" data-scroll-target="#sec-shell-exercises">Exercises</a></li>
+  </ul><div class="toc-actions"><ul><li><a href="https://github.com/wcresko/BioE_Comp_Tools_Fa2026/edit/main/Book/chapters/06-shell-scripting.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li><li><a href="https://github.com/wcresko/BioE_Comp_Tools_Fa2026/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content"><header id="title-block-header" class="quarto-title-block default"><div class="quarto-title">
+<h1 class="title"><span id="sec-shell-scripting" class="quarto-section-identifier"><span class="chapter-number">8</span>&nbsp; <span class="chapter-title">Shell Scripting</span></span></h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header><div class="callout callout-style-default callout-note callout-titled" title="Learning Objectives">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>Learning Objectives
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>After completing this chapter, you will be able to:</p>
+<ul>
+<li>Create and execute shell scripts</li>
+<li>Use variables, arrays, and command substitution</li>
+<li>Write conditional statements and loops</li>
+<li>Define and call functions</li>
+<li>Handle command-line arguments</li>
+<li>Implement proper error handling</li>
+<li>Build reproducible analysis pipelines</li>
+</ul>
+</div>
+</div>
+<section id="sec-why-shell-scripting" class="level2" data-number="8.1"><h2 data-number="8.1" class="anchored" data-anchor-id="sec-why-shell-scripting">
+<span class="header-section-number">8.1</span> Why Shell Scripting?</h2>
+<p>Throughout the previous chapters, you’ve been typing commands interactively. While this is great for exploration, real-world analyses require something more <span class="citation" data-cites="sandve2013ten">(<a href="../references.html#ref-sandve2013ten" role="doc-biblioref"><span class="nocase">Sandve et al.</span>, 2013</a>)</span>. You need <strong>reproducibility</strong>—a complete record of exactly what you did so you (or others) can repeat the analysis. You need <strong>automation</strong> so you can run the same analysis on many files without typing each command manually. Scripts provide <strong>efficiency</strong> by eliminating repetitive typing, and they serve as <strong>documentation</strong> that explains why you did each step. Finally, scripts enable <strong>sharing</strong>—letting collaborators reproduce your work with a single command.</p>
+<p>Shell scripts transform a series of commands into a reusable, documented program.</p>
+</section><section id="sec-first-script" class="level2" data-number="8.2"><h2 data-number="8.2" class="anchored" data-anchor-id="sec-first-script">
+<span class="header-section-number">8.2</span> Your First Shell Script</h2>
+<p>A shell script is simply a text file containing commands. Let’s create one:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1"></a><span class="co">#!/bin/bash</span></span>
+<span id="cb1-2"><a href="#cb1-2"></a><span class="co"># first_script.sh - My first shell script</span></span>
+<span id="cb1-3"><a href="#cb1-3"></a><span class="co"># Author: Your Name</span></span>
+<span id="cb1-4"><a href="#cb1-4"></a><span class="co"># Date: 2025-01-15</span></span>
+<span id="cb1-5"><a href="#cb1-5"></a></span>
+<span id="cb1-6"><a href="#cb1-6"></a><span class="co"># Display a greeting</span></span>
+<span id="cb1-7"><a href="#cb1-7"></a><span class="bu">echo</span> <span class="st">"Hello, Bioengineering!"</span></span>
+<span id="cb1-8"><a href="#cb1-8"></a></span>
+<span id="cb1-9"><a href="#cb1-9"></a><span class="co"># Show the current date</span></span>
+<span id="cb1-10"><a href="#cb1-10"></a><span class="bu">echo</span> <span class="st">"Today is: </span><span class="va">$(</span><span class="fu">date</span> +%Y-%m-%d<span class="va">)</span><span class="st">"</span></span>
+<span id="cb1-11"><a href="#cb1-11"></a></span>
+<span id="cb1-12"><a href="#cb1-12"></a><span class="co"># List files in current directory</span></span>
+<span id="cb1-13"><a href="#cb1-13"></a><span class="bu">echo</span> <span class="st">"Files in this directory:"</span></span>
+<span id="cb1-14"><a href="#cb1-14"></a><span class="fu">ls</span> <span class="at">-la</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<section id="sec-the-shebang-line" class="level3"><h3 class="anchored" data-anchor-id="sec-the-shebang-line">The Shebang Line</h3>
+<p>The first line <code>#!/bin/bash</code> is called a <strong>shebang</strong> (or hashbang). It tells the operating system which interpreter should execute this script. Always include it; <a href="#tbl-shebangs" class="quarto-xref">Table&nbsp;<span>8.1</span></a> lists the common ones.</p>
+<div id="tbl-shebangs" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure"><figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-shebangs-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;8.1: Common shebang lines
+</figcaption><div aria-describedby="tbl-shebangs-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<table class="caption-top table">
+<thead><tr class="header">
+<th style="text-align: left;">Shebang</th>
+<th style="text-align: left;">Interpreter</th>
+<th style="text-align: left;">Notes</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;"><code>#!/bin/bash</code></td>
+<td style="text-align: left;">Bash shell</td>
+<td style="text-align: left;">Most common for shell scripts</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><code>#!/bin/sh</code></td>
+<td style="text-align: left;">POSIX shell</td>
+<td style="text-align: left;">More portable across systems</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><code>#!/usr/bin/env python3</code></td>
+<td style="text-align: left;">Python 3</td>
+<td style="text-align: left;">Uses env to find Python</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><code>#!/usr/bin/env Rscript</code></td>
+<td style="text-align: left;">R</td>
+<td style="text-align: left;">For R scripts</td>
+</tr>
+</tbody>
+</table>
+</div>
+</figure>
+</div>
+</section><section id="sec-running-scripts" class="level3"><h3 class="anchored" data-anchor-id="sec-running-scripts">Running Scripts</h3>
+<p>There are several ways to run a script:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1"></a><span class="co"># Method 1: Invoke the interpreter explicitly</span></span>
+<span id="cb2-2"><a href="#cb2-2"></a><span class="ex">$</span> bash first_script.sh</span>
+<span id="cb2-3"><a href="#cb2-3"></a></span>
+<span id="cb2-4"><a href="#cb2-4"></a><span class="co"># Method 2: Make executable and run directly</span></span>
+<span id="cb2-5"><a href="#cb2-5"></a><span class="ex">$</span> chmod +x first_script.sh</span>
+<span id="cb2-6"><a href="#cb2-6"></a><span class="ex">$</span> ./first_script.sh</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>The <code>chmod +x</code> command adds execute permission to the file. After that, you can run it directly with <code>./</code>. The <code>./</code> is necessary because your current directory typically isn’t in your system’s PATH (see <a href="03-unix-fundamentals.html#sec-executables-and-the-path" class="quarto-xref"><span>Section 5.11.3</span></a>; permissions are explained in <a href="03-unix-fundamentals.html#sec-chmod" class="quarto-xref"><span>Section 5.9.2</span></a>).</p>
+<div class="callout callout-style-default callout-tip callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Tip
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Always use <code>chmod +x</code> on your scripts. It signals that the file is meant to be executed and allows direct invocation.</p>
+</div>
+</div>
+</section></section><section id="sec-shell-variables" class="level2" data-number="8.3"><h2 data-number="8.3" class="anchored" data-anchor-id="sec-shell-variables">
+<span class="header-section-number">8.3</span> Variables</h2>
+<p>Variables store values for later use. In Bash, variable assignment has strict syntax rules.</p>
+<section id="sec-assigning-variables" class="level3"><h3 class="anchored" data-anchor-id="sec-assigning-variables">Assigning Variables</h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb3"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1"></a><span class="co">#!/bin/bash</span></span>
+<span id="cb3-2"><a href="#cb3-2"></a></span>
+<span id="cb3-3"><a href="#cb3-3"></a><span class="co"># Assign variables (NO spaces around the =)</span></span>
+<span id="cb3-4"><a href="#cb3-4"></a><span class="va">NAME</span><span class="op">=</span><span class="st">"DNA Analysis"</span></span>
+<span id="cb3-5"><a href="#cb3-5"></a><span class="va">COUNT</span><span class="op">=</span>100</span>
+<span id="cb3-6"><a href="#cb3-6"></a><span class="va">INPUT_FILE</span><span class="op">=</span><span class="st">"sequences.fa"</span></span>
+<span id="cb3-7"><a href="#cb3-7"></a></span>
+<span id="cb3-8"><a href="#cb3-8"></a><span class="co"># Use variables (with $ prefix)</span></span>
+<span id="cb3-9"><a href="#cb3-9"></a><span class="bu">echo</span> <span class="st">"Running </span><span class="va">$NAME</span><span class="st">"</span></span>
+<span id="cb3-10"><a href="#cb3-10"></a><span class="bu">echo</span> <span class="st">"Processing </span><span class="va">$COUNT</span><span class="st"> sequences from </span><span class="va">$INPUT_FILE</span><span class="st">"</span></span>
+<span id="cb3-11"><a href="#cb3-11"></a></span>
+<span id="cb3-12"><a href="#cb3-12"></a><span class="co"># Curly braces for clarity</span></span>
+<span id="cb3-13"><a href="#cb3-13"></a><span class="bu">echo</span> <span class="st">"File: </span><span class="va">${INPUT_FILE}</span><span class="st">"</span></span>
+<span id="cb3-14"><a href="#cb3-14"></a><span class="bu">echo</span> <span class="st">"Creating </span><span class="va">${INPUT_FILE}</span><span class="st">.backup"</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="callout callout-style-default callout-warning callout-titled" title="Common Mistake">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Warning</span>Common Mistake
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Spaces around <code>=</code> will cause errors!</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb4"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1"></a><span class="co"># WRONG - causes errors</span></span>
+<span id="cb4-2"><a href="#cb4-2"></a><span class="ex">NAME</span> = <span class="st">"value"</span></span>
+<span id="cb4-3"><a href="#cb4-3"></a><span class="va">COUNT</span><span class="op">=</span> <span class="ex">100</span></span>
+<span id="cb4-4"><a href="#cb4-4"></a></span>
+<span id="cb4-5"><a href="#cb4-5"></a><span class="co"># RIGHT - no spaces</span></span>
+<span id="cb4-6"><a href="#cb4-6"></a><span class="va">NAME</span><span class="op">=</span><span class="st">"value"</span></span>
+<span id="cb4-7"><a href="#cb4-7"></a><span class="va">COUNT</span><span class="op">=</span>100</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+</div>
+</section><section id="sec-command-substitution" class="level3"><h3 class="anchored" data-anchor-id="sec-command-substitution">Command Substitution</h3>
+<p>Capture command output in a variable:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb5"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1"></a><span class="co">#!/bin/bash</span></span>
+<span id="cb5-2"><a href="#cb5-2"></a></span>
+<span id="cb5-3"><a href="#cb5-3"></a><span class="co"># Old syntax (backticks)</span></span>
+<span id="cb5-4"><a href="#cb5-4"></a><span class="va">TODAY</span><span class="op">=</span><span class="kw">`</span><span class="fu">date</span> +%Y-%m-%d<span class="kw">`</span></span>
+<span id="cb5-5"><a href="#cb5-5"></a></span>
+<span id="cb5-6"><a href="#cb5-6"></a><span class="co"># Modern syntax (preferred)</span></span>
+<span id="cb5-7"><a href="#cb5-7"></a><span class="va">TODAY</span><span class="op">=</span><span class="va">$(</span><span class="fu">date</span> +%Y-%m-%d<span class="va">)</span></span>
+<span id="cb5-8"><a href="#cb5-8"></a><span class="va">FILECOUNT</span><span class="op">=</span><span class="va">$(</span><span class="fu">ls</span> <span class="pp">*</span>.fa <span class="kw">|</span> <span class="fu">wc</span> <span class="at">-l</span><span class="va">)</span></span>
+<span id="cb5-9"><a href="#cb5-9"></a><span class="va">GENOME_SIZE</span><span class="op">=</span><span class="va">$(</span><span class="fu">grep</span> <span class="at">-v</span> <span class="st">"^&gt;"</span> genome.fa <span class="kw">|</span> <span class="fu">tr</span> <span class="at">-d</span> <span class="st">'\n'</span> <span class="kw">|</span> <span class="fu">wc</span> <span class="at">-c</span><span class="va">)</span></span>
+<span id="cb5-10"><a href="#cb5-10"></a></span>
+<span id="cb5-11"><a href="#cb5-11"></a><span class="bu">echo</span> <span class="st">"Analysis date: </span><span class="va">$TODAY</span><span class="st">"</span></span>
+<span id="cb5-12"><a href="#cb5-12"></a><span class="bu">echo</span> <span class="st">"Processing </span><span class="va">$FILECOUNT</span><span class="st"> FASTA files"</span></span>
+<span id="cb5-13"><a href="#cb5-13"></a><span class="bu">echo</span> <span class="st">"Genome size: </span><span class="va">$GENOME_SIZE</span><span class="st"> bp"</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section><section id="sec-arithmetic-operations" class="level3"><h3 class="anchored" data-anchor-id="sec-arithmetic-operations">Arithmetic Operations</h3>
+<p>Bash arithmetic uses <code>$(( ))</code>:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb6"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb6-1"><a href="#cb6-1"></a><span class="co">#!/bin/bash</span></span>
+<span id="cb6-2"><a href="#cb6-2"></a></span>
+<span id="cb6-3"><a href="#cb6-3"></a><span class="va">COUNT</span><span class="op">=</span>10</span>
+<span id="cb6-4"><a href="#cb6-4"></a><span class="va">DOUBLE</span><span class="op">=</span><span class="va">$((COUNT</span> <span class="op">*</span> <span class="dv">2</span><span class="va">))</span></span>
+<span id="cb6-5"><a href="#cb6-5"></a><span class="va">INCREMENT</span><span class="op">=</span><span class="va">$((COUNT</span> <span class="op">+</span> <span class="dv">1</span><span class="va">))</span></span>
+<span id="cb6-6"><a href="#cb6-6"></a></span>
+<span id="cb6-7"><a href="#cb6-7"></a><span class="co"># Calculate percentage</span></span>
+<span id="cb6-8"><a href="#cb6-8"></a><span class="va">TOTAL</span><span class="op">=</span>1000</span>
+<span id="cb6-9"><a href="#cb6-9"></a><span class="va">MATCHED</span><span class="op">=</span>350</span>
+<span id="cb6-10"><a href="#cb6-10"></a><span class="va">PERCENT</span><span class="op">=</span><span class="va">$((MATCHED</span> <span class="op">*</span> <span class="dv">100</span> <span class="op">/</span> <span class="va">TOTAL))</span></span>
+<span id="cb6-11"><a href="#cb6-11"></a></span>
+<span id="cb6-12"><a href="#cb6-12"></a><span class="bu">echo</span> <span class="st">"Doubled: </span><span class="va">$DOUBLE</span><span class="st">"</span></span>
+<span id="cb6-13"><a href="#cb6-13"></a><span class="bu">echo</span> <span class="st">"Match rate: </span><span class="va">$PERCENT</span><span class="st">%"</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>For floating-point math, use external tools like <code>bc</code>:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb7"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb7-1"><a href="#cb7-1"></a><span class="va">GC_CONTENT</span><span class="op">=</span><span class="va">$(</span><span class="bu">echo</span> <span class="st">"scale=2; 450 / 1000 * 100"</span> <span class="kw">|</span> <span class="fu">bc</span><span class="va">)</span></span>
+<span id="cb7-2"><a href="#cb7-2"></a><span class="bu">echo</span> <span class="st">"GC content: </span><span class="va">$GC_CONTENT</span><span class="st">%"</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section><section id="sec-string-operations" class="level3"><h3 class="anchored" data-anchor-id="sec-string-operations">String Operations</h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb8"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb8-1"><a href="#cb8-1"></a><span class="co">#!/bin/bash</span></span>
+<span id="cb8-2"><a href="#cb8-2"></a></span>
+<span id="cb8-3"><a href="#cb8-3"></a><span class="va">FILE</span><span class="op">=</span><span class="st">"sample_001.fastq.gz"</span></span>
+<span id="cb8-4"><a href="#cb8-4"></a></span>
+<span id="cb8-5"><a href="#cb8-5"></a><span class="co"># Remove suffix</span></span>
+<span id="cb8-6"><a href="#cb8-6"></a><span class="va">NAME</span><span class="op">=</span><span class="st">"</span><span class="va">${FILE</span><span class="op">%</span>.fastq.gz<span class="va">}</span><span class="st">"</span>    <span class="co"># sample_001</span></span>
+<span id="cb8-7"><a href="#cb8-7"></a></span>
+<span id="cb8-8"><a href="#cb8-8"></a><span class="co"># Remove prefix  </span></span>
+<span id="cb8-9"><a href="#cb8-9"></a><span class="va">NUMBER</span><span class="op">=</span><span class="st">"</span><span class="va">${FILE</span><span class="op">#</span>sample_<span class="va">}</span><span class="st">"</span>    <span class="co"># 001.fastq.gz</span></span>
+<span id="cb8-10"><a href="#cb8-10"></a></span>
+<span id="cb8-11"><a href="#cb8-11"></a><span class="co"># Remove longest match from end</span></span>
+<span id="cb8-12"><a href="#cb8-12"></a><span class="va">BASENAME</span><span class="op">=</span><span class="st">"</span><span class="va">${FILE</span><span class="op">%%</span>.<span class="pp">*</span><span class="va">}</span><span class="st">"</span>      <span class="co"># sample_001</span></span>
+<span id="cb8-13"><a href="#cb8-13"></a></span>
+<span id="cb8-14"><a href="#cb8-14"></a><span class="co"># String length</span></span>
+<span id="cb8-15"><a href="#cb8-15"></a><span class="va">LENGTH</span><span class="op">=</span><span class="va">${</span><span class="op">#</span><span class="va">FILE}</span>             <span class="co"># 19</span></span>
+<span id="cb8-16"><a href="#cb8-16"></a></span>
+<span id="cb8-17"><a href="#cb8-17"></a><span class="bu">echo</span> <span class="st">"Original: </span><span class="va">$FILE</span><span class="st">"</span></span>
+<span id="cb8-18"><a href="#cb8-18"></a><span class="bu">echo</span> <span class="st">"Name without extension: </span><span class="va">$NAME</span><span class="st">"</span></span>
+<span id="cb8-19"><a href="#cb8-19"></a><span class="bu">echo</span> <span class="st">"Length: </span><span class="va">$LENGTH</span><span class="st"> characters"</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section></section><section id="sec-shell-arrays" class="level2" data-number="8.4"><h2 data-number="8.4" class="anchored" data-anchor-id="sec-shell-arrays">
+<span class="header-section-number">8.4</span> Arrays</h2>
+<p>Arrays store multiple values:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb9"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb9-1"><a href="#cb9-1"></a><span class="co">#!/bin/bash</span></span>
+<span id="cb9-2"><a href="#cb9-2"></a></span>
+<span id="cb9-3"><a href="#cb9-3"></a><span class="co"># Declare an array</span></span>
+<span id="cb9-4"><a href="#cb9-4"></a><span class="va">BASES</span><span class="op">=</span><span class="va">(</span>A C G T<span class="va">)</span></span>
+<span id="cb9-5"><a href="#cb9-5"></a><span class="va">SAMPLES</span><span class="op">=</span><span class="va">(</span><span class="st">"control"</span> <span class="st">"treatment_1"</span> <span class="st">"treatment_2"</span><span class="va">)</span></span>
+<span id="cb9-6"><a href="#cb9-6"></a></span>
+<span id="cb9-7"><a href="#cb9-7"></a><span class="co"># Access elements (0-indexed)</span></span>
+<span id="cb9-8"><a href="#cb9-8"></a><span class="bu">echo</span> <span class="st">"First base: </span><span class="va">${BASES</span><span class="op">[</span><span class="dv">0</span><span class="op">]</span><span class="va">}</span><span class="st">"</span>        <span class="co"># A</span></span>
+<span id="cb9-9"><a href="#cb9-9"></a><span class="bu">echo</span> <span class="st">"Second sample: </span><span class="va">${SAMPLES</span><span class="op">[</span><span class="dv">1</span><span class="op">]</span><span class="va">}</span><span class="st">"</span>   <span class="co"># treatment_1</span></span>
+<span id="cb9-10"><a href="#cb9-10"></a></span>
+<span id="cb9-11"><a href="#cb9-11"></a><span class="co"># All elements</span></span>
+<span id="cb9-12"><a href="#cb9-12"></a><span class="bu">echo</span> <span class="st">"All bases: </span><span class="va">${BASES</span><span class="op">[@]</span><span class="va">}</span><span class="st">"</span></span>
+<span id="cb9-13"><a href="#cb9-13"></a></span>
+<span id="cb9-14"><a href="#cb9-14"></a><span class="co"># Array length</span></span>
+<span id="cb9-15"><a href="#cb9-15"></a><span class="bu">echo</span> <span class="st">"Number of samples: </span><span class="va">${</span><span class="op">#</span><span class="va">SAMPLES</span><span class="op">[@]</span><span class="va">}</span><span class="st">"</span></span>
+<span id="cb9-16"><a href="#cb9-16"></a></span>
+<span id="cb9-17"><a href="#cb9-17"></a><span class="co"># Add element</span></span>
+<span id="cb9-18"><a href="#cb9-18"></a><span class="va">BASES</span><span class="op">+=</span><span class="va">(</span>N<span class="va">)</span></span>
+<span id="cb9-19"><a href="#cb9-19"></a></span>
+<span id="cb9-20"><a href="#cb9-20"></a><span class="co"># Loop through array</span></span>
+<span id="cb9-21"><a href="#cb9-21"></a><span class="cf">for</span> sample <span class="kw">in</span> <span class="st">"</span><span class="va">${SAMPLES</span><span class="op">[@]</span><span class="va">}</span><span class="st">"</span><span class="kw">;</span> <span class="cf">do</span></span>
+<span id="cb9-22"><a href="#cb9-22"></a>    <span class="bu">echo</span> <span class="st">"Processing: </span><span class="va">$sample</span><span class="st">"</span></span>
+<span id="cb9-23"><a href="#cb9-23"></a><span class="cf">done</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section><section id="sec-shell-conditionals" class="level2" data-number="8.5"><h2 data-number="8.5" class="anchored" data-anchor-id="sec-shell-conditionals">
+<span class="header-section-number">8.5</span> Conditional Statements</h2>
+<p>Conditionals control program flow based on tests.</p>
+<section id="sec-basic-if-then-else" class="level3"><h3 class="anchored" data-anchor-id="sec-basic-if-then-else">Basic if/then/else</h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb10"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb10-1"><a href="#cb10-1"></a><span class="co">#!/bin/bash</span></span>
+<span id="cb10-2"><a href="#cb10-2"></a></span>
+<span id="cb10-3"><a href="#cb10-3"></a><span class="va">COUNT</span><span class="op">=</span>100</span>
+<span id="cb10-4"><a href="#cb10-4"></a></span>
+<span id="cb10-5"><a href="#cb10-5"></a><span class="cf">if</span> <span class="bu">[</span> <span class="va">$COUNT</span> <span class="ot">-gt</span> 50 <span class="bu">]</span><span class="kw">;</span> <span class="cf">then</span></span>
+<span id="cb10-6"><a href="#cb10-6"></a>    <span class="bu">echo</span> <span class="st">"High count"</span></span>
+<span id="cb10-7"><a href="#cb10-7"></a><span class="cf">elif</span> <span class="bu">[</span> <span class="va">$COUNT</span> <span class="ot">-gt</span> 10 <span class="bu">]</span><span class="kw">;</span> <span class="cf">then</span></span>
+<span id="cb10-8"><a href="#cb10-8"></a>    <span class="bu">echo</span> <span class="st">"Medium count"</span></span>
+<span id="cb10-9"><a href="#cb10-9"></a><span class="cf">else</span></span>
+<span id="cb10-10"><a href="#cb10-10"></a>    <span class="bu">echo</span> <span class="st">"Low count"</span></span>
+<span id="cb10-11"><a href="#cb10-11"></a><span class="cf">fi</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section><section id="sec-test-operators" class="level3"><h3 class="anchored" data-anchor-id="sec-test-operators">Test Operators</h3>
+<p>The operators available inside <code>[ ]</code> are grouped by type in <a href="#tbl-numeric-test-operators" class="quarto-xref">Table&nbsp;<span>8.2</span></a>, <a href="#tbl-string-test-operators" class="quarto-xref">Table&nbsp;<span>8.3</span></a>, and <a href="#tbl-file-test-operators" class="quarto-xref">Table&nbsp;<span>8.4</span></a>.</p>
+<p><strong>Numeric comparisons:</strong></p>
+<div id="tbl-numeric-test-operators" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure"><figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-numeric-test-operators-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;8.2: Numeric comparison operators for <code>[ ]</code> and <code>[[ ]]</code> tests
+</figcaption><div aria-describedby="tbl-numeric-test-operators-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<table class="caption-top table">
+<thead><tr class="header">
+<th style="text-align: left;">Operator</th>
+<th style="text-align: left;">Meaning</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;"><code>-eq</code></td>
+<td style="text-align: left;">Equal</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><code>-ne</code></td>
+<td style="text-align: left;">Not equal</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><code>-gt</code></td>
+<td style="text-align: left;">Greater than</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><code>-ge</code></td>
+<td style="text-align: left;">Greater than or equal</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><code>-lt</code></td>
+<td style="text-align: left;">Less than</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><code>-le</code></td>
+<td style="text-align: left;">Less than or equal</td>
+</tr>
+</tbody>
+</table>
+</div>
+</figure>
+</div>
+<p><strong>String comparisons:</strong></p>
+<div id="tbl-string-test-operators" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure"><figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-string-test-operators-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;8.3: String comparison operators
+</figcaption><div aria-describedby="tbl-string-test-operators-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<table class="caption-top table">
+<thead><tr class="header">
+<th style="text-align: left;">Operator</th>
+<th style="text-align: left;">Meaning</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;"><code>=</code></td>
+<td style="text-align: left;">Equal</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><code>!=</code></td>
+<td style="text-align: left;">Not equal</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><code>-z</code></td>
+<td style="text-align: left;">Zero length (empty)</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><code>-n</code></td>
+<td style="text-align: left;">Non-zero length</td>
+</tr>
+</tbody>
+</table>
+</div>
+</figure>
+</div>
+<p><strong>File tests:</strong></p>
+<div id="tbl-file-test-operators" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure"><figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-file-test-operators-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;8.4: File test operators
+</figcaption><div aria-describedby="tbl-file-test-operators-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<table class="caption-top table">
+<thead><tr class="header">
+<th style="text-align: left;">Operator</th>
+<th style="text-align: left;">Meaning</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;"><code>-f</code></td>
+<td style="text-align: left;">File exists and is regular file</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><code>-d</code></td>
+<td style="text-align: left;">Directory exists</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><code>-e</code></td>
+<td style="text-align: left;">File exists (any type)</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><code>-r</code></td>
+<td style="text-align: left;">File is readable</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><code>-w</code></td>
+<td style="text-align: left;">File is writable</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><code>-x</code></td>
+<td style="text-align: left;">File is executable</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><code>-s</code></td>
+<td style="text-align: left;">File exists and is not empty</td>
+</tr>
+</tbody>
+</table>
+</div>
+</figure>
+</div>
+</section><section id="sec-shell-examples" class="level3"><h3 class="anchored" data-anchor-id="sec-shell-examples">Examples</h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb11"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb11-1"><a href="#cb11-1"></a><span class="co">#!/bin/bash</span></span>
+<span id="cb11-2"><a href="#cb11-2"></a></span>
+<span id="cb11-3"><a href="#cb11-3"></a><span class="co"># File existence check</span></span>
+<span id="cb11-4"><a href="#cb11-4"></a><span class="cf">if</span> <span class="bu">[</span> <span class="ot">-f</span> <span class="st">"data.txt"</span> <span class="bu">]</span><span class="kw">;</span> <span class="cf">then</span></span>
+<span id="cb11-5"><a href="#cb11-5"></a>    <span class="bu">echo</span> <span class="st">"File exists"</span></span>
+<span id="cb11-6"><a href="#cb11-6"></a><span class="cf">else</span></span>
+<span id="cb11-7"><a href="#cb11-7"></a>    <span class="bu">echo</span> <span class="st">"File not found"</span></span>
+<span id="cb11-8"><a href="#cb11-8"></a><span class="cf">fi</span></span>
+<span id="cb11-9"><a href="#cb11-9"></a></span>
+<span id="cb11-10"><a href="#cb11-10"></a><span class="co"># Directory check with creation</span></span>
+<span id="cb11-11"><a href="#cb11-11"></a><span class="cf">if</span> <span class="bu">[</span> <span class="ot">!</span> <span class="ot">-d</span> <span class="st">"results"</span> <span class="bu">]</span><span class="kw">;</span> <span class="cf">then</span></span>
+<span id="cb11-12"><a href="#cb11-12"></a>    <span class="fu">mkdir</span> results</span>
+<span id="cb11-13"><a href="#cb11-13"></a>    <span class="bu">echo</span> <span class="st">"Created results directory"</span></span>
+<span id="cb11-14"><a href="#cb11-14"></a><span class="cf">fi</span></span>
+<span id="cb11-15"><a href="#cb11-15"></a></span>
+<span id="cb11-16"><a href="#cb11-16"></a><span class="co"># String comparison</span></span>
+<span id="cb11-17"><a href="#cb11-17"></a><span class="va">FILETYPE</span><span class="op">=</span><span class="st">"fasta"</span></span>
+<span id="cb11-18"><a href="#cb11-18"></a><span class="cf">if</span> <span class="bu">[</span> <span class="st">"</span><span class="va">$FILETYPE</span><span class="st">"</span> <span class="ot">=</span> <span class="st">"fasta"</span> <span class="bu">]</span><span class="kw">;</span> <span class="cf">then</span></span>
+<span id="cb11-19"><a href="#cb11-19"></a>    <span class="bu">echo</span> <span class="st">"Processing FASTA file"</span></span>
+<span id="cb11-20"><a href="#cb11-20"></a><span class="cf">fi</span></span>
+<span id="cb11-21"><a href="#cb11-21"></a></span>
+<span id="cb11-22"><a href="#cb11-22"></a><span class="co"># Combining conditions</span></span>
+<span id="cb11-23"><a href="#cb11-23"></a><span class="cf">if</span> <span class="bu">[</span> <span class="ot">-f</span> <span class="st">"</span><span class="va">$FILE</span><span class="st">"</span> <span class="bu">]</span> <span class="kw">&amp;&amp;</span> <span class="bu">[</span> <span class="ot">-r</span> <span class="st">"</span><span class="va">$FILE</span><span class="st">"</span> <span class="bu">]</span><span class="kw">;</span> <span class="cf">then</span></span>
+<span id="cb11-24"><a href="#cb11-24"></a>    <span class="bu">echo</span> <span class="st">"File exists and is readable"</span></span>
+<span id="cb11-25"><a href="#cb11-25"></a><span class="cf">fi</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="callout callout-style-default callout-important callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Important
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Always quote variables in tests: <code>[ "$VAR" = "value" ]</code>. Without quotes, empty variables cause syntax errors.</p>
+</div>
+</div>
+</section></section><section id="sec-shell-loops" class="level2" data-number="8.6"><h2 data-number="8.6" class="anchored" data-anchor-id="sec-shell-loops">
+<span class="header-section-number">8.6</span> Loops</h2>
+<p>Loops repeat actions multiple times.</p>
+<section id="sec-shell-for-loops" class="level3"><h3 class="anchored" data-anchor-id="sec-shell-for-loops">For Loops</h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb12"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb12-1"><a href="#cb12-1"></a><span class="co">#!/bin/bash</span></span>
+<span id="cb12-2"><a href="#cb12-2"></a></span>
+<span id="cb12-3"><a href="#cb12-3"></a><span class="co"># Loop over a list</span></span>
+<span id="cb12-4"><a href="#cb12-4"></a><span class="cf">for</span> base <span class="kw">in</span> A C G T<span class="kw">;</span> <span class="cf">do</span></span>
+<span id="cb12-5"><a href="#cb12-5"></a>    <span class="bu">echo</span> <span class="st">"Base: </span><span class="va">$base</span><span class="st">"</span></span>
+<span id="cb12-6"><a href="#cb12-6"></a><span class="cf">done</span></span>
+<span id="cb12-7"><a href="#cb12-7"></a></span>
+<span id="cb12-8"><a href="#cb12-8"></a><span class="co"># Loop over files</span></span>
+<span id="cb12-9"><a href="#cb12-9"></a><span class="cf">for</span> file <span class="kw">in</span> <span class="pp">*</span>.fastq<span class="kw">;</span> <span class="cf">do</span></span>
+<span id="cb12-10"><a href="#cb12-10"></a>    <span class="bu">echo</span> <span class="st">"Processing: </span><span class="va">$file</span><span class="st">"</span></span>
+<span id="cb12-11"><a href="#cb12-11"></a>    <span class="fu">gzip</span> <span class="st">"</span><span class="va">$file</span><span class="st">"</span></span>
+<span id="cb12-12"><a href="#cb12-12"></a><span class="cf">done</span></span>
+<span id="cb12-13"><a href="#cb12-13"></a></span>
+<span id="cb12-14"><a href="#cb12-14"></a><span class="co"># Loop with counter</span></span>
+<span id="cb12-15"><a href="#cb12-15"></a><span class="cf">for</span> i <span class="kw">in</span> <span class="dt">{</span><span class="dv">1</span><span class="dt">..</span><span class="dv">10</span><span class="dt">}</span><span class="kw">;</span> <span class="cf">do</span></span>
+<span id="cb12-16"><a href="#cb12-16"></a>    <span class="bu">echo</span> <span class="st">"Iteration </span><span class="va">$i</span><span class="st">"</span></span>
+<span id="cb12-17"><a href="#cb12-17"></a><span class="cf">done</span></span>
+<span id="cb12-18"><a href="#cb12-18"></a></span>
+<span id="cb12-19"><a href="#cb12-19"></a><span class="co"># C-style loop</span></span>
+<span id="cb12-20"><a href="#cb12-20"></a><span class="cf">for</span> <span class="kw">((</span><span class="va">i</span><span class="op">=</span><span class="dv">0</span><span class="kw">;</span> <span class="va">i</span><span class="op">&lt;</span><span class="dv">10</span><span class="kw">;</span> <span class="va">i</span><span class="op">++</span><span class="kw">));</span> <span class="cf">do</span></span>
+<span id="cb12-21"><a href="#cb12-21"></a>    <span class="bu">echo</span> <span class="st">"Index: </span><span class="va">$i</span><span class="st">"</span></span>
+<span id="cb12-22"><a href="#cb12-22"></a><span class="cf">done</span></span>
+<span id="cb12-23"><a href="#cb12-23"></a></span>
+<span id="cb12-24"><a href="#cb12-24"></a><span class="co"># Loop over array</span></span>
+<span id="cb12-25"><a href="#cb12-25"></a><span class="va">FILES</span><span class="op">=</span><span class="va">(</span><span class="st">"sample1.fa"</span> <span class="st">"sample2.fa"</span> <span class="st">"sample3.fa"</span><span class="va">)</span></span>
+<span id="cb12-26"><a href="#cb12-26"></a><span class="cf">for</span> file <span class="kw">in</span> <span class="st">"</span><span class="va">${FILES</span><span class="op">[@]</span><span class="va">}</span><span class="st">"</span><span class="kw">;</span> <span class="cf">do</span></span>
+<span id="cb12-27"><a href="#cb12-27"></a>    <span class="bu">echo</span> <span class="st">"Analyzing </span><span class="va">$file</span><span class="st">"</span></span>
+<span id="cb12-28"><a href="#cb12-28"></a><span class="cf">done</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section><section id="sec-shell-while-loops" class="level3"><h3 class="anchored" data-anchor-id="sec-shell-while-loops">While Loops</h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb13"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb13-1"><a href="#cb13-1"></a><span class="co">#!/bin/bash</span></span>
+<span id="cb13-2"><a href="#cb13-2"></a></span>
+<span id="cb13-3"><a href="#cb13-3"></a><span class="co"># Count down</span></span>
+<span id="cb13-4"><a href="#cb13-4"></a><span class="va">COUNT</span><span class="op">=</span>5</span>
+<span id="cb13-5"><a href="#cb13-5"></a><span class="cf">while</span> <span class="bu">[</span> <span class="va">$COUNT</span> <span class="ot">-gt</span> 0 <span class="bu">]</span><span class="kw">;</span> <span class="cf">do</span></span>
+<span id="cb13-6"><a href="#cb13-6"></a>    <span class="bu">echo</span> <span class="st">"Count: </span><span class="va">$COUNT</span><span class="st">"</span></span>
+<span id="cb13-7"><a href="#cb13-7"></a>    <span class="va">COUNT</span><span class="op">=</span><span class="va">$((COUNT</span> <span class="op">-</span> <span class="dv">1</span><span class="va">))</span></span>
+<span id="cb13-8"><a href="#cb13-8"></a><span class="cf">done</span></span>
+<span id="cb13-9"><a href="#cb13-9"></a></span>
+<span id="cb13-10"><a href="#cb13-10"></a><span class="co"># Read file line by line</span></span>
+<span id="cb13-11"><a href="#cb13-11"></a><span class="cf">while</span> <span class="bu">read</span> <span class="va">line</span><span class="kw">;</span> <span class="cf">do</span></span>
+<span id="cb13-12"><a href="#cb13-12"></a>    <span class="bu">echo</span> <span class="st">"Processing: </span><span class="va">$line</span><span class="st">"</span></span>
+<span id="cb13-13"><a href="#cb13-13"></a><span class="cf">done</span> <span class="op">&lt;</span> input.txt</span>
+<span id="cb13-14"><a href="#cb13-14"></a></span>
+<span id="cb13-15"><a href="#cb13-15"></a><span class="co"># Process command output</span></span>
+<span id="cb13-16"><a href="#cb13-16"></a><span class="fu">ls</span> <span class="pp">*</span>.fa <span class="kw">|</span> <span class="cf">while</span> <span class="bu">read</span> <span class="va">file</span><span class="kw">;</span> <span class="cf">do</span></span>
+<span id="cb13-17"><a href="#cb13-17"></a>    <span class="bu">echo</span> <span class="st">"Found: </span><span class="va">$file</span><span class="st">"</span></span>
+<span id="cb13-18"><a href="#cb13-18"></a><span class="cf">done</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section><section id="sec-loop-control" class="level3"><h3 class="anchored" data-anchor-id="sec-loop-control">Loop Control</h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb14"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb14-1"><a href="#cb14-1"></a><span class="co">#!/bin/bash</span></span>
+<span id="cb14-2"><a href="#cb14-2"></a></span>
+<span id="cb14-3"><a href="#cb14-3"></a><span class="cf">for</span> file <span class="kw">in</span> <span class="pp">*</span>.fa<span class="kw">;</span> <span class="cf">do</span></span>
+<span id="cb14-4"><a href="#cb14-4"></a>    <span class="co"># Skip files starting with "test"</span></span>
+<span id="cb14-5"><a href="#cb14-5"></a>    <span class="cf">if</span> <span class="kw">[[</span> <span class="st">"</span><span class="va">$file</span><span class="st">"</span> <span class="ot">==</span> test<span class="pp">*</span> <span class="kw">]];</span> <span class="cf">then</span></span>
+<span id="cb14-6"><a href="#cb14-6"></a>        <span class="cf">continue</span></span>
+<span id="cb14-7"><a href="#cb14-7"></a>    <span class="cf">fi</span></span>
+<span id="cb14-8"><a href="#cb14-8"></a>    </span>
+<span id="cb14-9"><a href="#cb14-9"></a>    <span class="co"># Stop if we find "final.fa"</span></span>
+<span id="cb14-10"><a href="#cb14-10"></a>    <span class="cf">if</span> <span class="bu">[</span> <span class="st">"</span><span class="va">$file</span><span class="st">"</span> <span class="ot">=</span> <span class="st">"final.fa"</span> <span class="bu">]</span><span class="kw">;</span> <span class="cf">then</span></span>
+<span id="cb14-11"><a href="#cb14-11"></a>        <span class="bu">echo</span> <span class="st">"Found final file, stopping"</span></span>
+<span id="cb14-12"><a href="#cb14-12"></a>        <span class="cf">break</span></span>
+<span id="cb14-13"><a href="#cb14-13"></a>    <span class="cf">fi</span></span>
+<span id="cb14-14"><a href="#cb14-14"></a>    </span>
+<span id="cb14-15"><a href="#cb14-15"></a>    <span class="bu">echo</span> <span class="st">"Processing: </span><span class="va">$file</span><span class="st">"</span></span>
+<span id="cb14-16"><a href="#cb14-16"></a><span class="cf">done</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section></section><section id="sec-cli-arguments" class="level2" data-number="8.7"><h2 data-number="8.7" class="anchored" data-anchor-id="sec-cli-arguments">
+<span class="header-section-number">8.7</span> Command-Line Arguments</h2>
+<p>Scripts become more flexible when they accept arguments:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb15"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb15-1"><a href="#cb15-1"></a><span class="co">#!/bin/bash</span></span>
+<span id="cb15-2"><a href="#cb15-2"></a><span class="co"># process_fasta.sh - Process a FASTA file</span></span>
+<span id="cb15-3"><a href="#cb15-3"></a></span>
+<span id="cb15-4"><a href="#cb15-4"></a><span class="co"># $0 is the script name</span></span>
+<span id="cb15-5"><a href="#cb15-5"></a><span class="bu">echo</span> <span class="st">"Script: </span><span class="va">$0</span><span class="st">"</span></span>
+<span id="cb15-6"><a href="#cb15-6"></a></span>
+<span id="cb15-7"><a href="#cb15-7"></a><span class="co"># $# is the number of arguments</span></span>
+<span id="cb15-8"><a href="#cb15-8"></a><span class="bu">echo</span> <span class="st">"Arguments received: </span><span class="va">$#</span><span class="st">"</span></span>
+<span id="cb15-9"><a href="#cb15-9"></a></span>
+<span id="cb15-10"><a href="#cb15-10"></a><span class="co"># $1, $2, etc. are positional arguments</span></span>
+<span id="cb15-11"><a href="#cb15-11"></a><span class="va">INPUT</span><span class="op">=</span><span class="va">$1</span></span>
+<span id="cb15-12"><a href="#cb15-12"></a><span class="va">OUTPUT</span><span class="op">=</span><span class="va">$2</span></span>
+<span id="cb15-13"><a href="#cb15-13"></a></span>
+<span id="cb15-14"><a href="#cb15-14"></a><span class="co"># $@ is all arguments</span></span>
+<span id="cb15-15"><a href="#cb15-15"></a><span class="bu">echo</span> <span class="st">"All arguments: </span><span class="va">$@</span><span class="st">"</span></span>
+<span id="cb15-16"><a href="#cb15-16"></a></span>
+<span id="cb15-17"><a href="#cb15-17"></a><span class="co"># Check for required arguments</span></span>
+<span id="cb15-18"><a href="#cb15-18"></a><span class="cf">if</span> <span class="bu">[</span> <span class="va">$#</span> <span class="ot">-lt</span> 2 <span class="bu">]</span><span class="kw">;</span> <span class="cf">then</span></span>
+<span id="cb15-19"><a href="#cb15-19"></a>    <span class="bu">echo</span> <span class="st">"Usage: </span><span class="va">$0</span><span class="st"> input.fasta output.txt"</span></span>
+<span id="cb15-20"><a href="#cb15-20"></a>    <span class="bu">exit</span> 1</span>
+<span id="cb15-21"><a href="#cb15-21"></a><span class="cf">fi</span></span>
+<span id="cb15-22"><a href="#cb15-22"></a></span>
+<span id="cb15-23"><a href="#cb15-23"></a><span class="co"># Now process the files</span></span>
+<span id="cb15-24"><a href="#cb15-24"></a><span class="bu">echo</span> <span class="st">"Input: </span><span class="va">$INPUT</span><span class="st">"</span></span>
+<span id="cb15-25"><a href="#cb15-25"></a><span class="bu">echo</span> <span class="st">"Output: </span><span class="va">$OUTPUT</span><span class="st">"</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Usage:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb16"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb16-1"><a href="#cb16-1"></a><span class="ex">$</span> ./process_fasta.sh sequences.fa results.txt</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<section id="sec-argument-validation" class="level3"><h3 class="anchored" data-anchor-id="sec-argument-validation">Argument Validation</h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb17"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb17-1"><a href="#cb17-1"></a><span class="co">#!/bin/bash</span></span>
+<span id="cb17-2"><a href="#cb17-2"></a></span>
+<span id="cb17-3"><a href="#cb17-3"></a><span class="co"># Check argument count</span></span>
+<span id="cb17-4"><a href="#cb17-4"></a><span class="cf">if</span> <span class="bu">[</span> <span class="va">$#</span> <span class="ot">-ne</span> 2 <span class="bu">]</span><span class="kw">;</span> <span class="cf">then</span></span>
+<span id="cb17-5"><a href="#cb17-5"></a>    <span class="bu">echo</span> <span class="st">"Error: Expected 2 arguments, got </span><span class="va">$#</span><span class="st">"</span> <span class="op">&gt;&amp;</span><span class="dv">2</span></span>
+<span id="cb17-6"><a href="#cb17-6"></a>    <span class="bu">echo</span> <span class="st">"Usage: </span><span class="va">$0</span><span class="st"> input.fa output.txt"</span> <span class="op">&gt;&amp;</span><span class="dv">2</span></span>
+<span id="cb17-7"><a href="#cb17-7"></a>    <span class="bu">exit</span> 1</span>
+<span id="cb17-8"><a href="#cb17-8"></a><span class="cf">fi</span></span>
+<span id="cb17-9"><a href="#cb17-9"></a></span>
+<span id="cb17-10"><a href="#cb17-10"></a><span class="va">INPUT</span><span class="op">=</span><span class="va">$1</span></span>
+<span id="cb17-11"><a href="#cb17-11"></a><span class="va">OUTPUT</span><span class="op">=</span><span class="va">$2</span></span>
+<span id="cb17-12"><a href="#cb17-12"></a></span>
+<span id="cb17-13"><a href="#cb17-13"></a><span class="co"># Validate input file</span></span>
+<span id="cb17-14"><a href="#cb17-14"></a><span class="cf">if</span> <span class="bu">[</span> <span class="ot">!</span> <span class="ot">-f</span> <span class="st">"</span><span class="va">$INPUT</span><span class="st">"</span> <span class="bu">]</span><span class="kw">;</span> <span class="cf">then</span></span>
+<span id="cb17-15"><a href="#cb17-15"></a>    <span class="bu">echo</span> <span class="st">"Error: Input file '</span><span class="va">$INPUT</span><span class="st">' not found"</span> <span class="op">&gt;&amp;</span><span class="dv">2</span></span>
+<span id="cb17-16"><a href="#cb17-16"></a>    <span class="bu">exit</span> 1</span>
+<span id="cb17-17"><a href="#cb17-17"></a><span class="cf">fi</span></span>
+<span id="cb17-18"><a href="#cb17-18"></a></span>
+<span id="cb17-19"><a href="#cb17-19"></a><span class="co"># Check if output would overwrite</span></span>
+<span id="cb17-20"><a href="#cb17-20"></a><span class="cf">if</span> <span class="bu">[</span> <span class="ot">-f</span> <span class="st">"</span><span class="va">$OUTPUT</span><span class="st">"</span> <span class="bu">]</span><span class="kw">;</span> <span class="cf">then</span></span>
+<span id="cb17-21"><a href="#cb17-21"></a>    <span class="bu">echo</span> <span class="st">"Warning: Output file exists. Overwrite? (y/n)"</span></span>
+<span id="cb17-22"><a href="#cb17-22"></a>    <span class="bu">read</span> <span class="va">answer</span></span>
+<span id="cb17-23"><a href="#cb17-23"></a>    <span class="cf">if</span> <span class="bu">[</span> <span class="st">"</span><span class="va">$answer</span><span class="st">"</span> <span class="ot">!=</span> <span class="st">"y"</span> <span class="bu">]</span><span class="kw">;</span> <span class="cf">then</span></span>
+<span id="cb17-24"><a href="#cb17-24"></a>        <span class="bu">exit</span> 0</span>
+<span id="cb17-25"><a href="#cb17-25"></a>    <span class="cf">fi</span></span>
+<span id="cb17-26"><a href="#cb17-26"></a><span class="cf">fi</span></span>
+<span id="cb17-27"><a href="#cb17-27"></a></span>
+<span id="cb17-28"><a href="#cb17-28"></a><span class="co"># Continue with processing...</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section></section><section id="sec-shell-functions" class="level2" data-number="8.8"><h2 data-number="8.8" class="anchored" data-anchor-id="sec-shell-functions">
+<span class="header-section-number">8.8</span> Functions</h2>
+<p>Functions make scripts modular and reusable:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb18"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb18-1"><a href="#cb18-1"></a><span class="co">#!/bin/bash</span></span>
+<span id="cb18-2"><a href="#cb18-2"></a></span>
+<span id="cb18-3"><a href="#cb18-3"></a><span class="co"># Define a function</span></span>
+<span id="cb18-4"><a href="#cb18-4"></a><span class="fu">count_sequences()</span> <span class="kw">{</span></span>
+<span id="cb18-5"><a href="#cb18-5"></a>    <span class="bu">local</span> <span class="va">FILE</span><span class="op">=</span><span class="va">$1</span>  <span class="co"># Local variable</span></span>
+<span id="cb18-6"><a href="#cb18-6"></a>    <span class="bu">local</span> <span class="va">COUNT</span><span class="op">=</span><span class="va">$(</span><span class="fu">grep</span> <span class="at">-c</span> <span class="st">"^&gt;"</span> <span class="st">"</span><span class="va">$FILE</span><span class="st">"</span><span class="va">)</span></span>
+<span id="cb18-7"><a href="#cb18-7"></a>    <span class="bu">echo</span> <span class="va">$COUNT</span></span>
+<span id="cb18-8"><a href="#cb18-8"></a><span class="kw">}</span></span>
+<span id="cb18-9"><a href="#cb18-9"></a></span>
+<span id="cb18-10"><a href="#cb18-10"></a><span class="co"># Function with multiple parameters</span></span>
+<span id="cb18-11"><a href="#cb18-11"></a><span class="fu">analyze_fasta()</span> <span class="kw">{</span></span>
+<span id="cb18-12"><a href="#cb18-12"></a>    <span class="bu">local</span> <span class="va">INPUT</span><span class="op">=</span><span class="va">$1</span></span>
+<span id="cb18-13"><a href="#cb18-13"></a>    <span class="bu">local</span> <span class="va">OUTPUT</span><span class="op">=</span><span class="va">$2</span></span>
+<span id="cb18-14"><a href="#cb18-14"></a>    </span>
+<span id="cb18-15"><a href="#cb18-15"></a>    <span class="bu">echo</span> <span class="st">"Analyzing </span><span class="va">$INPUT</span><span class="st">..."</span></span>
+<span id="cb18-16"><a href="#cb18-16"></a>    </span>
+<span id="cb18-17"><a href="#cb18-17"></a>    <span class="bu">local</span> <span class="va">SEQ_COUNT</span><span class="op">=</span><span class="va">$(</span><span class="ex">count_sequences</span> <span class="st">"</span><span class="va">$INPUT</span><span class="st">"</span><span class="va">)</span></span>
+<span id="cb18-18"><a href="#cb18-18"></a>    <span class="bu">local</span> <span class="va">TOTAL_LENGTH</span><span class="op">=</span><span class="va">$(</span><span class="fu">grep</span> <span class="at">-v</span> <span class="st">"^&gt;"</span> <span class="st">"</span><span class="va">$INPUT</span><span class="st">"</span> <span class="kw">|</span> <span class="fu">tr</span> <span class="at">-d</span> <span class="st">'\n'</span> <span class="kw">|</span> <span class="fu">wc</span> <span class="at">-c</span><span class="va">)</span></span>
+<span id="cb18-19"><a href="#cb18-19"></a>    </span>
+<span id="cb18-20"><a href="#cb18-20"></a>    <span class="bu">echo</span> <span class="st">"Sequences: </span><span class="va">$SEQ_COUNT</span><span class="st">"</span> <span class="op">&gt;</span> <span class="st">"</span><span class="va">$OUTPUT</span><span class="st">"</span></span>
+<span id="cb18-21"><a href="#cb18-21"></a>    <span class="bu">echo</span> <span class="st">"Total bases: </span><span class="va">$TOTAL_LENGTH</span><span class="st">"</span> <span class="op">&gt;&gt;</span> <span class="st">"</span><span class="va">$OUTPUT</span><span class="st">"</span></span>
+<span id="cb18-22"><a href="#cb18-22"></a><span class="kw">}</span></span>
+<span id="cb18-23"><a href="#cb18-23"></a></span>
+<span id="cb18-24"><a href="#cb18-24"></a><span class="co"># Call functions</span></span>
+<span id="cb18-25"><a href="#cb18-25"></a><span class="va">SEQ_NUM</span><span class="op">=</span><span class="va">$(</span><span class="ex">count_sequences</span> <span class="st">"proteins.fa"</span><span class="va">)</span></span>
+<span id="cb18-26"><a href="#cb18-26"></a><span class="bu">echo</span> <span class="st">"Found </span><span class="va">$SEQ_NUM</span><span class="st"> sequences"</span></span>
+<span id="cb18-27"><a href="#cb18-27"></a></span>
+<span id="cb18-28"><a href="#cb18-28"></a><span class="ex">analyze_fasta</span> <span class="st">"input.fa"</span> <span class="st">"statistics.txt"</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<section id="sec-shell-return-values" class="level3"><h3 class="anchored" data-anchor-id="sec-shell-return-values">Return Values</h3>
+<p>Functions return exit status (0-255), not strings. To return data:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb19"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb19-1"><a href="#cb19-1"></a><span class="co">#!/bin/bash</span></span>
+<span id="cb19-2"><a href="#cb19-2"></a></span>
+<span id="cb19-3"><a href="#cb19-3"></a><span class="co"># Return via stdout</span></span>
+<span id="cb19-4"><a href="#cb19-4"></a><span class="fu">get_gc_content()</span> <span class="kw">{</span></span>
+<span id="cb19-5"><a href="#cb19-5"></a>    <span class="bu">local</span> <span class="va">FILE</span><span class="op">=</span><span class="va">$1</span></span>
+<span id="cb19-6"><a href="#cb19-6"></a>    <span class="bu">local</span> <span class="va">GC</span><span class="op">=</span><span class="va">$(</span><span class="fu">grep</span> <span class="at">-v</span> <span class="st">"^&gt;"</span> <span class="st">"</span><span class="va">$FILE</span><span class="st">"</span> <span class="kw">|</span> <span class="fu">tr</span> <span class="at">-d</span> <span class="st">'\n'</span> <span class="kw">|</span> <span class="fu">grep</span> <span class="at">-o</span> <span class="st">"[GC]"</span> <span class="kw">|</span> <span class="fu">wc</span> <span class="at">-l</span><span class="va">)</span></span>
+<span id="cb19-7"><a href="#cb19-7"></a>    <span class="bu">local</span> <span class="va">TOTAL</span><span class="op">=</span><span class="va">$(</span><span class="fu">grep</span> <span class="at">-v</span> <span class="st">"^&gt;"</span> <span class="st">"</span><span class="va">$FILE</span><span class="st">"</span> <span class="kw">|</span> <span class="fu">tr</span> <span class="at">-d</span> <span class="st">'\n'</span> <span class="kw">|</span> <span class="fu">wc</span> <span class="at">-c</span><span class="va">)</span></span>
+<span id="cb19-8"><a href="#cb19-8"></a>    <span class="bu">echo</span> <span class="st">"</span><span class="va">$((GC</span> <span class="op">*</span> <span class="dv">100</span> <span class="op">/</span> <span class="va">TOTAL))</span><span class="st">"</span></span>
+<span id="cb19-9"><a href="#cb19-9"></a><span class="kw">}</span></span>
+<span id="cb19-10"><a href="#cb19-10"></a></span>
+<span id="cb19-11"><a href="#cb19-11"></a><span class="co"># Capture output</span></span>
+<span id="cb19-12"><a href="#cb19-12"></a><span class="va">GC_PERCENT</span><span class="op">=</span><span class="va">$(</span><span class="ex">get_gc_content</span> <span class="st">"genome.fa"</span><span class="va">)</span></span>
+<span id="cb19-13"><a href="#cb19-13"></a><span class="bu">echo</span> <span class="st">"GC content: </span><span class="va">$GC_PERCENT</span><span class="st">%"</span></span>
+<span id="cb19-14"><a href="#cb19-14"></a></span>
+<span id="cb19-15"><a href="#cb19-15"></a><span class="co"># Return status for success/failure</span></span>
+<span id="cb19-16"><a href="#cb19-16"></a><span class="fu">check_file()</span> <span class="kw">{</span></span>
+<span id="cb19-17"><a href="#cb19-17"></a>    <span class="cf">if</span> <span class="bu">[</span> <span class="ot">-f</span> <span class="st">"</span><span class="va">$1</span><span class="st">"</span> <span class="bu">]</span> <span class="kw">&amp;&amp;</span> <span class="bu">[</span> <span class="ot">-r</span> <span class="st">"</span><span class="va">$1</span><span class="st">"</span> <span class="bu">]</span><span class="kw">;</span> <span class="cf">then</span></span>
+<span id="cb19-18"><a href="#cb19-18"></a>        <span class="cf">return</span> <span class="dv">0</span>  <span class="co"># Success</span></span>
+<span id="cb19-19"><a href="#cb19-19"></a>    <span class="cf">else</span></span>
+<span id="cb19-20"><a href="#cb19-20"></a>        <span class="cf">return</span> <span class="dv">1</span>  <span class="co"># Failure</span></span>
+<span id="cb19-21"><a href="#cb19-21"></a>    <span class="cf">fi</span></span>
+<span id="cb19-22"><a href="#cb19-22"></a><span class="kw">}</span></span>
+<span id="cb19-23"><a href="#cb19-23"></a></span>
+<span id="cb19-24"><a href="#cb19-24"></a><span class="cf">if</span> <span class="ex">check_file</span> <span class="st">"data.txt"</span><span class="kw">;</span> <span class="cf">then</span></span>
+<span id="cb19-25"><a href="#cb19-25"></a>    <span class="bu">echo</span> <span class="st">"File is ready"</span></span>
+<span id="cb19-26"><a href="#cb19-26"></a><span class="cf">else</span></span>
+<span id="cb19-27"><a href="#cb19-27"></a>    <span class="bu">echo</span> <span class="st">"File not accessible"</span></span>
+<span id="cb19-28"><a href="#cb19-28"></a><span class="cf">fi</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section></section><section id="sec-error-handling" class="level2" data-number="8.9"><h2 data-number="8.9" class="anchored" data-anchor-id="sec-error-handling">
+<span class="header-section-number">8.9</span> Error Handling</h2>
+<p>Robust scripts handle errors gracefully.</p>
+<section id="sec-exit-status" class="level3"><h3 class="anchored" data-anchor-id="sec-exit-status">Exit Status</h3>
+<p>Every command returns an exit status: 0 for success, non-zero for failure.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb20"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb20-1"><a href="#cb20-1"></a><span class="co">#!/bin/bash</span></span>
+<span id="cb20-2"><a href="#cb20-2"></a></span>
+<span id="cb20-3"><a href="#cb20-3"></a><span class="co"># Check last command's status</span></span>
+<span id="cb20-4"><a href="#cb20-4"></a><span class="fu">grep</span> <span class="st">"pattern"</span> file.txt</span>
+<span id="cb20-5"><a href="#cb20-5"></a><span class="cf">if</span> <span class="bu">[</span> <span class="va">$?</span> <span class="ot">-ne</span> 0 <span class="bu">]</span><span class="kw">;</span> <span class="cf">then</span></span>
+<span id="cb20-6"><a href="#cb20-6"></a>    <span class="bu">echo</span> <span class="st">"Pattern not found"</span></span>
+<span id="cb20-7"><a href="#cb20-7"></a><span class="cf">fi</span></span>
+<span id="cb20-8"><a href="#cb20-8"></a></span>
+<span id="cb20-9"><a href="#cb20-9"></a><span class="co"># Conditional execution</span></span>
+<span id="cb20-10"><a href="#cb20-10"></a><span class="fu">grep</span> <span class="st">"pattern"</span> file.txt <span class="kw">&amp;&amp;</span> <span class="bu">echo</span> <span class="st">"Found!"</span></span>
+<span id="cb20-11"><a href="#cb20-11"></a><span class="fu">grep</span> <span class="st">"pattern"</span> file.txt <span class="kw">||</span> <span class="bu">echo</span> <span class="st">"Not found"</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section><section id="sec-strict-mode" class="level3"><h3 class="anchored" data-anchor-id="sec-strict-mode">Strict Mode</h3>
+<p>Start scripts with these settings for better error detection:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb21"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb21-1"><a href="#cb21-1"></a><span class="co">#!/bin/bash</span></span>
+<span id="cb21-2"><a href="#cb21-2"></a><span class="bu">set</span> <span class="at">-e</span>          <span class="co"># Exit on any error</span></span>
+<span id="cb21-3"><a href="#cb21-3"></a><span class="bu">set</span> <span class="at">-u</span>          <span class="co"># Error on undefined variables</span></span>
+<span id="cb21-4"><a href="#cb21-4"></a><span class="bu">set</span> <span class="at">-o</span> pipefail <span class="co"># Catch errors in pipes</span></span>
+<span id="cb21-5"><a href="#cb21-5"></a></span>
+<span id="cb21-6"><a href="#cb21-6"></a><span class="co"># Or combine: set -euo pipefail</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section><section id="sec-custom-error-handling" class="level3"><h3 class="anchored" data-anchor-id="sec-custom-error-handling">Custom Error Handling</h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb22"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb22-1"><a href="#cb22-1"></a><span class="co">#!/bin/bash</span></span>
+<span id="cb22-2"><a href="#cb22-2"></a><span class="bu">set</span> <span class="at">-euo</span> pipefail</span>
+<span id="cb22-3"><a href="#cb22-3"></a></span>
+<span id="cb22-4"><a href="#cb22-4"></a><span class="co"># Define error handler</span></span>
+<span id="cb22-5"><a href="#cb22-5"></a><span class="fu">error_exit()</span> <span class="kw">{</span></span>
+<span id="cb22-6"><a href="#cb22-6"></a>    <span class="bu">echo</span> <span class="st">"Error on line </span><span class="va">$1</span><span class="st">"</span> <span class="op">&gt;&amp;</span><span class="dv">2</span></span>
+<span id="cb22-7"><a href="#cb22-7"></a>    <span class="bu">exit</span> 1</span>
+<span id="cb22-8"><a href="#cb22-8"></a><span class="kw">}</span></span>
+<span id="cb22-9"><a href="#cb22-9"></a></span>
+<span id="cb22-10"><a href="#cb22-10"></a><span class="co"># Set trap to call handler on error</span></span>
+<span id="cb22-11"><a href="#cb22-11"></a><span class="bu">trap</span> <span class="st">'error_exit $LINENO'</span> ERR</span>
+<span id="cb22-12"><a href="#cb22-12"></a></span>
+<span id="cb22-13"><a href="#cb22-13"></a><span class="co"># Now errors are caught</span></span>
+<span id="cb22-14"><a href="#cb22-14"></a><span class="fu">check_file()</span> <span class="kw">{</span></span>
+<span id="cb22-15"><a href="#cb22-15"></a>    <span class="cf">if</span> <span class="bu">[</span> <span class="ot">!</span> <span class="ot">-f</span> <span class="st">"</span><span class="va">$1</span><span class="st">"</span> <span class="bu">]</span><span class="kw">;</span> <span class="cf">then</span></span>
+<span id="cb22-16"><a href="#cb22-16"></a>        <span class="bu">echo</span> <span class="st">"Error: File </span><span class="va">$1</span><span class="st"> not found!"</span> <span class="op">&gt;&amp;</span><span class="dv">2</span></span>
+<span id="cb22-17"><a href="#cb22-17"></a>        <span class="bu">exit</span> 1</span>
+<span id="cb22-18"><a href="#cb22-18"></a>    <span class="cf">fi</span></span>
+<span id="cb22-19"><a href="#cb22-19"></a><span class="kw">}</span></span>
+<span id="cb22-20"><a href="#cb22-20"></a></span>
+<span id="cb22-21"><a href="#cb22-21"></a><span class="co"># Validate inputs</span></span>
+<span id="cb22-22"><a href="#cb22-22"></a><span class="ex">check_file</span> <span class="st">"</span><span class="va">$1</span><span class="st">"</span></span>
+<span id="cb22-23"><a href="#cb22-23"></a></span>
+<span id="cb22-24"><a href="#cb22-24"></a><span class="co"># Continue processing...</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section><section id="sec-cleanup-on-exit" class="level3"><h3 class="anchored" data-anchor-id="sec-cleanup-on-exit">Cleanup on Exit</h3>
+<p>Ensure temporary files are removed even if script fails:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb23"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb23-1"><a href="#cb23-1"></a><span class="co">#!/bin/bash</span></span>
+<span id="cb23-2"><a href="#cb23-2"></a></span>
+<span id="cb23-3"><a href="#cb23-3"></a><span class="co"># Create temp file</span></span>
+<span id="cb23-4"><a href="#cb23-4"></a><span class="va">TMPFILE</span><span class="op">=</span><span class="va">$(</span><span class="fu">mktemp</span><span class="va">)</span></span>
+<span id="cb23-5"><a href="#cb23-5"></a></span>
+<span id="cb23-6"><a href="#cb23-6"></a><span class="co"># Remove temp file on exit (normal or error)</span></span>
+<span id="cb23-7"><a href="#cb23-7"></a><span class="bu">trap</span> <span class="st">"rm -f </span><span class="va">$TMPFILE</span><span class="st">"</span> EXIT</span>
+<span id="cb23-8"><a href="#cb23-8"></a></span>
+<span id="cb23-9"><a href="#cb23-9"></a><span class="co"># Use temp file...</span></span>
+<span id="cb23-10"><a href="#cb23-10"></a><span class="bu">echo</span> <span class="st">"working data"</span> <span class="op">&gt;</span> <span class="st">"</span><span class="va">$TMPFILE</span><span class="st">"</span></span>
+<span id="cb23-11"><a href="#cb23-11"></a><span class="co"># ... do processing ...</span></span>
+<span id="cb23-12"><a href="#cb23-12"></a></span>
+<span id="cb23-13"><a href="#cb23-13"></a><span class="co"># Cleanup happens automatically</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section></section><section id="sec-rscript" class="level2" data-number="8.10"><h2 data-number="8.10" class="anchored" data-anchor-id="sec-rscript">
+<span class="header-section-number">8.10</span> Running R Scripts from the Shell</h2>
+<p>While shell scripts are powerful, sometimes you need R’s statistical capabilities. The <code>Rscript</code> command lets you run R code directly from the shell.</p>
+<section id="sec-shell-basic-usage" class="level3"><h3 class="anchored" data-anchor-id="sec-shell-basic-usage">Basic Usage</h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb24"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb24-1"><a href="#cb24-1"></a><span class="co"># Run an R script</span></span>
+<span id="cb24-2"><a href="#cb24-2"></a><span class="ex">$</span> Rscript my_analysis.R</span>
+<span id="cb24-3"><a href="#cb24-3"></a></span>
+<span id="cb24-4"><a href="#cb24-4"></a><span class="co"># Execute a single R expression</span></span>
+<span id="cb24-5"><a href="#cb24-5"></a><span class="ex">$</span> Rscript <span class="at">-e</span> <span class="st">"print('Hello from R!')"</span></span>
+<span id="cb24-6"><a href="#cb24-6"></a></span>
+<span id="cb24-7"><a href="#cb24-7"></a><span class="co"># Quick calculation</span></span>
+<span id="cb24-8"><a href="#cb24-8"></a><span class="ex">$</span> Rscript <span class="at">-e</span> <span class="st">"mean(c(1, 2, 3, 4, 5))"</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section><section id="sec-passing-arguments-to-r-scripts" class="level3"><h3 class="anchored" data-anchor-id="sec-passing-arguments-to-r-scripts">Passing Arguments to R Scripts</h3>
+<p>You can pass command-line arguments to R scripts, making them flexible and reusable:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb25"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1"></a><span class="co">#!/usr/bin/env Rscript</span></span>
+<span id="cb25-2"><a href="#cb25-2"></a><span class="co"># process_data.R - Process a data file with custom parameters</span></span>
+<span id="cb25-3"><a href="#cb25-3"></a></span>
+<span id="cb25-4"><a href="#cb25-4"></a><span class="co"># Capture command-line arguments</span></span>
+<span id="cb25-5"><a href="#cb25-5"></a>args <span class="ot">&lt;-</span> <span class="fu">commandArgs</span>(<span class="at">trailingOnly =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb25-6"><a href="#cb25-6"></a></span>
+<span id="cb25-7"><a href="#cb25-7"></a><span class="co"># Check for required arguments</span></span>
+<span id="cb25-8"><a href="#cb25-8"></a><span class="cf">if</span> (<span class="fu">length</span>(args) <span class="sc">&lt;</span> <span class="dv">2</span>) {</span>
+<span id="cb25-9"><a href="#cb25-9"></a>  <span class="fu">stop</span>(<span class="st">"Usage: Rscript process_data.R &lt;input_file&gt; &lt;output_file&gt;"</span>)</span>
+<span id="cb25-10"><a href="#cb25-10"></a>}</span>
+<span id="cb25-11"><a href="#cb25-11"></a></span>
+<span id="cb25-12"><a href="#cb25-12"></a>input_file <span class="ot">&lt;-</span> args[<span class="dv">1</span>]</span>
+<span id="cb25-13"><a href="#cb25-13"></a>output_file <span class="ot">&lt;-</span> args[<span class="dv">2</span>]</span>
+<span id="cb25-14"><a href="#cb25-14"></a></span>
+<span id="cb25-15"><a href="#cb25-15"></a><span class="co"># Now use these in your analysis</span></span>
+<span id="cb25-16"><a href="#cb25-16"></a>data <span class="ot">&lt;-</span> <span class="fu">read.csv</span>(input_file)</span>
+<span id="cb25-17"><a href="#cb25-17"></a><span class="co"># ... process data ...</span></span>
+<span id="cb25-18"><a href="#cb25-18"></a><span class="fu">write.csv</span>(data, output_file)</span>
+<span id="cb25-19"><a href="#cb25-19"></a></span>
+<span id="cb25-20"><a href="#cb25-20"></a><span class="fu">cat</span>(<span class="st">"Processed"</span>, input_file, <span class="st">"-&gt; "</span>, output_file, <span class="st">"</span><span class="sc">\n</span><span class="st">"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Run it from the shell:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb26"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb26-1"><a href="#cb26-1"></a><span class="ex">$</span> Rscript process_data.R raw_data.csv cleaned_data.csv</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section><section id="sec-combining-shell-and-r" class="level3"><h3 class="anchored" data-anchor-id="sec-combining-shell-and-r">Combining Shell and R</h3>
+<p>A common pattern is using shell scripts to orchestrate R analyses:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb27"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb27-1"><a href="#cb27-1"></a><span class="co">#!/bin/bash</span></span>
+<span id="cb27-2"><a href="#cb27-2"></a><span class="co"># run_analysis.sh - Process all CSV files in a directory</span></span>
+<span id="cb27-3"><a href="#cb27-3"></a></span>
+<span id="cb27-4"><a href="#cb27-4"></a><span class="cf">for</span> file <span class="kw">in</span> data/<span class="pp">*</span>.csv<span class="kw">;</span> <span class="cf">do</span></span>
+<span id="cb27-5"><a href="#cb27-5"></a>    <span class="va">output</span><span class="op">=</span><span class="st">"results/</span><span class="va">$(</span><span class="fu">basename</span> <span class="st">"</span><span class="va">$file</span><span class="st">"</span> .csv<span class="va">)</span><span class="st">_processed.csv"</span></span>
+<span id="cb27-6"><a href="#cb27-6"></a>    <span class="bu">echo</span> <span class="st">"Processing </span><span class="va">$file</span><span class="st">..."</span></span>
+<span id="cb27-7"><a href="#cb27-7"></a>    <span class="ex">Rscript</span> process_data.R <span class="st">"</span><span class="va">$file</span><span class="st">"</span> <span class="st">"</span><span class="va">$output</span><span class="st">"</span></span>
+<span id="cb27-8"><a href="#cb27-8"></a><span class="cf">done</span></span>
+<span id="cb27-9"><a href="#cb27-9"></a></span>
+<span id="cb27-10"><a href="#cb27-10"></a><span class="bu">echo</span> <span class="st">"All files processed!"</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="callout callout-style-default callout-tip callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Tip
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Using <code>Rscript</code> is particularly valuable for batch processing, scheduled tasks (cron jobs), and integration with high-performance computing clusters where you submit shell scripts as jobs (<a href="11-hpc-talapas.html" class="quarto-xref"><span>Chapter 20</span></a>).</p>
+</div>
+</div>
+</section></section><section id="sec-scripts-other-languages" class="level2" data-number="8.11"><h2 data-number="8.11" class="anchored" data-anchor-id="sec-scripts-other-languages">
+<span class="header-section-number">8.11</span> Scripts in Other Languages</h2>
+<p>Everything in this chapter about shebangs, <code>chmod +x</code>, and command-line arguments applies to scripts in any interpreted language. The shell reads the shebang line, hands the file to that interpreter, and passes the arguments along. Here is the same tiny program, counting the records in a FASTA file whose name is given on the command line, written in bash, R, and Python. Notice that the structure is identical: read the first argument, complain if it is missing, count lines beginning with <code>&gt;</code>, and print the result.</p>
+<div class="tabset-margin-container"></div><div class="panel-tabset">
+<ul class="nav nav-tabs" role="tablist">
+<li class="nav-item" role="presentation"><a class="nav-link active" id="tabset-1-1-tab" data-bs-toggle="tab" data-bs-target="#tabset-1-1" role="tab" aria-controls="tabset-1-1" aria-selected="true" href="" aria-current="page">Bash</a></li>
+<li class="nav-item" role="presentation"><a class="nav-link" id="tabset-1-2-tab" data-bs-toggle="tab" data-bs-target="#tabset-1-2" role="tab" aria-controls="tabset-1-2" aria-selected="false" href="">R</a></li>
+<li class="nav-item" role="presentation"><a class="nav-link" id="tabset-1-3-tab" data-bs-toggle="tab" data-bs-target="#tabset-1-3" role="tab" aria-controls="tabset-1-3" aria-selected="false" href="">Python</a></li>
+</ul>
+<div class="tab-content">
+<div id="tabset-1-1" class="tab-pane active" role="tabpanel" aria-labelledby="tabset-1-1-tab">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb28"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb28-1"><a href="#cb28-1"></a><span class="co">#!/bin/bash</span></span>
+<span id="cb28-2"><a href="#cb28-2"></a><span class="co"># count_fasta.sh - count records in a FASTA file</span></span>
+<span id="cb28-3"><a href="#cb28-3"></a><span class="cf">if</span> <span class="bu">[</span> <span class="va">$#</span> <span class="ot">-lt</span> 1 <span class="bu">]</span><span class="kw">;</span> <span class="cf">then</span></span>
+<span id="cb28-4"><a href="#cb28-4"></a>    <span class="bu">echo</span> <span class="st">"Usage: </span><span class="va">$0</span><span class="st"> &lt;file.fasta&gt;"</span> <span class="op">&gt;&amp;</span><span class="dv">2</span></span>
+<span id="cb28-5"><a href="#cb28-5"></a>    <span class="bu">exit</span> 1</span>
+<span id="cb28-6"><a href="#cb28-6"></a><span class="cf">fi</span></span>
+<span id="cb28-7"><a href="#cb28-7"></a></span>
+<span id="cb28-8"><a href="#cb28-8"></a><span class="va">n</span><span class="op">=</span><span class="va">$(</span><span class="fu">grep</span> <span class="at">-c</span> <span class="st">'^&gt;'</span> <span class="st">"</span><span class="va">$1</span><span class="st">"</span><span class="va">)</span></span>
+<span id="cb28-9"><a href="#cb28-9"></a><span class="bu">echo</span> <span class="st">"</span><span class="va">$1</span><span class="st">: </span><span class="va">$n</span><span class="st"> records"</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb29"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb29-1"><a href="#cb29-1"></a><span class="fu">chmod</span> +x count_fasta.sh</span>
+<span id="cb29-2"><a href="#cb29-2"></a><span class="ex">./count_fasta.sh</span> sequences.fasta</span>
+<span id="cb29-3"><a href="#cb29-3"></a><span class="co"># sequences.fasta: 3 records</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div id="tabset-1-2" class="tab-pane" role="tabpanel" aria-labelledby="tabset-1-2-tab">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb30"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb30-1"><a href="#cb30-1"></a><span class="co">#!/usr/bin/env Rscript</span></span>
+<span id="cb30-2"><a href="#cb30-2"></a><span class="co"># count_fasta.R - count records in a FASTA file</span></span>
+<span id="cb30-3"><a href="#cb30-3"></a>args <span class="ot">&lt;-</span> <span class="fu">commandArgs</span>(<span class="at">trailingOnly =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb30-4"><a href="#cb30-4"></a><span class="cf">if</span> (<span class="fu">length</span>(args) <span class="sc">&lt;</span> <span class="dv">1</span>) {</span>
+<span id="cb30-5"><a href="#cb30-5"></a>  <span class="fu">stop</span>(<span class="st">"Usage: count_fasta.R &lt;file.fasta&gt;"</span>)</span>
+<span id="cb30-6"><a href="#cb30-6"></a>}</span>
+<span id="cb30-7"><a href="#cb30-7"></a></span>
+<span id="cb30-8"><a href="#cb30-8"></a>lines <span class="ot">&lt;-</span> <span class="fu">readLines</span>(args[<span class="dv">1</span>])</span>
+<span id="cb30-9"><a href="#cb30-9"></a>n <span class="ot">&lt;-</span> <span class="fu">sum</span>(<span class="fu">startsWith</span>(lines, <span class="st">"&gt;"</span>))</span>
+<span id="cb30-10"><a href="#cb30-10"></a><span class="fu">cat</span>(args[<span class="dv">1</span>], <span class="st">": "</span>, n, <span class="st">" records</span><span class="sc">\n</span><span class="st">"</span>, <span class="at">sep =</span> <span class="st">""</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb31"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb31-1"><a href="#cb31-1"></a><span class="fu">chmod</span> +x count_fasta.R</span>
+<span id="cb31-2"><a href="#cb31-2"></a><span class="ex">./count_fasta.R</span> sequences.fasta        <span class="co"># or: Rscript count_fasta.R sequences.fasta</span></span>
+<span id="cb31-3"><a href="#cb31-3"></a><span class="co"># sequences.fasta: 3 records</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div id="tabset-1-3" class="tab-pane" role="tabpanel" aria-labelledby="tabset-1-3-tab">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb32"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb32-1"><a href="#cb32-1"></a><span class="co">#!/usr/bin/env python3</span></span>
+<span id="cb32-2"><a href="#cb32-2"></a><span class="co"># count_fasta.py - count records in a FASTA file</span></span>
+<span id="cb32-3"><a href="#cb32-3"></a><span class="im">import</span> sys</span>
+<span id="cb32-4"><a href="#cb32-4"></a></span>
+<span id="cb32-5"><a href="#cb32-5"></a><span class="cf">if</span> <span class="bu">len</span>(sys.argv) <span class="op">&lt;</span> <span class="dv">2</span>:</span>
+<span id="cb32-6"><a href="#cb32-6"></a>    sys.exit(<span class="st">"Usage: count_fasta.py &lt;file.fasta&gt;"</span>)</span>
+<span id="cb32-7"><a href="#cb32-7"></a></span>
+<span id="cb32-8"><a href="#cb32-8"></a><span class="cf">with</span> <span class="bu">open</span>(sys.argv[<span class="dv">1</span>]) <span class="im">as</span> fh:</span>
+<span id="cb32-9"><a href="#cb32-9"></a>    n <span class="op">=</span> <span class="bu">sum</span>(<span class="dv">1</span> <span class="cf">for</span> line <span class="kw">in</span> fh <span class="cf">if</span> line.startswith(<span class="st">"&gt;"</span>))</span>
+<span id="cb32-10"><a href="#cb32-10"></a><span class="bu">print</span>(<span class="ss">f"</span><span class="sc">{</span>sys<span class="sc">.</span>argv[<span class="dv">1</span>]<span class="sc">}</span><span class="ss">: </span><span class="sc">{</span>n<span class="sc">}</span><span class="ss"> records"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb33"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb33-1"><a href="#cb33-1"></a><span class="fu">chmod</span> +x count_fasta.py</span>
+<span id="cb33-2"><a href="#cb33-2"></a><span class="ex">./count_fasta.py</span> sequences.fasta       <span class="co"># or: python3 count_fasta.py sequences.fasta</span></span>
+<span id="cb33-3"><a href="#cb33-3"></a><span class="co"># sequences.fasta: 3 records</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+</div>
+</div>
+<p>The differences are small and systematic: bash sees arguments as <code>$1</code>, <code>$2</code>, …; R collects them with <code>commandArgs(trailingOnly = TRUE)</code> into a character vector indexed from 1; Python puts them in the list <code>sys.argv</code>, where element <code>0</code> is the script name and the first real argument is <code>sys.argv[1]</code>. Whichever language you choose, the shell treats the script the same way, so a bash driver script can call any of them in a loop, as in the previous section. R scripting is covered in <a href="07-r-programming.html" class="quarto-xref"><span>Chapter 9</span></a> and Python scripting, including the more capable <code>argparse</code> module, in <a href="18-python-programming.html" class="quarto-xref"><span>Chapter 10</span></a>.</p>
+</section><section id="sec-complete-script" class="level2" data-number="8.12"><h2 data-number="8.12" class="anchored" data-anchor-id="sec-complete-script">
+<span class="header-section-number">8.12</span> A Complete Bioinformatics Script</h2>
+<p>Let’s put it all together with a realistic example:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb34"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb34-1"><a href="#cb34-1"></a><span class="co">#!/bin/bash</span></span>
+<span id="cb34-2"><a href="#cb34-2"></a><span class="co">#===============================================================================</span></span>
+<span id="cb34-3"><a href="#cb34-3"></a><span class="co"># fasta_stats.sh - Calculate statistics for FASTA files</span></span>
+<span id="cb34-4"><a href="#cb34-4"></a><span class="co"># </span></span>
+<span id="cb34-5"><a href="#cb34-5"></a><span class="co"># Usage: ./fasta_stats.sh input.fasta [output.txt]</span></span>
+<span id="cb34-6"><a href="#cb34-6"></a><span class="co">#</span></span>
+<span id="cb34-7"><a href="#cb34-7"></a><span class="co"># Author: Your Name</span></span>
+<span id="cb34-8"><a href="#cb34-8"></a><span class="co"># Date: 2025-01-15</span></span>
+<span id="cb34-9"><a href="#cb34-9"></a><span class="co">#===============================================================================</span></span>
+<span id="cb34-10"><a href="#cb34-10"></a></span>
+<span id="cb34-11"><a href="#cb34-11"></a><span class="bu">set</span> <span class="at">-euo</span> pipefail</span>
+<span id="cb34-12"><a href="#cb34-12"></a></span>
+<span id="cb34-13"><a href="#cb34-13"></a><span class="co">#-------------------------------------------------------------------------------</span></span>
+<span id="cb34-14"><a href="#cb34-14"></a><span class="co"># Configuration</span></span>
+<span id="cb34-15"><a href="#cb34-15"></a><span class="co">#-------------------------------------------------------------------------------</span></span>
+<span id="cb34-16"><a href="#cb34-16"></a><span class="va">VERSION</span><span class="op">=</span><span class="st">"1.0.0"</span></span>
+<span id="cb34-17"><a href="#cb34-17"></a></span>
+<span id="cb34-18"><a href="#cb34-18"></a><span class="co">#-------------------------------------------------------------------------------</span></span>
+<span id="cb34-19"><a href="#cb34-19"></a><span class="co"># Functions</span></span>
+<span id="cb34-20"><a href="#cb34-20"></a><span class="co">#-------------------------------------------------------------------------------</span></span>
+<span id="cb34-21"><a href="#cb34-21"></a></span>
+<span id="cb34-22"><a href="#cb34-22"></a><span class="fu">usage()</span> <span class="kw">{</span></span>
+<span id="cb34-23"><a href="#cb34-23"></a>    <span class="fu">cat</span> <span class="op">&lt;&lt; EOF</span></span>
+<span id="cb34-24"><a href="#cb34-24"></a><span class="st">Usage: </span><span class="va">$(</span><span class="fu">basename</span> <span class="st">"</span><span class="va">$0</span><span class="st">"</span><span class="va">)</span><span class="st"> [OPTIONS] input.fasta [output.txt]</span></span>
+<span id="cb34-25"><a href="#cb34-25"></a></span>
+<span id="cb34-26"><a href="#cb34-26"></a><span class="st">Calculate basic statistics for FASTA files.</span></span>
+<span id="cb34-27"><a href="#cb34-27"></a></span>
+<span id="cb34-28"><a href="#cb34-28"></a><span class="st">Options:</span></span>
+<span id="cb34-29"><a href="#cb34-29"></a><span class="st">    -h, --help      Show this help message</span></span>
+<span id="cb34-30"><a href="#cb34-30"></a><span class="st">    -v, --version   Show version information</span></span>
+<span id="cb34-31"><a href="#cb34-31"></a><span class="st">    -q, --quiet     Suppress progress messages</span></span>
+<span id="cb34-32"><a href="#cb34-32"></a></span>
+<span id="cb34-33"><a href="#cb34-33"></a><span class="st">Arguments:</span></span>
+<span id="cb34-34"><a href="#cb34-34"></a><span class="st">    input.fasta     Input FASTA file (required)</span></span>
+<span id="cb34-35"><a href="#cb34-35"></a><span class="st">    output.txt      Output file (optional, defaults to stdout)</span></span>
+<span id="cb34-36"><a href="#cb34-36"></a></span>
+<span id="cb34-37"><a href="#cb34-37"></a><span class="st">Examples:</span></span>
+<span id="cb34-38"><a href="#cb34-38"></a><span class="st">    </span><span class="va">$(</span><span class="fu">basename</span> <span class="st">"</span><span class="va">$0</span><span class="st">"</span><span class="va">)</span><span class="st"> sequences.fa</span></span>
+<span id="cb34-39"><a href="#cb34-39"></a><span class="st">    </span><span class="va">$(</span><span class="fu">basename</span> <span class="st">"</span><span class="va">$0</span><span class="st">"</span><span class="va">)</span><span class="st"> genome.fa stats.txt</span></span>
+<span id="cb34-40"><a href="#cb34-40"></a><span class="st">    </span><span class="va">$(</span><span class="fu">basename</span> <span class="st">"</span><span class="va">$0</span><span class="st">"</span><span class="va">)</span><span class="st"> -q input.fa &gt; results.txt</span></span>
+<span id="cb34-41"><a href="#cb34-41"></a><span class="op">EOF</span></span>
+<span id="cb34-42"><a href="#cb34-42"></a><span class="kw">}</span></span>
+<span id="cb34-43"><a href="#cb34-43"></a></span>
+<span id="cb34-44"><a href="#cb34-44"></a><span class="fu">log()</span> <span class="kw">{</span></span>
+<span id="cb34-45"><a href="#cb34-45"></a>    <span class="cf">if</span> <span class="bu">[</span> <span class="st">"</span><span class="va">$QUIET</span><span class="st">"</span> <span class="ot">=</span> false <span class="bu">]</span><span class="kw">;</span> <span class="cf">then</span></span>
+<span id="cb34-46"><a href="#cb34-46"></a>        <span class="bu">echo</span> <span class="st">"[</span><span class="va">$(</span><span class="fu">date</span> <span class="st">'+%Y-%m-%d %H:%M:%S'</span><span class="va">)</span><span class="st">] </span><span class="va">$1</span><span class="st">"</span> <span class="op">&gt;&amp;</span><span class="dv">2</span></span>
+<span id="cb34-47"><a href="#cb34-47"></a>    <span class="cf">fi</span></span>
+<span id="cb34-48"><a href="#cb34-48"></a><span class="kw">}</span></span>
+<span id="cb34-49"><a href="#cb34-49"></a></span>
+<span id="cb34-50"><a href="#cb34-50"></a><span class="fu">error()</span> <span class="kw">{</span></span>
+<span id="cb34-51"><a href="#cb34-51"></a>    <span class="bu">echo</span> <span class="st">"Error: </span><span class="va">$1</span><span class="st">"</span> <span class="op">&gt;&amp;</span><span class="dv">2</span></span>
+<span id="cb34-52"><a href="#cb34-52"></a>    <span class="bu">exit</span> 1</span>
+<span id="cb34-53"><a href="#cb34-53"></a><span class="kw">}</span></span>
+<span id="cb34-54"><a href="#cb34-54"></a></span>
+<span id="cb34-55"><a href="#cb34-55"></a><span class="fu">count_sequences()</span> <span class="kw">{</span></span>
+<span id="cb34-56"><a href="#cb34-56"></a>    <span class="fu">grep</span> <span class="at">-c</span> <span class="st">"^&gt;"</span> <span class="st">"</span><span class="va">$1</span><span class="st">"</span></span>
+<span id="cb34-57"><a href="#cb34-57"></a><span class="kw">}</span></span>
+<span id="cb34-58"><a href="#cb34-58"></a></span>
+<span id="cb34-59"><a href="#cb34-59"></a><span class="fu">total_length()</span> <span class="kw">{</span></span>
+<span id="cb34-60"><a href="#cb34-60"></a>    <span class="fu">grep</span> <span class="at">-v</span> <span class="st">"^&gt;"</span> <span class="st">"</span><span class="va">$1</span><span class="st">"</span> <span class="kw">|</span> <span class="fu">tr</span> <span class="at">-d</span> <span class="st">'\n'</span> <span class="kw">|</span> <span class="fu">wc</span> <span class="at">-c</span> <span class="kw">|</span> <span class="fu">tr</span> <span class="at">-d</span> <span class="st">' '</span></span>
+<span id="cb34-61"><a href="#cb34-61"></a><span class="kw">}</span></span>
+<span id="cb34-62"><a href="#cb34-62"></a></span>
+<span id="cb34-63"><a href="#cb34-63"></a><span class="fu">gc_content()</span> <span class="kw">{</span></span>
+<span id="cb34-64"><a href="#cb34-64"></a>    <span class="bu">local</span> <span class="va">gc</span><span class="op">=</span><span class="va">$(</span><span class="fu">grep</span> <span class="at">-v</span> <span class="st">"^&gt;"</span> <span class="st">"</span><span class="va">$1</span><span class="st">"</span> <span class="kw">|</span> <span class="fu">tr</span> <span class="at">-d</span> <span class="st">'\n'</span> <span class="kw">|</span> <span class="fu">grep</span> <span class="at">-o</span> <span class="st">"[GC]"</span> <span class="kw">|</span> <span class="fu">wc</span> <span class="at">-l</span> <span class="kw">|</span> <span class="fu">tr</span> <span class="at">-d</span> <span class="st">' '</span><span class="va">)</span></span>
+<span id="cb34-65"><a href="#cb34-65"></a>    <span class="bu">local</span> <span class="va">total</span><span class="op">=</span><span class="va">$(</span><span class="ex">total_length</span> <span class="st">"</span><span class="va">$1</span><span class="st">"</span><span class="va">)</span></span>
+<span id="cb34-66"><a href="#cb34-66"></a>    <span class="cf">if</span> <span class="bu">[</span> <span class="st">"</span><span class="va">$total</span><span class="st">"</span> <span class="ot">-gt</span> 0 <span class="bu">]</span><span class="kw">;</span> <span class="cf">then</span></span>
+<span id="cb34-67"><a href="#cb34-67"></a>        <span class="bu">echo</span> <span class="st">"</span><span class="va">$((gc</span> <span class="op">*</span> <span class="dv">100</span> <span class="op">/</span> <span class="va">total))</span><span class="st">"</span></span>
+<span id="cb34-68"><a href="#cb34-68"></a>    <span class="cf">else</span></span>
+<span id="cb34-69"><a href="#cb34-69"></a>        <span class="bu">echo</span> <span class="st">"0"</span></span>
+<span id="cb34-70"><a href="#cb34-70"></a>    <span class="cf">fi</span></span>
+<span id="cb34-71"><a href="#cb34-71"></a><span class="kw">}</span></span>
+<span id="cb34-72"><a href="#cb34-72"></a></span>
+<span id="cb34-73"><a href="#cb34-73"></a><span class="co">#-------------------------------------------------------------------------------</span></span>
+<span id="cb34-74"><a href="#cb34-74"></a><span class="co"># Parse Arguments</span></span>
+<span id="cb34-75"><a href="#cb34-75"></a><span class="co">#-------------------------------------------------------------------------------</span></span>
+<span id="cb34-76"><a href="#cb34-76"></a></span>
+<span id="cb34-77"><a href="#cb34-77"></a><span class="va">QUIET</span><span class="op">=</span>false</span>
+<span id="cb34-78"><a href="#cb34-78"></a></span>
+<span id="cb34-79"><a href="#cb34-79"></a><span class="cf">while</span> <span class="kw">[[</span> <span class="va">$#</span> <span class="ot">-gt</span> 0 <span class="kw">]];</span> <span class="cf">do</span></span>
+<span id="cb34-80"><a href="#cb34-80"></a>    <span class="cf">case</span> <span class="va">$1</span> <span class="kw">in</span></span>
+<span id="cb34-81"><a href="#cb34-81"></a>        <span class="ss">-h</span><span class="kw">|</span><span class="ss">--help</span><span class="kw">)</span></span>
+<span id="cb34-82"><a href="#cb34-82"></a>            <span class="ex">usage</span></span>
+<span id="cb34-83"><a href="#cb34-83"></a>            <span class="bu">exit</span> 0</span>
+<span id="cb34-84"><a href="#cb34-84"></a>            <span class="cf">;;</span></span>
+<span id="cb34-85"><a href="#cb34-85"></a>        <span class="ss">-v</span><span class="kw">|</span><span class="ss">--version</span><span class="kw">)</span></span>
+<span id="cb34-86"><a href="#cb34-86"></a>            <span class="bu">echo</span> <span class="st">"</span><span class="va">$(</span><span class="fu">basename</span> <span class="st">"</span><span class="va">$0</span><span class="st">"</span><span class="va">)</span><span class="st"> version </span><span class="va">$VERSION</span><span class="st">"</span></span>
+<span id="cb34-87"><a href="#cb34-87"></a>            <span class="bu">exit</span> 0</span>
+<span id="cb34-88"><a href="#cb34-88"></a>            <span class="cf">;;</span></span>
+<span id="cb34-89"><a href="#cb34-89"></a>        <span class="ss">-q</span><span class="kw">|</span><span class="ss">--quiet</span><span class="kw">)</span></span>
+<span id="cb34-90"><a href="#cb34-90"></a>            <span class="va">QUIET</span><span class="op">=</span>true</span>
+<span id="cb34-91"><a href="#cb34-91"></a>            <span class="bu">shift</span></span>
+<span id="cb34-92"><a href="#cb34-92"></a>            <span class="cf">;;</span></span>
+<span id="cb34-93"><a href="#cb34-93"></a>        <span class="ss">-</span><span class="pp">*</span><span class="kw">)</span></span>
+<span id="cb34-94"><a href="#cb34-94"></a>            <span class="ex">error</span> <span class="st">"Unknown option: </span><span class="va">$1</span><span class="st">"</span></span>
+<span id="cb34-95"><a href="#cb34-95"></a>            <span class="cf">;;</span></span>
+<span id="cb34-96"><a href="#cb34-96"></a>        <span class="pp">*</span><span class="kw">)</span></span>
+<span id="cb34-97"><a href="#cb34-97"></a>            <span class="cf">break</span></span>
+<span id="cb34-98"><a href="#cb34-98"></a>            <span class="cf">;;</span></span>
+<span id="cb34-99"><a href="#cb34-99"></a>    <span class="cf">esac</span></span>
+<span id="cb34-100"><a href="#cb34-100"></a><span class="cf">done</span></span>
+<span id="cb34-101"><a href="#cb34-101"></a></span>
+<span id="cb34-102"><a href="#cb34-102"></a><span class="co"># Check required arguments</span></span>
+<span id="cb34-103"><a href="#cb34-103"></a><span class="cf">if</span> <span class="bu">[</span> <span class="va">$#</span> <span class="ot">-lt</span> 1 <span class="bu">]</span><span class="kw">;</span> <span class="cf">then</span></span>
+<span id="cb34-104"><a href="#cb34-104"></a>    <span class="ex">usage</span> <span class="op">&gt;&amp;</span><span class="dv">2</span></span>
+<span id="cb34-105"><a href="#cb34-105"></a>    <span class="bu">exit</span> 1</span>
+<span id="cb34-106"><a href="#cb34-106"></a><span class="cf">fi</span></span>
+<span id="cb34-107"><a href="#cb34-107"></a></span>
+<span id="cb34-108"><a href="#cb34-108"></a><span class="va">INPUT</span><span class="op">=</span><span class="st">"</span><span class="va">$1</span><span class="st">"</span></span>
+<span id="cb34-109"><a href="#cb34-109"></a><span class="va">OUTPUT</span><span class="op">=</span><span class="st">"</span><span class="va">${2</span><span class="op">:-</span>/dev/stdout<span class="va">}</span><span class="st">"</span></span>
+<span id="cb34-110"><a href="#cb34-110"></a></span>
+<span id="cb34-111"><a href="#cb34-111"></a><span class="co">#-------------------------------------------------------------------------------</span></span>
+<span id="cb34-112"><a href="#cb34-112"></a><span class="co"># Validate Input</span></span>
+<span id="cb34-113"><a href="#cb34-113"></a><span class="co">#-------------------------------------------------------------------------------</span></span>
+<span id="cb34-114"><a href="#cb34-114"></a></span>
+<span id="cb34-115"><a href="#cb34-115"></a><span class="cf">if</span> <span class="bu">[</span> <span class="ot">!</span> <span class="ot">-f</span> <span class="st">"</span><span class="va">$INPUT</span><span class="st">"</span> <span class="bu">]</span><span class="kw">;</span> <span class="cf">then</span></span>
+<span id="cb34-116"><a href="#cb34-116"></a>    <span class="ex">error</span> <span class="st">"Input file not found: </span><span class="va">$INPUT</span><span class="st">"</span></span>
+<span id="cb34-117"><a href="#cb34-117"></a><span class="cf">fi</span></span>
+<span id="cb34-118"><a href="#cb34-118"></a></span>
+<span id="cb34-119"><a href="#cb34-119"></a><span class="cf">if</span> <span class="bu">[</span> <span class="ot">!</span> <span class="ot">-r</span> <span class="st">"</span><span class="va">$INPUT</span><span class="st">"</span> <span class="bu">]</span><span class="kw">;</span> <span class="cf">then</span></span>
+<span id="cb34-120"><a href="#cb34-120"></a>    <span class="ex">error</span> <span class="st">"Cannot read input file: </span><span class="va">$INPUT</span><span class="st">"</span></span>
+<span id="cb34-121"><a href="#cb34-121"></a><span class="cf">fi</span></span>
+<span id="cb34-122"><a href="#cb34-122"></a></span>
+<span id="cb34-123"><a href="#cb34-123"></a><span class="co">#-------------------------------------------------------------------------------</span></span>
+<span id="cb34-124"><a href="#cb34-124"></a><span class="co"># Main Analysis</span></span>
+<span id="cb34-125"><a href="#cb34-125"></a><span class="co">#-------------------------------------------------------------------------------</span></span>
+<span id="cb34-126"><a href="#cb34-126"></a></span>
+<span id="cb34-127"><a href="#cb34-127"></a><span class="ex">log</span> <span class="st">"Starting analysis of </span><span class="va">$INPUT</span><span class="st">"</span></span>
+<span id="cb34-128"><a href="#cb34-128"></a></span>
+<span id="cb34-129"><a href="#cb34-129"></a><span class="ex">log</span> <span class="st">"Counting sequences..."</span></span>
+<span id="cb34-130"><a href="#cb34-130"></a><span class="va">SEQ_COUNT</span><span class="op">=</span><span class="va">$(</span><span class="ex">count_sequences</span> <span class="st">"</span><span class="va">$INPUT</span><span class="st">"</span><span class="va">)</span></span>
+<span id="cb34-131"><a href="#cb34-131"></a></span>
+<span id="cb34-132"><a href="#cb34-132"></a><span class="ex">log</span> <span class="st">"Calculating total length..."</span></span>
+<span id="cb34-133"><a href="#cb34-133"></a><span class="va">TOTAL_LEN</span><span class="op">=</span><span class="va">$(</span><span class="ex">total_length</span> <span class="st">"</span><span class="va">$INPUT</span><span class="st">"</span><span class="va">)</span></span>
+<span id="cb34-134"><a href="#cb34-134"></a></span>
+<span id="cb34-135"><a href="#cb34-135"></a><span class="ex">log</span> <span class="st">"Computing GC content..."</span></span>
+<span id="cb34-136"><a href="#cb34-136"></a><span class="va">GC_PCT</span><span class="op">=</span><span class="va">$(</span><span class="ex">gc_content</span> <span class="st">"</span><span class="va">$INPUT</span><span class="st">"</span><span class="va">)</span></span>
+<span id="cb34-137"><a href="#cb34-137"></a></span>
+<span id="cb34-138"><a href="#cb34-138"></a><span class="co"># Calculate average length</span></span>
+<span id="cb34-139"><a href="#cb34-139"></a><span class="cf">if</span> <span class="bu">[</span> <span class="st">"</span><span class="va">$SEQ_COUNT</span><span class="st">"</span> <span class="ot">-gt</span> 0 <span class="bu">]</span><span class="kw">;</span> <span class="cf">then</span></span>
+<span id="cb34-140"><a href="#cb34-140"></a>    <span class="va">AVG_LEN</span><span class="op">=</span><span class="va">$((TOTAL_LEN</span> <span class="op">/</span> <span class="va">SEQ_COUNT))</span></span>
+<span id="cb34-141"><a href="#cb34-141"></a><span class="cf">else</span></span>
+<span id="cb34-142"><a href="#cb34-142"></a>    <span class="va">AVG_LEN</span><span class="op">=</span>0</span>
+<span id="cb34-143"><a href="#cb34-143"></a><span class="cf">fi</span></span>
+<span id="cb34-144"><a href="#cb34-144"></a></span>
+<span id="cb34-145"><a href="#cb34-145"></a><span class="co">#-------------------------------------------------------------------------------</span></span>
+<span id="cb34-146"><a href="#cb34-146"></a><span class="co"># Output Results</span></span>
+<span id="cb34-147"><a href="#cb34-147"></a><span class="co">#-------------------------------------------------------------------------------</span></span>
+<span id="cb34-148"><a href="#cb34-148"></a></span>
+<span id="cb34-149"><a href="#cb34-149"></a><span class="kw">{</span></span>
+<span id="cb34-150"><a href="#cb34-150"></a>    <span class="bu">echo</span> <span class="st">"=== FASTA Statistics ==="</span></span>
+<span id="cb34-151"><a href="#cb34-151"></a>    <span class="bu">echo</span> <span class="st">"File: </span><span class="va">$INPUT</span><span class="st">"</span></span>
+<span id="cb34-152"><a href="#cb34-152"></a>    <span class="bu">echo</span> <span class="st">"Date: </span><span class="va">$(</span><span class="fu">date</span> <span class="st">'+%Y-%m-%d %H:%M:%S'</span><span class="va">)</span><span class="st">"</span></span>
+<span id="cb34-153"><a href="#cb34-153"></a>    <span class="bu">echo</span> <span class="st">""</span></span>
+<span id="cb34-154"><a href="#cb34-154"></a>    <span class="bu">echo</span> <span class="st">"Number of sequences: </span><span class="va">$SEQ_COUNT</span><span class="st">"</span></span>
+<span id="cb34-155"><a href="#cb34-155"></a>    <span class="bu">echo</span> <span class="st">"Total length: </span><span class="va">$TOTAL_LEN</span><span class="st"> bp"</span></span>
+<span id="cb34-156"><a href="#cb34-156"></a>    <span class="bu">echo</span> <span class="st">"Average length: </span><span class="va">$AVG_LEN</span><span class="st"> bp"</span></span>
+<span id="cb34-157"><a href="#cb34-157"></a>    <span class="bu">echo</span> <span class="st">"GC content: </span><span class="va">$GC_PCT</span><span class="st">%"</span></span>
+<span id="cb34-158"><a href="#cb34-158"></a><span class="kw">}</span> <span class="op">&gt;</span> <span class="st">"</span><span class="va">$OUTPUT</span><span class="st">"</span></span>
+<span id="cb34-159"><a href="#cb34-159"></a></span>
+<span id="cb34-160"><a href="#cb34-160"></a><span class="ex">log</span> <span class="st">"Analysis complete. Results written to </span><span class="va">$OUTPUT</span><span class="st">"</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section><section id="sec-scripting-best-practices" class="level2" data-number="8.13"><h2 data-number="8.13" class="anchored" data-anchor-id="sec-scripting-best-practices">
+<span class="header-section-number">8.13</span> Best Practices Summary</h2>
+<div class="callout callout-style-default callout-tip callout-titled" title="Shell Scripting Best Practices">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Tip</span>Shell Scripting Best Practices
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<ol type="1">
+<li>
+<strong>Always include a shebang</strong>: <code>#!/bin/bash</code>
+</li>
+<li>
+<strong>Use strict mode</strong>: <code>set -euo pipefail</code>
+</li>
+<li>
+<strong>Comment your code</strong>: Explain what and why</li>
+<li>
+<strong>Use meaningful names</strong>: <code>SEQ_COUNT</code> not <code>SC</code>
+</li>
+<li>
+<strong>Validate inputs</strong>: Check files exist, arguments are provided</li>
+<li>
+<strong>Handle errors</strong>: Provide useful error messages</li>
+<li>
+<strong>Make it portable</strong>: Don’t hardcode paths</li>
+<li>
+<strong>Test incrementally</strong>: Build and test piece by piece</li>
+<li>
+<strong>Version control</strong>: Track changes with git (<a href="10-git-github.html" class="quarto-xref"><span>Chapter 19</span></a>)</li>
+<li>
+<strong>Document usage</strong>: Include help messages</li>
+</ol>
+</div>
+</div>
+</section><section id="sec-scripting-summary" class="level2" data-number="8.14"><h2 data-number="8.14" class="anchored" data-anchor-id="sec-scripting-summary">
+<span class="header-section-number">8.14</span> Summary</h2>
+<p>This chapter covered shell scripting essentials:</p>
+<ul>
+<li>Scripts are text files containing commands with a shebang line</li>
+<li>Variables store values; arrays store multiple values</li>
+<li>Conditionals (<code>if/elif/else</code>) control flow based on tests</li>
+<li>Loops (<code>for</code>, <code>while</code>) repeat actions</li>
+<li>Functions make code modular and reusable</li>
+<li>Command-line arguments make scripts flexible</li>
+<li>Error handling ensures robustness</li>
+<li>Combining these elements creates powerful analysis pipelines</li>
+</ul>
+<p>Shell scripting is a foundational skill for computational biology. Even as you learn other languages like R and Python, shell scripts remain invaluable for automation, file management, and orchestrating complex workflows.</p>
+<div class="callout callout-style-default callout-tip callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Tip
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>For quick reference on Unix commands used in shell scripts, see <a href="appendix-unix.html" class="quarto-xref"><span>Appendix A</span></a>.</p>
+</div>
+</div>
+</section><section id="sec-shell-additional-reading" class="level2 unnumbered"><h2 class="unnumbered anchored" data-anchor-id="sec-shell-additional-reading">Additional Reading</h2>
+<p>To advance your shell scripting skills:</p>
+<ul>
+<li>
+<strong><a href="https://tldp.org/LDP/Bash-Beginners-Guide/html/">Bash Guide for Beginners</a></strong> — A comprehensive introduction to Bash scripting</li>
+<li>
+<strong><a href="https://tldp.org/LDP/abs/html/">Advanced Bash-Scripting Guide</a></strong> — An in-depth exploration of shell scripting techniques</li>
+<li>
+<strong><a href="https://www.shellcheck.net/">ShellCheck</a></strong> — An online tool for finding bugs in your shell scripts</li>
+<li>
+<strong>“Learning the bash Shell”</strong> by Cameron Newham — A thorough guide to Bash programming</li>
+<li>
+<strong><a href="https://google.github.io/styleguide/shellguide.html">Google Shell Style Guide</a></strong> — Best practices for writing maintainable scripts</li>
+</ul>
+<p>For bioinformatics workflow development:</p>
+<ul>
+<li>
+<strong><a href="https://snakemake.readthedocs.io/">Snakemake</a></strong> — A workflow management system that builds on shell scripting concepts</li>
+<li>
+<strong><a href="https://www.nextflow.io/">Nextflow</a></strong> — A domain-specific language for data-driven pipelines</li>
+<li>
+<strong><a href="https://www.gnu.org/software/make/manual/">GNU Make Tutorial</a></strong> — Build automation that complements shell scripts</li>
+</ul></section><section id="sec-shell-exercises" class="level2 unnumbered"><h2 class="unnumbered anchored" data-anchor-id="sec-shell-exercises">Exercises</h2>
+<div class="callout callout-style-default callout-tip callout-titled" title="Practice Exercises">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Tip</span>Practice Exercises
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p><strong>Exercise 1: Basic Script</strong></p>
+<p>Create a script that: 1. Accepts a directory as an argument 2. Counts files of each type (.txt, .csv, .fa, etc.) 3. Reports the results</p>
+<p><strong>Exercise 2: File Processing Loop</strong></p>
+<p>Write a script that: 1. Loops through all <code>.fastq</code> files in a directory 2. Counts the number of reads in each (hint: lines/4 in FASTQ) 3. Saves results to a summary file</p>
+<p><strong>Exercise 3: FASTA Validator</strong></p>
+<p>Create a script that validates FASTA files: 1. Check that every header line starts with <code>&gt;</code> 2. Check that sequence lines only contain valid characters 3. Report any errors found</p>
+<p><strong>Exercise 4: Analysis Pipeline</strong></p>
+<p>Build a complete analysis script that: 1. Accepts input/output arguments with validation 2. Downloads a bacterial genome if not present 3. Calculates genome statistics 4. Finds all occurrences of a user-specified motif 5. Generates a summary report 6. Includes proper error handling and logging</p>
+</div>
+</div>
+
+
+<div id="refs" class="references csl-bib-body hanging-indent" data-entry-spacing="0" data-line-spacing="2" role="list" style="display: none">
+<div id="ref-sandve2013ten" class="csl-entry" role="listitem">
+<span class="nocase">Sandve, G. K. et al.</span> (2013). <a href="https://doi.org/10.1371/journal.pcbi.1003285">Ten simple rules for reproducible computational research</a>.
+</div>
+</div>
+</section></main><!-- /main --><script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    // Ensure there is a toggle, if there isn't float one in the top right
+    if (window.document.querySelector('.quarto-color-scheme-toggle') === null) {
+      const a = window.document.createElement('a');
+      a.classList.add('top-right');
+      a.classList.add('quarto-color-scheme-toggle');
+      a.href = "";
+      a.onclick = function() { try { window.quartoToggleColorScheme(); } catch {} return false; };
+      const i = window.document.createElement("i");
+      i.classList.add('bi');
+      a.appendChild(i);
+      window.document.body.appendChild(a);
+    }
+    setColorSchemeToggle(hasAlternateSentinel())
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+            // target, if specified
+            link.setAttribute("target", "_blank");
+            if (link.getAttribute("rel") === null) {
+              link.setAttribute("rel", "noopener");
+            }
+            // default icon
+            link.classList.add("external");
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        const annoteTargets = window.document.querySelectorAll('.code-annotation-anchor');
+        for (let i=0; i<annoteTargets.length; i++) {
+          const annoteTarget = annoteTargets[i];
+          const targetCell = annoteTarget.getAttribute("data-target-cell");
+          const targetAnnotation = annoteTarget.getAttribute("data-target-annotation");
+          const contentFn = () => {
+            const content = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+            if (content) {
+              const tipContent = content.cloneNode(true);
+              tipContent.classList.add("code-annotation-tip-content");
+              return tipContent.outerHTML;
+            }
+          }
+          const config = {
+            allowHTML: true,
+            content: contentFn,
+            onShow: (instance) => {
+              selectCodeLines(instance.reference);
+              instance.reference.classList.add('code-annotation-active');
+              window.tippy.hideAll();
+            },
+            onHide: (instance) => {
+              unselectCodeLines();
+              instance.reference.classList.remove('code-annotation-active');
+            },
+            maxWidth: 300,
+            delay: [50, 0],
+            duration: [200, 0],
+            offset: [5, 10],
+            arrow: true,
+            appendTo: function(el) {
+              return el.parentElement.parentElement.parentElement;
+            },
+            interactive: true,
+            interactiveBorder: 10,
+            theme: 'quarto',
+            placement: 'right',
+            popperOptions: {
+              modifiers: [
+              {
+                name: 'flip',
+                options: {
+                  flipVariations: false, // true by default
+                  allowedAutoPlacements: ['right'],
+                  fallbackPlacements: ['right', 'top', 'top-start', 'top-end', 'bottom', 'bottom-start', 'bottom-end', 'left'],
+                },
+              },
+              {
+                name: 'preventOverflow',
+                options: {
+                  mainAxis: false,
+                  altAxis: false
+                }
+              }
+              ]        
+            }      
+          };
+          window.tippy(annoteTarget, config); 
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script><nav class="page-navigation"><div class="nav-page nav-page-previous">
+      <a href="../chapters/05-grep-regex.html" class="pagination-link" aria-label="GREP and Regular Expressions">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">GREP and Regular Expressions</span></span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+      <a href="../chapters/07-r-programming.html" class="pagination-link" aria-label="R Programming Fundamentals">
+        <span class="nav-page-text"><span class="chapter-number">9</span>&nbsp; <span class="chapter-title">R Programming Fundamentals</span></span> <i class="bi bi-arrow-right-short"></i>
+      </a>
+  </div>
+</nav>
+</div> <!-- /content -->
+<footer class="footer"><div class="nav-footer">
+    <div class="nav-footer-left">
+<p>© 2026 William A. Cresko | Knight Campus for Accelerating Scientific Impact</p>
+</div>   
+    <div class="nav-footer-center">
+      &nbsp;
+    <div class="toc-actions d-sm-block d-md-none"><ul><li><a href="https://github.com/wcresko/BioE_Comp_Tools_Fa2026/edit/main/Book/chapters/06-shell-scripting.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li><li><a href="https://github.com/wcresko/BioE_Comp_Tools_Fa2026/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></div>
+    <div class="nav-footer-right">
+<p><a href="https://wcresko.github.io/BioE_Comp_Tools_Fa2026/">Course website</a> | Built with <a href="https://quarto.org/">Quarto</a></p>
+</div>
+  </div>
+</footer>
+
+
+</body></html>

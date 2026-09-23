@@ -1,0 +1,459 @@
+# SLURM Command Reference {#sec-appendix-slurm}
+
+This appendix is a compact reference for SLURM (Simple Linux Utility for Resource Management) [@yoo2003slurm] commands and directives on clusters like Talapas. The concepts behind them (fair-share scheduling, right-sizing, pipeline design) are explained in @sec-hpc-talapas.
+
+## The Ten Commands You Will Actually Use {#sec-common-commands-ref}
+
+| Task | Command |
+|:-----|:--------|
+| Submit a batch script | `sbatch script.sh` |
+| Submit with a one-off override | `sbatch --mem=64G --time=08:00:00 script.sh` |
+| Interactive shell on a compute node | `srun --account=myPIRG --partition=interactive --time=2:00:00 --cpus-per-task=2 --mem=8G --pty bash` |
+| List your jobs (with pending reason) | `squeue -u $USER` |
+| Estimated start time of a pending job | `squeue -j JOBID --start` |
+| Cancel a job / all your pending jobs | `scancel JOBID` / `scancel -u $USER -t PENDING` |
+| Efficiency report for a finished job | `seff JOBID` |
+| Accounting fields for a finished job | `sacct -j JOBID --format=JobID,ReqMem,MaxRSS,Elapsed,State,ExitCode` |
+| Everything SLURM knows about a job | `scontrol show job JOBID` |
+| Partition and node availability | `sinfo` |
+
+: The SLURM commands used day to day {#tbl-common-commands-ref}
+
+## Job Submission {#sec-slurm-submit}
+
+| Command | Description | Example |
+|:--------|:------------|:--------|
+| `sbatch` | Submit batch job | `sbatch script.sh` |
+| `sbatch --parsable` | Return only job ID | `sbatch --parsable script.sh` |
+| `srun` | Run interactive command | `srun --pty bash` |
+| `srun --pty` | Allocate pseudo-terminal | `srun --pty -p interactive bash` |
+| `salloc` | Allocate resources | `salloc -N 1 -t 1:00:00` |
+
+: Job submission commands {#tbl-slurm-submit}
+
+## Job Management {#sec-slurm-manage}
+
+| Command | Description | Example |
+|:--------|:------------|:--------|
+| `squeue` | Show job queue | `squeue` |
+| `squeue -u $USER` | Show your jobs | `squeue -u $USER` |
+| `squeue -p partition` | Show partition jobs | `squeue -p compute` |
+| `squeue -j JOBID` | Show specific job | `squeue -j 123456` |
+| `squeue -l` | Long format | `squeue -l` |
+| `squeue --start` | Show start times | `squeue --start` |
+| `scancel JOBID` | Cancel specific job | `scancel 123456` |
+| `scancel -u $USER` | Cancel all your jobs | `scancel -u $USER` |
+| `scancel -n NAME` | Cancel by job name | `scancel -n analysis` |
+| `scancel -p PARTITION` | Cancel by partition | `scancel -p compute` |
+| `scontrol hold JOBID` | Hold job | `scontrol hold 123456` |
+| `scontrol release JOBID` | Release held job | `scontrol release 123456` |
+
+: Job management commands {#tbl-slurm-manage}
+
+## Job Information {#sec-slurm-info}
+
+| Command | Description | Example |
+|:--------|:------------|:--------|
+| `scontrol show job JOBID` | Detailed job info | `scontrol show job 123456` |
+| `scontrol show node NODE` | Node information | `scontrol show node n001` |
+| `sacct` | Job accounting | `sacct` |
+| `sacct -j JOBID` | Accounting for job | `sacct -j 123456` |
+| `sacct --format` | Custom format | `sacct --format=JobID,Elapsed,MaxRSS` |
+| `sacct -S YYYY-MM-DD` | Jobs since date | `sacct -S 2024-01-01` |
+| `seff JOBID` | Job efficiency report | `seff 123456` |
+
+: Job information commands {#tbl-slurm-info}
+
+### Useful sacct Format Fields {#sec-sacct-fields}
+
+| Field | Description |
+|:------|:------------|
+| `JobID` | Job identifier |
+| `JobName` | Job name |
+| `Partition` | Partition used |
+| `Account` | Account charged |
+| `State` | Job state |
+| `ExitCode` | Exit code |
+| `Elapsed` | Wall time used |
+| `TotalCPU` | CPU time used |
+| `MaxRSS` | Max memory used |
+| `MaxVMSize` | Max virtual memory |
+| `ReqMem` | Requested memory |
+| `ReqCPUS` | Requested CPUs |
+| `AllocCPUS` | Allocated CPUs |
+| `NodeList` | Nodes used |
+| `Start` | Start time |
+| `End` | End time |
+
+: sacct format fields {#tbl-sacct-fields}
+
+### Reading `seff` and Right-Sizing {#sec-rightsizing-ref}
+
+Run `seff JOBID` after every job. The loop: first run with a modest over-estimate; then set the next run from what was actually used.
+
+| `seff` line | Use it to set |
+|:------------|:--------------|
+| `State: COMPLETED` (else `FAILED`, `OUT_OF_MEMORY`, `TIMEOUT`, `CANCELLED`) | Whether to trust the output at all; read the `.err` log if not `COMPLETED` |
+| `Memory Utilized` (= `MaxRSS` in `sacct`) | Next `--mem` = this × 1.2 |
+| `Memory Efficiency` | Under 50%? Shrink `--mem` |
+| `Job Wall-clock time` (= `Elapsed`) | Next `--time` = this × 1.2 |
+| `CPU Efficiency` | Low on a multi-core request means the tool is not using the cores; reduce `--cpus-per-task` |
+
+: Turning `seff` output into the next job's requests {#tbl-seff-ref}
+
+Defaults on Talapas if you do not specify: about 3.7 GB memory per core, 1 core, and the partition's maximum time (24 h on `compute`). There is no default partition or account; both are required.
+
+### Why Is My Job Pending? {#sec-pd-reasons-ref}
+
+Shown in the `NODELIST(REASON)` column of `squeue -u $USER`.
+
+| Reason | Meaning | Action |
+|:-------|:--------|:-------|
+| `Priority` | Higher fair-share priority jobs are ahead | Wait |
+| `Resources` | Requested resources not free yet | Wait; check requests are not oversized |
+| `QOSMaxCpuPerUserLimit` / `QOSMaxJobsPerUserLimit` / `QOSMaxMemoryPerUser` | Per-user cap on cores / jobs / memory reached | Wait for your own jobs to finish; throttle arrays with `%M` |
+| `ReqNodeNotAvail, Reserved for maintenance` | `--time` runs into a maintenance window | Shorten `--time` or add `--time-min` |
+| `PartitionTimeLimit` | `--time` exceeds the partition maximum | Shorten, or use the `*long` partition |
+| `AssocGrpCPUMinutesLimit` | PIRG allocation exhausted | Contact RACS |
+| `Dependency` | Waiting on `--dependency=` job | Normal |
+| `InvalidAccount` | `--account` missing or wrong | `groups`; fix `--account=` |
+
+: Common pending reasons {#tbl-pd-reasons-ref}
+
+## Cluster Information {#sec-slurm-cluster}
+
+| Command | Description | Example |
+|:--------|:------------|:--------|
+| `sinfo` | Partition overview | `sinfo` |
+| `sinfo -p PARTITION` | Specific partition | `sinfo -p compute` |
+| `sinfo -N` | Node-oriented view | `sinfo -N` |
+| `sinfo -l` | Long format | `sinfo -l` |
+| `sinfo --states=idle` | Nodes in state | `sinfo --states=idle` |
+| `scontrol show partition` | Partition details | `scontrol show partition compute` |
+| `scontrol show config` | SLURM configuration | `scontrol show config` |
+| `sprio` | Job priority factors | `sprio` |
+| `sshare` | Share information | `sshare -u $USER` |
+
+: Cluster information commands {#tbl-slurm-cluster}
+
+### Node States {#sec-node-states}
+
+| State | Description |
+|:------|:------------|
+| `idle` | Available, no jobs |
+| `alloc` | Fully allocated |
+| `mix` | Partially allocated |
+| `down` | Unavailable |
+| `drain` | Not accepting new jobs |
+| `maint` | Under maintenance |
+| `resv` | Reserved |
+
+: Node states {#tbl-node-states}
+
+### Job States {#sec-job-states}
+
+| State | Description |
+|:------|:------------|
+| `PD` | Pending (waiting to run) |
+| `R` | Running |
+| `CG` | Completing |
+| `CD` | Completed |
+| `F` | Failed |
+| `TO` | Timeout |
+| `CA` | Cancelled |
+| `NF` | Node failure |
+| `OOM` | Out of memory |
+
+: Job states {#tbl-job-states}
+
+## SBATCH Directives {#sec-sbatch-directives}
+
+### Essential Directives {#sec-essential-directives}
+
+```bash
+#!/bin/bash
+#SBATCH --job-name=my_job       # Job name (displayed in queue)
+#SBATCH --partition=compute     # Partition to use (required)
+#SBATCH --account=PIRG          # Account to charge (required)
+#SBATCH --time=04:00:00         # Time limit (HH:MM:SS or D-HH:MM:SS)
+#SBATCH --nodes=1               # Number of nodes
+#SBATCH --ntasks=1              # Number of tasks (MPI ranks)
+#SBATCH --cpus-per-task=4       # CPUs per task (threads)
+#SBATCH --mem=16G               # Memory per node
+
+set -euo pipefail               # stop on error / unset var / failed pipe stage
+module purge                    # modules must be loaded INSIDE the script
+module load R/4.3.3
+```
+
+### Output Directives {#sec-output-directives}
+
+```bash
+#SBATCH --output=output_%j.log  # Standard output (%j = job ID)
+#SBATCH --error=error_%j.log    # Standard error
+#SBATCH --output=%x_%j.out      # %x = job name
+#SBATCH --mail-user=email@uoregon.edu  # Email address
+#SBATCH --mail-type=BEGIN,END,FAIL     # When to email
+```
+
+### Resource Directives {#sec-resource-directives}
+
+```bash
+#SBATCH --mem-per-cpu=4G        # Memory per CPU
+#SBATCH --gres=gpu:1            # Request 1 GPU
+#SBATCH --gres=gpu:v100:2       # Request 2 V100 GPUs
+#SBATCH --constraint=intel      # Node constraint
+#SBATCH --exclusive             # Exclusive node access
+#SBATCH --array=1-100           # Job array
+#SBATCH --array=1-100%10        # Array with max 10 running
+```
+
+### Dependency Directives {#sec-dependency-directives}
+
+```bash
+#SBATCH --dependency=afterok:JOBID      # Run after job succeeds
+#SBATCH --dependency=afterany:JOBID     # Run after job completes
+#SBATCH --dependency=afternotok:JOBID   # Run after job fails
+#SBATCH --dependency=singleton          # Only one job with this name
+```
+
+## Complete SBATCH Directive Reference {#sec-sbatch-reference}
+
+| Directive | Description | Example |
+|:----------|:------------|:--------|
+| `--job-name` / `-J` | Job name | `--job-name=analysis` |
+| `--partition` / `-p` | Partition | `--partition=compute` |
+| `--account` / `-A` | Account | `--account=myPIRG` |
+| `--time` / `-t` | Time limit; exceeded → `TIMEOUT` | `--time=04:00:00` |
+| `--time-min` | Minimum acceptable time (lets backfill start the job in a shorter gap) | `--time-min=01:00:00` |
+| `--nodes` / `-N` | Number of nodes | `--nodes=2` |
+| `--ntasks` / `-n` | Number of tasks | `--ntasks=8` |
+| `--ntasks-per-node` | Tasks per node | `--ntasks-per-node=4` |
+| `--cpus-per-task` / `-c` | CPUs per task | `--cpus-per-task=4` |
+| `--mem` | Memory per node; exceeded → `OUT_OF_MEMORY` | `--mem=32G` |
+| `--mem-per-cpu` | Memory per CPU | `--mem-per-cpu=4G` |
+| `--gres` | Generic resources | `--gres=gpu:1` |
+| `--output` / `-o` | Stdout file (`%j` job ID, `%x` name, `%A_%a` array) | `--output=logs/%x_%j.out` |
+| `--error` / `-e` | Stderr file (omit to merge into `--output`) | `--error=logs/%x_%j.err` |
+| `--mail-user` | Email address | `--mail-user=me@uoregon.edu` |
+| `--mail-type` | Email events | `--mail-type=ALL` |
+| `--array` | Job array (`%M` = max concurrent) | `--array=1-100%10` |
+| `--dependency` | Job dependencies | `--dependency=afterok:123` |
+| `--constraint` | Node features | `--constraint=intel` |
+| `--exclusive` | Exclusive access | `--exclusive` |
+| `--nodelist` | Specific nodes | `--nodelist=n[001-004]` |
+| `--exclude` | Exclude nodes | `--exclude=n001` |
+| `--qos` | Quality of service | `--qos=long` |
+| `--reservation` | Use reservation | `--reservation=workshop` |
+
+: Complete SBATCH directives {#tbl-sbatch-all}
+
+### Output Filename Patterns {#sec-filename-patterns}
+
+| Pattern | Replaced With |
+|:--------|:--------------|
+| `%j` | Job ID |
+| `%x` | Job name |
+| `%N` | Short hostname |
+| `%n` | Node identifier |
+| `%A` | Array job ID |
+| `%a` | Array task ID |
+| `%u` | Username |
+
+: Filename patterns {#tbl-filename-patterns}
+
+## Module Commands {#sec-module-commands}
+
+| Command | Description | Example |
+|:--------|:------------|:--------|
+| `module avail` | List available modules | `module avail` |
+| `module avail NAME` | Search modules | `module avail python` |
+| `module spider NAME` | Detailed search | `module spider R` |
+| `module load NAME` | Load module | `module load R/4.3.3` |
+| `module load NAME/VER` | Load specific version | `module load miniconda3/20240410` |
+| `module unload NAME` | Unload module | `module unload R` |
+| `module list` | Show loaded modules | `module list` |
+| `module purge` | Unload all modules | `module purge` |
+| `module show NAME` | Show module details | `module show R/4.3.3` |
+| `module help NAME` | Module help | `module help python` |
+| `module swap OLD NEW` | Replace module | `module swap gcc/9 gcc/11` |
+| `module save NAME` | Save collection | `module save mymodules` |
+| `module restore NAME` | Restore collection | `module restore mymodules` |
+| `module savelist` | List collections | `module savelist` |
+
+: Module commands {#tbl-module-commands}
+
+## Job Arrays {#sec-job-arrays}
+
+### Template: One Script, Many Samples {#sec-array-template-ref}
+
+```bash
+#!/bin/bash
+#SBATCH --job-name=align
+#SBATCH --partition=compute
+#SBATCH --account=myPIRG
+#SBATCH --time=02:00:00
+#SBATCH --cpus-per-task=8
+#SBATCH --mem=16G
+#SBATCH --array=1-24%8               # 24 tasks, at most 8 running at once
+#SBATCH --output=logs/%x_%A_%a.out   # %A = array job ID, %a = task ID
+#SBATCH --error=logs/%x_%A_%a.err
+
+set -euo pipefail
+module purge
+module load bwa/0.7.17 samtools/1.17
+
+SAMPLE=$(sed -n "${SLURM_ARRAY_TASK_ID}p" samples.txt)   # line N = task N
+OUT="results/${SAMPLE}.bam"
+[[ -s "$OUT" ]] && { echo "$SAMPLE done, skipping"; exit 0; }   # resumable
+
+bwa mem -t "$SLURM_CPUS_PER_TASK" ref.fa "raw/${SAMPLE}_R1.fastq.gz" "raw/${SAMPLE}_R2.fastq.gz" \
+    | samtools sort -@ "$SLURM_CPUS_PER_TASK" -o "$OUT.tmp"
+mv "$OUT.tmp" "$OUT"          # rename only after success: no truncated outputs
+echo "Wrote $OUT"
+```
+
+Run `mkdir -p logs results` before submitting. The `logs/` directory must exist or the job fails silently.
+
+### Array Index Variants {#sec-array-variants-ref}
+
+```bash
+#SBATCH --array=0-100:10        # 0, 10, 20, ..., 100
+#SBATCH --array=1-1000%50       # Max 50 running at once
+#SBATCH --array=3,7,12          # Rerun only specific tasks
+```
+
+To size the array from a file at submit time: `sbatch --array=1-$(wc -l < samples.txt) align.sh`. To run a step only after every task succeeds: `sbatch --dependency=afterok:ARRAY_JOB_ID next_step.sh`.
+
+## Environment Variables {#sec-slurm-env}
+
+| Variable | Description |
+|:---------|:------------|
+| `$SLURM_JOB_ID` | Job ID |
+| `$SLURM_JOB_NAME` | Job name |
+| `$SLURM_SUBMIT_DIR` | Directory where job was submitted |
+| `$SLURM_JOB_NODELIST` | List of nodes |
+| `$SLURM_NNODES` | Number of nodes |
+| `$SLURM_NTASKS` | Number of tasks |
+| `$SLURM_CPUS_PER_TASK` | CPUs per task |
+| `$SLURM_MEM_PER_NODE` | Memory per node |
+| `$SLURM_ARRAY_TASK_ID` | Array task ID |
+| `$SLURM_ARRAY_JOB_ID` | Array job ID |
+| `$SLURM_TMPDIR` | Temporary directory |
+| `$SLURM_NODEID` | Node ID within job |
+| `$SLURM_PROCID` | Task ID within job |
+| `$SLURM_LOCALID` | Local task ID on node |
+
+: SLURM environment variables {#tbl-slurm-env}
+
+## Example Job Scripts {#sec-example-scripts}
+
+### Basic R Script {#sec-example-r}
+
+```bash
+#!/bin/bash
+#SBATCH --job-name=r_analysis
+#SBATCH --partition=compute
+#SBATCH --account=myPIRG
+#SBATCH --time=02:00:00
+#SBATCH --nodes=1
+#SBATCH --cpus-per-task=4
+#SBATCH --mem=16G
+#SBATCH --output=r_job_%j.log
+
+# Load required modules
+module load R/4.3.3
+
+# Run R script
+Rscript my_analysis.R
+```
+
+### Python with Conda {#sec-example-python}
+
+```bash
+#!/bin/bash
+#SBATCH --job-name=python_job
+#SBATCH --partition=compute
+#SBATCH --account=myPIRG
+#SBATCH --time=04:00:00
+#SBATCH --cpus-per-task=8
+#SBATCH --mem=32G
+#SBATCH --output=python_%j.log
+
+# Load conda and activate your environment
+module load miniconda3/20240410
+conda activate myenv
+
+# Run Python script
+python analysis.py --input data.csv --output results/
+```
+
+### GPU Job {#sec-example-gpu}
+
+```bash
+#!/bin/bash
+#SBATCH --job-name=gpu_job
+#SBATCH --partition=gpu
+#SBATCH --account=myPIRG
+#SBATCH --time=08:00:00
+#SBATCH --nodes=1
+#SBATCH --cpus-per-task=4
+#SBATCH --mem=32G
+#SBATCH --gres=gpu:1
+#SBATCH --output=gpu_%j.log
+
+module load cuda/12.4
+module load miniconda3/20240410
+conda activate ml_env
+
+python train_model.py
+```
+
+### MPI Job {#sec-example-mpi}
+
+```bash
+#!/bin/bash
+#SBATCH --job-name=mpi_job
+#SBATCH --partition=compute
+#SBATCH --account=myPIRG
+#SBATCH --time=04:00:00
+#SBATCH --nodes=4
+#SBATCH --ntasks-per-node=16
+#SBATCH --mem-per-cpu=4G
+#SBATCH --output=mpi_%j.log
+
+module load openmpi/4.1
+
+mpirun -np 64 ./my_mpi_program
+```
+
+## Talapas-Specific Information {#sec-talapas-specific}
+
+### Common Partitions {#sec-talapas-partitions}
+
+| Partition | Description | Time Limit |
+|:----------|:------------|:-----------|
+| `compute` | Standard CPU nodes | 1 day |
+| `computelong` | Extended-time CPU jobs | 14 days |
+| `gpu` | GPU nodes | 1 day |
+| `gpulong` | Extended-time GPU jobs | 14 days |
+| `interactive` | Interactive CPU sessions | 12 hours |
+| `interactivegpu` | Interactive GPU sessions | 8 hours |
+| `memory` | High-memory nodes (up to 4 TB) | 1 day |
+| `memorylong` | Extended-time high-memory jobs | 14 days |
+
+: Talapas partitions {#tbl-talapas-partitions}
+
+Run `sinfo` to list every partition, including your lab's condo partitions. Interactive sessions should use `--partition=interactive` (or `interactivegpu`).
+
+### Storage Locations {#sec-talapas-storage-ref}
+
+| Location | Quota | Purpose |
+|:---------|:------|:--------|
+| `/home/$USER` | 250 GB | Config files, small data |
+| `/projects/PIRG/$USER` | Shared (2 TB default) | Large data, analysis |
+| `/projects/PIRG/shared` | Shared | Shared group data |
+| `/scratch/PIRG` | Large per-PIRG quota | Working data; **purged after 90 days without access** |
+| `$SLURM_TMPDIR` | Local | Temporary scratch |
+
+: Talapas storage. Nothing is backed up by RACS; use Globus for large transfers (@sec-file-transfer). {#tbl-talapas-storage}

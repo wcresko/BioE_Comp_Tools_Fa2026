@@ -1,0 +1,312 @@
+# Regular Expression Reference {#sec-appendix-regex}
+
+This appendix provides a comprehensive reference for regular expression (regex) patterns used in text processing with tools like `grep`, `sed`, `awk`, and R. The tutorial treatment is in @sec-grep-regex.
+
+## Basic Metacharacters {#sec-regex-basic}
+
+| Character | Meaning | Example | Matches |
+|:----------|:--------|:--------|:--------|
+| `.` | Any single character | `a.c` | "abc", "a1c", "a-c" |
+| `*` | Zero or more of preceding | `ab*c` | "ac", "abc", "abbc" |
+| `+` | One or more of preceding | `ab+c` | "abc", "abbc" (not "ac") |
+| `?` | Zero or one of preceding | `colou?r` | "color", "colour" |
+| `^` | Start of line | `^The` | Lines starting with "The" |
+| `$` | End of line | `end$` | Lines ending with "end" |
+| `\` | Escape special character | `\.` | Literal period |
+
+: Basic metacharacters {#tbl-regex-basic-ref}
+
+## Character Classes {#sec-regex-classes}
+
+| Pattern | Meaning | Equivalent |
+|:--------|:--------|:-----------|
+| `[abc]` | Any of a, b, or c | — |
+| `[a-z]` | Any lowercase letter | — |
+| `[A-Z]` | Any uppercase letter | — |
+| `[0-9]` | Any digit | `\d` |
+| `[a-zA-Z]` | Any letter | — |
+| `[a-zA-Z0-9]` | Any alphanumeric | `\w` (includes _) |
+| `[^abc]` | Any character except a, b, c | — |
+| `[^0-9]` | Any non-digit | `\D` |
+
+: Character classes {#tbl-regex-classes}
+
+## POSIX Character Classes {#sec-regex-posix}
+
+| Class | Meaning | Equivalent |
+|:------|:--------|:-----------|
+| `[:alnum:]` | Alphanumeric | `[a-zA-Z0-9]` |
+| `[:alpha:]` | Alphabetic | `[a-zA-Z]` |
+| `[:digit:]` | Digits | `[0-9]` |
+| `[:lower:]` | Lowercase letters | `[a-z]` |
+| `[:upper:]` | Uppercase letters | `[A-Z]` |
+| `[:space:]` | Whitespace | `[ \t\n\r\f\v]` |
+| `[:blank:]` | Space and tab | `[ \t]` |
+| `[:punct:]` | Punctuation | — |
+| `[:print:]` | Printable characters | — |
+| `[:graph:]` | Visible characters | — |
+| `[:cntrl:]` | Control characters | — |
+| `[:xdigit:]` | Hexadecimal digits | `[0-9A-Fa-f]` |
+
+: POSIX character classes {#tbl-regex-posix}
+
+::: {.callout-note}
+POSIX classes must be used inside brackets: `[[:digit:]]` not `[:digit:]`
+:::
+
+## Shorthand Character Classes {#sec-regex-shorthand}
+
+| Pattern | Meaning | Equivalent |
+|:--------|:--------|:-----------|
+| `\d` | Digit | `[0-9]` |
+| `\D` | Non-digit | `[^0-9]` |
+| `\w` | Word character | `[a-zA-Z0-9_]` |
+| `\W` | Non-word character | `[^a-zA-Z0-9_]` |
+| `\s` | Whitespace | `[ \t\n\r\f]` |
+| `\S` | Non-whitespace | `[^ \t\n\r\f]` |
+| `\b` | Word boundary | — |
+| `\B` | Non-word boundary | — |
+
+: Shorthand classes {#tbl-regex-shorthand}
+
+::: {.callout-warning}
+Not all tools support `\d`, `\w`, `\s` shorthand. POSIX classes are more portable.
+:::
+
+## Quantifiers {#sec-regex-quantifiers}
+
+| Pattern | Meaning | Example | Matches |
+|:--------|:--------|:--------|:--------|
+| `*` | 0 or more | `a*` | "", "a", "aa", "aaa" |
+| `+` | 1 or more | `a+` | "a", "aa", "aaa" |
+| `?` | 0 or 1 | `a?` | "", "a" |
+| `{n}` | Exactly n | `a{3}` | "aaa" |
+| `{n,}` | n or more | `a{2,}` | "aa", "aaa", "aaaa" |
+| `{n,m}` | Between n and m | `a{2,4}` | "aa", "aaa", "aaaa" |
+| `{,m}` | At most m | `a{,3}` | "", "a", "aa", "aaa" |
+
+: Quantifiers {#tbl-regex-quantifiers}
+
+### Greedy vs. Lazy Quantifiers {#sec-greedy-lazy}
+
+| Greedy | Lazy | Meaning |
+|:-------|:-----|:--------|
+| `*` | `*?` | 0 or more (prefer fewer) |
+| `+` | `+?` | 1 or more (prefer fewer) |
+| `?` | `??` | 0 or 1 (prefer 0) |
+| `{n,m}` | `{n,m}?` | n to m (prefer fewer) |
+
+: Greedy vs. lazy {#tbl-greedy-lazy}
+
+## Anchors and Boundaries {#sec-regex-anchors}
+
+| Pattern | Meaning | Example |
+|:--------|:--------|:--------|
+| `^` | Start of line | `^Start` |
+| `$` | End of line | `end$` |
+| `\b` | Word boundary | `\bword\b` |
+| `\B` | Non-word boundary | `\Bword` |
+| `\A` | Start of string | — |
+| `\Z` | End of string | — |
+
+: Anchors and boundaries {#tbl-regex-anchors}
+
+## Grouping and Capturing {#sec-regex-groups}
+
+| Pattern | Meaning | Example |
+|:--------|:--------|:--------|
+| `(...)` | Capture group | `(abc)+` |
+| `(?:...)` | Non-capturing group | `(?:abc)+` |
+| `\1`, `\2` | Back-reference | `(\w+) \1` matches repeated words |
+| `(?P<name>...)` | Named group (Python) | `(?P<word>\w+)` |
+
+: Grouping patterns {#tbl-regex-groups}
+
+## Alternation {#sec-regex-alternation}
+
+| Pattern | Meaning | Example | Matches |
+|:--------|:--------|:--------|:--------|
+| `a\|b` | a or b | `cat\|dog` | "cat" or "dog" |
+| `(a\|b)c` | (a or b) followed by c | `(gray\|grey)` | "gray" or "grey" |
+
+: Alternation {#tbl-regex-alternation}
+
+## Lookahead and Lookbehind {#sec-regex-lookaround}
+
+| Pattern | Name | Meaning |
+|:--------|:-----|:--------|
+| `(?=...)` | Positive lookahead | Followed by ... |
+| `(?!...)` | Negative lookahead | Not followed by ... |
+| `(?<=...)` | Positive lookbehind | Preceded by ... |
+| `(?<!...)` | Negative lookbehind | Not preceded by ... |
+
+: Lookaround patterns {#tbl-regex-lookaround}
+
+### Lookaround Examples {#sec-lookaround-examples}
+
+| Pattern | Matches |
+|:--------|:--------|
+| `foo(?=bar)` | "foo" only if followed by "bar" |
+| `foo(?!bar)` | "foo" only if NOT followed by "bar" |
+| `(?<=foo)bar` | "bar" only if preceded by "foo" |
+| `(?<!foo)bar` | "bar" only if NOT preceded by "foo" |
+
+: Lookaround examples {#tbl-lookaround-examples}
+
+## Common Patterns {#sec-regex-common}
+
+### Numbers {#sec-regex-numbers}
+
+| Pattern | Matches |
+|:--------|:--------|
+| `[0-9]+` | Integer |
+| `-?[0-9]+` | Integer (with optional negative) |
+| `[0-9]+\.[0-9]+` | Decimal number |
+| `-?[0-9]*\.?[0-9]+` | Any number |
+| `[0-9]+(\.[0-9]+)?([eE][+-]?[0-9]+)?` | Scientific notation |
+
+: Number patterns {#tbl-regex-numbers}
+
+### Text Patterns {#sec-regex-text}
+
+| Pattern | Matches |
+|:--------|:--------|
+| `\b[A-Z][a-z]*\b` | Capitalized word |
+| `\b[A-Z]+\b` | All caps word |
+| `[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}` | Email (simple) |
+| `https?://[^\s]+` | URL (simple) |
+| `\b\d{3}[-.]?\d{3}[-.]?\d{4}\b` | US phone number |
+
+: Text patterns {#tbl-regex-text}
+
+### Bioinformatics Patterns {#sec-regex-bio}
+
+| Pattern | Matches |
+|:--------|:--------|
+| `^>.*` | FASTA header |
+| `^[ACGT]+$` | DNA sequence (strict) |
+| `^[ACGTN]+$` | DNA with N |
+| `^[ACGU]+$` | RNA sequence |
+| `ATG([ACGT]{3})*?(TAA\|TAG\|TGA)` | Open reading frame |
+| `[ACDEFGHIKLMNPQRSTVWY]+` | Protein sequence |
+| `chr[0-9XYM]+:[0-9]+-[0-9]+` | Genomic coordinates |
+
+: Bioinformatics patterns {#tbl-regex-bio}
+
+## Tool-Specific Notes {#sec-regex-tools}
+
+### grep Variants {#sec-regex-grep}
+
+| Command | Regex Type | Notes |
+|:--------|:-----------|:------|
+| `grep` | Basic (BRE) | Escape `+`, `?`, `\|`, `{}` |
+| `grep -E` | Extended (ERE) | `+`, `?`, `\|` work without escape |
+| `grep -P` | Perl (PCRE) | Full Perl regex support |
+| `egrep` | Extended (ERE) | Same as `grep -E` |
+
+: grep variants {#tbl-grep-variants}
+
+### Basic vs. Extended Regex {#sec-bre-ere}
+
+| Feature | Basic (BRE) | Extended (ERE) |
+|:--------|:------------|:---------------|
+| One or more | `\+` | `+` |
+| Zero or one | `\?` | `?` |
+| Alternation | `\|` | `\|` |
+| Grouping | `\(\)` | `()` |
+| Repetition | `\{n,m\}` | `{n,m}` |
+
+: BRE vs ERE {#tbl-bre-ere}
+
+### sed Patterns {#sec-regex-sed}
+
+```bash
+# Basic substitution
+sed 's/old/new/g' file.txt
+
+# Using extended regex
+sed -E 's/[0-9]+/NUMBER/g' file.txt
+
+# Capture groups
+sed -E 's/([a-z]+) ([a-z]+)/\2 \1/g' file.txt  # Swap words
+
+# Delete lines matching pattern
+sed '/pattern/d' file.txt
+
+# Print only matching lines
+sed -n '/pattern/p' file.txt
+```
+
+### awk Patterns {#sec-regex-awk}
+
+```bash
+# Match pattern
+awk '/pattern/ {print}' file.txt
+
+# Match in specific field
+awk '$2 ~ /pattern/ {print}' file.txt
+
+# Negated match
+awk '$2 !~ /pattern/ {print}' file.txt
+
+# Case insensitive (GNU awk)
+awk 'BEGIN{IGNORECASE=1} /pattern/' file.txt
+```
+
+### R Regular Expressions {#sec-regex-r}
+
+```r
+# Base R functions
+grep("pattern", x)           # Return indices
+grepl("pattern", x)          # Return TRUE/FALSE
+sub("old", "new", x)         # Replace first
+gsub("old", "new", x)        # Replace all
+regmatches(x, regexpr(...))  # Extract match
+
+# stringr functions (tidyverse)
+str_detect(x, "pattern")     # TRUE/FALSE
+str_extract(x, "pattern")    # Extract match
+str_replace(x, "old", "new") # Replace first
+str_replace_all(x, "old", "new")  # Replace all
+str_split(x, "pattern")      # Split string
+```
+
+## Regex Flags/Modifiers {#sec-regex-flags}
+
+| Flag | Meaning | Usage |
+|:-----|:--------|:------|
+| `i` | Case insensitive | `grep -i`, `(?i)` |
+| `g` | Global (all matches) | `s/old/new/g` |
+| `m` | Multiline mode | `(?m)` |
+| `s` | Single-line (dot matches newline) | `(?s)` |
+| `x` | Extended (allow whitespace/comments) | `(?x)` |
+
+: Regex flags {#tbl-regex-flags}
+
+## Escaping Special Characters {#sec-regex-escape}
+
+Characters that need escaping in regex:
+
+```
+. * + ? ^ $ { } [ ] ( ) | \
+```
+
+To match these literally, precede with backslash:
+
+| To Match | Use |
+|:---------|:----|
+| `.` | `\.` |
+| `*` | `\*` |
+| `?` | `\?` |
+| `[` | `\[` |
+| `]` | `\]` |
+| `(` | `\(` |
+| `)` | `\)` |
+| `{` | `\{` |
+| `}` | `\}` |
+| `\|` | `\\|` |
+| `\` | `\\` |
+| `^` | `\^` |
+| `$` | `\$` |
+
+: Escaping special characters {#tbl-regex-escape}

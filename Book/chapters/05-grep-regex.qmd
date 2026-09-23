@@ -1,0 +1,756 @@
+# GREP and Regular Expressions {#sec-grep-regex}
+
+```{r}
+#| label: ch05-setup
+#| include: false
+library(tidyverse)
+library(gt)
+theme_set(theme_minimal())
+```
+
+::: {.callout-note title="Learning Objectives"}
+After completing this chapter, you will be able to:
+
+- Use `grep` to search for patterns in files and data streams
+- Construct regular expressions to match complex patterns
+- Apply extended regular expressions for advanced pattern matching
+- Combine `grep` with other Unix tools for sophisticated text processing
+- Search genomic data for biological patterns like restriction sites and motifs
+- Edit text streams with `sed` and filter, reformat, and summarize columns with `awk`
+:::
+
+## Introduction to Pattern Matching {#sec-pattern-matching}
+
+While the tools in @sec-files-pipes can filter and transform data, they work on whole lines or fixed positions. **Pattern matching** lets you search based on the *content* of text—finding lines that contain specific sequences of characters.
+
+**GREP** (**G**lobal **R**egular **E**xpression **P**rint) is the Unix standard for pattern matching. Originally developed for the ed text editor in the 1970s, `grep` remains essential for bioinformatics, log analysis, and text processing.
+
+## Basic GREP Usage {#sec-basic-grep}
+
+At its simplest, `grep` finds lines containing a specific string:
+
+```bash
+# Find lines containing "error"
+$ grep "error" logfile.txt
+
+# Search multiple files
+$ grep "mutation" *.txt
+
+# Search recursively in directories
+$ grep -r "BRCA1" data/
+```
+
+### Essential GREP Options {#sec-essential-grep-options}
+
+| Option | Description |
+|:-------|:------------|
+| `-i` | Case-insensitive search |
+| `-v` | Invert match (lines NOT containing pattern) |
+| `-c` | Count matching lines |
+| `-n` | Show line numbers |
+| `-l` | List only filenames with matches |
+| `-o` | Print only the matched part |
+| `-w` | Match whole words only |
+| `-A n` | Show n lines after match |
+| `-B n` | Show n lines before match |
+| `-C n` | Show n lines before and after match |
+
+: Common `grep` options {#tbl-grep-options}
+
+### Examples {#sec-grep-examples}
+
+```bash
+# Case-insensitive search
+$ grep -i "gene" annotations.txt
+
+# Count matches (not lines, just the count)
+$ grep -c ">" sequences.fasta
+
+# Show line numbers
+$ grep -n "ERROR" application.log
+
+# Find files containing pattern
+$ grep -l "experimental" *.md
+
+# Remove comment lines (inverted match)
+$ grep -v "^#" config.txt
+
+# Show context around matches
+$ grep -C 2 "significant" results.txt
+```
+
+## Introduction to Regular Expressions {#sec-regex-intro}
+
+So far we've searched for literal text. **Regular expressions** (regex) let you describe patterns that match multiple strings [@friedl2006regex]. A condensed syntax reference is in @sec-appendix-regex, and the same patterns work in R (`stringr`) and Python (`re`).
+
+For example, the pattern `[ACGT]+` matches any sequence of DNA bases, while `colou?r` matches both "color" and "colour".
+
+### Metacharacters: Characters with Special Meaning {#sec-grep-metacharacters}
+
+Regular expressions use certain characters as pattern-building blocks (@tbl-regex-basic):
+
+| Character | Meaning | Example |
+|:----------|:--------|:--------|
+| `.` | Any single character | `a.c` matches "abc", "a1c", "a-c" |
+| `*` | Zero or more of preceding | `ab*c` matches "ac", "abc", "abbc" |
+| `^` | Start of line | `^Hello` matches lines starting with "Hello" |
+| `$` | End of line | `end$` matches lines ending with "end" |
+| `[]` | Character class | `[aeiou]` matches any vowel |
+| `[^]` | Negated class | `[^0-9]` matches non-digits |
+| `\` | Escape special characters | `\.` matches literal period |
+
+: Basic regular expression metacharacters {#tbl-regex-basic}
+
+::: {.callout-note}
+The `*` in regular expressions is different from the `*` wildcard in the shell. In regex, `*` means "zero or more of the preceding character." In shell globbing, `*` means "any characters."
+:::
+
+### Anchors: Position Matching {#sec-grep-anchors}
+
+Anchors don't match characters—they match positions:
+
+```bash
+# Lines starting with "Chr"
+$ grep "^Chr" genome.gff
+
+# Lines ending with "protein"
+$ grep "protein$" annotations.txt
+
+# Empty lines
+$ grep "^$" file.txt
+
+# Lines with exactly "gene"
+$ grep "^gene$" list.txt
+```
+
+### Character Classes {#sec-character-classes}
+
+Character classes match any single character from a set:
+
+```bash
+# Match any vowel
+$ grep "[aeiou]" words.txt
+
+# Match any digit
+$ grep "[0-9]" data.txt
+
+# Match any uppercase letter
+$ grep "[A-Z]" text.txt
+
+# Match DNA bases
+$ grep "[ACGT]" sequence.txt
+
+# Match non-DNA characters (errors in sequence)
+$ grep "[^ACGTN]" sequence.txt
+```
+
+**Predefined character classes:**
+
+- `[[:alpha:]]` — letters
+- `[[:digit:]]` — digits (same as `[0-9]`)
+- `[[:alnum:]]` — letters and digits
+- `[[:space:]]` — whitespace
+- `[[:upper:]]` — uppercase letters
+- `[[:lower:]]` — lowercase letters
+
+### Quantifiers {#sec-quantifiers}
+
+Quantifiers specify how many times a pattern should repeat:
+
+```bash
+# Match "color" or "colour" (zero or one 'u')
+$ grep "colou\?r" text.txt
+
+# Three consecutive A's
+$ grep "A\{3\}" sequence.txt
+
+# Two to four T's
+$ grep "T\{2,4\}" sequence.txt
+
+# At least three G's
+$ grep "G\{3,\}" sequence.txt
+```
+
+::: {.callout-warning}
+In basic `grep`, quantifiers like `?`, `+`, and `{}` must be escaped with `\`. Use `grep -E` or `egrep` to avoid escaping.
+:::
+
+## Extended Regular Expressions {#sec-extended-regex}
+
+Extended regular expressions (ERE) add more metacharacters (@tbl-regex-extended) and don't require escaping common quantifiers. Use `grep -E` or `egrep`:
+
+| Character | Meaning |
+|:----------|:--------|
+| `+` | One or more of preceding |
+| `?` | Zero or one of preceding |
+| `{n}` | Exactly n of preceding |
+| `{n,m}` | Between n and m of preceding |
+| `\|` | Alternation (OR) |
+| `()` | Grouping |
+
+: Extended regular expression metacharacters {#tbl-regex-extended}
+
+### Alternation: Matching Multiple Patterns {#sec-grep-alternation}
+
+```bash
+# Match "start" OR "stop" OR "pause"
+$ grep -E "start|stop|pause" commands.txt
+
+# Match any start codon
+$ grep -E "ATG|GTG|TTG" sequences.fa
+
+# Match file extensions
+$ grep -E "\.(txt|csv|tsv)$" filelist.txt
+```
+
+### Grouping {#sec-grouping}
+
+Parentheses group patterns together:
+
+```bash
+# Match "gray" or "grey"
+$ grep -E "gr(a|e)y" text.txt
+
+# Match "ab", "abab", "ababab", etc.
+$ grep -E "(ab)+" data.txt
+
+# Match repeated dinucleotide
+$ grep -E "(AT){3,}" sequence.txt
+```
+
+### The Plus Quantifier {#sec-grep-plus-quantifier}
+
+Unlike `*` (zero or more), `+` requires at least one match:
+
+```bash
+# One or more A's followed by one or more T's
+$ grep -E "A+T+" sequence.txt
+
+# One or more digits
+$ grep -E "[0-9]+" data.txt
+```
+
+## Practical Bioinformatics Examples {#sec-regex-bioinformatics}
+
+### Working with FASTA Files {#sec-working-with-fasta-files}
+
+```bash
+# Count sequences (lines starting with >)
+$ grep -c "^>" sequences.fa
+
+# Extract all headers
+$ grep "^>" sequences.fa
+
+# Find specific gene headers
+$ grep -i "kinase" sequences.fa
+
+# Find sequences by organism
+$ grep -E "^>.*Homo sapiens" proteins.fa
+```
+
+### Searching for Biological Motifs {#sec-searching-for-biological-motifs}
+
+```bash
+# Find restriction enzyme sites
+$ grep -E "GAATTC" genome.fa         # EcoRI
+$ grep -E "GGATCC" genome.fa         # BamHI
+$ grep -E "G[ACGT]A[ACGT]TC" genome.fa    # Degenerate site (N = any base)
+
+# Find potential ORFs (start followed by codons, then the first stop)
+$ grep -oP "ATG([ACGT]{3})*?(TAA|TAG|TGA)" cds.fa
+
+# Find poly-A tails
+$ grep -E "A{10,}" transcripts.fa
+
+# Find microsatellites (dinucleotide repeats)
+$ grep -E "(AT){5,}" genome.fa
+$ grep -E "(CA){5,}" genome.fa
+```
+
+::: {.callout-note title="Lazy quantifiers need Perl regex"}
+Notice the `*?` in the ORF pattern. A plain `*` is *greedy*—it grabs as many codons as it can, so `ATG([ACGT]{3})*(TAA|TAG|TGA)` would run all the way to the *last* stop codon on the line. Adding `?` makes the quantifier *lazy*, stopping at the *first* in-frame stop codon. Lazy quantifiers are not part of extended regular expressions (`-E`); they require Perl-compatible regex, which `grep -P` provides on GNU grep (Linux, WSL, Talapas). The BSD `grep` that ships with macOS lacks `-P`; there, install GNU grep with Homebrew (`brew install grep`, then use `ggrep`) or drop the `?` and accept greedy matching. Also note that `N` is not a regex wildcard—write `[ACGT]` for "any base."
+:::
+
+### Analyzing GFF/GTF Files {#sec-analyzing-gff-gtf-files}
+
+```bash
+# Find all genes
+$ grep -P "\tgene\t" annotations.gff
+
+# Find genes on chromosome 1
+$ grep "^chr1" genes.gff | grep -P "\tgene\t"
+
+# Extract gene IDs
+$ grep -oE "gene_id \"[^\"]+\"" annotations.gtf
+
+# Find protein-coding genes
+$ grep "protein_coding" annotations.gtf
+```
+
+### Log File Analysis {#sec-log-file-analysis}
+
+```bash
+# Find errors in logs
+$ grep -i "error" application.log
+
+# Find specific error codes
+$ grep -E "error\s*[0-9]{3}" application.log
+
+# Extract timestamps of errors
+$ grep -E "^[0-9]{4}-[0-9]{2}-[0-9]{2}.*error" log.txt
+
+# Count errors per type
+$ grep -oE "ERROR: [A-Za-z]+" log.txt | sort | uniq -c
+```
+
+## Combining GREP with Pipes {#sec-grep-pipes}
+
+The real power of `grep` emerges when combined with other tools through pipes (@sec-files-pipes):
+
+```bash
+# Count unique patterns
+$ grep "^>" sequences.fa | sort | uniq | wc -l
+
+# Extract sequence names without > symbol
+$ grep "^>" sequences.fa | cut -c2-
+
+# Find headers, then get organism names
+$ grep "^>" proteins.fa | grep -oE "\[.*\]" | sort | uniq -c | sort -rn
+
+# Process FASTA: count bases per sequence
+$ grep -v "^>" sequence.fa | while read line; do
+    echo "$line" | wc -c
+  done
+```
+
+### Extracting Matching Regions {#sec-extracting-matching-regions}
+
+The `-o` flag prints only the matched portion:
+
+```bash
+# Extract all email addresses
+$ grep -oE "[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}" contacts.txt
+
+# Extract all URLs
+$ grep -oE "https?://[a-zA-Z0-9./?=_-]+" webpage.html
+
+# Extract gene names from headers
+$ grep "^>" genes.fa | grep -oE "gene=[^;]+"
+```
+
+### Context Searches {#sec-context-searches}
+
+When you need to see what surrounds a match:
+
+```bash
+# Show 3 lines after each match (including the sequence)
+$ grep -A 3 "^>interesting_gene" sequences.fa
+
+# Show lines before and after
+$ grep -C 5 "error" logfile.txt
+
+# Extract sequence following a header
+$ grep -A 1 "^>target_gene" sequences.fa | grep -v "^>"
+```
+
+## Processing Genomic Data: A Complete Example {#sec-genomic-processing}
+
+Let's work through a realistic analysis pipeline for human chromosome data.
+
+### Downloading the Data {#sec-downloading-the-data}
+
+```bash
+# Download human chromosome 21 from UCSC (~13 MB compressed; the
+# smallest human autosome, so it is a good size for practice)
+$ wget https://hgdownload.soe.ucsc.edu/goldenPath/hg38/chromosomes/chr21.fa.gz
+
+# Decompress it to a plain FASTA file
+$ gunzip -k chr21.fa.gz
+$ mv chr21.fa genome.fa
+
+# Or work with a subset without decompressing everything
+$ zcat chr21.fa.gz | head -1000 > sample.fa
+```
+
+::: {.callout-note}
+The UCSC file is *soft-masked*: repetitive regions are written in lowercase (`acgt`) rather than uppercase. Patterns like `GAATTC` will therefore miss sites that fall in masked regions. Add `-i` to `grep`, or convert everything to uppercase first with `tr 'acgt' 'ACGT'`, if you want to count every occurrence.
+:::
+
+### Analyzing Sequence Content {#sec-analyzing-sequence-content}
+
+```bash
+# Count sequences in the file
+$ grep -c "^>" genome.fa
+
+# View headers
+$ grep "^>" genome.fa | head
+
+# Total bases (excluding headers and newlines)
+$ grep -v "^>" genome.fa | tr -d '\n' | wc -c
+
+# Nucleotide frequencies
+$ grep -v "^>" genome.fa | tr -d '\n' | fold -w1 | sort | uniq -c
+```
+
+### Finding Restriction Enzyme Sites {#sec-finding-restriction-enzyme-sites}
+
+```bash
+# Count EcoRI sites (GAATTC)
+$ grep -v "^>" genome.fa | tr -d '\n' | grep -o "GAATTC" | wc -l
+
+# Count multiple restriction sites
+$ for site in GAATTC GGATCC AAGCTT CTCGAG; do
+    count=$(grep -v "^>" genome.fa | tr -d '\n' | grep -o "$site" | wc -l)
+    echo "$site: $count"
+  done
+
+# Find context around restriction sites (50 bases each side)
+$ grep -v "^>" genome.fa | tr -d '\n' | grep -oE ".{50}GAATTC.{50}" | head
+```
+
+### Finding Simple Sequence Repeats {#sec-finding-simple-sequence-repeats}
+
+```bash
+# Dinucleotide repeats
+$ grep -v "^>" genome.fa | tr -d '\n' | grep -oE "(AT){5,}" | wc -l
+$ grep -v "^>" genome.fa | tr -d '\n' | grep -oE "(CA){5,}" | wc -l
+
+# Homopolymer runs (consecutive same base)
+$ grep -v "^>" genome.fa | tr -d '\n' | grep -oE "A{10,}" | wc -l
+$ grep -v "^>" genome.fa | tr -d '\n' | grep -oE "T{10,}" | wc -l
+```
+
+### Stream Processing Large Files {#sec-stream-processing-large-files}
+
+Process data without loading it entirely into memory:
+
+```bash
+# Download, decompress, and analyze in one pipeline
+$ curl -sL https://hgdownload.soe.ucsc.edu/goldenPath/hg38/chromosomes/chr21.fa.gz | \
+  gunzip -c | \
+  grep -v "^>" | \
+  tr -d '\n' | \
+  grep -o "GAATTC" | \
+  wc -l
+
+# Process compressed file directly
+$ zgrep -c "^>" chr21.fa.gz
+```
+
+## Common Patterns Reference {#sec-common-patterns}
+
+@tbl-common-patterns is a quick reference for frequently needed patterns:
+
+| Pattern | What It Matches |
+|:--------|:----------------|
+| `^>` | FASTA headers |
+| `^#` | Comment lines |
+| `^$` | Empty lines |
+| `[ACGT]+` | DNA sequence |
+| `[ACGU]+` | RNA sequence |
+| `[A-Z]{3}` | Uppercase triplet (codon) |
+| `ATG([ACGT]{3})*` | Potential ORF |
+| `(TAA\|TAG\|TGA)` | Stop codons |
+| `A{n,}` | Poly-A of at least n |
+| `\t` | Tab character |
+| `\s+` | One or more whitespace |
+| `[0-9]+\.[0-9]+` | Decimal number |
+
+: Common regular expression patterns for bioinformatics {#tbl-common-patterns}
+
+## Editing Text Streams with sed {#sec-sed}
+
+`grep` tells you *which* lines match a pattern, but it never changes them. When you want to *edit* text as it flows through a pipe—replace one string with another, delete unwanted lines, or pull out just part of each line—the tool is **sed**, the **s**tream **ed**itor. Like `grep`, `sed` reads input one line at a time, applies your instructions, and prints the result. It never opens an interactive window; you describe the edit on the command line and `sed` performs it on every line.
+
+### Substitution: `s/old/new/` {#sec-sed-substitution}
+
+The workhorse `sed` command is substitution. The syntax is `s/pattern/replacement/`, where *pattern* is a regular expression using the same metacharacters you learned for `grep`:
+
+```bash
+# Replace the first "chr" on each line with "chromosome"
+$ sed 's/chr/chromosome/' regions.bed
+
+# Replace tabs with commas (first tab on each line only!)
+$ sed 's/\t/,/' data.tsv
+```
+
+By default `s` replaces only the *first* match on each line. Add the `g` (global) flag to replace every occurrence:
+
+```bash
+# Replace every tab, converting TSV to CSV
+$ sed 's/\t/,/g' data.tsv > data.csv
+
+# Convert a DNA sequence to RNA: every T becomes U
+$ grep -v "^>" gene.fa | sed 's/T/U/g'
+```
+
+The `/` character is only a convention. If your pattern or replacement itself contains slashes (file paths, for example), pick a different delimiter such as `|` or `#`, and `sed` will use whatever character follows the `s`:
+
+```bash
+# Rewrite a directory prefix without escaping every slash
+$ sed 's|/home/old_user/|/home/new_user/|g' paths.txt
+```
+
+### Printing and Deleting Lines {#sec-printing-and-deleting-lines}
+
+`sed` normally prints every line, edited or not. The `-n` option suppresses that automatic output, and the `p` command prints explicitly. Together they let you select lines by number—something `head` and `tail` can do only awkwardly:
+
+```bash
+# Print lines 10 through 20 (inclusive)
+$ sed -n '10,20p' results.txt
+
+# Print only the lines where a substitution actually happened
+$ sed -n 's/ERROR/**ERROR**/p' pipeline.log
+```
+
+An *address* can be a line number, a range, or a regular expression between slashes. Combined with the `d` (delete) command, this is a concise way to strip unwanted lines:
+
+```bash
+# Delete comment lines
+$ sed '/^#/d' annotations.gff
+
+# Delete blank lines
+$ sed '/^$/d' notes.txt
+
+# Delete the header line (line 1) of a table
+$ sed '1d' measurements.tsv
+```
+
+Note that `sed '/^#/d'` and `grep -v '^#'` produce the same output; use whichever reads more naturally in your pipeline.
+
+### Capture Groups {#sec-capture-groups}
+
+With `-E` (extended regex, exactly as in `grep -E`), parentheses capture part of the match, and `\1`, `\2`, ... refer back to those captured pieces in the replacement. This is how you *rearrange* text rather than just replace it:
+
+```bash
+# Turn "sample_12_rep3" into "12-3"
+$ echo "sample_12_rep3" | sed -E 's/sample_([0-9]+)_rep([0-9]+)/\1-\2/'
+12-3
+
+# Shorten FASTA headers to just the first word
+$ sed -E 's/^>([^ ]+).*/>\1/' proteins.fa
+
+# Swap the first two tab-separated columns
+$ sed -E 's/^([^\t]+)\t([^\t]+)/\2\t\1/' data.tsv
+```
+
+Read the second example carefully: `^>` anchors to the header, `([^ ]+)` captures everything up to the first space, `.*` swallows the rest of the line, and the replacement `>\1` writes back only the captured identifier.
+
+### Editing Files in Place {#sec-editing-files-in-place}
+
+Everything above writes to standard output and leaves the input file untouched. The `-i` option instead edits the file *in place*—and here two warnings are in order.
+
+::: {.callout-warning title="`sed -i` overwrites your file"}
+There is no undo. A typo in the pattern can silently corrupt a file you spent hours creating. **Write to a new file until you are confident the edit does what you expect:**
+
+```bash
+# Safe: check the result first
+$ sed 's/T/U/g' gene.fa > gene_rna.fa
+$ head gene_rna.fa
+
+# Only once you are sure
+$ sed -i 's/T/U/g' gene.fa
+```
+:::
+
+::: {.callout-important title="Linux and macOS disagree about `-i`"}
+GNU `sed` (Linux, WSL, Talapas) and BSD `sed` (macOS) interpret `-i` differently. On macOS, `-i` *requires* an argument giving a backup suffix, and you must pass an empty string to mean "no backup":
+
+```bash
+# Linux / WSL / Talapas
+$ sed -i 's/a/b/' file.txt
+
+# macOS
+$ sed -i '' 's/a/b/' file.txt
+```
+
+If you use the Linux form on a Mac, `sed` treats `s/a/b/` as the backup suffix and then complains that `file.txt` is not a valid command. A portable alternative that works everywhere is to give a real suffix, e.g. `sed -i.bak 's/a/b/' file.txt`, which also leaves you a backup. On macOS you can also install GNU sed with Homebrew (`brew install gnu-sed`, invoked as `gsed`).
+:::
+
+## Working with Columns: awk {#sec-awk}
+
+Much biological data is tabular: GFF and BED annotations, VCF variant calls, and the tab- or comma-separated spreadsheets that come off plate readers and flow cytometers. `cut` can pull out columns, but it cannot do arithmetic on them or decide which rows to keep based on a column's value. **awk** (named for its authors Aho, Weinberger, and Kernighan) is a small programming language built exactly for this: it splits each line into fields and lets you filter, compute, and reformat by column.
+
+### The `pattern { action }` Model {#sec-awk-pattern-action}
+
+An `awk` program is a list of rules of the form `pattern { action }`. For every input line, `awk` tests each pattern; when a pattern matches, it runs the action. Either half is optional: a pattern alone prints matching lines, and an action alone runs on every line.
+
+```bash
+# No pattern: print the first column of every line
+$ awk '{ print $1 }' annotations.gff
+
+# Pattern only: print whole lines where column 3 is "gene"
+$ awk '$3 == "gene"' annotations.gff
+
+# Both: print columns 1, 4, and 5 for gene lines
+$ awk '$3 == "gene" { print $1, $4, $5 }' annotations.gff
+```
+
+Inside an action, `$1`, `$2`, ... refer to the fields of the current line, `$0` is the whole line, and `$NF` is the *last* field (`NF` is the number of fields). The variable `NR` is the current line (record) number. By default fields are separated by any run of spaces or tabs, so `awk` works on a GFF or BED file without any extra options.
+
+### Choosing the Delimiter {#sec-awk-delimiter}
+
+For CSV files, tell `awk` to split on commas with `-F','`. If the field separator is a single tab and some columns may be empty, use `-F'\t'` so that consecutive tabs are not collapsed into one:
+
+```bash
+# Third column of a CSV
+$ awk -F',' '{ print $3 }' od600_readings.csv
+
+# Tab-delimited with possibly empty fields
+$ awk -F'\t' '{ print $1, $9 }' annotations.gff
+```
+
+### Skipping Headers and Filtering Rows {#sec-awk-filtering}
+
+Because `NR` counts lines, `NR > 1` is the idiom for "skip the header." Patterns can be any comparison or regular expression, and several can be combined with `&&` (and) or `||` (or):
+
+```bash
+# Skip the header, print sample and OD600 columns
+$ awk -F',' 'NR > 1 { print $1, $4 }' od600_readings.csv
+
+# Rows where the OD600 (column 4) exceeds 0.8
+$ awk -F',' 'NR > 1 && $4 > 0.8' od600_readings.csv
+
+# BED intervals on chr21 longer than 1 kb
+$ awk '$1 == "chr21" && ($3 - $2) > 1000' peaks.bed
+
+# Genes on the minus strand (regex match on column 7)
+$ awk '$3 == "gene" && $7 ~ /-/' annotations.gff
+```
+
+### Computing Sums and Means with `END` {#sec-awk-end}
+
+Two special patterns run outside the line-by-line loop: `BEGIN` before any input is read and `END` after the last line. `END` is where you report a total that you accumulated along the way. Variables spring into existence at first use and start at zero:
+
+```bash
+# Total length of all BED intervals
+$ awk '{ total += $3 - $2 } END { print total }' peaks.bed
+
+# Mean of column 4, skipping the header
+$ awk -F',' 'NR > 1 { sum += $4; n++ } END { print sum / n }' od600_readings.csv
+
+# Count gene features (equivalent to grep -c but by column)
+$ awk '$3 == "gene" { n++ } END { print n }' annotations.gff
+```
+
+### Controlling Output: `OFS` {#sec-awk-ofs}
+
+When you `print` several fields separated by commas, `awk` joins them with the *output field separator*, `OFS`, which defaults to a single space. Set it in a `BEGIN` block (or with `-v OFS=...`) to produce tab- or comma-separated output:
+
+```bash
+# Convert a GFF to a simple three-column TSV
+$ awk 'BEGIN { OFS = "\t" } $3 == "gene" { print $1, $4, $5 }' annotations.gff
+
+# Convert TSV to CSV (rebuilding $0 forces awk to apply the new OFS)
+$ awk -F'\t' -v OFS=',' '{ $1 = $1; print }' measurements.tsv
+```
+
+### A Bioengineering Example: Mean per Treatment {#sec-awk-mean-per-treatment}
+
+Suppose a plate reader exports a CSV with sample name, treatment, and OD600 columns:
+
+```
+sample,treatment,od600
+S01,control,0.42
+S02,control,0.45
+S03,IPTG,0.81
+S04,IPTG,0.79
+S05,IPTG,0.85
+```
+
+To compute the mean OD600 for each treatment we need one running sum and one count *per treatment*. `awk`'s **associative arrays**—arrays indexed by a string instead of a number—make this a one-liner:
+
+```bash
+$ awk -F',' 'NR > 1 { sum[$2] += $3; n[$2]++ }
+             END { for (t in sum) print t, sum[t] / n[t] }' od600_readings.csv
+control 0.435
+IPTG 0.816667
+```
+
+For each data line, `sum[$2]` accumulates the OD600 under the treatment name in column 2 and `n[$2]` counts the samples. In `END`, `for (t in sum)` loops over every treatment seen (in no particular order—pipe the output through `sort` if you want it alphabetical). This same pattern—group by one column, aggregate another—answers a large share of everyday questions about tabular data, and it runs at the speed of the disk on files far too big to open in a spreadsheet.
+
+### Choosing the Right Tool {#sec-grep-choosing-the-right-tool}
+
+A useful rule of thumb: **grep finds lines, sed edits text, awk works with columns.** They overlap—each can delete comment lines, for instance—but each is clearest at its own job, and they chain together naturally in a pipeline (@tbl-grep-sed-awk).
+
+| Tool | Best at | Typical call | Example |
+|:-----|:--------|:-------------|:--------|
+| `grep` | Selecting lines that match a pattern | `grep -E 'pattern' file` | `grep -c "^>" seqs.fa` |
+| `sed` | Editing text within lines | `sed 's/old/new/g' file` | `sed 's/T/U/g' gene.fa` |
+| `awk` | Filtering and computing on columns | `awk 'pattern { action }' file` | `awk '$3 == "gene"' genes.gff` |
+
+: Comparing `grep`, `sed`, and `awk` {#tbl-grep-sed-awk}
+
+## Summary {#sec-regex-summary}
+
+This chapter covered pattern matching with `grep` and regular expressions, and the two companion tools that edit and compute on the text `grep` finds:
+
+- `grep` finds lines matching patterns in files or streams
+- Basic regex uses metacharacters: `.`, `*`, `^`, `$`, `[]`
+- Extended regex (`grep -E`) adds: `+`, `?`, `|`, `{}`
+- Character classes match sets of characters
+- Anchors match positions (start/end of line)
+- Combining `grep` with pipes enables powerful analysis
+- Genomic data analysis uses these tools for motif searching
+- `sed` edits text streams: `s/old/new/g` substitutes, `-n 'a,bp'` prints ranges, `/pattern/d` deletes, and `-E` with `\1` rearranges captured text
+- `sed -i` edits files in place—write to a new file until you are confident, and remember that macOS needs `sed -i ''`
+- `awk` works with columns: `$1 ... $NF`, `NR`, `-F','`, `NR > 1` to skip headers, `END` blocks for sums and means, and associative arrays for per-group summaries
+- Rule of thumb: grep finds lines, sed edits text, awk works with columns
+
+Regular expressions are a foundational skill. While the syntax can seem cryptic initially, investment in learning regex pays off enormously across all aspects of computational biology. Keep @sec-appendix-regex at hand while you practice.
+
+::: {.callout-tip}
+For a comprehensive reference of regular expression patterns and `grep` command syntax, see @sec-appendix-regex. For other Unix commands, see @sec-appendix-unix.
+:::
+
+## Additional Reading {#sec-grep-additional-reading .unnumbered}
+
+To deepen your understanding of regular expressions:
+
+- **[Regular-Expressions.info](https://www.regular-expressions.info/)** — A comprehensive tutorial and reference site for regex
+- **[RegexOne](https://regexone.com/)** — An interactive tutorial for learning regular expressions step by step
+- **[regex101.com](https://regex101.com/)** — An online regex tester with explanations of each component
+- **"Mastering Regular Expressions"** by Jeffrey Friedl [@friedl2006regex] — The definitive book on regex theory and practice
+
+For bioinformatics-specific pattern matching:
+
+- **[BioStars: Regular Expressions in Bioinformatics](https://www.biostars.org/)** — Community Q&A with many regex examples
+- **[Rosalind.info](http://rosalind.info/)** — Bioinformatics problem sets that often require regex solutions
+- **GNU Grep Manual** — Official documentation with advanced options: `man grep` or online at [gnu.org](https://www.gnu.org/software/grep/manual/)
+
+## Exercises {#sec-grep-exercises .unnumbered}
+
+::: {.callout-tip title="Practice Exercises"}
+**Exercise 1: Basic Pattern Matching**
+
+Create a file with various text and practice:
+1. Find all lines containing "the" (case-insensitive)
+2. Find lines starting with a capital letter
+3. Find lines ending with a period
+4. Count empty lines
+
+**Exercise 2: Biological Patterns**
+
+Using a FASTA file:
+1. Count the number of sequences
+2. Extract headers for sequences longer than 1000 bp (hint: you'll need multiple commands)
+3. Find all sequences containing the pattern "TATAAA" (TATA box)
+4. Count how many sequences have "chromosome" in their header
+
+**Exercise 3: Regular Expression Practice**
+
+Write `grep` commands to match:
+1. Phone numbers in format: (555) 555-5555
+2. Email addresses
+3. Dates in YYYY-MM-DD format
+4. DNA sequences that are exactly 20 bases long
+
+**Exercise 4: Genomic Analysis Pipeline**
+
+Download a bacterial genome and:
+1. Calculate the genome size
+2. Count all restriction sites for at least 3 different enzymes
+3. Find the longest homopolymer run
+4. Calculate GC content using only Unix tools
+5. Document your pipeline in a shell script
+:::

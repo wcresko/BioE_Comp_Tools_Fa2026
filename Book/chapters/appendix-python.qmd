@@ -1,0 +1,360 @@
+# Python Quick Reference {#sec-appendix-python}
+
+This appendix collects the Python commands used in @sec-python-programming in the same look-it-up format as the R reference (@sec-appendix-r). @tbl-r-python-translation maps the two languages onto each other.
+
+## Basics {#sec-py-ref-basics}
+
+### Assignment, Help, and Inspection {#sec-py-ref-assign}
+
+| Operation | Syntax | Example |
+|:----------|:-------|:--------|
+| Assignment | `=` | `x = 5` |
+| Multiple assignment | `a, b = 1, 2` | `lo, hi = min_max(x)` |
+| Print | `print()` | `print(x)` |
+| Comment | `#` | `# comment` |
+| Help | `help()` | `help(len)` |
+| Type | `type()` | `type(x)` |
+| Attributes and methods | `dir()` | `dir(str)` |
+| Length | `len()` | `len(x)` |
+| Identity / membership | `is`, `in` | `x is None`, `"a" in s` |
+
+: Basics {#tbl-py-ref-basic}
+
+### Operators {#sec-py-ref-operators}
+
+| Operator | Description | Example |
+|:---------|:------------|:--------|
+| `+ - * /` | Arithmetic (`/` is always true division) | `7 / 2` is `3.5` |
+| `//` | Integer division | `7 // 2` is `3` |
+| `%` | Modulo | `7 % 2` is `1` |
+| `**` | Exponentiation (`^` is bitwise XOR) | `2 ** 10` |
+| `== != < > <= >=` | Comparison | `x == 5` |
+| `and`, `or`, `not` | Logical (scalars) | `a > 0 and b > 0` |
+| `&`, `\|`, `~` | Logical (NumPy arrays, pandas) | `(x > 0) & (x < 10)` |
+| `in` | Membership | `"TP53" in genes` |
+| `+=`, `-=`, `*=` | In-place update | `n += 1` |
+
+: Operators {#tbl-py-ref-operators}
+
+### Types and Conversion {#sec-py-ref-types}
+
+| Type | Example | Convert with |
+|:-----|:--------|:-------------|
+| `int` | `42` | `int("42")` |
+| `float` | `3.14` | `float("3.5")` |
+| `str` | `"gene1"` | `str(123)` |
+| `bool` | `True`, `False` | `bool(0)` |
+| `None` | absence of a value | — |
+
+: Basic types {#tbl-py-ref-types}
+
+## Strings {#sec-py-ref-strings}
+
+| Syntax | Description | Example |
+|:-------|:------------|:--------|
+| `s[i]`, `s[-1]` | Character by 0-based position; negative counts from the end | `seq[0]` |
+| `s[a:b]` | Slice from `a` up to (not including) `b` | `seq[0:3]` |
+| `len(s)` | Length | `len(seq)` |
+| `s.upper()`, `s.lower()` | Change case | `seq.upper()` |
+| `s.count(sub)` | Count occurrences | `seq.count("G")` |
+| `s.find(sub)` | Position of first match (or −1) | `seq.find("ATG")` |
+| `s.replace(old, new)` | Replace all | `seq.replace("T", "U")` |
+| `s.startswith()`, `s.endswith()` | Prefix / suffix test | `line.startswith(">")` |
+| `s.strip()` | Trim whitespace | `line.strip()` |
+| `s.split(sep)` | Split into a list | `"a,b".split(",")` |
+| `sep.join(list)` | Join a list into a string | `"_".join(parts)` |
+| `f"..."` | f-string formatting | `f"{gene}: {gc:.3f}"` |
+| `s.isdigit()`, `s.isalpha()` | Character class tests | `"123".isdigit()` |
+| `import re` | Regular expressions | `re.findall(r"[GC]", seq)` |
+
+: String operations {#tbl-py-ref-strings}
+
+## Lists, Tuples, Dictionaries, Sets {#sec-py-ref-collections}
+
+### Lists and Tuples {#sec-py-ref-lists}
+
+| Syntax | Description | Example |
+|:-------|:------------|:--------|
+| `[1, 2, 3]` | List literal | `genes = ["TP53", "EGFR"]` |
+| `(1, 2)` | Tuple literal (immutable) | `point = (3.2, 5.1)` |
+| `x[i]`, `x[-1]`, `x[a:b]` | Index and slice (0-based) | `x[0]`, `x[1:3]` |
+| `x.append(v)` | Add to end | `genes.append("KRAS")` |
+| `x.extend(list)` | Add several | `genes.extend(more)` |
+| `x.insert(i, v)`, `x.pop(i)` | Insert / remove at position | `x.pop()` |
+| `x.remove(v)` | Remove first matching value | `genes.remove("EGFR")` |
+| `x.index(v)` | Position of a value | `genes.index("TP53")` |
+| `x.sort()`, `sorted(x)` | Sort in place / return sorted copy | `sorted(x, reverse=True)` |
+| `reversed(x)` | Reverse iterator | `list(reversed(x))` |
+| `sum()`, `min()`, `max()` | Aggregates | `sum(x)` |
+| `range(a, b, step)` | Integer sequence | `list(range(0, 10, 2))` |
+| `enumerate(x)` | Index and value pairs | `for i, g in enumerate(genes):` |
+| `zip(a, b)` | Walk two sequences together | `for g, v in zip(genes, vals):` |
+| `[f(v) for v in x if cond]` | List comprehension | `[g.upper() for g in genes]` |
+
+: Lists and tuples {#tbl-py-ref-lists}
+
+### Dictionaries and Sets {#sec-py-ref-dicts}
+
+| Syntax | Description | Example |
+|:-------|:------------|:--------|
+| `{"a": 1}` | Dictionary literal | `expr = {"TP53": 8.1}` |
+| `d[k]`, `d[k] = v` | Get / set by key | `expr["EGFR"] = 3.4` |
+| `d.get(k, default)` | Get with default if missing | `expr.get("MYC", 0)` |
+| `k in d` | Key present? | `"TP53" in expr` |
+| `d.keys()`, `d.values()`, `d.items()` | Iterate keys / values / pairs | `for k, v in d.items():` |
+| `d.pop(k)` | Remove a key | `expr.pop("TP53")` |
+| `{k: f(v) for k, v in d.items()}` | Dict comprehension | `{g: round(v) for g, v in expr.items()}` |
+| `{1, 2, 3}`, `set(x)` | Set literal / from iterable | `set(genes)` |
+| `a & b`, `a \| b`, `a - b` | Intersection, union, difference | `genes & targets` |
+| `s.add(v)`, `s.discard(v)` | Add / remove | `s.add("MYC")` |
+
+: Dictionaries and sets {#tbl-py-ref-dicts}
+
+## NumPy {#sec-py-ref-numpy}
+
+`import numpy as np`
+
+| Function | Description | Example |
+|:---------|:------------|:--------|
+| `np.array()` | Array from a list | `np.array([1, 2, 3])` |
+| `np.arange()` | Sequence with step | `np.arange(0, 1, 0.1)` |
+| `np.linspace()` | Sequence of length n | `np.linspace(0, 1, 5)` |
+| `np.zeros()`, `np.ones()` | Filled arrays | `np.zeros(10)` |
+| `np.repeat()`, `np.tile()` | Repeat elements / whole array | `np.repeat(["A", "B"], 3)` |
+| `x.shape`, `x.ndim`, `x.dtype` | Dimensions and type | `mat.shape` |
+| `x.reshape()` | Change shape | `np.arange(12).reshape(3, 4)` |
+| `x.T` | Transpose | `mat.T` |
+| `x[i, j]`, `x[:, j]` | Matrix indexing | `mat[0, 1]`, `mat[:, 2]` |
+| `x[mask]` | Boolean indexing | `x[x > 5]` |
+| `np.where()` | Indices where true, or vectorized if/else | `np.where(x > 5, "hi", "lo")` |
+| `x.sum()`, `x.mean()`, `x.std(ddof=1)` | Aggregates (`ddof=1` = R's `sd`) | `x.mean()` |
+| `axis=0` / `axis=1` | Aggregate over columns / rows | `mat.sum(axis=0)` |
+| `np.median()`, `np.percentile()` | Order statistics | `np.percentile(x, 75)` |
+| `np.log()`, `np.exp()`, `np.sqrt()` | Element-wise math | `np.log1p(counts)` |
+| `np.nan`, `np.isnan()`, `np.nanmean()` | Missing values | `np.nanmean(v)` |
+| `np.unique()` | Unique values (and counts) | `np.unique(x, return_counts=True)` |
+| `np.concatenate()`, `np.vstack()` | Combine arrays | `np.vstack([a, b])` |
+| `np.random.default_rng(seed)` | Random generator | `rng.normal(0, 1, 100)` |
+
+: NumPy essentials {#tbl-py-ref-numpy}
+
+## pandas {#sec-py-ref-pandas}
+
+`import pandas as pd`
+
+### Creating, Reading, Writing {#sec-py-ref-pandas-io}
+
+| Function | Description | Example |
+|:---------|:------------|:--------|
+| `pd.DataFrame()` | Data frame from dict of columns | `pd.DataFrame({"x": [1, 2]})` |
+| `pd.Series()` | One column | `pd.Series([1, 2, 3])` |
+| `pd.read_csv()` | Read CSV (`sep="\t"` for TSV) | `pd.read_csv("f.csv")` |
+| `pd.read_excel()` | Read Excel (needs openpyxl) | `pd.read_excel("f.xlsx")` |
+| `df.to_csv()` | Write CSV | `df.to_csv("out.csv", index=False)` |
+| `pd.read_parquet()` / `df.to_parquet()` | Fast binary format | `df.to_parquet("out.parquet")` |
+
+: pandas I/O {#tbl-py-ref-pandas-io}
+
+### Inspecting {#sec-py-ref-pandas-inspect}
+
+| Syntax | Description |
+|:-------|:------------|
+| `df.head(n)`, `df.tail(n)` | First / last rows |
+| `df.shape`, `len(df)` | Dimensions, row count |
+| `df.columns`, `df.index` | Column and row labels |
+| `df.dtypes` | Column types |
+| `df.info()` | Structure overview |
+| `df.describe()` | Summary statistics |
+| `df["col"].unique()`, `.nunique()` | Unique values / count |
+| `df["col"].value_counts()` | Frequency table |
+
+: Inspecting a DataFrame {#tbl-py-ref-pandas-inspect}
+
+### Selecting and Filtering {#sec-py-ref-pandas-select}
+
+| Syntax | Description |
+|:-------|:------------|
+| `df["col"]` | One column as a Series |
+| `df[["a", "b"]]` | Several columns as a DataFrame |
+| `df.loc[rows, cols]` | Select by label |
+| `df.iloc[rows, cols]` | Select by 0-based position |
+| `df[df["x"] > 3]` | Boolean mask |
+| `df.query("x > 3 and g == 'a'")` | Filter with an expression |
+| `df["g"].isin([...])` | Membership mask |
+| `df.drop(columns=[...])` | Drop columns |
+| `df.rename(columns={"old": "new"})` | Rename |
+| `df.drop_duplicates()` | Unique rows |
+
+: Selecting and filtering {#tbl-py-ref-pandas-select}
+
+### Transforming, Grouping, Combining {#sec-py-ref-pandas-transform}
+
+| Syntax | Description |
+|:-------|:------------|
+| `df["y"] = df["x"] * 2` | Add or modify a column |
+| `df.assign(y=lambda d: d["x"] * 2)` | Add columns, returning a new frame (chainable) |
+| `df.sort_values("x", ascending=False)` | Sort rows |
+| `df.groupby("g")["x"].mean()` | Grouped summary |
+| `df.groupby("g").agg(m=("x", "mean"), n=("x", "size"))` | Named aggregations |
+| `df.groupby("g").size()` | Group counts |
+| `a.merge(b, on="k", how="left")` | Join (`inner`, `left`, `right`, `outer`) |
+| `pd.concat([a, b])` | Stack rows (`axis=1` for columns) |
+| `df.melt(id_vars=..., var_name=..., value_name=...)` | Wide to long |
+| `df.pivot(index=..., columns=..., values=...)` | Long to wide |
+| `df.pivot_table(values=..., index=..., aggfunc="mean")` | Pivot with aggregation |
+| `df["x"].apply(f)` | Apply a function to each value |
+| `df.isna()`, `df.dropna()`, `df.fillna(0)` | Missing values |
+| `df["x"].astype(float)` | Convert type |
+| `df.reset_index()`, `df.set_index("col")` | Index handling |
+
+: Transforming and combining {#tbl-py-ref-pandas-transform}
+
+## Control Flow and Functions {#sec-py-ref-control}
+
+```python
+# if / elif / else — blocks are marked by indentation, not braces
+if x > 10:
+    label = "high"
+elif x > 5:
+    label = "mid"
+else:
+    label = "low"
+
+# for and while; break and continue
+for i in range(5):
+    if i == 3:
+        continue
+    print(i)
+
+while n > 0:
+    n -= 1
+
+# Functions: defaults, docstring, type hints, multiple returns
+def gc_content(seq: str, digits: int = 3) -> float:
+    """Return the GC fraction of a DNA sequence."""
+    seq = seq.upper()
+    return round((seq.count("G") + seq.count("C")) / len(seq), digits)
+
+def min_max(x):
+    return min(x), max(x)          # returns a tuple
+lo, hi = min_max(values)
+
+# Anonymous functions
+sorted(genes, key=lambda g: len(g))
+
+# Errors
+try:
+    df = pd.read_csv(path)
+except FileNotFoundError as err:
+    print(f"Missing file: {err}")
+finally:
+    print("done")
+
+if not seq:
+    raise ValueError("sequence is empty")
+```
+
+## Files and Paths {#sec-py-ref-files}
+
+| Syntax | Description |
+|:-------|:------------|
+| `from pathlib import Path` | Path objects |
+| `Path("data") / "file.csv"` | Join path components |
+| `p.exists()`, `p.is_file()`, `p.is_dir()` | Tests |
+| `p.name`, `p.stem`, `p.suffix`, `p.parent` | Path parts |
+| `p.glob("*.csv")` | Matching files |
+| `p.read_text()`, `p.write_text(s)` | Whole-file read / write |
+| `with open(p) as fh:` | Open for reading (closes automatically) |
+| `open(p, "w")`, `open(p, "a")` | Write / append mode |
+| `for line in fh:` | Iterate lines |
+| `fh.read()`, `fh.readlines()` | Whole file / list of lines |
+| `import csv` + `csv.DictReader(fh)` | Row-by-row CSV as dictionaries |
+| `import json` + `json.load(fh)` / `json.dump(obj, fh)` | JSON |
+| `import gzip` + `gzip.open(p, "rt")` | Compressed text |
+
+: Files and paths {#tbl-py-ref-files}
+
+## Plotting {#sec-py-ref-plotting}
+
+`import matplotlib.pyplot as plt` and `import seaborn as sns`
+
+| Function | Description |
+|:---------|:------------|
+| `fig, ax = plt.subplots(figsize=(6, 4))` | Create a figure and axes |
+| `ax.plot(x, y)` | Line plot |
+| `ax.scatter(x, y)` | Scatter plot |
+| `ax.hist(x, bins=30)` | Histogram |
+| `ax.bar(labels, heights)` | Bar chart |
+| `ax.boxplot([a, b])` | Box plot |
+| `ax.set_xlabel()`, `ax.set_ylabel()`, `ax.set_title()` | Labels |
+| `ax.set_xscale("log")` | Log axis |
+| `ax.legend()` | Legend |
+| `fig.savefig("plot.png", dpi=300)` | Save |
+| `plt.show()` | Display |
+| `sns.scatterplot(data=df, x=, y=, hue=)` | Scatter from a DataFrame |
+| `sns.lineplot()`, `sns.histplot()`, `sns.boxplot()`, `sns.violinplot()` | Common seaborn plots |
+| `sns.heatmap(matrix)` | Heatmap |
+| `sns.relplot(..., col="g")`, `sns.catplot()` | Faceted figures |
+| `sns.set_theme(style="whitegrid")` | Global style |
+| `from plotnine import *` | ggplot2 grammar in Python |
+
+: Plotting {#tbl-py-ref-plotting}
+
+## Command-Line Scripts {#sec-py-ref-cli}
+
+```python
+#!/usr/bin/env python3
+import sys
+import argparse
+
+sys.argv                 # ['script.py', 'arg1', 'arg2']; sys.argv[0] is the script name
+sys.exit("message")      # print to stderr and exit with status 1
+
+parser = argparse.ArgumentParser(description="What this script does")
+parser.add_argument("input", help="input file")
+parser.add_argument("-o", "--output", default="out.tsv")
+parser.add_argument("--min-length", type=int, default=0)
+parser.add_argument("--verbose", action="store_true")
+args = parser.parse_args()
+args.input, args.output, args.min_length
+
+if __name__ == "__main__":
+    main()               # run only when executed, not when imported
+```
+
+## Environments and Packages {#sec-py-ref-env}
+
+| Command | Description |
+|:--------|:------------|
+| `python3 --version` | Which Python |
+| `python3 -m venv .venv` | Create a virtual environment |
+| `source .venv/bin/activate` | Activate (Windows: `.venv\Scripts\activate`) |
+| `deactivate` | Leave the environment |
+| `pip install pandas` | Install a package |
+| `pip install -r requirements.txt` | Install from a list |
+| `pip freeze > requirements.txt` | Record installed packages |
+| `pip list`, `pip show pandas` | What is installed / package details |
+| `uv venv`, `uv pip install pandas` | Faster equivalents with uv |
+| `conda create -n name python=3.12 pandas` | Conda environment |
+| `conda activate name` / `conda deactivate` | Switch conda environments |
+| `conda env export > environment.yml` | Record a conda environment |
+| `module load python3` | Python on Talapas |
+| `import numpy as np` | Import with an alias |
+| `from pathlib import Path` | Import one name |
+| `pip install jupyter` then `jupyter lab` | Notebooks |
+
+: Environments and packages {#tbl-py-ref-env}
+
+## Common Gotchas {#sec-py-gotchas}
+
+::: {.callout-warning title="Things that bite R users"}
+- **0-indexing and half-open slices.** `x[0]` is the first element, `x[-1]` is the *last*, and `x[1:3]` gives elements 1 and 2 only.
+- **Indentation is syntax.** Mixed tabs and spaces, or a missing colon before an indented block, produce `IndentationError` or `SyntaxError`. Use four spaces.
+- **`^` is not power.** Use `**`; `2 ^ 3` is `1` (bitwise XOR).
+- **Lists are not vectors.** `[1, 2] * 2` is `[1, 2, 1, 2]`; use NumPy arrays for element-wise math.
+- **Mutability.** `y = x` for a list or DataFrame makes `y` *another name for the same object*; changing one changes both. Use `x.copy()`.
+- **Population vs. sample SD.** `np.std(x)` divides by *n*; use `ddof=1` (or pandas `.std()`) to match R's `sd()`.
+- **`and`/`or` vs `&`/`|`.** Words for scalars; symbols (with parentheses) for arrays and DataFrame masks.
+- **`NaN != NaN`.** Test missing values with `np.isnan()` or `pd.isna()`, never `== np.nan`.
+- **Which Python?** If `import pandas` fails in the IDE but works in the terminal, the IDE is using a different interpreter or environment; check the interpreter picker.
+:::

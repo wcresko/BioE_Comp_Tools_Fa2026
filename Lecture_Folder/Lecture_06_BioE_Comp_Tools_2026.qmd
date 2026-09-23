@@ -24,10 +24,11 @@ set.seed(2026)
 
 ## Goals for today
 
--   Introduction to scripts in Unix and R
+-   Introduction to scripts in Unix, R and Python
 -   Writing shell scripts: variables, conditionals, loops and functions
 -   Error handling and best practices
--   Using R Studio and Visual Studio Code (VSC) as script editors
+-   The same script written in R (`Rscript`) and in Python (`python3`)
+-   Using R Studio, Positron and Visual Studio Code (VSC) as script editors
 
 
 # Scripting in Unix, R and Python
@@ -35,6 +36,21 @@ set.seed(2026)
 ![](images/RStudio_Screenshot.png){fig-align="center" width="75%"}
 
 ------------------------------------------------------------------------
+
+## Three languages, one idea: a script
+
+| | **Shell** (`bash`) | **R** | **Python** |
+|---|---|---|---|
+| File | `script.sh` | `script.R` | `script.py` |
+| Shebang (line 1) | `#!/bin/bash` | `#!/usr/bin/env Rscript` | `#!/usr/bin/env python3` |
+| Run it | `bash script.sh` or `./script.sh` | `Rscript script.R` | `python3 script.py` |
+| Comments | `#` | `#` | `#` |
+| Arguments | `$1`, `$2`, `$@` | `commandArgs(trailingOnly = TRUE)` | `sys.argv[1:]` (or `argparse`) |
+| Best at | gluing programs and files together | statistics, data frames, figures | general programming, images, ML |
+
+::: callout-tip
+Today is mostly about **shell** scripts. At the end we will write the same FASTA-statistics script in R and in Python - and **Lecture 07** goes deep on both languages.
+:::
 
 ## What is a Shell Script?
 
@@ -240,9 +256,12 @@ done < input.txt
 count_sequences() {
     local FILE=$1  # Local variable
     local COUNT=$(grep -c "^>" "$FILE")
-    echo "File $FILE has $COUNT sequences"
-    return $COUNT  # Optional return value
+    echo "$COUNT"  # "Return" a value by printing it
 }
+# Note: bash 'return' only carries an exit status (0-255), not data -
+# so functions hand back results via echo, captured with $(...)
+n=$(count_sequences proteins.fasta)
+echo "proteins.fasta has $n sequences"
 
 # Another function with multiple parameters
 process_fasta() {
@@ -251,11 +270,10 @@ process_fasta() {
     
     echo "Processing $INPUT..."
     grep "^>" "$INPUT" > "$OUTPUT"
-    count_sequences "$INPUT"
+    echo "$INPUT has $(count_sequences "$INPUT") sequences"
 }
 
 # Call functions
-count_sequences "proteins.fasta"
 process_fasta "input.fasta" "headers.txt"
 ```
 
@@ -331,6 +349,119 @@ GC_PERCENT=$((GC_COUNT * 100 / TOTAL_LENGTH))
 echo "GC content: $GC_PERCENT%"
 ```
 
+## The same script in R and Python
+
+The shell version of `fasta_stats.sh` works, but counting and arithmetic get awkward in bash. Here is the same program as an **R script** and a **Python script** - both take the file name as a command-line argument.
+
+::: panel-tabset
+### R
+
+```{r}
+#| label: lec06-fasta-stats-r
+#| echo: true
+#| eval: false
+
+#!/usr/bin/env Rscript
+# Script: fasta_stats.R
+# Purpose: Calculate basic statistics for a FASTA file
+
+args <- commandArgs(trailingOnly = TRUE)     # like $1 $2 ... in bash
+if (length(args) != 1) {
+  cat("Usage: Rscript fasta_stats.R sequences.fasta\n")
+  quit(status = 1)
+}
+input <- args[1]
+if (!file.exists(input)) {
+  cat("Error: File", input, "not found!\n")
+  quit(status = 1)
+}
+
+lines   <- readLines(input)
+headers <- grepl("^>", lines)                # TRUE for header lines
+seq     <- paste(lines[!headers], collapse = "")
+
+cat("=== FASTA Statistics for", input, "===\n")
+cat("Number of sequences:", sum(headers), "\n")
+cat("Total length:", nchar(seq), "bp\n")
+cat("Average length:", nchar(seq) / sum(headers), "bp\n")
+gc <- sum(strsplit(seq, "")[[1]] %in% c("G", "C"))
+cat("GC content:", round(100 * gc / nchar(seq), 1), "%\n")
+```
+
+### Python
+
+```{python}
+#| label: lec06-fasta-stats-py
+#| echo: true
+#| eval: false
+
+#!/usr/bin/env python3
+# Script: fasta_stats.py
+# Purpose: Calculate basic statistics for a FASTA file
+
+import sys
+from pathlib import Path
+
+if len(sys.argv) != 2:                       # sys.argv[0] is the script name, like $0
+    print("Usage: python3 fasta_stats.py sequences.fasta")
+    sys.exit(1)
+input_file = Path(sys.argv[1])
+if not input_file.is_file():
+    print(f"Error: File {input_file} not found!")
+    sys.exit(1)
+
+lines   = input_file.read_text().splitlines()
+headers = [line for line in lines if line.startswith(">")]
+seq     = "".join(line for line in lines if not line.startswith(">"))
+
+print(f"=== FASTA Statistics for {input_file} ===")
+print(f"Number of sequences: {len(headers)}")
+print(f"Total length: {len(seq)} bp")
+print(f"Average length: {len(seq) / len(headers):.1f} bp")
+gc = seq.count("G") + seq.count("C")
+print(f"GC content: {100 * gc / len(seq):.1f}%")
+```
+:::
+
+## Running R and Python scripts from the shell
+
+::: panel-tabset
+### R
+
+``` bash
+Rscript fasta_stats.R proteins.fasta        # run with the interpreter ...
+
+chmod +x fasta_stats.R                      # ... or make it executable
+./fasta_stats.R proteins.fasta              #     (needs the #!/usr/bin/env Rscript shebang)
+
+Rscript -e 'mean(c(1, 2, 3))'               # one-liner without a file
+R                                           # interactive console; quit with q()
+```
+
+-   `Rscript` runs the file top to bottom and prints only what you `cat()` or `print()`
+-   In **RStudio** / **Positron**: open the `.R` file and press `Cmd/Ctrl-Enter` to send lines to the console
+
+### Python
+
+``` bash
+python3 fasta_stats.py proteins.fasta       # run with the interpreter ...
+
+chmod +x fasta_stats.py                     # ... or make it executable
+./fasta_stats.py proteins.fasta             #     (needs the #!/usr/bin/env python3 shebang)
+
+python3 -c 'print(sum([1, 2, 3]) / 3)'      # one-liner without a file
+python3                                     # interactive REPL; quit with exit() or Ctrl-D
+```
+
+-   `python3 script.py` runs the file top to bottom and prints only what you `print()`
+-   In **VS Code** / **Positron**: open the `.py` file and press `Cmd/Ctrl-Enter`, or use the Run button
+-   Keep project packages in a virtual environment: `python3 -m venv .venv && source .venv/bin/activate`
+:::
+
+::: callout-tip
+Both scripts return an **exit status** (`quit(status = 1)` / `sys.exit(1)`), so a shell pipeline or SLURM job can tell whether they succeeded - just like `exit 1` in bash. In Lecture 10 we submit these scripts to Talapas with `Rscript` and `python3` inside an `sbatch` job.
+:::
+
 ## Best Practices for Shell Scripts
 
 1.  **Always include a shebang**: `#!/bin/bash`
@@ -343,3 +474,7 @@ echo "GC content: $GC_PERCENT%"
 8.  **Test incrementally**: Build scripts step by step
 9.  **Create help messages**: Document usage
 10. **Log important steps**: Keep records of what was done
+
+::: callout-note
+Every one of these applies to **R and Python scripts** too: shebang line, comments, checking `commandArgs()` / `sys.argv`, meaningful names, relative paths, Git, and testing on a tiny input first.
+:::

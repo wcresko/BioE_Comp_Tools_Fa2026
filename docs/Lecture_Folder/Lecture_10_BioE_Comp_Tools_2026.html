@@ -217,6 +217,7 @@ Bill Cresko
 <li>Basics of working with Talapas</li>
 <li>The SLURM job scheduler</li>
 <li>Software modules and monitoring jobs</li>
+<li>Running R (<code>Rscript</code>) and Python (<code>python3</code>) scripts as batch jobs</li>
 <li><a href="https://wcresko.github.io/computational_tools_book/" class="uri">https://wcresko.github.io/computational_tools_book/</a></li>
 </ul>
 </section>
@@ -270,52 +271,138 @@ Bill Cresko
 <section id="node-types-on-talapas" class="slide level2">
 <h2>Node Types on Talapas</h2>
 <table class="caption-top">
+<colgroup>
+<col style="width: 25%">
+<col style="width: 9%">
+<col style="width: 15%">
+<col style="width: 16%">
+<col style="width: 32%">
+</colgroup>
 <thead>
 <tr class="header">
-<th>Node Type</th>
-<th>Cores</th>
-<th>Memory</th>
+<th>Node type (general use)</th>
+<th>How many</th>
+<th>Cores per node</th>
+<th>Memory per node</th>
 <th>Purpose</th>
 </tr>
 </thead>
 <tbody>
 <tr class="odd">
-<td>Standard CPU</td>
-<td>28-128</td>
-<td>128-512 GB</td>
+<td>Standard CPU (AMD Milan)</td>
+<td>43</td>
+<td>128</td>
+<td>512 GB</td>
 <td>General computation</td>
 </tr>
 <tr class="even">
-<td>Large Memory</td>
-<td>56</td>
-<td>1-4 TB</td>
-<td>Memory-intensive work</td>
+<td>GPU</td>
+<td>24</td>
+<td>48</td>
+<td>256 - 512 GB</td>
+<td>Machine learning, CUDA (52 NVIDIA A100 GPUs in total)</td>
 </tr>
 <tr class="odd">
-<td>GPU (K80/A100)</td>
-<td>28-48</td>
-<td>256-512 GB</td>
-<td>Machine learning, CUDA</td>
+<td>Large memory</td>
+<td>a few</td>
+<td>varies</td>
+<td>up to 4 TB</td>
+<td>Memory-hungry jobs (e.g.&nbsp;genome assembly)</td>
 </tr>
 <tr class="even">
 <td>Interactive</td>
-<td>Various</td>
-<td>Various</td>
-<td>Testing, development</td>
+<td>19</td>
+<td>varies</td>
+<td>varies</td>
+<td>Testing, development, Open OnDemand sessions</td>
 </tr>
 </tbody>
 </table>
+<div class="callout callout-note callout-titled callout-style-default">
+<div class="callout-body">
+<div class="callout-title">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<p><strong>Note</strong></p>
+</div>
+<div class="callout-content">
+<p>Researchers can also buy <strong>condo</strong> nodes that their group gets priority on - about 166 more CPU nodes plus V100, A100, and H100 GPUs. Numbers from <a href="https://racs.uoregon.edu/services">RACS</a>; check the <a href="https://uoracs.github.io/talapas2-knowledge-base/">Knowledge Base</a> for the current list.</p>
+</div>
+</div>
+</div>
 </section>
 <section id="partitions-queues" class="slide level2">
-<h2>Partitions (Queues):</h2>
-<ul>
-<li><code>compute</code> - General purpose CPU partition (default)</li>
-<li><code>short</code> - Jobs up to 24 hours</li>
-<li><code>long</code> - Jobs up to 14 days</li>
-<li><code>gpu</code> / <code>longgpu</code> - GPU-enabled nodes</li>
-<li><code>fat</code> / <code>longfat</code> - High-memory nodes</li>
-<li><code>preempt</code> - Access to all nodes (may be interrupted)</li>
-</ul>
+<h2>Partitions (Queues)</h2>
+<table class="caption-top">
+<colgroup>
+<col style="width: 23%">
+<col style="width: 15%">
+<col style="width: 60%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Partition</th>
+<th>Time limit</th>
+<th>Use it for</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>compute</code></td>
+<td>1 day</td>
+<td>General CPU jobs (the default choice)</td>
+</tr>
+<tr class="even">
+<td><code>computelong</code></td>
+<td>14 days</td>
+<td>Long CPU jobs</td>
+</tr>
+<tr class="odd">
+<td><code>gpu</code></td>
+<td>1 day</td>
+<td>Jobs that need a GPU</td>
+</tr>
+<tr class="even">
+<td><code>gpulong</code></td>
+<td>14 days</td>
+<td>Long GPU jobs</td>
+</tr>
+<tr class="odd">
+<td><code>interactive</code></td>
+<td>12 hours</td>
+<td>Shorter interactive CPU sessions</td>
+</tr>
+<tr class="even">
+<td><code>interactivegpu</code></td>
+<td>8 hours</td>
+<td>Shorter interactive GPU sessions</td>
+</tr>
+<tr class="odd">
+<td><code>memory</code></td>
+<td>1 day</td>
+<td>Jobs needing lots of memory (up to 4 TB)</td>
+</tr>
+<tr class="even">
+<td><code>memorylong</code></td>
+<td>14 days</td>
+<td>Long, memory-hungry jobs</td>
+</tr>
+</tbody>
+</table>
+<div class="callout callout-tip callout-titled callout-style-default">
+<div class="callout-body">
+<div class="callout-title">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<p><strong>Tip</strong></p>
+</div>
+<div class="callout-content">
+<p>Run <code>sinfo</code> on Talapas to see every partition, including your lab’s condo partitions.</p>
+</div>
+</div>
+</div>
 </section>
 <section id="getting-access-to-talapas" class="slide level2">
 <h2>Getting Access to Talapas</h2>
@@ -356,12 +443,12 @@ Bill Cresko
 </section>
 <section id="logging-into-talapas---command-line" class="slide level2">
 <h2>Logging Into Talapas - command line</h2>
-<h3 id="from-maclinux-terminal">From Mac/Linux Terminal:</h3>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb1-1"><a></a><span class="co"># Basic SSH connection</span></span>
+<h3 id="from-a-terminal-macos-ubuntuwsl-vs-code-positron">From a terminal (macOS, Ubuntu/WSL, VS Code, Positron):</h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb1-1"><a></a><span class="co"># Through the load balancer - works from anywhere (expect a Duo prompt)</span></span>
 <span id="cb1-2"><a></a></span>
 <span id="cb1-3"><a></a><span class="fu">ssh</span> yourduckid@login.talapas.uoregon.edu</span>
 <span id="cb1-4"><a></a></span>
-<span id="cb1-5"><a></a><span class="co"># Or specific login node</span></span>
+<span id="cb1-5"><a></a><span class="co"># With the UO VPN connected you can also pick a specific login node</span></span>
 <span id="cb1-6"><a></a></span>
 <span id="cb1-7"><a></a><span class="fu">ssh</span> yourduckid@login1.talapas.uoregon.edu</span>
 <span id="cb1-8"><a></a><span class="fu">ssh</span> yourduckid@login2.talapas.uoregon.edu</span>
@@ -369,14 +456,22 @@ Bill Cresko
 <span id="cb1-10"><a></a><span class="fu">ssh</span> yourduckid@login4.talapas.uoregon.edu</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <h3 id="from-windows">From Windows:</h3>
 <ul>
-<li>Use PuTTY, MobaXterm, or Windows Terminal</li>
-<li>Or use VS Code with Remote-SSH extension</li>
+<li>Use the Ubuntu (WSL) terminal</li>
+<li>Or VS Code / Positron with the Remote-SSH extension</li>
 </ul>
-<h3 id="off-campus">Off Campus?</h3>
-<ul>
-<li>First connect to UO VPN</li>
-<li>Then SSH as normal</li>
-</ul>
+<div class="callout callout-note callout-titled callout-style-default">
+<div class="callout-body">
+<div class="callout-title">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<p><strong>Note</strong></p>
+</div>
+<div class="callout-content">
+<p>The Knowledge Base says the UO VPN is <strong>recommended, not required</strong>. Off campus without the VPN: SSH to the load balancer <code>login.talapas.uoregon.edu</code> and answer the Duo two-step prompts.</p>
+</div>
+</div>
+</div>
 </section>
 <section id="connecting-vs-code-to-talapas-remote-ssh" class="slide level2">
 <h2>Connecting VS Code to Talapas (Remote-SSH)</h2>
@@ -475,7 +570,7 @@ Bill Cresko
 <span id="cb3-8"><a></a></span>
 <span id="cb3-9"><a></a><span class="co"># Check all jobs on a partition</span></span>
 <span id="cb3-10"><a></a></span>
-<span id="cb3-11"><a></a><span class="ex">squeue</span> <span class="at">-p</span> short</span>
+<span id="cb3-11"><a></a><span class="ex">squeue</span> <span class="at">-p</span> compute</span>
 <span id="cb3-12"><a></a></span>
 <span id="cb3-13"><a></a><span class="co"># Cancel a job</span></span>
 <span id="cb3-14"><a></a></span>
@@ -491,14 +586,14 @@ Bill Cresko
 <span id="cb3-24"><a></a></span>
 <span id="cb3-25"><a></a><span class="co"># View partition information</span></span>
 <span id="cb3-26"><a></a></span>
-<span id="cb3-27"><a></a><span class="ex">sinfo</span> <span class="at">-p</span> short</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb3-27"><a></a><span class="ex">sinfo</span> <span class="at">-p</span> compute</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </section>
 <section id="interactive-jobs" class="slide level2">
 <h2>Interactive Jobs</h2>
 <h3 id="for-testing-and-development">For testing and development:</h3>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb4"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb4-1"><a></a><span class="co"># Start an interactive session</span></span>
 <span id="cb4-2"><a></a></span>
-<span id="cb4-3"><a></a><span class="ex">srun</span> <span class="at">--pty</span> <span class="at">--partition</span><span class="op">=</span>compute <span class="at">--account</span><span class="op">=</span>myPIRG <span class="dt">\</span></span>
+<span id="cb4-3"><a></a><span class="ex">srun</span> <span class="at">--pty</span> <span class="at">--partition</span><span class="op">=</span>interactive <span class="at">--account</span><span class="op">=</span>myPIRG <span class="dt">\</span></span>
 <span id="cb4-4"><a></a>     <span class="at">--time</span><span class="op">=</span>2:00:00 <span class="at">--cpus-per-task</span><span class="op">=</span>4 <span class="at">--mem</span><span class="op">=</span>8G /bin/bash</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p><br>
 <br>
@@ -514,6 +609,11 @@ Bill Cresko
 </section>
 <section id="writing-a-slurm-batch-script" class="slide level2">
 <h2>Writing a SLURM Batch Script</h2>
+<p>A batch script is a <strong>shell script</strong> with <code>#SBATCH</code> directives on top. The last lines are the same commands you would type on your laptop - <code>Rscript</code> or <code>python3</code>.</p>
+<div class="panel-tabset">
+<ul id="tabset-1" class="panel-tabset-tabby"><li><a data-tabby-default="" href="#tabset-1-1">R</a></li><li><a href="#tabset-1-2">Python</a></li><li><a href="#tabset-1-3">R + Python in one job</a></li></ul>
+<div class="tab-content">
+<div id="tabset-1-1">
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb5"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb5-1"><a></a><span class="co">#!/bin/bash</span></span>
 <span id="cb5-2"><a></a><span class="co">#SBATCH --job-name=my_analysis      # Job name</span></span>
 <span id="cb5-3"><a></a><span class="co">#SBATCH --partition=compute         # Partition (queue)</span></span>
@@ -533,6 +633,139 @@ Bill Cresko
 <span id="cb5-17"><a></a><span class="co"># Run your program</span></span>
 <span id="cb5-18"><a></a></span>
 <span id="cb5-19"><a></a><span class="ex">Rscript</span> my_analysis.R</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div id="tabset-1-2">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb6"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb6-1"><a></a><span class="co">#!/bin/bash</span></span>
+<span id="cb6-2"><a></a><span class="co">#SBATCH --job-name=my_analysis_py   # Job name</span></span>
+<span id="cb6-3"><a></a><span class="co">#SBATCH --partition=compute         # Partition (queue)</span></span>
+<span id="cb6-4"><a></a><span class="co">#SBATCH --account=myPIRG            # Your PIRG name</span></span>
+<span id="cb6-5"><a></a><span class="co">#SBATCH --output=output_%j.log      # Standard output (%j = job ID)</span></span>
+<span id="cb6-6"><a></a><span class="co">#SBATCH --error=error_%j.log        # Standard error</span></span>
+<span id="cb6-7"><a></a><span class="co">#SBATCH --time=04:00:00             # Time limit (HH:MM:SS)</span></span>
+<span id="cb6-8"><a></a><span class="co">#SBATCH --nodes=1                   # Number of nodes</span></span>
+<span id="cb6-9"><a></a><span class="co">#SBATCH --ntasks-per-node=1         # Tasks per node</span></span>
+<span id="cb6-10"><a></a><span class="co">#SBATCH --cpus-per-task=4           # CPUs per task</span></span>
+<span id="cb6-11"><a></a><span class="co">#SBATCH --mem=16G                   # Memory per node</span></span>
+<span id="cb6-12"><a></a></span>
+<span id="cb6-13"><a></a><span class="co"># Load required modules</span></span>
+<span id="cb6-14"><a></a></span>
+<span id="cb6-15"><a></a><span class="ex">module</span> load python3/3.11.4          <span class="co"># or: module load miniconda3/20240410</span></span>
+<span id="cb6-16"><a></a>                                    <span class="co">#     conda activate my_env</span></span>
+<span id="cb6-17"><a></a></span>
+<span id="cb6-18"><a></a><span class="co"># Run your program</span></span>
+<span id="cb6-19"><a></a></span>
+<span id="cb6-20"><a></a><span class="ex">python3</span> my_analysis.py</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div id="tabset-1-3">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb7"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb7-1"><a></a><span class="co">#!/bin/bash</span></span>
+<span id="cb7-2"><a></a><span class="co">#SBATCH --job-name=fasta_pipeline</span></span>
+<span id="cb7-3"><a></a><span class="co">#SBATCH --partition=compute</span></span>
+<span id="cb7-4"><a></a><span class="co">#SBATCH --account=myPIRG</span></span>
+<span id="cb7-5"><a></a><span class="co">#SBATCH --output=output_%j.log</span></span>
+<span id="cb7-6"><a></a><span class="co">#SBATCH --error=error_%j.log</span></span>
+<span id="cb7-7"><a></a><span class="co">#SBATCH --time=01:00:00</span></span>
+<span id="cb7-8"><a></a><span class="co">#SBATCH --cpus-per-task=2</span></span>
+<span id="cb7-9"><a></a><span class="co">#SBATCH --mem=8G</span></span>
+<span id="cb7-10"><a></a></span>
+<span id="cb7-11"><a></a><span class="bu">set</span> <span class="at">-e</span>                              <span class="co"># stop the job if any step fails</span></span>
+<span id="cb7-12"><a></a></span>
+<span id="cb7-13"><a></a><span class="ex">module</span> load python3/3.11.4</span>
+<span id="cb7-14"><a></a><span class="ex">module</span> load R/4.3.3</span>
+<span id="cb7-15"><a></a></span>
+<span id="cb7-16"><a></a><span class="co"># Step 1 (Python): summarise every FASTA file into one table</span></span>
+<span id="cb7-17"><a></a><span class="ex">python3</span> fasta_stats.py data/<span class="pp">*</span>.fasta <span class="op">&gt;</span> results/fasta_stats.tsv</span>
+<span id="cb7-18"><a></a></span>
+<span id="cb7-19"><a></a><span class="co"># Step 2 (R): read that table, make the figure</span></span>
+<span id="cb7-20"><a></a><span class="ex">Rscript</span> plot_stats.R results/fasta_stats.tsv results/fasta_stats.png</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+</div>
+</div>
+</section>
+<section id="what-the-job-actually-runs" class="slide level2">
+<h2>What the job actually runs</h2>
+<p>The scripts are ordinary R and Python programs - the same ones you test on your laptop first. Arguments come from the command line so nothing is hard-coded.</p>
+<div class="panel-tabset">
+<ul id="tabset-2" class="panel-tabset-tabby"><li><a data-tabby-default="" href="#tabset-2-1">R (<code>plot_stats.R</code>)</a></li><li><a href="#tabset-2-2">Python (<code>fasta_stats.py</code>)</a></li></ul>
+<div class="tab-content">
+<div id="tabset-2-1">
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a></a><span class="co">#!/usr/bin/env Rscript</span></span>
+<span id="cb8-2"><a></a><span class="fu">library</span>(tidyverse)</span>
+<span id="cb8-3"><a></a></span>
+<span id="cb8-4"><a></a>args <span class="ot">&lt;-</span> <span class="fu">commandArgs</span>(<span class="at">trailingOnly =</span> <span class="cn">TRUE</span>)      <span class="co"># c("results/fasta_stats.tsv", "results/fasta_stats.png")</span></span>
+<span id="cb8-5"><a></a>stats <span class="ot">&lt;-</span> <span class="fu">read_tsv</span>(args[<span class="dv">1</span>])</span>
+<span id="cb8-6"><a></a></span>
+<span id="cb8-7"><a></a>p <span class="ot">&lt;-</span> <span class="fu">ggplot</span>(stats, <span class="fu">aes</span>(<span class="at">x =</span> file, <span class="at">y =</span> gc_percent)) <span class="sc">+</span></span>
+<span id="cb8-8"><a></a>  <span class="fu">geom_col</span>() <span class="sc">+</span></span>
+<span id="cb8-9"><a></a>  <span class="fu">labs</span>(<span class="at">x =</span> <span class="cn">NULL</span>, <span class="at">y =</span> <span class="st">"GC content (%)"</span>) <span class="sc">+</span></span>
+<span id="cb8-10"><a></a>  <span class="fu">theme_minimal</span>()</span>
+<span id="cb8-11"><a></a></span>
+<span id="cb8-12"><a></a><span class="fu">ggsave</span>(args[<span class="dv">2</span>], p, <span class="at">width =</span> <span class="dv">8</span>, <span class="at">height =</span> <span class="dv">4</span>)</span>
+<span id="cb8-13"><a></a><span class="fu">cat</span>(<span class="st">"Wrote"</span>, args[<span class="dv">2</span>], <span class="st">"</span><span class="sc">\n</span><span class="st">"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+</div>
+<div id="tabset-2-2">
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a></a><span class="co">#!/usr/bin/env python3</span></span>
+<span id="cb9-2"><a></a><span class="im">import</span> sys</span>
+<span id="cb9-3"><a></a><span class="im">from</span> pathlib <span class="im">import</span> Path</span>
+<span id="cb9-4"><a></a></span>
+<span id="cb9-5"><a></a><span class="bu">print</span>(<span class="st">"file</span><span class="ch">\t</span><span class="st">n_seqs</span><span class="ch">\t</span><span class="st">total_bp</span><span class="ch">\t</span><span class="st">gc_percent"</span>)           <span class="co"># header of the TSV</span></span>
+<span id="cb9-6"><a></a><span class="cf">for</span> path <span class="kw">in</span> <span class="bu">map</span>(Path, sys.argv[<span class="dv">1</span>:]):                 <span class="co"># every file given on the command line</span></span>
+<span id="cb9-7"><a></a>    lines <span class="op">=</span> path.read_text().splitlines()</span>
+<span id="cb9-8"><a></a>    n_seqs <span class="op">=</span> <span class="bu">sum</span>(line.startswith(<span class="st">"&gt;"</span>) <span class="cf">for</span> line <span class="kw">in</span> lines)</span>
+<span id="cb9-9"><a></a>    seq <span class="op">=</span> <span class="st">""</span>.join(line <span class="cf">for</span> line <span class="kw">in</span> lines <span class="cf">if</span> <span class="kw">not</span> line.startswith(<span class="st">"&gt;"</span>)).upper()</span>
+<span id="cb9-10"><a></a>    gc <span class="op">=</span> <span class="dv">100</span> <span class="op">*</span> (seq.count(<span class="st">"G"</span>) <span class="op">+</span> seq.count(<span class="st">"C"</span>)) <span class="op">/</span> <span class="bu">len</span>(seq)</span>
+<span id="cb9-11"><a></a>    <span class="bu">print</span>(<span class="ss">f"</span><span class="sc">{</span>path<span class="sc">.</span>name<span class="sc">}</span><span class="ch">\t</span><span class="sc">{</span>n_seqs<span class="sc">}</span><span class="ch">\t</span><span class="sc">{</span><span class="bu">len</span>(seq)<span class="sc">}</span><span class="ch">\t</span><span class="sc">{</span>gc<span class="sc">:.1f}</span><span class="ss">"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+</div>
+</div>
+</div>
+<div class="callout callout-tip callout-titled callout-style-default">
+<div class="callout-body">
+<div class="callout-title">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<p><strong>Tip</strong></p>
+</div>
+<div class="callout-content">
+<p>Test on a <strong>tiny input on the login node</strong> first (<code>python3 fasta_stats.py small.fasta</code>), then submit: <code>sbatch run_pipeline.sh</code>. Output and errors land in <code>output_JOBID.log</code> and <code>error_JOBID.log</code>.</p>
+</div>
+</div>
+</div>
+</section>
+<section id="r-and-python-packages-on-talapas" class="slide level2">
+<h2>R and Python packages on Talapas</h2>
+<div class="panel-tabset">
+<ul id="tabset-3" class="panel-tabset-tabby"><li><a data-tabby-default="" href="#tabset-3-1">R</a></li><li><a href="#tabset-3-2">Python</a></li></ul>
+<div class="tab-content">
+<div id="tabset-3-1">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb10"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb10-1"><a></a><span class="ex">module</span> load R/4.3.3</span>
+<span id="cb10-2"><a></a><span class="ex">R</span>                                   <span class="co"># interactive, on an interactive node</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb11"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a></a><span class="fu">install.packages</span>(<span class="st">"tidyverse"</span>)       <span class="co"># goes to your personal library in ~/R/ - once</span></span>
+<span id="cb11-2"><a></a><span class="fu">library</span>(tidyverse)                  <span class="co"># every session / every script</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<ul>
+<li>Modules give you R itself; <strong>you</strong> install packages into your home directory</li>
+<li>For a reproducible project, <code>renv::init()</code> records exact package versions in the project folder</li>
+</ul>
+</div>
+<div id="tabset-3-2">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb12"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb12-1"><a></a><span class="ex">module</span> load miniconda3/20240410</span>
+<span id="cb12-2"><a></a><span class="ex">conda</span> create <span class="at">-n</span> my_env python=3.11 pandas matplotlib biopython   <span class="co"># once</span></span>
+<span id="cb12-3"><a></a><span class="ex">conda</span> activate my_env                                            <span class="co"># every session / job</span></span>
+<span id="cb12-4"><a></a></span>
+<span id="cb12-5"><a></a><span class="co"># or, with the plain python3 module and a virtual environment:</span></span>
+<span id="cb12-6"><a></a><span class="ex">module</span> load python3/3.11.4</span>
+<span id="cb12-7"><a></a><span class="ex">python3</span> <span class="at">-m</span> venv ~/envs/my_env <span class="kw">&amp;&amp;</span> <span class="bu">source</span> ~/envs/my_env/bin/activate</span>
+<span id="cb12-8"><a></a><span class="ex">pip</span> install pandas matplotlib biopython</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<ul>
+<li><code>conda</code> (with the <strong>bioconda</strong> channel) installs compiled bioinformatics tools too - <code>conda install -c bioconda samtools</code></li>
+<li>Put the same <code>module load</code> + <code>conda activate</code> / <code>source .../activate</code> lines in your <code>sbatch</code> script</li>
+</ul>
+</div>
+</div>
+</div>
 </section>
 <section id="understanding-slurm-directives" class="slide level2">
 <h2>Understanding SLURM Directives</h2>
@@ -553,12 +786,12 @@ Bill Cresko
 <tr class="odd">
 <td><code>--partition</code></td>
 <td>Queue to use</td>
-<td><code>compute</code>, <code>short</code>, <code>long</code>, <code>gpu</code></td>
+<td><code>compute</code>, <code>computelong</code>, <code>gpu</code>, <code>memory</code></td>
 </tr>
 <tr class="even">
 <td><code>--account</code></td>
 <td>PIRG for accounting</td>
-<td><code>nereus</code></td>
+<td><code>myPIRG</code></td>
 </tr>
 <tr class="odd">
 <td><code>--time</code></td>
@@ -596,55 +829,55 @@ Bill Cresko
 </section>
 <section id="gpu-jobs" class="slide level2">
 <h2>GPU Jobs</h2>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb6"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb6-1"><a></a><span class="co">#!/bin/bash</span></span>
-<span id="cb6-2"><a></a><span class="co">#SBATCH --job-name=gpu_job</span></span>
-<span id="cb6-3"><a></a><span class="co">#SBATCH --partition=gpu             # GPU partition</span></span>
-<span id="cb6-4"><a></a><span class="co">#SBATCH --account=myPIRG</span></span>
-<span id="cb6-5"><a></a><span class="co">#SBATCH --time=1-00:00:00           # 1 day</span></span>
-<span id="cb6-6"><a></a><span class="co">#SBATCH --nodes=1</span></span>
-<span id="cb6-7"><a></a><span class="co">#SBATCH --ntasks-per-node=1</span></span>
-<span id="cb6-8"><a></a><span class="co">#SBATCH --gres=gpu:1                # Request 1 GPU</span></span>
-<span id="cb6-9"><a></a><span class="co">#SBATCH --mem=32G</span></span>
-<span id="cb6-10"><a></a></span>
-<span id="cb6-11"><a></a><span class="co"># Load CUDA and your software</span></span>
-<span id="cb6-12"><a></a></span>
-<span id="cb6-13"><a></a><span class="ex">module</span> load cuda/12.4</span>
-<span id="cb6-14"><a></a><span class="ex">module</span> load miniconda3/20240410</span>
-<span id="cb6-15"><a></a></span>
-<span id="cb6-16"><a></a><span class="co"># Activate your conda environment</span></span>
-<span id="cb6-17"><a></a></span>
-<span id="cb6-18"><a></a><span class="ex">conda</span> activate my_ml_env</span>
-<span id="cb6-19"><a></a></span>
-<span id="cb6-20"><a></a><span class="co"># Run your GPU code</span></span>
-<span id="cb6-21"><a></a></span>
-<span id="cb6-22"><a></a><span class="ex">python</span> train_model.py</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb13"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb13-1"><a></a><span class="co">#!/bin/bash</span></span>
+<span id="cb13-2"><a></a><span class="co">#SBATCH --job-name=gpu_job</span></span>
+<span id="cb13-3"><a></a><span class="co">#SBATCH --partition=gpu             # GPU partition</span></span>
+<span id="cb13-4"><a></a><span class="co">#SBATCH --account=myPIRG</span></span>
+<span id="cb13-5"><a></a><span class="co">#SBATCH --time=1-00:00:00           # 1 day</span></span>
+<span id="cb13-6"><a></a><span class="co">#SBATCH --nodes=1</span></span>
+<span id="cb13-7"><a></a><span class="co">#SBATCH --ntasks-per-node=1</span></span>
+<span id="cb13-8"><a></a><span class="co">#SBATCH --gres=gpu:1                # Request 1 GPU</span></span>
+<span id="cb13-9"><a></a><span class="co">#SBATCH --mem=32G</span></span>
+<span id="cb13-10"><a></a></span>
+<span id="cb13-11"><a></a><span class="co"># Load CUDA and your software</span></span>
+<span id="cb13-12"><a></a></span>
+<span id="cb13-13"><a></a><span class="ex">module</span> load cuda/12.4</span>
+<span id="cb13-14"><a></a><span class="ex">module</span> load miniconda3/20240410</span>
+<span id="cb13-15"><a></a></span>
+<span id="cb13-16"><a></a><span class="co"># Activate your conda environment</span></span>
+<span id="cb13-17"><a></a></span>
+<span id="cb13-18"><a></a><span class="ex">conda</span> activate my_ml_env</span>
+<span id="cb13-19"><a></a></span>
+<span id="cb13-20"><a></a><span class="co"># Run your GPU code</span></span>
+<span id="cb13-21"><a></a></span>
+<span id="cb13-22"><a></a><span class="ex">python</span> train_model.py</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p><br>
 <br>
 </p>
 <h3 id="check-available-gpus">Check available GPUs:</h3>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb7"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb7-1"><a></a><span class="ex">/packages/racs/bin/slurm-show-gpus</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb14"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb14-1"><a></a><span class="ex">/packages/racs/bin/slurm-show-gpus</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </section>
 <section id="talapas-uses-software-modules-lmod" class="slide level2">
 <h2>Talapas Uses Software Modules (LMOD)</h2>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb8"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb8-1"><a></a><span class="co"># List all available modules</span></span>
-<span id="cb8-2"><a></a><span class="ex">module</span> avail</span>
-<span id="cb8-3"><a></a></span>
-<span id="cb8-4"><a></a><span class="co"># Search for specific software</span></span>
-<span id="cb8-5"><a></a><span class="ex">module</span> spider R</span>
-<span id="cb8-6"><a></a><span class="ex">module</span> spider python</span>
-<span id="cb8-7"><a></a></span>
-<span id="cb8-8"><a></a><span class="co"># Load a module</span></span>
-<span id="cb8-9"><a></a><span class="ex">module</span> load R/4.3.3</span>
-<span id="cb8-10"><a></a><span class="ex">module</span> load miniconda3/20240410</span>
-<span id="cb8-11"><a></a></span>
-<span id="cb8-12"><a></a><span class="co"># See what's loaded</span></span>
-<span id="cb8-13"><a></a><span class="ex">module</span> list</span>
-<span id="cb8-14"><a></a></span>
-<span id="cb8-15"><a></a><span class="co"># Unload a module</span></span>
-<span id="cb8-16"><a></a><span class="ex">module</span> unload R</span>
-<span id="cb8-17"><a></a></span>
-<span id="cb8-18"><a></a><span class="co"># Reset to default</span></span>
-<span id="cb8-19"><a></a><span class="ex">module</span> purge</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb15"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb15-1"><a></a><span class="co"># List all available modules</span></span>
+<span id="cb15-2"><a></a><span class="ex">module</span> avail</span>
+<span id="cb15-3"><a></a></span>
+<span id="cb15-4"><a></a><span class="co"># Search for specific software</span></span>
+<span id="cb15-5"><a></a><span class="ex">module</span> spider R</span>
+<span id="cb15-6"><a></a><span class="ex">module</span> spider python          <span class="co"># python3/3.x.y modules, plus miniconda3 for conda environments</span></span>
+<span id="cb15-7"><a></a></span>
+<span id="cb15-8"><a></a><span class="co"># Load a module</span></span>
+<span id="cb15-9"><a></a><span class="ex">module</span> load R/4.3.3</span>
+<span id="cb15-10"><a></a><span class="ex">module</span> load miniconda3/20240410</span>
+<span id="cb15-11"><a></a></span>
+<span id="cb15-12"><a></a><span class="co"># See what's loaded</span></span>
+<span id="cb15-13"><a></a><span class="ex">module</span> list</span>
+<span id="cb15-14"><a></a></span>
+<span id="cb15-15"><a></a><span class="co"># Unload a module</span></span>
+<span id="cb15-16"><a></a><span class="ex">module</span> unload R</span>
+<span id="cb15-17"><a></a></span>
+<span id="cb15-18"><a></a><span class="co"># Reset to default</span></span>
+<span id="cb15-19"><a></a><span class="ex">module</span> purge</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="callout callout-note callout-titled callout-style-default">
 <div class="callout-body">
 <div class="callout-title">
@@ -661,17 +894,17 @@ Bill Cresko
 </section>
 <section id="monitoring-your-jobs" class="slide level2">
 <h2>Monitoring Your Jobs</h2>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb9"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb9-1"><a></a><span class="co"># Check job status</span></span>
-<span id="cb9-2"><a></a></span>
-<span id="cb9-3"><a></a><span class="ex">squeue</span> <span class="at">-u</span> <span class="va">$USER</span></span>
-<span id="cb9-4"><a></a></span>
-<span id="cb9-5"><a></a><span class="co"># Detailed job information</span></span>
-<span id="cb9-6"><a></a></span>
-<span id="cb9-7"><a></a><span class="ex">scontrol</span> show job JOBID</span>
-<span id="cb9-8"><a></a></span>
-<span id="cb9-9"><a></a><span class="co"># After job completes - see resource usage</span></span>
-<span id="cb9-10"><a></a></span>
-<span id="cb9-11"><a></a><span class="ex">sacct</span> <span class="at">-j</span> JOBID <span class="at">--format</span><span class="op">=</span>JobID,JobName,Elapsed,MaxRSS,State</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb16"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb16-1"><a></a><span class="co"># Check job status</span></span>
+<span id="cb16-2"><a></a></span>
+<span id="cb16-3"><a></a><span class="ex">squeue</span> <span class="at">-u</span> <span class="va">$USER</span></span>
+<span id="cb16-4"><a></a></span>
+<span id="cb16-5"><a></a><span class="co"># Detailed job information</span></span>
+<span id="cb16-6"><a></a></span>
+<span id="cb16-7"><a></a><span class="ex">scontrol</span> show job JOBID</span>
+<span id="cb16-8"><a></a></span>
+<span id="cb16-9"><a></a><span class="co"># After job completes - see resource usage</span></span>
+<span id="cb16-10"><a></a></span>
+<span id="cb16-11"><a></a><span class="ex">sacct</span> <span class="at">-j</span> JOBID <span class="at">--format</span><span class="op">=</span>JobID,JobName,Elapsed,MaxRSS,State</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p><br>
 <br>
 </p>

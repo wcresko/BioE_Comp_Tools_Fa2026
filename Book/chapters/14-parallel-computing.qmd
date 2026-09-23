@@ -1,0 +1,633 @@
+# Parallel Computing in R {#sec-parallel-computing}
+
+```{r}
+#| label: ch14-setup
+#| include: false
+#| cache: false
+#| message: false
+#| warning: false
+
+if (!require("pacman")) install.packages("pacman")
+pacman::p_load(tictoc, parallel, future, future.apply, tidyverse, furrr)
+theme_set(theme_minimal())
+
+## Set future resolution strategy
+plan(multisession)
+```
+
+::: {.callout-note title="Learning Objectives"}
+After completing this chapter, you will be able to:
+
+- Understand when parallel computing provides performance benefits
+- Use the future ecosystem for parallel programming in R
+- Apply future_lapply() and future_map() for parallel iteration
+- Choose between forking and socket-based parallelization
+- Understand the differences between explicit and implicit parallelization
+- Avoid common pitfalls like resource competition
+- Debug functions and handle errors in parallel contexts
+- Cache results to avoid recomputation
+:::
+
+## Why Parallel Computing? {#sec-why-parallel}
+
+Modern computers have multiple processor cores, but by default R only uses one. This means that when you run a computationally intensive analysis --- like bootstrapping, permutation tests, or processing thousands of samples --- most of your computer's power sits idle.
+
+**Parallel computing** lets you use all available cores simultaneously, potentially reducing computation time by a factor equal to your core count. A task that takes 8 hours on one core might take just 1 hour across 8 cores.
+
+In biosciences, parallel computing is especially valuable for:
+
+- **Bootstrapping** for confidence intervals
+- **Permutation tests** for significance testing
+- **Simulation studies** (e.g., population genetics)
+- **Processing many samples** (e.g., analyzing hundreds of RNA-seq files)
+- **Cross-validation** in machine learning
+- **Parameter sweeps** for computational models
+
+## How Many Cores Do You Have? {#sec-cores}
+
+Before parallelizing, find out how many cores are available:
+
+```{r}
+#| label: detect-cores
+#| cache: false
+
+parallel::detectCores()
+```
+
+This number includes both physical cores and "logical" cores (from technologies like Intel's hyperthreading). For CPU-intensive tasks, your effective speedup is typically limited by the number of physical cores.
+
+## A Motivating Example {#sec-parallel-example}
+
+Let's start with a simple example to demonstrate the power of parallelization. We'll create a deliberately slow function that simulates a computationally expensive operation:
+
+```{r}
+#| label: slow-function
+
+# Simulate analyzing a biological sample (takes 2 seconds each)
+analyze_sample = function(sample_id) {
+  # Simulate processing time
+  Sys.sleep(2)
+
+  # Return some fake results
+  tibble(
+    sample_id = sample_id,
+    gene_count = sample(5000:20000, 1),
+    quality_score = runif(1, 0.8, 1.0)
+  )
+}
+```
+
+### Serial Execution {#sec-serial-execution}
+
+First, let's process 8 samples the traditional way:
+
+```{r}
+#| label: serial-example
+#| cache: true
+
+library(tictoc)
+
+tic()
+serial_results = lapply(1:8, analyze_sample) %>% bind_rows()
+toc()
+```
+
+As expected, processing 8 samples at 2 seconds each takes about 16 seconds.
+
+### Parallel Execution {#sec-parallel-execution}
+
+Now let's do the same thing in parallel using the **future.apply** package:
+
+```{r}
+#| label: parallel-example
+#| cache: true
+
+library(future.apply)
+plan(multisession)  # Enable parallel processing
+
+tic()
+parallel_results = future_lapply(1:8, analyze_sample) %>% bind_rows()
+toc()
+```
+
+The parallel version is dramatically faster! With 8 cores, we can process all 8 samples simultaneously, reducing the time from ~16 seconds to ~2 seconds.
+
+Let's verify the results are identical:
+
+```{r}
+#| label: compare-results
+
+# Results have same structure (values differ due to random generation)
+all.equal(names(serial_results), names(parallel_results))
+```
+
+## The Future Ecosystem {#sec-future}
+
+The examples above use the **future** package ecosystem, which provides a unified, elegant approach to parallel programming in R. The key packages are listed in @tbl-future-packages:
+
+| Package | Description |
+|:--------|:------------|
+| **future** | Core package defining how code is evaluated |
+| **future.apply** | Parallel versions of apply functions |
+| **furrr** | Parallel versions of purrr functions |
+
+: The future ecosystem {#tbl-future-packages}
+
+### Setting Up Parallel Execution {#sec-setting-up-parallel-execution}
+
+Before running parallel code, you must set a "plan" that determines how futures are resolved:
+
+```{r}
+#| label: plan-options
+#| eval: false
+
+library(future)
+
+# Sequential (no parallelization - useful for debugging)
+plan(sequential)
+
+# Parallel using multiple R sessions (works on all systems)
+plan(multisession)
+
+# Parallel using forked processes (faster, but Unix/Mac only)
+plan(multicore)
+```
+
+For most users, `plan(multisession)` is the safest choice as it works on all operating systems.
+
+### future_lapply: Parallel Apply {#sec-future-lapply}
+
+The `future_lapply()` function is a drop-in replacement for `lapply()` (@sec-lapply):
+
+```{r}
+#| label: future-lapply-demo
+#| cache: true
+
+# Serial version
+# lapply(1:4, function(x) x^2)
+
+# Parallel version - just add "future_"
+future_lapply(1:4, function(x) x^2)
+```
+
+### furrr: Parallel purrr {#sec-furrr}
+
+If you prefer **purrr**'s syntax (@sec-purrr-map), **furrr** provides parallel versions of all map functions:
+
+```{r}
+#| label: furrr-demo
+#| cache: true
+
+library(furrr)
+
+# Serial: map_dbl(1:4, function(x) x^2)
+# Parallel:
+future_map_dbl(1:4, function(x) x^2)
+
+# Returns a data frame directly
+future_map_dfr(1:4, function(x) {
+  tibble(value = x, squared = x^2)
+})
+```
+
+## A Real Example: Bootstrapping Gene Expression {#sec-bootstrap-example}
+
+Let's apply parallel computing to a realistic bioinformatics task: bootstrapping to estimate confidence intervals for differential expression.
+
+### Setup {#sec-par-setup}
+
+```{r}
+#| label: bootstrap-setup
+
+set.seed(1234)
+
+# Simulate gene expression data for 1000 genes, 50 samples
+n_genes = 1000
+n_samples = 50
+
+expression_data = tibble(
+  gene_id = rep(paste0("gene_", 1:n_genes), each = n_samples),
+  sample_id = rep(paste0("sample_", 1:n_samples), n_genes),
+  group = rep(rep(c("control", "treatment"), each = n_samples/2), n_genes),
+  expression = rnorm(n_genes * n_samples, mean = 10, sd = 2)
+) %>%
+  # Add a treatment effect to some genes
+  mutate(
+    expression = if_else(
+      gene_id %in% paste0("gene_", 1:100) & group == "treatment",
+      expression + rnorm(n(), 2, 0.5),  # Upregulated genes
+      expression
+    )
+  )
+
+head(expression_data)
+```
+
+### Bootstrap Function {#sec-bootstrap-function}
+
+```{r}
+#| label: bootstrap-function
+
+# Function to bootstrap fold change for one gene
+bootstrap_fold_change = function(gene_data) {
+  # Resample within each group
+  boot_sample = gene_data %>%
+    group_by(group) %>%
+    slice_sample(prop = 1, replace = TRUE) %>%
+    ungroup()
+
+  # Calculate mean expression per group
+  means = boot_sample %>%
+    group_by(group) %>%
+    summarise(mean_expr = mean(expression), .groups = "drop")
+
+  # Calculate fold change (treatment / control)
+  fc = means$mean_expr[means$group == "treatment"] /
+       means$mean_expr[means$group == "control"]
+
+  return(fc)
+}
+
+# Function to run many bootstrap iterations for one gene
+run_bootstrap = function(gene_id, data, n_boot = 1000) {
+  gene_data = data %>% filter(gene_id == !!gene_id)
+
+  # Run bootstrap iterations
+  boot_fcs = replicate(n_boot, bootstrap_fold_change(gene_data))
+
+  # Return summary statistics
+  tibble(
+    gene_id = gene_id,
+    mean_fc = mean(boot_fcs),
+    lower_ci = quantile(boot_fcs, 0.025),
+    upper_ci = quantile(boot_fcs, 0.975)
+  )
+}
+```
+
+### Compare Serial vs Parallel {#sec-compare-serial-vs-parallel}
+
+Let's bootstrap confidence intervals for 20 genes:
+
+```{r}
+#| label: bootstrap-comparison
+#| cache: true
+
+genes_to_test = paste0("gene_", 1:20)
+
+# Serial version
+tic()
+serial_boot = map_dfr(genes_to_test, run_bootstrap,
+                      data = expression_data, n_boot = 500)
+toc()
+
+# Parallel version
+tic()
+parallel_boot = future_map_dfr(genes_to_test, run_bootstrap,
+                                data = expression_data, n_boot = 500,
+                                .options = furrr_options(seed = TRUE))
+toc()
+```
+
+The parallel version should be substantially faster, with speedup proportional to your core count.
+
+### View Results {#sec-view-results}
+
+```{r}
+#| label: bootstrap-results
+
+parallel_boot %>%
+  mutate(
+    significant = lower_ci > 1 | upper_ci < 1,
+    direction = case_when(
+      lower_ci > 1 ~ "upregulated",
+      upper_ci < 1 ~ "downregulated",
+      TRUE ~ "not significant"
+    )
+  ) %>%
+  head(10)
+```
+
+## Forking vs Sockets {#sec-fork-socket}
+
+There are two main approaches to parallelization:
+
+### Socket-based (multisession) {#sec-multisession}
+
+- Creates new R sessions for each worker
+- Works on **all operating systems** including Windows
+- Requires copying data to each worker (slower startup)
+- Selected with `plan(multisession)`
+
+### Fork-based (multicore) {#sec-multicore}
+
+- Clones the current R session
+- Works on **Unix/Mac only** (not Windows)
+- Shares memory with parent process (faster)
+- Selected with `plan(multicore)`
+- May cause issues in RStudio; run from terminal for best results
+
+```{r}
+#| label: plan-comparison
+#| eval: false
+
+# Safe choice for all systems
+plan(multisession)
+
+# Faster on Unix/Mac (run scripts from terminal)
+plan(multicore)
+
+# Specify number of workers
+plan(multisession, workers = 4)
+```
+
+::: {.callout-warning}
+On Windows, `plan(multicore)` silently falls back to `plan(sequential)`. Always use `plan(multisession)` for cross-platform code.
+:::
+
+## Handling Errors in Parallel Code {#sec-parallel-errors}
+
+Errors in parallel code can be tricky to debug. The **purrr** package provides `safely()` and `possibly()` to handle errors gracefully:
+
+```{r}
+#| label: error-handling
+
+# A function that sometimes fails
+risky_analysis = function(x) {
+  if (x == 5) stop("Error processing sample 5!")
+  tibble(sample = x, result = x^2)
+}
+
+# Wrap in safely() to catch errors
+safe_analysis = safely(risky_analysis, otherwise = NULL)
+
+# Run in parallel - won't crash if one fails
+results = future_map(1:10, safe_analysis)
+
+# Extract successful results
+successful = map(results, "result") %>%
+  compact() %>%  # Remove NULLs
+
+  bind_rows()
+
+# See which failed
+errors = map(results, "error") %>%
+  compact()
+
+cat("Successful:", nrow(successful), "\n")
+cat("Failed:", length(errors), "\n")
+```
+
+For simpler error handling, use `possibly()`:
+
+```{r}
+#| label: possibly-example
+
+# Returns NA for failed cases
+robust_analysis = possibly(risky_analysis, otherwise = tibble(sample = NA, result = NA))
+
+future_map_dfr(1:10, robust_analysis)
+```
+
+## Caching Results {#sec-caching}
+
+For expensive computations, cache intermediate results so you don't have to recompute them:
+
+```{r}
+#| label: memoise-example
+#| cache: true
+
+library(memoise)
+
+# Create a slow function
+slow_gc_analysis = function(sequence) {
+  Sys.sleep(1)  # Simulate slow computation
+  tibble(
+    sequence = sequence,
+    gc_content = str_count(toupper(sequence), "[GC]") / nchar(sequence)
+  )
+}
+
+# Create memoised version
+memo_gc_analysis = memoise(slow_gc_analysis)
+
+# First call - slow
+tic()
+result1 = memo_gc_analysis("ATGCGATCGATCG")
+toc()
+
+# Second call with same input - instant (cached)
+tic()
+result2 = memo_gc_analysis("ATGCGATCGATCG")
+toc()
+```
+
+### Persistent Caching {#sec-persistent-caching}
+
+To cache results across R sessions (useful for long analyses):
+
+```{r}
+#| label: persistent-cache
+#| eval: false
+
+# Create a cache directory
+cache_dir = "analysis_cache"
+if (!dir.exists(cache_dir)) dir.create(cache_dir)
+
+# Create memoised function with persistent cache
+memo_gc_persistent = memoise(
+  slow_gc_analysis,
+  cache = cache_filesystem(cache_dir)
+)
+
+# Results will be saved to disk and available in future sessions
+```
+
+## When to Use Parallel Computing {#sec-when-parallel}
+
+Parallel computing isn't always faster. Consider:
+
+### Good Candidates for Parallelization {#sec-good-candidates-for-parallelization}
+
+- **Independent iterations**: Each iteration doesn't depend on others
+- **CPU-intensive tasks**: Complex calculations, simulations
+- **Many iterations**: Overhead is amortized across many runs
+- **Long-running operations**: Minutes or hours of total computation
+
+### Poor Candidates {#sec-poor-candidates}
+
+- **Fast operations**: Overhead exceeds computation time
+- **Few iterations**: Not enough work to distribute
+- **Memory-intensive**: Each worker needs its own copy of data
+- **I/O bound**: Waiting for disk/network, not CPU
+
+### Amdahl's Law {#sec-amdahls-law}
+
+The maximum speedup from parallelization is limited by the sequential portion of your code. If 50% of your code must run sequentially, you can never achieve more than 2× speedup, regardless of core count (@fig-amdahl).
+
+```{r}
+#| label: fig-amdahl
+#| fig-cap: "Amdahl's law: speedup as a function of core count for different parallel fractions"
+#| echo: false
+
+expand.grid(
+  cores = 2^(0:7),
+  parallel_fraction = c(0.5, 0.75, 0.9, 0.95, 0.99)
+) %>%
+  mutate(
+    speedup = 1 / (1 - parallel_fraction + parallel_fraction/cores),
+    parallel_pct = scales::percent(parallel_fraction, accuracy = 1)
+  ) %>%
+  ggplot(aes(x = cores, y = speedup, color = parallel_pct)) +
+  geom_line(linewidth = 1) +
+  scale_x_continuous(trans = "log2", breaks = 2^(0:7)) +
+  labs(
+    title = "Amdahl's Law: Diminishing Returns from Parallelization",
+    subtitle = "Speedup is limited by the fraction of code that can run in parallel",
+    x = "Number of Cores",
+    y = "Speedup Factor",
+    color = "Parallel\nFraction"
+  )
+```
+
+## Best Practices {#sec-parallel-best-practices}
+
+### 1. Start Sequential, Then Parallelize {#sec-par-start-sequential}
+
+Always develop and debug your code in sequential mode first:
+
+```{r}
+#| label: debug-sequential
+#| eval: false
+
+# Debug with sequential execution
+plan(sequential)
+
+# Test with a small subset
+test_results = map_dfr(1:3, my_analysis_function)
+
+# Once working, switch to parallel
+plan(multisession)
+full_results = future_map_dfr(1:1000, my_analysis_function)
+```
+
+### 2. Set Random Seeds {#sec-par-random-seeds}
+
+For reproducible parallel simulations:
+
+```{r}
+#| label: parallel-seeds
+#| eval: false
+
+# future.apply
+future_lapply(1:10, my_function, future.seed = 123)
+
+# furrr
+future_map(1:10, my_function, .options = furrr_options(seed = 123))
+```
+
+### 3. Monitor Progress {#sec-par-monitor-progress}
+
+Use progress bars to track long-running parallel jobs:
+
+```{r}
+#| label: progress-bar
+#| eval: false
+
+library(progressr)
+
+handlers("txtprogressbar")
+
+with_progress({
+  p = progressor(steps = 100)
+
+  results = future_map(1:100, function(x) {
+    p()  # Signal progress
+    slow_function(x)
+  })
+})
+```
+
+### 4. Manage Memory {#sec-par-manage-memory}
+
+Each parallel worker needs memory for:
+- A copy of R
+- Any data passed to the function
+- Results being computed
+
+If you run out of memory, reduce the number of workers:
+
+```{r}
+#| label: reduce-workers
+#| eval: false
+
+# Use fewer workers for memory-intensive tasks
+plan(multisession, workers = 2)
+```
+
+### 5. Know When to Leave Your Laptop {#sec-parallel-to-cluster}
+
+Everything in this chapter parallelizes *within one machine*: `plan(multisession, workers = 8)` cannot use more cores than your laptop has, and every worker shares its memory. When a job needs more cores, more memory, or more hours than that, the next step is a cluster (@sec-hpc-talapas), where the SLURM scheduler [@yoo2003slurm] hands your script a slice of a compute node. The R code needs almost no change, but two habits matter:
+
+- **Ask `future` for the cores SLURM gave you, not the cores the node has.** On a shared node `parallel::detectCores()` reports the whole machine (often 128 cores), so use the allocation instead (see @tbl-slurm-env-vars): `plan(multisession, workers = as.integer(Sys.getenv("SLURM_CPUS_PER_TASK", "1")))`. Use `multisession`, not `multicore`, inside a batch job unless you have verified forking works with your packages.
+- **Scale *out* with job arrays rather than *up* with more workers.** Many independent samples are better submitted as a SLURM job array (@sec-hpc-job-arrays), one R process per sample, each with its own memory limit and log, than as one giant `future_map()` on one node. To make that R process reproducible on any machine, package its dependencies with `renv` or run it inside an Apptainer container [@kurtzer2017singularity], the cluster-safe counterpart of Docker [@merkel2014docker].
+
+## Summary {#sec-parallel-summary}
+
+Parallel computing can dramatically speed up computationally intensive analyses:
+
+- The **future** ecosystem provides a simple, unified approach to parallelization
+- Use `plan(multisession)` for cross-platform compatibility
+- Replace `lapply()` with `future_lapply()` or `map()` with `future_map()`
+- Always develop in sequential mode first, then parallelize
+- Use `safely()` or `possibly()` to handle errors gracefully
+- Cache expensive results with **memoise** for persistent storage
+- Consider Amdahl's law: not everything benefits from parallelization
+
+Parallel programming in R has never been easier. With just a few lines of code, you can harness all your computer's cores for faster, more efficient analyses.
+
+::: {.callout-tip}
+For reference on R functions used in parallel computing workflows, see @sec-appendix-r.
+:::
+
+## Exercises {#sec-par-exercises .unnumbered}
+
+::: {.callout-tip title="Practice Exercises"}
+**Exercise 1: Basic Parallelization**
+
+Write a function that simulates processing a biological sample (include a `Sys.sleep(1)` to simulate processing time). Use `future_lapply()` to process 10 samples in parallel and compare the time to serial execution.
+
+**Exercise 2: Bootstrap Analysis**
+
+Using the gene expression simulation from this chapter:
+1. Write a function to bootstrap the mean expression of a single gene
+2. Apply it in parallel to 50 genes
+3. Calculate 95% confidence intervals for each gene
+
+**Exercise 3: Error Handling**
+
+Create a function that analyzes DNA sequences but fails if the sequence contains invalid characters. Use `safely()` to process a list of sequences where some are invalid, and report which ones failed.
+
+**Exercise 4: Parameter Sweep**
+
+Write a function that simulates bacterial growth with parameters for growth rate (k), carrying capacity (K), and initial population (n0). Use parallel computing to run simulations across a grid of parameter combinations.
+
+**Exercise 5: Caching**
+
+Create a memoised version of a "slow" function that calculates protein properties. Demonstrate that repeated calls with the same input are instant.
+
+**Exercise 6: Benchmarking**
+
+For a computationally intensive task of your choice:
+1. Time the serial version
+2. Time the parallel version with 2, 4, and 8 workers
+3. Calculate the speedup factor for each
+4. Does the speedup match what you'd expect from Amdahl's law?
+:::
+
+## Additional Reading {#sec-par-additional-reading .unnumbered}
+
+- [future package documentation](https://future.futureverse.org/)
+- [furrr package documentation](https://furrr.futureverse.org/)
+- [Parallel Computing with R: A Brief Review](https://arxiv.org/abs/1912.11144) by Dirk Eddelbuettel
+- [R for Data Science: Iteration](https://r4ds.had.co.nz/iteration.html) chapter on functional programming

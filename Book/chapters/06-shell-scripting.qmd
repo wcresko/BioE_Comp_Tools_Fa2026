@@ -1,0 +1,1012 @@
+# Shell Scripting {#sec-shell-scripting}
+
+```{r}
+#| label: ch06-setup
+#| include: false
+library(tidyverse)
+library(gt)
+theme_set(theme_minimal())
+```
+
+::: {.callout-note title="Learning Objectives"}
+After completing this chapter, you will be able to:
+
+- Create and execute shell scripts
+- Use variables, arrays, and command substitution
+- Write conditional statements and loops
+- Define and call functions
+- Handle command-line arguments
+- Implement proper error handling
+- Build reproducible analysis pipelines
+:::
+
+## Why Shell Scripting? {#sec-why-shell-scripting}
+
+Throughout the previous chapters, you've been typing commands interactively. While this is great for exploration, real-world analyses require something more [@sandve2013ten]. You need **reproducibility**—a complete record of exactly what you did so you (or others) can repeat the analysis. You need **automation** so you can run the same analysis on many files without typing each command manually. Scripts provide **efficiency** by eliminating repetitive typing, and they serve as **documentation** that explains why you did each step. Finally, scripts enable **sharing**—letting collaborators reproduce your work with a single command.
+
+Shell scripts transform a series of commands into a reusable, documented program.
+
+## Your First Shell Script {#sec-first-script}
+
+A shell script is simply a text file containing commands. Let's create one:
+
+```bash
+#!/bin/bash
+# first_script.sh - My first shell script
+# Author: Your Name
+# Date: 2025-01-15
+
+# Display a greeting
+echo "Hello, Bioengineering!"
+
+# Show the current date
+echo "Today is: $(date +%Y-%m-%d)"
+
+# List files in current directory
+echo "Files in this directory:"
+ls -la
+```
+
+### The Shebang Line {#sec-the-shebang-line}
+
+The first line `#!/bin/bash` is called a **shebang** (or hashbang). It tells the operating system which interpreter should execute this script. Always include it; @tbl-shebangs lists the common ones.
+
+| Shebang | Interpreter | Notes |
+|:--------|:------------|:------|
+| `#!/bin/bash` | Bash shell | Most common for shell scripts |
+| `#!/bin/sh` | POSIX shell | More portable across systems |
+| `#!/usr/bin/env python3` | Python 3 | Uses env to find Python |
+| `#!/usr/bin/env Rscript` | R | For R scripts |
+
+: Common shebang lines {#tbl-shebangs}
+
+### Running Scripts {#sec-running-scripts}
+
+There are several ways to run a script:
+
+```bash
+# Method 1: Invoke the interpreter explicitly
+$ bash first_script.sh
+
+# Method 2: Make executable and run directly
+$ chmod +x first_script.sh
+$ ./first_script.sh
+```
+
+The `chmod +x` command adds execute permission to the file. After that, you can run it directly with `./`. The `./` is necessary because your current directory typically isn't in your system's PATH (see @sec-executables-and-the-path; permissions are explained in @sec-chmod).
+
+::: {.callout-tip}
+Always use `chmod +x` on your scripts. It signals that the file is meant to be executed and allows direct invocation.
+:::
+
+## Variables {#sec-shell-variables}
+
+Variables store values for later use. In Bash, variable assignment has strict syntax rules.
+
+### Assigning Variables {#sec-assigning-variables}
+
+```bash
+#!/bin/bash
+
+# Assign variables (NO spaces around the =)
+NAME="DNA Analysis"
+COUNT=100
+INPUT_FILE="sequences.fa"
+
+# Use variables (with $ prefix)
+echo "Running $NAME"
+echo "Processing $COUNT sequences from $INPUT_FILE"
+
+# Curly braces for clarity
+echo "File: ${INPUT_FILE}"
+echo "Creating ${INPUT_FILE}.backup"
+```
+
+::: {.callout-warning title="Common Mistake"}
+Spaces around `=` will cause errors!
+
+```bash
+# WRONG - causes errors
+NAME = "value"
+COUNT= 100
+
+# RIGHT - no spaces
+NAME="value"
+COUNT=100
+```
+:::
+
+### Command Substitution {#sec-command-substitution}
+
+Capture command output in a variable:
+
+```bash
+#!/bin/bash
+
+# Old syntax (backticks)
+TODAY=`date +%Y-%m-%d`
+
+# Modern syntax (preferred)
+TODAY=$(date +%Y-%m-%d)
+FILECOUNT=$(ls *.fa | wc -l)
+GENOME_SIZE=$(grep -v "^>" genome.fa | tr -d '\n' | wc -c)
+
+echo "Analysis date: $TODAY"
+echo "Processing $FILECOUNT FASTA files"
+echo "Genome size: $GENOME_SIZE bp"
+```
+
+### Arithmetic Operations {#sec-arithmetic-operations}
+
+Bash arithmetic uses `$(( ))`:
+
+```bash
+#!/bin/bash
+
+COUNT=10
+DOUBLE=$((COUNT * 2))
+INCREMENT=$((COUNT + 1))
+
+# Calculate percentage
+TOTAL=1000
+MATCHED=350
+PERCENT=$((MATCHED * 100 / TOTAL))
+
+echo "Doubled: $DOUBLE"
+echo "Match rate: $PERCENT%"
+```
+
+For floating-point math, use external tools like `bc`:
+
+```bash
+GC_CONTENT=$(echo "scale=2; 450 / 1000 * 100" | bc)
+echo "GC content: $GC_CONTENT%"
+```
+
+### String Operations {#sec-string-operations}
+
+```bash
+#!/bin/bash
+
+FILE="sample_001.fastq.gz"
+
+# Remove suffix
+NAME="${FILE%.fastq.gz}"    # sample_001
+
+# Remove prefix  
+NUMBER="${FILE#sample_}"    # 001.fastq.gz
+
+# Remove longest match from end
+BASENAME="${FILE%%.*}"      # sample_001
+
+# String length
+LENGTH=${#FILE}             # 19
+
+echo "Original: $FILE"
+echo "Name without extension: $NAME"
+echo "Length: $LENGTH characters"
+```
+
+## Arrays {#sec-shell-arrays}
+
+Arrays store multiple values:
+
+```bash
+#!/bin/bash
+
+# Declare an array
+BASES=(A C G T)
+SAMPLES=("control" "treatment_1" "treatment_2")
+
+# Access elements (0-indexed)
+echo "First base: ${BASES[0]}"        # A
+echo "Second sample: ${SAMPLES[1]}"   # treatment_1
+
+# All elements
+echo "All bases: ${BASES[@]}"
+
+# Array length
+echo "Number of samples: ${#SAMPLES[@]}"
+
+# Add element
+BASES+=(N)
+
+# Loop through array
+for sample in "${SAMPLES[@]}"; do
+    echo "Processing: $sample"
+done
+```
+
+## Conditional Statements {#sec-shell-conditionals}
+
+Conditionals control program flow based on tests.
+
+### Basic if/then/else {#sec-basic-if-then-else}
+
+```bash
+#!/bin/bash
+
+COUNT=100
+
+if [ $COUNT -gt 50 ]; then
+    echo "High count"
+elif [ $COUNT -gt 10 ]; then
+    echo "Medium count"
+else
+    echo "Low count"
+fi
+```
+
+### Test Operators {#sec-test-operators}
+
+The operators available inside `[ ]` are grouped by type in @tbl-numeric-test-operators, @tbl-string-test-operators, and @tbl-file-test-operators.
+
+**Numeric comparisons:**
+
+| Operator | Meaning |
+|:---------|:--------|
+| `-eq` | Equal |
+| `-ne` | Not equal |
+| `-gt` | Greater than |
+| `-ge` | Greater than or equal |
+| `-lt` | Less than |
+| `-le` | Less than or equal |
+
+: Numeric comparison operators for `[ ]` and `[[ ]]` tests {#tbl-numeric-test-operators}
+
+**String comparisons:**
+
+| Operator | Meaning |
+|:---------|:--------|
+| `=` | Equal |
+| `!=` | Not equal |
+| `-z` | Zero length (empty) |
+| `-n` | Non-zero length |
+
+: String comparison operators {#tbl-string-test-operators}
+
+**File tests:**
+
+| Operator | Meaning |
+|:---------|:--------|
+| `-f` | File exists and is regular file |
+| `-d` | Directory exists |
+| `-e` | File exists (any type) |
+| `-r` | File is readable |
+| `-w` | File is writable |
+| `-x` | File is executable |
+| `-s` | File exists and is not empty |
+
+: File test operators {#tbl-file-test-operators}
+
+### Examples {#sec-shell-examples}
+
+```bash
+#!/bin/bash
+
+# File existence check
+if [ -f "data.txt" ]; then
+    echo "File exists"
+else
+    echo "File not found"
+fi
+
+# Directory check with creation
+if [ ! -d "results" ]; then
+    mkdir results
+    echo "Created results directory"
+fi
+
+# String comparison
+FILETYPE="fasta"
+if [ "$FILETYPE" = "fasta" ]; then
+    echo "Processing FASTA file"
+fi
+
+# Combining conditions
+if [ -f "$FILE" ] && [ -r "$FILE" ]; then
+    echo "File exists and is readable"
+fi
+```
+
+::: {.callout-important}
+Always quote variables in tests: `[ "$VAR" = "value" ]`. Without quotes, empty variables cause syntax errors.
+:::
+
+## Loops {#sec-shell-loops}
+
+Loops repeat actions multiple times.
+
+### For Loops {#sec-shell-for-loops}
+
+```bash
+#!/bin/bash
+
+# Loop over a list
+for base in A C G T; do
+    echo "Base: $base"
+done
+
+# Loop over files
+for file in *.fastq; do
+    echo "Processing: $file"
+    gzip "$file"
+done
+
+# Loop with counter
+for i in {1..10}; do
+    echo "Iteration $i"
+done
+
+# C-style loop
+for ((i=0; i<10; i++)); do
+    echo "Index: $i"
+done
+
+# Loop over array
+FILES=("sample1.fa" "sample2.fa" "sample3.fa")
+for file in "${FILES[@]}"; do
+    echo "Analyzing $file"
+done
+```
+
+### While Loops {#sec-shell-while-loops}
+
+```bash
+#!/bin/bash
+
+# Count down
+COUNT=5
+while [ $COUNT -gt 0 ]; do
+    echo "Count: $COUNT"
+    COUNT=$((COUNT - 1))
+done
+
+# Read file line by line
+while read line; do
+    echo "Processing: $line"
+done < input.txt
+
+# Process command output
+ls *.fa | while read file; do
+    echo "Found: $file"
+done
+```
+
+### Loop Control {#sec-loop-control}
+
+```bash
+#!/bin/bash
+
+for file in *.fa; do
+    # Skip files starting with "test"
+    if [[ "$file" == test* ]]; then
+        continue
+    fi
+    
+    # Stop if we find "final.fa"
+    if [ "$file" = "final.fa" ]; then
+        echo "Found final file, stopping"
+        break
+    fi
+    
+    echo "Processing: $file"
+done
+```
+
+## Command-Line Arguments {#sec-cli-arguments}
+
+Scripts become more flexible when they accept arguments:
+
+```bash
+#!/bin/bash
+# process_fasta.sh - Process a FASTA file
+
+# $0 is the script name
+echo "Script: $0"
+
+# $# is the number of arguments
+echo "Arguments received: $#"
+
+# $1, $2, etc. are positional arguments
+INPUT=$1
+OUTPUT=$2
+
+# $@ is all arguments
+echo "All arguments: $@"
+
+# Check for required arguments
+if [ $# -lt 2 ]; then
+    echo "Usage: $0 input.fasta output.txt"
+    exit 1
+fi
+
+# Now process the files
+echo "Input: $INPUT"
+echo "Output: $OUTPUT"
+```
+
+Usage:
+```bash
+$ ./process_fasta.sh sequences.fa results.txt
+```
+
+### Argument Validation {#sec-argument-validation}
+
+```bash
+#!/bin/bash
+
+# Check argument count
+if [ $# -ne 2 ]; then
+    echo "Error: Expected 2 arguments, got $#" >&2
+    echo "Usage: $0 input.fa output.txt" >&2
+    exit 1
+fi
+
+INPUT=$1
+OUTPUT=$2
+
+# Validate input file
+if [ ! -f "$INPUT" ]; then
+    echo "Error: Input file '$INPUT' not found" >&2
+    exit 1
+fi
+
+# Check if output would overwrite
+if [ -f "$OUTPUT" ]; then
+    echo "Warning: Output file exists. Overwrite? (y/n)"
+    read answer
+    if [ "$answer" != "y" ]; then
+        exit 0
+    fi
+fi
+
+# Continue with processing...
+```
+
+## Functions {#sec-shell-functions}
+
+Functions make scripts modular and reusable:
+
+```bash
+#!/bin/bash
+
+# Define a function
+count_sequences() {
+    local FILE=$1  # Local variable
+    local COUNT=$(grep -c "^>" "$FILE")
+    echo $COUNT
+}
+
+# Function with multiple parameters
+analyze_fasta() {
+    local INPUT=$1
+    local OUTPUT=$2
+    
+    echo "Analyzing $INPUT..."
+    
+    local SEQ_COUNT=$(count_sequences "$INPUT")
+    local TOTAL_LENGTH=$(grep -v "^>" "$INPUT" | tr -d '\n' | wc -c)
+    
+    echo "Sequences: $SEQ_COUNT" > "$OUTPUT"
+    echo "Total bases: $TOTAL_LENGTH" >> "$OUTPUT"
+}
+
+# Call functions
+SEQ_NUM=$(count_sequences "proteins.fa")
+echo "Found $SEQ_NUM sequences"
+
+analyze_fasta "input.fa" "statistics.txt"
+```
+
+### Return Values {#sec-shell-return-values}
+
+Functions return exit status (0-255), not strings. To return data:
+
+```bash
+#!/bin/bash
+
+# Return via stdout
+get_gc_content() {
+    local FILE=$1
+    local GC=$(grep -v "^>" "$FILE" | tr -d '\n' | grep -o "[GC]" | wc -l)
+    local TOTAL=$(grep -v "^>" "$FILE" | tr -d '\n' | wc -c)
+    echo "$((GC * 100 / TOTAL))"
+}
+
+# Capture output
+GC_PERCENT=$(get_gc_content "genome.fa")
+echo "GC content: $GC_PERCENT%"
+
+# Return status for success/failure
+check_file() {
+    if [ -f "$1" ] && [ -r "$1" ]; then
+        return 0  # Success
+    else
+        return 1  # Failure
+    fi
+}
+
+if check_file "data.txt"; then
+    echo "File is ready"
+else
+    echo "File not accessible"
+fi
+```
+
+## Error Handling {#sec-error-handling}
+
+Robust scripts handle errors gracefully.
+
+### Exit Status {#sec-exit-status}
+
+Every command returns an exit status: 0 for success, non-zero for failure.
+
+```bash
+#!/bin/bash
+
+# Check last command's status
+grep "pattern" file.txt
+if [ $? -ne 0 ]; then
+    echo "Pattern not found"
+fi
+
+# Conditional execution
+grep "pattern" file.txt && echo "Found!"
+grep "pattern" file.txt || echo "Not found"
+```
+
+### Strict Mode {#sec-strict-mode}
+
+Start scripts with these settings for better error detection:
+
+```bash
+#!/bin/bash
+set -e          # Exit on any error
+set -u          # Error on undefined variables
+set -o pipefail # Catch errors in pipes
+
+# Or combine: set -euo pipefail
+```
+
+### Custom Error Handling {#sec-custom-error-handling}
+
+```bash
+#!/bin/bash
+set -euo pipefail
+
+# Define error handler
+error_exit() {
+    echo "Error on line $1" >&2
+    exit 1
+}
+
+# Set trap to call handler on error
+trap 'error_exit $LINENO' ERR
+
+# Now errors are caught
+check_file() {
+    if [ ! -f "$1" ]; then
+        echo "Error: File $1 not found!" >&2
+        exit 1
+    fi
+}
+
+# Validate inputs
+check_file "$1"
+
+# Continue processing...
+```
+
+### Cleanup on Exit {#sec-cleanup-on-exit}
+
+Ensure temporary files are removed even if script fails:
+
+```bash
+#!/bin/bash
+
+# Create temp file
+TMPFILE=$(mktemp)
+
+# Remove temp file on exit (normal or error)
+trap "rm -f $TMPFILE" EXIT
+
+# Use temp file...
+echo "working data" > "$TMPFILE"
+# ... do processing ...
+
+# Cleanup happens automatically
+```
+
+## Running R Scripts from the Shell {#sec-rscript}
+
+While shell scripts are powerful, sometimes you need R's statistical capabilities. The `Rscript` command lets you run R code directly from the shell.
+
+### Basic Usage {#sec-shell-basic-usage}
+
+```bash
+# Run an R script
+$ Rscript my_analysis.R
+
+# Execute a single R expression
+$ Rscript -e "print('Hello from R!')"
+
+# Quick calculation
+$ Rscript -e "mean(c(1, 2, 3, 4, 5))"
+```
+
+### Passing Arguments to R Scripts {#sec-passing-arguments-to-r-scripts}
+
+You can pass command-line arguments to R scripts, making them flexible and reusable:
+
+```r
+#!/usr/bin/env Rscript
+# process_data.R - Process a data file with custom parameters
+
+# Capture command-line arguments
+args <- commandArgs(trailingOnly = TRUE)
+
+# Check for required arguments
+if (length(args) < 2) {
+  stop("Usage: Rscript process_data.R <input_file> <output_file>")
+}
+
+input_file <- args[1]
+output_file <- args[2]
+
+# Now use these in your analysis
+data <- read.csv(input_file)
+# ... process data ...
+write.csv(data, output_file)
+
+cat("Processed", input_file, "-> ", output_file, "\n")
+```
+
+Run it from the shell:
+
+```bash
+$ Rscript process_data.R raw_data.csv cleaned_data.csv
+```
+
+### Combining Shell and R {#sec-combining-shell-and-r}
+
+A common pattern is using shell scripts to orchestrate R analyses:
+
+```bash
+#!/bin/bash
+# run_analysis.sh - Process all CSV files in a directory
+
+for file in data/*.csv; do
+    output="results/$(basename "$file" .csv)_processed.csv"
+    echo "Processing $file..."
+    Rscript process_data.R "$file" "$output"
+done
+
+echo "All files processed!"
+```
+
+::: {.callout-tip}
+Using `Rscript` is particularly valuable for batch processing, scheduled tasks (cron jobs), and integration with high-performance computing clusters where you submit shell scripts as jobs (@sec-hpc-talapas).
+:::
+
+## Scripts in Other Languages {#sec-scripts-other-languages}
+
+Everything in this chapter about shebangs, `chmod +x`, and command-line arguments applies to scripts in any interpreted language. The shell reads the shebang line, hands the file to that interpreter, and passes the arguments along. Here is the same tiny program, counting the records in a FASTA file whose name is given on the command line, written in bash, R, and Python. Notice that the structure is identical: read the first argument, complain if it is missing, count lines beginning with `>`, and print the result.
+
+::: {.panel-tabset}
+### Bash
+
+```bash
+#!/bin/bash
+# count_fasta.sh - count records in a FASTA file
+if [ $# -lt 1 ]; then
+    echo "Usage: $0 <file.fasta>" >&2
+    exit 1
+fi
+
+n=$(grep -c '^>' "$1")
+echo "$1: $n records"
+```
+
+```bash
+chmod +x count_fasta.sh
+./count_fasta.sh sequences.fasta
+# sequences.fasta: 3 records
+```
+
+### R
+
+```r
+#!/usr/bin/env Rscript
+# count_fasta.R - count records in a FASTA file
+args <- commandArgs(trailingOnly = TRUE)
+if (length(args) < 1) {
+  stop("Usage: count_fasta.R <file.fasta>")
+}
+
+lines <- readLines(args[1])
+n <- sum(startsWith(lines, ">"))
+cat(args[1], ": ", n, " records\n", sep = "")
+```
+
+```bash
+chmod +x count_fasta.R
+./count_fasta.R sequences.fasta        # or: Rscript count_fasta.R sequences.fasta
+# sequences.fasta: 3 records
+```
+
+### Python
+
+```python
+#!/usr/bin/env python3
+# count_fasta.py - count records in a FASTA file
+import sys
+
+if len(sys.argv) < 2:
+    sys.exit("Usage: count_fasta.py <file.fasta>")
+
+with open(sys.argv[1]) as fh:
+    n = sum(1 for line in fh if line.startswith(">"))
+print(f"{sys.argv[1]}: {n} records")
+```
+
+```bash
+chmod +x count_fasta.py
+./count_fasta.py sequences.fasta       # or: python3 count_fasta.py sequences.fasta
+# sequences.fasta: 3 records
+```
+:::
+
+The differences are small and systematic: bash sees arguments as `$1`, `$2`, ...; R collects them with `commandArgs(trailingOnly = TRUE)` into a character vector indexed from 1; Python puts them in the list `sys.argv`, where element `0` is the script name and the first real argument is `sys.argv[1]`. Whichever language you choose, the shell treats the script the same way, so a bash driver script can call any of them in a loop, as in the previous section. R scripting is covered in @sec-r-programming and Python scripting, including the more capable `argparse` module, in @sec-python-programming.
+
+## A Complete Bioinformatics Script {#sec-complete-script}
+
+Let's put it all together with a realistic example:
+
+```bash
+#!/bin/bash
+#===============================================================================
+# fasta_stats.sh - Calculate statistics for FASTA files
+# 
+# Usage: ./fasta_stats.sh input.fasta [output.txt]
+#
+# Author: Your Name
+# Date: 2025-01-15
+#===============================================================================
+
+set -euo pipefail
+
+#-------------------------------------------------------------------------------
+# Configuration
+#-------------------------------------------------------------------------------
+VERSION="1.0.0"
+
+#-------------------------------------------------------------------------------
+# Functions
+#-------------------------------------------------------------------------------
+
+usage() {
+    cat << EOF
+Usage: $(basename "$0") [OPTIONS] input.fasta [output.txt]
+
+Calculate basic statistics for FASTA files.
+
+Options:
+    -h, --help      Show this help message
+    -v, --version   Show version information
+    -q, --quiet     Suppress progress messages
+
+Arguments:
+    input.fasta     Input FASTA file (required)
+    output.txt      Output file (optional, defaults to stdout)
+
+Examples:
+    $(basename "$0") sequences.fa
+    $(basename "$0") genome.fa stats.txt
+    $(basename "$0") -q input.fa > results.txt
+EOF
+}
+
+log() {
+    if [ "$QUIET" = false ]; then
+        echo "[$(date '+%Y-%m-%d %H:%M:%S')] $1" >&2
+    fi
+}
+
+error() {
+    echo "Error: $1" >&2
+    exit 1
+}
+
+count_sequences() {
+    grep -c "^>" "$1"
+}
+
+total_length() {
+    grep -v "^>" "$1" | tr -d '\n' | wc -c | tr -d ' '
+}
+
+gc_content() {
+    local gc=$(grep -v "^>" "$1" | tr -d '\n' | grep -o "[GC]" | wc -l | tr -d ' ')
+    local total=$(total_length "$1")
+    if [ "$total" -gt 0 ]; then
+        echo "$((gc * 100 / total))"
+    else
+        echo "0"
+    fi
+}
+
+#-------------------------------------------------------------------------------
+# Parse Arguments
+#-------------------------------------------------------------------------------
+
+QUIET=false
+
+while [[ $# -gt 0 ]]; do
+    case $1 in
+        -h|--help)
+            usage
+            exit 0
+            ;;
+        -v|--version)
+            echo "$(basename "$0") version $VERSION"
+            exit 0
+            ;;
+        -q|--quiet)
+            QUIET=true
+            shift
+            ;;
+        -*)
+            error "Unknown option: $1"
+            ;;
+        *)
+            break
+            ;;
+    esac
+done
+
+# Check required arguments
+if [ $# -lt 1 ]; then
+    usage >&2
+    exit 1
+fi
+
+INPUT="$1"
+OUTPUT="${2:-/dev/stdout}"
+
+#-------------------------------------------------------------------------------
+# Validate Input
+#-------------------------------------------------------------------------------
+
+if [ ! -f "$INPUT" ]; then
+    error "Input file not found: $INPUT"
+fi
+
+if [ ! -r "$INPUT" ]; then
+    error "Cannot read input file: $INPUT"
+fi
+
+#-------------------------------------------------------------------------------
+# Main Analysis
+#-------------------------------------------------------------------------------
+
+log "Starting analysis of $INPUT"
+
+log "Counting sequences..."
+SEQ_COUNT=$(count_sequences "$INPUT")
+
+log "Calculating total length..."
+TOTAL_LEN=$(total_length "$INPUT")
+
+log "Computing GC content..."
+GC_PCT=$(gc_content "$INPUT")
+
+# Calculate average length
+if [ "$SEQ_COUNT" -gt 0 ]; then
+    AVG_LEN=$((TOTAL_LEN / SEQ_COUNT))
+else
+    AVG_LEN=0
+fi
+
+#-------------------------------------------------------------------------------
+# Output Results
+#-------------------------------------------------------------------------------
+
+{
+    echo "=== FASTA Statistics ==="
+    echo "File: $INPUT"
+    echo "Date: $(date '+%Y-%m-%d %H:%M:%S')"
+    echo ""
+    echo "Number of sequences: $SEQ_COUNT"
+    echo "Total length: $TOTAL_LEN bp"
+    echo "Average length: $AVG_LEN bp"
+    echo "GC content: $GC_PCT%"
+} > "$OUTPUT"
+
+log "Analysis complete. Results written to $OUTPUT"
+```
+
+## Best Practices Summary {#sec-scripting-best-practices}
+
+::: {.callout-tip title="Shell Scripting Best Practices"}
+1. **Always include a shebang**: `#!/bin/bash`
+2. **Use strict mode**: `set -euo pipefail`
+3. **Comment your code**: Explain what and why
+4. **Use meaningful names**: `SEQ_COUNT` not `SC`
+5. **Validate inputs**: Check files exist, arguments are provided
+6. **Handle errors**: Provide useful error messages
+7. **Make it portable**: Don't hardcode paths
+8. **Test incrementally**: Build and test piece by piece
+9. **Version control**: Track changes with git (@sec-git-github)
+10. **Document usage**: Include help messages
+:::
+
+## Summary {#sec-scripting-summary}
+
+This chapter covered shell scripting essentials:
+
+- Scripts are text files containing commands with a shebang line
+- Variables store values; arrays store multiple values
+- Conditionals (`if/elif/else`) control flow based on tests
+- Loops (`for`, `while`) repeat actions
+- Functions make code modular and reusable
+- Command-line arguments make scripts flexible
+- Error handling ensures robustness
+- Combining these elements creates powerful analysis pipelines
+
+Shell scripting is a foundational skill for computational biology. Even as you learn other languages like R and Python, shell scripts remain invaluable for automation, file management, and orchestrating complex workflows.
+
+::: {.callout-tip}
+For quick reference on Unix commands used in shell scripts, see @sec-appendix-unix.
+:::
+
+## Additional Reading {#sec-shell-additional-reading .unnumbered}
+
+To advance your shell scripting skills:
+
+- **[Bash Guide for Beginners](https://tldp.org/LDP/Bash-Beginners-Guide/html/)** — A comprehensive introduction to Bash scripting
+- **[Advanced Bash-Scripting Guide](https://tldp.org/LDP/abs/html/)** — An in-depth exploration of shell scripting techniques
+- **[ShellCheck](https://www.shellcheck.net/)** — An online tool for finding bugs in your shell scripts
+- **"Learning the bash Shell"** by Cameron Newham — A thorough guide to Bash programming
+- **[Google Shell Style Guide](https://google.github.io/styleguide/shellguide.html)** — Best practices for writing maintainable scripts
+
+For bioinformatics workflow development:
+
+- **[Snakemake](https://snakemake.readthedocs.io/)** — A workflow management system that builds on shell scripting concepts
+- **[Nextflow](https://www.nextflow.io/)** — A domain-specific language for data-driven pipelines
+- **[GNU Make Tutorial](https://www.gnu.org/software/make/manual/)** — Build automation that complements shell scripts
+
+## Exercises {#sec-shell-exercises .unnumbered}
+
+::: {.callout-tip title="Practice Exercises"}
+**Exercise 1: Basic Script**
+
+Create a script that:
+1. Accepts a directory as an argument
+2. Counts files of each type (.txt, .csv, .fa, etc.)
+3. Reports the results
+
+**Exercise 2: File Processing Loop**
+
+Write a script that:
+1. Loops through all `.fastq` files in a directory
+2. Counts the number of reads in each (hint: lines/4 in FASTQ)
+3. Saves results to a summary file
+
+**Exercise 3: FASTA Validator**
+
+Create a script that validates FASTA files:
+1. Check that every header line starts with `>`
+2. Check that sequence lines only contain valid characters
+3. Report any errors found
+
+**Exercise 4: Analysis Pipeline**
+
+Build a complete analysis script that:
+1. Accepts input/output arguments with validation
+2. Downloads a bacterial genome if not present
+3. Calculates genome statistics
+4. Finds all occurrences of a user-specified motif
+5. Generates a summary report
+6. Includes proper error handling and logging
+:::

@@ -1,0 +1,380 @@
+# Your Computational Toolkit: Installing and Using Editors and IDEs {#sec-toolkit}
+
+::: {.callout-note title="Learning Objectives"}
+After completing this chapter, you will be able to:
+
+- Explain what an editor and an integrated development environment (IDE) do for you, and why a small investment in learning one pays off every day
+- Install the core software for this course: a Unix shell, R, Python, Quarto, TinyTeX, VS Code, and Positron
+- Navigate the layout of VS Code and Positron, use the Command Palette and the integrated terminal, and install the extensions we rely on
+- Choose sensibly among VS Code, Positron, and RStudio for a given task
+- Keep track of which "side" of a Windows computer you are working on when using WSL
+- Distinguish Jupyter notebooks from Quarto documents, and know what a Python environment is
+- Install the compiler toolchain your operating system needs to build R and Python packages from source
+- Verify that everything is installed correctly and troubleshoot the most common installation problems
+:::
+
+In @sec-introduction you set up the operating-system level of your computer: a Unix shell on macOS or Linux, or Windows Subsystem for Linux (WSL) with Ubuntu on Windows. This chapter fills in the rest of the toolkit. By the end you should have the languages we use (R and Python), the publishing system that turns code and prose into documents (Quarto, with a small LaTeX distribution for PDFs), and, most importantly, a comfortable place to write and run code: an editor or IDE.
+
+We spend far more time in this chapter on the editor than on any single language. That is deliberate. Over the course of a graduate degree you will spend hundreds of hours writing scripts, documents, and analyses, and almost all of that time is spent inside an editor. Learning its layout, shortcuts, and quirks early is the single best productivity investment you can make.
+
+::: {.callout-note title="What each of these tools actually is"}
+The install list below mixes three different kinds of software, and it helps to know which does what:
+
+- **R**, **Python**, and **LaTeX** are **languages**. You write code (or markup) in them and a program executes it: R and Python turn analysis code into results and figures; LaTeX turns markup into a typeset document and is what produces PDF output.
+- **Quarto** is a **formatting and publishing system**. It weaves your prose together with code chunks, runs the code through R or Python, and renders the result into an HTML page, slide deck, or PDF. It is the layer that turns a `.qmd` file into a finished document.
+- **VS Code**, **Positron**, and **RStudio** are **integrated development environments (IDEs)**: the workbenches you sit in. Each gives you an editor, a place to run code and see output, and tools for managing projects. None of them is a language, and none is required by any other tool; they are where you do the work.
+
+In short: R, Python, and LaTeX are languages, Quarto stitches and publishes them, and the IDEs are where you write.
+:::
+
+## Why an Editor or IDE? {#sec-why-ide}
+
+Every program you write in this course, whether a Bash script, an R analysis, or a Quarto document, is a plain-text file. In principle you could write it with any tool that produces plain text, and for quick edits on a remote server, terminal editors such as `nano` and `vim` remain useful (we will meet them in @sec-unix-fundamentals). But plain editors do not scale to real projects. Once your work spans a dozen files across several directories, you want a tool that can show the whole project at once, that color-codes your code so structure and mistakes are visible at a glance, and that lets you run code right where you write it.
+
+An **Integrated Development Environment (IDE)** bundles those capabilities into one window: a text **editor** with syntax highlighting and completion, a **terminal** for shell commands, a **console** for an interactive R or Python session, and tools such as a file explorer, a search across the project, and an interface to version control (@sec-git-github). The three IDEs you will encounter in this course, VS Code, Positron, and RStudio, all provide these pieces; they differ mainly in emphasis, as we discuss in @sec-which-ide.
+
+::: {.callout-tip title="Open the folder, not the file"}
+All three IDEs work best when they can see your entire project. Always use **File → Open Folder** (or its equivalent) on the project's top-level directory, rather than double-clicking a single file. The file explorer then shows the whole tree, project-wide search works, and the integrated terminal opens in that folder automatically, so relative paths in your scripts behave as expected.
+:::
+
+## Is Your Laptop Ready? {#sec-laptop-minimums}
+
+Before installing anything, make sure your machine can handle the software. The course requires a laptop with **16 GB of RAM** (8 GB is the absolute minimum and will struggle with larger datasets later in the term), at least **20 GB of free disk space** (the installs in this chapter alone take roughly 10 GB, and your data needs room too), and an up-to-date **macOS, Windows 10/11, or Linux**. You also need **administrator rights** to install software; if your laptop is managed by a lab or department, you may need to ask their IT staff for help. Chromebooks and iPads will not work for this course. If you do not have a suitable laptop, talk to the instructor early so that a solution can be found.
+
+Some installers, R in particular, come in different versions for different processors, so it helps to know what kind of chip you have. @tbl-chip-check shows how to find out.
+
+| System | How to check | What you will see |
+|:-------|:-------------|:------------------|
+| macOS | Apple menu → **About This Mac** | **Chip: Apple M1/M2/M3/M4** (Apple silicon) or **Processor: Intel** |
+| Windows | **Settings → System → About** | Processor, RAM, "64-bit operating system" |
+| Any Unix shell | `uname -m` | `arm64` (Apple silicon or other ARM) or `x86_64` (Intel/AMD) |
+
+: Finding out which processor your computer has {#tbl-chip-check}
+
+While you are there, note your RAM and free disk space. In @sec-computing-at-uo we compare these numbers to what a single node of the Talapas cluster offers; the comparison is instructive.
+
+## The Install Checklist {#sec-install-checklist}
+
+Here is everything you need to install for the course, in a sensible order. Several of the downloads are large, so it is worth starting them and letting them run while you read the rest of the chapter. The operating-system prerequisites (the Xcode command-line tools on macOS, and WSL with Ubuntu on Windows) are covered in @sec-introduction; make sure those are finished first.
+
+### A Unix shell {#sec-toolkit-shell}
+
+On macOS and Linux you already have one: open **Terminal** (on macOS, press `Cmd-Space` and type "Terminal"; on Linux, often `Ctrl-Alt-T`). On Windows, the shell you will use for this course is the **Ubuntu** app installed by WSL. Confirm it works by typing `echo $SHELL` and `whoami` at the prompt. macOS uses `zsh` by default and Ubuntu uses `bash`; for everything in this course they behave the same.
+
+### R {#sec-toolkit-r}
+
+Download R from CRAN at <https://cran.r-project.org>. On **macOS** choose the `.pkg` installer that matches your chip: **arm64** for Apple silicon (M1 through M4) or **x86_64** for Intel Macs. If you are unsure, run `uname -m` in Terminal (@tbl-chip-check). On **Windows**, choose "base" and run the installer, accepting the defaults. R is the subject of @sec-r-programming and everything that follows it.
+
+::: {.callout-note title="Windows: install R and Python on the Windows side"}
+If you use WSL, install R, Python, VS Code, and Positron as ordinary **Windows** applications, not inside Ubuntu. The IDEs run on Windows and will find the Windows copies of R and Python; Ubuntu is where you will type shell commands. @sec-which-side explains how to tell the two apart.
+:::
+
+### Python {#sec-toolkit-python}
+
+There are three common ways to install Python 3, and for this course any of them is fine as long as you pick one and stick with it:
+
+- **The python.org installer** (simplest). Download from <https://www.python.org/downloads/>. On **macOS**, run the installer. On **Windows**, the first screen of the installer has a checkbox labeled **"Add python.exe to PATH"**: check it. If you skip it, your terminal will not be able to find Python and you will end up reinstalling.
+- **uv** (fastest). A single small program from <https://docs.astral.sh/uv/> that installs Python versions, creates environments, and installs packages; `uv python install 3.12` fetches an interpreter.
+- **conda** (Miniconda or Miniforge). A package manager that also installs non-Python software; it is the standard on Talapas and in bioinformatics, but heavier than the other two.
+
+Inside **Ubuntu on WSL**, Python is already present, but the tools for installing packages and creating environments are not, so add them with:
+
+```bash
+sudo apt install -y python3-pip python3-venv
+```
+
+The trade-offs among these options, and how to use environments with each, are covered in @sec-python-programming.
+
+### Quarto {#sec-toolkit-quarto}
+
+Quarto turns Markdown and code into HTML pages, PDFs, Word documents, and slides; it is how this book and the course slides are built. Download the installer for your operating system from <https://quarto.org/docs/get-started/> and run it. Quarto is covered in depth in @sec-quarto-documents.
+
+### TinyTeX {#sec-tinytex}
+
+To produce PDFs, Quarto needs a **LaTeX** distribution, the standard system for typesetting mathematics (@sec-latex-basics). Full distributions such as MacTeX and MiKTeX are several gigabytes; TinyTeX installs only what Quarto needs. After Quarto is installed, open a terminal and run:
+
+```bash
+quarto --version
+quarto install tinytex     # takes several minutes
+```
+
+If you already have a full LaTeX distribution, Quarto will find and use it, and you can skip this step.
+
+### VS Code {#sec-vs-code}
+
+Download **Visual Studio Code** from <https://code.visualstudio.com/download>. It is free and requires no account. Run the installer, open VS Code, and allow any permissions it asks for. Installation details and the extensions we use are in @sec-vscode.
+
+### Positron {#sec-toolkit-positron}
+
+Download **Positron** from <https://positron.posit.co/download>. Install R and Python *before* Positron so that it can find them automatically. Details are in @sec-positron.
+
+### Compiler tools {#sec-compiler-tools}
+
+Several R and Python packages (and nearly all Bioconductor packages) **compile from source** the first time you install them, which requires a working C, C++, and often Fortran compiler. Install the toolchain once now; @sec-setup-troubleshooting lists the errors you will see if it is missing.
+
+**macOS.** Apple's Xcode command-line tools, installed in @sec-introduction with `xcode-select --install`, provide `clang`, `git`, and `make`. They do not include a Fortran compiler, which some R packages need; if you ever see `gfortran not found`, install gfortran from the R for macOS tools page at <https://mac.r-project.org/tools/>, then relaunch your IDE.
+
+**Windows.** Install **Rtools** from <https://cran.r-project.org/bin/windows/Rtools/>, choosing the version that matches your R (for example Rtools44 for R 4.4, Rtools45 for R 4.5). Rtools is for the Windows copy of R; it is separate from Ubuntu on WSL, which uses `build-essential` as described next.
+
+**Linux (including Ubuntu on WSL).** Install the toolchain from the package manager:
+
+```bash
+sudo apt update && sudo apt install -y build-essential gfortran
+```
+
+`build-essential` provides `gcc`, `g++`, and `make`; `gfortran` covers packages with Fortran code. On Fedora or RHEL, use `sudo dnf groupinstall "Development Tools"` and add `gcc-gfortran`.
+
+### Git (later) {#sec-toolkit-git}
+
+We will also use Git for version control, but not yet. Installing and configuring Git, and connecting it to GitHub, is done in @sec-git-github, so there is nothing to do now.
+
+## Visual Studio Code {#sec-vscode}
+
+**VS Code** is a free, general-purpose code editor from Microsoft, built on the open-source Code OSS project. It runs on macOS, Windows, and Linux, supports essentially every programming language through extensions, and has the largest extension ecosystem and user community of any editor. It is also the editor most likely to be waiting for you on a collaborator's machine or in a company.
+
+### Installing and opening a project {#sec-installing-and-opening-a-project}
+
+After running the installer from <https://code.visualstudio.com/download>, open VS Code and use **File → Open Folder** to open your project directory. Windows users will be prompted to install the **WSL** extension; accept, because it allows VS Code to work directly inside Ubuntu. Once the WSL extension is installed, typing `code .` in an Ubuntu terminal opens the current directory in VS Code, connected to Ubuntu.
+
+On macOS, the `code` command is not on your `PATH` by default. Open the Command Palette (`Cmd-Shift-P`), type "shell command", and run **"Shell Command: Install 'code' command in PATH"**. From then on, `code .` in Terminal opens the current folder, and `code somefile.R` opens a single file.
+
+### The layout {#sec-vscode-layout}
+
+VS Code's window has a handful of regions that you will use constantly. The **Activity Bar** runs down the far left and switches the side panel between the **Explorer** (a file tree of your open folder), **Search** (find text across the entire project), **Source Control** (a graphical front-end to Git, covered in @sec-git-github), and **Extensions**. The **editor** occupies the center; you can open many files in tabs and split the editor to see two files side by side with `Cmd-\` (macOS) or `Ctrl-\` (Windows/Linux). The **integrated terminal** at the bottom is a full shell (zsh, bash, or, on Windows with the WSL extension, Ubuntu's bash); toggle it with ``Ctrl-` ``, the backtick key that sits above Tab. Finally, the **Command Palette**, opened with `Cmd-Shift-P` or `Ctrl-Shift-P`, lets you find and run any command by typing part of its name. If you cannot remember where a menu item lives, the Command Palette is the answer.
+
+### Extensions for this course {#sec-extensions-for-this-course}
+
+Open the Extensions panel (`Cmd-Shift-X` / `Ctrl-Shift-X`), search for each of the following, and click **Install**:
+
+- **Quarto** (from Quarto), to edit, preview, and render `.qmd` documents
+- **Python** (from Microsoft), for Python language support
+- **R** (from REditorSupport), for R language support
+- **Jupyter** (from Microsoft), for notebooks and interactive Python
+- **WSL** (from Microsoft; Windows only), to work inside Ubuntu
+- Later in the term, **Remote - SSH** (from Microsoft), which lets you edit files on Talapas as if they were local (@sec-hpc-talapas)
+
+Extensions can be added and removed at any time, so start with this short list and add more as you discover a need.
+
+### Keyboard shortcuts worth memorizing {#sec-keyboard-shortcuts-worth-memorizing}
+
+A few shortcuts account for most of the time savings in an editor. @tbl-vscode-shortcuts lists the ones worth learning first; they work identically in Positron. A fuller list, including shell and RStudio shortcuts, is in @sec-appendix-shortcuts.
+
+| Action | macOS | Windows / Linux |
+|:-------|:------|:----------------|
+| Command Palette | `Cmd-Shift-P` | `Ctrl-Shift-P` |
+| Toggle terminal | ``Ctrl-` `` | ``Ctrl-` `` |
+| Toggle comment | `Cmd-/` | `Ctrl-/` |
+| Indent / un-indent | `Cmd-]` / `Cmd-[` | `Ctrl-]` / `Ctrl-[` |
+| Find in file | `Cmd-F` | `Ctrl-F` |
+| Search whole project | `Cmd-Shift-F` | `Ctrl-Shift-F` |
+| Save | `Cmd-S` | `Ctrl-S` |
+| Markdown preview | `Cmd-Shift-V` | `Ctrl-Shift-V` |
+| Render Quarto document | `Cmd-Shift-K` | `Ctrl-Shift-K` |
+
+: Keyboard shortcuts in VS Code and Positron {#tbl-vscode-shortcuts}
+
+::: {.callout-tip}
+The backtick (`` ` ``) used to toggle the terminal is usually on the key above **Tab**, not the apostrophe key. Confusing the two is the most common reason the terminal "won't open."
+:::
+
+## Positron {#sec-positron}
+
+**Positron** is a free, next-generation data-science IDE from Posit, the company behind RStudio. It is built on **Code OSS**, the open-source core of VS Code, so everything in the previous section (Explorer, editor tabs, terminal, Command Palette, the shortcuts in @tbl-vscode-shortcuts) carries over unchanged. What Positron adds is a set of data-science panes of the kind RStudio users have relied on for years, and native support for both R and Python.
+
+### Installing {#sec-positron-installing}
+
+Download Positron from <https://positron.posit.co/download> and run the installer. Because Positron discovers the R and Python installations on your computer when it starts, install both languages *first*. Then open Positron, use **File → Open Folder** on your project, and start an R or Python session from the **interpreter picker** at the top right of the window. You can have several sessions open and switch among them, which is convenient for projects that mix R and Python.
+
+### The layout {#sec-positron-layout}
+
+In addition to the VS Code regions, Positron adds a **Console**, an interactive R or Python session where you can type expressions and see results immediately; a **Variables** pane listing every object you have created, with its type and size; a **Plots** pane that displays your figures and keeps a history of them; a **Data Explorer** that opens a data frame in a spreadsheet-like, sortable, filterable view; and a **Help** pane showing documentation for the function under your cursor. The recommended workflow is the same as in RStudio: write code in the **editor**, where it is saved in a file, and send lines or selections to the console with `Cmd-Enter` (macOS) or `Ctrl-Enter` (Windows/Linux). Use the console directly only for quick experiments; anything you would want to reproduce belongs in a file.
+
+### Extensions in Positron {#sec-extensions-in-positron}
+
+Positron installs extensions from **Open VSX**, an open extension registry, rather than from Microsoft's Visual Studio Marketplace. Most extensions you would want (Quarto, Python, Jupyter, and many others) are available there, but a few Microsoft-only extensions are not, and Positron provides its own equivalents for the important ones. In particular, the VS Code **R extension is not used in Positron**: R support is built in, so do not install it.
+
+## RStudio {#sec-rstudio-overview}
+
+**RStudio**, also from Posit, is the IDE that most R users learned on, and it remains an excellent environment for pure R work. Its window is divided into four panes: the **Source** editor for scripts and documents, the **Console** for a live R session, an **Environment/History** pane that shows your objects and past commands, and a **Files/Plots/Packages/Help** pane. If you already know and like RStudio, there is no need to abandon it; it renders Quarto documents, integrates with Git, and is available on Talapas through Open OnDemand (@sec-computing-at-uo). It does not, however, support Python and other languages nearly as well as Positron or VS Code. RStudio is introduced in detail alongside R in @sec-rstudio.
+
+## VS Code vs. Positron vs. RStudio: Which Should I Use? {#sec-which-ide}
+
+Because Positron is built on Code OSS, VS Code and Positron share their editor, Command Palette, terminal, keyboard shortcuts, settings format, and Quarto support; both are free, cross-platform, support extensions, and can connect to remote machines over SSH. The difference is focus. Positron is built *for data science*: R and Python are first-class, and the Console, Variables, Plots, and Data Explorer panes are always at hand. VS Code is *general-purpose*: any language works through extensions, its extension library and community are the largest, and it is the tool of choice for shell scripts, configuration files, and polyglot projects. RStudio is R-centric and mature, with the best-integrated R experience but limited support for anything else. @tbl-ide-comparison summarizes the trade-offs, and @tbl-which-ide gives a rule of thumb.
+
+| | VS Code | Positron | RStudio |
+|:--|:--------|:---------|:--------|
+| Made by | Microsoft | Posit | Posit |
+| Built on | Code OSS | Code OSS | Its own framework |
+| Languages | Anything, via extensions | R and Python built in; others via extensions | R (Python via `reticulate`) |
+| Data-science panes (Console, Variables, Plots, Data Explorer) | No (extensions approximate them) | Yes | Yes (Environment, Plots, Viewer) |
+| Extension source | Visual Studio Marketplace | Open VSX | RStudio add-ins |
+| Quarto rendering | Yes (Quarto extension) | Yes (Quarto extension) | Yes (built in) |
+| Remote work over SSH | Remote - SSH extension | Remote - SSH | RStudio Server / Open OnDemand |
+| Cost | Free | Free | Free (open-source edition) |
+
+: Comparison of the three IDEs used in this course {#tbl-ide-comparison}
+
+| If you mostly... | Try |
+|:-----------------|:----|
+| Analyze data interactively in R or Python | **Positron** |
+| Write shell scripts, edit configuration files, work in many languages | **VS Code** |
+| Work on remote servers like Talapas | Either VS Code or Positron |
+| Already love RStudio for pure R work | RStudio is fine too |
+
+: Choosing an IDE {#tbl-which-ide}
+
+You do not have to choose forever. VS Code and Positron share so much muscle memory that learning one means you mostly know the other, and this course uses both.
+
+## Windows: Which Side Am I On? {#sec-which-side}
+
+With WSL installed, a Windows laptop effectively runs **two operating systems**: Windows itself and Ubuntu. Both are useful, but it matters which one you are typing into, because they have different home directories, different views of the file system, and different commands. @tbl-which-side is the map.
+
+| | **Windows side** | **Ubuntu (WSL) side** |
+|:--|:-----------------|:----------------------|
+| Terminal | PowerShell or Command Prompt | The **Ubuntu** app, or a VS Code terminal showing "WSL: Ubuntu" |
+| Prompt looks like | `PS C:\Users\you>` | `you@laptop:~$` |
+| Your home folder | `C:\Users\you` | `/home/you` (also `~`) |
+| The *other* side's files | `\\wsl$\Ubuntu\home\you` | `/mnt/c/Users/you` |
+| Unix commands (`ls`, `grep`, ...) | Mostly **no** | **Yes** |
+| Where R, Python, VS Code, Positron are installed | **Here** | (not needed) |
+
+: Windows and Ubuntu on the same laptop {#tbl-which-side}
+
+The rule for this course is simple: type **shell commands in Ubuntu**, and install **R, Python, VS Code, and Positron on the Windows side**. In VS Code, a green badge in the bottom-left corner reading **WSL: Ubuntu** tells you that the window is connected to Ubuntu; without it, the integrated terminal is PowerShell and Unix commands will mostly fail. Your Linux home directory (`/home/you`) lives on a virtual disk and is the fastest place to work; your Windows files are reachable from Ubuntu under `/mnt/c/` (for example `/mnt/c/Users/you/Documents`), and Ubuntu's files appear in Windows File Explorer under **Linux** in the sidebar, or at the path `\\wsl$\Ubuntu\home\you`. Installing **Windows Terminal** from the Microsoft Store gives you a nicer terminal with tabs that can open either side.
+
+::: {.callout-tip title="Keep projects in the Linux home directory"}
+WSL and Windows share files, so you never need two copies of anything, but *where* a project lives affects speed. Working inside the Linux home directory (`~`, that is `/home/you`) is noticeably faster than working under `/mnt/c`, and case-sensitivity rules differ between the two file systems. Keep course projects in your Linux home and reach over to `/mnt/c/Users/you/Downloads` only when you need a file that arrived on the Windows side. If you later run R or Python *inside* Ubuntu, keep the project under `~/` as well; running a WSL program on files under `/mnt/c` is the most common cause of mysteriously slow file reading.
+:::
+
+## Jupyter Notebooks vs. Quarto Documents {#sec-jupyter-vs-quarto}
+
+Two file formats let you mix code, its output, and explanatory text in one document, and you will encounter both. A **Jupyter notebook** (`.ipynb`) is made of cells, each containing code or Markdown, and the outputs are saved *inside* the file alongside the code. Notebooks are enormously popular in Python, machine learning, and image analysis; they run in JupyterLab, VS Code, and Positron, and on Talapas through Open OnDemand (@sec-computing-at-uo). Their drawback is that the file is stored as JSON with embedded output, which makes it hard to read as text and awkward to track in Git.
+
+A **Quarto document** (`.qmd`) is plain text: Markdown prose with a YAML header and code chunks in R, Python, Julia, or Bash. Output is not stored in the source; it is regenerated every time you render, which is exactly what reproducibility demands, and the plain-text source is easy to read, edit, and diff in Git. Quarto renders to HTML, PDF, Word, slides, and websites (@sec-quarto-documents). You do not have to choose between the two: Quarto can render Jupyter notebooks directly with `quarto render notebook.ipynb`, and can use Jupyter as the engine for Python chunks in `.qmd` files. This course uses Quarto; many of your labs may use Jupyter, and the skills transfer.
+
+## A Preview of Python Environments {#sec-python-environments-preview}
+
+Different projects need different versions of packages, and installing everything into one Python installation eventually breaks something. The solution is an **environment**: an isolated set of packages for one project. Python's built-in `venv` module creates one in your project folder:
+
+```bash
+python3 -m venv .venv            # create an environment in this project
+source .venv/bin/activate        # turn it on (Windows PowerShell: .venv\Scripts\activate)
+pip install numpy pandas         # install packages into it
+deactivate                       # turn it off
+```
+
+While the environment is active, `python` and `pip` refer to the copies inside `.venv`, and packages you install go there rather than into the system Python. On Talapas you will instead use **conda** environments, which can manage non-Python software as well (@sec-hpc-talapas); `uv` is a fast, modern alternative to `venv` and `pip`; and R has the same idea in the **renv** package. There is nothing to set up now; the point is to know the word "environment" so that it is not a surprise later.
+
+## AI Assistants Inside the Editor {#sec-editor-ai}
+
+Both IDEs can host an AI coding assistant. **GitHub Copilot** in VS Code suggests code as you type and answers questions in a chat panel; it is free for verified students through the GitHub Student Developer Pack. **Positron Assistant** is an AI chat built into Positron that can see your console, variables, and plots. Both are genuinely useful for explaining error messages, writing boilerplate, and learning unfamiliar syntax.
+
+They are also confidently wrong surprisingly often. Treat every suggestion as a draft from a well-read but careless colleague: read it, run it, and make sure you understand it before it goes into your analysis. Never paste sensitive data (see the data-classification rules in @sec-computing-at-uo) into an assistant, and follow the course's AI policy: you may use these tools to learn and debug, but the work you submit must be your own. We return to AI-assisted coding, and how to use it well, in @sec-ai-assisted-coding; there is no need to set anything up now.
+
+## Verification Checkpoint {#sec-toolkit-checkpoint}
+
+Once everything is installed, open a terminal inside VS Code or Positron (``Ctrl-` ``) and run the following commands:
+
+```bash
+echo $SHELL
+R --version
+python3 --version     # Windows PowerShell (not WSL): try  py --version
+quarto --version
+quarto check          # checks for R, Python, and LaTeX
+```
+
+Each should print a version number (or, for `quarto check`, a list of passing checks), not "command not found." Then open Positron and confirm that you can start both an R console and a Python console from the interpreter picker. If a command is not found, the most likely explanation is that the terminal was opened before the program was installed: a terminal only sees programs that were on the `PATH` when it started, so close and reopen the terminal, or restart the IDE, before doing anything else. @tbl-install-troubleshooting lists other common problems.
+
+| Symptom | Likely cause | Try this |
+|:--------|:-------------|:---------|
+| `command not found` | Program not on your `PATH`, or the terminal was opened before the install | Close and reopen the terminal (or restart VS Code/Positron) |
+| Windows: `python` opens the Microsoft Store | The Windows "app execution alias" intercepts the command | Use `py` instead, or reinstall Python with **Add python.exe to PATH** checked |
+| "Permission denied" | Need administrator rights, or the file is not executable | Run the installer as administrator; on Unix, use `sudo` only when instructions say to |
+| Installer fails or reports "disk full" | Not enough free space | Check with `df -h ~` and free up at least 20 GB |
+| macOS: "cannot be opened because the developer cannot be verified" | Gatekeeper security | Right-click the app and choose **Open**, or allow it under System Settings → Privacy & Security |
+| Download is crawling | Many people on the same Wi-Fi | Pair up with a neighbor, or finish at home |
+
+: Troubleshooting common installation problems {#tbl-install-troubleshooting}
+
+If you are still stuck, copy the exact error message as text and ask for help; @sec-computing-at-uo describes where to ask at UO and how to ask so that you get a fast answer.
+
+## Troubleshooting Common Setup Problems {#sec-setup-troubleshooting}
+
+@tbl-install-troubleshooting covers the problems that appear while installing. The following come up a little later, usually the first time you install R packages or start a real project, and every one of them has bitten several students in past years.
+
+### macOS: "compilation failed" or `clang` errors when installing a package {#sec-trouble-macos-compile}
+
+The Xcode command-line tools are missing or out of date. In Terminal:
+
+```bash
+xcode-select --install
+```
+
+Relaunch RStudio or Positron after the install finishes. If the error instead mentions `gfortran not found` or `library not found for -lgfortran`, install gfortran from <https://mac.r-project.org/tools/> (see the compiler tools item in @sec-install-checklist) and try the package install again.
+
+### Windows: "WARNING: Rtools is required to build R packages" {#sec-trouble-rtools}
+
+R is trying to compile a package but cannot find Rtools, or you have an Rtools version that does not match your R version (Rtools44 for R 4.4, and so on). Install the matching version from <https://cran.r-project.org/bin/windows/Rtools/>, restart R, and confirm with `Sys.which("make")`, which should now print a path.
+
+### `BiocManager::install()` hangs or takes forever on one package {#sec-trouble-biocmanager}
+
+The most common cause is a slow Bioconductor mirror. Pick a closer one and try again:
+
+```r
+chooseBioCmirror()                              # interactive; pick a US mirror
+options(BioC_mirror = "https://bioconductor.org")
+BiocManager::install("DESeq2")
+```
+
+The first Bioconductor install compiles many dependencies and can genuinely take 20 to 60 minutes; do it the day before you need it, not the morning of.
+
+### RStudio or Positron "can't find" a package you just installed {#sec-trouble-package-not-found}
+
+Almost always a stale R session: the package was installed, but the running session was started before. Restart R (*Session → Restart R*, or `Ctrl/Cmd + Shift + F10`) and try `library()` again. If that does not help, the package may have been installed into the library of a *different* R version than the one the IDE is running:
+
+```r
+.libPaths()                          # which library folders is this session using?
+installed.packages()[, "Package"]    # what is actually installed there?
+R.version.string                     # which R is this?
+```
+
+If the versions do not match, point the IDE at the correct R install (RStudio: *Tools → Global Options → General → R version*; Positron: the interpreter picker at the top right) and reinstall the package there.
+
+### Windows/WSL: R or Python is painfully slow, or cannot see the project files {#sec-trouble-wsl-slow}
+
+The project is on the Windows side (`/mnt/c/Users/...`) but the program is running inside WSL, or the reverse. File access across that boundary is dramatically slower, and case-sensitivity differs. Choose one arrangement and stick with it: either run R, Python, and the IDE as Windows programs with the project under `C:\Users\you`, which is what this course recommends (@sec-which-side), or run everything inside Ubuntu with the project under `~/`.
+
+### Old results keep coming back after a fix {#sec-trouble-stale-results}
+
+R keeps every object you create for the whole session, so a later chunk can silently use an old object after you edit an earlier one. Restart R and run the script from the top; `rm(list = ls())` clears variables but not loaded packages, so a restart is more reliable. In RStudio, also go to *Tools → Global Options → General* and uncheck **"Restore .RData into workspace at startup"** and set **"Save workspace to .RData on exit"** to **Never**, so that each session starts clean.
+
+## Summary {#sec-toolkit-summary}
+
+This chapter assembled the software you will use for the rest of the course and, more importantly, introduced the place where you will do most of your work: the editor. Key takeaways:
+
+- An IDE combines an editor, terminal, console, and project tools in one window; always open the whole project folder, not a single file
+- The core installs are R (matching your chip), Python (with "Add to PATH" on Windows), Quarto with TinyTeX, VS Code, and Positron; Git comes later in @sec-git-github
+- VS Code is general-purpose with the largest ecosystem; Positron is built on the same core with R and Python and data-science panes built in; RStudio remains a fine choice for pure R
+- On Windows, type shell commands in Ubuntu but install languages and IDEs on the Windows side, and watch for the "WSL: Ubuntu" badge
+- Quarto documents are plain text and regenerate their output; Jupyter notebooks store output in the file; Quarto can render both
+- Python environments (`venv`, conda, `uv`) and R's `renv` isolate each project's packages
+- Editor-based AI assistants are useful for learning and debugging but must be read, tested, and never fed sensitive data
+- Compiling packages needs a toolchain: Xcode command-line tools plus gfortran on macOS, Rtools matching your R version on Windows, `build-essential gfortran` on Linux
+- `R --version`, `python3 --version`, `quarto --version`, and `quarto check` confirm a working installation; when a command is not found, reopen the terminal first
+- The most common later problems (compiler errors, slow Bioconductor mirrors, a stale R session, projects on the wrong side of WSL) are collected in @sec-setup-troubleshooting
+
+In @sec-computing-at-uo we turn from your laptop to the resources the University provides: your digital identity, cloud storage, data-security rules, site-licensed software, and the Talapas cluster.
+
+## Exercises {#sec-toolkit-exercises .unnumbered}
+
+::: {.callout-tip title="Practice Exercises"}
+1. **Checkpoint**: Run every command in @sec-toolkit-checkpoint and record the version of R, Python, and Quarto on your machine. Note which shell `echo $SHELL` reports and whether `quarto check` finds LaTeX.
+
+2. **Project layout**: Create a folder called `bootcamp` with subfolders `data/raw`, `data/processed`, `scripts`, `output/figures`, and `docs`. Open the folder in VS Code and in Positron. In each, open the integrated terminal and run `pwd` to confirm it started in your project directory.
+
+3. **Extensions**: Install the Quarto, Python, R, and Jupyter extensions in VS Code (and, on Windows, WSL). Then open Positron's Extensions panel and confirm that the Quarto extension is available from Open VSX. What happens if you search for the R extension there?
+
+4. **Shortcuts**: In a new file, type three lines of code, select them, and use the toggle-comment shortcut from @tbl-vscode-shortcuts to comment and uncomment them. Then use the project-wide search to find every occurrence of the word `library` in your `bootcamp` folder.
+
+5. **Windows only**: Open a PowerShell window and an Ubuntu window side by side. In each, print your home directory (`echo $HOME` in Ubuntu; `echo $HOME` or `$env:USERPROFILE` in PowerShell) and list its contents. Then, from Ubuntu, `ls /mnt/c/Users/<your name>` and confirm you can see your Windows files.
+:::

@@ -352,12 +352,15 @@ Bill Cresko
 <span id="cb6-7"><a></a><span class="co"># Find sequences without stop codons</span></span>
 <span id="cb6-8"><a></a><span class="fu">grep</span> <span class="at">-v</span> <span class="at">-E</span> <span class="st">"(TAA|TAG|TGA)"</span> orfs.txt</span>
 <span id="cb6-9"><a></a></span>
-<span id="cb6-10"><a></a><span class="co"># Quality control pipeline</span></span>
-<span id="cb6-11"><a></a><span class="fu">zcat</span> reads.fastq.gz <span class="kw">|</span> <span class="fu">grep</span> <span class="at">-A1</span> <span class="st">"^@"</span> <span class="kw">|</span> <span class="fu">grep</span> <span class="at">-v</span> <span class="st">"^--"</span> <span class="kw">|</span> </span>
-<span id="cb6-12"><a></a>  <span class="fu">grep</span> <span class="at">-E</span> <span class="st">"^[ACGTN]+$"</span> <span class="kw">|</span> <span class="fu">grep</span> <span class="at">-c</span> <span class="st">"N"</span></span>
-<span id="cb6-13"><a></a></span>
-<span id="cb6-14"><a></a><span class="co"># Search and replace with sed (uses regex)</span></span>
-<span id="cb6-15"><a></a><span class="fu">grep</span> <span class="st">"gene"</span> data.txt <span class="kw">|</span> <span class="fu">sed</span> <span class="st">'s/gene/GENE/g'</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb6-10"><a></a><span class="co"># Quality control pipeline: count reads containing an N</span></span>
+<span id="cb6-11"><a></a><span class="co"># FASTQ records are 4 lines; the sequence is always line 2 of each,</span></span>
+<span id="cb6-12"><a></a><span class="co"># so awk 'NR % 4 == 2' pulls out sequence lines. (grep "^@" is NOT</span></span>
+<span id="cb6-13"><a></a><span class="co"># safe here - quality lines can start with @ too, since @ is a valid</span></span>
+<span id="cb6-14"><a></a><span class="co"># quality character.)</span></span>
+<span id="cb6-15"><a></a><span class="fu">zcat</span> reads.fastq.gz <span class="kw">|</span> <span class="fu">awk</span> <span class="st">'NR % 4 == 2'</span> <span class="kw">|</span> <span class="fu">grep</span> <span class="at">-c</span> <span class="st">"N"</span></span>
+<span id="cb6-16"><a></a></span>
+<span id="cb6-17"><a></a><span class="co"># Search and replace with sed (uses regex)</span></span>
+<span id="cb6-18"><a></a><span class="fu">grep</span> <span class="st">"gene"</span> data.txt <span class="kw">|</span> <span class="fu">sed</span> <span class="st">'s/gene/GENE/g'</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </section>
 <section id="analyzing-sequence-content" class="slide level2">
 <h2>Analyzing Sequence Content</h2>
@@ -396,12 +399,13 @@ Bill Cresko
 <span id="cb8-11"><a></a><span class="fu">gzip</span> <span class="at">-k</span> file.txt       <span class="co"># Keep original file</span></span>
 <span id="cb8-12"><a></a></span>
 <span id="cb8-13"><a></a><span class="co"># Work directly with compressed files</span></span>
-<span id="cb8-14"><a></a></span>
-<span id="cb8-15"><a></a><span class="fu">zcat</span> reads.fastq.gz <span class="kw">|</span> <span class="fu">grep</span> <span class="st">"^@"</span> <span class="kw">|</span> <span class="fu">wc</span> <span class="at">-l</span></span>
-<span id="cb8-16"><a></a></span>
-<span id="cb8-17"><a></a><span class="co"># Concatenate compressed files</span></span>
-<span id="cb8-18"><a></a></span>
-<span id="cb8-19"><a></a><span class="fu">zcat</span> file1.gz file2.gz <span class="kw">|</span> <span class="fu">gzip</span> <span class="op">&gt;</span> combined.gz</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb8-14"><a></a><span class="co"># (count reads: every 4th line is a header; don't grep "^@" - quality lines can start with @)</span></span>
+<span id="cb8-15"><a></a></span>
+<span id="cb8-16"><a></a><span class="fu">zcat</span> reads.fastq.gz <span class="kw">|</span> <span class="fu">awk</span> <span class="st">'NR % 4 == 1'</span> <span class="kw">|</span> <span class="fu">wc</span> <span class="at">-l</span></span>
+<span id="cb8-17"><a></a></span>
+<span id="cb8-18"><a></a><span class="co"># Concatenate compressed files</span></span>
+<span id="cb8-19"><a></a></span>
+<span id="cb8-20"><a></a><span class="fu">zcat</span> file1.gz file2.gz <span class="kw">|</span> <span class="fu">gzip</span> <span class="op">&gt;</span> combined.gz</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </section>
 <section id="examining-large-files-efficiently" class="slide level2">
 <h2>Examining Large Files Efficiently</h2>
@@ -473,7 +477,7 @@ Bill Cresko
 <p><strong>Tip</strong></p>
 </div>
 <div class="callout-content">
-<p>Rule of thumb: <strong><code>grep</code></strong> finds lines, <strong><code>sed</code></strong> edits text, <strong><code>awk</code></strong> works with columns. More in <a href="../Resources_Folder/Appendix_B_GREP_Regex_Shell.html">Appendix B</a>.</p>
+<p>Rule of thumb: <strong><code>grep</code></strong> finds lines, <strong><code>sed</code></strong> edits text, <strong><code>awk</code></strong> works with columns. More in the course book’s <a href="../book/chapters/05-grep-regex.html">GREP chapter</a> and <a href="../book/chapters/appendix-regex.html">Regular Expression Reference</a>.</p>
 </div>
 </div>
 </div>

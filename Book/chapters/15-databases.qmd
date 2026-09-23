@@ -1,0 +1,505 @@
+# Working with Databases {#sec-databases}
+
+```{r}
+#| label: ch15-setup
+#| include: false
+#| message: false
+
+if (!require("pacman")) install.packages("pacman")
+pacman::p_load(tidyverse, DBI, dbplyr, duckdb)
+theme_set(theme_minimal())
+```
+
+::: {.callout-note title="Learning Objectives"}
+After completing this chapter, you will be able to:
+
+- Understand database fundamentals and when to use them
+- Connect to databases from R using DBI
+- Write basic SQL queries
+- Use dbplyr to work with databases using familiar dplyr syntax
+- Translate between dplyr operations and SQL
+- Work with in-process databases like duckdb for large datasets
+:::
+
+## Why Databases? {#sec-why-databases}
+
+A huge amount of scientific data lives in databases. While you can sometimes ask a collaborator to export a snapshot to a CSV file, this approach becomes painful quickly: every time you need updated data or a different subset, you must coordinate with another person. Being able to access databases directly gives you the data you need, when you need it.
+
+Databases offer several advantages over flat files:
+
+- **Scale**: Databases can handle datasets too large to fit in memory
+- **Speed**: Indexes enable fast queries on specific subsets
+- **Concurrent access**: Multiple users can safely read and write simultaneously
+- **Data integrity**: Constraints prevent invalid data from being entered
+- **Security**: Fine-grained access controls protect sensitive information
+
+In biosciences, you'll encounter databases for:
+
+- Genomic sequence repositories
+- Clinical trial data
+- Laboratory information management systems (LIMS)
+- Institutional data warehouses
+- Public resources like NCBI, Ensembl, and UniProt
+
+## Database Basics {#sec-db-basics}
+
+At the simplest level, you can think of a database as a collection of data frames, called **tables** in database terminology. Like a data frame, a database table is a collection of named columns where every value in a column is the same type.
+
+There are three key differences between data frames and database tables:
+
+1. **Storage**: Database tables are stored on disk and can be arbitrarily large. Data frames are stored in memory and limited by available RAM.
+
+2. **Indexes**: Database tables almost always have indexes that enable fast lookups without scanning every row—like the index of a book.
+
+3. **Orientation**: Traditional databases are **row-oriented** (optimized for adding records), while analytical databases are increasingly **column-oriented** (optimized for computing statistics).
+
+### Types of Database Systems {#sec-types-of-database-systems}
+
+Database management systems (DBMS) come in three main forms (@tbl-dbms-types):
+
+| Type | Description | Examples |
+|:-----|:------------|:---------|
+| **Client-server** | Central server, multiple client connections | PostgreSQL, MySQL, SQL Server |
+| **Cloud** | Managed cloud services, auto-scaling | Amazon Redshift, Google BigQuery, Snowflake |
+| **In-process** | Runs entirely within your application | SQLite, DuckDB |
+
+: Types of database management systems {#tbl-dbms-types}
+
+For learning and local analysis, in-process databases like **duckdb** are ideal—no server setup required, and they're designed for analytical workloads.
+
+## Connecting to Databases {#sec-db-connecting}
+
+To connect to a database from R, you need two packages:
+
+- **DBI** (DataBase Interface): Provides generic functions for connecting, querying, and managing databases
+- **A database driver**: A package specific to your DBMS (e.g., RPostgres, RMariaDB, duckdb)
+
+### Using duckdb for Learning {#sec-using-duckdb-for-learning}
+
+duckdb is a high-performance analytical database that's perfect for learning. It runs entirely within R and requires no external setup:
+
+```{r}
+#| label: duckdb-connect
+
+# Create an in-memory database (temporary, deleted when R closes)
+con <- DBI::dbConnect(duckdb::duckdb())
+```
+
+For persistent storage in a real project, specify a file path:
+
+```{r}
+#| label: duckdb-persistent
+#| eval: false
+
+# Persistent database stored in a file
+con <- DBI::dbConnect(duckdb::duckdb(), dbdir = "my_database.duckdb")
+```
+
+### Connecting to Other Databases {#sec-connecting-to-other-databases}
+
+Different databases require different connection parameters:
+
+```{r}
+#| label: other-connections
+#| eval: false
+
+# PostgreSQL
+con <- DBI::dbConnect(
+  RPostgres::Postgres(),
+  host = "database.example.com",
+  port = 5432,
+  dbname = "mydb",
+  user = "username",
+  password = "password"
+)
+
+# MySQL/MariaDB
+con <- DBI::dbConnect(
+  RMariaDB::MariaDB(),
+  host = "localhost",
+  dbname = "mydb",
+  username = "user"
+)
+```
+
+::: {.callout-tip}
+Never put passwords directly in your code! Use environment variables, the keyring package, or configuration files that aren't committed to version control.
+:::
+
+## Loading Data into a Database {#sec-db-loading}
+
+Let's create some example tables to work with. We'll use familiar datasets:
+
+```{r}
+#| label: load-data
+
+# Write data frames to database tables
+dbWriteTable(con, "mtcars", mtcars)
+dbWriteTable(con, "iris", iris)
+
+# Verify the tables exist
+dbListTables(con)
+```
+
+### Reading Tables {#sec-reading-tables}
+
+You can read an entire table into R:
+
+```{r}
+#| label: read-table
+
+# Read a table into R as a data frame
+con |>
+  dbReadTable("mtcars") |>
+  as_tibble()
+```
+
+However, for large tables this defeats the purpose of using a database. Instead, you'll want to query just the data you need.
+
+## SQL: The Language of Databases {#sec-sql}
+
+**SQL** (Structured Query Language) is the standard language for working with databases. While we'll primarily use dbplyr to write dplyr code that gets translated to SQL, understanding SQL basics is valuable. @tbl-sql-clauses maps each SQL clause to the dplyr verb you already know from @sec-tidy-data.
+
+### Basic SQL Queries {#sec-basic-sql-queries}
+
+The most common SQL operation is `SELECT`, which retrieves data:
+
+```{r}
+#| label: basic-sql
+
+# Run a SQL query directly
+sql <- "SELECT mpg, cyl, hp FROM mtcars WHERE mpg > 25"
+result <- dbGetQuery(con, sql)
+as_tibble(result)
+```
+
+### SQL Query Structure {#sec-sql-query-structure}
+
+A SQL query follows this general pattern:
+
+```sql
+SELECT columns
+FROM table
+WHERE conditions
+GROUP BY columns
+ORDER BY columns
+```
+
+The clauses must appear in this order, though not all are required.
+
+| Clause | Purpose | dplyr equivalent |
+|:-------|:--------|:-----------------|
+| `SELECT` | Choose columns, compute values | `select()`, `mutate()` |
+| `FROM` | Specify the table | The data frame name |
+| `WHERE` | Filter rows | `filter()` |
+| `GROUP BY` | Define groups for aggregation | `group_by()` |
+| `ORDER BY` | Sort results | `arrange()` |
+
+: SQL clauses and their dplyr equivalents {#tbl-sql-clauses}
+
+## Using dbplyr: dplyr for Databases {#sec-dbplyr}
+
+**dbplyr** is a dplyr backend that translates your dplyr code to SQL and runs it on the database. This means you can use familiar tidyverse syntax (@sec-dplyr) without learning SQL.
+
+### Creating a Database Reference {#sec-creating-a-database-reference}
+
+Use `tbl()` to create a reference to a database table:
+
+```{r}
+#| label: ch15-tbl-reference
+
+mtcars_db <- tbl(con, "mtcars")
+mtcars_db
+```
+
+Notice that this doesn't load the data—it just creates a reference. The data stays in the database.
+
+### Lazy Evaluation {#sec-lazy-evaluation}
+
+dbplyr operations are **lazy**: they build up a query without executing it until you explicitly request the data:
+
+```{r}
+#| label: lazy-evaluation
+
+# Build a query (doesn't execute yet)
+efficient_cars <- mtcars_db |>
+  filter(mpg > 25) |>
+  select(mpg, cyl, hp, wt) |>
+  arrange(desc(mpg))
+
+# See the generated SQL
+efficient_cars |> show_query()
+```
+
+### Collecting Results {#sec-collecting-results}
+
+Use `collect()` to execute the query and bring results into R:
+```{r}
+#| label: collect-results
+
+# Execute query and return results to R
+efficient_cars |> collect()
+```
+
+::: {.callout-important}
+Only `collect()` what you need! Fetching an entire large table defeats the purpose of using a database. Filter and aggregate in the database first, then collect the summarized results.
+:::
+
+## Translating dplyr to SQL {#sec-dplyr-sql}
+
+dbplyr translates dplyr verbs to SQL clauses. Let's see how common operations map:
+
+### Filtering and Selecting {#sec-filtering-and-selecting}
+
+```{r}
+#| label: filter-select-sql
+
+mtcars_db |>
+  filter(cyl == 6, mpg > 18) |>
+  select(mpg, cyl, hp, wt) |>
+  show_query()
+```
+
+### Mutating (Creating New Columns) {#sec-mutating}
+
+```{r}
+#| label: mutate-sql
+
+mtcars_db |>
+  mutate(
+    efficiency = mpg / wt,
+    hp_per_cyl = hp / cyl
+  ) |>
+  select(mpg, wt, efficiency, hp_per_cyl) |>
+  show_query()
+```
+
+### Grouping and Summarizing {#sec-grouping-and-summarizing}
+
+```{r}
+#| label: group-summarize-sql
+
+mtcars_db |>
+  group_by(cyl) |>
+  summarize(
+    n = n(),
+    avg_mpg = mean(mpg, na.rm = TRUE),
+    max_hp = max(hp, na.rm = TRUE)
+  ) |>
+  show_query()
+```
+
+### Arranging (Sorting) {#sec-arranging}
+
+```{r}
+#| label: arrange-sql
+
+mtcars_db |>
+  arrange(cyl, desc(mpg)) |>
+  show_query()
+```
+
+## SQL Syntax Details {#sec-sql-syntax}
+
+Understanding SQL helps you write better dbplyr code and debug issues.
+
+### Key Differences from R {#sec-key-differences-from-r}
+
+@tbl-r-sql-syntax lists the syntax differences that trip people up most often.
+
+| Aspect | R/dplyr | SQL |
+|:-------|:--------|:----|
+| Equality | `==` | `=` |
+| Logical AND | `&` | `AND` |
+| Logical OR | `|` | `OR` |
+| Missing values | `NA` | `NULL` |
+| Strings | `"text"` or `'text'` | `'text'` only |
+| Case sensitivity | Case sensitive | Keywords case insensitive |
+
+: Syntax differences between R and SQL {#tbl-r-sql-syntax}
+
+### NULL Handling {#sec-null-handling}
+
+SQL's `NULL` behaves like R's `NA`—it's "contagious" in calculations:
+
+```{r}
+#| label: null-handling
+
+mtcars_db |>
+  filter(!is.na(mpg)) |>
+  show_query()
+```
+
+### Subqueries {#sec-subqueries}
+
+Sometimes dbplyr generates subqueries—queries nested inside other queries:
+
+```{r}
+#| label: subqueries
+
+mtcars_db |>
+  mutate(mpg_group = if_else(mpg > 20, "high", "low")) |>
+  filter(mpg_group == "high") |>
+  show_query()
+```
+
+The subquery is needed because SQL evaluates `WHERE` before `SELECT`, so you can't filter on a column you're creating in the same query.
+
+## Working with Multiple Tables {#sec-db-multiple-tables}
+
+Databases often store data across multiple related tables (normalized data). You can use joins in dbplyr just like with regular data frames (@sec-joins):
+
+```{r}
+#| label: database-joins
+#| eval: false
+
+# Join tables in the database
+orders_db |>
+  left_join(customers_db, by = "customer_id") |>
+  show_query()
+```
+
+The join is executed in the database, which is much more efficient than loading both tables into R and joining there.
+
+## Window Functions {#sec-window-functions}
+
+SQL window functions perform calculations across sets of rows related to the current row. dbplyr translates functions like `lag()`, `lead()`, and `rank()` to their SQL equivalents:
+
+```{r}
+#| label: window-functions
+
+mtcars_db |>
+  group_by(cyl) |>
+  mutate(
+    rank_mpg = min_rank(desc(mpg)),
+    mpg_vs_avg = mpg - mean(mpg, na.rm = TRUE)
+  ) |>
+  select(cyl, mpg, rank_mpg, mpg_vs_avg) |>
+  show_query()
+```
+
+## Best Practices {#sec-db-best-practices}
+
+### 1. Filter Early {#sec-db-filter-early}
+
+Push filtering to the database rather than collecting all data and filtering in R:
+
+```{r}
+#| label: filter-early
+#| eval: false
+
+# Good: Filter in database
+mtcars_db |>
+  filter(mpg > 25) |>
+  collect()
+
+# Bad: Collect everything then filter
+mtcars_db |>
+  collect() |>
+  filter(mpg > 25)
+```
+
+### 2. Select Only Needed Columns {#sec-db-select-columns}
+
+```{r}
+#| label: select-columns
+#| eval: false
+
+# Good: Select specific columns
+mtcars_db |>
+  select(mpg, cyl, hp) |>
+  collect()
+
+# Bad: Collect all columns
+mtcars_db |>
+  collect() |>
+  select(mpg, cyl, hp)
+```
+
+### 3. Aggregate in the Database {#sec-db-aggregate}
+
+```{r}
+#| label: aggregate-database
+#| eval: false
+
+# Good: Summarize in database
+mtcars_db |>
+  group_by(cyl) |>
+  summarize(avg_mpg = mean(mpg)) |>
+  collect()
+
+# Bad: Collect then summarize
+mtcars_db |>
+  collect() |>
+  group_by(cyl) |>
+  summarize(avg_mpg = mean(mpg))
+```
+
+### 4. Close Connections {#sec-db-close-connections}
+
+Always close your database connection when you're done:
+
+```{r}
+#| label: close-connection
+
+dbDisconnect(con)
+```
+
+## When to Use Databases {#sec-when-databases}
+
+Databases are valuable when:
+
+- **Data is too large for memory**: Even modest databases handle billions of rows
+- **Multiple users need access**: Databases manage concurrent access safely
+- **Data changes frequently**: Updates are immediate, no file copying needed
+- **You need specific subsets**: Queries return just what you need
+- **Data integrity matters**: Constraints prevent invalid data
+
+For smaller datasets that fit comfortably in memory, regular data frames are simpler and faster for exploratory analysis.
+
+The same idea, an index that lets you pull out just the rows you need without reading the whole file, is why genomics has its own "databases in a file": a sorted, indexed BAM or VCF queried with `samtools` and `bcftools` [@li2009samtools; @danecek2021twelve] returns the reads or variants in one region in milliseconds, exactly as a SQL `WHERE` clause on an indexed column does. See @sec-appendix-data-formats for those formats.
+
+## Summary {#sec-db-summary}
+
+In this chapter, you learned how to:
+
+- Connect to databases from R using DBI
+- Use duckdb as a lightweight analytical database
+- Write basic SQL queries with SELECT, WHERE, and GROUP BY
+- Use dbplyr to work with databases using familiar dplyr syntax
+- Translate dplyr operations to SQL and understand the generated queries
+- Apply best practices for efficient database access
+
+The combination of dbplyr and DBI lets you leverage your existing tidyverse skills while accessing data at any scale. When you need to work with data too large for memory or collaborate with others through a shared database, these tools let you stay productive without learning an entirely new programming paradigm.
+
+::: {.callout-tip}
+For reference on dplyr and tidyverse functions used with databases, see @sec-appendix-r.
+:::
+
+## Exercises {#sec-db-exercises .unnumbered}
+
+1. **Basic Connection**: Connect to a duckdb database and load the `nycflights13::flights` data into a table called "flights".
+
+2. **SQL Practice**: Write SQL queries to:
+   - Find all flights from JFK airport
+   - Calculate the average departure delay by carrier
+   - Find the 10 destinations with the most flights
+
+3. **dbplyr Translation**: Use dbplyr to write the equivalent dplyr code for each SQL query above. Compare the generated SQL with your hand-written queries.
+
+4. **Efficient Querying**: Given a database with a large "sales" table:
+   - What's wrong with: `tbl(con, "sales") |> collect() |> filter(year == 2023)`?
+   - How would you rewrite this query efficiently?
+
+5. **Joins in Databases**: If you have two tables, "experiments" and "samples", linked by sample_id:
+   - Write dbplyr code to join them
+   - Use `show_query()` to see the generated SQL
+   - Explain when the join happens (in R or in the database)
+
+## Additional Resources {#sec-db-additional-resources .unnumbered}
+
+- [DBI package documentation](https://dbi.r-dbi.org/)
+- [dbplyr package documentation](https://dbplyr.tidyverse.org/)
+- [duckdb for R](https://duckdb.org/docs/api/r)
+- [SQL for Data Scientists](https://sqlfordatascientists.com) by Renée M. P. Teate
+- [Practical SQL](https://www.practicalsql.com) by Anthony DeBarros

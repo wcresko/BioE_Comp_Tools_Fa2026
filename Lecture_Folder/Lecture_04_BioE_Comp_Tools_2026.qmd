@@ -264,38 +264,39 @@ NCATGCAGCGTACGGTAATTGGCAG
 :::::
 
 ::: callout-tip
-Both are usually gzip-compressed (`.fa.gz`, `.fastq.gz`) - use `zcat` / `zless` / `zgrep` to read them without unpacking. More formats (CSV/TSV, GFF, BED, VCF, HDF5) in [Appendix G](../Resources_Folder/Appendix_G_Data_Formats_Repositories.qmd).
+Both are usually gzip-compressed (`.fa.gz`, `.fastq.gz`) - use `zcat` / `zless` / `zgrep` to read them without unpacking. More formats (CSV/TSV, GFF, BED, VCF, HDF5) in the [Data Formats appendix](../book/chapters/appendix-data-formats.html) of the course book.
 :::
 
 # Working with Large Genomic Data Files
 
 ## Human Chromosome Data
 
--   Genomic data files can be massive (human genome \~6 billion base pairs)
+-   Genomic data files can be massive (the full human genome is \~3.1 GB compressed)
 -   FASTA format is standard for sequence data
 -   Perfect use case for Unix pipes and redirection
--   Let's work with human genome assembly version 38 (\~3.1 GB)
+-   We will practice on **human chromosome 21** - the smallest autosome (\~13 MB compressed, \~46 Mb of sequence), so every command finishes in seconds
+-   The same commands work unchanged on the whole genome - only the wait time changes
+-   The course book works through the same file in [Chapter 5](../book/chapters/05-grep-regex.html#sec-genomic-processing)
 
 ## Downloading Genomic Data
 
-Download version 38 of the human genome from NCBI:
+Download chromosome 21 of the human genome (hg38 / GRCh38) from UCSC:
 
 ``` bash
+# Using `wget` to download chr21 (~13 MB)
 
-# Using `wget` to download human genome
+wget https://hgdownload.soe.ucsc.edu/goldenPath/hg38/chromosomes/chr21.fa.gz
 
-wget https://ftp.ncbi.nlm.nih.gov/genomes/all/GCF/000/001/405/\
-GCF_000001405.40_GRCh38.p14/GCF_000001405.40_GRCh38.p14_genomic.fna.gz
+# Or using `curl` and save with a specific name (-L follows redirects)
 
-# Or using `curl` and save with specific name
-
-curl -o human_genome.fa.gz https://ftp.ncbi.nlm.nih.gov/genomes/all/GCF/000/001/405/\
-GCF_000001405.40_GRCh38.p14/GCF_000001405.40_GRCh38.p14_genomic.fna.gz
+curl -L -o chr21.fa.gz \
+  https://hgdownload.soe.ucsc.edu/goldenPath/hg38/chromosomes/chr21.fa.gz
 ```
 
--   `wget` and `curl` are both tools for downloading files
--   The backslash allows long URLs to span multiple lines
+-   `wget` and `curl` are both tools for downloading files (macOS ships `curl`; install `wget` with Homebrew if you want it)
+-   The backslash lets a long command span multiple lines
 -   `.gz` extension means the file is compressed
+-   The whole genome lives in the same directory as `hg38.fa.gz` (\~1 GB) - same commands, much longer runs
 
 ## Examining Large Files Efficiently
 
@@ -304,44 +305,45 @@ Don't use `cat` on huge files! Use these approaches:
 ``` bash
 # Decompress and look at first 10 lines
 
-gunzip -c human_genome.fa.gz | head -10
+gunzip -c chr21.fa.gz | head -10
 
-# Check file size before and after decompression
+# Check file size before and after decompression (-k keeps the .gz)
 
-ls -lh human_genome.fa.gz
-gunzip human_genome.fa.gz
-ls -lh human_genome.fa
+ls -lh chr21.fa.gz
+gunzip -k chr21.fa.gz
+ls -lh chr21.fa
 
 # Count sequences in FASTA file (lines starting with >)
+# grep can't read gzip data directly - use zgrep (or zcat | grep)
 
-grep "^>" human_genome.fa.gz | wc -l
+zgrep "^>" chr21.fa.gz | wc -l
 
 # View sequence headers only
 
-grep "^>" human_genome.fa.gz | less
+zgrep "^>" chr21.fa.gz | less
 ```
+
+::: callout-note
+The UCSC file is *soft-masked*: repeats are written in lowercase (`acgt`). Patterns like `GAATTC` will miss sites inside masked regions - add `-i` to `grep`, or uppercase everything first with `tr 'acgt' 'ACGT'`.
+:::
 
 ## Creating a Subset for Analysis
 
 Make a smaller working file for testing:
 
 ``` bash
-# Extract first 1MB of sequence for testing
+# Extract the first ~1 Mb of sequence for testing (50 bases per line)
 
-head -n 20000 human_genome.fa.gz > human_genome_subset.fa
+zcat chr21.fa.gz | head -n 20000 > chr21_subset.fa
 
-# Or extract specific scaffold/contig by name
+# Extract a specific record by name from a multi-sequence FASTA
+# (e.g. from hg38.fa - chr21.fa has only one record)
 
-awk '/^>chr21:1000000-2000000/,/^>/' human_genome.fa | \
-  head -n -1 > region_of_interest.fa
+awk '/^>chr21$/,/^>chr22$/' hg38.fa | head -n -1 > chr21_from_genome.fa
 
-# Create a random sample of sequences
+# Pull out a window of lines from the middle of the chromosome
 
-grep "^>" human_genome.fa | \
-  shuf -n 10 | \
-  while read header; do
-    grep -A 1000 "$header" human_genome.fa
-  done > random_sample.fa
+sed -n '400000,420000p' chr21.fa > region_of_interest.fa
 ```
 
 ## Processing FASTA Files with Pipes
@@ -351,24 +353,22 @@ Extract specific regions or sequences:
 ``` bash
 # Extract just the sequence (no headers) and count bases
 
-grep -v "^>" human_genome.fa | tr -d '\n' | wc -c
+grep -v "^>" chr21.fa | tr -d '\n' | wc -c
 
-# Count each type of nucleotide
+# Count each type of nucleotide (uppercase first so a == A)
 
-grep -v "^>" human_genome.fa | \
+grep -v "^>" chr21.fa | \
+  tr 'acgtn' 'ACGTN' | \
   tr -d '\n' | \
   fold -w1 | \
   sort | \
   uniq -c
-
-# Extract a specific gene region (lines 1000-2000)
-
-sed -n '1000,2000p' human_genome.fa > gene_region.fa
 ```
 
 -   `grep -v` inverts the match (excludes lines)
 -   `tr -d '\n'` removes newlines
 -   `fold -w1` puts each character on its own line
+-   Expect a lot of `N` - the first \~5 Mb of chr21 is unassembled
 
 ## Finding Patterns in Genomic Data
 
@@ -377,20 +377,23 @@ Search for specific sequences and motifs:
 ``` bash
 # Find all instances of a restriction enzyme site (EcoRI: GAATTC)
 
-grep -v "^>" human_genome.fa | \
+grep -v "^>" chr21.fa | \
+  tr 'acgt' 'ACGT' | \
   tr -d '\n' | \
   grep -o "GAATTC" | \
   wc -l
 
 # Extract 100 bases around each EcoRI site
 
-grep -v "^>" human_genome.fa | \
+grep -v "^>" chr21.fa | \
+  tr 'acgt' 'ACGT' | \
   tr -d '\n' | \
   grep -oE ".{100}GAATTC.{100}" > ecori_contexts.txt
 
-# Find all start codons (ATG) and their positions
+# Find all start codons (ATG) and their byte offsets
 
-grep -v "^>" human_genome.fa | \
+grep -v "^>" chr21.fa | \
+  tr 'acgt' 'ACGT' | \
   tr -d '\n' | \
   grep -b -o "ATG" | \
   head -20
@@ -402,19 +405,20 @@ Stream processing without saving intermediate files:
 
 ``` bash
 # Download, decompress, and process in one pipeline
-curl -s https://url/to/genome.fa.gz | \
+curl -sL https://hgdownload.soe.ucsc.edu/goldenPath/hg38/chromosomes/chr21.fa.gz | \
   gunzip -c | \
   grep -v "^>" | \
   tr -d '\n' | \
   cut -c1-1000000 > first_megabase.txt
 
 # Download and immediately analyze GC content
-wget -O - https://url/to/genome.fa.gz | \
+wget -qO - https://hgdownload.soe.ucsc.edu/goldenPath/hg38/chromosomes/chr21.fa.gz | \
   gunzip -c | \
   grep -v "^>" | \
-  tr -d '\n' | \
+  tr 'acgtn' 'ACGTN' | \
+  tr -d 'N\n' | \
   tr 'ATGC' '0011' | \
-  awk '{s+=gsub(/1/,"")} END {print "GC%:", s/length*100}'
+  awk '{n = length($0); gc = gsub(/1/, ""); print "GC%:", 100 * gc / n}'
 ```
 
 ::: notes

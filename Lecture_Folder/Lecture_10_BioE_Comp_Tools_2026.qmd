@@ -27,6 +27,7 @@ set.seed(2026)
 -   Basics of working with Talapas
 -   The SLURM job scheduler
 -   Software modules and monitoring jobs
+-   Running R (`Rscript`) and Python (`python3`) scripts as batch jobs
 -   <https://wcresko.github.io/computational_tools_book/>
 
 
@@ -72,21 +73,33 @@ set.seed(2026)
 
 ## Node Types on Talapas
 
-| Node Type      | Cores   | Memory     | Purpose                |
-|----------------|---------|------------|------------------------|
-| Standard CPU   | 28-128  | 128-512 GB | General computation    |
-| Large Memory   | 56      | 1-4 TB     | Memory-intensive work  |
-| GPU (K80/A100) | 28-48   | 256-512 GB | Machine learning, CUDA |
-| Interactive    | Various | Various    | Testing, development   |
+| Node type (general use)  | How many | Cores per node | Memory per node | Purpose                         |
+|--------------------------|----------|----------------|-----------------|---------------------------------|
+| Standard CPU (AMD Milan) | 43       | 128            | 512 GB          | General computation             |
+| GPU                      | 24       | 48             | 256 - 512 GB    | Machine learning, CUDA (52 NVIDIA A100 GPUs in total) |
+| Large memory             | a few    | varies         | up to 4 TB      | Memory-hungry jobs (e.g. genome assembly) |
+| Interactive              | 19       | varies         | varies          | Testing, development, Open OnDemand sessions |
 
-## Partitions (Queues):
+::: callout-note
+Researchers can also buy **condo** nodes that their group gets priority on - about 166 more CPU nodes plus V100, A100, and H100 GPUs. Numbers from [RACS](https://racs.uoregon.edu/services); check the [Knowledge Base](https://uoracs.github.io/talapas2-knowledge-base/) for the current list.
+:::
 
--   `compute` - General purpose CPU partition (default)
--   `short` - Jobs up to 24 hours
--   `long` - Jobs up to 14 days
--   `gpu` / `longgpu` - GPU-enabled nodes
--   `fat` / `longfat` - High-memory nodes
--   `preempt` - Access to all nodes (may be interrupted)
+## Partitions (Queues)
+
+| Partition        | Time limit | Use it for                                   |
+|------------------|------------|----------------------------------------------|
+| `compute`        | 1 day      | General CPU jobs (the default choice)        |
+| `computelong`    | 14 days    | Long CPU jobs                                |
+| `gpu`            | 1 day      | Jobs that need a GPU                         |
+| `gpulong`        | 14 days    | Long GPU jobs                                |
+| `interactive`    | 12 hours   | Shorter interactive CPU sessions             |
+| `interactivegpu` | 8 hours    | Shorter interactive GPU sessions             |
+| `memory`         | 1 day      | Jobs needing lots of memory (up to 4 TB)     |
+| `memorylong`     | 14 days    | Long, memory-hungry jobs                     |
+
+::: callout-tip
+Run `sinfo` on Talapas to see every partition, including your lab's condo partitions.
+:::
 
 ## Getting Access to Talapas
 
@@ -123,14 +136,14 @@ set.seed(2026)
 
 ## Logging Into Talapas - command line
 
-### From Mac/Linux Terminal:
+### From a terminal (macOS, Ubuntu/WSL, VS Code, Positron):
 
 ``` bash
-# Basic SSH connection
+# Through the load balancer - works from anywhere (expect a Duo prompt)
 
 ssh yourduckid@login.talapas.uoregon.edu
 
-# Or specific login node
+# With the UO VPN connected you can also pick a specific login node
 
 ssh yourduckid@login1.talapas.uoregon.edu
 ssh yourduckid@login2.talapas.uoregon.edu
@@ -140,13 +153,12 @@ ssh yourduckid@login4.talapas.uoregon.edu
 
 ### From Windows:
 
--   Use PuTTY, MobaXterm, or Windows Terminal
--   Or use VS Code with Remote-SSH extension
+-   Use the Ubuntu (WSL) terminal
+-   Or VS Code / Positron with the Remote-SSH extension
 
-### Off Campus?
-
--   First connect to UO VPN
--   Then SSH as normal
+::: callout-note
+The Knowledge Base says the UO VPN is **recommended, not required**. Off campus without the VPN: SSH to the load balancer `login.talapas.uoregon.edu` and answer the Duo two-step prompts.
+:::
 
 ## Connecting VS Code to Talapas (Remote-SSH)
 
@@ -209,7 +221,7 @@ squeue -u $USER
 
 # Check all jobs on a partition
 
-squeue -p short
+squeue -p compute
 
 # Cancel a job
 
@@ -225,7 +237,7 @@ sacct -j JOBID --format=JobID,Elapsed,MaxRSS
 
 # View partition information
 
-sinfo -p short
+sinfo -p compute
 ```
 
 ## Interactive Jobs
@@ -235,7 +247,7 @@ sinfo -p short
 ``` bash
 # Start an interactive session
 
-srun --pty --partition=compute --account=myPIRG \
+srun --pty --partition=interactive --account=myPIRG \
      --time=2:00:00 --cpus-per-task=4 --mem=8G /bin/bash
 ```
 
@@ -252,6 +264,11 @@ srun --pty --partition=compute --account=myPIRG \
 **Note**: Your prompt will change from `login1` to something like `n049`
 
 ## Writing a SLURM Batch Script
+
+A batch script is a **shell script** with `#SBATCH` directives on top. The last lines are the same commands you would type on your laptop - `Rscript` or `python3`.
+
+::: panel-tabset
+### R
 
 ``` bash
 #!/bin/bash
@@ -275,12 +292,150 @@ module load R/4.3.3
 Rscript my_analysis.R
 ```
 
+### Python
+
+``` bash
+#!/bin/bash
+#SBATCH --job-name=my_analysis_py   # Job name
+#SBATCH --partition=compute         # Partition (queue)
+#SBATCH --account=myPIRG            # Your PIRG name
+#SBATCH --output=output_%j.log      # Standard output (%j = job ID)
+#SBATCH --error=error_%j.log        # Standard error
+#SBATCH --time=04:00:00             # Time limit (HH:MM:SS)
+#SBATCH --nodes=1                   # Number of nodes
+#SBATCH --ntasks-per-node=1         # Tasks per node
+#SBATCH --cpus-per-task=4           # CPUs per task
+#SBATCH --mem=16G                   # Memory per node
+
+# Load required modules
+
+module load python3/3.11.4          # or: module load miniconda3/20240410
+                                    #     conda activate my_env
+
+# Run your program
+
+python3 my_analysis.py
+```
+
+### R + Python in one job
+
+``` bash
+#!/bin/bash
+#SBATCH --job-name=fasta_pipeline
+#SBATCH --partition=compute
+#SBATCH --account=myPIRG
+#SBATCH --output=output_%j.log
+#SBATCH --error=error_%j.log
+#SBATCH --time=01:00:00
+#SBATCH --cpus-per-task=2
+#SBATCH --mem=8G
+
+set -e                              # stop the job if any step fails
+
+module load python3/3.11.4
+module load R/4.3.3
+
+# Step 1 (Python): summarise every FASTA file into one table
+python3 fasta_stats.py data/*.fasta > results/fasta_stats.tsv
+
+# Step 2 (R): read that table, make the figure
+Rscript plot_stats.R results/fasta_stats.tsv results/fasta_stats.png
+```
+:::
+
+## What the job actually runs
+
+The scripts are ordinary R and Python programs - the same ones you test on your laptop first. Arguments come from the command line so nothing is hard-coded.
+
+::: panel-tabset
+### R (`plot_stats.R`)
+
+```{r}
+#| label: lec10-plot-stats-r
+#| echo: true
+#| eval: false
+
+#!/usr/bin/env Rscript
+library(tidyverse)
+
+args <- commandArgs(trailingOnly = TRUE)      # c("results/fasta_stats.tsv", "results/fasta_stats.png")
+stats <- read_tsv(args[1])
+
+p <- ggplot(stats, aes(x = file, y = gc_percent)) +
+  geom_col() +
+  labs(x = NULL, y = "GC content (%)") +
+  theme_minimal()
+
+ggsave(args[2], p, width = 8, height = 4)
+cat("Wrote", args[2], "\n")
+```
+
+### Python (`fasta_stats.py`)
+
+```{python}
+#| label: lec10-fasta-stats-py
+#| echo: true
+#| eval: false
+
+#!/usr/bin/env python3
+import sys
+from pathlib import Path
+
+print("file\tn_seqs\ttotal_bp\tgc_percent")           # header of the TSV
+for path in map(Path, sys.argv[1:]):                 # every file given on the command line
+    lines = path.read_text().splitlines()
+    n_seqs = sum(line.startswith(">") for line in lines)
+    seq = "".join(line for line in lines if not line.startswith(">")).upper()
+    gc = 100 * (seq.count("G") + seq.count("C")) / len(seq)
+    print(f"{path.name}\t{n_seqs}\t{len(seq)}\t{gc:.1f}")
+```
+:::
+
+::: callout-tip
+Test on a **tiny input on the login node** first (`python3 fasta_stats.py small.fasta`), then submit: `sbatch run_pipeline.sh`. Output and errors land in `output_JOBID.log` and `error_JOBID.log`.
+:::
+
+## R and Python packages on Talapas
+
+::: panel-tabset
+### R
+
+``` bash
+module load R/4.3.3
+R                                   # interactive, on an interactive node
+```
+
+``` r
+install.packages("tidyverse")       # goes to your personal library in ~/R/ - once
+library(tidyverse)                  # every session / every script
+```
+
+-   Modules give you R itself; **you** install packages into your home directory
+-   For a reproducible project, `renv::init()` records exact package versions in the project folder
+
+### Python
+
+``` bash
+module load miniconda3/20240410
+conda create -n my_env python=3.11 pandas matplotlib biopython   # once
+conda activate my_env                                            # every session / job
+
+# or, with the plain python3 module and a virtual environment:
+module load python3/3.11.4
+python3 -m venv ~/envs/my_env && source ~/envs/my_env/bin/activate
+pip install pandas matplotlib biopython
+```
+
+-   `conda` (with the **bioconda** channel) installs compiled bioinformatics tools too - `conda install -c bioconda samtools`
+-   Put the same `module load` + `conda activate` / `source .../activate` lines in your `sbatch` script
+:::
+
 ## Understanding SLURM Directives
 
 | Directive         | Description         | Example                           |
 |-------------------|---------------------|-----------------------------------|
-| `--partition`     | Queue to use        | `compute`, `short`, `long`, `gpu` |
-| `--account`       | PIRG for accounting | `nereus`                          |
+| `--partition`     | Queue to use        | `compute`, `computelong`, `gpu`, `memory` |
+| `--account`       | PIRG for accounting | `myPIRG`                          |
 | `--time`          | Max runtime         | `1-12:00:00` (1 day, 12 hrs)      |
 | `--nodes`         | Number of nodes     | `1`                               |
 | `--cpus-per-task` | Cores per task      | `8`                               |
@@ -334,7 +489,7 @@ module avail
 
 # Search for specific software
 module spider R
-module spider python
+module spider python          # python3/3.x.y modules, plus miniconda3 for conda environments
 
 # Load a module
 module load R/4.3.3

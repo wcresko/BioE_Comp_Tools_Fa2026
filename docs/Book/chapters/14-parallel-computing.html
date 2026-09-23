@@ -1,0 +1,1890 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.9.38">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+<meta name="description" content="A comprehensive guide to essential computational tools for graduate students in bioengineering and life sciences, covering Unix/Linux, R and Python, editors and IDEs, computing resources at the University of Oregon, AI-assisted coding, reproducible documents, version control with Git/GitHub, and high-performance computing.">
+<title>14&nbsp; Parallel Computing in R – Foundational Computational Tools for Bioengineers</title>
+<style>
+/* Default styles provided by pandoc.
+** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+*/
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+/* CSS for citations */
+div.csl-bib-body { }
+div.csl-entry {
+  clear: both;
+  margin-bottom: 0em;
+}
+.hanging-indent div.csl-entry {
+  margin-left:2em;
+  text-indent:-2em;
+}
+div.csl-left-margin {
+  min-width:2em;
+  float:left;
+}
+div.csl-right-inline {
+  margin-left:2em;
+  padding-left:1em;
+}
+div.csl-indent {
+  margin-left: 2em;
+}</style>
+
+<script src="../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../">
+<link href="../chapters/15-databases.html" rel="next">
+<link href="../chapters/13-writing-functions.html" rel="prev">
+<script src="../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../site_libs/quarto-html/popper.min.js"></script>
+<script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-3836fb1e46d4cb83c75cfb618a44b85e.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-text-highlighting-styles">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-dark-4234edb6284ff370703ce34fde7cc7c8.css" rel="stylesheet" class="quarto-color-scheme quarto-color-alternate" id="quarto-text-highlighting-styles">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-3836fb1e46d4cb83c75cfb618a44b85e.css" rel="stylesheet" class="quarto-color-scheme-extra" id="quarto-text-highlighting-styles">
+<script src="../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../site_libs/bootstrap/bootstrap-882387fc1d6267d1b7263d283c4866b5.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
+<link href="../site_libs/bootstrap/bootstrap-dark-814ca0c199338aa1abdb5ae469f0d636.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
+<link href="../site_libs/bootstrap/bootstrap-882387fc1d6267d1b7263d283c4866b5.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light"><script id="quarto-search-options" type="application/json">{
+  "location": "sidebar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "start",
+  "type": "textbox",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+</head>
+<body class="nav-sidebar docked quarto-light"><script id="quarto-html-before-body" type="application/javascript">
+    const toggleBodyColorMode = (bsSheetEl) => {
+      const mode = bsSheetEl.getAttribute("data-mode");
+      const bodyEl = window.document.querySelector("body");
+      if (mode === "dark") {
+        bodyEl.classList.add("quarto-dark");
+        bodyEl.classList.remove("quarto-light");
+      } else {
+        bodyEl.classList.add("quarto-light");
+        bodyEl.classList.remove("quarto-dark");
+      }
+    }
+    const toggleBodyColorPrimary = () => {
+      const bsSheetEl = window.document.querySelector("link#quarto-bootstrap:not([rel=disabled-stylesheet])");
+      if (bsSheetEl) {
+        toggleBodyColorMode(bsSheetEl);
+      }
+    }
+    const setColorSchemeToggle = (alternate) => {
+      const toggles = window.document.querySelectorAll('.quarto-color-scheme-toggle');
+      for (let i=0; i < toggles.length; i++) {
+        const toggle = toggles[i];
+        if (toggle) {
+          if (alternate) {
+            toggle.classList.add("alternate");
+          } else {
+            toggle.classList.remove("alternate");
+          }
+        }
+      }
+    };
+    const toggleColorMode = (alternate) => {
+      // Switch the stylesheets
+      const primaryStylesheets = window.document.querySelectorAll('link.quarto-color-scheme:not(.quarto-color-alternate)');
+      const alternateStylesheets = window.document.querySelectorAll('link.quarto-color-scheme.quarto-color-alternate');
+      manageTransitions('#quarto-margin-sidebar .nav-link', false);
+      if (alternate) {
+        // note: dark is layered on light, we don't disable primary!
+        enableStylesheet(alternateStylesheets);
+        for (const sheetNode of alternateStylesheets) {
+          if (sheetNode.id === "quarto-bootstrap") {
+            toggleBodyColorMode(sheetNode);
+          }
+        }
+      } else {
+        disableStylesheet(alternateStylesheets);
+        enableStylesheet(primaryStylesheets)
+        toggleBodyColorPrimary();
+      }
+      manageTransitions('#quarto-margin-sidebar .nav-link', true);
+      // Switch the toggles
+      setColorSchemeToggle(alternate)
+      // Hack to workaround the fact that safari doesn't
+      // properly recolor the scrollbar when toggling (#1455)
+      if (navigator.userAgent.indexOf('Safari') > 0 && navigator.userAgent.indexOf('Chrome') == -1) {
+        manageTransitions("body", false);
+        window.scrollTo(0, 1);
+        setTimeout(() => {
+          window.scrollTo(0, 0);
+          manageTransitions("body", true);
+        }, 40);
+      }
+    }
+    const disableStylesheet = (stylesheets) => {
+      for (let i=0; i < stylesheets.length; i++) {
+        const stylesheet = stylesheets[i];
+        stylesheet.rel = 'disabled-stylesheet';
+      }
+    }
+    const enableStylesheet = (stylesheets) => {
+      for (let i=0; i < stylesheets.length; i++) {
+        const stylesheet = stylesheets[i];
+        if(stylesheet.rel !== 'stylesheet') { // for Chrome, which will still FOUC without this check
+          stylesheet.rel = 'stylesheet';
+        }
+      }
+    }
+    const manageTransitions = (selector, allowTransitions) => {
+      const els = window.document.querySelectorAll(selector);
+      for (let i=0; i < els.length; i++) {
+        const el = els[i];
+        if (allowTransitions) {
+          el.classList.remove('notransition');
+        } else {
+          el.classList.add('notransition');
+        }
+      }
+    }
+    const isFileUrl = () => {
+      return window.location.protocol === 'file:';
+    }
+    const hasAlternateSentinel = () => {
+      let styleSentinel = getColorSchemeSentinel();
+      if (styleSentinel !== null) {
+        return styleSentinel === "alternate";
+      } else {
+        return false;
+      }
+    }
+    const setStyleSentinel = (alternate) => {
+      const value = alternate ? "alternate" : "default";
+      if (!isFileUrl()) {
+        window.localStorage.setItem("quarto-color-scheme", value);
+      } else {
+        localAlternateSentinel = value;
+      }
+    }
+    const getColorSchemeSentinel = () => {
+      if (!isFileUrl()) {
+        const storageValue = window.localStorage.getItem("quarto-color-scheme");
+        return storageValue != null ? storageValue : localAlternateSentinel;
+      } else {
+        return localAlternateSentinel;
+      }
+    }
+    const toggleGiscusIfUsed = (isAlternate, darkModeDefault) => {
+      const baseTheme = document.querySelector('#giscus-base-theme')?.value ?? 'light';
+      const alternateTheme = document.querySelector('#giscus-alt-theme')?.value ?? 'dark';
+      let newTheme = '';
+      if(authorPrefersDark) {
+        newTheme = isAlternate ? baseTheme : alternateTheme;
+      } else {
+        newTheme = isAlternate ? alternateTheme : baseTheme;
+      }
+      const changeGiscusTheme = () => {
+        // From: https://github.com/giscus/giscus/issues/336
+        const sendMessage = (message) => {
+          const iframe = document.querySelector('iframe.giscus-frame');
+          if (!iframe) return;
+          iframe.contentWindow.postMessage({ giscus: message }, 'https://giscus.app');
+        }
+        sendMessage({
+          setConfig: {
+            theme: newTheme
+          }
+        });
+      }
+      const isGiscussLoaded = window.document.querySelector('iframe.giscus-frame') !== null;
+      if (isGiscussLoaded) {
+        changeGiscusTheme();
+      }
+    };
+    const authorPrefersDark = false;
+    const darkModeDefault = authorPrefersDark;
+      document.querySelector('link#quarto-text-highlighting-styles.quarto-color-scheme-extra').rel = 'disabled-stylesheet';
+      document.querySelector('link#quarto-bootstrap.quarto-color-scheme-extra').rel = 'disabled-stylesheet';
+    let localAlternateSentinel = darkModeDefault ? 'alternate' : 'default';
+    // Dark / light mode switch
+    window.quartoToggleColorScheme = () => {
+      // Read the current dark / light value
+      let toAlternate = !hasAlternateSentinel();
+      toggleColorMode(toAlternate);
+      setStyleSentinel(toAlternate);
+      toggleGiscusIfUsed(toAlternate, darkModeDefault);
+      window.dispatchEvent(new Event('resize'));
+    };
+    // Switch to dark mode if need be
+    if (hasAlternateSentinel()) {
+      toggleColorMode(true);
+    } else {
+      toggleColorMode(false);
+    }
+  </script>
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top"><nav class="quarto-secondary-nav"><div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../chapters/14-parallel-computing.html"><span class="chapter-number">14</span>&nbsp; <span class="chapter-title">Parallel Computing in R</span></a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+      <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
+        <i class="bi bi-search"></i>
+      </button>
+    </div>
+  </nav></header><!-- content --><div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation docked overflow-auto"><div class="pt-lg-2 mt-2 text-left sidebar-header">
+    <div class="sidebar-title mb-0 py-0">
+      <a href="../">Foundational Computational Tools for Bioengineers</a> 
+        <div class="sidebar-tools-main">
+    <a href="https://github.com/wcresko/BioE_Comp_Tools_Fa2026/tree/main/Book/" title="Source Code" class="quarto-navigation-tool px-1" aria-label="Source Code"><i class="bi bi-github"></i></a>
+  <a href="" class="quarto-color-scheme-toggle quarto-navigation-tool  px-1" onclick="window.quartoToggleColorScheme(); return false;" title="Toggle dark mode"><i class="bi"></i></a>
+</div>
+    </div>
+      </div>
+        <div class="mt-2 flex-shrink-0 align-items-center">
+        <div class="sidebar-search">
+        <div id="quarto-search" class="" title="Search"></div>
+        </div>
+        </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+<li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Preface</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/01-introduction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">Introduction to Computational Tools</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/02-your-toolkit.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">Your Computational Toolkit: Installing and Using Editors and IDEs</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/03-computing-at-uo.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Computing Resources at the University of Oregon</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/02-computer-systems.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Computer Systems Architecture</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/03-unix-fundamentals.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Unix Fundamentals</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/04-files-pipes.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Files, Pipes, and Redirection</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/05-grep-regex.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">GREP and Regular Expressions</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/06-shell-scripting.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">8</span>&nbsp; <span class="chapter-title">Shell Scripting</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/07-r-programming.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">9</span>&nbsp; <span class="chapter-title">R Programming Fundamentals</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/18-python-programming.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">10</span>&nbsp; <span class="chapter-title">Python Programming Fundamentals</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/08-tidy-data.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">11</span>&nbsp; <span class="chapter-title">Tidy Data Principles</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/09-data-visualization.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">12</span>&nbsp; <span class="chapter-title">Data Visualization with ggplot2</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/13-writing-functions.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">13</span>&nbsp; <span class="chapter-title">Writing Functions in R</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/14-parallel-computing.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text"><span class="chapter-number">14</span>&nbsp; <span class="chapter-title">Parallel Computing in R</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/15-databases.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">15</span>&nbsp; <span class="chapter-title">Working with Databases</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/12-quarto-documents.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">16</span>&nbsp; <span class="chapter-title">Reproducible Documents with Quarto</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/16-latex-basics.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">17</span>&nbsp; <span class="chapter-title">LaTeX for Scientific Documents</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/17-ai-assisted-coding.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">18</span>&nbsp; <span class="chapter-title">Coding with AI Assistants</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/10-git-github.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">19</span>&nbsp; <span class="chapter-title">Version Control with Git and GitHub</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/11-hpc-talapas.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">20</span>&nbsp; <span class="chapter-title">High-Performance Computing with Talapas</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../references.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">References</span></a>
+  </div>
+</li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="false">
+ <span class="menu-text">Appendices</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="false" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 ">
+<li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/appendix-unix.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">A</span>&nbsp; <span class="chapter-title">Unix Command Reference</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/appendix-git.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">B</span>&nbsp; <span class="chapter-title">Git Command Reference</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/appendix-r.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">C</span>&nbsp; <span class="chapter-title">R Command Reference</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/appendix-python.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">D</span>&nbsp; <span class="chapter-title">Python Quick Reference</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/appendix-latex.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">E</span>&nbsp; <span class="chapter-title">LaTeX Command Reference</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/appendix-slurm.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">F</span>&nbsp; <span class="chapter-title">SLURM Command Reference</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/appendix-regex.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">G</span>&nbsp; <span class="chapter-title">Regular Expression Reference</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/appendix-shortcuts.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">H</span>&nbsp; <span class="chapter-title">Keyboard Shortcuts Reference</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/appendix-data-formats.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">I</span>&nbsp; <span class="chapter-title">Common Data Formats &amp; Public Repositories</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/appendix-glossary.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">J</span>&nbsp; <span class="chapter-title">Glossary</span></span></a>
+  </div>
+</li>
+      </ul>
+</li>
+    </ul>
+</div>
+</nav><div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active"><h2 id="toc-title">Table of contents</h2>
+   
+  <ul>
+<li><a href="#sec-why-parallel" id="toc-sec-why-parallel" class="nav-link active" data-scroll-target="#sec-why-parallel"><span class="header-section-number">14.1</span> Why Parallel Computing?</a></li>
+  <li><a href="#sec-cores" id="toc-sec-cores" class="nav-link" data-scroll-target="#sec-cores"><span class="header-section-number">14.2</span> How Many Cores Do You Have?</a></li>
+  <li>
+<a href="#sec-parallel-example" id="toc-sec-parallel-example" class="nav-link" data-scroll-target="#sec-parallel-example"><span class="header-section-number">14.3</span> A Motivating Example</a>
+  <ul class="collapse">
+<li><a href="#sec-serial-execution" id="toc-sec-serial-execution" class="nav-link" data-scroll-target="#sec-serial-execution">Serial Execution</a></li>
+  <li><a href="#sec-parallel-execution" id="toc-sec-parallel-execution" class="nav-link" data-scroll-target="#sec-parallel-execution">Parallel Execution</a></li>
+  </ul>
+</li>
+  <li>
+<a href="#sec-future" id="toc-sec-future" class="nav-link" data-scroll-target="#sec-future"><span class="header-section-number">14.4</span> The Future Ecosystem</a>
+  <ul class="collapse">
+<li><a href="#sec-setting-up-parallel-execution" id="toc-sec-setting-up-parallel-execution" class="nav-link" data-scroll-target="#sec-setting-up-parallel-execution">Setting Up Parallel Execution</a></li>
+  <li><a href="#sec-future-lapply" id="toc-sec-future-lapply" class="nav-link" data-scroll-target="#sec-future-lapply">future_lapply: Parallel Apply</a></li>
+  <li><a href="#sec-furrr" id="toc-sec-furrr" class="nav-link" data-scroll-target="#sec-furrr">furrr: Parallel purrr</a></li>
+  </ul>
+</li>
+  <li>
+<a href="#sec-bootstrap-example" id="toc-sec-bootstrap-example" class="nav-link" data-scroll-target="#sec-bootstrap-example"><span class="header-section-number">14.5</span> A Real Example: Bootstrapping Gene Expression</a>
+  <ul class="collapse">
+<li><a href="#sec-par-setup" id="toc-sec-par-setup" class="nav-link" data-scroll-target="#sec-par-setup">Setup</a></li>
+  <li><a href="#sec-bootstrap-function" id="toc-sec-bootstrap-function" class="nav-link" data-scroll-target="#sec-bootstrap-function">Bootstrap Function</a></li>
+  <li><a href="#sec-compare-serial-vs-parallel" id="toc-sec-compare-serial-vs-parallel" class="nav-link" data-scroll-target="#sec-compare-serial-vs-parallel">Compare Serial vs Parallel</a></li>
+  <li><a href="#sec-view-results" id="toc-sec-view-results" class="nav-link" data-scroll-target="#sec-view-results">View Results</a></li>
+  </ul>
+</li>
+  <li>
+<a href="#sec-fork-socket" id="toc-sec-fork-socket" class="nav-link" data-scroll-target="#sec-fork-socket"><span class="header-section-number">14.6</span> Forking vs Sockets</a>
+  <ul class="collapse">
+<li><a href="#sec-multisession" id="toc-sec-multisession" class="nav-link" data-scroll-target="#sec-multisession">Socket-based (multisession)</a></li>
+  <li><a href="#sec-multicore" id="toc-sec-multicore" class="nav-link" data-scroll-target="#sec-multicore">Fork-based (multicore)</a></li>
+  </ul>
+</li>
+  <li><a href="#sec-parallel-errors" id="toc-sec-parallel-errors" class="nav-link" data-scroll-target="#sec-parallel-errors"><span class="header-section-number">14.7</span> Handling Errors in Parallel Code</a></li>
+  <li>
+<a href="#sec-caching" id="toc-sec-caching" class="nav-link" data-scroll-target="#sec-caching"><span class="header-section-number">14.8</span> Caching Results</a>
+  <ul class="collapse">
+<li><a href="#sec-persistent-caching" id="toc-sec-persistent-caching" class="nav-link" data-scroll-target="#sec-persistent-caching">Persistent Caching</a></li>
+  </ul>
+</li>
+  <li>
+<a href="#sec-when-parallel" id="toc-sec-when-parallel" class="nav-link" data-scroll-target="#sec-when-parallel"><span class="header-section-number">14.9</span> When to Use Parallel Computing</a>
+  <ul class="collapse">
+<li><a href="#sec-good-candidates-for-parallelization" id="toc-sec-good-candidates-for-parallelization" class="nav-link" data-scroll-target="#sec-good-candidates-for-parallelization">Good Candidates for Parallelization</a></li>
+  <li><a href="#sec-poor-candidates" id="toc-sec-poor-candidates" class="nav-link" data-scroll-target="#sec-poor-candidates">Poor Candidates</a></li>
+  <li><a href="#sec-amdahls-law" id="toc-sec-amdahls-law" class="nav-link" data-scroll-target="#sec-amdahls-law">Amdahl’s Law</a></li>
+  </ul>
+</li>
+  <li>
+<a href="#sec-parallel-best-practices" id="toc-sec-parallel-best-practices" class="nav-link" data-scroll-target="#sec-parallel-best-practices"><span class="header-section-number">14.10</span> Best Practices</a>
+  <ul class="collapse">
+<li><a href="#sec-par-start-sequential" id="toc-sec-par-start-sequential" class="nav-link" data-scroll-target="#sec-par-start-sequential">1. Start Sequential, Then Parallelize</a></li>
+  <li><a href="#sec-par-random-seeds" id="toc-sec-par-random-seeds" class="nav-link" data-scroll-target="#sec-par-random-seeds">2. Set Random Seeds</a></li>
+  <li><a href="#sec-par-monitor-progress" id="toc-sec-par-monitor-progress" class="nav-link" data-scroll-target="#sec-par-monitor-progress">3. Monitor Progress</a></li>
+  <li><a href="#sec-par-manage-memory" id="toc-sec-par-manage-memory" class="nav-link" data-scroll-target="#sec-par-manage-memory">4. Manage Memory</a></li>
+  <li><a href="#sec-parallel-to-cluster" id="toc-sec-parallel-to-cluster" class="nav-link" data-scroll-target="#sec-parallel-to-cluster">5. Know When to Leave Your Laptop</a></li>
+  </ul>
+</li>
+  <li><a href="#sec-parallel-summary" id="toc-sec-parallel-summary" class="nav-link" data-scroll-target="#sec-parallel-summary"><span class="header-section-number">14.11</span> Summary</a></li>
+  <li><a href="#sec-par-exercises" id="toc-sec-par-exercises" class="nav-link" data-scroll-target="#sec-par-exercises">Exercises</a></li>
+  <li><a href="#sec-par-additional-reading" id="toc-sec-par-additional-reading" class="nav-link" data-scroll-target="#sec-par-additional-reading">Additional Reading</a></li>
+  </ul><div class="toc-actions"><ul><li><a href="https://github.com/wcresko/BioE_Comp_Tools_Fa2026/edit/main/Book/chapters/14-parallel-computing.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li><li><a href="https://github.com/wcresko/BioE_Comp_Tools_Fa2026/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content"><header id="title-block-header" class="quarto-title-block default"><div class="quarto-title">
+<h1 class="title"><span id="sec-parallel-computing" class="quarto-section-identifier"><span class="chapter-number">14</span>&nbsp; <span class="chapter-title">Parallel Computing in R</span></span></h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header><div class="callout callout-style-default callout-note callout-titled" title="Learning Objectives">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>Learning Objectives
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>After completing this chapter, you will be able to:</p>
+<ul>
+<li>Understand when parallel computing provides performance benefits</li>
+<li>Use the future ecosystem for parallel programming in R</li>
+<li>Apply future_lapply() and future_map() for parallel iteration</li>
+<li>Choose between forking and socket-based parallelization</li>
+<li>Understand the differences between explicit and implicit parallelization</li>
+<li>Avoid common pitfalls like resource competition</li>
+<li>Debug functions and handle errors in parallel contexts</li>
+<li>Cache results to avoid recomputation</li>
+</ul>
+</div>
+</div>
+<section id="sec-why-parallel" class="level2" data-number="14.1"><h2 data-number="14.1" class="anchored" data-anchor-id="sec-why-parallel">
+<span class="header-section-number">14.1</span> Why Parallel Computing?</h2>
+<p>Modern computers have multiple processor cores, but by default R only uses one. This means that when you run a computationally intensive analysis — like bootstrapping, permutation tests, or processing thousands of samples — most of your computer’s power sits idle.</p>
+<p><strong>Parallel computing</strong> lets you use all available cores simultaneously, potentially reducing computation time by a factor equal to your core count. A task that takes 8 hours on one core might take just 1 hour across 8 cores.</p>
+<p>In biosciences, parallel computing is especially valuable for:</p>
+<ul>
+<li>
+<strong>Bootstrapping</strong> for confidence intervals</li>
+<li>
+<strong>Permutation tests</strong> for significance testing</li>
+<li>
+<strong>Simulation studies</strong> (e.g., population genetics)</li>
+<li>
+<strong>Processing many samples</strong> (e.g., analyzing hundreds of RNA-seq files)</li>
+<li>
+<strong>Cross-validation</strong> in machine learning</li>
+<li>
+<strong>Parameter sweeps</strong> for computational models</li>
+</ul></section><section id="sec-cores" class="level2" data-number="14.2"><h2 data-number="14.2" class="anchored" data-anchor-id="sec-cores">
+<span class="header-section-number">14.2</span> How Many Cores Do You Have?</h2>
+<p>Before parallelizing, find out how many cores are available:</p>
+<div class="cell" data-layout-align="center">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1"></a>parallel<span class="sc">::</span><span class="fu">detectCores</span>()</span>
+<span id="cb1-2"><a href="#cb1-2"></a><span class="co">#&gt; [1] 14</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p>This number includes both physical cores and “logical” cores (from technologies like Intel’s hyperthreading). For CPU-intensive tasks, your effective speedup is typically limited by the number of physical cores.</p>
+</section><section id="sec-parallel-example" class="level2" data-number="14.3"><h2 data-number="14.3" class="anchored" data-anchor-id="sec-parallel-example">
+<span class="header-section-number">14.3</span> A Motivating Example</h2>
+<p>Let’s start with a simple example to demonstrate the power of parallelization. We’ll create a deliberately slow function that simulates a computationally expensive operation:</p>
+<div class="cell" data-layout-align="center">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1"></a><span class="co"># Simulate analyzing a biological sample (takes 2 seconds each)</span></span>
+<span id="cb2-2"><a href="#cb2-2"></a>analyze_sample <span class="ot">=</span> <span class="cf">function</span>(sample_id) {</span>
+<span id="cb2-3"><a href="#cb2-3"></a>  <span class="co"># Simulate processing time</span></span>
+<span id="cb2-4"><a href="#cb2-4"></a>  <span class="fu">Sys.sleep</span>(<span class="dv">2</span>)</span>
+<span id="cb2-5"><a href="#cb2-5"></a></span>
+<span id="cb2-6"><a href="#cb2-6"></a>  <span class="co"># Return some fake results</span></span>
+<span id="cb2-7"><a href="#cb2-7"></a>  <span class="fu">tibble</span>(</span>
+<span id="cb2-8"><a href="#cb2-8"></a>    <span class="at">sample_id =</span> sample_id,</span>
+<span id="cb2-9"><a href="#cb2-9"></a>    <span class="at">gene_count =</span> <span class="fu">sample</span>(<span class="dv">5000</span><span class="sc">:</span><span class="dv">20000</span>, <span class="dv">1</span>),</span>
+<span id="cb2-10"><a href="#cb2-10"></a>    <span class="at">quality_score =</span> <span class="fu">runif</span>(<span class="dv">1</span>, <span class="fl">0.8</span>, <span class="fl">1.0</span>)</span>
+<span id="cb2-11"><a href="#cb2-11"></a>  )</span>
+<span id="cb2-12"><a href="#cb2-12"></a>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<section id="sec-serial-execution" class="level3"><h3 class="anchored" data-anchor-id="sec-serial-execution">Serial Execution</h3>
+<p>First, let’s process 8 samples the traditional way:</p>
+<div class="cell" data-layout-align="center">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1"></a><span class="fu">library</span>(tictoc)</span>
+<span id="cb3-2"><a href="#cb3-2"></a></span>
+<span id="cb3-3"><a href="#cb3-3"></a><span class="fu">tic</span>()</span>
+<span id="cb3-4"><a href="#cb3-4"></a>serial_results <span class="ot">=</span> <span class="fu">lapply</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">8</span>, analyze_sample) <span class="sc">%&gt;%</span> <span class="fu">bind_rows</span>()</span>
+<span id="cb3-5"><a href="#cb3-5"></a><span class="fu">toc</span>()</span>
+<span id="cb3-6"><a href="#cb3-6"></a><span class="co">#&gt; 16.064 sec elapsed</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p>As expected, processing 8 samples at 2 seconds each takes about 16 seconds.</p>
+</section><section id="sec-parallel-execution" class="level3"><h3 class="anchored" data-anchor-id="sec-parallel-execution">Parallel Execution</h3>
+<p>Now let’s do the same thing in parallel using the <strong>future.apply</strong> package:</p>
+<div class="cell" data-layout-align="center">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1"></a><span class="fu">library</span>(future.apply)</span>
+<span id="cb4-2"><a href="#cb4-2"></a><span class="fu">plan</span>(multisession)  <span class="co"># Enable parallel processing</span></span>
+<span id="cb4-3"><a href="#cb4-3"></a></span>
+<span id="cb4-4"><a href="#cb4-4"></a><span class="fu">tic</span>()</span>
+<span id="cb4-5"><a href="#cb4-5"></a>parallel_results <span class="ot">=</span> <span class="fu">future_lapply</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">8</span>, analyze_sample) <span class="sc">%&gt;%</span> <span class="fu">bind_rows</span>()</span>
+<span id="cb4-6"><a href="#cb4-6"></a><span class="fu">toc</span>()</span>
+<span id="cb4-7"><a href="#cb4-7"></a><span class="co">#&gt; 2.282 sec elapsed</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p>The parallel version is dramatically faster! With 8 cores, we can process all 8 samples simultaneously, reducing the time from ~16 seconds to ~2 seconds.</p>
+<p>Let’s verify the results are identical:</p>
+<div class="cell" data-layout-align="center">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1"></a><span class="co"># Results have same structure (values differ due to random generation)</span></span>
+<span id="cb5-2"><a href="#cb5-2"></a><span class="fu">all.equal</span>(<span class="fu">names</span>(serial_results), <span class="fu">names</span>(parallel_results))</span>
+<span id="cb5-3"><a href="#cb5-3"></a><span class="co">#&gt; [1] TRUE</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+</section></section><section id="sec-future" class="level2" data-number="14.4"><h2 data-number="14.4" class="anchored" data-anchor-id="sec-future">
+<span class="header-section-number">14.4</span> The Future Ecosystem</h2>
+<p>The examples above use the <strong>future</strong> package ecosystem, which provides a unified, elegant approach to parallel programming in R. The key packages are listed in <a href="#tbl-future-packages" class="quarto-xref">Table&nbsp;<span>14.1</span></a>:</p>
+<div id="tbl-future-packages" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure"><figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-future-packages-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;14.1: The future ecosystem
+</figcaption><div aria-describedby="tbl-future-packages-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<table class="caption-top table">
+<thead><tr class="header">
+<th style="text-align: left;">Package</th>
+<th style="text-align: left;">Description</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;"><strong>future</strong></td>
+<td style="text-align: left;">Core package defining how code is evaluated</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><strong>future.apply</strong></td>
+<td style="text-align: left;">Parallel versions of apply functions</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><strong>furrr</strong></td>
+<td style="text-align: left;">Parallel versions of purrr functions</td>
+</tr>
+</tbody>
+</table>
+</div>
+</figure>
+</div>
+<section id="sec-setting-up-parallel-execution" class="level3"><h3 class="anchored" data-anchor-id="sec-setting-up-parallel-execution">Setting Up Parallel Execution</h3>
+<p>Before running parallel code, you must set a “plan” that determines how futures are resolved:</p>
+<div class="cell" data-layout-align="center">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1"></a><span class="fu">library</span>(future)</span>
+<span id="cb6-2"><a href="#cb6-2"></a></span>
+<span id="cb6-3"><a href="#cb6-3"></a><span class="co"># Sequential (no parallelization - useful for debugging)</span></span>
+<span id="cb6-4"><a href="#cb6-4"></a><span class="fu">plan</span>(sequential)</span>
+<span id="cb6-5"><a href="#cb6-5"></a></span>
+<span id="cb6-6"><a href="#cb6-6"></a><span class="co"># Parallel using multiple R sessions (works on all systems)</span></span>
+<span id="cb6-7"><a href="#cb6-7"></a><span class="fu">plan</span>(multisession)</span>
+<span id="cb6-8"><a href="#cb6-8"></a></span>
+<span id="cb6-9"><a href="#cb6-9"></a><span class="co"># Parallel using forked processes (faster, but Unix/Mac only)</span></span>
+<span id="cb6-10"><a href="#cb6-10"></a><span class="fu">plan</span>(multicore)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p>For most users, <code>plan(multisession)</code> is the safest choice as it works on all operating systems.</p>
+</section><section id="sec-future-lapply" class="level3"><h3 class="anchored" data-anchor-id="sec-future-lapply">future_lapply: Parallel Apply</h3>
+<p>The <code>future_lapply()</code> function is a drop-in replacement for <code><a href="https://rdrr.io/r/base/lapply.html">lapply()</a></code> (<a href="13-writing-functions.html#sec-lapply" class="quarto-xref"><span>Section 13.6.2</span></a>):</p>
+<div class="cell" data-layout-align="center">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1"></a><span class="co"># Serial version</span></span>
+<span id="cb7-2"><a href="#cb7-2"></a><span class="co"># lapply(1:4, function(x) x^2)</span></span>
+<span id="cb7-3"><a href="#cb7-3"></a></span>
+<span id="cb7-4"><a href="#cb7-4"></a><span class="co"># Parallel version - just add "future_"</span></span>
+<span id="cb7-5"><a href="#cb7-5"></a><span class="fu">future_lapply</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">4</span>, <span class="cf">function</span>(x) x<span class="sc">^</span><span class="dv">2</span>)</span>
+<span id="cb7-6"><a href="#cb7-6"></a><span class="co">#&gt; [[1]]</span></span>
+<span id="cb7-7"><a href="#cb7-7"></a><span class="co">#&gt; [1] 1</span></span>
+<span id="cb7-8"><a href="#cb7-8"></a><span class="co">#&gt; </span></span>
+<span id="cb7-9"><a href="#cb7-9"></a><span class="co">#&gt; [[2]]</span></span>
+<span id="cb7-10"><a href="#cb7-10"></a><span class="co">#&gt; [1] 4</span></span>
+<span id="cb7-11"><a href="#cb7-11"></a><span class="co">#&gt; </span></span>
+<span id="cb7-12"><a href="#cb7-12"></a><span class="co">#&gt; [[3]]</span></span>
+<span id="cb7-13"><a href="#cb7-13"></a><span class="co">#&gt; [1] 9</span></span>
+<span id="cb7-14"><a href="#cb7-14"></a><span class="co">#&gt; </span></span>
+<span id="cb7-15"><a href="#cb7-15"></a><span class="co">#&gt; [[4]]</span></span>
+<span id="cb7-16"><a href="#cb7-16"></a><span class="co">#&gt; [1] 16</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+</section><section id="sec-furrr" class="level3"><h3 class="anchored" data-anchor-id="sec-furrr">furrr: Parallel purrr</h3>
+<p>If you prefer <strong>purrr</strong>’s syntax (<a href="13-writing-functions.html#sec-purrr-map" class="quarto-xref"><span>Section 13.6.3</span></a>), <strong>furrr</strong> provides parallel versions of all map functions:</p>
+<div class="cell" data-layout-align="center">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1"></a><span class="fu">library</span>(furrr)</span>
+<span id="cb8-2"><a href="#cb8-2"></a></span>
+<span id="cb8-3"><a href="#cb8-3"></a><span class="co"># Serial: map_dbl(1:4, function(x) x^2)</span></span>
+<span id="cb8-4"><a href="#cb8-4"></a><span class="co"># Parallel:</span></span>
+<span id="cb8-5"><a href="#cb8-5"></a><span class="fu">future_map_dbl</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">4</span>, <span class="cf">function</span>(x) x<span class="sc">^</span><span class="dv">2</span>)</span>
+<span id="cb8-6"><a href="#cb8-6"></a><span class="co">#&gt; [1]  1  4  9 16</span></span>
+<span id="cb8-7"><a href="#cb8-7"></a></span>
+<span id="cb8-8"><a href="#cb8-8"></a><span class="co"># Returns a data frame directly</span></span>
+<span id="cb8-9"><a href="#cb8-9"></a><span class="fu">future_map_dfr</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">4</span>, <span class="cf">function</span>(x) {</span>
+<span id="cb8-10"><a href="#cb8-10"></a>  <span class="fu">tibble</span>(<span class="at">value =</span> x, <span class="at">squared =</span> x<span class="sc">^</span><span class="dv">2</span>)</span>
+<span id="cb8-11"><a href="#cb8-11"></a>})</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div class="kable-table">
+<table class="caption-top table table-sm table-striped small">
+<thead><tr class="header">
+<th style="text-align: right;">value</th>
+<th style="text-align: right;">squared</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">1</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">2</td>
+<td style="text-align: right;">4</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">3</td>
+<td style="text-align: right;">9</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">4</td>
+<td style="text-align: right;">16</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+</section></section><section id="sec-bootstrap-example" class="level2" data-number="14.5"><h2 data-number="14.5" class="anchored" data-anchor-id="sec-bootstrap-example">
+<span class="header-section-number">14.5</span> A Real Example: Bootstrapping Gene Expression</h2>
+<p>Let’s apply parallel computing to a realistic bioinformatics task: bootstrapping to estimate confidence intervals for differential expression.</p>
+<section id="sec-par-setup" class="level3"><h3 class="anchored" data-anchor-id="sec-par-setup">Setup</h3>
+<div class="cell" data-layout-align="center">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1"></a><span class="fu">set.seed</span>(<span class="dv">1234</span>)</span>
+<span id="cb9-2"><a href="#cb9-2"></a></span>
+<span id="cb9-3"><a href="#cb9-3"></a><span class="co"># Simulate gene expression data for 1000 genes, 50 samples</span></span>
+<span id="cb9-4"><a href="#cb9-4"></a>n_genes <span class="ot">=</span> <span class="dv">1000</span></span>
+<span id="cb9-5"><a href="#cb9-5"></a>n_samples <span class="ot">=</span> <span class="dv">50</span></span>
+<span id="cb9-6"><a href="#cb9-6"></a></span>
+<span id="cb9-7"><a href="#cb9-7"></a>expression_data <span class="ot">=</span> <span class="fu">tibble</span>(</span>
+<span id="cb9-8"><a href="#cb9-8"></a>  <span class="at">gene_id =</span> <span class="fu">rep</span>(<span class="fu">paste0</span>(<span class="st">"gene_"</span>, <span class="dv">1</span><span class="sc">:</span>n_genes), <span class="at">each =</span> n_samples),</span>
+<span id="cb9-9"><a href="#cb9-9"></a>  <span class="at">sample_id =</span> <span class="fu">rep</span>(<span class="fu">paste0</span>(<span class="st">"sample_"</span>, <span class="dv">1</span><span class="sc">:</span>n_samples), n_genes),</span>
+<span id="cb9-10"><a href="#cb9-10"></a>  <span class="at">group =</span> <span class="fu">rep</span>(<span class="fu">rep</span>(<span class="fu">c</span>(<span class="st">"control"</span>, <span class="st">"treatment"</span>), <span class="at">each =</span> n_samples<span class="sc">/</span><span class="dv">2</span>), n_genes),</span>
+<span id="cb9-11"><a href="#cb9-11"></a>  <span class="at">expression =</span> <span class="fu">rnorm</span>(n_genes <span class="sc">*</span> n_samples, <span class="at">mean =</span> <span class="dv">10</span>, <span class="at">sd =</span> <span class="dv">2</span>)</span>
+<span id="cb9-12"><a href="#cb9-12"></a>) <span class="sc">%&gt;%</span></span>
+<span id="cb9-13"><a href="#cb9-13"></a>  <span class="co"># Add a treatment effect to some genes</span></span>
+<span id="cb9-14"><a href="#cb9-14"></a>  <span class="fu">mutate</span>(</span>
+<span id="cb9-15"><a href="#cb9-15"></a>    <span class="at">expression =</span> <span class="fu">if_else</span>(</span>
+<span id="cb9-16"><a href="#cb9-16"></a>      gene_id <span class="sc">%in%</span> <span class="fu">paste0</span>(<span class="st">"gene_"</span>, <span class="dv">1</span><span class="sc">:</span><span class="dv">100</span>) <span class="sc">&amp;</span> group <span class="sc">==</span> <span class="st">"treatment"</span>,</span>
+<span id="cb9-17"><a href="#cb9-17"></a>      expression <span class="sc">+</span> <span class="fu">rnorm</span>(<span class="fu">n</span>(), <span class="dv">2</span>, <span class="fl">0.5</span>),  <span class="co"># Upregulated genes</span></span>
+<span id="cb9-18"><a href="#cb9-18"></a>      expression</span>
+<span id="cb9-19"><a href="#cb9-19"></a>    )</span>
+<span id="cb9-20"><a href="#cb9-20"></a>  )</span>
+<span id="cb9-21"><a href="#cb9-21"></a></span>
+<span id="cb9-22"><a href="#cb9-22"></a><span class="fu">head</span>(expression_data)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div class="kable-table">
+<table class="caption-top table table-sm table-striped small">
+<thead><tr class="header">
+<th style="text-align: left;">gene_id</th>
+<th style="text-align: left;">sample_id</th>
+<th style="text-align: left;">group</th>
+<th style="text-align: right;">expression</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">gene_1</td>
+<td style="text-align: left;">sample_1</td>
+<td style="text-align: left;">control</td>
+<td style="text-align: right;">7.585869</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">gene_1</td>
+<td style="text-align: left;">sample_2</td>
+<td style="text-align: left;">control</td>
+<td style="text-align: right;">10.554858</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">gene_1</td>
+<td style="text-align: left;">sample_3</td>
+<td style="text-align: left;">control</td>
+<td style="text-align: right;">12.168882</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">gene_1</td>
+<td style="text-align: left;">sample_4</td>
+<td style="text-align: left;">control</td>
+<td style="text-align: right;">5.308605</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">gene_1</td>
+<td style="text-align: left;">sample_5</td>
+<td style="text-align: left;">control</td>
+<td style="text-align: right;">10.858249</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">gene_1</td>
+<td style="text-align: left;">sample_6</td>
+<td style="text-align: left;">control</td>
+<td style="text-align: right;">11.012112</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+</section><section id="sec-bootstrap-function" class="level3"><h3 class="anchored" data-anchor-id="sec-bootstrap-function">Bootstrap Function</h3>
+<div class="cell" data-layout-align="center">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb10"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1"></a><span class="co"># Function to bootstrap fold change for one gene</span></span>
+<span id="cb10-2"><a href="#cb10-2"></a>bootstrap_fold_change <span class="ot">=</span> <span class="cf">function</span>(gene_data) {</span>
+<span id="cb10-3"><a href="#cb10-3"></a>  <span class="co"># Resample within each group</span></span>
+<span id="cb10-4"><a href="#cb10-4"></a>  boot_sample <span class="ot">=</span> gene_data <span class="sc">%&gt;%</span></span>
+<span id="cb10-5"><a href="#cb10-5"></a>    <span class="fu">group_by</span>(group) <span class="sc">%&gt;%</span></span>
+<span id="cb10-6"><a href="#cb10-6"></a>    <span class="fu">slice_sample</span>(<span class="at">prop =</span> <span class="dv">1</span>, <span class="at">replace =</span> <span class="cn">TRUE</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb10-7"><a href="#cb10-7"></a>    <span class="fu">ungroup</span>()</span>
+<span id="cb10-8"><a href="#cb10-8"></a></span>
+<span id="cb10-9"><a href="#cb10-9"></a>  <span class="co"># Calculate mean expression per group</span></span>
+<span id="cb10-10"><a href="#cb10-10"></a>  means <span class="ot">=</span> boot_sample <span class="sc">%&gt;%</span></span>
+<span id="cb10-11"><a href="#cb10-11"></a>    <span class="fu">group_by</span>(group) <span class="sc">%&gt;%</span></span>
+<span id="cb10-12"><a href="#cb10-12"></a>    <span class="fu">summarise</span>(<span class="at">mean_expr =</span> <span class="fu">mean</span>(expression), <span class="at">.groups =</span> <span class="st">"drop"</span>)</span>
+<span id="cb10-13"><a href="#cb10-13"></a></span>
+<span id="cb10-14"><a href="#cb10-14"></a>  <span class="co"># Calculate fold change (treatment / control)</span></span>
+<span id="cb10-15"><a href="#cb10-15"></a>  fc <span class="ot">=</span> means<span class="sc">$</span>mean_expr[means<span class="sc">$</span>group <span class="sc">==</span> <span class="st">"treatment"</span>] <span class="sc">/</span></span>
+<span id="cb10-16"><a href="#cb10-16"></a>       means<span class="sc">$</span>mean_expr[means<span class="sc">$</span>group <span class="sc">==</span> <span class="st">"control"</span>]</span>
+<span id="cb10-17"><a href="#cb10-17"></a></span>
+<span id="cb10-18"><a href="#cb10-18"></a>  <span class="fu">return</span>(fc)</span>
+<span id="cb10-19"><a href="#cb10-19"></a>}</span>
+<span id="cb10-20"><a href="#cb10-20"></a></span>
+<span id="cb10-21"><a href="#cb10-21"></a><span class="co"># Function to run many bootstrap iterations for one gene</span></span>
+<span id="cb10-22"><a href="#cb10-22"></a>run_bootstrap <span class="ot">=</span> <span class="cf">function</span>(gene_id, data, <span class="at">n_boot =</span> <span class="dv">1000</span>) {</span>
+<span id="cb10-23"><a href="#cb10-23"></a>  gene_data <span class="ot">=</span> data <span class="sc">%&gt;%</span> <span class="fu">filter</span>(gene_id <span class="sc">==</span> <span class="sc">!!</span>gene_id)</span>
+<span id="cb10-24"><a href="#cb10-24"></a></span>
+<span id="cb10-25"><a href="#cb10-25"></a>  <span class="co"># Run bootstrap iterations</span></span>
+<span id="cb10-26"><a href="#cb10-26"></a>  boot_fcs <span class="ot">=</span> <span class="fu">replicate</span>(n_boot, <span class="fu">bootstrap_fold_change</span>(gene_data))</span>
+<span id="cb10-27"><a href="#cb10-27"></a></span>
+<span id="cb10-28"><a href="#cb10-28"></a>  <span class="co"># Return summary statistics</span></span>
+<span id="cb10-29"><a href="#cb10-29"></a>  <span class="fu">tibble</span>(</span>
+<span id="cb10-30"><a href="#cb10-30"></a>    <span class="at">gene_id =</span> gene_id,</span>
+<span id="cb10-31"><a href="#cb10-31"></a>    <span class="at">mean_fc =</span> <span class="fu">mean</span>(boot_fcs),</span>
+<span id="cb10-32"><a href="#cb10-32"></a>    <span class="at">lower_ci =</span> <span class="fu">quantile</span>(boot_fcs, <span class="fl">0.025</span>),</span>
+<span id="cb10-33"><a href="#cb10-33"></a>    <span class="at">upper_ci =</span> <span class="fu">quantile</span>(boot_fcs, <span class="fl">0.975</span>)</span>
+<span id="cb10-34"><a href="#cb10-34"></a>  )</span>
+<span id="cb10-35"><a href="#cb10-35"></a>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+</section><section id="sec-compare-serial-vs-parallel" class="level3"><h3 class="anchored" data-anchor-id="sec-compare-serial-vs-parallel">Compare Serial vs Parallel</h3>
+<p>Let’s bootstrap confidence intervals for 20 genes:</p>
+<div class="cell" data-layout-align="center">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb11"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1"></a>genes_to_test <span class="ot">=</span> <span class="fu">paste0</span>(<span class="st">"gene_"</span>, <span class="dv">1</span><span class="sc">:</span><span class="dv">20</span>)</span>
+<span id="cb11-2"><a href="#cb11-2"></a></span>
+<span id="cb11-3"><a href="#cb11-3"></a><span class="co"># Serial version</span></span>
+<span id="cb11-4"><a href="#cb11-4"></a><span class="fu">tic</span>()</span>
+<span id="cb11-5"><a href="#cb11-5"></a>serial_boot <span class="ot">=</span> <span class="fu">map_dfr</span>(genes_to_test, run_bootstrap,</span>
+<span id="cb11-6"><a href="#cb11-6"></a>                      <span class="at">data =</span> expression_data, <span class="at">n_boot =</span> <span class="dv">500</span>)</span>
+<span id="cb11-7"><a href="#cb11-7"></a><span class="fu">toc</span>()</span>
+<span id="cb11-8"><a href="#cb11-8"></a><span class="co">#&gt; 16.867 sec elapsed</span></span>
+<span id="cb11-9"><a href="#cb11-9"></a></span>
+<span id="cb11-10"><a href="#cb11-10"></a><span class="co"># Parallel version</span></span>
+<span id="cb11-11"><a href="#cb11-11"></a><span class="fu">tic</span>()</span>
+<span id="cb11-12"><a href="#cb11-12"></a>parallel_boot <span class="ot">=</span> <span class="fu">future_map_dfr</span>(genes_to_test, run_bootstrap,</span>
+<span id="cb11-13"><a href="#cb11-13"></a>                                <span class="at">data =</span> expression_data, <span class="at">n_boot =</span> <span class="dv">500</span>,</span>
+<span id="cb11-14"><a href="#cb11-14"></a>                                <span class="at">.options =</span> <span class="fu">furrr_options</span>(<span class="at">seed =</span> <span class="cn">TRUE</span>))</span>
+<span id="cb11-15"><a href="#cb11-15"></a><span class="fu">toc</span>()</span>
+<span id="cb11-16"><a href="#cb11-16"></a><span class="co">#&gt; 2.828 sec elapsed</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p>The parallel version should be substantially faster, with speedup proportional to your core count.</p>
+</section><section id="sec-view-results" class="level3"><h3 class="anchored" data-anchor-id="sec-view-results">View Results</h3>
+<div class="cell" data-layout-align="center">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb12"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1"></a>parallel_boot <span class="sc">%&gt;%</span></span>
+<span id="cb12-2"><a href="#cb12-2"></a>  <span class="fu">mutate</span>(</span>
+<span id="cb12-3"><a href="#cb12-3"></a>    <span class="at">significant =</span> lower_ci <span class="sc">&gt;</span> <span class="dv">1</span> <span class="sc">|</span> upper_ci <span class="sc">&lt;</span> <span class="dv">1</span>,</span>
+<span id="cb12-4"><a href="#cb12-4"></a>    <span class="at">direction =</span> <span class="fu">case_when</span>(</span>
+<span id="cb12-5"><a href="#cb12-5"></a>      lower_ci <span class="sc">&gt;</span> <span class="dv">1</span> <span class="sc">~</span> <span class="st">"upregulated"</span>,</span>
+<span id="cb12-6"><a href="#cb12-6"></a>      upper_ci <span class="sc">&lt;</span> <span class="dv">1</span> <span class="sc">~</span> <span class="st">"downregulated"</span>,</span>
+<span id="cb12-7"><a href="#cb12-7"></a>      <span class="cn">TRUE</span> <span class="sc">~</span> <span class="st">"not significant"</span></span>
+<span id="cb12-8"><a href="#cb12-8"></a>    )</span>
+<span id="cb12-9"><a href="#cb12-9"></a>  ) <span class="sc">%&gt;%</span></span>
+<span id="cb12-10"><a href="#cb12-10"></a>  <span class="fu">head</span>(<span class="dv">10</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div class="kable-table">
+<table class="caption-top table table-sm table-striped small">
+<thead><tr class="header">
+<th style="text-align: left;">gene_id</th>
+<th style="text-align: right;">mean_fc</th>
+<th style="text-align: right;">lower_ci</th>
+<th style="text-align: right;">upper_ci</th>
+<th style="text-align: left;">significant</th>
+<th style="text-align: left;">direction</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">gene_1</td>
+<td style="text-align: right;">1.131773</td>
+<td style="text-align: right;">1.024564</td>
+<td style="text-align: right;">1.238272</td>
+<td style="text-align: left;">TRUE</td>
+<td style="text-align: left;">upregulated</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">gene_2</td>
+<td style="text-align: right;">1.172248</td>
+<td style="text-align: right;">1.048010</td>
+<td style="text-align: right;">1.295856</td>
+<td style="text-align: left;">TRUE</td>
+<td style="text-align: left;">upregulated</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">gene_3</td>
+<td style="text-align: right;">1.186548</td>
+<td style="text-align: right;">1.088120</td>
+<td style="text-align: right;">1.289473</td>
+<td style="text-align: left;">TRUE</td>
+<td style="text-align: left;">upregulated</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">gene_4</td>
+<td style="text-align: right;">1.183704</td>
+<td style="text-align: right;">1.054100</td>
+<td style="text-align: right;">1.320405</td>
+<td style="text-align: left;">TRUE</td>
+<td style="text-align: left;">upregulated</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">gene_5</td>
+<td style="text-align: right;">1.127931</td>
+<td style="text-align: right;">1.012363</td>
+<td style="text-align: right;">1.237380</td>
+<td style="text-align: left;">TRUE</td>
+<td style="text-align: left;">upregulated</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">gene_6</td>
+<td style="text-align: right;">1.131323</td>
+<td style="text-align: right;">1.031547</td>
+<td style="text-align: right;">1.240307</td>
+<td style="text-align: left;">TRUE</td>
+<td style="text-align: left;">upregulated</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">gene_7</td>
+<td style="text-align: right;">1.176178</td>
+<td style="text-align: right;">1.069463</td>
+<td style="text-align: right;">1.302288</td>
+<td style="text-align: left;">TRUE</td>
+<td style="text-align: left;">upregulated</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">gene_8</td>
+<td style="text-align: right;">1.178690</td>
+<td style="text-align: right;">1.031968</td>
+<td style="text-align: right;">1.313715</td>
+<td style="text-align: left;">TRUE</td>
+<td style="text-align: left;">upregulated</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">gene_9</td>
+<td style="text-align: right;">1.273898</td>
+<td style="text-align: right;">1.166305</td>
+<td style="text-align: right;">1.398772</td>
+<td style="text-align: left;">TRUE</td>
+<td style="text-align: left;">upregulated</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">gene_10</td>
+<td style="text-align: right;">1.265714</td>
+<td style="text-align: right;">1.126358</td>
+<td style="text-align: right;">1.420870</td>
+<td style="text-align: left;">TRUE</td>
+<td style="text-align: left;">upregulated</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+</section></section><section id="sec-fork-socket" class="level2" data-number="14.6"><h2 data-number="14.6" class="anchored" data-anchor-id="sec-fork-socket">
+<span class="header-section-number">14.6</span> Forking vs Sockets</h2>
+<p>There are two main approaches to parallelization:</p>
+<section id="sec-multisession" class="level3"><h3 class="anchored" data-anchor-id="sec-multisession">Socket-based (multisession)</h3>
+<ul>
+<li>Creates new R sessions for each worker</li>
+<li>Works on <strong>all operating systems</strong> including Windows</li>
+<li>Requires copying data to each worker (slower startup)</li>
+<li>Selected with <code>plan(multisession)</code>
+</li>
+</ul></section><section id="sec-multicore" class="level3"><h3 class="anchored" data-anchor-id="sec-multicore">Fork-based (multicore)</h3>
+<ul>
+<li>Clones the current R session</li>
+<li>Works on <strong>Unix/Mac only</strong> (not Windows)</li>
+<li>Shares memory with parent process (faster)</li>
+<li>Selected with <code>plan(multicore)</code>
+</li>
+<li>May cause issues in RStudio; run from terminal for best results</li>
+</ul>
+<div class="cell" data-layout-align="center">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb13"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1"></a><span class="co"># Safe choice for all systems</span></span>
+<span id="cb13-2"><a href="#cb13-2"></a><span class="fu">plan</span>(multisession)</span>
+<span id="cb13-3"><a href="#cb13-3"></a></span>
+<span id="cb13-4"><a href="#cb13-4"></a><span class="co"># Faster on Unix/Mac (run scripts from terminal)</span></span>
+<span id="cb13-5"><a href="#cb13-5"></a><span class="fu">plan</span>(multicore)</span>
+<span id="cb13-6"><a href="#cb13-6"></a></span>
+<span id="cb13-7"><a href="#cb13-7"></a><span class="co"># Specify number of workers</span></span>
+<span id="cb13-8"><a href="#cb13-8"></a><span class="fu">plan</span>(multisession, <span class="at">workers =</span> <span class="dv">4</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div class="callout callout-style-default callout-warning callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Warning
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>On Windows, <code>plan(multicore)</code> silently falls back to <code>plan(sequential)</code>. Always use <code>plan(multisession)</code> for cross-platform code.</p>
+</div>
+</div>
+</section></section><section id="sec-parallel-errors" class="level2" data-number="14.7"><h2 data-number="14.7" class="anchored" data-anchor-id="sec-parallel-errors">
+<span class="header-section-number">14.7</span> Handling Errors in Parallel Code</h2>
+<p>Errors in parallel code can be tricky to debug. The <strong>purrr</strong> package provides <code>safely()</code> and <code>possibly()</code> to handle errors gracefully:</p>
+<div class="cell" data-layout-align="center">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb14"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1"></a><span class="co"># A function that sometimes fails</span></span>
+<span id="cb14-2"><a href="#cb14-2"></a>risky_analysis <span class="ot">=</span> <span class="cf">function</span>(x) {</span>
+<span id="cb14-3"><a href="#cb14-3"></a>  <span class="cf">if</span> (x <span class="sc">==</span> <span class="dv">5</span>) <span class="fu">stop</span>(<span class="st">"Error processing sample 5!"</span>)</span>
+<span id="cb14-4"><a href="#cb14-4"></a>  <span class="fu">tibble</span>(<span class="at">sample =</span> x, <span class="at">result =</span> x<span class="sc">^</span><span class="dv">2</span>)</span>
+<span id="cb14-5"><a href="#cb14-5"></a>}</span>
+<span id="cb14-6"><a href="#cb14-6"></a></span>
+<span id="cb14-7"><a href="#cb14-7"></a><span class="co"># Wrap in safely() to catch errors</span></span>
+<span id="cb14-8"><a href="#cb14-8"></a>safe_analysis <span class="ot">=</span> <span class="fu">safely</span>(risky_analysis, <span class="at">otherwise =</span> <span class="cn">NULL</span>)</span>
+<span id="cb14-9"><a href="#cb14-9"></a></span>
+<span id="cb14-10"><a href="#cb14-10"></a><span class="co"># Run in parallel - won't crash if one fails</span></span>
+<span id="cb14-11"><a href="#cb14-11"></a>results <span class="ot">=</span> <span class="fu">future_map</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">10</span>, safe_analysis)</span>
+<span id="cb14-12"><a href="#cb14-12"></a></span>
+<span id="cb14-13"><a href="#cb14-13"></a><span class="co"># Extract successful results</span></span>
+<span id="cb14-14"><a href="#cb14-14"></a>successful <span class="ot">=</span> <span class="fu">map</span>(results, <span class="st">"result"</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb14-15"><a href="#cb14-15"></a>  <span class="fu">compact</span>() <span class="sc">%&gt;%</span>  <span class="co"># Remove NULLs</span></span>
+<span id="cb14-16"><a href="#cb14-16"></a></span>
+<span id="cb14-17"><a href="#cb14-17"></a>  <span class="fu">bind_rows</span>()</span>
+<span id="cb14-18"><a href="#cb14-18"></a></span>
+<span id="cb14-19"><a href="#cb14-19"></a><span class="co"># See which failed</span></span>
+<span id="cb14-20"><a href="#cb14-20"></a>errors <span class="ot">=</span> <span class="fu">map</span>(results, <span class="st">"error"</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb14-21"><a href="#cb14-21"></a>  <span class="fu">compact</span>()</span>
+<span id="cb14-22"><a href="#cb14-22"></a></span>
+<span id="cb14-23"><a href="#cb14-23"></a><span class="fu">cat</span>(<span class="st">"Successful:"</span>, <span class="fu">nrow</span>(successful), <span class="st">"</span><span class="sc">\n</span><span class="st">"</span>)</span>
+<span id="cb14-24"><a href="#cb14-24"></a><span class="co">#&gt; Successful: 9</span></span>
+<span id="cb14-25"><a href="#cb14-25"></a><span class="fu">cat</span>(<span class="st">"Failed:"</span>, <span class="fu">length</span>(errors), <span class="st">"</span><span class="sc">\n</span><span class="st">"</span>)</span>
+<span id="cb14-26"><a href="#cb14-26"></a><span class="co">#&gt; Failed: 1</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p>For simpler error handling, use <code>possibly()</code>:</p>
+<div class="cell" data-layout-align="center">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb15"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1"></a><span class="co"># Returns NA for failed cases</span></span>
+<span id="cb15-2"><a href="#cb15-2"></a>robust_analysis <span class="ot">=</span> <span class="fu">possibly</span>(risky_analysis, <span class="at">otherwise =</span> <span class="fu">tibble</span>(<span class="at">sample =</span> <span class="cn">NA</span>, <span class="at">result =</span> <span class="cn">NA</span>))</span>
+<span id="cb15-3"><a href="#cb15-3"></a></span>
+<span id="cb15-4"><a href="#cb15-4"></a><span class="fu">future_map_dfr</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">10</span>, robust_analysis)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div class="kable-table">
+<table class="caption-top table table-sm table-striped small">
+<thead><tr class="header">
+<th style="text-align: right;">sample</th>
+<th style="text-align: right;">result</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">1</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">2</td>
+<td style="text-align: right;">4</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">3</td>
+<td style="text-align: right;">9</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">4</td>
+<td style="text-align: right;">16</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">NA</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">6</td>
+<td style="text-align: right;">36</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">7</td>
+<td style="text-align: right;">49</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">8</td>
+<td style="text-align: right;">64</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">9</td>
+<td style="text-align: right;">81</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">10</td>
+<td style="text-align: right;">100</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+</section><section id="sec-caching" class="level2" data-number="14.8"><h2 data-number="14.8" class="anchored" data-anchor-id="sec-caching">
+<span class="header-section-number">14.8</span> Caching Results</h2>
+<p>For expensive computations, cache intermediate results so you don’t have to recompute them:</p>
+<div class="cell" data-layout-align="center">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb16"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1"></a><span class="fu">library</span>(memoise)</span>
+<span id="cb16-2"><a href="#cb16-2"></a></span>
+<span id="cb16-3"><a href="#cb16-3"></a><span class="co"># Create a slow function</span></span>
+<span id="cb16-4"><a href="#cb16-4"></a>slow_gc_analysis <span class="ot">=</span> <span class="cf">function</span>(sequence) {</span>
+<span id="cb16-5"><a href="#cb16-5"></a>  <span class="fu">Sys.sleep</span>(<span class="dv">1</span>)  <span class="co"># Simulate slow computation</span></span>
+<span id="cb16-6"><a href="#cb16-6"></a>  <span class="fu">tibble</span>(</span>
+<span id="cb16-7"><a href="#cb16-7"></a>    <span class="at">sequence =</span> sequence,</span>
+<span id="cb16-8"><a href="#cb16-8"></a>    <span class="at">gc_content =</span> <span class="fu">str_count</span>(<span class="fu">toupper</span>(sequence), <span class="st">"[GC]"</span>) <span class="sc">/</span> <span class="fu">nchar</span>(sequence)</span>
+<span id="cb16-9"><a href="#cb16-9"></a>  )</span>
+<span id="cb16-10"><a href="#cb16-10"></a>}</span>
+<span id="cb16-11"><a href="#cb16-11"></a></span>
+<span id="cb16-12"><a href="#cb16-12"></a><span class="co"># Create memoised version</span></span>
+<span id="cb16-13"><a href="#cb16-13"></a>memo_gc_analysis <span class="ot">=</span> <span class="fu">memoise</span>(slow_gc_analysis)</span>
+<span id="cb16-14"><a href="#cb16-14"></a></span>
+<span id="cb16-15"><a href="#cb16-15"></a><span class="co"># First call - slow</span></span>
+<span id="cb16-16"><a href="#cb16-16"></a><span class="fu">tic</span>()</span>
+<span id="cb16-17"><a href="#cb16-17"></a>result1 <span class="ot">=</span> <span class="fu">memo_gc_analysis</span>(<span class="st">"ATGCGATCGATCG"</span>)</span>
+<span id="cb16-18"><a href="#cb16-18"></a><span class="fu">toc</span>()</span>
+<span id="cb16-19"><a href="#cb16-19"></a><span class="co">#&gt; 1.008 sec elapsed</span></span>
+<span id="cb16-20"><a href="#cb16-20"></a></span>
+<span id="cb16-21"><a href="#cb16-21"></a><span class="co"># Second call with same input - instant (cached)</span></span>
+<span id="cb16-22"><a href="#cb16-22"></a><span class="fu">tic</span>()</span>
+<span id="cb16-23"><a href="#cb16-23"></a>result2 <span class="ot">=</span> <span class="fu">memo_gc_analysis</span>(<span class="st">"ATGCGATCGATCG"</span>)</span>
+<span id="cb16-24"><a href="#cb16-24"></a><span class="fu">toc</span>()</span>
+<span id="cb16-25"><a href="#cb16-25"></a><span class="co">#&gt; 0.008 sec elapsed</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<section id="sec-persistent-caching" class="level3"><h3 class="anchored" data-anchor-id="sec-persistent-caching">Persistent Caching</h3>
+<p>To cache results across R sessions (useful for long analyses):</p>
+<div class="cell" data-layout-align="center">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb17"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1"></a><span class="co"># Create a cache directory</span></span>
+<span id="cb17-2"><a href="#cb17-2"></a>cache_dir <span class="ot">=</span> <span class="st">"analysis_cache"</span></span>
+<span id="cb17-3"><a href="#cb17-3"></a><span class="cf">if</span> (<span class="sc">!</span><span class="fu">dir.exists</span>(cache_dir)) <span class="fu">dir.create</span>(cache_dir)</span>
+<span id="cb17-4"><a href="#cb17-4"></a></span>
+<span id="cb17-5"><a href="#cb17-5"></a><span class="co"># Create memoised function with persistent cache</span></span>
+<span id="cb17-6"><a href="#cb17-6"></a>memo_gc_persistent <span class="ot">=</span> <span class="fu">memoise</span>(</span>
+<span id="cb17-7"><a href="#cb17-7"></a>  slow_gc_analysis,</span>
+<span id="cb17-8"><a href="#cb17-8"></a>  <span class="at">cache =</span> <span class="fu">cache_filesystem</span>(cache_dir)</span>
+<span id="cb17-9"><a href="#cb17-9"></a>)</span>
+<span id="cb17-10"><a href="#cb17-10"></a></span>
+<span id="cb17-11"><a href="#cb17-11"></a><span class="co"># Results will be saved to disk and available in future sessions</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+</section></section><section id="sec-when-parallel" class="level2" data-number="14.9"><h2 data-number="14.9" class="anchored" data-anchor-id="sec-when-parallel">
+<span class="header-section-number">14.9</span> When to Use Parallel Computing</h2>
+<p>Parallel computing isn’t always faster. Consider:</p>
+<section id="sec-good-candidates-for-parallelization" class="level3"><h3 class="anchored" data-anchor-id="sec-good-candidates-for-parallelization">Good Candidates for Parallelization</h3>
+<ul>
+<li>
+<strong>Independent iterations</strong>: Each iteration doesn’t depend on others</li>
+<li>
+<strong>CPU-intensive tasks</strong>: Complex calculations, simulations</li>
+<li>
+<strong>Many iterations</strong>: Overhead is amortized across many runs</li>
+<li>
+<strong>Long-running operations</strong>: Minutes or hours of total computation</li>
+</ul></section><section id="sec-poor-candidates" class="level3"><h3 class="anchored" data-anchor-id="sec-poor-candidates">Poor Candidates</h3>
+<ul>
+<li>
+<strong>Fast operations</strong>: Overhead exceeds computation time</li>
+<li>
+<strong>Few iterations</strong>: Not enough work to distribute</li>
+<li>
+<strong>Memory-intensive</strong>: Each worker needs its own copy of data</li>
+<li>
+<strong>I/O bound</strong>: Waiting for disk/network, not CPU</li>
+</ul></section><section id="sec-amdahls-law" class="level3"><h3 class="anchored" data-anchor-id="sec-amdahls-law">Amdahl’s Law</h3>
+<p>The maximum speedup from parallelization is limited by the sequential portion of your code. If 50% of your code must run sequentially, you can never achieve more than 2× speedup, regardless of core count (<a href="#fig-amdahl" class="quarto-xref">Figure&nbsp;<span>14.1</span></a>).</p>
+<div class="cell" data-layout-align="center">
+<div class="cell-output-display">
+<div id="fig-amdahl" class="quarto-float quarto-figure quarto-figure-center anchored" data-fig-align="center">
+<figure class="quarto-float quarto-float-fig figure"><div aria-describedby="fig-amdahl-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="14-parallel-computing_files/figure-html/fig-amdahl-1.png" class="img-fluid quarto-figure quarto-figure-center figure-img" style="width:100.0%">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-amdahl-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;14.1: Amdahl’s law: speedup as a function of core count for different parallel fractions
+</figcaption></figure>
+</div>
+</div>
+</div>
+</section></section><section id="sec-parallel-best-practices" class="level2" data-number="14.10"><h2 data-number="14.10" class="anchored" data-anchor-id="sec-parallel-best-practices">
+<span class="header-section-number">14.10</span> Best Practices</h2>
+<section id="sec-par-start-sequential" class="level3"><h3 class="anchored" data-anchor-id="sec-par-start-sequential">1. Start Sequential, Then Parallelize</h3>
+<p>Always develop and debug your code in sequential mode first:</p>
+<div class="cell" data-layout-align="center">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb18"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1"></a><span class="co"># Debug with sequential execution</span></span>
+<span id="cb18-2"><a href="#cb18-2"></a><span class="fu">plan</span>(sequential)</span>
+<span id="cb18-3"><a href="#cb18-3"></a></span>
+<span id="cb18-4"><a href="#cb18-4"></a><span class="co"># Test with a small subset</span></span>
+<span id="cb18-5"><a href="#cb18-5"></a>test_results <span class="ot">=</span> <span class="fu">map_dfr</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">3</span>, my_analysis_function)</span>
+<span id="cb18-6"><a href="#cb18-6"></a></span>
+<span id="cb18-7"><a href="#cb18-7"></a><span class="co"># Once working, switch to parallel</span></span>
+<span id="cb18-8"><a href="#cb18-8"></a><span class="fu">plan</span>(multisession)</span>
+<span id="cb18-9"><a href="#cb18-9"></a>full_results <span class="ot">=</span> <span class="fu">future_map_dfr</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">1000</span>, my_analysis_function)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+</section><section id="sec-par-random-seeds" class="level3"><h3 class="anchored" data-anchor-id="sec-par-random-seeds">2. Set Random Seeds</h3>
+<p>For reproducible parallel simulations:</p>
+<div class="cell" data-layout-align="center">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb19"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1"></a><span class="co"># future.apply</span></span>
+<span id="cb19-2"><a href="#cb19-2"></a><span class="fu">future_lapply</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">10</span>, my_function, <span class="at">future.seed =</span> <span class="dv">123</span>)</span>
+<span id="cb19-3"><a href="#cb19-3"></a></span>
+<span id="cb19-4"><a href="#cb19-4"></a><span class="co"># furrr</span></span>
+<span id="cb19-5"><a href="#cb19-5"></a><span class="fu">future_map</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">10</span>, my_function, <span class="at">.options =</span> <span class="fu">furrr_options</span>(<span class="at">seed =</span> <span class="dv">123</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+</section><section id="sec-par-monitor-progress" class="level3"><h3 class="anchored" data-anchor-id="sec-par-monitor-progress">3. Monitor Progress</h3>
+<p>Use progress bars to track long-running parallel jobs:</p>
+<div class="cell" data-layout-align="center">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb20"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1"></a><span class="fu">library</span>(progressr)</span>
+<span id="cb20-2"><a href="#cb20-2"></a></span>
+<span id="cb20-3"><a href="#cb20-3"></a><span class="fu">handlers</span>(<span class="st">"txtprogressbar"</span>)</span>
+<span id="cb20-4"><a href="#cb20-4"></a></span>
+<span id="cb20-5"><a href="#cb20-5"></a><span class="fu">with_progress</span>({</span>
+<span id="cb20-6"><a href="#cb20-6"></a>  p <span class="ot">=</span> <span class="fu">progressor</span>(<span class="at">steps =</span> <span class="dv">100</span>)</span>
+<span id="cb20-7"><a href="#cb20-7"></a></span>
+<span id="cb20-8"><a href="#cb20-8"></a>  results <span class="ot">=</span> <span class="fu">future_map</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">100</span>, <span class="cf">function</span>(x) {</span>
+<span id="cb20-9"><a href="#cb20-9"></a>    <span class="fu">p</span>()  <span class="co"># Signal progress</span></span>
+<span id="cb20-10"><a href="#cb20-10"></a>    <span class="fu">slow_function</span>(x)</span>
+<span id="cb20-11"><a href="#cb20-11"></a>  })</span>
+<span id="cb20-12"><a href="#cb20-12"></a>})</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+</section><section id="sec-par-manage-memory" class="level3"><h3 class="anchored" data-anchor-id="sec-par-manage-memory">4. Manage Memory</h3>
+<p>Each parallel worker needs memory for: - A copy of R - Any data passed to the function - Results being computed</p>
+<p>If you run out of memory, reduce the number of workers:</p>
+<div class="cell" data-layout-align="center">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb21"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1"></a><span class="co"># Use fewer workers for memory-intensive tasks</span></span>
+<span id="cb21-2"><a href="#cb21-2"></a><span class="fu">plan</span>(multisession, <span class="at">workers =</span> <span class="dv">2</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+</section><section id="sec-parallel-to-cluster" class="level3"><h3 class="anchored" data-anchor-id="sec-parallel-to-cluster">5. Know When to Leave Your Laptop</h3>
+<p>Everything in this chapter parallelizes <em>within one machine</em>: <code>plan(multisession, workers = 8)</code> cannot use more cores than your laptop has, and every worker shares its memory. When a job needs more cores, more memory, or more hours than that, the next step is a cluster (<a href="11-hpc-talapas.html" class="quarto-xref"><span>Chapter 20</span></a>), where the SLURM scheduler <span class="citation" data-cites="yoo2003slurm">(<a href="../references.html#ref-yoo2003slurm" role="doc-biblioref">Yoo et al., 2003</a>)</span> hands your script a slice of a compute node. The R code needs almost no change, but two habits matter:</p>
+<ul>
+<li>
+<strong>Ask <code>future</code> for the cores SLURM gave you, not the cores the node has.</strong> On a shared node <code><a href="https://rdrr.io/r/parallel/detectCores.html">parallel::detectCores()</a></code> reports the whole machine (often 128 cores), so use the allocation instead (see <a href="11-hpc-talapas.html#tbl-slurm-env-vars" class="quarto-xref">Table&nbsp;<span>20.5</span></a>): <code>plan(multisession, workers = as.integer(Sys.getenv("SLURM_CPUS_PER_TASK", "1")))</code>. Use <code>multisession</code>, not <code>multicore</code>, inside a batch job unless you have verified forking works with your packages.</li>
+<li>
+<strong>Scale <em>out</em> with job arrays rather than <em>up</em> with more workers.</strong> Many independent samples are better submitted as a SLURM job array (<a href="11-hpc-talapas.html#sec-hpc-job-arrays" class="quarto-xref"><span>Section 20.14.3</span></a>), one R process per sample, each with its own memory limit and log, than as one giant <code>future_map()</code> on one node. To make that R process reproducible on any machine, package its dependencies with <code>renv</code> or run it inside an Apptainer container <span class="citation" data-cites="kurtzer2017singularity">(<a href="../references.html#ref-kurtzer2017singularity" role="doc-biblioref">Kurtzer et al., 2017</a>)</span>, the cluster-safe counterpart of Docker <span class="citation" data-cites="merkel2014docker">(<a href="../references.html#ref-merkel2014docker" role="doc-biblioref">Merkel, 2014</a>)</span>.</li>
+</ul></section></section><section id="sec-parallel-summary" class="level2" data-number="14.11"><h2 data-number="14.11" class="anchored" data-anchor-id="sec-parallel-summary">
+<span class="header-section-number">14.11</span> Summary</h2>
+<p>Parallel computing can dramatically speed up computationally intensive analyses:</p>
+<ul>
+<li>The <strong>future</strong> ecosystem provides a simple, unified approach to parallelization</li>
+<li>Use <code>plan(multisession)</code> for cross-platform compatibility</li>
+<li>Replace <code><a href="https://rdrr.io/r/base/lapply.html">lapply()</a></code> with <code>future_lapply()</code> or <code>map()</code> with <code>future_map()</code>
+</li>
+<li>Always develop in sequential mode first, then parallelize</li>
+<li>Use <code>safely()</code> or <code>possibly()</code> to handle errors gracefully</li>
+<li>Cache expensive results with <strong>memoise</strong> for persistent storage</li>
+<li>Consider Amdahl’s law: not everything benefits from parallelization</li>
+</ul>
+<p>Parallel programming in R has never been easier. With just a few lines of code, you can harness all your computer’s cores for faster, more efficient analyses.</p>
+<div class="callout callout-style-default callout-tip callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Tip
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>For reference on R functions used in parallel computing workflows, see <a href="appendix-r.html" class="quarto-xref"><span>Appendix C</span></a>.</p>
+</div>
+</div>
+</section><section id="sec-par-exercises" class="level2 unnumbered"><h2 class="unnumbered anchored" data-anchor-id="sec-par-exercises">Exercises</h2>
+<div class="callout callout-style-default callout-tip callout-titled" title="Practice Exercises">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Tip</span>Practice Exercises
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p><strong>Exercise 1: Basic Parallelization</strong></p>
+<p>Write a function that simulates processing a biological sample (include a <code>Sys.sleep(1)</code> to simulate processing time). Use <code>future_lapply()</code> to process 10 samples in parallel and compare the time to serial execution.</p>
+<p><strong>Exercise 2: Bootstrap Analysis</strong></p>
+<p>Using the gene expression simulation from this chapter: 1. Write a function to bootstrap the mean expression of a single gene 2. Apply it in parallel to 50 genes 3. Calculate 95% confidence intervals for each gene</p>
+<p><strong>Exercise 3: Error Handling</strong></p>
+<p>Create a function that analyzes DNA sequences but fails if the sequence contains invalid characters. Use <code>safely()</code> to process a list of sequences where some are invalid, and report which ones failed.</p>
+<p><strong>Exercise 4: Parameter Sweep</strong></p>
+<p>Write a function that simulates bacterial growth with parameters for growth rate (k), carrying capacity (K), and initial population (n0). Use parallel computing to run simulations across a grid of parameter combinations.</p>
+<p><strong>Exercise 5: Caching</strong></p>
+<p>Create a memoised version of a “slow” function that calculates protein properties. Demonstrate that repeated calls with the same input are instant.</p>
+<p><strong>Exercise 6: Benchmarking</strong></p>
+<p>For a computationally intensive task of your choice: 1. Time the serial version 2. Time the parallel version with 2, 4, and 8 workers 3. Calculate the speedup factor for each 4. Does the speedup match what you’d expect from Amdahl’s law?</p>
+</div>
+</div>
+</section><section id="sec-par-additional-reading" class="level2 unnumbered"><h2 class="unnumbered anchored" data-anchor-id="sec-par-additional-reading">Additional Reading</h2>
+<ul>
+<li><a href="https://future.futureverse.org/">future package documentation</a></li>
+<li><a href="https://furrr.futureverse.org/">furrr package documentation</a></li>
+<li>
+<a href="https://arxiv.org/abs/1912.11144">Parallel Computing with R: A Brief Review</a> by Dirk Eddelbuettel</li>
+<li>
+<a href="https://r4ds.had.co.nz/iteration.html">R for Data Science: Iteration</a> chapter on functional programming</li>
+</ul>
+
+
+<div id="refs" class="references csl-bib-body hanging-indent" data-entry-spacing="0" data-line-spacing="2" role="list" style="display: none">
+<div id="ref-kurtzer2017singularity" class="csl-entry" role="listitem">
+Kurtzer, G. M., Sochat, V., &amp; Bauer, M. W. (2017). <a href="https://doi.org/10.1371/journal.pone.0177459">Singularity: Scientific containers for mobility of compute</a>.
+</div>
+<div id="ref-merkel2014docker" class="csl-entry" role="listitem">
+Merkel, D. (2014). Docker: Lightweight linux containers for consistent development and deployment.
+</div>
+<div id="ref-yoo2003slurm" class="csl-entry" role="listitem">
+Yoo, A. B., Jette, M. A., &amp; Grondona, M. (2003). <a href="https://doi.org/10.1007/10968987_3">SLURM: Simple linux utility for resource management</a>.
+</div>
+</div>
+</section></main><!-- /main --><script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    // Ensure there is a toggle, if there isn't float one in the top right
+    if (window.document.querySelector('.quarto-color-scheme-toggle') === null) {
+      const a = window.document.createElement('a');
+      a.classList.add('top-right');
+      a.classList.add('quarto-color-scheme-toggle');
+      a.href = "";
+      a.onclick = function() { try { window.quartoToggleColorScheme(); } catch {} return false; };
+      const i = window.document.createElement("i");
+      i.classList.add('bi');
+      a.appendChild(i);
+      window.document.body.appendChild(a);
+    }
+    setColorSchemeToggle(hasAlternateSentinel())
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+            // target, if specified
+            link.setAttribute("target", "_blank");
+            if (link.getAttribute("rel") === null) {
+              link.setAttribute("rel", "noopener");
+            }
+            // default icon
+            link.classList.add("external");
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        const annoteTargets = window.document.querySelectorAll('.code-annotation-anchor');
+        for (let i=0; i<annoteTargets.length; i++) {
+          const annoteTarget = annoteTargets[i];
+          const targetCell = annoteTarget.getAttribute("data-target-cell");
+          const targetAnnotation = annoteTarget.getAttribute("data-target-annotation");
+          const contentFn = () => {
+            const content = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+            if (content) {
+              const tipContent = content.cloneNode(true);
+              tipContent.classList.add("code-annotation-tip-content");
+              return tipContent.outerHTML;
+            }
+          }
+          const config = {
+            allowHTML: true,
+            content: contentFn,
+            onShow: (instance) => {
+              selectCodeLines(instance.reference);
+              instance.reference.classList.add('code-annotation-active');
+              window.tippy.hideAll();
+            },
+            onHide: (instance) => {
+              unselectCodeLines();
+              instance.reference.classList.remove('code-annotation-active');
+            },
+            maxWidth: 300,
+            delay: [50, 0],
+            duration: [200, 0],
+            offset: [5, 10],
+            arrow: true,
+            appendTo: function(el) {
+              return el.parentElement.parentElement.parentElement;
+            },
+            interactive: true,
+            interactiveBorder: 10,
+            theme: 'quarto',
+            placement: 'right',
+            popperOptions: {
+              modifiers: [
+              {
+                name: 'flip',
+                options: {
+                  flipVariations: false, // true by default
+                  allowedAutoPlacements: ['right'],
+                  fallbackPlacements: ['right', 'top', 'top-start', 'top-end', 'bottom', 'bottom-start', 'bottom-end', 'left'],
+                },
+              },
+              {
+                name: 'preventOverflow',
+                options: {
+                  mainAxis: false,
+                  altAxis: false
+                }
+              }
+              ]        
+            }      
+          };
+          window.tippy(annoteTarget, config); 
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script><nav class="page-navigation"><div class="nav-page nav-page-previous">
+      <a href="../chapters/13-writing-functions.html" class="pagination-link" aria-label="Writing Functions in R">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">13</span>&nbsp; <span class="chapter-title">Writing Functions in R</span></span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+      <a href="../chapters/15-databases.html" class="pagination-link" aria-label="Working with Databases">
+        <span class="nav-page-text"><span class="chapter-number">15</span>&nbsp; <span class="chapter-title">Working with Databases</span></span> <i class="bi bi-arrow-right-short"></i>
+      </a>
+  </div>
+</nav>
+</div> <!-- /content -->
+<footer class="footer"><div class="nav-footer">
+    <div class="nav-footer-left">
+<p>© 2026 William A. Cresko | Knight Campus for Accelerating Scientific Impact</p>
+</div>   
+    <div class="nav-footer-center">
+      &nbsp;
+    <div class="toc-actions d-sm-block d-md-none"><ul><li><a href="https://github.com/wcresko/BioE_Comp_Tools_Fa2026/edit/main/Book/chapters/14-parallel-computing.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li><li><a href="https://github.com/wcresko/BioE_Comp_Tools_Fa2026/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></div>
+    <div class="nav-footer-right">
+<p><a href="https://wcresko.github.io/BioE_Comp_Tools_Fa2026/">Course website</a> | Built with <a href="https://quarto.org/">Quarto</a></p>
+</div>
+  </div>
+</footer>
+
+
+</body></html>
