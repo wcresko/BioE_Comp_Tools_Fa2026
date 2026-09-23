@@ -199,7 +199,7 @@
 
 <section id="title-slide" class="quarto-title-block center">
   <h1 class="title">Lecture 03 - Computational Tools for Bioengineers</h1>
-  <p class="subtitle">Unix Navigation, Files, Pipes and Tidy Data</p>
+  <p class="subtitle">Data Streams, Large Genomic Files, GREP and Regular Expressions</p>
 
 <div class="quarto-title-authors">
 <div class="quarto-title-author">
@@ -215,217 +215,38 @@ Bill Cresko
 <h2>Book reading for this lecture</h2>
 <p>The course book goes deeper on everything in this lecture. Read before or after class:</p>
 <ul>
-<li><a href="../book/chapters/05-unix-fundamentals.html">Ch. 5: Unix Fundamentals</a></li>
-<li><a href="../book/chapters/06-files-pipes.html">Ch. 6: Files, Pipes, and Redirection</a></li>
-<li><a href="../book/chapters/11-tidy-data.html">Ch. 11: Tidy Data Principles</a></li>
-<li><em>Reference:</em> <a href="../book/chapters/appendix-A-unix.html">App. A: Unix Command Reference</a></li>
+<li><a href="../book/chapters/07-files-pipes.html">Ch. 7: Files, Pipes, and Redirection</a></li>
+<li><a href="../book/chapters/09-grep-regex.html">Ch. 9: GREP and Regular Expressions</a></li>
+<li><em>Reference:</em> <a href="../book/chapters/appendix-C-data-formats.html">App. C: Common Data Formats &amp; Public Repositories</a> · <a href="../book/chapters/appendix-D-regex.html">App. D: Regular Expression Reference</a></li>
 </ul>
 </section>
 <section id="goals-for-today" class="slide level2">
 <h2>Goals for today</h2>
 <ul>
-<li>Deeper dive into Unix tools</li>
-<li>Reading and writing files</li>
-<li>Tidy data</li>
-<li>Advanced Unix tools to manipulate large files</li>
+<li>Unix standard streams and redirection</li>
+<li>Working with large genomic data files (FASTA and FASTQ)</li>
+<li>GREP and regular expressions</li>
+<li>Working with compressed files; search-and-replace with <code>sed</code></li>
 </ul>
 </section>
 <section>
-<section id="computational-tools---the-command-line" class="title-slide slide level1 center">
-<h1>Computational Tools - The Command Line</h1>
+<section id="the-command-line" class="title-slide slide level1 center">
+<h1>The Command Line</h1>
 
 <img data-src="images/Lec02_img002.jpeg" class="quarto-figure quarto-figure-center r-stretch" style="width:90.0%"></section>
-<section id="what-is-unix" class="slide level2">
-<h2>What is Unix?</h2>
-<ul>
-<li>An operating system developed at Bell Labs in 1969, released in 1973</li>
-<li>Now a family of operating systems: Linux, macOS, and others share the Unix design</li>
-<li>Runs both locally on your computer and on large clusters like Talapas</li>
-<li>Its <strong>shell</strong> gives you a scripting language for talking to the operating system</li>
-<li>Linux is an open-source operating system built on the same design</li>
-</ul>
-</section>
-<section id="what-is-a-shell" class="slide level2" data-background-image="images/Lec02_img003.jpeg">
-<h2>What is a shell?</h2>
-<ul>
-<li><p>The ‘shell’ is a program that runs UNIX and takes in commands and gives them to the operating system</p></li>
-<li><p><strong><code>bash</code></strong> (Linux, WSL, Talapas) and <strong><code>zsh</code></strong> (macOS default) are the common shells - nearly identical for our purposes</p></li>
-<li><p>You can access the shell via a <strong><code>terminal window</code></strong></p></li>
-</ul>
-</section>
-<section id="section" class="slide level2" data-background-image="images/Lec02_img003.jpeg">
-<h2></h2>
-
-<img data-src="images/Lec02_img004.jpeg" class="quarto-figure quarto-figure-center r-stretch" style="width:90.0%"></section>
-<section id="recipes-for-a-shell-command" class="slide level2">
-<h2>Recipes for a shell command</h2>
-<ul>
-<li><strong>Prompt</strong>: notation used to indicate your computer is ready to accept a new command</li>
-<li><strong>Command</strong>: the building blocks of programming, tell computer to do a specific task</li>
-<li><strong>Options</strong>: change the behavior of a command</li>
-<li><strong>Argument</strong>: what the command should operate on</li>
-</ul>
-
-<img data-src="images/Lec00_img006.svg" class="quarto-figure quarto-figure-center r-stretch" style="width:80.0%"></section>
-<section id="why-use-the-shell" class="slide level2">
-<h2>Why use the shell?</h2>
-<ul>
-<li class="fragment">Speed</li>
-<li class="fragment">Can handle extremely large file sizes</li>
-<li class="fragment">Use programs only available via shell</li>
-<li class="fragment">The commands work almost identically across platforms</li>
-<li class="fragment">You can even use them on a large computer cluster like Talapas and AWS</li>
-<li class="fragment">It is incredibly powerful particularly for repeated actions</li>
-<li class="fragment">It allows you to do thousands of ‘clicks’ with single commands</li>
-</ul>
-</section>
-<section id="where-do-you-get-help" class="slide level2">
-<h2>Where do you get help?</h2>
-<ul>
-<li>Manual pages!
-<ul>
-<li>The shell has manuals for all basic commands</li>
-<li>Type <code>man [command_name]</code> to access the manual for a specific command</li>
-<li>Type <code>q</code> to exit</li>
-</ul></li>
-<li>Also…the internet!</li>
-<li>Also… Generative AI (ChatGPT, Claude, etc.)</li>
-</ul>
-</section></section>
-<section>
-<section id="common-navigation-commands" class="title-slide slide level1 center">
-<h1>Common navigation commands</h1>
-
-<img data-src="images/Lec03_img001.jpeg" class="quarto-figure quarto-figure-center r-stretch" style="width:90.0%"></section>
-<section id="section-1" class="slide level2">
-<h2></h2>
-
-<img data-src="images/Lec03_img002.jpeg" class="quarto-figure quarto-figure-center r-stretch" style="width:90.0%"></section>
-<section id="the-way-you-normally-navigate" class="slide level2">
-<h2>The way you normally navigate</h2>
-
-<img data-src="images/Lec03_img003.jpeg" class="quarto-figure quarto-figure-center r-stretch" style="width:90.0%"></section>
-<section id="section-2" class="slide level2">
-<h2></h2>
-
-<img data-src="images/Lec03_img004.jpeg" class="quarto-figure quarto-figure-center r-stretch" style="width:90.0%"></section>
-<section id="how-is-a-computer-organized" class="slide level2">
-<h2>How is a computer organized?</h2>
-<ul>
-<li>System of directories (folders) and files</li>
-<li>/ = the root directory, which holds all other directories</li>
-<li>Most of your files will be located under /Users in a directory of your username</li>
-<li>the <code>~</code> is shorthand for your home folder</li>
-<li>Navigation in the shell consists of jumping up and down between directories and seeing what’s in them</li>
-<li>The “path” refers to the location a file is in
-<ul>
-<li>ex: “/Users/wcresko/Documents”</li>
-</ul></li>
-</ul>
-
-<img data-src="images/Lec03_img005.svg" class="quarto-figure quarto-figure-center r-stretch" style="width:100.0%"></section>
-<section id="the-unix-file-hierarchy" class="slide level2">
-<h2>The Unix file hierarchy</h2>
-
-<img data-src="images/Lec00_img004.svg" class="quarto-figure quarto-figure-center r-stretch" style="width:90.0%"></section>
-<section id="paths---the-address-of-a-file-in-the-tree" class="slide level2">
-<h2>Paths - the address of a file in the tree</h2>
-
-<img data-src="images/Lec00_img005.svg" class="quarto-figure quarto-figure-center r-stretch" style="width:90.0%"></section>
-<section id="special-files---the-dot-entries" class="slide level2">
-<h2>Special files - the ‘dot’ entries</h2>
-
-<img data-src="images/Lec03_img006.svg" class="quarto-figure quarto-figure-center r-stretch" style="width:90.0%"></section>
-<section id="refers-to-the-directory-you-are-in" class="slide level2">
-<h2><code>.</code> refers to the directory you are in</h2>
-
-<img data-src="images/Lec03_img007.svg" class="quarto-figure quarto-figure-center r-stretch" style="width:90.0%"></section>
-<section id="refers-to-the-parent-directory" class="slide level2">
-<h2><code>..</code> refers to the parent directory</h2>
-
-<img data-src="images/Lec03_img008.svg" class="quarto-figure quarto-figure-center r-stretch" style="width:90.0%"></section>
-<section id="navigating-with-.." class="slide level2">
-<h2>Navigating with <code>..</code></h2>
-
-<img data-src="images/Lec00_img007.svg" class="quarto-figure quarto-figure-center r-stretch" style="width:90.0%"></section>
-<section id="relative-vs.-absolute-paths" class="slide level2">
-<h2>Relative vs.&nbsp;absolute paths</h2>
-<div class="panel-tabset">
-<ul id="tabset-1" class="panel-tabset-tabby"><li><a data-tabby-default="" href="#tabset-1-1">Concept</a></li><li><a href="#tabset-1-2">Examples</a></li></ul>
-<div class="tab-content">
-<div id="tabset-1-1">
-<ul>
-<li><strong>Absolute path</strong>: the full path from the root <code>/</code> (e.g., <code>/Users/wcresko/Documents</code>) - works from anywhere</li>
-<li><strong>Relative path</strong>: the path from where you are right now (e.g., <code>../Documents</code>) - portable, but depends on your current directory</li>
-<li><code>.</code> refers to the current directory</li>
-<li><code>..</code> refers to the parent directory</li>
-<li><code>~</code> refers to your home directory</li>
-</ul>
-</div>
-<div id="tabset-1-2">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb1-1"><a></a><span class="co"># Absolute path</span></span>
-<span id="cb1-2"><a></a><span class="bu">cd</span> /Users/wcresko/Documents</span>
-<span id="cb1-3"><a></a></span>
-<span id="cb1-4"><a></a><span class="co"># Relative paths</span></span>
-<span id="cb1-5"><a></a><span class="bu">cd</span> ..           <span class="co"># Go up one directory</span></span>
-<span id="cb1-6"><a></a><span class="bu">cd</span> ./data       <span class="co"># Go into data directory (same as cd data)</span></span>
-<span id="cb1-7"><a></a><span class="bu">cd</span> ../scripts   <span class="co"># Go up one, then into scripts</span></span>
-<span id="cb1-8"><a></a><span class="bu">cd</span> ~            <span class="co"># Go to home directory</span></span>
-<span id="cb1-9"><a></a><span class="bu">cd</span> <span class="at">-</span>            <span class="co"># Go to previous directory</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</div>
-</div>
-</div>
-</section>
-<section id="common-navigation-commands-1" class="slide level2">
-<h2>Common navigation commands</h2>
-<ul>
-<li class="fragment"><strong><code>pwd</code></strong> = “print working directory”, which will print where you currently are in the system</li>
-<li class="fragment"><strong><code>ls</code></strong> = “list”, list all directories and files in your current position
-<ul>
-<li class="fragment"><code>ls –F</code> = denote which results are directories, files, etc.</li>
-<li class="fragment"><code>ls –l</code> = ”long format”, lists total file sizes</li>
-<li class="fragment"><code>ls –r</code> = “reverse”, lists the results in reverse order</li>
-<li class="fragment"><code>ls –S</code> = “size”, sort results by size</li>
-<li class="fragment"><code>ls –t</code> = “time”, sort results by time created, from most recent to last</li>
-</ul></li>
-</ul>
-</section>
-<section id="common-navigation-commands-2" class="slide level2">
-<h2>Common Navigation Commands</h2>
-<ul>
-<li><code>cd</code> = “change directory”, will place you in a new position based on your path argument
-<ul>
-<li><code>cd ..</code> “go up one directory”</li>
-<li><code>cd –</code> “go to the directory you were at last (like the back arrow on an internet browser)”</li>
-<li><code>cd ~</code> “go to my home directory”</li>
-</ul></li>
-</ul>
-</section>
-<section id="lets-practice" class="slide level2">
-<h2>Let’s practice!</h2>
-<ul>
-<li>Try navigating around your computer using <code>cd</code> and <code>ls</code></li>
-<li>If you are on Ubuntu, you may need to create some empty directories in your Ubuntu folder before navigating in the terminal</li>
-</ul>
-</section></section>
-<section>
-<section id="working-with-files" class="title-slide slide level1 center">
-<h1>Working with files</h1>
-
-</section>
 <section id="making-new-files" class="slide level2">
 <h2>Making new files</h2>
 <ul>
-<li class="fragment">Make new folders: <code>mkdir</code></li>
-<li class="fragment">Make new files: <code>nano</code>, <code>touch</code></li>
-<li class="fragment">Rename files: <code>mv</code></li>
-<li class="fragment">Move files: <code>mv</code></li>
-<li class="fragment">Copy files: <code>cp</code></li>
-<li class="fragment">Delete files: <code>rm</code></li>
-<li class="fragment">Delete directories: <code>rmdir</code></li>
-<li class="fragment">Examining file length: <code>wc</code></li>
-<li class="fragment">Reading files: <code>cat</code></li>
-<li class="fragment">Looking at beginning or end: <code>head</code> or <code>tail</code></li>
+<li>Make new folders: <code>mkdir</code></li>
+<li>Make new files: <code>nano</code>, <code>touch</code></li>
+<li>Rename files: <code>mv</code></li>
+<li>Move files: <code>mv</code></li>
+<li>Copy files: <code>cp</code></li>
+<li>Delete files: <code>rm</code></li>
+<li>Delete directories: <code>rmdir</code></li>
+<li>Examining file length: <code>wc</code></li>
+<li>Reading files: <code>cat</code></li>
+<li>Looking at beginning or end: <code>head</code> or <code>tail</code></li>
 </ul>
 </section>
 <section id="things-to-keep-in-mind" class="slide level2">
@@ -448,239 +269,160 @@ Bill Cresko
 </ul></li>
 </ul>
 </section>
-<section id="lets-try-it-out" class="slide level2">
-<h2>Let’s try it out</h2>
+<section id="practice-making-files-and-directories" class="slide level2">
+<h2>Practice making files and directories</h2>
 <ul>
 <li>Make a new directory called whatever you’d like.</li>
-<li>Add a file named “Practice.txt” to the directory and add some text to it</li>
+<li>Add a file named <code>Practice.txt</code> to the directory and add some text to it</li>
 <li>Read the contents of the file and get its length</li>
-<li>Rename the file to “Super_practice.txt”</li>
-<li>Move the file to a new folder named “Testing”</li>
-<li>Make a copy of the file named “Super_practice_copy.txt”</li>
-<li>Read the contents of the file and get its length to make sure it’s the same as Super_practice.txt</li>
-<li>Delete the original “Super_practice.txt”</li>
+<li>Rename the file to <code>Super_practice.txt</code></li>
+<li>Move the file to a new folder named <code>Testing</code></li>
+<li>Make a copy of the file named <code>Super_practice_copy.txt</code></li>
+<li>Read the contents of the file and get its length to make sure it’s the same as <code>Super_practice.txt</code></li>
+<li>Delete the original <code>Super_practice.txt</code></li>
 </ul>
-</section>
-<section id="useful-flags-for-file-commands" class="slide level2">
-<h2>Useful flags for file commands</h2>
-<table class="caption-top">
-<colgroup>
-<col style="width: 25%">
-<col style="width: 75%">
-</colgroup>
-<thead>
-<tr class="header">
-<th>Command</th>
-<th>Effect</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td><code>ls -l</code></td>
-<td>Long listing: permissions, owner, size, date</td>
-</tr>
-<tr class="even">
-<td><code>ls -a</code></td>
-<td>Show hidden “dot” files (names starting with <code>.</code>)</td>
-</tr>
-<tr class="odd">
-<td><code>ls -lh</code></td>
-<td>Human-readable sizes (K, M, G)</td>
-</tr>
-<tr class="even">
-<td><code>ls -lt</code></td>
-<td>Sort by modification time, newest first</td>
-</tr>
-<tr class="odd">
-<td><code>cp -r src/ dst/</code></td>
-<td>Copy a directory and everything in it</td>
-</tr>
-<tr class="even">
-<td><code>rm -i file</code></td>
-<td>Ask before deleting each file</td>
-</tr>
-<tr class="odd">
-<td><code>rm -r dir/</code></td>
-<td>Delete a directory <strong>and all its contents</strong> - no undo!</td>
-</tr>
-<tr class="even">
-<td><code>mkdir -p a/b/c</code></td>
-<td>Make nested directories in one step</td>
-</tr>
-</tbody>
-</table>
-<div class="callout callout-warning callout-titled callout-style-default">
-<div class="callout-body">
-<div class="callout-title">
-<div class="callout-icon-container">
-<i class="callout-icon"></i>
-</div>
-<p><strong>Warning</strong></p>
-</div>
-<div class="callout-content">
-<p>The shell has <strong>no Trash</strong>. Double-check the path before <code>rm -r</code>, and never combine it with a wildcard (<code>rm -r *</code>) without thinking twice.</p>
-</div>
-</div>
-</div>
 </section></section>
 <section>
-<section id="wildcards" class="title-slide slide level1 center">
-<h1>Wildcards</h1>
-
-</section>
-<section id="wildcards---one-command-many-files" class="slide level2">
-<h2>Wildcards - one command, many files</h2>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb2-1"><a></a><span class="fu">touch</span> sample_01.fastq sample_02.fastq sample_03.fastq control.fastq notes.md</span>
-<span id="cb2-2"><a></a></span>
-<span id="cb2-3"><a></a><span class="fu">ls</span> <span class="pp">*</span>.fastq              <span class="co"># everything ending in .fastq</span></span>
-<span id="cb2-4"><a></a><span class="fu">ls</span> sample_<span class="pp">*</span>.fastq       <span class="co"># the three sample_ files</span></span>
-<span id="cb2-5"><a></a><span class="fu">ls</span> sample_0<span class="pp">?</span>.fastq      <span class="co"># ? matches exactly one character</span></span>
-<span id="cb2-6"><a></a><span class="fu">ls</span> sample_0<span class="pp">[</span><span class="ss">12</span><span class="pp">]</span>.fastq   <span class="co"># only sample_01 and sample_02</span></span>
-<span id="cb2-7"><a></a><span class="fu">ls</span> <span class="pp">*</span>.<span class="dt">{fastq</span><span class="op">,</span><span class="dt">md}</span>         <span class="co"># brace expansion: .fastq OR .md</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<table class="caption-top">
-<thead>
-<tr class="header">
-<th>Pattern</th>
-<th>Matches</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td><code>*</code></td>
-<td>Any string of characters (including none)</td>
-</tr>
-<tr class="even">
-<td><code>?</code></td>
-<td>Exactly one character</td>
-</tr>
-<tr class="odd">
-<td><code>[abc]</code></td>
-<td>Any one character in the set</td>
-</tr>
-<tr class="even">
-<td><code>[a-z]</code></td>
-<td>Any one character in the range</td>
-</tr>
-<tr class="odd">
-<td><code>{foo,bar}</code></td>
-<td>Either <code>foo</code> or <code>bar</code> (brace expansion)</td>
-</tr>
-</tbody>
-</table>
-<div class="callout callout-tip callout-titled callout-style-default">
-<div class="callout-body">
-<div class="callout-title">
-<div class="callout-icon-container">
-<i class="callout-icon"></i>
-</div>
-<p><strong>Tip</strong></p>
-</div>
-<div class="callout-content">
-<p>The <strong>shell</strong> expands wildcards <em>before</em> the command runs - so <code>rm *.fastq</code> deletes every matching file at once. Run <code>ls *.fastq</code> first to see exactly what will be affected. More in the <a href="../book/chapters/05-unix-fundamentals.html">Unix Fundamentals chapter</a> of the course book.</p>
-</div>
-</div>
-</div>
-</section></section>
-<section>
-<section id="reading-files-in-unix" class="title-slide slide level1 center">
-<h1>Reading Files in Unix</h1>
+<section id="reading-and-writing-files-in-unix" class="title-slide slide level1 center">
+<h1>Reading and Writing Files in Unix</h1>
 
 </section>
 <section id="commands-for-reading-files" class="slide level2">
 <h2>Commands for Reading Files</h2>
 <ul>
-<li class="fragment"><strong><code>cat</code></strong> = concatenate and display files
+<li><strong><code>cat</code></strong> = concatenate and display files
 <ul>
-<li class="fragment">Shows entire file at once</li>
-<li class="fragment">Good for small files</li>
+<li>Shows entire file at once</li>
+<li>Good for small files</li>
 </ul></li>
-<li class="fragment"><strong><code>less</code></strong> = view file page by page
+<li><strong><code>less</code></strong> = view file page by page
 <ul>
-<li class="fragment">Navigate with space (forward), b (back), q (quit)</li>
-<li class="fragment">Search with /pattern</li>
+<li>Navigate with <code>space</code> (forward), <code>b</code> (back), <code>q</code> (quit)</li>
+<li>Search with <code>/pattern</code></li>
 </ul></li>
-<li class="fragment"><strong><code>more</code></strong> = similar to less but simpler
+<li><strong><code>more</code></strong> = similar to less but simpler
 <ul>
-<li class="fragment">Space to go forward, q to quit</li>
+<li>Space to go forward, <code>q</code> to quit</li>
 </ul></li>
-<li class="fragment"><strong><code>head</code></strong> = display first 10 lines (default)
+<li><strong><code>head</code></strong> = display first 10 lines (default)
 <ul>
-<li class="fragment"><code>head -n 20 file.txt</code> shows first 20 lines</li>
+<li><code>head -n 20 file.txt</code> shows first 20 lines</li>
 </ul></li>
-<li class="fragment"><strong><code>tail</code></strong> = display last 10 lines (default)
+<li><strong><code>tail</code></strong> = display last 10 lines (default)
 <ul>
-<li class="fragment"><code>tail -n 20 file.txt</code> shows last 20 lines</li>
-<li class="fragment"><code>tail -f file.txt</code> follows file as it grows (useful for logs)</li>
+<li><code>tail -n 20 file.txt</code> shows last 20 lines</li>
+<li><code>tail -f file.txt</code> follows file as it grows (useful for logs)</li>
 </ul></li>
 </ul>
 </section>
 <section id="input-redirection" class="slide level2">
 <h2>Input Redirection</h2>
 <ul>
-<li class="fragment"><strong><code>&lt;</code></strong> = redirect input from a file
+<li><strong><code>&lt;</code></strong> = redirect input from a file
 <ul>
-<li class="fragment"><code>command &lt; input.txt</code></li>
-<li class="fragment">Sends contents of file as input to command</li>
+<li><code>command &lt; input.txt</code></li>
+<li>Sends contents of file as input to command</li>
 </ul></li>
-<li class="fragment"><strong><code>&lt;&lt;</code></strong> = here document (multi-line input)
+<li><strong><code>&lt;&lt;</code></strong> = here document (multi-line input)
 <ul>
-<li class="fragment">Allows you to provide multi-line input directly in the terminal</li>
+<li>Allows you to provide multi-line input directly in the terminal</li>
 </ul></li>
-<li class="fragment">Example uses:
+<li>Example uses:
 <ul>
-<li class="fragment"><code>wc -l &lt; data.txt</code> counts lines in data.txt</li>
-<li class="fragment"><code>sort &lt; names.txt</code> sorts contents of names.txt</li>
-<li class="fragment">Many commands can read from files directly OR from <code>stdin</code></li>
+<li><code>wc -l &lt; data.txt</code> counts lines in data.txt</li>
+<li><code>sort &lt; names.txt</code> sorts contents of names.txt</li>
 </ul></li>
 </ul>
-</section></section>
-<section>
-<section id="writing-files-in-unix" class="title-slide slide level1 center">
-<h1>Writing Files in Unix</h1>
-
 </section>
 <section id="output-redirection" class="slide level2">
 <h2>Output Redirection</h2>
 <ul>
-<li class="fragment"><strong><code>&gt;</code></strong> = redirect output to a file (overwrites)
+<li><strong><code>&gt;</code></strong> = redirect output to a file (overwrites)
 <ul>
-<li class="fragment"><code>ls -l &gt; filelist.txt</code></li>
-<li class="fragment">Creates new file or overwrites existing</li>
+<li><code>ls -l &gt; filelist.txt</code></li>
+<li>Creates new file or overwrites existing</li>
 </ul></li>
-<li class="fragment"><strong><code>&gt;&gt;</code></strong> = append output to a file
+<li><strong><code>&gt;&gt;</code></strong> = append output to a file
 <ul>
-<li class="fragment"><code>echo "new line" &gt;&gt; existing.txt</code></li>
-<li class="fragment">Adds to the end of existing file</li>
+<li><code>echo "new line" &gt;&gt; existing.txt</code></li>
+<li>Adds to the end of existing file</li>
 </ul></li>
-<li class="fragment"><strong><code>2&gt;</code></strong> = redirect error messages
+<li><strong><code>2&gt;</code></strong> = redirect error messages
 <ul>
-<li class="fragment"><code>command 2&gt; errors.txt</code></li>
-<li class="fragment">Captures error messages separately</li>
+<li><code>command 2&gt; errors.txt</code></li>
+<li>Captures error messages separately</li>
 </ul></li>
-<li class="fragment"><strong><code>&amp;&gt;</code></strong> = redirect both output and errors
+<li><strong><code>&amp;&gt;</code></strong> = redirect both output and errors
 <ul>
-<li class="fragment"><code>command &amp;&gt; all_output.txt</code></li>
+<li><code>command &amp;&gt; all_output.txt</code></li>
 </ul></li>
 </ul>
 </section>
-<section id="redirection-visually" class="slide level2">
-<h2>Redirection, visually</h2>
-<div class="columns">
-<div class="column" style="width:50%;">
-<div class="quarto-figure quarto-figure-center">
-<figure>
-<p><img data-src="images/Lec00_img008.svg" style="width:100.0%"></p>
-<figcaption>Normally a command’s output goes to the screen</figcaption>
-</figure>
-</div>
-</div><div class="column" style="width:50%;">
-<div class="quarto-figure quarto-figure-center">
-<figure>
-<p><img data-src="images/Lec00_img009.svg" style="width:100.0%"></p>
-<figcaption><code>&gt;</code> sends that output to a file instead</figcaption>
-</figure>
-</div>
-</div></div>
+<section id="unix-three-standard-streams" class="slide level2">
+<h2>Unix Three Standard Streams</h2>
+<ul>
+<li><strong>stdin (0)</strong> = Standard Input
+<ul>
+<li>Where programs read input from</li>
+<li>Default: keyboard</li>
+</ul></li>
+<li><strong>stdout (1)</strong> = Standard Output
+<ul>
+<li>Where programs write normal output</li>
+<li>Default: terminal screen</li>
+</ul></li>
+<li><strong>stderr (2)</strong> = Standard Error
+<ul>
+<li>Where programs write error messages</li>
+<li>Default: terminal screen (same as stdout)</li>
+</ul></li>
+</ul>
+</section>
+<section id="visualizing-data-streams" class="slide level2">
+<h2>Visualizing Data Streams</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb1-1"><a></a><span class="co"># Every Unix program has these three streams</span></span>
+<span id="cb1-2"><a></a>         <span class="ex">┌──────────────┐</span></span>
+<span id="cb1-3"><a></a><span class="ex">stdin</span> ───<span class="op">&gt;</span>│              │───<span class="op">&gt;</span> stdout</span>
+<span id="cb1-4"><a></a>    <span class="kw">(</span><span class="ex">0</span><span class="kw">)</span>  <span class="ex">│</span>   Program    │      <span class="er">(</span><span class="ex">1</span><span class="kw">)</span></span>
+<span id="cb1-5"><a></a>         <span class="ex">│</span>              │───<span class="op">&gt;</span> stderr</span>
+<span id="cb1-6"><a></a>         <span class="ex">└──────────────┘</span>      <span class="er">(</span><span class="ex">2</span><span class="kw">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<ul>
+<li>File descriptor numbers: 0, 1, 2</li>
+<li>Can redirect each stream independently</li>
+<li>Programs don’t know if streams are redirected</li>
+<li>This abstraction is key to Unix philosophy</li>
+</ul>
+</section>
+<section id="basic-stream-redirection" class="slide level2">
+<h2>Basic Stream Redirection</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb2-1"><a></a><span class="co"># Redirect stdout to file (equivalent ways)</span></span>
+<span id="cb2-2"><a></a></span>
+<span id="cb2-3"><a></a><span class="fu">ls</span> <span class="at">-l</span> <span class="op">&gt;</span> files.txt</span>
+<span id="cb2-4"><a></a><span class="fu">ls</span> <span class="at">-l</span> <span class="dv">1</span><span class="op">&gt;</span> files.txt      <span class="co"># Explicitly using fd 1</span></span>
+<span id="cb2-5"><a></a></span>
+<span id="cb2-6"><a></a><span class="co"># Redirect stderr to file</span></span>
+<span id="cb2-7"><a></a></span>
+<span id="cb2-8"><a></a><span class="fu">ls</span> /nonexistent <span class="dv">2</span><span class="op">&gt;</span> errors.txt</span>
+<span id="cb2-9"><a></a></span>
+<span id="cb2-10"><a></a><span class="co"># Redirect both stdout and stderr to same file</span></span>
+<span id="cb2-11"><a></a></span>
+<span id="cb2-12"><a></a><span class="fu">ls</span> <span class="at">-l</span> /nonexistent <span class="op">&amp;&gt;</span> all_output.txt</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="bioinformatics-example" class="slide level2">
+<h2>Bioinformatics Example</h2>
+<p>Processing sequence data with stream control:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb3"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb3-1"><a></a><span class="co"># FASTQ processing pipeline with error handling</span></span>
+<span id="cb3-2"><a></a></span>
+<span id="cb3-3"><a></a><span class="fu">zcat</span> reads.fastq.gz <span class="dv">2</span><span class="op">&gt;</span> unzip_errors.log <span class="kw">|</span> </span>
+<span id="cb3-4"><a></a><span class="ex">fastqc</span> stdin <span class="dv">2</span><span class="op">&gt;</span> qc_errors.log <span class="kw">|</span> </span>
+<span id="cb3-5"><a></a><span class="ex">trimmomatic</span> <span class="dv">2</span><span class="op">&gt;</span> trim_errors.log <span class="kw">|</span> </span>
+<span id="cb3-6"><a></a><span class="ex">bowtie2</span> <span class="at">-x</span> genome <span class="at">-</span> <span class="dv">2</span><span class="op">&gt;</span> alignment_stats.txt <span class="kw">|</span> </span>
+<span id="cb3-7"><a></a><span class="ex">samtools</span> sort <span class="dv">2</span><span class="op">&gt;</span> sort_errors.log <span class="kw">|</span> </span>
+<span id="cb3-8"><a></a><span class="ex">samtools</span> index <span class="at">-</span> <span class="dv">2</span><span class="op">&gt;</span> index_errors.log</span>
+<span id="cb3-9"><a></a></span>
+<span id="cb3-10"><a></a><span class="co"># Check all error logs at once</span></span>
+<span id="cb3-11"><a></a></span>
+<span id="cb3-12"><a></a><span class="fu">cat</span> <span class="pp">*</span>_errors.log <span class="kw">|</span> <span class="fu">grep</span> <span class="at">-E</span> <span class="st">"ERROR|WARNING"</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </section></section>
 <section>
 <section id="unix-pipes" class="title-slide slide level1 center">
@@ -690,84 +432,281 @@ Bill Cresko
 <section id="what-are-pipes" class="slide level2">
 <h2>What are Pipes?</h2>
 <ul>
-<li class="fragment"><strong><code>|</code></strong> = the pipe operator
+<li><strong><code>|</code></strong> = the pipe operator
 <ul>
-<li class="fragment">Takes output from one command as input to another</li>
-<li class="fragment">Chains commands together</li>
-<li class="fragment">No intermediate files needed!</li>
+<li>Takes output from one command as input to another</li>
+<li>Chains commands together</li>
+<li>No intermediate files needed!</li>
 </ul></li>
-<li class="fragment">Basic syntax:
+<li>Basic syntax:
 <ul>
-<li class="fragment"><code>command1 | command2 | command3</code></li>
+<li><code>command1 | command2 | command3</code></li>
 </ul></li>
-<li class="fragment">Power of Unix philosophy:
+<li>Power of Unix philosophy:
 <ul>
-<li class="fragment">Small tools that do one thing well</li>
-<li class="fragment">Combine them to do complex tasks</li>
+<li>Small tools that do one thing well</li>
+<li>Combine them to do complex tasks</li>
 </ul></li>
 </ul>
 </section>
-<section id="pipes-visually" class="slide level2">
-<h2>Pipes, visually</h2>
-
-<img data-src="images/Lec00_img010.svg" style="width:90.0%" class="r-stretch quarto-figure-center"><p class="caption">Each command’s output becomes the next command’s input</p></section>
 <section id="common-pipe-patterns" class="slide level2">
 <h2>Common Pipe Patterns</h2>
 <ul>
-<li class="fragment"><strong>Counting patterns:</strong>
+<li><strong>Counting patterns:</strong>
 <ul>
-<li class="fragment"><code>grep "pattern" file.txt | wc -l</code></li>
-<li class="fragment">Count lines matching a pattern</li>
+<li><code>grep "pattern" file.txt | wc -l</code></li>
+<li>Count lines matching a pattern</li>
 </ul></li>
-<li class="fragment"><strong>Sorting and uniqueness:</strong>
+<li><strong>Sorting and uniqueness:</strong>
 <ul>
-<li class="fragment"><code>cat file.txt | sort | uniq</code></li>
-<li class="fragment">Sort lines and remove duplicates</li>
+<li><code>cat file.txt | sort | uniq</code></li>
+<li>Sort lines and remove duplicates</li>
 </ul></li>
-<li class="fragment"><strong>Finding top/bottom items:</strong>
+<li><strong>Finding top/bottom items:</strong>
 <ul>
-<li class="fragment"><code>sort data.txt | head -5</code></li>
-<li class="fragment">Get top 5 after sorting</li>
+<li><code>sort data.txt | head -5</code></li>
+<li>Get top 5 after sorting</li>
 </ul></li>
-<li class="fragment"><strong>Filtering and processing:</strong>
+<li><strong>Filtering and processing:</strong>
 <ul>
-<li class="fragment"><code>ls -l | grep ".txt" | awk '{print $5, $9}'</code></li>
-<li class="fragment">List txt files with sizes</li>
+<li><code>ls -l | grep ".txt" | awk '{print $5, $9}'</code></li>
+<li>List txt files with sizes</li>
 </ul></li>
 </ul>
 </section>
 <section id="advanced-pipe-examples" class="slide level2">
 <h2>Advanced Pipe Examples</h2>
 <ul>
-<li class="fragment"><strong>Multi-step data processing:</strong>
+<li><strong>Multi-step data processing:</strong>
 <ul>
-<li class="fragment"><code>cat data.csv | cut -d',' -f2 | sort | uniq -c | sort -rn</code></li>
-<li class="fragment">Extract column 2, count unique values, sort by frequency</li>
+<li><code>cat data.csv | cut -d',' -f2 | sort | uniq -c | sort -rn</code></li>
+<li>Extract column 2, count unique values, sort by frequency</li>
 </ul></li>
-<li class="fragment"><strong>Real-time monitoring:</strong>
+<li><strong>Complex transformations:</strong>
 <ul>
-<li class="fragment"><code>tail -f logfile.txt | grep ERROR</code></li>
-<li class="fragment">Watch log file for errors in real-time</li>
+<li><code>find . -name "*.txt" | xargs wc -l | sort -n</code></li>
+<li>Find all txt files and sort by line count</li>
 </ul></li>
-<li class="fragment"><strong>Complex transformations:</strong>
+<li><strong>Real-time monitoring:</strong>
 <ul>
-<li class="fragment"><code>find . -name "*.txt" | xargs wc -l | sort -n</code></li>
-<li class="fragment">Find all txt files and sort by line count</li>
+<li><code>tail -f logfile.txt | grep ERROR</code></li>
+<li>Watch log file for errors in real-time</li>
 </ul></li>
 </ul>
 </section>
-<section id="combining-it-all-together" class="slide level2">
-<h2>Combining It All Together</h2>
-<p>Example workflow:</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb3"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb3-1"><a></a><span class="co"># Read a file, process it, save results, and display</span></span>
-<span id="cb3-2"><a></a><span class="fu">cat</span> data.txt <span class="kw">|</span> <span class="dt">\</span></span>
-<span id="cb3-3"><a></a>  <span class="fu">grep</span> <span class="at">-v</span> <span class="st">"^#"</span> <span class="kw">|</span> <span class="ex">\ </span>      <span class="co"># Remove comment lines</span></span>
-<span id="cb3-4"><a></a>  <span class="fu">cut</span> <span class="at">-f1,3</span> <span class="kw">|</span> <span class="ex">\ </span>         <span class="co"># Extract columns 1 and 3</span></span>
-<span id="cb3-5"><a></a>  <span class="fu">sort</span> <span class="at">-k2</span> <span class="at">-n</span> <span class="kw">|</span> <span class="ex">\ </span>       <span class="co"># Sort by column 2 numerically</span></span>
-<span id="cb3-6"><a></a>  <span class="fu">tee</span> results.txt <span class="kw">|</span> <span class="ex">\ </span>   <span class="co"># Save to file</span></span>
-<span id="cb3-7"><a></a>  <span class="fu">head</span> <span class="at">-10</span>               <span class="co"># Show top 10</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<section id="tips-for-working-with-files-and-pipes" class="slide level2">
+<h2>Tips for Working with Files and Pipes</h2>
+<ul>
+<li>Test pipes step by step
+<ul>
+<li>Build complex pipes incrementally</li>
+<li>Check output at each stage</li>
+</ul></li>
+<li>Use <code>less</code> for large files instead of <code>cat</code></li>
+<li>Remember: <code>&gt;</code> overwrites, <code>&gt;&gt;</code> appends</li>
+<li>Pipe efficiency:
+<ul>
+<li>Filter early in the pipeline</li>
+<li>Reduces data passed between commands</li>
+</ul></li>
+<li>Save intermediate results when debugging complex pipes # Unix Data Streams</li>
+</ul>
+</section>
+<section id="sequence-file-formats-fasta-and-fastq" class="slide level2">
+<h2>Sequence file formats: FASTA and FASTQ</h2>
+<div class="columns">
+<div class="column" style="width:50%;">
+<p><strong>FASTA</strong> - sequences (genomes, genes, proteins)</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb4"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb4-1"><a></a><span class="op">&gt;</span>chr21 <span class="ex">Homo</span> sapiens chromosome 21</span>
+<span id="cb4-2"><a></a><span class="ex">NNNNNNNNNNGATCCTTGAAGCGCCCCCAAGG</span></span>
+<span id="cb4-3"><a></a><span class="ex">GCATCTTCTCTACTTTCACCTAACAGATCCCA</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<ul>
+<li>Header line starts with <code>&gt;</code></li>
+<li>Sequence on one or more lines</li>
+<li>Count sequences: <code>grep -c "^&gt;" file.fa</code></li>
+</ul>
+</div><div class="column" style="width:50%;">
+<p><strong>FASTQ</strong> - raw sequencing reads</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb5"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb5-1"><a></a><span class="ex">@SRR12345.1</span> read_1</span>
+<span id="cb5-2"><a></a><span class="ex">NCATGCAGCGTACGGTAATTGGCAG</span></span>
+<span id="cb5-3"><a></a><span class="ex">+</span></span>
+<span id="cb5-4"><a></a><span class="co">#AAAAFFFFFFFFFFFFFFFFFFFF</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<ul>
+<li><strong>4 lines per read</strong>: <code>@</code> header, sequence, <code>+</code>, per-base quality</li>
+<li>Quality letters encode Phred scores (<code>!</code> = lowest, <code>I</code> = Q40)</li>
+<li>Count reads: <code>echo $(( $(wc -l &lt; reads.fastq) / 4 ))</code></li>
+</ul>
+</div></div>
+<div class="callout callout-tip callout-titled callout-style-default">
+<div class="callout-body">
+<div class="callout-title">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<p><strong>Tip</strong></p>
+</div>
+<div class="callout-content">
+<p>Both are usually gzip-compressed (<code>.fa.gz</code>, <code>.fastq.gz</code>) - use <code>zcat</code> / <code>zless</code> / <code>zgrep</code> to read them without unpacking. More formats (CSV/TSV, GFF, BED, VCF, HDF5) in the <a href="../book/chapters/appendix-C-data-formats.html">Data Formats appendix</a> of the course book.</p>
+</div>
+</div>
+</div>
+</section></section>
+<section>
+<section id="working-with-large-genomic-data-files" class="title-slide slide level1 center">
+<h1>Working with Large Genomic Data Files</h1>
+
+</section>
+<section id="human-chromosome-data" class="slide level2">
+<h2>Human Chromosome Data</h2>
+<ul>
+<li>Genomic data files can be massive (the full human genome is ~3.1 GB compressed)</li>
+<li>FASTA format is standard for sequence data</li>
+<li>Perfect use case for Unix pipes and redirection</li>
+<li>We will practice on <strong>human chromosome 21</strong> - the smallest autosome (~13 MB compressed, ~46 Mb of sequence), so every command finishes in seconds</li>
+<li>The same commands work unchanged on the whole genome - only the wait time changes</li>
+<li>The course book works through the same file in <a href="../book/chapters/09-grep-regex.html#sec-genomic-processing">Chapter 9</a></li>
+</ul>
+</section>
+<section id="downloading-genomic-data" class="slide level2">
+<h2>Downloading Genomic Data</h2>
+<p>Download chromosome 21 of the human genome (hg38 / GRCh38) from UCSC:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb6"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb6-1"><a></a><span class="co"># Using `wget` to download chr21 (~13 MB)</span></span>
+<span id="cb6-2"><a></a></span>
+<span id="cb6-3"><a></a><span class="fu">wget</span> https://hgdownload.soe.ucsc.edu/goldenPath/hg38/chromosomes/chr21.fa.gz</span>
+<span id="cb6-4"><a></a></span>
+<span id="cb6-5"><a></a><span class="co"># Or using `curl` and save with a specific name (-L follows redirects)</span></span>
+<span id="cb6-6"><a></a></span>
+<span id="cb6-7"><a></a><span class="ex">curl</span> <span class="at">-L</span> <span class="at">-o</span> chr21.fa.gz <span class="dt">\</span></span>
+<span id="cb6-8"><a></a>  https://hgdownload.soe.ucsc.edu/goldenPath/hg38/chromosomes/chr21.fa.gz</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<ul>
+<li><code>wget</code> and <code>curl</code> are both tools for downloading files (macOS ships <code>curl</code>; install <code>wget</code> with Homebrew if you want it)</li>
+<li>The backslash lets a long command span multiple lines</li>
+<li><code>.gz</code> extension means the file is compressed</li>
+<li>The whole genome lives in the same directory as <code>hg38.fa.gz</code> (~1 GB) - same commands, much longer runs</li>
+</ul>
+</section>
+<section id="examining-large-files-efficiently" class="slide level2">
+<h2>Examining Large Files Efficiently</h2>
+<p>Don’t use <code>cat</code> on huge files! Use these approaches:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb7"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb7-1"><a></a><span class="co"># Decompress and look at first 10 lines</span></span>
+<span id="cb7-2"><a></a></span>
+<span id="cb7-3"><a></a><span class="fu">gunzip</span> <span class="at">-c</span> chr21.fa.gz <span class="kw">|</span> <span class="fu">head</span> <span class="at">-10</span></span>
+<span id="cb7-4"><a></a></span>
+<span id="cb7-5"><a></a><span class="co"># Check file size before and after decompression (-k keeps the .gz)</span></span>
+<span id="cb7-6"><a></a></span>
+<span id="cb7-7"><a></a><span class="fu">ls</span> <span class="at">-lh</span> chr21.fa.gz</span>
+<span id="cb7-8"><a></a><span class="fu">gunzip</span> <span class="at">-k</span> chr21.fa.gz</span>
+<span id="cb7-9"><a></a><span class="fu">ls</span> <span class="at">-lh</span> chr21.fa</span>
+<span id="cb7-10"><a></a></span>
+<span id="cb7-11"><a></a><span class="co"># Count sequences in FASTA file (lines starting with &gt;)</span></span>
+<span id="cb7-12"><a></a><span class="co"># grep can't read gzip data directly - use zgrep (or zcat | grep)</span></span>
+<span id="cb7-13"><a></a></span>
+<span id="cb7-14"><a></a><span class="fu">zgrep</span> <span class="st">"^&gt;"</span> chr21.fa.gz <span class="kw">|</span> <span class="fu">wc</span> <span class="at">-l</span></span>
+<span id="cb7-15"><a></a></span>
+<span id="cb7-16"><a></a><span class="co"># View sequence headers only</span></span>
+<span id="cb7-17"><a></a></span>
+<span id="cb7-18"><a></a><span class="fu">zgrep</span> <span class="st">"^&gt;"</span> chr21.fa.gz <span class="kw">|</span> <span class="fu">less</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="callout callout-note callout-titled callout-style-default">
+<div class="callout-body">
+<div class="callout-title">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<p><strong>Note</strong></p>
+</div>
+<div class="callout-content">
+<p>The UCSC file is <em>soft-masked</em>: repeats are written in lowercase (<code>acgt</code>). Patterns like <code>GAATTC</code> will miss sites inside masked regions - add <code>-i</code> to <code>grep</code>, or uppercase everything first with <code>tr 'acgt' 'ACGT'</code>.</p>
+</div>
+</div>
+</div>
+</section>
+<section id="creating-a-subset-for-analysis" class="slide level2">
+<h2>Creating a Subset for Analysis</h2>
+<p>Make a smaller working file for testing:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb8"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb8-1"><a></a><span class="co"># Extract the first ~1 Mb of sequence for testing (50 bases per line)</span></span>
+<span id="cb8-2"><a></a></span>
+<span id="cb8-3"><a></a><span class="fu">zcat</span> chr21.fa.gz <span class="kw">|</span> <span class="fu">head</span> <span class="at">-n</span> 20000 <span class="op">&gt;</span> chr21_subset.fa</span>
+<span id="cb8-4"><a></a></span>
+<span id="cb8-5"><a></a><span class="co"># Extract a specific record by name from a multi-sequence FASTA</span></span>
+<span id="cb8-6"><a></a><span class="co"># (e.g. from hg38.fa - chr21.fa has only one record)</span></span>
+<span id="cb8-7"><a></a></span>
+<span id="cb8-8"><a></a><span class="fu">awk</span> <span class="st">'/^&gt;chr21$/,/^&gt;chr22$/'</span> hg38.fa <span class="kw">|</span> <span class="fu">head</span> <span class="at">-n</span> <span class="at">-1</span> <span class="op">&gt;</span> chr21_from_genome.fa</span>
+<span id="cb8-9"><a></a></span>
+<span id="cb8-10"><a></a><span class="co"># Pull out a window of lines from the middle of the chromosome</span></span>
+<span id="cb8-11"><a></a></span>
+<span id="cb8-12"><a></a><span class="fu">sed</span> <span class="at">-n</span> <span class="st">'400000,420000p'</span> chr21.fa <span class="op">&gt;</span> region_of_interest.fa</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="processing-fasta-files-with-pipes" class="slide level2">
+<h2>Processing FASTA Files with Pipes</h2>
+<p>Extract specific regions or sequences:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb9"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb9-1"><a></a><span class="co"># Extract just the sequence (no headers) and count bases</span></span>
+<span id="cb9-2"><a></a></span>
+<span id="cb9-3"><a></a><span class="fu">grep</span> <span class="at">-v</span> <span class="st">"^&gt;"</span> chr21.fa <span class="kw">|</span> <span class="fu">tr</span> <span class="at">-d</span> <span class="st">'\n'</span> <span class="kw">|</span> <span class="fu">wc</span> <span class="at">-c</span></span>
+<span id="cb9-4"><a></a></span>
+<span id="cb9-5"><a></a><span class="co"># Count each type of nucleotide (uppercase first so a == A)</span></span>
+<span id="cb9-6"><a></a></span>
+<span id="cb9-7"><a></a><span class="fu">grep</span> <span class="at">-v</span> <span class="st">"^&gt;"</span> chr21.fa <span class="kw">|</span> <span class="dt">\</span></span>
+<span id="cb9-8"><a></a>  <span class="fu">tr</span> <span class="st">'acgtn'</span> <span class="st">'ACGTN'</span> <span class="kw">|</span> <span class="dt">\</span></span>
+<span id="cb9-9"><a></a>  <span class="fu">tr</span> <span class="at">-d</span> <span class="st">'\n'</span> <span class="kw">|</span> <span class="dt">\</span></span>
+<span id="cb9-10"><a></a>  <span class="fu">fold</span> <span class="at">-w1</span> <span class="kw">|</span> <span class="dt">\</span></span>
+<span id="cb9-11"><a></a>  <span class="fu">sort</span> <span class="kw">|</span> <span class="dt">\</span></span>
+<span id="cb9-12"><a></a>  <span class="fu">uniq</span> <span class="at">-c</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<ul>
+<li><code>grep -v</code> inverts the match (excludes lines)</li>
+<li><code>tr -d '\n'</code> removes newlines</li>
+<li><code>fold -w1</code> puts each character on its own line</li>
+<li>Expect a lot of <code>N</code> - the first ~5 Mb of chr21 is unassembled</li>
+</ul>
+</section>
+<section id="finding-patterns-in-genomic-data" class="slide level2">
+<h2>Finding Patterns in Genomic Data</h2>
+<p>Search for specific sequences and motifs:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb10"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb10-1"><a></a><span class="co"># Find all instances of a restriction enzyme site (EcoRI: GAATTC)</span></span>
+<span id="cb10-2"><a></a></span>
+<span id="cb10-3"><a></a><span class="fu">grep</span> <span class="at">-v</span> <span class="st">"^&gt;"</span> chr21.fa <span class="kw">|</span> <span class="dt">\</span></span>
+<span id="cb10-4"><a></a>  <span class="fu">tr</span> <span class="st">'acgt'</span> <span class="st">'ACGT'</span> <span class="kw">|</span> <span class="dt">\</span></span>
+<span id="cb10-5"><a></a>  <span class="fu">tr</span> <span class="at">-d</span> <span class="st">'\n'</span> <span class="kw">|</span> <span class="dt">\</span></span>
+<span id="cb10-6"><a></a>  <span class="fu">grep</span> <span class="at">-o</span> <span class="st">"GAATTC"</span> <span class="kw">|</span> <span class="dt">\</span></span>
+<span id="cb10-7"><a></a>  <span class="fu">wc</span> <span class="at">-l</span></span>
+<span id="cb10-8"><a></a></span>
+<span id="cb10-9"><a></a><span class="co"># Extract 100 bases around each EcoRI site</span></span>
+<span id="cb10-10"><a></a></span>
+<span id="cb10-11"><a></a><span class="fu">grep</span> <span class="at">-v</span> <span class="st">"^&gt;"</span> chr21.fa <span class="kw">|</span> <span class="dt">\</span></span>
+<span id="cb10-12"><a></a>  <span class="fu">tr</span> <span class="st">'acgt'</span> <span class="st">'ACGT'</span> <span class="kw">|</span> <span class="dt">\</span></span>
+<span id="cb10-13"><a></a>  <span class="fu">tr</span> <span class="at">-d</span> <span class="st">'\n'</span> <span class="kw">|</span> <span class="dt">\</span></span>
+<span id="cb10-14"><a></a>  <span class="fu">grep</span> <span class="at">-oE</span> <span class="st">".{100}GAATTC.{100}"</span> <span class="op">&gt;</span> ecori_contexts.txt</span>
+<span id="cb10-15"><a></a></span>
+<span id="cb10-16"><a></a><span class="co"># Find all start codons (ATG) and their byte offsets</span></span>
+<span id="cb10-17"><a></a></span>
+<span id="cb10-18"><a></a><span class="fu">grep</span> <span class="at">-v</span> <span class="st">"^&gt;"</span> chr21.fa <span class="kw">|</span> <span class="dt">\</span></span>
+<span id="cb10-19"><a></a>  <span class="fu">tr</span> <span class="st">'acgt'</span> <span class="st">'ACGT'</span> <span class="kw">|</span> <span class="dt">\</span></span>
+<span id="cb10-20"><a></a>  <span class="fu">tr</span> <span class="at">-d</span> <span class="st">'\n'</span> <span class="kw">|</span> <span class="dt">\</span></span>
+<span id="cb10-21"><a></a>  <span class="fu">grep</span> <span class="at">-b</span> <span class="at">-o</span> <span class="st">"ATG"</span> <span class="kw">|</span> <span class="dt">\</span></span>
+<span id="cb10-22"><a></a>  <span class="fu">head</span> <span class="at">-20</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="combining-downloads-with-processing" class="slide level2">
+<h2>Combining Downloads with Processing</h2>
+<p>Stream processing without saving intermediate files:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb11"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb11-1"><a></a><span class="co"># Download, decompress, and process in one pipeline</span></span>
+<span id="cb11-2"><a></a><span class="ex">curl</span> <span class="at">-sL</span> https://hgdownload.soe.ucsc.edu/goldenPath/hg38/chromosomes/chr21.fa.gz <span class="kw">|</span> <span class="dt">\</span></span>
+<span id="cb11-3"><a></a>  <span class="fu">gunzip</span> <span class="at">-c</span> <span class="kw">|</span> <span class="dt">\</span></span>
+<span id="cb11-4"><a></a>  <span class="fu">grep</span> <span class="at">-v</span> <span class="st">"^&gt;"</span> <span class="kw">|</span> <span class="dt">\</span></span>
+<span id="cb11-5"><a></a>  <span class="fu">tr</span> <span class="at">-d</span> <span class="st">'\n'</span> <span class="kw">|</span> <span class="dt">\</span></span>
+<span id="cb11-6"><a></a>  <span class="fu">cut</span> <span class="at">-c1-1000000</span> <span class="op">&gt;</span> first_megabase.txt</span>
+<span id="cb11-7"><a></a></span>
+<span id="cb11-8"><a></a><span class="co"># Download and immediately analyze GC content</span></span>
+<span id="cb11-9"><a></a><span class="fu">wget</span> <span class="at">-qO</span> <span class="at">-</span> https://hgdownload.soe.ucsc.edu/goldenPath/hg38/chromosomes/chr21.fa.gz <span class="kw">|</span> <span class="dt">\</span></span>
+<span id="cb11-10"><a></a>  <span class="fu">gunzip</span> <span class="at">-c</span> <span class="kw">|</span> <span class="dt">\</span></span>
+<span id="cb11-11"><a></a>  <span class="fu">grep</span> <span class="at">-v</span> <span class="st">"^&gt;"</span> <span class="kw">|</span> <span class="dt">\</span></span>
+<span id="cb11-12"><a></a>  <span class="fu">tr</span> <span class="st">'acgtn'</span> <span class="st">'ACGTN'</span> <span class="kw">|</span> <span class="dt">\</span></span>
+<span id="cb11-13"><a></a>  <span class="fu">tr</span> <span class="at">-d</span> <span class="st">'N\n'</span> <span class="kw">|</span> <span class="dt">\</span></span>
+<span id="cb11-14"><a></a>  <span class="fu">tr</span> <span class="st">'ATGC'</span> <span class="st">'0011'</span> <span class="kw">|</span> <span class="dt">\</span></span>
+<span id="cb11-15"><a></a>  <span class="fu">awk</span> <span class="st">'{n = length($0); gc = gsub(/1/, ""); print "GC%:", 100 * gc / n}'</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <aside class="notes">
-<p>The backslash allows you to continue commands on multiple lines for readability</p>
+<ul>
+<li>The <code>-O -</code> flag tells wget to output to stdout</li>
+<li>This approach saves disk space and time</li>
+</ul>
 <style type="text/css">
         span.MJX_Assistive_MathML {
           position:absolute!important;
@@ -780,112 +719,254 @@ Bill Cresko
           display:block!important;
       }</style></aside>
 </section>
-<section id="practice-exercise-files-and-pipes" class="slide level2">
-<h2>Practice Exercise: Files and Pipes</h2>
-<p>Try these exercises:</p>
-<ol type="1">
-<li>Create a file with a list of numbers (one per line)</li>
-<li>Use pipes to sort them numerically</li>
-<li>Save the sorted list to a new file using redirection</li>
-<li>Use <code>tee</code> to display and save the top 5 numbers</li>
-<li>Count how many unique numbers you have using pipes</li>
-<li>Append the count to your results file</li>
-</ol>
-</section>
-<section id="tips-for-working-with-files-and-pipes" class="slide level2">
-<h2>Tips for Working with Files and Pipes</h2>
+<section id="key-takeaways" class="slide level2">
+<h2>Key Takeaways</h2>
 <ul>
-<li class="fragment">Test pipes step by step
-<ul>
-<li class="fragment">Build complex pipes incrementally</li>
-<li class="fragment">Check output at each stage</li>
-</ul></li>
-<li class="fragment">Use <code>less</code> for large files instead of <code>cat</code></li>
-<li class="fragment">Remember: <code>&gt;</code> overwrites, <code>&gt;&gt;</code> appends</li>
-<li class="fragment">Pipe efficiency:
-<ul>
-<li class="fragment">Filter early in the pipeline</li>
-<li class="fragment">Reduces data passed between commands</li>
-</ul></li>
-<li class="fragment">Save intermediate results when debugging complex pipes</li>
+<li><strong>Real bioinformatics often involves gigabytes of data - these Unix tools scale beautifully!</strong></li>
+<li><strong>Never load entire genome files into memory</strong> - use streaming</li>
+<li><strong>Combine tools</strong> - each does one thing well</li>
+<li><strong>Test on subsets first</strong> - extract small portions for development</li>
+<li><strong>Document your pipelines</strong> - save commands in scripts</li>
+<li><strong>Use compression</strong> - work with .gz files directly when possible</li>
+<li><strong>Think in streams</strong> - data flows through pipes without intermediate files</li>
 </ul>
+</section>
+<section id="practice-exercise-genomic-data-pipeline" class="slide level2">
+<h2>Practice Exercise: Genomic Data Pipeline</h2>
+<p>Build a complete analysis pipeline:</p>
+<ol type="1">
+<li>Download a bacterial genome (smaller, ~5 MB)</li>
+<li>Count the total number of genes (hint: count headers)</li>
+<li>Calculate the genome size in base pairs</li>
+<li>Find the 10 most common 6-base sequences</li>
+<li>Extract all genes with “ribosomal” in the header</li>
+<li>Save your pipeline as a shell script for reproducibility</li>
+</ol>
+</section></section>
+<section>
+<section id="grep-and-regular-expressions" class="title-slide slide level1 center">
+<h1>GREP and Regular Expressions</h1>
+
+</section>
+<section id="what-is-grep" class="slide level2">
+<h2>What is GREP?</h2>
+<ul>
+<li><strong>GREP</strong> = Global Regular Expression Print</li>
+<li>Powerful text search tool in Unix</li>
+<li>Searches for patterns in files or input streams</li>
+<li>Returns lines that match the pattern</li>
+<li>Essential for large data processing</li>
+</ul>
+<p>Basic syntax:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb12"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb12-1"><a></a><span class="fu">grep</span> <span class="pp">[</span><span class="ss">options</span><span class="pp">]</span> pattern <span class="pp">[</span><span class="ss">file...</span><span class="pp">]</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="basic-grep-usage" class="slide level2">
+<h2>Basic GREP Usage</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb13"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb13-1"><a></a><span class="co"># Search for a simple pattern</span></span>
+<span id="cb13-2"><a></a><span class="fu">grep</span> <span class="st">"ACGT"</span> sequences.txt</span>
+<span id="cb13-3"><a></a></span>
+<span id="cb13-4"><a></a><span class="co"># Case-insensitive search</span></span>
+<span id="cb13-5"><a></a><span class="fu">grep</span> <span class="at">-i</span> <span class="st">"gene"</span> annotations.txt</span>
+<span id="cb13-6"><a></a></span>
+<span id="cb13-7"><a></a><span class="co"># Count matching lines</span></span>
+<span id="cb13-8"><a></a><span class="fu">grep</span> <span class="at">-c</span> <span class="st">"&gt;"</span> proteins.fasta</span>
+<span id="cb13-9"><a></a></span>
+<span id="cb13-10"><a></a><span class="co"># Show line numbers</span></span>
+<span id="cb13-11"><a></a><span class="fu">grep</span> <span class="at">-n</span> <span class="st">"ERROR"</span> logfile.txt</span>
+<span id="cb13-12"><a></a></span>
+<span id="cb13-13"><a></a><span class="co"># Invert match (show non-matching lines)</span></span>
+<span id="cb13-14"><a></a><span class="fu">grep</span> <span class="at">-v</span> <span class="st">"^#"</span> data.txt    <span class="co"># Skip comment lines</span></span>
+<span id="cb13-15"><a></a></span>
+<span id="cb13-16"><a></a><span class="co"># Search multiple files</span></span>
+<span id="cb13-17"><a></a><span class="fu">grep</span> <span class="st">"mutation"</span> <span class="pp">*</span>.txt</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="introduction-to-regular-expressions" class="slide level2">
+<h2>Introduction to Regular Expressions</h2>
+<p>Regular expressions (regex) are patterns for matching text:</p>
+<ul>
+<li><strong><code>.</code></strong> = any single character</li>
+<li><strong><code>*</code></strong> = zero or more of preceding character</li>
+<li><strong><code>+</code></strong> = one or more of preceding character</li>
+<li><strong><code>?</code></strong> = zero or one of preceding character</li>
+<li><strong><code>^</code></strong> = start of line</li>
+<li><strong><code>$</code></strong> = end of line</li>
+<li><strong><code>[abc]</code></strong> = any character in set</li>
+<li><strong><code>[^abc]</code></strong> = any character NOT in set</li>
+<li><strong><code>\</code></strong> = escape special characters</li>
+</ul>
+</section>
+<section id="basic-regex-examples" class="slide level2">
+<h2>Basic Regex Examples</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb14"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb14-1"><a></a><span class="co"># Match DNA sequences</span></span>
+<span id="cb14-2"><a></a><span class="fu">grep</span> <span class="st">"^ATG"</span> genes.txt         <span class="co"># Lines starting with ATG</span></span>
+<span id="cb14-3"><a></a><span class="fu">grep</span> <span class="st">"TAG$"</span> genes.txt         <span class="co"># Lines ending with TAG</span></span>
+<span id="cb14-4"><a></a><span class="fu">grep</span> <span class="st">"A.G"</span> sequences.txt      <span class="co"># A, any char, then G</span></span>
+<span id="cb14-5"><a></a></span>
+<span id="cb14-6"><a></a><span class="co"># Character classes</span></span>
+<span id="cb14-7"><a></a><span class="fu">grep</span> <span class="st">"[ACGT]"</span> dna.txt         <span class="co"># Any DNA base</span></span>
+<span id="cb14-8"><a></a><span class="fu">grep</span> <span class="st">"[^ACGT]"</span> dna.txt        <span class="co"># Non-DNA characters</span></span>
+<span id="cb14-9"><a></a><span class="fu">grep</span> <span class="st">"[0-9]"</span> data.txt         <span class="co"># Any digit</span></span>
+<span id="cb14-10"><a></a><span class="fu">grep</span> <span class="st">"[A-Za-z]"</span> text.txt      <span class="co"># Any letter</span></span>
+<span id="cb14-11"><a></a></span>
+<span id="cb14-12"><a></a><span class="co"># Quantifiers</span></span>
+<span id="cb14-13"><a></a><span class="fu">grep</span> <span class="st">"A\{3\}"</span> sequence.txt    <span class="co"># Exactly 3 A's</span></span>
+<span id="cb14-14"><a></a><span class="fu">grep</span> <span class="st">"T\{2,4\}"</span> sequence.txt  <span class="co"># 2 to 4 T's</span></span>
+<span id="cb14-15"><a></a><span class="fu">grep</span> <span class="st">"GC*"</span> sequence.txt       <span class="co"># G followed by 0+ C's</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="extended-regular-expressions" class="slide level2">
+<h2>Extended Regular Expressions</h2>
+<p>Use <code>grep -E</code> or <code>egrep</code> for extended regex:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb15"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb15-1"><a></a><span class="co"># Alternation (OR)</span></span>
+<span id="cb15-2"><a></a><span class="fu">grep</span> <span class="at">-E</span> <span class="st">"start|stop|pause"</span> commands.txt</span>
+<span id="cb15-3"><a></a></span>
+<span id="cb15-4"><a></a><span class="co"># Grouping</span></span>
+<span id="cb15-5"><a></a><span class="fu">grep</span> <span class="at">-E</span> <span class="st">"(ATG|GTG|TTG)"</span> codons.txt</span>
+<span id="cb15-6"><a></a></span>
+<span id="cb15-7"><a></a><span class="co"># Plus quantifier (one or more)</span></span>
+<span id="cb15-8"><a></a><span class="fu">grep</span> <span class="at">-E</span> <span class="st">"A+T+G+"</span> sequences.txt</span>
+<span id="cb15-9"><a></a></span>
+<span id="cb15-10"><a></a><span class="co"># Question mark (optional)</span></span>
+<span id="cb15-11"><a></a><span class="fu">grep</span> <span class="at">-E</span> <span class="st">"colou?r"</span> british_american.txt</span>
+<span id="cb15-12"><a></a></span>
+<span id="cb15-13"><a></a><span class="co"># Complex patterns for bioinformatics</span></span>
+<span id="cb15-14"><a></a><span class="fu">grep</span> <span class="at">-E</span> <span class="st">"^&gt;sp\|[A-Z0-9]+\|"</span> uniprot.fasta  <span class="co"># UniProt headers</span></span>
+<span id="cb15-15"><a></a><span class="fu">grep</span> <span class="at">-E</span> <span class="st">"[ACGT]{20,}"</span> primers.txt          <span class="co"># Sequences 20bp+</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="combining-grep-with-pipes" class="slide level2">
+<h2>Combining GREP with Pipes</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb16"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb16-1"><a></a><span class="co"># Count unique sequence headers</span></span>
+<span id="cb16-2"><a></a><span class="fu">grep</span> <span class="st">"^&gt;"</span> sequences.fasta <span class="kw">|</span> <span class="fu">sort</span> <span class="kw">|</span> <span class="fu">uniq</span> <span class="kw">|</span> <span class="fu">wc</span> <span class="at">-l</span></span>
+<span id="cb16-3"><a></a></span>
+<span id="cb16-4"><a></a><span class="co"># Extract gene names from GFF file</span></span>
+<span id="cb16-5"><a></a><span class="fu">grep</span> <span class="at">-v</span> <span class="st">"^#"</span> annotation.gff <span class="kw">|</span> <span class="fu">cut</span> <span class="at">-f9</span> <span class="kw">|</span> <span class="fu">grep</span> <span class="at">-oE</span> <span class="st">"gene=[^;]+"</span></span>
+<span id="cb16-6"><a></a></span>
+<span id="cb16-7"><a></a><span class="co"># Find sequences without stop codons</span></span>
+<span id="cb16-8"><a></a><span class="fu">grep</span> <span class="at">-v</span> <span class="at">-E</span> <span class="st">"(TAA|TAG|TGA)"</span> orfs.txt</span>
+<span id="cb16-9"><a></a></span>
+<span id="cb16-10"><a></a><span class="co"># Quality control pipeline: count reads containing an N</span></span>
+<span id="cb16-11"><a></a><span class="co"># FASTQ records are 4 lines; the sequence is always line 2 of each,</span></span>
+<span id="cb16-12"><a></a><span class="co"># so awk 'NR % 4 == 2' pulls out sequence lines. (grep "^@" is NOT</span></span>
+<span id="cb16-13"><a></a><span class="co"># safe here - quality lines can start with @ too, since @ is a valid</span></span>
+<span id="cb16-14"><a></a><span class="co"># quality character.)</span></span>
+<span id="cb16-15"><a></a><span class="fu">zcat</span> reads.fastq.gz <span class="kw">|</span> <span class="fu">awk</span> <span class="st">'NR % 4 == 2'</span> <span class="kw">|</span> <span class="fu">grep</span> <span class="at">-c</span> <span class="st">"N"</span></span>
+<span id="cb16-16"><a></a></span>
+<span id="cb16-17"><a></a><span class="co"># Search and replace with sed (uses regex)</span></span>
+<span id="cb16-18"><a></a><span class="fu">grep</span> <span class="st">"gene"</span> data.txt <span class="kw">|</span> <span class="fu">sed</span> <span class="st">'s/gene/GENE/g'</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="analyzing-sequence-content" class="slide level2">
+<h2>Analyzing Sequence Content</h2>
+<p>Combine Unix tools to analyze genomic data:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb17"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb17-1"><a></a><span class="co"># Count total bases in chromosome 21</span></span>
+<span id="cb17-2"><a></a></span>
+<span id="cb17-3"><a></a><span class="fu">grep</span> <span class="at">-v</span> <span class="st">"^&gt;"</span> human_genome.fa <span class="kw">|</span> <span class="fu">tr</span> <span class="at">-d</span> <span class="st">'\n'</span> <span class="kw">|</span> <span class="fu">wc</span> <span class="at">-c</span></span>
+<span id="cb17-4"><a></a></span>
+<span id="cb17-5"><a></a><span class="co"># Count each type of base</span></span>
+<span id="cb17-6"><a></a></span>
+<span id="cb17-7"><a></a><span class="fu">grep</span> <span class="at">-v</span> <span class="st">"^&gt;"</span> human_genome.fa <span class="kw">|</span> <span class="fu">tr</span> <span class="at">-d</span> <span class="st">'\n'</span> <span class="kw">|</span> </span>
+<span id="cb17-8"><a></a>  <span class="fu">fold</span> <span class="at">-w1</span> <span class="kw">|</span> <span class="fu">sort</span> <span class="kw">|</span> <span class="fu">uniq</span> <span class="at">-c</span></span>
+<span id="cb17-9"><a></a></span>
+<span id="cb17-10"><a></a><span class="co"># Calculate GC content</span></span>
+<span id="cb17-11"><a></a></span>
+<span id="cb17-12"><a></a><span class="fu">grep</span> <span class="at">-v</span> <span class="st">"^&gt;"</span> human_genome.fa <span class="kw">|</span> <span class="fu">tr</span> <span class="at">-d</span> <span class="st">'\n'</span> <span class="kw">|</span> </span>
+<span id="cb17-13"><a></a>  <span class="fu">tr</span> <span class="at">-cd</span> <span class="st">'GCgc'</span> <span class="kw">|</span> <span class="fu">wc</span> <span class="at">-c</span></span>
+<span id="cb17-14"><a></a></span>
+<span id="cb17-15"><a></a><span class="co"># Find simple sequence repeats (e.g., "ATATAT...")</span></span>
+<span id="cb17-16"><a></a></span>
+<span id="cb17-17"><a></a><span class="fu">grep</span> <span class="at">-v</span> <span class="st">"^&gt;"</span> human_genome.fa <span class="kw">|</span> <span class="fu">grep</span> <span class="at">-oE</span> <span class="st">"(AT){5,}"</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="working-with-compressed-files" class="slide level2">
+<h2>Working with Compressed Files</h2>
+<p>Most genomic data is compressed to save space:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb18"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb18-1"><a></a><span class="co"># View compressed files without extracting</span></span>
+<span id="cb18-2"><a></a></span>
+<span id="cb18-3"><a></a><span class="fu">zcat</span> file.gz <span class="kw">|</span> <span class="fu">head</span></span>
+<span id="cb18-4"><a></a><span class="fu">zless</span> file.gz</span>
+<span id="cb18-5"><a></a><span class="fu">zgrep</span> <span class="st">"pattern"</span> file.gz</span>
+<span id="cb18-6"><a></a></span>
+<span id="cb18-7"><a></a><span class="co"># Compress and decompress</span></span>
+<span id="cb18-8"><a></a></span>
+<span id="cb18-9"><a></a><span class="fu">gzip</span> file.txt          <span class="co"># Creates file.txt.gz</span></span>
+<span id="cb18-10"><a></a><span class="fu">gunzip</span> file.txt.gz     <span class="co"># Restores file.txt</span></span>
+<span id="cb18-11"><a></a><span class="fu">gzip</span> <span class="at">-k</span> file.txt       <span class="co"># Keep original file</span></span>
+<span id="cb18-12"><a></a></span>
+<span id="cb18-13"><a></a><span class="co"># Work directly with compressed files</span></span>
+<span id="cb18-14"><a></a><span class="co"># (count reads: every 4th line is a header; don't grep "^@" - quality lines can start with @)</span></span>
+<span id="cb18-15"><a></a></span>
+<span id="cb18-16"><a></a><span class="fu">zcat</span> reads.fastq.gz <span class="kw">|</span> <span class="fu">awk</span> <span class="st">'NR % 4 == 1'</span> <span class="kw">|</span> <span class="fu">wc</span> <span class="at">-l</span></span>
+<span id="cb18-17"><a></a></span>
+<span id="cb18-18"><a></a><span class="co"># Concatenate compressed files</span></span>
+<span id="cb18-19"><a></a></span>
+<span id="cb18-20"><a></a><span class="fu">zcat</span> file1.gz file2.gz <span class="kw">|</span> <span class="fu">gzip</span> <span class="op">&gt;</span> combined.gz</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="beyond-grep-sed-for-search-and-replace" class="slide level2">
+<h2>Beyond grep: <code>sed</code> for search-and-replace</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb19"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb19-1"><a></a><span class="co"># Substitute the first match on each line (s/pattern/replacement/)</span></span>
+<span id="cb19-2"><a></a><span class="fu">sed</span> <span class="st">'s/chr/Chr/'</span> regions.bed</span>
+<span id="cb19-3"><a></a></span>
+<span id="cb19-4"><a></a><span class="co"># Substitute every match on each line (g = global)</span></span>
+<span id="cb19-5"><a></a><span class="fu">sed</span> <span class="st">'s/T/U/g'</span> dna.txt <span class="op">&gt;</span> rna.txt</span>
+<span id="cb19-6"><a></a></span>
+<span id="cb19-7"><a></a><span class="co"># Delete lines matching a pattern (e.g. comment lines)</span></span>
+<span id="cb19-8"><a></a><span class="fu">sed</span> <span class="st">'/^#/d'</span> annotation.gff</span>
+<span id="cb19-9"><a></a></span>
+<span id="cb19-10"><a></a><span class="co"># Print only lines 10-20</span></span>
+<span id="cb19-11"><a></a><span class="fu">sed</span> <span class="at">-n</span> <span class="st">'10,20p'</span> big_file.txt</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="callout callout-warning callout-titled callout-style-default">
+<div class="callout-body">
+<div class="callout-title">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<p><strong>Warning</strong></p>
+</div>
+<div class="callout-content">
+<p><code>sed -i</code> edits a file <strong>in place</strong> - and the syntax differs between Linux (<code>sed -i 's/a/b/' f</code>) and macOS (<code>sed -i '' 's/a/b/' f</code>). Write to a new file until you’re confident.</p>
+</div>
+</div>
+</div>
+</section>
+<section id="beyond-grep-awk-for-columns" class="slide level2">
+<h2>Beyond grep: <code>awk</code> for columns</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb20"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb20-1"><a></a><span class="co"># Print columns 1 and 3 of a tab- or space-separated file</span></span>
+<span id="cb20-2"><a></a><span class="fu">awk</span> <span class="st">'{print $1, $3}'</span> data.tsv</span>
+<span id="cb20-3"><a></a></span>
+<span id="cb20-4"><a></a><span class="co"># Keep rows where column 5 is greater than 30</span></span>
+<span id="cb20-5"><a></a><span class="fu">awk</span> <span class="st">'$5 &gt; 30'</span> measurements.tsv</span>
+<span id="cb20-6"><a></a></span>
+<span id="cb20-7"><a></a><span class="co"># Comma-separated file: set the field separator, skip the header</span></span>
+<span id="cb20-8"><a></a><span class="fu">awk</span> <span class="at">-F</span><span class="st">','</span> <span class="st">'NR &gt; 1 {print $2}'</span> samples.csv</span>
+<span id="cb20-9"><a></a></span>
+<span id="cb20-10"><a></a><span class="co"># Sum and average a column</span></span>
+<span id="cb20-11"><a></a><span class="fu">awk</span> <span class="at">-F</span><span class="st">','</span> <span class="st">'NR &gt; 1 {sum += $3; n++} END {print sum, sum/n}'</span> samples.csv</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="callout callout-tip callout-titled callout-style-default">
+<div class="callout-body">
+<div class="callout-title">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<p><strong>Tip</strong></p>
+</div>
+<div class="callout-content">
+<p>Rule of thumb: <strong><code>grep</code></strong> finds lines, <strong><code>sed</code></strong> edits text, <strong><code>awk</code></strong> works with columns. More in the course book’s <a href="../book/chapters/09-grep-regex.html">GREP chapter</a> and <a href="../book/chapters/appendix-D-regex.html">Regular Expression Reference</a>.</p>
+</div>
+</div>
+</div>
+</section>
+<section id="homework---microbial-genome-analysis" class="slide level2">
+<h2>Homework - microbial genome analysis</h2>
+<p>With a sample FASTA file:</p>
+<ol type="1">
+<li>Download a bacterial genome from NCBI</li>
+<li>Count the number of genes (sequences)</li>
+<li>Calculate the total genome size</li>
+<li>Find the longest and shortest genes</li>
+<li>Calculate overall GC content</li>
+<li>Search for specific motifs or restriction sites</li>
+<li>Extract protein-coding sequences based on headers</li>
+</ol>
 </section>
 <section class="slide level2">
 
-</section></section>
-<section>
-<section id="tidy-data" class="title-slide slide level1 center">
-<h1>Tidy Data</h1>
-
-</section>
-<section id="an-example-to-get-us-started" class="slide level2">
-<h2>An example to get us started</h2>
-</section>
-<section id="section-3" class="slide level2">
-<h2></h2>
-
-<img data-src="images/Lec03_img009.jpeg" class="quarto-figure quarto-figure-center r-stretch" style="width:100.0%"></section>
-<section id="section-4" class="slide level2">
-<h2></h2>
-
-<img data-src="images/Lec03_img010.jpeg" class="quarto-figure quarto-figure-center r-stretch" style="width:90.0%"></section>
-<section id="data-set-rules-of-thumb-aka-tidy-data" class="slide level2">
-<h2>Data set rules of thumb (aka Tidy Data)</h2>
-<ul>
-<li>Store a copy of data in nonproprietary software and hardware formats, such as plain ASCII text (aka a flat file)</li>
-<li>Leave an uncorrected file when doing analyses</li>
-<li>Use descriptive names for your data files and variables</li>
-<li>Include a header line with descriptive variable names</li>
-<li>Maintain effective metadata about the data (data dictionary)</li>
-<li>When you add observations to a database, add rows</li>
-<li>When you add variables to a database, add columns, not rows</li>
-<li>A column of data should contain only one data type</li>
-</ul>
-</section>
-<section id="not-all-data-are-tidy-to-begin-with" class="slide level2">
-<h2>Not all data are tidy to begin with</h2>
-<ul>
-<li><p>Sometimes need to do some data wrangling</p></li>
-<li><p>But also contingency tables</p></li>
-</ul>
-</section>
-<section id="types-of-data" class="slide level2">
-<h2>Types of data</h2>
-<table class="caption-top">
-<colgroup>
-<col style="width: 25%">
-<col style="width: 25%">
-<col style="width: 25%">
-<col style="width: 25%">
-</colgroup>
-<tbody>
-<tr class="odd">
-<td style="text-align: center;">Categorical</td>
-<td style="text-align: center;"></td>
-<td style="text-align: center;">Quantitative</td>
-<td style="text-align: center;"></td>
-</tr>
-<tr class="even">
-<td style="text-align: center;">Ordinal</td>
-<td style="text-align: center;">Nominal</td>
-<td style="text-align: center;">Ratio</td>
-<td style="text-align: center;">Interval</td>
-</tr>
-<tr class="odd">
-<td style="text-align: center;">small, medium, large</td>
-<td style="text-align: center;">apples, oranges, bananas</td>
-<td style="text-align: center;">kilograms, dollars, years</td>
-<td style="text-align: center;">temperature, calendar year</td>
-</tr>
-<tr class="even">
-<td style="text-align: center;">ordered character</td>
-<td style="text-align: center;">character</td>
-<td style="text-align: center;">numeric</td>
-<td style="text-align: center;">integer</td>
-</tr>
-</tbody>
-</table>
-<p>‘Factor’ is a special type of character variable that we will explore more later</p>
 
 
 </section></section>

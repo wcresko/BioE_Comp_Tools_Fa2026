@@ -199,7 +199,7 @@
 
 <section id="title-slide" class="quarto-title-block center">
   <h1 class="title">Lecture 05 - Computational Tools for Bioengineers</h1>
-  <p class="subtitle">GREP and Regular Expressions</p>
+  <p class="subtitle">R and Python Fundamentals 1: Scripts, Variables, Vectors and Types</p>
 
 <div class="quarto-title-authors">
 <div class="quarto-title-author">
@@ -215,267 +215,52 @@ Bill Cresko
 <h2>Book reading for this lecture</h2>
 <p>The course book goes deeper on everything in this lecture. Read before or after class:</p>
 <ul>
-<li><a href="../book/chapters/07-grep-regex.html">Ch. 7: GREP and Regular Expressions</a></li>
-<li><em>Reference:</em> <a href="../book/chapters/appendix-G-regex.html">App. G: Regular Expression Reference</a></li>
+<li><a href="../book/chapters/11-r-programming.html">Ch. 11: R Programming Fundamentals</a></li>
+<li><a href="../book/chapters/12-python-programming.html">Ch. 12: Python Programming Fundamentals</a></li>
+<li><em>Reference:</em> <a href="../book/chapters/appendix-E-r.html">App. E: R Command Reference</a> · <a href="../book/chapters/appendix-F-python.html">App. F: Python Quick Reference</a></li>
 </ul>
 </section>
 <section id="goals-for-today" class="slide level2">
 <h2>Goals for today</h2>
 <ul>
-<li>Finish using GREP for large files</li>
-<li>Working with compressed files</li>
-<li>Homework 1 - microbial genome analysis</li>
+<li>Using RStudio, Positron and Visual Studio Code as script editors</li>
+<li>Why R <em>and</em> Python - same ideas, different syntax</li>
+<li>Scripts, variables, arithmetic, strings and vectors</li>
+<li>Types of data and getting help</li>
 </ul>
 </section>
 <section>
-<section id="working-with-large-genomic-data-files" class="title-slide slide level1 center">
-<h1>Working with Large Genomic Data Files</h1>
+<section id="r-and-python-two-scripting-languages-for-data" class="title-slide slide level1 center">
+<h1>R and Python: two scripting languages for data</h1>
 
 </section>
-<section id="human-chromosome-data" class="slide level2">
-<h2>Human Chromosome Data</h2>
+<section id="why-use-r" class="slide level2">
+<h2>Why use <code>R</code>?</h2>
 <ul>
-<li>Genomic data files can be massive (human genome ~6 billion base pairs)</li>
-<li>FASTA format is standard for sequence data</li>
-<li>Perfect use case for Unix pipes and redirection</li>
-<li>Let’s work with human genome assembly version 38 (~3.1 GB)</li>
+<li>Good general scripting tool for statistics and mathematics</li>
+<li>Powerful and flexible and free</li>
+<li>Runs on all computer platforms</li>
+<li>New enhancements coming out all the time</li>
+<li>Superb data management &amp; graphics capabilities</li>
+<li>Reproducibility - can keep your scripts to see exactly what was done</li>
+<li>You can write your own functions</li>
+<li>Lots of online help available</li>
+<li>Can use a nice GUI front end such as <code>Rstudio</code></li>
+<li>Can embed your <code>R</code> analyses in dynamic, polished files using <code>Quarto Markdown</code></li>
+<li>Quarto Markdown can be reused for websites, papers, books, presentations…</li>
 </ul>
 </section>
-<section id="downloading-genomic-data" class="slide level2">
-<h2>Downloading Genomic Data</h2>
-<p>Download version 38 of the human genome from NCBI:</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb1-1"><a></a></span>
-<span id="cb1-2"><a></a><span class="co"># Using `wget` to download human genome</span></span>
-<span id="cb1-3"><a></a></span>
-<span id="cb1-4"><a></a><span class="fu">wget</span> https://ftp.ncbi.nlm.nih.gov/genomes/all/GCF/000/001/405/<span class="dt">\</span></span>
-<span id="cb1-5"><a></a>GCF_000001405.40_GRCh38.p14/GCF_000001405.40_GRCh38.p14_genomic.fna.gz</span>
-<span id="cb1-6"><a></a></span>
-<span id="cb1-7"><a></a><span class="co"># Or using `curl` and save with specific name</span></span>
-<span id="cb1-8"><a></a></span>
-<span id="cb1-9"><a></a><span class="ex">curl</span> <span class="at">-o</span> human_genome.fa.gz https://ftp.ncbi.nlm.nih.gov/genomes/all/GCF/000/001/405/<span class="dt">\</span></span>
-<span id="cb1-10"><a></a>GCF_000001405.40_GRCh38.p14/GCF_000001405.40_GRCh38.p14_genomic.fna.gz</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<section id="why-use-python" class="slide level2">
+<h2>Why use <code>Python</code>?</h2>
 <ul>
-<li><code>wget</code> and <code>curl</code> are both tools for downloading files</li>
-<li>The backslash (<code>\</code>) allows long URLs to span multiple lines</li>
-<li><code>.gz</code> extension means the file is compressed</li>
+<li>A general-purpose language that is also excellent for data analysis (<code>pandas</code>, <code>numpy</code>, <code>matplotlib</code>, <code>scipy</code>)</li>
+<li>The language of machine learning, image analysis and instrument control (<code>scikit-learn</code>, <code>PyTorch</code>, <code>scikit-image</code>)</li>
+<li>Free, open source, runs everywhere - including Talapas (<code>module load python3</code>)</li>
+<li>Huge ecosystem: <code>pip install</code> gives you access to &gt;500,000 packages on PyPI; <code>conda</code> adds compiled scientific tools</li>
+<li>Readable syntax; indentation <em>is</em> the structure of the code</li>
+<li>Runs as scripts (<code>python3 script.py</code>), interactively (REPL / IPython), in <strong>Jupyter notebooks</strong>, and in <strong>Quarto</strong> <code>{python}</code> chunks</li>
+<li>Same IDEs: <strong>Positron</strong> and <strong>VS Code</strong> run R and Python side by side</li>
 </ul>
-</section></section>
-<section>
-<section id="grep-and-regular-expressions" class="title-slide slide level1 center">
-<h1>GREP and Regular Expressions</h1>
-
-</section>
-<section id="what-is-grep" class="slide level2">
-<h2>What is GREP?</h2>
-<ul>
-<li><strong>GREP</strong> = Global Regular Expression Print</li>
-<li>Powerful text search tool in Unix</li>
-<li>Searches for patterns in files or input streams</li>
-<li>Returns lines that match the pattern</li>
-<li>Essential for large data processing</li>
-</ul>
-<p>Basic syntax:</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb2-1"><a></a><span class="fu">grep</span> <span class="pp">[</span><span class="ss">options</span><span class="pp">]</span> pattern <span class="pp">[</span><span class="ss">file...</span><span class="pp">]</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</section>
-<section id="basic-grep-usage" class="slide level2">
-<h2>Basic GREP Usage</h2>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb3"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb3-1"><a></a><span class="co"># Search for a simple pattern</span></span>
-<span id="cb3-2"><a></a><span class="fu">grep</span> <span class="st">"ACGT"</span> sequences.txt</span>
-<span id="cb3-3"><a></a></span>
-<span id="cb3-4"><a></a><span class="co"># Case-insensitive search</span></span>
-<span id="cb3-5"><a></a><span class="fu">grep</span> <span class="at">-i</span> <span class="st">"gene"</span> annotations.txt</span>
-<span id="cb3-6"><a></a></span>
-<span id="cb3-7"><a></a><span class="co"># Count matching lines</span></span>
-<span id="cb3-8"><a></a><span class="fu">grep</span> <span class="at">-c</span> <span class="st">"&gt;"</span> proteins.fasta</span>
-<span id="cb3-9"><a></a></span>
-<span id="cb3-10"><a></a><span class="co"># Show line numbers</span></span>
-<span id="cb3-11"><a></a><span class="fu">grep</span> <span class="at">-n</span> <span class="st">"ERROR"</span> logfile.txt</span>
-<span id="cb3-12"><a></a></span>
-<span id="cb3-13"><a></a><span class="co"># Invert match (show non-matching lines)</span></span>
-<span id="cb3-14"><a></a><span class="fu">grep</span> <span class="at">-v</span> <span class="st">"^#"</span> data.txt    <span class="co"># Skip comment lines</span></span>
-<span id="cb3-15"><a></a></span>
-<span id="cb3-16"><a></a><span class="co"># Search multiple files</span></span>
-<span id="cb3-17"><a></a><span class="fu">grep</span> <span class="st">"mutation"</span> <span class="pp">*</span>.txt</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</section>
-<section id="introduction-to-regular-expressions" class="slide level2">
-<h2>Introduction to Regular Expressions</h2>
-<p>Regular expressions (regex) are patterns for matching text:</p>
-<ul>
-<li><strong><code>.</code></strong> = any single character</li>
-<li><strong><code>*</code></strong> = zero or more of preceding character</li>
-<li><strong><code>+</code></strong> = one or more of preceding character</li>
-<li><strong><code>?</code></strong> = zero or one of preceding character</li>
-<li><strong><code>^</code></strong> = start of line</li>
-<li><strong><code>$</code></strong> = end of line</li>
-<li><strong><code>[abc]</code></strong> = any character in set</li>
-<li><strong><code>[^abc]</code></strong> = any character NOT in set</li>
-<li><strong><code>\</code></strong> = escape special characters</li>
-</ul>
-</section>
-<section id="basic-regex-examples" class="slide level2">
-<h2>Basic Regex Examples</h2>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb4"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb4-1"><a></a><span class="co"># Match DNA sequences</span></span>
-<span id="cb4-2"><a></a><span class="fu">grep</span> <span class="st">"^ATG"</span> genes.txt         <span class="co"># Lines starting with ATG</span></span>
-<span id="cb4-3"><a></a><span class="fu">grep</span> <span class="st">"TAG$"</span> genes.txt         <span class="co"># Lines ending with TAG</span></span>
-<span id="cb4-4"><a></a><span class="fu">grep</span> <span class="st">"A.G"</span> sequences.txt      <span class="co"># A, any char, then G</span></span>
-<span id="cb4-5"><a></a></span>
-<span id="cb4-6"><a></a><span class="co"># Character classes</span></span>
-<span id="cb4-7"><a></a><span class="fu">grep</span> <span class="st">"[ACGT]"</span> dna.txt         <span class="co"># Any DNA base</span></span>
-<span id="cb4-8"><a></a><span class="fu">grep</span> <span class="st">"[^ACGT]"</span> dna.txt        <span class="co"># Non-DNA characters</span></span>
-<span id="cb4-9"><a></a><span class="fu">grep</span> <span class="st">"[0-9]"</span> data.txt         <span class="co"># Any digit</span></span>
-<span id="cb4-10"><a></a><span class="fu">grep</span> <span class="st">"[A-Za-z]"</span> text.txt      <span class="co"># Any letter</span></span>
-<span id="cb4-11"><a></a></span>
-<span id="cb4-12"><a></a><span class="co"># Quantifiers</span></span>
-<span id="cb4-13"><a></a><span class="fu">grep</span> <span class="st">"A\{3\}"</span> sequence.txt    <span class="co"># Exactly 3 A's</span></span>
-<span id="cb4-14"><a></a><span class="fu">grep</span> <span class="st">"T\{2,4\}"</span> sequence.txt  <span class="co"># 2 to 4 T's</span></span>
-<span id="cb4-15"><a></a><span class="fu">grep</span> <span class="st">"GC*"</span> sequence.txt       <span class="co"># G followed by 0+ C's</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</section>
-<section id="extended-regular-expressions" class="slide level2">
-<h2>Extended Regular Expressions</h2>
-<p>Use <code>grep -E</code> or <code>egrep</code> for extended regex:</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb5"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb5-1"><a></a><span class="co"># Alternation (OR)</span></span>
-<span id="cb5-2"><a></a><span class="fu">grep</span> <span class="at">-E</span> <span class="st">"start|stop|pause"</span> commands.txt</span>
-<span id="cb5-3"><a></a></span>
-<span id="cb5-4"><a></a><span class="co"># Grouping</span></span>
-<span id="cb5-5"><a></a><span class="fu">grep</span> <span class="at">-E</span> <span class="st">"(ATG|GTG|TTG)"</span> codons.txt</span>
-<span id="cb5-6"><a></a></span>
-<span id="cb5-7"><a></a><span class="co"># Plus quantifier (one or more)</span></span>
-<span id="cb5-8"><a></a><span class="fu">grep</span> <span class="at">-E</span> <span class="st">"A+T+G+"</span> sequences.txt</span>
-<span id="cb5-9"><a></a></span>
-<span id="cb5-10"><a></a><span class="co"># Question mark (optional)</span></span>
-<span id="cb5-11"><a></a><span class="fu">grep</span> <span class="at">-E</span> <span class="st">"colou?r"</span> british_american.txt</span>
-<span id="cb5-12"><a></a></span>
-<span id="cb5-13"><a></a><span class="co"># Complex patterns for bioinformatics</span></span>
-<span id="cb5-14"><a></a><span class="fu">grep</span> <span class="at">-E</span> <span class="st">"^&gt;sp\|[A-Z0-9]+\|"</span> uniprot.fasta  <span class="co"># UniProt headers</span></span>
-<span id="cb5-15"><a></a><span class="fu">grep</span> <span class="at">-E</span> <span class="st">"[ACGT]{20,}"</span> primers.txt          <span class="co"># Sequences 20bp+</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</section>
-<section id="combining-grep-with-pipes" class="slide level2">
-<h2>Combining GREP with Pipes</h2>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb6"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb6-1"><a></a><span class="co"># Count unique sequence headers</span></span>
-<span id="cb6-2"><a></a><span class="fu">grep</span> <span class="st">"^&gt;"</span> sequences.fasta <span class="kw">|</span> <span class="fu">sort</span> <span class="kw">|</span> <span class="fu">uniq</span> <span class="kw">|</span> <span class="fu">wc</span> <span class="at">-l</span></span>
-<span id="cb6-3"><a></a></span>
-<span id="cb6-4"><a></a><span class="co"># Extract gene names from GFF file</span></span>
-<span id="cb6-5"><a></a><span class="fu">grep</span> <span class="at">-v</span> <span class="st">"^#"</span> annotation.gff <span class="kw">|</span> <span class="fu">cut</span> <span class="at">-f9</span> <span class="kw">|</span> <span class="fu">grep</span> <span class="at">-oE</span> <span class="st">"gene=[^;]+"</span></span>
-<span id="cb6-6"><a></a></span>
-<span id="cb6-7"><a></a><span class="co"># Find sequences without stop codons</span></span>
-<span id="cb6-8"><a></a><span class="fu">grep</span> <span class="at">-v</span> <span class="at">-E</span> <span class="st">"(TAA|TAG|TGA)"</span> orfs.txt</span>
-<span id="cb6-9"><a></a></span>
-<span id="cb6-10"><a></a><span class="co"># Quality control pipeline: count reads containing an N</span></span>
-<span id="cb6-11"><a></a><span class="co"># FASTQ records are 4 lines; the sequence is always line 2 of each,</span></span>
-<span id="cb6-12"><a></a><span class="co"># so awk 'NR % 4 == 2' pulls out sequence lines. (grep "^@" is NOT</span></span>
-<span id="cb6-13"><a></a><span class="co"># safe here - quality lines can start with @ too, since @ is a valid</span></span>
-<span id="cb6-14"><a></a><span class="co"># quality character.)</span></span>
-<span id="cb6-15"><a></a><span class="fu">zcat</span> reads.fastq.gz <span class="kw">|</span> <span class="fu">awk</span> <span class="st">'NR % 4 == 2'</span> <span class="kw">|</span> <span class="fu">grep</span> <span class="at">-c</span> <span class="st">"N"</span></span>
-<span id="cb6-16"><a></a></span>
-<span id="cb6-17"><a></a><span class="co"># Search and replace with sed (uses regex)</span></span>
-<span id="cb6-18"><a></a><span class="fu">grep</span> <span class="st">"gene"</span> data.txt <span class="kw">|</span> <span class="fu">sed</span> <span class="st">'s/gene/GENE/g'</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</section>
-<section id="analyzing-sequence-content" class="slide level2">
-<h2>Analyzing Sequence Content</h2>
-<p>Combine Unix tools to analyze genomic data:</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb7"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb7-1"><a></a><span class="co"># Count total bases in chromosome 21</span></span>
-<span id="cb7-2"><a></a></span>
-<span id="cb7-3"><a></a><span class="fu">grep</span> <span class="at">-v</span> <span class="st">"^&gt;"</span> human_genome.fa <span class="kw">|</span> <span class="fu">tr</span> <span class="at">-d</span> <span class="st">'\n'</span> <span class="kw">|</span> <span class="fu">wc</span> <span class="at">-c</span></span>
-<span id="cb7-4"><a></a></span>
-<span id="cb7-5"><a></a><span class="co"># Count each type of base</span></span>
-<span id="cb7-6"><a></a></span>
-<span id="cb7-7"><a></a><span class="fu">grep</span> <span class="at">-v</span> <span class="st">"^&gt;"</span> human_genome.fa <span class="kw">|</span> <span class="fu">tr</span> <span class="at">-d</span> <span class="st">'\n'</span> <span class="kw">|</span> </span>
-<span id="cb7-8"><a></a>  <span class="fu">fold</span> <span class="at">-w1</span> <span class="kw">|</span> <span class="fu">sort</span> <span class="kw">|</span> <span class="fu">uniq</span> <span class="at">-c</span></span>
-<span id="cb7-9"><a></a></span>
-<span id="cb7-10"><a></a><span class="co"># Calculate GC content</span></span>
-<span id="cb7-11"><a></a></span>
-<span id="cb7-12"><a></a><span class="fu">grep</span> <span class="at">-v</span> <span class="st">"^&gt;"</span> human_genome.fa <span class="kw">|</span> <span class="fu">tr</span> <span class="at">-d</span> <span class="st">'\n'</span> <span class="kw">|</span> </span>
-<span id="cb7-13"><a></a>  <span class="fu">tr</span> <span class="at">-cd</span> <span class="st">'GCgc'</span> <span class="kw">|</span> <span class="fu">wc</span> <span class="at">-c</span></span>
-<span id="cb7-14"><a></a></span>
-<span id="cb7-15"><a></a><span class="co"># Find simple sequence repeats (e.g., "ATATAT...")</span></span>
-<span id="cb7-16"><a></a></span>
-<span id="cb7-17"><a></a><span class="fu">grep</span> <span class="at">-v</span> <span class="st">"^&gt;"</span> human_genome.fa <span class="kw">|</span> <span class="fu">grep</span> <span class="at">-oE</span> <span class="st">"(AT){5,}"</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</section>
-<section id="working-with-compressed-files" class="slide level2">
-<h2>Working with Compressed Files</h2>
-<p>Most genomic data is compressed to save space:</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb8"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb8-1"><a></a><span class="co"># View compressed files without extracting</span></span>
-<span id="cb8-2"><a></a></span>
-<span id="cb8-3"><a></a><span class="fu">zcat</span> file.gz <span class="kw">|</span> <span class="fu">head</span></span>
-<span id="cb8-4"><a></a><span class="fu">zless</span> file.gz</span>
-<span id="cb8-5"><a></a><span class="fu">zgrep</span> <span class="st">"pattern"</span> file.gz</span>
-<span id="cb8-6"><a></a></span>
-<span id="cb8-7"><a></a><span class="co"># Compress and decompress</span></span>
-<span id="cb8-8"><a></a></span>
-<span id="cb8-9"><a></a><span class="fu">gzip</span> file.txt          <span class="co"># Creates file.txt.gz</span></span>
-<span id="cb8-10"><a></a><span class="fu">gunzip</span> file.txt.gz     <span class="co"># Restores file.txt</span></span>
-<span id="cb8-11"><a></a><span class="fu">gzip</span> <span class="at">-k</span> file.txt       <span class="co"># Keep original file</span></span>
-<span id="cb8-12"><a></a></span>
-<span id="cb8-13"><a></a><span class="co"># Work directly with compressed files</span></span>
-<span id="cb8-14"><a></a><span class="co"># (count reads: every 4th line is a header; don't grep "^@" - quality lines can start with @)</span></span>
-<span id="cb8-15"><a></a></span>
-<span id="cb8-16"><a></a><span class="fu">zcat</span> reads.fastq.gz <span class="kw">|</span> <span class="fu">awk</span> <span class="st">'NR % 4 == 1'</span> <span class="kw">|</span> <span class="fu">wc</span> <span class="at">-l</span></span>
-<span id="cb8-17"><a></a></span>
-<span id="cb8-18"><a></a><span class="co"># Concatenate compressed files</span></span>
-<span id="cb8-19"><a></a></span>
-<span id="cb8-20"><a></a><span class="fu">zcat</span> file1.gz file2.gz <span class="kw">|</span> <span class="fu">gzip</span> <span class="op">&gt;</span> combined.gz</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</section>
-<section id="examining-large-files-efficiently" class="slide level2">
-<h2>Examining Large Files Efficiently</h2>
-<p>Don’t use <code>cat</code> on huge files! Use these approaches:</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb9"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb9-1"><a></a><span class="co"># Decompress and look at first 10 lines</span></span>
-<span id="cb9-2"><a></a></span>
-<span id="cb9-3"><a></a><span class="fu">gunzip</span> <span class="at">-c</span> human_genome.fa.gz <span class="kw">|</span> <span class="fu">head</span> <span class="at">-10</span></span>
-<span id="cb9-4"><a></a></span>
-<span id="cb9-5"><a></a><span class="co"># Check file size before and after decompression</span></span>
-<span id="cb9-6"><a></a></span>
-<span id="cb9-7"><a></a><span class="fu">ls</span> <span class="at">-lh</span> human_genome.fa.gz</span>
-<span id="cb9-8"><a></a><span class="fu">gunzip</span> human_genome.fa.gz</span>
-<span id="cb9-9"><a></a><span class="fu">ls</span> <span class="at">-lh</span> human_genome.fa</span>
-<span id="cb9-10"><a></a></span>
-<span id="cb9-11"><a></a><span class="co"># Count sequences in FASTA file (lines starting with &gt;)</span></span>
-<span id="cb9-12"><a></a></span>
-<span id="cb9-13"><a></a><span class="fu">grep</span> <span class="st">"^&gt;"</span> human_genome.fa <span class="kw">|</span> <span class="fu">wc</span> <span class="at">-l</span></span>
-<span id="cb9-14"><a></a></span>
-<span id="cb9-15"><a></a><span class="co"># View sequence headers only</span></span>
-<span id="cb9-16"><a></a></span>
-<span id="cb9-17"><a></a><span class="fu">grep</span> <span class="st">"^&gt;"</span> human_genome.fa <span class="kw">|</span> <span class="fu">less</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</section>
-<section id="beyond-grep-sed-for-search-and-replace" class="slide level2">
-<h2>Beyond grep: <code>sed</code> for search-and-replace</h2>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb10"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb10-1"><a></a><span class="co"># Substitute the first match on each line (s/pattern/replacement/)</span></span>
-<span id="cb10-2"><a></a><span class="fu">sed</span> <span class="st">'s/chr/Chr/'</span> regions.bed</span>
-<span id="cb10-3"><a></a></span>
-<span id="cb10-4"><a></a><span class="co"># Substitute every match on each line (g = global)</span></span>
-<span id="cb10-5"><a></a><span class="fu">sed</span> <span class="st">'s/T/U/g'</span> dna.txt <span class="op">&gt;</span> rna.txt</span>
-<span id="cb10-6"><a></a></span>
-<span id="cb10-7"><a></a><span class="co"># Delete lines matching a pattern (e.g. comment lines)</span></span>
-<span id="cb10-8"><a></a><span class="fu">sed</span> <span class="st">'/^#/d'</span> annotation.gff</span>
-<span id="cb10-9"><a></a></span>
-<span id="cb10-10"><a></a><span class="co"># Print only lines 10-20</span></span>
-<span id="cb10-11"><a></a><span class="fu">sed</span> <span class="at">-n</span> <span class="st">'10,20p'</span> big_file.txt</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="callout callout-warning callout-titled callout-style-default">
-<div class="callout-body">
-<div class="callout-title">
-<div class="callout-icon-container">
-<i class="callout-icon"></i>
-</div>
-<p><strong>Warning</strong></p>
-</div>
-<div class="callout-content">
-<p><code>sed -i</code> edits a file <strong>in place</strong> - and the syntax differs between Linux (<code>sed -i 's/a/b/' f</code>) and macOS (<code>sed -i '' 's/a/b/' f</code>). Write to a new file until you’re confident.</p>
-</div>
-</div>
-</div>
-</section>
-<section id="beyond-grep-awk-for-columns" class="slide level2">
-<h2>Beyond grep: <code>awk</code> for columns</h2>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb11"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb11-1"><a></a><span class="co"># Print columns 1 and 3 of a tab- or space-separated file</span></span>
-<span id="cb11-2"><a></a><span class="fu">awk</span> <span class="st">'{print $1, $3}'</span> data.tsv</span>
-<span id="cb11-3"><a></a></span>
-<span id="cb11-4"><a></a><span class="co"># Keep rows where column 5 is greater than 30</span></span>
-<span id="cb11-5"><a></a><span class="fu">awk</span> <span class="st">'$5 &gt; 30'</span> measurements.tsv</span>
-<span id="cb11-6"><a></a></span>
-<span id="cb11-7"><a></a><span class="co"># Comma-separated file: set the field separator, skip the header</span></span>
-<span id="cb11-8"><a></a><span class="fu">awk</span> <span class="at">-F</span><span class="st">','</span> <span class="st">'NR &gt; 1 {print $2}'</span> samples.csv</span>
-<span id="cb11-9"><a></a></span>
-<span id="cb11-10"><a></a><span class="co"># Sum and average a column</span></span>
-<span id="cb11-11"><a></a><span class="fu">awk</span> <span class="at">-F</span><span class="st">','</span> <span class="st">'NR &gt; 1 {sum += $3; n++} END {print sum, sum/n}'</span> samples.csv</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="callout callout-tip callout-titled callout-style-default">
 <div class="callout-body">
 <div class="callout-title">
@@ -485,26 +270,811 @@ Bill Cresko
 <p><strong>Tip</strong></p>
 </div>
 <div class="callout-content">
-<p>Rule of thumb: <strong><code>grep</code></strong> finds lines, <strong><code>sed</code></strong> edits text, <strong><code>awk</code></strong> works with columns. More in the course book’s <a href="../book/chapters/07-grep-regex.html">GREP chapter</a> and <a href="../book/chapters/appendix-G-regex.html">Regular Expression Reference</a>.</p>
+<p>You do not have to choose. Most computational biologists use <strong>both</strong>: R for statistics and figures, Python for pipelines, images and machine learning. This lecture shows every idea in both languages - use the tabs.</p>
 </div>
 </div>
 </div>
 </section>
-<section id="homework---microbial-genome-analysis" class="slide level2">
-<h2>Homework - microbial genome analysis</h2>
-<p>With a sample FASTA file:</p>
-<ol type="1">
-<li>Download a bacterial genome from NCBI</li>
-<li>Count the number of genes (sequences)</li>
-<li>Calculate the total genome size</li>
-<li>Find the longest and shortest genes</li>
-<li>Calculate overall GC content</li>
-<li>Search for specific motifs or restriction sites</li>
-<li>Extract protein-coding sequences based on headers</li>
-</ol>
-</section>
-<section class="slide level2">
+<section id="your-ide-the-four-panes" class="slide level2">
+<h2>Your IDE: the four panes</h2>
 
+<img data-src="images/Lec06_img001.png" class="quarto-figure quarto-figure-center r-stretch" style="width:70.0%"><table class="caption-top">
+<colgroup>
+<col style="width: 22%">
+<col style="width: 15%">
+<col style="width: 27%">
+<col style="width: 33%">
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: left;">Pane</th>
+<th style="text-align: left;">RStudio location</th>
+<th style="text-align: left;">Positron equivalent</th>
+<th style="text-align: left;">Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;"><strong>Code editor</strong></td>
+<td style="text-align: left;">Top-left</td>
+<td style="text-align: left;">Editor tabs</td>
+<td style="text-align: left;">Write/edit scripts and <code>.qmd</code> files</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><strong>Console</strong></td>
+<td style="text-align: left;">Bottom-left</td>
+<td style="text-align: left;">Console (R <em>or</em> Python)</td>
+<td style="text-align: left;">Interactive session; run one line</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><strong>Environment</strong></td>
+<td style="text-align: left;">Top-right</td>
+<td style="text-align: left;">Variables</td>
+<td style="text-align: left;">Objects you have created, history</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><strong>Files / Plots / Help</strong></td>
+<td style="text-align: left;">Bottom-right</td>
+<td style="text-align: left;">Explorer, Plots, Help, Data Explorer</td>
+<td style="text-align: left;">Navigate files, view plots, read docs</td>
+</tr>
+</tbody>
+</table>
+<div class="callout callout-tip callout-titled callout-style-default">
+<div class="callout-body">
+<div class="callout-title">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<p><strong>Tip</strong></p>
+</div>
+<div class="callout-content">
+<p><code>R</code> and <code>Python</code> are the languages; <strong>RStudio</strong>, <strong>Positron</strong> and <strong>VS Code</strong> are the IDEs you write them in. Write code in the <em>editor</em> so it is saved, and send lines to the <em>console</em> with <code>Cmd/Ctrl-Enter</code>. Customize the RStudio layout in Tools → Global Options → Pane Layout.</p>
+</div>
+</div>
+</div>
+</section>
+<section id="r-vs-python-same-ideas-different-syntax" class="slide level2">
+<h2>R vs Python: same ideas, different syntax</h2>
+<table class="caption-top">
+<colgroup>
+<col style="width: 33%">
+<col style="width: 33%">
+<col style="width: 33%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Idea</th>
+<th>R</th>
+<th>Python</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Assignment</td>
+<td><code>x &lt;- 5</code></td>
+<td><code>x = 5</code></td>
+</tr>
+<tr class="even">
+<td>Counting starts at</td>
+<td><strong>1</strong>: <code>x[1]</code> is the first element</td>
+<td><strong>0</strong>: <code>x[0]</code> is the first element</td>
+</tr>
+<tr class="odd">
+<td>Last element</td>
+<td><code>x[length(x)]</code>; <code>x[-1]</code> <em>drops</em> the first</td>
+<td><code>x[-1]</code> <em>is</em> the last</td>
+</tr>
+<tr class="even">
+<td>Sequence of values</td>
+<td>vector <code>c(1, 2, 3)</code></td>
+<td>list <code>[1, 2, 3]</code> or <code>numpy</code> array <code>np.array([1, 2, 3])</code></td>
+</tr>
+<tr class="odd">
+<td>Vector arithmetic</td>
+<td><code>x^2</code> on any vector</td>
+<td><code>x**2</code> only on a numpy array (a list needs a loop)</td>
+</tr>
+<tr class="even">
+<td>Table of data</td>
+<td><code>data.frame</code> / tibble</td>
+<td><code>pandas</code> <code>DataFrame</code></td>
+</tr>
+<tr class="odd">
+<td>Load a package</td>
+<td><code>library(dplyr)</code></td>
+<td><code>import pandas as pd</code></td>
+</tr>
+<tr class="even">
+<td>Install a package</td>
+<td><code>install.packages("dplyr")</code></td>
+<td><code>pip install pandas</code> (or <code>uv</code>, <code>conda</code>)</td>
+</tr>
+<tr class="odd">
+<td>Chain steps</td>
+<td>pipe <code>x \|&gt; f() \|&gt; g()</code></td>
+<td>method chaining <code>x.f().g()</code></td>
+</tr>
+<tr class="even">
+<td>Blocks</td>
+<td>curly braces <code>{ }</code></td>
+<td>indentation (4 spaces)</td>
+</tr>
+<tr class="odd">
+<td>Missing value</td>
+<td><code>NA</code></td>
+<td><code>None</code>, <code>float("nan")</code>, <code>pd.NA</code></td>
+</tr>
+<tr class="even">
+<td>Help</td>
+<td><code>?mean</code></td>
+<td><code>help(statistics.mean)</code> or <code>mean?</code> in Jupyter</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="r-scripts-and-quarto-markdown" class="slide level2">
+<h2><code>R scripts</code> and <code>Quarto Markdown</code></h2>
+<ul>
+<li>Often we want to write scripts that can just be run - <code>R scripts</code></li>
+<li>We can also embed code in Quarto Markdown files that provide more annotations</li>
+<li>This improves interpertability and reproducibility</li>
+<li>You can insert <code>R code chunks</code> into <code>Quarto Markdown</code> documents</li>
+</ul>
+</section>
+<section id="python-scripts-notebooks-and-quarto-markdown" class="slide level2">
+<h2><code>Python scripts</code>, <code>notebooks</code> and <code>Quarto Markdown</code></h2>
+<ul>
+<li>A <code>Python script</code> (<code>script.py</code>) is a text file of Python commands run top to bottom with <code>python3 script.py</code></li>
+<li>A <strong>Jupyter notebook</strong> (<code>.ipynb</code>) mixes code cells, output and Markdown - popular in Python, but stored as JSON (hard to read in Git)</li>
+<li>The same <code>Quarto Markdown</code> file can hold <code>{python}</code> code chunks - Quarto runs them through Jupyter</li>
+<li>So the R and Python workflows are the same: <strong>script</strong> for things that just run, <strong>Quarto</strong> when you want prose + code + output</li>
+</ul>
+</section>
+<section id="r-script-basics" class="slide level2">
+<h2><code>R script</code> basics</h2>
+<ul>
+<li><p>A series of R commands that will be executed<br>
+</p></li>
+<li><p>Can add comments using hashtags <code>#</code><br>
+</p></li>
+<li><p>Can have pipes (<code>|&gt;</code>) to connect one step to the next<br>
+</p></li>
+</ul>
+</section>
+<section id="python-script-basics" class="slide level2">
+<h2><code>Python script</code> basics</h2>
+<ul>
+<li><p>A series of Python commands that will be executed, top to bottom<br>
+</p></li>
+<li><p>Comments also use hashtags <code>#</code><br>
+</p></li>
+<li><p>Steps are connected with <strong>method chaining</strong> (<code>data.dropna().groupby("x").mean()</code>) rather than pipes<br>
+</p></li>
+<li><p>Whitespace matters: the body of a loop, <code>if</code> or function is <strong>indented</strong> (4 spaces)<br>
+</p></li>
+<li><p>Start scripts with <code>#!/usr/bin/env python3</code> and run them with <code>python3 script.py</code> (or <code>./script.py</code> after <code>chmod +x</code>)</p></li>
+</ul>
+</section>
+<section id="basics-of-r-and-python" class="slide level2">
+<h2>BASICS of <code>R</code> and <code>Python</code></h2>
+<ul>
+<li>Commands can be submitted through the terminal, console or scripts (R: <code>R</code> / <code>Rscript</code>; Python: <code>python3</code> / <code>python3 script.py</code>)</li>
+<li>Notice on these slides I’m evaluating the code chunks and showing output</li>
+<li>Also notice that both languages follow the normal priority of mathematical evaluation</li>
+<li>Careful: exponent is <code>^</code> in R but <code>**</code> in Python (<code>^</code> in Python is bitwise XOR!)</li>
+</ul>
+<div class="panel-tabset">
+<ul id="tabset-1" class="panel-tabset-tabby"><li><a data-tabby-default="" href="#tabset-1-1">R</a></li><li><a href="#tabset-1-2">Python</a></li></ul>
+<div class="tab-content">
+<div id="tabset-1-1">
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a></a><span class="dv">4</span><span class="sc">*</span><span class="dv">4</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 16</code></pre>
+</div>
+</div>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a></a>(<span class="dv">4</span><span class="sc">+</span><span class="dv">3</span><span class="sc">*</span><span class="dv">2</span><span class="sc">^</span><span class="dv">2</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 16</code></pre>
+</div>
+</div>
+</div>
+<div id="tabset-1-2">
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a></a><span class="dv">4</span><span class="op">*</span><span class="dv">4</span></span>
+<span id="cb5-2"><a></a><span class="co"># 16</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a></a>(<span class="dv">4</span><span class="op">+</span><span class="dv">3</span><span class="op">*</span><span class="dv">2</span><span class="op">**</span><span class="dv">2</span>)</span>
+<span id="cb6-2"><a></a><span class="co"># 16</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<section id="assigning-variables" class="slide level2">
+<h2>Assigning Variables</h2>
+<ul>
+<li>A better way to do this is to assign variables</li>
+<li>Variables are assigned values using the <code>&lt;-</code> operator in R and the <code>=</code> operator in Python.</li>
+<li>Variable names must begin with a letter (or <code>_</code> in Python), but other than that, just about anything goes.</li>
+<li>Do keep in mind that both <code>R</code> and <code>Python</code> are case sensitive.</li>
+</ul>
+</section>
+<section id="assigning-variables-1" class="slide level2">
+<h2>Assigning Variables</h2>
+<div class="panel-tabset">
+<ul id="tabset-2" class="panel-tabset-tabby"><li><a data-tabby-default="" href="#tabset-2-1">R</a></li><li><a href="#tabset-2-2">Python</a></li></ul>
+<div class="tab-content">
+<div id="tabset-2-1">
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a></a>x <span class="ot">&lt;-</span> <span class="dv">2</span></span>
+<span id="cb7-2"><a></a>x<span class="sc">*</span><span class="dv">3</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 6</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a></a>y <span class="ot">&lt;-</span> x <span class="sc">*</span> <span class="dv">3</span></span>
+<span id="cb9-2"><a></a>y<span class="dv">-2</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 4</code></pre>
+</div>
+</div>
+<p>These do not work</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb11"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a></a><span class="dv">3</span>y <span class="ot">&lt;-</span> <span class="dv">3</span></span>
+<span id="cb11-2"><a></a><span class="dv">3</span><span class="sc">*</span>y <span class="ot">&lt;-</span> <span class="dv">3</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+</div>
+<div id="tabset-2-2">
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb12"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a></a>x <span class="op">=</span> <span class="dv">2</span></span>
+<span id="cb12-2"><a></a>x<span class="op">*</span><span class="dv">3</span></span>
+<span id="cb12-3"><a></a><span class="co"># 6</span></span>
+<span id="cb12-4"><a></a>y <span class="op">=</span> x <span class="op">*</span> <span class="dv">3</span></span>
+<span id="cb12-5"><a></a>y<span class="op">-</span><span class="dv">2</span></span>
+<span id="cb12-6"><a></a><span class="co"># 4</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p>These do not work either (<code>SyntaxError</code>)</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb13"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a></a><span class="dv">3</span><span class="er">y</span> <span class="op">=</span> <span class="dv">3</span></span>
+<span id="cb13-2"><a></a><span class="dv">3</span><span class="op">*</span>y <span class="op">=</span> <span class="dv">3</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<section id="arithmetic-operations-on-functions" class="slide level2">
+<h2>Arithmetic operations on functions</h2>
+<ul>
+<li>Arithmetic operations can be performed easily on functions as well as numbers.</li>
+<li>Try the following, and then your own.</li>
+</ul>
+<div class="panel-tabset">
+<ul id="tabset-3" class="panel-tabset-tabby"><li><a data-tabby-default="" href="#tabset-3-1">R</a></li><li><a href="#tabset-3-2">Python</a></li></ul>
+<div class="tab-content">
+<div id="tabset-3-1">
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb14"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a></a>x<span class="sc">+</span><span class="dv">2</span></span>
+<span id="cb14-2"><a></a>x<span class="sc">^</span><span class="dv">2</span></span>
+<span id="cb14-3"><a></a><span class="fu">log</span>(x)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+</div>
+<div id="tabset-3-2">
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb15"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb15-1"><a></a><span class="im">import</span> math</span>
+<span id="cb15-2"><a></a></span>
+<span id="cb15-3"><a></a>x<span class="op">+</span><span class="dv">2</span></span>
+<span id="cb15-4"><a></a>x<span class="op">**</span><span class="dv">2</span></span>
+<span id="cb15-5"><a></a>math.log(x)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+</div>
+</div>
+</div>
+<ul>
+<li>Note that the last of these - <code>log</code> - is a built in function of <code>R</code>, and therefore the object of the function needs to be put in parentheses</li>
+<li>In Python, <code>log</code> lives in the <code>math</code> module, so we <code>import math</code> once and call <code>math.log(x)</code> (<code>numpy</code> has <code>np.log()</code> for whole arrays)</li>
+<li>These parentheses will be important, and we’ll come back to them later when we add arguments after the object in the parentheses<br>
+</li>
+<li>The outcome of calculations can be assigned to new variables as well, and the results can be checked using the ‘print’ command</li>
+</ul>
+</section>
+<section id="arithmetic-operations-on-functions-1" class="slide level2">
+<h2>Arithmetic operations on functions</h2>
+<div class="panel-tabset">
+<ul id="tabset-4" class="panel-tabset-tabby"><li><a data-tabby-default="" href="#tabset-4-1">R</a></li><li><a href="#tabset-4-2">Python</a></li></ul>
+<div class="tab-content">
+<div id="tabset-4-1">
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb16"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a></a>y <span class="ot">&lt;-</span> <span class="dv">67</span></span>
+<span id="cb16-2"><a></a><span class="fu">print</span>(y)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 67</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb18"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a></a>x <span class="ot">&lt;-</span> <span class="dv">124</span></span>
+<span id="cb18-2"><a></a>z <span class="ot">&lt;-</span> (x<span class="sc">*</span>y)<span class="sc">^</span><span class="dv">2</span></span>
+<span id="cb18-3"><a></a><span class="fu">print</span>(z)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 69022864</code></pre>
+</div>
+</div>
+</div>
+<div id="tabset-4-2">
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb20"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb20-1"><a></a>y <span class="op">=</span> <span class="dv">67</span></span>
+<span id="cb20-2"><a></a><span class="bu">print</span>(y)</span>
+<span id="cb20-3"><a></a><span class="co"># 67</span></span>
+<span id="cb20-4"><a></a></span>
+<span id="cb20-5"><a></a>x <span class="op">=</span> <span class="dv">124</span></span>
+<span id="cb20-6"><a></a>z <span class="op">=</span> (x<span class="op">*</span>y)<span class="op">**</span><span class="dv">2</span></span>
+<span id="cb20-7"><a></a><span class="bu">print</span>(z)</span>
+<span id="cb20-8"><a></a><span class="co"># 69022864</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<section id="strings" class="slide level2">
+<h2>STRINGS</h2>
+<ul>
+<li>Variables and operations can be performed on characters as well</li>
+<li>Note that characters need to be set off by quotation marks to differentiate them from numbers</li>
+<li>The <code>c</code> stands for <code>concatenate</code>; in Python square brackets <code>[ ]</code> build a <strong>list</strong></li>
+<li>Note that we are using the same variable names as we did previously, which means that we’re overwriting our previous assignment</li>
+<li>A good rule of thumb is to use new names for each variable, and make them short but still descriptive</li>
+</ul>
+</section>
+<section id="strings-1" class="slide level2">
+<h2>STRINGS</h2>
+<div class="panel-tabset">
+<ul id="tabset-5" class="panel-tabset-tabby"><li><a data-tabby-default="" href="#tabset-5-1">R</a></li><li><a href="#tabset-5-2">Python</a></li></ul>
+<div class="tab-content">
+<div id="tabset-5-1">
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb21"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a></a>x <span class="ot">&lt;-</span> <span class="st">"I Love"</span></span>
+<span id="cb21-2"><a></a><span class="fu">print</span> (x)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "I Love"</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb23"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a></a>y <span class="ot">&lt;-</span> <span class="st">"Bioengineering"</span></span>
+<span id="cb23-2"><a></a><span class="fu">print</span> (y)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "Bioengineering"</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb25"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb25-1"><a></a>z <span class="ot">&lt;-</span> <span class="fu">c</span>(x,y)</span>
+<span id="cb25-2"><a></a><span class="fu">print</span> (z)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "I Love"         "Bioengineering"</code></pre>
+</div>
+</div>
+</div>
+<div id="tabset-5-2">
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb27"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb27-1"><a></a>x <span class="op">=</span> <span class="st">"I Love"</span></span>
+<span id="cb27-2"><a></a><span class="bu">print</span>(x)</span>
+<span id="cb27-3"><a></a><span class="co"># I Love</span></span>
+<span id="cb27-4"><a></a>y <span class="op">=</span> <span class="st">"Bioengineering"</span></span>
+<span id="cb27-5"><a></a><span class="bu">print</span>(y)</span>
+<span id="cb27-6"><a></a><span class="co"># Bioengineering</span></span>
+<span id="cb27-7"><a></a>z <span class="op">=</span> [x, y]</span>
+<span id="cb27-8"><a></a><span class="bu">print</span>(z)</span>
+<span id="cb27-9"><a></a><span class="co"># ['I Love', 'Bioengineering']</span></span>
+<span id="cb27-10"><a></a><span class="bu">print</span>(x <span class="op">+</span> <span class="st">" "</span> <span class="op">+</span> y)      <span class="co"># + joins strings</span></span>
+<span id="cb27-11"><a></a><span class="co"># I Love Bioengineering</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<section id="vectors" class="slide level2">
+<h2>VECTORS</h2>
+<ul>
+<li>In general <code>R</code> thinks in terms of vectors (a list of characters, factors or numerical values).</li>
+<li>It will benefit any <code>R</code> user to try to write programs with that in mind, as it will simplify most things.</li>
+<li>Vectors can be assigned directly using the <code>c()</code> function and then entering the exact values.</li>
+<li>Python has <strong>lists</strong> (<code>[ ]</code>) for any collection, and <strong>numpy arrays</strong> (<code>np.array()</code>) when you want R-style vector math</li>
+<li><code>x^2</code> squares every element of an R vector; in Python that only works on a numpy array - a list needs a loop or a <em>list comprehension</em></li>
+</ul>
+</section>
+<section id="vectors-1" class="slide level2">
+<h2>VECTORS</h2>
+<div class="panel-tabset">
+<ul id="tabset-6" class="panel-tabset-tabby"><li><a data-tabby-default="" href="#tabset-6-1">R</a></li><li><a href="#tabset-6-2">Python</a></li></ul>
+<div class="tab-content">
+<div id="tabset-6-1">
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb28"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb28-1"><a></a>x <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">2</span>,<span class="dv">3</span>,<span class="dv">4</span>,<span class="dv">2</span>,<span class="dv">1</span>,<span class="dv">2</span>,<span class="dv">4</span>,<span class="dv">5</span>,<span class="dv">10</span>,<span class="dv">8</span>,<span class="dv">9</span>)</span>
+<span id="cb28-2"><a></a><span class="fu">print</span>(x)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code> [1]  2  3  4  2  1  2  4  5 10  8  9</code></pre>
+</div>
+</div>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb30"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb30-1"><a></a>x <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">2</span>,<span class="dv">3</span>,<span class="dv">4</span>,<span class="dv">2</span>,<span class="dv">1</span>,<span class="dv">2</span>,<span class="dv">4</span>,<span class="dv">5</span>,<span class="dv">10</span>,<span class="dv">8</span>,<span class="dv">9</span>)</span>
+<span id="cb30-2"><a></a>y <span class="ot">&lt;-</span> x<span class="sc">^</span><span class="dv">2</span></span>
+<span id="cb30-3"><a></a><span class="fu">print</span>(x)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code> [1]  2  3  4  2  1  2  4  5 10  8  9</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb32"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb32-1"><a></a><span class="fu">print</span>(y)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code> [1]   4   9  16   4   1   4  16  25 100  64  81</code></pre>
+</div>
+</div>
+</div>
+<div id="tabset-6-2">
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb34"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb34-1"><a></a>x <span class="op">=</span> [<span class="dv">2</span>,<span class="dv">3</span>,<span class="dv">4</span>,<span class="dv">2</span>,<span class="dv">1</span>,<span class="dv">2</span>,<span class="dv">4</span>,<span class="dv">5</span>,<span class="dv">10</span>,<span class="dv">8</span>,<span class="dv">9</span>]     <span class="co"># a list</span></span>
+<span id="cb34-2"><a></a><span class="bu">print</span>(x)</span>
+<span id="cb34-3"><a></a><span class="co"># [2, 3, 4, 2, 1, 2, 4, 5, 10, 8, 9]</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb35"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb35-1"><a></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
+<span id="cb35-2"><a></a></span>
+<span id="cb35-3"><a></a>x <span class="op">=</span> np.array([<span class="dv">2</span>,<span class="dv">3</span>,<span class="dv">4</span>,<span class="dv">2</span>,<span class="dv">1</span>,<span class="dv">2</span>,<span class="dv">4</span>,<span class="dv">5</span>,<span class="dv">10</span>,<span class="dv">8</span>,<span class="dv">9</span>])   <span class="co"># a numpy array</span></span>
+<span id="cb35-4"><a></a>y <span class="op">=</span> x<span class="op">**</span><span class="dv">2</span>                                 <span class="co"># element-wise, like R</span></span>
+<span id="cb35-5"><a></a><span class="bu">print</span>(x)</span>
+<span id="cb35-6"><a></a><span class="co"># [ 2  3  4  2  1  2  4  5 10  8  9]</span></span>
+<span id="cb35-7"><a></a><span class="bu">print</span>(y)</span>
+<span id="cb35-8"><a></a><span class="co"># [  4   9  16   4   1   4  16  25 100  64  81]</span></span>
+<span id="cb35-9"><a></a><span class="co"># with a plain list you would write: y = [v**2 for v in x]</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<section id="vectors-cont." class="slide level2">
+<h2>VECTORS (cont.)</h2>
+<div class="panel-tabset">
+<ul id="tabset-7" class="panel-tabset-tabby"><li><a data-tabby-default="" href="#tabset-7-1">R</a></li><li><a href="#tabset-7-2">Python</a></li></ul>
+<div class="tab-content">
+<div id="tabset-7-1">
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb36"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb36-1"><a></a><span class="fu">plot</span>(x,y)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div id="fig-lec07-example-vector-plot" class="quarto-float quarto-figure quarto-figure-center">
+<figure class="quarto-float quarto-float-fig">
+<div aria-describedby="fig-lec07-example-vector-plot-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img data-src="Lecture_05_BioE_Comp_Tools_2026_files/figure-revealjs/fig-lec07-example-vector-plot-1.png" width="960">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-lec07-example-vector-plot-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;1: Each value of x plotted against its square (y = x^2)
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+</div>
+<div id="tabset-7-2">
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb37"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb37-1"><a></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
+<span id="cb37-2"><a></a></span>
+<span id="cb37-3"><a></a>plt.scatter(x, y)</span>
+<span id="cb37-4"><a></a>plt.xlabel(<span class="st">"x"</span>)</span>
+<span id="cb37-5"><a></a>plt.ylabel(<span class="st">"y"</span>)</span>
+<span id="cb37-6"><a></a>plt.show()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<section id="basic-statistics" class="slide level2">
+<h2>Basic Statistics</h2>
+<ul>
+<li>Many functions exist to operate on vectors.</li>
+<li>Combine these with your previous variable to see what happens.</li>
+<li>Also, try to find other functions (e.g.&nbsp;standard deviation).</li>
+</ul>
+<div class="panel-tabset">
+<ul id="tabset-8" class="panel-tabset-tabby"><li><a data-tabby-default="" href="#tabset-8-1">R</a></li><li><a href="#tabset-8-2">Python</a></li></ul>
+<div class="tab-content">
+<div id="tabset-8-1">
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb38"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb38-1"><a></a><span class="fu">mean</span>(x)</span>
+<span id="cb38-2"><a></a><span class="fu">median</span>(x)</span>
+<span id="cb38-3"><a></a><span class="fu">var</span>(x)</span>
+<span id="cb38-4"><a></a><span class="fu">log</span>(x)  <span class="co"># natural log</span></span>
+<span id="cb38-5"><a></a><span class="fu">sqrt</span>(x)</span>
+<span id="cb38-6"><a></a><span class="fu">sum</span>(x)</span>
+<span id="cb38-7"><a></a><span class="fu">length</span>(x)</span>
+<span id="cb38-8"><a></a><span class="fu">sample</span>(x, <span class="at">replace =</span> <span class="cn">TRUE</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+</div>
+<div id="tabset-8-2">
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb39"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb39-1"><a></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
+<span id="cb39-2"><a></a><span class="im">import</span> random</span>
+<span id="cb39-3"><a></a></span>
+<span id="cb39-4"><a></a>x.mean()                     <span class="co"># or np.mean(x)</span></span>
+<span id="cb39-5"><a></a>np.median(x)</span>
+<span id="cb39-6"><a></a>x.var(ddof<span class="op">=</span><span class="dv">1</span>)                <span class="co"># sample variance, like R's var()</span></span>
+<span id="cb39-7"><a></a>np.log(x)                    <span class="co"># natural log, element-wise</span></span>
+<span id="cb39-8"><a></a>np.sqrt(x)</span>
+<span id="cb39-9"><a></a>x.<span class="bu">sum</span>()                      <span class="co"># sum(x) also works</span></span>
+<span id="cb39-10"><a></a><span class="bu">len</span>(x)                       <span class="co"># length(x)</span></span>
+<span id="cb39-11"><a></a>random.choices(<span class="bu">list</span>(x), k<span class="op">=</span><span class="bu">len</span>(x))   <span class="co"># sample with replacement</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+</div>
+</div>
+</div>
+<ul>
+<li>Notice that the last function (<code>sample</code>) has an argument (<code>replace=T</code>); in Python <code>random.choices()</code> samples <em>with</em> replacement and <code>k=</code> sets how many</li>
+<li>Python functions come in two flavours: <code>np.median(x)</code> (function) and <code>x.mean()</code> (a <strong>method</strong> attached to the array)</li>
+<li>Arguments simply modify or direct the function in some way</li>
+<li>There are many arguments for each function, some of which are defaults</li>
+</ul>
+</section>
+<section id="getting-help" class="slide level2">
+<h2>Getting Help</h2>
+<ul>
+<li>Getting Help on any function is very easy - just type a question mark and the name of the function (R), or <code>help(function)</code> in Python.</li>
+<li>There are functions for just about anything within <code>R</code> and it is easy enough to write your own functions if none already exist to do what you want to do.</li>
+<li>In general, function calls have a simple structure: a function name, a set of parentheses and an optional set of parameters to send to the function.</li>
+<li>Help pages exist for all functions that, at a minimum, explain what parameters exist for the function.<br>
+</li>
+<li>Help can be accessed a few ways - try them :</li>
+</ul>
+</section>
+<section id="getting-help-1" class="slide level2">
+<h2>Getting Help</h2>
+<div class="panel-tabset">
+<ul id="tabset-9" class="panel-tabset-tabby"><li><a data-tabby-default="" href="#tabset-9-1">R</a></li><li><a href="#tabset-9-2">Python</a></li></ul>
+<div class="tab-content">
+<div id="tabset-9-1">
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb40"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb40-1"><a></a><span class="sc">-</span> <span class="fu">help</span>(mean)</span>
+<span id="cb40-2"><a></a><span class="sc">-</span> ?mean</span>
+<span id="cb40-3"><a></a><span class="sc">-</span> <span class="fu">example</span>(mean)</span>
+<span id="cb40-4"><a></a><span class="sc">-</span> <span class="fu">help.search</span>(<span class="st">"mean"</span>)</span>
+<span id="cb40-5"><a></a><span class="sc">-</span> <span class="fu">apropos</span>(<span class="st">"mean"</span>)</span>
+<span id="cb40-6"><a></a><span class="sc">-</span> <span class="fu">args</span>(mean)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+</div>
+<div id="tabset-9-2">
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb41"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb41-1"><a></a><span class="im">import</span> numpy <span class="im">as</span> np, inspect</span>
+<span id="cb41-2"><a></a></span>
+<span id="cb41-3"><a></a><span class="bu">help</span>(np.mean)                <span class="co"># full documentation, any Python</span></span>
+<span id="cb41-4"><a></a>np.mean?                     <span class="co"># short help - IPython, Jupyter, Positron only</span></span>
+<span id="cb41-5"><a></a>np.mean??                    <span class="co"># ... plus the source code</span></span>
+<span id="cb41-6"><a></a><span class="bu">dir</span>(np)                      <span class="co"># list everything inside a module</span></span>
+<span id="cb41-7"><a></a>[n <span class="cf">for</span> n <span class="kw">in</span> <span class="bu">dir</span>(np) <span class="cf">if</span> <span class="st">"mean"</span> <span class="kw">in</span> n]   <span class="co"># like apropos("mean")</span></span>
+<span id="cb41-8"><a></a>inspect.signature(np.mean)   <span class="co"># like args(mean)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+</div>
+</div>
+</div>
+<ul>
+<li>Online: <a href="https://docs.python.org/3/" class="uri">https://docs.python.org/3/</a>, <a href="https://numpy.org/doc/" class="uri">https://numpy.org/doc/</a>, <a href="https://pandas.pydata.org/docs/" class="uri">https://pandas.pydata.org/docs/</a></li>
+</ul>
+</section>
+<section id="creating-vectors" class="slide level2">
+<h2>Creating vectors</h2>
+<ul>
+<li>Creating vector of new data by entering it by hand can be a drag</li>
+<li>However, it is also very easy to use functions such as <code>seq</code> and <code>sample</code> (Python: <code>range()</code>, <code>np.arange()</code>, <code>np.linspace()</code>)</li>
+<li>Try the examples below; can you figure out what the three arguments in the parentheses mean?</li>
+<li>Try varying the arguments to see what happens.</li>
+<li>Don’t go too crazy with the last one or your computer might slow way down</li>
+</ul>
+</section>
+<section id="creating-vectors-1" class="slide level2">
+<h2>Creating vectors</h2>
+<div class="panel-tabset">
+<ul id="tabset-10" class="panel-tabset-tabby"><li><a data-tabby-default="" href="#tabset-10-1">R</a></li><li><a href="#tabset-10-2">Python</a></li></ul>
+<div class="tab-content">
+<div id="tabset-10-1">
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb42"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb42-1"><a></a>seq_1 <span class="ot">&lt;-</span> <span class="fu">seq</span>(<span class="fl">0.0</span>, <span class="fl">10.0</span>, <span class="at">by =</span> <span class="fl">0.1</span>)</span>
+<span id="cb42-2"><a></a><span class="fu">print</span>(seq_1)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>  [1]  0.0  0.1  0.2  0.3  0.4  0.5  0.6  0.7  0.8  0.9  1.0  1.1  1.2  1.3  1.4
+ [16]  1.5  1.6  1.7  1.8  1.9  2.0  2.1  2.2  2.3  2.4  2.5  2.6  2.7  2.8  2.9
+ [31]  3.0  3.1  3.2  3.3  3.4  3.5  3.6  3.7  3.8  3.9  4.0  4.1  4.2  4.3  4.4
+ [46]  4.5  4.6  4.7  4.8  4.9  5.0  5.1  5.2  5.3  5.4  5.5  5.6  5.7  5.8  5.9
+ [61]  6.0  6.1  6.2  6.3  6.4  6.5  6.6  6.7  6.8  6.9  7.0  7.1  7.2  7.3  7.4
+ [76]  7.5  7.6  7.7  7.8  7.9  8.0  8.1  8.2  8.3  8.4  8.5  8.6  8.7  8.8  8.9
+ [91]  9.0  9.1  9.2  9.3  9.4  9.5  9.6  9.7  9.8  9.9 10.0</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb44"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb44-1"><a></a>seq_2 <span class="ot">&lt;-</span> <span class="fu">seq</span>(<span class="fl">10.0</span>, <span class="fl">0.0</span>, <span class="at">by =</span> <span class="sc">-</span><span class="fl">0.1</span>)</span>
+<span id="cb44-2"><a></a><span class="fu">print</span>(seq_2)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>  [1] 10.0  9.9  9.8  9.7  9.6  9.5  9.4  9.3  9.2  9.1  9.0  8.9  8.8  8.7  8.6
+ [16]  8.5  8.4  8.3  8.2  8.1  8.0  7.9  7.8  7.7  7.6  7.5  7.4  7.3  7.2  7.1
+ [31]  7.0  6.9  6.8  6.7  6.6  6.5  6.4  6.3  6.2  6.1  6.0  5.9  5.8  5.7  5.6
+ [46]  5.5  5.4  5.3  5.2  5.1  5.0  4.9  4.8  4.7  4.6  4.5  4.4  4.3  4.2  4.1
+ [61]  4.0  3.9  3.8  3.7  3.6  3.5  3.4  3.3  3.2  3.1  3.0  2.9  2.8  2.7  2.6
+ [76]  2.5  2.4  2.3  2.2  2.1  2.0  1.9  1.8  1.7  1.6  1.5  1.4  1.3  1.2  1.1
+ [91]  1.0  0.9  0.8  0.7  0.6  0.5  0.4  0.3  0.2  0.1  0.0</code></pre>
+</div>
+</div>
+</div>
+<div id="tabset-10-2">
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb46"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb46-1"><a></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
+<span id="cb46-2"><a></a></span>
+<span id="cb46-3"><a></a>seq_1 <span class="op">=</span> np.linspace(<span class="fl">0.0</span>, <span class="fl">10.0</span>, <span class="dv">101</span>)    <span class="co"># 101 points from 0 to 10 (step 0.1)</span></span>
+<span id="cb46-4"><a></a><span class="bu">print</span>(seq_1)</span>
+<span id="cb46-5"><a></a><span class="co"># [ 0.   0.1  0.2 ...  9.8  9.9 10. ]</span></span>
+<span id="cb46-6"><a></a>seq_2 <span class="op">=</span> np.linspace(<span class="fl">10.0</span>, <span class="fl">0.0</span>, <span class="dv">101</span>)</span>
+<span id="cb46-7"><a></a><span class="bu">print</span>(seq_2)</span>
+<span id="cb46-8"><a></a><span class="co"># [10.   9.9  9.8 ...  0.2  0.1  0. ]</span></span>
+<span id="cb46-9"><a></a><span class="bu">list</span>(<span class="bu">range</span>(<span class="dv">0</span>, <span class="dv">10</span>))                     <span class="co"># integers only: 0, 1, ..., 9 (stop is excluded!)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<section id="creating-vectors-2" class="slide level2">
+<h2>Creating vectors</h2>
+<div class="panel-tabset">
+<ul id="tabset-11" class="panel-tabset-tabby"><li><a data-tabby-default="" href="#tabset-11-1">R</a></li><li><a href="#tabset-11-2">Python</a></li></ul>
+<div class="tab-content">
+<div id="tabset-11-1">
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb47"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb47-1"><a></a>seq_square <span class="ot">&lt;-</span> (seq_2)<span class="sc">*</span>(seq_2)</span>
+<span id="cb47-2"><a></a><span class="fu">print</span>(seq_square)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>  [1] 100.00  98.01  96.04  94.09  92.16  90.25  88.36  86.49  84.64  82.81
+ [11]  81.00  79.21  77.44  75.69  73.96  72.25  70.56  68.89  67.24  65.61
+ [21]  64.00  62.41  60.84  59.29  57.76  56.25  54.76  53.29  51.84  50.41
+ [31]  49.00  47.61  46.24  44.89  43.56  42.25  40.96  39.69  38.44  37.21
+ [41]  36.00  34.81  33.64  32.49  31.36  30.25  29.16  28.09  27.04  26.01
+ [51]  25.00  24.01  23.04  22.09  21.16  20.25  19.36  18.49  17.64  16.81
+ [61]  16.00  15.21  14.44  13.69  12.96  12.25  11.56  10.89  10.24   9.61
+ [71]   9.00   8.41   7.84   7.29   6.76   6.25   5.76   5.29   4.84   4.41
+ [81]   4.00   3.61   3.24   2.89   2.56   2.25   1.96   1.69   1.44   1.21
+ [91]   1.00   0.81   0.64   0.49   0.36   0.25   0.16   0.09   0.04   0.01
+[101]   0.00</code></pre>
+</div>
+</div>
+</div>
+<div id="tabset-11-2">
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb49"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb49-1"><a></a>seq_square <span class="op">=</span> (seq_2)<span class="op">*</span>(seq_2)</span>
+<span id="cb49-2"><a></a><span class="bu">print</span>(seq_square)</span>
+<span id="cb49-3"><a></a><span class="co"># [100.    98.01  96.04 ...   0.04   0.01   0.  ]</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<section id="creating-vectors-3" class="slide level2">
+<h2>Creating vectors</h2>
+<div class="panel-tabset">
+<ul id="tabset-12" class="panel-tabset-tabby"><li><a data-tabby-default="" href="#tabset-12-1">R</a></li><li><a href="#tabset-12-2">Python</a></li></ul>
+<div class="tab-content">
+<div id="tabset-12-1">
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb50"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb50-1"><a></a>seq_square_new <span class="ot">&lt;-</span> (seq_2)<span class="sc">^</span><span class="dv">2</span></span>
+<span id="cb50-2"><a></a><span class="fu">print</span>(seq_square_new)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>  [1] 100.00  98.01  96.04  94.09  92.16  90.25  88.36  86.49  84.64  82.81
+ [11]  81.00  79.21  77.44  75.69  73.96  72.25  70.56  68.89  67.24  65.61
+ [21]  64.00  62.41  60.84  59.29  57.76  56.25  54.76  53.29  51.84  50.41
+ [31]  49.00  47.61  46.24  44.89  43.56  42.25  40.96  39.69  38.44  37.21
+ [41]  36.00  34.81  33.64  32.49  31.36  30.25  29.16  28.09  27.04  26.01
+ [51]  25.00  24.01  23.04  22.09  21.16  20.25  19.36  18.49  17.64  16.81
+ [61]  16.00  15.21  14.44  13.69  12.96  12.25  11.56  10.89  10.24   9.61
+ [71]   9.00   8.41   7.84   7.29   6.76   6.25   5.76   5.29   4.84   4.41
+ [81]   4.00   3.61   3.24   2.89   2.56   2.25   1.96   1.69   1.44   1.21
+ [91]   1.00   0.81   0.64   0.49   0.36   0.25   0.16   0.09   0.04   0.01
+[101]   0.00</code></pre>
+</div>
+</div>
+</div>
+<div id="tabset-12-2">
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb52"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb52-1"><a></a>seq_square_new <span class="op">=</span> (seq_2)<span class="op">**</span><span class="dv">2</span></span>
+<span id="cb52-2"><a></a><span class="bu">print</span>(seq_square_new)</span>
+<span id="cb52-3"><a></a><span class="co"># [100.    98.01  96.04 ...   0.04   0.01   0.  ]</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<section id="types-of-vectors-of-data" class="slide level2">
+<h2>Types of vectors of data</h2>
+<ul>
+<li><p><code>int</code> stands for integers</p></li>
+<li><p><code>dbl</code> stands for doubles, or real numbers</p></li>
+<li><p><code>chr</code> stands for character vectors, or strings</p></li>
+<li><p><code>dttm</code> stands for date-times (a date + a time)</p></li>
+<li><p><code>lgl</code> stands for logical, vectors that contain only TRUE or FALSE</p></li>
+<li><p><code>fctr</code> stands for factors, which R uses to represent categorical variables with fixed possible values</p></li>
+<li><p><code>date</code> stands for dates</p></li>
+</ul>
+<!-- -->
+<ul>
+<li>Integer and double vectors are known collectively as numeric vectors.</li>
+<li>In <code>R</code> numbers are doubles by default.</li>
+</ul>
+</section>
+<section id="the-hierarchy-of-r-vector-types" class="slide level2">
+<h2>The hierarchy of R vector types</h2>
+
+<img data-src="images/Lec07_img001.svg" style="width:85.0%" class="r-stretch quarto-figure-center"><p class="caption">Atomic vectors (logical, numeric, character) and the augmented types built on them (factors, dates, date-times)</p></section>
+<section id="types-of-vectors-of-data-1" class="slide level2">
+<h2>Types of vectors of data</h2>
+<ul>
+<li>Logical vectors can take only three possible values:
+<ul>
+<li><code>FALSE</code></li>
+<li><code>TRUE</code></li>
+<li><code>NA</code> which is ‘not available’.</li>
+</ul></li>
+<li>Integers have one special value: NA, while doubles have four:
+<ul>
+<li><code>NA</code></li>
+<li><code>NaN</code> which is ‘not a number’</li>
+<li><code>Inf</code></li>
+<li><code>-Inf</code></li>
+</ul></li>
+</ul>
+</section>
+<section id="types-of-data-in-python" class="slide level2">
+<h2>Types of data in Python</h2>
+<table class="caption-top">
+<colgroup>
+<col style="width: 19%">
+<col style="width: 45%">
+<col style="width: 34%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>R</th>
+<th>Python</th>
+<th>Example</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>int</code></td>
+<td><code>int</code></td>
+<td><code>3</code></td>
+</tr>
+<tr class="even">
+<td><code>dbl</code></td>
+<td><code>float</code></td>
+<td><code>3.0</code>, <code>2.5e-3</code></td>
+</tr>
+<tr class="odd">
+<td><code>chr</code></td>
+<td><code>str</code></td>
+<td><code>"low"</code></td>
+</tr>
+<tr class="even">
+<td><code>lgl</code></td>
+<td><code>bool</code></td>
+<td><code>True</code>, <code>False</code></td>
+</tr>
+<tr class="odd">
+<td><code>fctr</code></td>
+<td><code>pandas.Categorical</code></td>
+<td><code>pd.Categorical(["low", "high"])</code></td>
+</tr>
+<tr class="even">
+<td><code>date</code> / <code>dttm</code></td>
+<td><code>datetime.date</code> / <code>datetime.datetime</code></td>
+<td><code>datetime.date(2026, 11, 9)</code></td>
+</tr>
+<tr class="odd">
+<td><code>NA</code></td>
+<td><code>None</code>, <code>float("nan")</code>, <code>np.nan</code>, <code>pd.NA</code></td>
+<td></td>
+</tr>
+<tr class="even">
+<td><code>Inf</code> / <code>-Inf</code></td>
+<td><code>math.inf</code> / <code>-math.inf</code></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li>Ask with <code>type(x)</code>; a numpy array or pandas column has one <strong>dtype</strong> for all its values (<code>x.dtype</code>)</li>
+<li><code>7 / 2</code> is <code>3.5</code> (always a float); <code>7 // 2</code> is <code>3</code> (integer division); <code>7 % 2</code> is the remainder <code>1</code></li>
+</ul>
 
 
 </section></section>

@@ -199,7 +199,7 @@
 
 <section id="title-slide" class="quarto-title-block center">
   <h1 class="title">Lecture 10 - Computational Tools for Bioengineers</h1>
-  <p class="subtitle">Talapas and High Performance Computing</p>
+  <p class="subtitle">Git, GitHub and GitHub Pages</p>
 
 <div class="quarto-title-authors">
 <div class="quarto-title-author">
@@ -215,771 +215,328 @@ Bill Cresko
 <h2>Book reading for this lecture</h2>
 <p>The course book goes deeper on everything in this lecture. Read before or after class:</p>
 <ul>
-<li><a href="../book/chapters/20-hpc-talapas.html">Ch. 20: High-Performance Computing with Talapas</a></li>
-<li><a href="../book/chapters/14-parallel-computing.html">Ch. 14: Parallel Computing in R</a></li>
-<li><em>Reference:</em> <a href="../book/chapters/appendix-F-slurm.html">App. F: SLURM Command Reference</a></li>
+<li><a href="../book/chapters/19-git-github.html">Ch. 19: Version Control with Git and GitHub</a></li>
+<li><em>Reference:</em> <a href="../book/chapters/appendix-I-git.html">App. I: Git Command Reference</a></li>
 </ul>
 </section>
 <section id="goals-for-today" class="slide level2">
 <h2>Goals for today</h2>
 <ul>
-<li>Basics of working with Talapas</li>
-<li>The SLURM job scheduler</li>
-<li>Software modules and monitoring jobs</li>
-<li>Running R (<code>Rscript</code>) and Python (<code>python3</code>) scripts as batch jobs</li>
+<li>Finish Git and GitHub</li>
+<li>Publishing websites with GitHub Pages</li>
 <li><a href="https://wcresko.github.io/computational_tools_book/" class="uri">https://wcresko.github.io/computational_tools_book/</a></li>
 </ul>
 </section>
-<section>
-<section id="talapas-and-high-performance-computing" class="title-slide slide level1 center">
-<h1>Talapas and High Performance Computing</h1>
+<section id="git-and-github" class="slide level2">
+<h2>Git and GitHub</h2>
+<h3 id="what-is-git">What is Git?</h3>
+<ul>
+<li><strong>Git</strong> is a distributed version control system</li>
+<li>Tracks changes in your code over time</li>
+<li>Allows collaboration with others</li>
+<li>Maintains complete history of all changes</li>
+</ul>
+<h3 id="what-is-github">What is GitHub?</h3>
+<ul>
+<li><strong>GitHub</strong> is a web-based hosting service for Git repositories</li>
+<li>Provides cloud storage for your code</li>
+<li>Enables collaboration features</li>
+<li>Hosts documentation and websites (GitHub Pages)</li>
+<li>Free for public repositories</li>
+</ul>
+</section>
+<section id="git-workflow-concept" class="slide level2">
+<h2>Git Workflow Concept</h2>
 
-</section>
-<section id="what-is-talapas" class="slide level2">
-<h2>What is Talapas?</h2>
-<ul>
-<li><strong>Talapas</strong> is UO’s high-performance computing (HPC) cluster</li>
-<li>Named from Chinook word for coyote (educator and keeper of knowledge)</li>
-<li>Managed by Research Advanced Computing Services (RACS)</li>
-<li>Located in the Allen Hall Data Center</li>
-<li>https://uoracs.github.io/talapas2-knowledge-base/</li>
-</ul>
-<h3 id="key-resources">Key Resources:</h3>
-<ul>
-<li>Over 14,520 CPU cores</li>
-<li>129 TB of memory</li>
-<li>89 GPUs (including A100, H100, V100)</li>
-<li>3+ Petabytes of storage</li>
+<img data-src="images/Lec08_img001.svg" style="width:100.0%" class="r-stretch quarto-figure-center"><p class="caption">Git workflow: working directory, staging area, local and remote repositories</p><ul>
+<li><strong>Track Changes</strong>: Every modification is recorded</li>
+<li><strong>Collaboration</strong>: Multiple people can work simultaneously</li>
+<li><strong>Backup</strong>: Your code is safe in multiple places</li>
+<li><strong>Experimentation</strong>: Try new things without breaking working code</li>
 </ul>
 </section>
-<section id="talapas-architecture" class="slide level2">
-<h2>Talapas Architecture</h2>
-
-<img data-src="images/Lec10_img001.svg" class="quarto-figure quarto-figure-center r-stretch" style="width:95.0%"></section>
-<section id="login-nodes-vs-compute-nodes" class="slide level2">
-<h2>Login Nodes vs Compute Nodes</h2>
-<h3 id="login-nodes-head-nodes">Login Nodes (Head Nodes)</h3>
-<ul>
-<li>Where you land when you SSH into Talapas</li>
-<li>For <strong>light tasks only</strong>: file management, editing, job submission</li>
-<li>Shared by all users - be considerate!</li>
-<li>Heavy processes will be killed</li>
-</ul>
-<h3 id="compute-nodes">Compute Nodes</h3>
-<ul>
-<li>Where your actual work runs</li>
-<li>Accessed through the SLURM scheduler</li>
-<li>Different types for different needs:
-<ul>
-<li>Standard CPU nodes</li>
-<li>GPU nodes</li>
-<li>High-memory (“fat”) nodes</li>
-</ul></li>
-</ul>
-</section>
-<section id="node-types-on-talapas" class="slide level2">
-<h2>Node Types on Talapas</h2>
-<table class="caption-top">
-<colgroup>
-<col style="width: 25%">
-<col style="width: 9%">
-<col style="width: 15%">
-<col style="width: 16%">
-<col style="width: 32%">
-</colgroup>
-<thead>
-<tr class="header">
-<th>Node type (general use)</th>
-<th>How many</th>
-<th>Cores per node</th>
-<th>Memory per node</th>
-<th>Purpose</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td>Standard CPU (AMD Milan)</td>
-<td>43</td>
-<td>128</td>
-<td>512 GB</td>
-<td>General computation</td>
-</tr>
-<tr class="even">
-<td>GPU</td>
-<td>24</td>
-<td>48</td>
-<td>256 - 512 GB</td>
-<td>Machine learning, CUDA (52 NVIDIA A100 GPUs in total)</td>
-</tr>
-<tr class="odd">
-<td>Large memory</td>
-<td>a few</td>
-<td>varies</td>
-<td>up to 4 TB</td>
-<td>Memory-hungry jobs (e.g.&nbsp;genome assembly)</td>
-</tr>
-<tr class="even">
-<td>Interactive</td>
-<td>19</td>
-<td>varies</td>
-<td>varies</td>
-<td>Testing, development, Open OnDemand sessions</td>
-</tr>
-</tbody>
-</table>
-<div class="callout callout-note callout-titled callout-style-default">
-<div class="callout-body">
-<div class="callout-title">
-<div class="callout-icon-container">
-<i class="callout-icon"></i>
-</div>
-<p><strong>Note</strong></p>
-</div>
-<div class="callout-content">
-<p>Researchers can also buy <strong>condo</strong> nodes that their group gets priority on - about 166 more CPU nodes plus V100, A100, and H100 GPUs. Numbers from <a href="https://racs.uoregon.edu/services">RACS</a>; check the <a href="https://uoracs.github.io/talapas2-knowledge-base/">Knowledge Base</a> for the current list.</p>
-</div>
-</div>
-</div>
-</section>
-<section id="partitions-queues" class="slide level2">
-<h2>Partitions (Queues)</h2>
-<table class="caption-top">
-<colgroup>
-<col style="width: 23%">
-<col style="width: 15%">
-<col style="width: 60%">
-</colgroup>
-<thead>
-<tr class="header">
-<th>Partition</th>
-<th>Time limit</th>
-<th>Use it for</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td><code>compute</code></td>
-<td>1 day</td>
-<td>General CPU jobs (the default choice)</td>
-</tr>
-<tr class="even">
-<td><code>computelong</code></td>
-<td>14 days</td>
-<td>Long CPU jobs</td>
-</tr>
-<tr class="odd">
-<td><code>gpu</code></td>
-<td>1 day</td>
-<td>Jobs that need a GPU</td>
-</tr>
-<tr class="even">
-<td><code>gpulong</code></td>
-<td>14 days</td>
-<td>Long GPU jobs</td>
-</tr>
-<tr class="odd">
-<td><code>interactive</code></td>
-<td>12 hours</td>
-<td>Shorter interactive CPU sessions</td>
-</tr>
-<tr class="even">
-<td><code>interactivegpu</code></td>
-<td>8 hours</td>
-<td>Shorter interactive GPU sessions</td>
-</tr>
-<tr class="odd">
-<td><code>memory</code></td>
-<td>1 day</td>
-<td>Jobs needing lots of memory (up to 4 TB)</td>
-</tr>
-<tr class="even">
-<td><code>memorylong</code></td>
-<td>14 days</td>
-<td>Long, memory-hungry jobs</td>
-</tr>
-</tbody>
-</table>
-<div class="callout callout-tip callout-titled callout-style-default">
-<div class="callout-body">
-<div class="callout-title">
-<div class="callout-icon-container">
-<i class="callout-icon"></i>
-</div>
-<p><strong>Tip</strong></p>
-</div>
-<div class="callout-content">
-<p>Run <code>sinfo</code> on Talapas to see every partition, including your lab’s condo partitions.</p>
-</div>
-</div>
-</div>
-</section>
-<section id="getting-access-to-talapas" class="slide level2">
-<h2>Getting Access to Talapas</h2>
-<h3 id="step-1-join-or-create-a-pirg">Step 1: Join or Create a PIRG</h3>
-<ul>
-<li><strong>PIRG</strong> = Principal Investigator Research Group</li>
-<li>Contact your PI to be added to their PIRG</li>
-<li>Or contact RACS to create a new PIRG</li>
-</ul>
-<h3 id="step-2-request-access">Step 2: Request Access</h3>
-<ul>
-<li>Visit <a href="https://racs.uoregon.edu/request-access">racs.uoregon.edu/request-access</a></li>
-<li>Your username = your Duck ID</li>
-<li>Your password = your UO password</li>
-</ul>
-</section>
-<section id="logging-into-talapas---web-browser" class="slide level2">
-<h2>Logging Into Talapas - web browser</h2>
-<p><a href="https://ondemand.talapas.uoregon.edu">ondemand.talapas.uoregon.edu</a></p>
-<ul>
-<li>No command line needed!</li>
-<li>File browser for uploads/downloads</li>
-<li>Interactive applications:
-<ul>
-<li>JupyterLab/Notebooks</li>
-<li>RStudio</li>
-<li>MATLAB</li>
-<li>Remote desktop</li>
-</ul></li>
-</ul>
-<h3 id="great-for">Great for:</h3>
-<ul>
-<li>Beginners learning HPC</li>
-<li>Quick file management</li>
-<li>Interactive data analysis</li>
-<li>Running GUI applications</li>
-</ul>
-</section>
-<section id="logging-into-talapas---command-line" class="slide level2">
-<h2>Logging Into Talapas - command line</h2>
-<h3 id="from-a-terminal-macos-ubuntuwsl-vs-code-positron">From a terminal (macOS, Ubuntu/WSL, VS Code, Positron):</h3>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb1-1"><a></a><span class="co"># Through the load balancer - works from anywhere (expect a Duo prompt)</span></span>
+<section id="setting-up-git" class="slide level2">
+<h2>Setting Up Git</h2>
+<h3 id="install-git">1. Install Git</h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb1-1"><a></a><span class="co"># Check if Git is installed</span></span>
 <span id="cb1-2"><a></a></span>
-<span id="cb1-3"><a></a><span class="fu">ssh</span> yourduckid@login.talapas.uoregon.edu</span>
+<span id="cb1-3"><a></a><span class="fu">git</span> <span class="at">--version</span></span>
 <span id="cb1-4"><a></a></span>
-<span id="cb1-5"><a></a><span class="co"># With the UO VPN connected you can also pick a specific login node</span></span>
+<span id="cb1-5"><a></a><span class="co"># macOS (with Homebrew)</span></span>
 <span id="cb1-6"><a></a></span>
-<span id="cb1-7"><a></a><span class="fu">ssh</span> yourduckid@login1.talapas.uoregon.edu</span>
-<span id="cb1-8"><a></a><span class="fu">ssh</span> yourduckid@login2.talapas.uoregon.edu</span>
-<span id="cb1-9"><a></a><span class="fu">ssh</span> yourduckid@login3.talapas.uoregon.edu</span>
-<span id="cb1-10"><a></a><span class="fu">ssh</span> yourduckid@login4.talapas.uoregon.edu</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<h3 id="from-windows">From Windows:</h3>
-<ul>
-<li>Use the Ubuntu (WSL) terminal</li>
-<li>Or VS Code / Positron with the Remote-SSH extension</li>
-</ul>
-<div class="callout callout-note callout-titled callout-style-default">
-<div class="callout-body">
-<div class="callout-title">
-<div class="callout-icon-container">
-<i class="callout-icon"></i>
-</div>
-<p><strong>Note</strong></p>
-</div>
-<div class="callout-content">
-<p>The Knowledge Base says the UO VPN is <strong>recommended, not required</strong>. Off campus without the VPN: SSH to the load balancer <code>login.talapas.uoregon.edu</code> and answer the Duo two-step prompts.</p>
-</div>
-</div>
-</div>
+<span id="cb1-7"><a></a><span class="ex">brew</span> install git</span>
+<span id="cb1-8"><a></a></span>
+<span id="cb1-9"><a></a><span class="co"># Ubuntu/Debian</span></span>
+<span id="cb1-10"><a></a></span>
+<span id="cb1-11"><a></a><span class="fu">sudo</span> apt-get install git</span>
+<span id="cb1-12"><a></a></span>
+<span id="cb1-13"><a></a><span class="co"># Windows: Download from git-scm.com</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<h3 id="configure-git">2. Configure Git</h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb2-1"><a></a><span class="co"># Set your name and email</span></span>
+<span id="cb2-2"><a></a></span>
+<span id="cb2-3"><a></a><span class="fu">git</span> config <span class="at">--global</span> user.name <span class="st">"Your Name"</span></span>
+<span id="cb2-4"><a></a><span class="fu">git</span> config <span class="at">--global</span> user.email <span class="st">"your.email@example.com"</span></span>
+<span id="cb2-5"><a></a></span>
+<span id="cb2-6"><a></a><span class="co"># Check your settings</span></span>
+<span id="cb2-7"><a></a></span>
+<span id="cb2-8"><a></a><span class="fu">git</span> config <span class="at">--list</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </section>
-<section id="connecting-vs-code-to-talapas-remote-ssh" class="slide level2">
-<h2>Connecting VS Code to Talapas (Remote-SSH)</h2>
+<section>
+<section id="github" class="title-slide slide level1 center">
+<h1>GitHub</h1>
 
-<img data-src="images/Lec10_img002.svg" class="quarto-figure quarto-figure-center r-stretch" style="width:100.0%"><div class="callout callout-tip callout-titled callout-style-default">
-<div class="callout-body">
-<div class="callout-title">
-<div class="callout-icon-container">
-<i class="callout-icon"></i>
-</div>
-<p><strong>Tip</strong></p>
-</div>
-<div class="callout-content">
-<p>With <strong>Remote - SSH</strong>, VS Code (or Positron) runs its editor on your laptop while the files, terminal, and code live on Talapas - it feels just like working locally.</p>
-</div>
-</div>
-</div>
 </section>
-<section id="storage-on-talapas" class="slide level2">
-<h2>Storage on Talapas</h2>
-
-<img data-src="images/Lec10_img003.svg" class="quarto-figure quarto-figure-center r-stretch" style="width:85.0%"><h3 id="directory-structure">Directory Structure:</h3>
-<table class="caption-top">
-<colgroup>
-<col style="width: 32%">
-<col style="width: 29%">
-<col style="width: 37%">
-</colgroup>
-<thead>
-<tr class="header">
-<th>Location</th>
-<th>Quota</th>
-<th>Purpose</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td><code>/home/duckid</code></td>
-<td>250 GB</td>
-<td>Config files, small scripts</td>
-</tr>
-<tr class="even">
-<td><code>/projects/PIRG/duckid</code></td>
-<td>Shared (2 TB default)</td>
-<td>Large data, analysis</td>
-</tr>
-<tr class="odd">
-<td><code>/projects/PIRG/shared</code></td>
-<td>Shared</td>
-<td>Files shared with group</td>
-</tr>
-<tr class="even">
-<td><code>/tmp</code></td>
-<td>Local to node</td>
-<td>Temporary scratch space</td>
-</tr>
-</tbody>
-</table>
-</section>
-<section id="important-notes" class="slide level2">
-<h2>Important Notes:</h2>
+<section id="github-for-scientific-collaboration" class="slide level2">
+<h2>GitHub for Scientific Collaboration</h2>
+<h3 id="perfect-for-research-projects">Perfect for Research Projects:</h3>
 <ul>
-<li><strong>Data is NOT automatically backed up!</strong></li>
-<li>Use <code>/projects</code> for large files</li>
-<li>Clean up when done</li>
-</ul>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb2-1"><a></a><span class="co"># Check your storage usage</span></span>
-<span id="cb2-2"><a></a><span class="fu">df</span> <span class="at">-h</span> ~</span>
-<span id="cb2-3"><a></a><span class="fu">du</span> <span class="at">-sh</span> /projects/myPIRG/myusername</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</section>
-<section id="what-is-slurm" class="slide level2">
-<h2>What is SLURM?</h2>
-<ul>
-<li><strong>S</strong>imple <strong>L</strong>inux <strong>U</strong>tility for <strong>R</strong>esource <strong>M</strong>anagement</li>
-<li>Job scheduler and workload manager</li>
-<li>Allocates resources fairly among users</li>
-<li>Ensures efficient cluster utilization</li>
-</ul>
-
-<img data-src="images/Lec10_img004.svg" class="quarto-figure quarto-figure-center r-stretch" style="width:95.0%"><h3 id="key-concepts">Key Concepts:</h3>
-<ul>
-<li><strong>Jobs</strong>: Units of work you submit</li>
-<li><strong>Partitions</strong>: Queues with different properties</li>
-<li><strong>Accounts</strong>: Your PIRG for resource tracking</li>
+<li><strong>Reproducibility</strong>: Complete history of analysis development</li>
+<li><strong>Collaboration</strong>: Work with colleagues worldwide</li>
+<li><strong>Documentation</strong>: README files, wikis, and GitHub Pages</li>
+<li><strong>Issues</strong>: Track bugs, ideas, and to-dos</li>
+<li><strong>Releases</strong>: Tag specific versions for publications</li>
+<li><strong>DOI Integration</strong>: Link with Zenodo for citations</li>
 </ul>
 </section>
-<section id="essential-slurm-commands" class="slide level2">
-<h2>Essential SLURM Commands</h2>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb3"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb3-1"><a></a><span class="co"># Submit a batch job</span></span>
+<section id="resources-and-help" class="slide level2">
+<h2>Resources and Help</h2>
+<h3 id="learning-resources">Learning Resources:</h3>
+<ul>
+<li><strong>GitHub Docs</strong> <code>(https://docs.github.com)</code></li>
+<li><strong>Pro Git Book</strong> <code>(https://git-scm.com/book) (free online)</code></li>
+<li><strong>GitHub Skills</strong> <code>(https://skills.github.com)</code></li>
+<li><strong>Quarto + GitHub Pages</strong> <code>(https://quarto.org/docs/publishing/github-pages.html)</code></li>
+</ul>
+</section>
+<section id="creating-a-github-account" class="slide level2">
+<h2>Creating a GitHub Account</h2>
+<h3 id="steps-to-get-started">Steps to Get Started:</h3>
+<ol type="1">
+<li>Go to <a href="https://github.com">github.com</a></li>
+<li>Click “Sign up”</li>
+<li>Choose a username (professional, memorable)</li>
+<li>Add your university email</li>
+<li>Verify your account</li>
+<li>Consider GitHub Student Developer Pack:
+<ul>
+<li>Free GitHub Pro while you’re a student</li>
+<li>Access to development tools</li>
+<li>Apply at <a href="https://education.github.com">education.github.com</a></li>
+</ul></li>
+</ol>
+</section>
+<section id="basic-git-commands" class="slide level2">
+<h2>Basic Git Commands</h2>
+<h3 id="initialize-a-repository">Initialize a Repository</h3>
+<p>There are two ways to do this: create a new repository, or clone an existing repository</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb3"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb3-1"><a></a><span class="co"># Create a new repository</span></span>
 <span id="cb3-2"><a></a></span>
-<span id="cb3-3"><a></a><span class="ex">sbatch</span> myscript.sh</span>
+<span id="cb3-3"><a></a><span class="fu">git</span> init</span>
 <span id="cb3-4"><a></a></span>
-<span id="cb3-5"><a></a><span class="co"># Check your jobs in the queue</span></span>
+<span id="cb3-5"><a></a><span class="co"># Clone an existing repository</span></span>
 <span id="cb3-6"><a></a></span>
-<span id="cb3-7"><a></a><span class="ex">squeue</span> <span class="at">-u</span> <span class="va">$USER</span></span>
-<span id="cb3-8"><a></a></span>
-<span id="cb3-9"><a></a><span class="co"># Check all jobs on a partition</span></span>
-<span id="cb3-10"><a></a></span>
-<span id="cb3-11"><a></a><span class="ex">squeue</span> <span class="at">-p</span> compute</span>
-<span id="cb3-12"><a></a></span>
-<span id="cb3-13"><a></a><span class="co"># Cancel a job</span></span>
-<span id="cb3-14"><a></a></span>
-<span id="cb3-15"><a></a><span class="ex">scancel</span> JOBID</span>
-<span id="cb3-16"><a></a></span>
-<span id="cb3-17"><a></a><span class="co"># Get detailed job info</span></span>
-<span id="cb3-18"><a></a></span>
-<span id="cb3-19"><a></a><span class="ex">scontrol</span> show job JOBID</span>
-<span id="cb3-20"><a></a></span>
-<span id="cb3-21"><a></a><span class="co"># Check job history and resource usage</span></span>
-<span id="cb3-22"><a></a></span>
-<span id="cb3-23"><a></a><span class="ex">sacct</span> <span class="at">-j</span> JOBID <span class="at">--format</span><span class="op">=</span>JobID,Elapsed,MaxRSS</span>
-<span id="cb3-24"><a></a></span>
-<span id="cb3-25"><a></a><span class="co"># View partition information</span></span>
-<span id="cb3-26"><a></a></span>
-<span id="cb3-27"><a></a><span class="ex">sinfo</span> <span class="at">-p</span> compute</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb3-7"><a></a><span class="fu">git</span> clone https://github.com/username/repository.git</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </section>
-<section id="interactive-jobs" class="slide level2">
-<h2>Interactive Jobs</h2>
-<h3 id="for-testing-and-development">For testing and development:</h3>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb4"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb4-1"><a></a><span class="co"># Start an interactive session</span></span>
+<section id="creating-a-template-repo-on-github" class="slide level2">
+<h2>Creating a template repo on GitHub</h2>
+<p>I created a template website repository for you to clone and edit</p>
+<ul>
+<li>Open GitHub and log into it (important that you’re logged in)</li>
+<li>Go to this repository in my GitHub account:</li>
+</ul>
+<p><code>https://github.com/wcresko/academic_website_template</code></p>
+<ul>
+<li>Click the green button in the upper right hand corner that says ‘Use this template’</li>
+<li>This will clone the template into your GitHub account.</li>
+</ul>
+</section>
+<section id="cloning-the-template-repository-to-your-local-machine" class="slide level2">
+<h2>Cloning the template repository to your local machine</h2>
+<ul>
+<li><p>Now you can clone the repository to you local machine</p></li>
+<li><p>Open your terminal and <code>cd</code> to a location where you want to clone the repository</p></li>
+</ul>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb4"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb4-1"><a></a><span class="co">## type the following command</span></span>
 <span id="cb4-2"><a></a></span>
-<span id="cb4-3"><a></a><span class="ex">srun</span> <span class="at">--pty</span> <span class="at">--partition</span><span class="op">=</span>interactive <span class="at">--account</span><span class="op">=</span>myPIRG <span class="dt">\</span></span>
-<span id="cb4-4"><a></a>     <span class="at">--time</span><span class="op">=</span>2:00:00 <span class="at">--cpus-per-task</span><span class="op">=</span>4 <span class="at">--mem</span><span class="op">=</span>8G /bin/bash</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<p><br>
-<br>
-</p>
-<h3 id="when-to-use-interactive-jobs">When to use interactive jobs:</h3>
+<span id="cb4-3"><a></a><span class="fu">git</span> clone <span class="op">&lt;&lt; Link</span> to your repository on GitHub <span class="op">&gt;&gt;</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <ul>
-<li>Testing your workflow before batch submission</li>
-<li>Debugging code</li>
-<li>Quick data exploration</li>
-<li>Running GUI applications</li>
+<li>I’ll show you how to find the link on GitHub to use</li>
 </ul>
-<p><strong>Note</strong>: Your prompt will change from <code>login1</code> to something like <code>n049</code></p>
 </section>
-<section id="writing-a-slurm-batch-script" class="slide level2">
-<h2>Writing a SLURM Batch Script</h2>
-<p>A batch script is a <strong>shell script</strong> with <code>#SBATCH</code> directives on top. The last lines are the same commands you would type on your laptop - <code>Rscript</code> or <code>python3</code>.</p>
-<div class="panel-tabset">
-<ul id="tabset-1" class="panel-tabset-tabby"><li><a data-tabby-default="" href="#tabset-1-1">R</a></li><li><a href="#tabset-1-2">Python</a></li><li><a href="#tabset-1-3">R + Python in one job</a></li></ul>
-<div class="tab-content">
-<div id="tabset-1-1">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb5"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb5-1"><a></a><span class="co">#!/bin/bash</span></span>
-<span id="cb5-2"><a></a><span class="co">#SBATCH --job-name=my_analysis      # Job name</span></span>
-<span id="cb5-3"><a></a><span class="co">#SBATCH --partition=compute         # Partition (queue)</span></span>
-<span id="cb5-4"><a></a><span class="co">#SBATCH --account=myPIRG            # Your PIRG name</span></span>
-<span id="cb5-5"><a></a><span class="co">#SBATCH --output=output_%j.log      # Standard output (%j = job ID)</span></span>
-<span id="cb5-6"><a></a><span class="co">#SBATCH --error=error_%j.log        # Standard error</span></span>
-<span id="cb5-7"><a></a><span class="co">#SBATCH --time=04:00:00             # Time limit (HH:MM:SS)</span></span>
-<span id="cb5-8"><a></a><span class="co">#SBATCH --nodes=1                   # Number of nodes</span></span>
-<span id="cb5-9"><a></a><span class="co">#SBATCH --ntasks-per-node=1         # Tasks per node</span></span>
-<span id="cb5-10"><a></a><span class="co">#SBATCH --cpus-per-task=4           # CPUs per task</span></span>
-<span id="cb5-11"><a></a><span class="co">#SBATCH --mem=16G                   # Memory per node</span></span>
-<span id="cb5-12"><a></a></span>
-<span id="cb5-13"><a></a><span class="co"># Load required modules</span></span>
-<span id="cb5-14"><a></a></span>
-<span id="cb5-15"><a></a><span class="ex">module</span> load R/4.3.3</span>
-<span id="cb5-16"><a></a></span>
-<span id="cb5-17"><a></a><span class="co"># Run your program</span></span>
-<span id="cb5-18"><a></a></span>
-<span id="cb5-19"><a></a><span class="ex">Rscript</span> my_analysis.R</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</div>
-<div id="tabset-1-2">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb6"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb6-1"><a></a><span class="co">#!/bin/bash</span></span>
-<span id="cb6-2"><a></a><span class="co">#SBATCH --job-name=my_analysis_py   # Job name</span></span>
-<span id="cb6-3"><a></a><span class="co">#SBATCH --partition=compute         # Partition (queue)</span></span>
-<span id="cb6-4"><a></a><span class="co">#SBATCH --account=myPIRG            # Your PIRG name</span></span>
-<span id="cb6-5"><a></a><span class="co">#SBATCH --output=output_%j.log      # Standard output (%j = job ID)</span></span>
-<span id="cb6-6"><a></a><span class="co">#SBATCH --error=error_%j.log        # Standard error</span></span>
-<span id="cb6-7"><a></a><span class="co">#SBATCH --time=04:00:00             # Time limit (HH:MM:SS)</span></span>
-<span id="cb6-8"><a></a><span class="co">#SBATCH --nodes=1                   # Number of nodes</span></span>
-<span id="cb6-9"><a></a><span class="co">#SBATCH --ntasks-per-node=1         # Tasks per node</span></span>
-<span id="cb6-10"><a></a><span class="co">#SBATCH --cpus-per-task=4           # CPUs per task</span></span>
-<span id="cb6-11"><a></a><span class="co">#SBATCH --mem=16G                   # Memory per node</span></span>
+<section id="track-changes" class="slide level2">
+<h2>Track Changes</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb5"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb5-1"><a></a><span class="co"># Check status</span></span>
+<span id="cb5-2"><a></a></span>
+<span id="cb5-3"><a></a><span class="fu">git</span> status</span>
+<span id="cb5-4"><a></a></span>
+<span id="cb5-5"><a></a><span class="co"># Add files to staging</span></span>
+<span id="cb5-6"><a></a></span>
+<span id="cb5-7"><a></a><span class="fu">git</span> add filename.txt        <span class="co"># Add specific file</span></span>
+<span id="cb5-8"><a></a><span class="fu">git</span> add .                   <span class="co"># Add all changes</span></span>
+<span id="cb5-9"><a></a></span>
+<span id="cb5-10"><a></a><span class="co"># Commit changes</span></span>
+<span id="cb5-11"><a></a></span>
+<span id="cb5-12"><a></a><span class="fu">git</span> commit <span class="at">-m</span> <span class="st">"Descriptive message about changes"</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="working-with-remotes" class="slide level2">
+<h2>Working with Remotes</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb6"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb6-1"><a></a><span class="co"># Add a remote repository</span></span>
+<span id="cb6-2"><a></a></span>
+<span id="cb6-3"><a></a><span class="fu">git</span> remote add origin https://github.com/username/repo.git</span>
+<span id="cb6-4"><a></a></span>
+<span id="cb6-5"><a></a><span class="co"># View remotes</span></span>
+<span id="cb6-6"><a></a></span>
+<span id="cb6-7"><a></a><span class="fu">git</span> remote <span class="at">-v</span></span>
+<span id="cb6-8"><a></a></span>
+<span id="cb6-9"><a></a><span class="co"># Push changes to GitHub</span></span>
+<span id="cb6-10"><a></a></span>
+<span id="cb6-11"><a></a><span class="fu">git</span> push origin main</span>
 <span id="cb6-12"><a></a></span>
-<span id="cb6-13"><a></a><span class="co"># Load required modules</span></span>
+<span id="cb6-13"><a></a><span class="co"># Pull changes from GitHub</span></span>
 <span id="cb6-14"><a></a></span>
-<span id="cb6-15"><a></a><span class="ex">module</span> load python3/3.11.4          <span class="co"># or: module load miniconda3/20240410</span></span>
-<span id="cb6-16"><a></a>                                    <span class="co">#     conda activate my_env</span></span>
-<span id="cb6-17"><a></a></span>
-<span id="cb6-18"><a></a><span class="co"># Run your program</span></span>
-<span id="cb6-19"><a></a></span>
-<span id="cb6-20"><a></a><span class="ex">python3</span> my_analysis.py</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</div>
-<div id="tabset-1-3">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb7"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb7-1"><a></a><span class="co">#!/bin/bash</span></span>
-<span id="cb7-2"><a></a><span class="co">#SBATCH --job-name=fasta_pipeline</span></span>
-<span id="cb7-3"><a></a><span class="co">#SBATCH --partition=compute</span></span>
-<span id="cb7-4"><a></a><span class="co">#SBATCH --account=myPIRG</span></span>
-<span id="cb7-5"><a></a><span class="co">#SBATCH --output=output_%j.log</span></span>
-<span id="cb7-6"><a></a><span class="co">#SBATCH --error=error_%j.log</span></span>
-<span id="cb7-7"><a></a><span class="co">#SBATCH --time=01:00:00</span></span>
-<span id="cb7-8"><a></a><span class="co">#SBATCH --cpus-per-task=2</span></span>
-<span id="cb7-9"><a></a><span class="co">#SBATCH --mem=8G</span></span>
+<span id="cb6-15"><a></a><span class="fu">git</span> pull origin main</span>
+<span id="cb6-16"><a></a></span>
+<span id="cb6-17"><a></a><span class="co"># Fetch without merging</span></span>
+<span id="cb6-18"><a></a></span>
+<span id="cb6-19"><a></a><span class="fu">git</span> fetch origin</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="branching-and-merging" class="slide level2">
+<h2>Branching and Merging</h2>
+
+<img data-src="images/Lec08_img002.svg" style="width:100.0%" class="r-stretch quarto-figure-center"><p class="caption">Branching and merging</p><div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb7"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb7-1"><a></a><span class="co"># Create and switch to new branch</span></span>
+<span id="cb7-2"><a></a></span>
+<span id="cb7-3"><a></a><span class="fu">git</span> switch <span class="at">-c</span> feature-branch</span>
+<span id="cb7-4"><a></a></span>
+<span id="cb7-5"><a></a><span class="co"># Switch branches</span></span>
+<span id="cb7-6"><a></a></span>
+<span id="cb7-7"><a></a><span class="fu">git</span> switch main</span>
+<span id="cb7-8"><a></a></span>
+<span id="cb7-9"><a></a><span class="co"># Merge branch</span></span>
 <span id="cb7-10"><a></a></span>
-<span id="cb7-11"><a></a><span class="bu">set</span> <span class="at">-e</span>                              <span class="co"># stop the job if any step fails</span></span>
-<span id="cb7-12"><a></a></span>
-<span id="cb7-13"><a></a><span class="ex">module</span> load python3/3.11.4</span>
-<span id="cb7-14"><a></a><span class="ex">module</span> load R/4.3.3</span>
-<span id="cb7-15"><a></a></span>
-<span id="cb7-16"><a></a><span class="co"># Step 1 (Python): summarise every FASTA file into one table</span></span>
-<span id="cb7-17"><a></a><span class="ex">python3</span> fasta_stats.py data/<span class="pp">*</span>.fasta <span class="op">&gt;</span> results/fasta_stats.tsv</span>
-<span id="cb7-18"><a></a></span>
-<span id="cb7-19"><a></a><span class="co"># Step 2 (R): read that table, make the figure</span></span>
-<span id="cb7-20"><a></a><span class="ex">Rscript</span> plot_stats.R results/fasta_stats.tsv results/fasta_stats.png</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</div>
-</div>
-</div>
+<span id="cb7-11"><a></a><span class="fu">git</span> merge feature-branch</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Note: <code>git checkout -b</code> / <code>git checkout main</code> is the older syntax - it still works and you will see it everywhere</p>
 </section>
-<section id="what-the-job-actually-runs" class="slide level2">
-<h2>What the job actually runs</h2>
-<p>The scripts are ordinary R and Python programs - the same ones you test on your laptop first. Arguments come from the command line so nothing is hard-coded.</p>
-<div class="panel-tabset">
-<ul id="tabset-2" class="panel-tabset-tabby"><li><a data-tabby-default="" href="#tabset-2-1">R (<code>plot_stats.R</code>)</a></li><li><a href="#tabset-2-2">Python (<code>fasta_stats.py</code>)</a></li></ul>
-<div class="tab-content">
-<div id="tabset-2-1">
-<div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a></a><span class="co">#!/usr/bin/env Rscript</span></span>
-<span id="cb8-2"><a></a><span class="fu">library</span>(tidyverse)</span>
-<span id="cb8-3"><a></a></span>
-<span id="cb8-4"><a></a>args <span class="ot">&lt;-</span> <span class="fu">commandArgs</span>(<span class="at">trailingOnly =</span> <span class="cn">TRUE</span>)      <span class="co"># c("results/fasta_stats.tsv", "results/fasta_stats.png")</span></span>
-<span id="cb8-5"><a></a>stats <span class="ot">&lt;-</span> <span class="fu">read_tsv</span>(args[<span class="dv">1</span>])</span>
+<section id="common-git-workflow" class="slide level2">
+<h2>Common Git Workflow</h2>
+<h3 id="daily-development-cycle">Daily Development Cycle</h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb8"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb8-1"><a></a><span class="co"># 1. Start your day - update your local copy</span></span>
+<span id="cb8-2"><a></a></span>
+<span id="cb8-3"><a></a><span class="fu">git</span> pull origin main</span>
+<span id="cb8-4"><a></a></span>
+<span id="cb8-5"><a></a><span class="co"># 2. Create a feature branch</span></span>
 <span id="cb8-6"><a></a></span>
-<span id="cb8-7"><a></a>p <span class="ot">&lt;-</span> <span class="fu">ggplot</span>(stats, <span class="fu">aes</span>(<span class="at">x =</span> file, <span class="at">y =</span> gc_percent)) <span class="sc">+</span></span>
-<span id="cb8-8"><a></a>  <span class="fu">geom_col</span>() <span class="sc">+</span></span>
-<span id="cb8-9"><a></a>  <span class="fu">labs</span>(<span class="at">x =</span> <span class="cn">NULL</span>, <span class="at">y =</span> <span class="st">"GC content (%)"</span>) <span class="sc">+</span></span>
-<span id="cb8-10"><a></a>  <span class="fu">theme_minimal</span>()</span>
-<span id="cb8-11"><a></a></span>
-<span id="cb8-12"><a></a><span class="fu">ggsave</span>(args[<span class="dv">2</span>], p, <span class="at">width =</span> <span class="dv">8</span>, <span class="at">height =</span> <span class="dv">4</span>)</span>
-<span id="cb8-13"><a></a><span class="fu">cat</span>(<span class="st">"Wrote"</span>, args[<span class="dv">2</span>], <span class="st">"</span><span class="sc">\n</span><span class="st">"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</div>
-</div>
-<div id="tabset-2-2">
-<div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a></a><span class="co">#!/usr/bin/env python3</span></span>
-<span id="cb9-2"><a></a><span class="im">import</span> sys</span>
-<span id="cb9-3"><a></a><span class="im">from</span> pathlib <span class="im">import</span> Path</span>
+<span id="cb8-7"><a></a><span class="fu">git</span> switch <span class="at">-c</span> new-feature</span>
+<span id="cb8-8"><a></a></span>
+<span id="cb8-9"><a></a><span class="co"># 3. Make changes and commit regularly</span></span>
+<span id="cb8-10"><a></a></span>
+<span id="cb8-11"><a></a><span class="fu">git</span> add .</span>
+<span id="cb8-12"><a></a><span class="fu">git</span> commit <span class="at">-m</span> <span class="st">"Add new analysis function"</span></span>
+<span id="cb8-13"><a></a></span>
+<span id="cb8-14"><a></a><span class="co"># 4. Push your branch</span></span>
+<span id="cb8-15"><a></a></span>
+<span id="cb8-16"><a></a><span class="fu">git</span> push origin new-feature</span>
+<span id="cb8-17"><a></a></span>
+<span id="cb8-18"><a></a><span class="co"># 5. Create pull request on GitHub (via website)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="viewing-commit-history" class="slide level2">
+<h2>Viewing Commit History</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb9"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb9-1"><a></a><span class="co"># View commit history</span></span>
+<span id="cb9-2"><a></a></span>
+<span id="cb9-3"><a></a><span class="fu">git</span> log</span>
 <span id="cb9-4"><a></a></span>
-<span id="cb9-5"><a></a><span class="bu">print</span>(<span class="st">"file</span><span class="ch">\t</span><span class="st">n_seqs</span><span class="ch">\t</span><span class="st">total_bp</span><span class="ch">\t</span><span class="st">gc_percent"</span>)           <span class="co"># header of the TSV</span></span>
-<span id="cb9-6"><a></a><span class="cf">for</span> path <span class="kw">in</span> <span class="bu">map</span>(Path, sys.argv[<span class="dv">1</span>:]):                 <span class="co"># every file given on the command line</span></span>
-<span id="cb9-7"><a></a>    lines <span class="op">=</span> path.read_text().splitlines()</span>
-<span id="cb9-8"><a></a>    n_seqs <span class="op">=</span> <span class="bu">sum</span>(line.startswith(<span class="st">"&gt;"</span>) <span class="cf">for</span> line <span class="kw">in</span> lines)</span>
-<span id="cb9-9"><a></a>    seq <span class="op">=</span> <span class="st">""</span>.join(line <span class="cf">for</span> line <span class="kw">in</span> lines <span class="cf">if</span> <span class="kw">not</span> line.startswith(<span class="st">"&gt;"</span>)).upper()</span>
-<span id="cb9-10"><a></a>    gc <span class="op">=</span> <span class="dv">100</span> <span class="op">*</span> (seq.count(<span class="st">"G"</span>) <span class="op">+</span> seq.count(<span class="st">"C"</span>)) <span class="op">/</span> <span class="bu">len</span>(seq)</span>
-<span id="cb9-11"><a></a>    <span class="bu">print</span>(<span class="ss">f"</span><span class="sc">{</span>path<span class="sc">.</span>name<span class="sc">}</span><span class="ch">\t</span><span class="sc">{</span>n_seqs<span class="sc">}</span><span class="ch">\t</span><span class="sc">{</span><span class="bu">len</span>(seq)<span class="sc">}</span><span class="ch">\t</span><span class="sc">{</span>gc<span class="sc">:.1f}</span><span class="ss">"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</div>
-</div>
-</div>
-</div>
-<div class="callout callout-tip callout-titled callout-style-default">
-<div class="callout-body">
-<div class="callout-title">
-<div class="callout-icon-container">
-<i class="callout-icon"></i>
-</div>
-<p><strong>Tip</strong></p>
-</div>
-<div class="callout-content">
-<p>Test on a <strong>tiny input on the login node</strong> first (<code>python3 fasta_stats.py small.fasta</code>), then submit: <code>sbatch run_pipeline.sh</code>. Output and errors land in <code>output_JOBID.log</code> and <code>error_JOBID.log</code>.</p>
-</div>
-</div>
-</div>
+<span id="cb9-5"><a></a><span class="co"># Prettier one-line format</span></span>
+<span id="cb9-6"><a></a></span>
+<span id="cb9-7"><a></a><span class="fu">git</span> log <span class="at">--oneline</span></span>
+<span id="cb9-8"><a></a></span>
+<span id="cb9-9"><a></a><span class="co"># With graph</span></span>
+<span id="cb9-10"><a></a></span>
+<span id="cb9-11"><a></a><span class="fu">git</span> log <span class="at">--graph</span> <span class="at">--oneline</span> <span class="at">--all</span></span>
+<span id="cb9-12"><a></a></span>
+<span id="cb9-13"><a></a><span class="co"># Show changes in commits</span></span>
+<span id="cb9-14"><a></a></span>
+<span id="cb9-15"><a></a><span class="fu">git</span> log <span class="at">-p</span></span>
+<span id="cb9-16"><a></a></span>
+<span id="cb9-17"><a></a><span class="co"># Show last n commits</span></span>
+<span id="cb9-18"><a></a></span>
+<span id="cb9-19"><a></a><span class="fu">git</span> log <span class="at">-3</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </section>
-<section id="r-and-python-packages-on-talapas" class="slide level2">
-<h2>R and Python packages on Talapas</h2>
-<div class="panel-tabset">
-<ul id="tabset-3" class="panel-tabset-tabby"><li><a data-tabby-default="" href="#tabset-3-1">R</a></li><li><a href="#tabset-3-2">Python</a></li></ul>
-<div class="tab-content">
-<div id="tabset-3-1">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb10"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb10-1"><a></a><span class="ex">module</span> load R/4.3.3</span>
-<span id="cb10-2"><a></a><span class="ex">R</span>                                   <span class="co"># interactive, on an interactive node</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb11"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a></a><span class="fu">install.packages</span>(<span class="st">"tidyverse"</span>)       <span class="co"># goes to your personal library in ~/R/ - once</span></span>
-<span id="cb11-2"><a></a><span class="fu">library</span>(tidyverse)                  <span class="co"># every session / every script</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<section id="gitignore-file" class="slide level2">
+<h2>.gitignore File</h2>
+<h3 id="exclude-files-from-version-control">Exclude files from version control:</h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb10"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb10-1"><a></a><span class="co"># Create .gitignore file</span></span>
+<span id="cb10-2"><a></a><span class="fu">touch</span> .gitignore</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<h3 id="common-patterns-to-exclude">Common patterns to exclude:</h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb11"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb11-1"><a></a><span class="co"># Data files</span></span>
+<span id="cb11-2"><a></a><span class="ex">*.fastq</span></span>
+<span id="cb11-3"><a></a><span class="ex">*.fasta</span></span>
+<span id="cb11-4"><a></a><span class="ex">*.bam</span></span>
+<span id="cb11-5"><a></a><span class="ex">*.vcf</span></span>
+<span id="cb11-6"><a></a><span class="ex">data/raw/*</span></span>
+<span id="cb11-7"><a></a></span>
+<span id="cb11-8"><a></a><span class="co"># R files</span></span>
+<span id="cb11-9"><a></a><span class="ex">.Rhistory</span></span>
+<span id="cb11-10"><a></a><span class="ex">.RData</span></span>
+<span id="cb11-11"><a></a><span class="ex">.Rproj.user</span></span>
+<span id="cb11-12"><a></a></span>
+<span id="cb11-13"><a></a><span class="co"># Python files</span></span>
+<span id="cb11-14"><a></a><span class="ex">__pycache__/</span></span>
+<span id="cb11-15"><a></a><span class="ex">*.pyc</span></span>
+<span id="cb11-16"><a></a><span class="ex">.venv/</span></span>
+<span id="cb11-17"><a></a><span class="ex">.ipynb_checkpoints/</span></span>
+<span id="cb11-18"><a></a></span>
+<span id="cb11-19"><a></a><span class="co"># Output files</span></span>
+<span id="cb11-20"><a></a><span class="ex">results/temp/*</span></span>
+<span id="cb11-21"><a></a><span class="ex">*.log</span></span>
+<span id="cb11-22"><a></a></span>
+<span id="cb11-23"><a></a><span class="co"># System files</span></span>
+<span id="cb11-24"><a></a><span class="ex">.DS_Store</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="best-practices" class="slide level2">
+<h2>Best Practices</h2>
+<h3 id="commit-messages">Commit Messages</h3>
 <ul>
-<li>Modules give you R itself; <strong>you</strong> install packages into your home directory</li>
-<li>For a reproducible project, <code>renv::init()</code> records exact package versions in the project folder</li>
+<li>Be descriptive and concise</li>
+<li>Use present tense: “Add feature” not “Added feature”</li>
+<li>Reference issues: “Fix bug #123”</li>
 </ul>
-</div>
-<div id="tabset-3-2">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb12"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb12-1"><a></a><span class="ex">module</span> load miniconda3/20240410</span>
-<span id="cb12-2"><a></a><span class="ex">conda</span> create <span class="at">-n</span> my_env python=3.11 pandas matplotlib biopython   <span class="co"># once</span></span>
-<span id="cb12-3"><a></a><span class="ex">conda</span> activate my_env                                            <span class="co"># every session / job</span></span>
-<span id="cb12-4"><a></a></span>
-<span id="cb12-5"><a></a><span class="co"># or, with the plain python3 module and a virtual environment:</span></span>
-<span id="cb12-6"><a></a><span class="ex">module</span> load python3/3.11.4</span>
-<span id="cb12-7"><a></a><span class="ex">python3</span> <span class="at">-m</span> venv ~/envs/my_env <span class="kw">&amp;&amp;</span> <span class="bu">source</span> ~/envs/my_env/bin/activate</span>
-<span id="cb12-8"><a></a><span class="ex">pip</span> install pandas matplotlib biopython</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<ul>
-<li><code>conda</code> (with the <strong>bioconda</strong> channel) installs compiled bioinformatics tools too - <code>conda install -c bioconda samtools</code></li>
-<li>Put the same <code>module load</code> + <code>conda activate</code> / <code>source .../activate</code> lines in your <code>sbatch</code> script</li>
-</ul>
-</div>
-</div>
-</div>
+<h3 id="repository-organization">Repository Organization</h3>
+<pre><code>project/
+├── README.md          # Project description
+├── data/              # Raw data (consider .gitignore)
+├── analysis/          # Analysis scripts (.R, .py, .sh, .qmd)
+├── results/           # Output files
+└── docs/              # Documentation</code></pre>
 </section>
-<section id="understanding-slurm-directives" class="slide level2">
-<h2>Understanding SLURM Directives</h2>
-<table class="caption-top">
-<colgroup>
-<col style="width: 25%">
-<col style="width: 28%">
-<col style="width: 46%">
-</colgroup>
-<thead>
-<tr class="header">
-<th>Directive</th>
-<th>Description</th>
-<th>Example</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td><code>--partition</code></td>
-<td>Queue to use</td>
-<td><code>compute</code>, <code>computelong</code>, <code>gpu</code>, <code>memory</code></td>
-</tr>
-<tr class="even">
-<td><code>--account</code></td>
-<td>PIRG for accounting</td>
-<td><code>myPIRG</code></td>
-</tr>
-<tr class="odd">
-<td><code>--time</code></td>
-<td>Max runtime</td>
-<td><code>1-12:00:00</code> (1 day, 12 hrs)</td>
-</tr>
-<tr class="even">
-<td><code>--nodes</code></td>
-<td>Number of nodes</td>
-<td><code>1</code></td>
-</tr>
-<tr class="odd">
-<td><code>--cpus-per-task</code></td>
-<td>Cores per task</td>
-<td><code>8</code></td>
-</tr>
-<tr class="even">
-<td><code>--mem</code></td>
-<td>Memory per node</td>
-<td><code>32G</code></td>
-</tr>
-<tr class="odd">
-<td><code>--mem-per-cpu</code></td>
-<td>Memory per CPU</td>
-<td><code>4G</code></td>
-</tr>
-<tr class="even">
-<td><code>--gres</code></td>
-<td>Generic resources</td>
-<td><code>gpu:1</code></td>
-</tr>
-</tbody>
-</table>
-<p><strong>Tip</strong>: Request only what you need - smaller jobs run sooner!</p>
+<section id="github-pages" class="slide level2">
+<h2>GitHub Pages</h2>
+<h3 id="host-your-research-website-for-free">Host Your Research Website for Free!</h3>
+
+<img data-src="images/Lec08_img003.svg" style="width:100.0%" class="r-stretch quarto-figure-center"><p class="caption">From Quarto source to a live website</p><h3 id="setup-steps">Setup Steps:</h3>
+<ol type="1">
+<li>Create repository</li>
+<li>Clone to your local computer</li>
+<li>Make changes in RStudio, VS Code or Positron (<code>.qmd</code> files with R or Python chunks)</li>
+<li>Add and Commit your changes</li>
+<li>Push your changes and files to the remote repository</li>
+<li>Enable Pages in repository settings</li>
+<li>Your site is live at <code>https://username.github.io/repo_name</code></li>
+</ol>
 </section>
-<section id="gpu-jobs" class="slide level2">
-<h2>GPU Jobs</h2>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb13"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb13-1"><a></a><span class="co">#!/bin/bash</span></span>
-<span id="cb13-2"><a></a><span class="co">#SBATCH --job-name=gpu_job</span></span>
-<span id="cb13-3"><a></a><span class="co">#SBATCH --partition=gpu             # GPU partition</span></span>
-<span id="cb13-4"><a></a><span class="co">#SBATCH --account=myPIRG</span></span>
-<span id="cb13-5"><a></a><span class="co">#SBATCH --time=1-00:00:00           # 1 day</span></span>
-<span id="cb13-6"><a></a><span class="co">#SBATCH --nodes=1</span></span>
-<span id="cb13-7"><a></a><span class="co">#SBATCH --ntasks-per-node=1</span></span>
-<span id="cb13-8"><a></a><span class="co">#SBATCH --gres=gpu:1                # Request 1 GPU</span></span>
-<span id="cb13-9"><a></a><span class="co">#SBATCH --mem=32G</span></span>
-<span id="cb13-10"><a></a></span>
-<span id="cb13-11"><a></a><span class="co"># Load CUDA and your software</span></span>
-<span id="cb13-12"><a></a></span>
-<span id="cb13-13"><a></a><span class="ex">module</span> load cuda/12.4</span>
-<span id="cb13-14"><a></a><span class="ex">module</span> load miniconda3/20240410</span>
-<span id="cb13-15"><a></a></span>
-<span id="cb13-16"><a></a><span class="co"># Activate your conda environment</span></span>
-<span id="cb13-17"><a></a></span>
-<span id="cb13-18"><a></a><span class="ex">conda</span> activate my_ml_env</span>
-<span id="cb13-19"><a></a></span>
-<span id="cb13-20"><a></a><span class="co"># Run your GPU code</span></span>
-<span id="cb13-21"><a></a></span>
-<span id="cb13-22"><a></a><span class="ex">python</span> train_model.py</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<p><br>
-<br>
-</p>
-<h3 id="check-available-gpus">Check available GPUs:</h3>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb14"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb14-1"><a></a><span class="ex">/packages/racs/bin/slurm-show-gpus</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</section>
-<section id="talapas-uses-software-modules-lmod" class="slide level2">
-<h2>Talapas Uses Software Modules (LMOD)</h2>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb15"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb15-1"><a></a><span class="co"># List all available modules</span></span>
-<span id="cb15-2"><a></a><span class="ex">module</span> avail</span>
-<span id="cb15-3"><a></a></span>
-<span id="cb15-4"><a></a><span class="co"># Search for specific software</span></span>
-<span id="cb15-5"><a></a><span class="ex">module</span> spider R</span>
-<span id="cb15-6"><a></a><span class="ex">module</span> spider python          <span class="co"># python3/3.x.y modules, plus miniconda3 for conda environments</span></span>
-<span id="cb15-7"><a></a></span>
-<span id="cb15-8"><a></a><span class="co"># Load a module</span></span>
-<span id="cb15-9"><a></a><span class="ex">module</span> load R/4.3.3</span>
-<span id="cb15-10"><a></a><span class="ex">module</span> load miniconda3/20240410</span>
-<span id="cb15-11"><a></a></span>
-<span id="cb15-12"><a></a><span class="co"># See what's loaded</span></span>
-<span id="cb15-13"><a></a><span class="ex">module</span> list</span>
-<span id="cb15-14"><a></a></span>
-<span id="cb15-15"><a></a><span class="co"># Unload a module</span></span>
-<span id="cb15-16"><a></a><span class="ex">module</span> unload R</span>
-<span id="cb15-17"><a></a></span>
-<span id="cb15-18"><a></a><span class="co"># Reset to default</span></span>
-<span id="cb15-19"><a></a><span class="ex">module</span> purge</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="callout callout-note callout-titled callout-style-default">
-<div class="callout-body">
-<div class="callout-title">
-<div class="callout-icon-container">
-<i class="callout-icon"></i>
-</div>
-<p><strong>Note</strong></p>
-</div>
-<div class="callout-content">
-<p>In your batch scripts, always load modules after the SBATCH directives!</p>
-</div>
-</div>
-</div>
-</section>
-<section id="monitoring-your-jobs" class="slide level2">
-<h2>Monitoring Your Jobs</h2>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb16"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb16-1"><a></a><span class="co"># Check job status</span></span>
-<span id="cb16-2"><a></a></span>
-<span id="cb16-3"><a></a><span class="ex">squeue</span> <span class="at">-u</span> <span class="va">$USER</span></span>
-<span id="cb16-4"><a></a></span>
-<span id="cb16-5"><a></a><span class="co"># Detailed job information</span></span>
-<span id="cb16-6"><a></a></span>
-<span id="cb16-7"><a></a><span class="ex">scontrol</span> show job JOBID</span>
-<span id="cb16-8"><a></a></span>
-<span id="cb16-9"><a></a><span class="co"># After job completes - see resource usage</span></span>
-<span id="cb16-10"><a></a></span>
-<span id="cb16-11"><a></a><span class="ex">sacct</span> <span class="at">-j</span> JOBID <span class="at">--format</span><span class="op">=</span>JobID,JobName,Elapsed,MaxRSS,State</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<p><br>
-<br>
-</p>
-<h3 id="common-status-codes">Common Status Codes:</h3>
-<table class="caption-top">
-<thead>
-<tr class="header">
-<th>Code</th>
-<th>Meaning</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td>PD</td>
-<td>Pending (waiting)</td>
-</tr>
-<tr class="even">
-<td>R</td>
-<td>Running</td>
-</tr>
-<tr class="odd">
-<td>CG</td>
-<td>Completing</td>
-</tr>
-<tr class="even">
-<td>CD</td>
-<td>Completed</td>
-</tr>
-<tr class="odd">
-<td>F</td>
-<td>Failed</td>
-</tr>
-</tbody>
-</table>
-</section>
-<section id="best-practices-for-talapas" class="slide level2">
-<h2>Best Practices for Talapas</h2>
-<h3 id="do">Do:</h3>
-<ul>
-<li>Request only resources you need</li>
-<li>Test with small datasets first</li>
-<li>Use <code>--time</code> conservatively</li>
-<li>Clean up old files regularly</li>
-<li>Use <code>/projects</code> for large data</li>
-</ul>
-<h3 id="dont">Don’t:</h3>
-<ul>
-<li>Run heavy computation on login nodes</li>
-<li>Leave jobs running indefinitely</li>
-<li>Store sensitive data without encryption</li>
-<li>Forget to acknowledge RACS in publications</li>
-</ul>
-</section>
-<section id="getting-help-with-talapas" class="slide level2">
-<h2>Getting Help with Talapas</h2>
-<h3 id="resources">Resources:</h3>
-<ul>
-<li>Documentation: <a href="https://uoracs.github.io/talapas2-knowledge-base/">uoracs.github.io/talapas2-knowledge-base</a></li>
-<li>Service Desk: <a href="https://hpcrcf.atlassian.net/servicedesk/customer/portal/1">hpcrcf.atlassian.net/servicedesk</a></li>
-<li>Email: racs@uoregon.edu</li>
-<li>Office Hours: Knight Library, Dream Lab 122E (Wednesdays 1-3pm)</li>
-</ul>
-<h3 id="acknowledgment-text">Acknowledgment Text:</h3>
-<blockquote>
-<p>“The authors acknowledge Research Advanced Computing Services (RACS) at the University of Oregon for providing computing resources that have contributed to the research results reported within this publication.”</p>
-</blockquote>
+<section id="github-pages-configuration" class="slide level2">
+<h2>GitHub Pages Configuration</h2>
+<h3 id="in-your-repository">In your repository:</h3>
+<ol type="1">
+<li>Go to Settings → Pages</li>
+<li>Source: Deploy from a branch</li>
+<li>Branch: main (or gh-pages)</li>
+<li>Folder: <code>/docs</code> (preferable) or <code>/</code> (root)</li>
+</ol>
+<h3 id="for-quarto-projects">For Quarto projects:</h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb13"><pre class="sourceCode numberSource yaml number-lines code-with-copy"><code class="sourceCode yaml"><span id="cb13-1"><a></a><span class="co"># In _quarto.yml</span></span>
+<span id="cb13-2"><a></a></span>
+<span id="cb13-3"><a></a><span class="fu">project</span><span class="kw">:</span></span>
+<span id="cb13-4"><a></a><span class="at">  </span><span class="fu">type</span><span class="kw">:</span><span class="at"> website</span></span>
+<span id="cb13-5"><a></a><span class="at">  </span><span class="fu">output-dir</span><span class="kw">:</span><span class="at"> docs</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 
 
 </section></section>
