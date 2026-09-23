@@ -10,22 +10,30 @@ This book accompanies a graduate-level course taught at the University of Oregon
 
 ## Contents
 
-1. **Introduction to Computational Tools** - Why computational skills matter
-2. **Your Computational Toolkit** - Installing R, Python, Quarto; VS Code, Positron, RStudio
-3. **Computing Resources at the University of Oregon** - Identity, storage, data classification, backups, RACS, Talapas access
-4. **Computer Systems Architecture** - Understanding hardware and operating systems
-5. **Unix Fundamentals** - Navigation and basic commands
-6. **Files, Pipes, and Redirection** - Data processing pipelines
-7. **GREP, Regular Expressions, sed and awk** - Pattern matching and text processing
-8. **Shell Scripting** - Automation and reproducibility
-9. **R Programming Fundamentals** - Statistical computing basics
-10. **Python Programming Fundamentals** - Python 3, NumPy, pandas, matplotlib, and an R-to-Python translation table
-11. **Tidy Data Principles** and **Data Visualization with ggplot2**
-12. **Writing Functions**, **Parallel Computing**, **Databases**
-13. **Reproducible Documents with Quarto** and **LaTeX**
-14. **Coding with AI Assistants** - Using LLM tools well and safely
-15. **Version Control with Git and GitHub** - Tracking changes and collaboration
-16. **High-Performance Computing with Talapas** - Using computing clusters
+1. Introduction to Computational Tools
+2. Your Computational Toolkit
+3. Computing Resources at the University of Oregon
+4. Computer Systems Architecture
+5. Unix Fundamentals
+6. Files, Pipes, and Redirection
+7. GREP and Regular Expressions
+8. Shell Scripting
+9. R Programming Fundamentals
+10. Python Programming Fundamentals
+11. Tidy Data Principles
+12. Data Visualization with ggplot2
+13. Writing Functions in R
+14. Parallel Computing in R
+15. Working with Databases
+16. Reproducible Documents with Quarto
+17. LaTeX for Scientific Documents
+18. Coding with AI Assistants
+19. Version Control with Git and GitHub
+20. High-Performance Computing with Talapas
+
+Appendices A-J: Unix, Git, R, Python, LaTeX, SLURM and regex references; keyboard shortcuts; data formats & public repositories; glossary.
+
+Chapter files in `chapters/` are numbered to match this order (`05-unix-fundamentals.qmd` is Chapter 5; `appendix-A-unix.qmd` is Appendix A), and their figures are named `images/Chap05_img001.svg`, `images/AppA_img001.png`, etc. (see `images/README.md`).
 
 ## Building the Book
 
@@ -70,23 +78,23 @@ BioE_Comp_Tools_Fa2026/Book/
 ├── apa.csl              # Citation style
 ├── chapters/            # Chapter content
 │   ├── 01-introduction.qmd
-│   ├── 02-computer-systems.qmd
-│   ├── 03-unix-fundamentals.qmd
-│   ├── 04-files-pipes.qmd
-│   ├── 05-grep-regex.qmd
-│   ├── 06-shell-scripting.qmd
-│   ├── 07-r-programming.qmd
-│   ├── 08-tidy-data.qmd
-│   ├── 09-data-visualization.qmd
-│   ├── 10-git-github.qmd
-│   ├── 11-hpc-talapas.qmd
-│   ├── 12-quarto-documents.qmd
+│   ├── 04-computer-systems.qmd
+│   ├── 05-unix-fundamentals.qmd
+│   ├── 06-files-pipes.qmd
+│   ├── 07-grep-regex.qmd
+│   ├── 08-shell-scripting.qmd
+│   ├── 09-r-programming.qmd
+│   ├── 11-tidy-data.qmd
+│   ├── 12-data-visualization.qmd
+│   ├── 19-git-github.qmd
+│   ├── 20-hpc-talapas.qmd
+│   ├── 16-quarto-documents.qmd
 │   ├── 13-writing-functions.qmd
 │   ├── 14-parallel-computing.qmd
 │   ├── 15-databases.qmd
-│   ├── 16-latex-basics.qmd
-│   ├── 17-ai-assisted-coding.qmd
-│   ├── 18-python-programming.qmd
+│   ├── 17-latex-basics.qmd
+│   ├── 18-ai-assisted-coding.qmd
+│   ├── 10-python-programming.qmd
 │   └── appendix-*.qmd   # unix, git, r, python, latex, slurm, regex, shortcuts, data-formats, glossary
 ├── images/              # Image assets
 └── (renders to ../docs/book/)
@@ -109,7 +117,7 @@ Edit `custom.scss` to modify colors, fonts, and other visual elements. The book 
 Place images in the `images/` directory and reference them in chapters:
 
 ```markdown
-![Caption](../images/filename.png)
+![Caption](../images/Chap05_img001.svg){#fig-example}
 ```
 
 ## Author

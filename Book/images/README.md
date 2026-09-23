@@ -1,32 +1,18 @@
 # Images Directory
 
-This directory contains images used throughout the book.
+Every figure used by a book chapter lives here and is referenced from the chapter as `../images/<name>`.
 
-## Required Images
+## Naming convention
 
-Please add the following images to this directory:
+`Chap##_img###.<ext>` for chapter figures and `App#_img###.<ext>` for appendix figures, numbered in order of first appearance within the chapter (e.g. `Chap05_img001.svg` is the first figure in Chapter 5, *Unix Fundamentals*). Chapter numbers follow the rendered book order, which matches the numeric prefix of the chapter file in `chapters/`.
 
-### Cover and Branding
-- `cover.png` - Book cover image (recommended: 1200x1600 pixels)
-- `uo_logo.png` - University of Oregon logo for sidebar
+The same convention is used for the lecture decks: `Lecture_Folder/images/Lec##_img###.<ext>`.
 
-### Chapter Images
-Images referenced in the original slides should be placed here. These include:
-- Code/terminal screenshots
-- Workflow diagrams
-- Conceptual illustrations
+## Adding a figure
 
-## Image Guidelines
+1. Save it here with the next free number for that chapter (`ls Chap05_*` shows what exists).
+2. Reference it with a caption, an id and alt text, e.g.
+   `![Caption](../images/Chap05_img007.svg){#fig-something width="80%" fig-alt="..."}`
+3. Prefer SVG for diagrams, PNG for screenshots, JPEG for photographs; keep files under ~500 KB where possible.
 
-- Use PNG format for diagrams and screenshots
-- Use JPEG for photographs
-- Keep file sizes reasonable (under 500KB when possible)
-- Use descriptive filenames: `git_workflow_diagram.png` not `img1.png`
-
-## Creating Diagrams
-
-Many diagrams in this book are created using Mermaid directly in the Quarto documents. For custom diagrams, consider:
-
-- [draw.io](https://draw.io) - Free diagramming tool
-- [Excalidraw](https://excalidraw.com) - Hand-drawn style diagrams
-- [Mermaid Live Editor](https://mermaid.live) - Preview Mermaid diagrams
+Unused images are removed at each clean-up pass; everything is recoverable from git history.

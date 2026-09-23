@@ -58,13 +58,13 @@ None. `SB/chapters/02-installing-tools.qmd` has no figures; the SW Week1 install
 # B-unix change log
 
 Sources read in full: `SB/chapters/03-unix-command-line.qmd`, `SB/chapters/A3-unix-reference.qmd`, `SW/Lecture_Folder/Appendix_B.qmd`, `SW/Lecture_Folder/Appendix_C.qmd`, and the shell/navigation/files sections of `SW/Lecture_Folder/Week1.qmd` (lines 287-516) plus its pipe-figure slides (lines 1696-1746).
-Targets edited: `work_Book/chapters/03-unix-fundamentals.qmd`, `04-files-pipes.qmd`, `05-grep-regex.qmd`, `06-shell-scripting.qmd`, `appendix-unix.qmd`. `appendix-regex.qmd` was read and left unchanged (nothing in the stats sources adds to it).
+Targets edited: `work_Book/chapters/05-unix-fundamentals.qmd`, `06-files-pipes.qmd`, `07-grep-regex.qmd`, `08-shell-scripting.qmd`, `appendix-A-unix.qmd`. `appendix-G-regex.qmd` was read and left unchanged (nothing in the stats sources adds to it).
 
 All new headings carry `{#sec-...}` ids, all new figures `{#fig-...}` ids with captions, all new tables `{#tbl-...}` ids; fences and `:::` divs verified balanced; no duplicate ids across the book; every `@sec-/@fig-/@tbl-` reference in the edited files resolves.
 
 ## 1. Edits
 
-### `03-unix-fundamentals.qmd`
+### `05-unix-fundamentals.qmd`
 - **Anatomy of a Shell Command** — added the newer SVG figure `appendix_B_S38_shell_command_anatomy.svg` (`#fig-shell-command-anatomy`) and a **Prompt** entry to the definition list, mirroring the Week1/Appendix_B "Recipes for a Shell Command" (prompt / command / options / argument). Book had text only.
 - **Understanding the File System** — added `appendix_B_S42_file_structure.svg` (`#fig-file-structure`) after the intro paragraph (Week1 "How is a computer organized?").
 - **The Directory Tree** — added `appendix_B_S43_unix_file_hierarchy.svg` (`#fig-unix-file-hierarchy`) with a linking sentence after the ASCII tree (Week1 "UNIX File Hierarchy (SVG)"; audit item #29).
@@ -80,7 +80,7 @@ All new headings carry `{#sec-...}` ids, all new figures `{#fig-...}` ids with c
 - **Summary** — three bullets added (`.`/`..`, permissions/`chmod +x`, wildcards expanded by the shell).
 - **Exercises** — added *Exercise 4: Wild Cards and Structure* (adapted from SB Exercise U.1: five `dir_N` directories, `touch`, `nano`, wildcard listing, `rm` then `rmdir`) and *Exercise 5: File Permissions* (SB Exercise U.4).
 
-### `04-files-pipes.qmd`
+### `06-files-pipes.qmd`
 - **Learning objectives** — now mention capturing errors separately.
 - **Standard Streams** — added a paragraph that a program does not know where its output goes, and the figure `pipe_step3_output_to_shell.svg` (`#fig-stream-to-terminal`) (Appendix_B "Unix Three Standard Streams" / Week1 pipe step 3 SVG; audit #38).
 - **Output Redirection** — added figure `pipe_step4_redirect_to_file.svg` (`#fig-redirect-to-file`); added the explicit `ls -l 1> file_list.txt` form and a sentence explaining `>` = `1>` (Appendix_B; audit #32).
@@ -103,7 +103,7 @@ All new headings carry `{#sec-...}` ids, all new figures `{#fig-...}` ids with c
 - **Summary** — updated bullets (`2>` per stage, `<<`, `join`, streaming/subsets).
 - **Exercise 2** — added steps 5-6 (`tee`, count unique numbers and append) from Appendix_B "Practice Exercise: Files and Pipes".
 
-### `05-grep-regex.qmd`
+### `07-grep-regex.qmd`
 - **Quantifiers** — added `grep "GC*"` with a paragraph explaining that a quantifier binds only to the preceding character/group (Appendix_C; audit #42).
 - **The Plus Quantifier** — added `grep -E "[ACGT]{20,}" primers.txt` (Appendix_C "Complex patterns").
 - **Working with FASTA Files** — added the UniProt header pattern `^>sp\|[A-Z0-9]+\|` with a comment on the escaped `|` (audit #42) and `grep -v -E "TAA|TAG|TGA"` (Appendix_C "Combining with Pipes").
@@ -111,10 +111,10 @@ All new headings carry `{#sec-...}` ids, all new figures `{#fig-...}` ids with c
 - **awk filtering** — added `$2 == "control"`, `{ print NR, $0 }`, and a short "arithmetic on fields" example `$2 * 1000` (SB "Flexible Text Processing with awk").
 - **NEW `### Putting It Together` (`#sec-text-tools-together`)** after the grep/sed/awk comparison table — the SB "Combining Commands in Pipelines" one-liners (unique gene names, significant rows sorted by effect size, CSV→TSV subset, value counts, sequences per chromosome, GFF feature types) with a closing paragraph naming the select → extract → sort → count idiom.
 
-### `06-shell-scripting.qmd`
+### `08-shell-scripting.qmd`
 - **Exit Status** — added the `if ! grep ... > /dev/null 2>&1; then` idiom with a sentence on any command serving as an `if` condition (Appendix_C "Error Handling" try-catch style). Everything else in Appendix_C (shebang, `$()`, `$(())`, `$0/$#/$@`, arrays, `${var%pattern}`, conditionals table, loops, functions, `set -euo pipefail`, `trap`, `fasta_stats.sh`, best-practices list) was already present, usually in more detail.
 
-### `appendix-unix.qmd`
+### `appendix-A-unix.qmd`
 - Text-processing table: `sort -k` row now shows `-k2,2 -n` and explains `-kN,N`; added `sort -t`, `uniq -u`, `cut -f2-5` range note, `join -1 -2`, `fold -w`.
 - Redirection table: added `<<` and `1>` rows.
 - Compression table: added `gunzip -k` and `gunzip -c`.
@@ -143,11 +143,11 @@ Notes: the SVG was preferred over the matching `.jpeg` in every case (both exist
 - SB/Appendix_B/Week1 WSL installation steps — belong to ch. 1/toolkit setup (another agent's targets); ch. 3 already cross-references `@sec-windows-setup`.
 - SB *Navigation Commands*, *Working with Files and Directories*, *Viewing File Contents*, *Getting Help* — book already has the same commands with more explanation (`less` keys, `wc` options, `man` navigation, `--help`, `apropos`).
 - SB *Pattern Matching with grep*, *Search and Replace with sed*, *awk* basics — ch. 5 already has fuller sed/awk sections (added 2026-09-22); only the few missing examples noted above were pulled. SB's `\s` in basic grep skipped (GNU extension; book uses POSIX classes).
-- SB *Bioinformatics File Formats* (CSV/TSV, FASTA, SAM/BAM + `samtools`, BED, VCF + `bcftools`, GFF/GTF, compressed formats) — already covered in `appendix-data-formats.qmd` (`@sec-fasta`, `@sec-fastq`, `@sec-sam-bam`, `@sec-genomic-annotation-and-interval-formats`, `@sec-gzip-streaming`); only the FASTQ awk one-liners were added to ch. 4.
+- SB *Bioinformatics File Formats* (CSV/TSV, FASTA, SAM/BAM + `samtools`, BED, VCF + `bcftools`, GFF/GTF, compressed formats) — already covered in `appendix-I-data-formats.qmd` (`@sec-fasta`, `@sec-fastq`, `@sec-sam-bam`, `@sec-genomic-annotation-and-interval-formats`, `@sec-gzip-streaming`); only the FASTQ awk one-liners were added to ch. 4.
 - SB *Ctrl-C "Interrupting Commands"* callout — already in the keyboard-shortcut table (`@tbl-keyboard-shortcuts`).
 - SB Exercises U.2 and U.3 — equivalent to existing ch. 4 Exercise 3/4 and ch. 5 exercises.
 - SB *Additional Resources* list — book's reading lists already include Software Carpentry and the GNU Awk guide; the Stanford cheat-sheet/Korf primer/DataCamp links were not added.
-- SB `A3-unix-reference.qmd` — the book's `appendix-unix.qmd` is already a strict superset (adds `ls -S/-F`, `shuf`, `history`, `uname -m`, macOS `sed -i ''`, etc.).
+- SB `A3-unix-reference.qmd` — the book's `appendix-A-unix.qmd` is already a strict superset (adds `ls -S/-F`, `shuf`, `history`, `uname -m`, macOS `sed -i ''`, etc.).
 - Appendix_B *Accessing the Shell* and *Where Do You Get Help?* (incl. "Generative AI") — covered in ch. 3 and the AI chapter.
 - Appendix_B *Human Chromosome Data* `ls -lh`/`gunzip` size demo — folded into the compression section rather than a separate subsection.
 - Appendix_B *Practice: File Operations* exercise — equivalent to existing ch. 3 Exercise 2.
@@ -163,13 +163,13 @@ Notes: the SVG was preferred over the matching `.jpeg` in every case (both exist
 # C-r change log — R basics / RStudio / R reference
 
 Sources read in full: `SB/chapters/04-r-rstudio.qmd`, `SB/chapters/A4-r-reference.qmd`, `SW/Lecture_Folder/Appendix_D.qmd`, R-basics portions of `SW/Lecture_Folder/Week1.qmd` (lines 518–1397) and the headings of `Week2.qmd` (its R content is dplyr/ggplot/probability, outside this assignment).
-Targets read in full: `work_Book/chapters/07-r-programming.qmd`, `work_Book/chapters/appendix-r.qmd`; headings of `13-writing-functions.qmd`; relevant sections of `02-your-toolkit.qmd` and `08-tidy-data.qmd` checked for duplication.
+Targets read in full: `work_Book/chapters/09-r-programming.qmd`, `work_Book/chapters/appendix-C-r.qmd`; headings of `13-writing-functions.qmd`; relevant sections of `02-your-toolkit.qmd` and `11-tidy-data.qmd` checked for duplication.
 
 Overall finding: the Comp Tools chapter 07 and appendix were already a superset of the stats book's R chapter and R reference on most topics (objects, vectors, sorting, `which()`, floating point, `near()`, vignettes, `conflicted`, lists, matrices, apply family, `replicate()`, cleanup). The additions below are the pieces the stats sources have that the target lacked, plus a few consistency fixes.
 
 ## 1. Edits
 
-### `work_Book/chapters/07-r-programming.qmd`
+### `work_Book/chapters/09-r-programming.qmd`
 
 | Section | What + why |
 |:--|:--|
@@ -199,7 +199,7 @@ Overall finding: the Comp Tools chapter 07 and appendix were already a superset 
 | Summary | Added bullets on `NA` handling and error messages / reprex. |
 | Exercises | Exercise 7: added step 5 (round-trip without `row.names = FALSE`). Added Exercise 8 "Exploring RStudio and the Help System" (SB Exercise R.1 + help tasks + deliberately triggering errors) and Exercise 9 "Base Plotting" (SB Exercise R.7: `type`, `breaks`, `par(mfrow)`, vectorized `col`). |
 
-### `work_Book/chapters/appendix-r.qmd`
+### `work_Book/chapters/appendix-C-r.qmd`
 
 | Section | What + why |
 |:--|:--|
@@ -221,7 +221,7 @@ None. The only R-basics figure in the stats sources is the RStudio IDE screensho
 - SB §"Installing R and RStudio" and SW Week1 "Installing R and RStudio / Platform Considerations" — installation belongs to `02-your-toolkit.qmd` (`@sec-install-checklist`), assigned elsewhere.
 - SB §"Generating Random Numbers", SW "Drawing Samples from Distributions", "Overlaying Density Curves", "Binomial Distribution" — probability content; the mechanics (`rnorm`, `sample`, `set.seed`, `curve(dnorm…, add = TRUE)`) are already in ch07 `#sec-random-sampling`.
 - SB §"Introduction to R Markdown" — superseded by the book's Quarto chapter (`@sec-quarto-documents`); R Markdown itself is not taught in this course.
-- SW Week1 "Tidy Data & File Types", "Tidy Data Set Rules of Thumb", "Common File Formats", "Genomic Data Formats", SW Appendix D "Tidy Data Principles"/"Types of Data" — tidy-data and data-format material; covered by ch08 and `appendix-data-formats.qmd`, assigned to other agents.
+- SW Week1 "Tidy Data & File Types", "Tidy Data Set Rules of Thumb", "Common File Formats", "Genomic Data Formats", SW Appendix D "Tidy Data Principles"/"Types of Data" — tidy-data and data-format material; covered by ch08 and `appendix-I-data-formats.qmd`, assigned to other agents.
 - SW Week1 "The Tidyverse Ecosystem" table and `install.packages("tidyverse")` — already in ch08 `#sec-core-tidyverse-packages`.
 - SW Week1 "R Resources" table — ch07 "Additional Resources" already lists the same links.
 - SW Week1 "Transcriptomic Data Analysis" exercise — course-specific dataset not available in this repo.
@@ -236,11 +236,11 @@ None. The only R-basics figure in the stats sources is the RStudio IDE screensho
 
 Sources read: `SB/chapters/05-markdown-latex.qmd`, `SB/chapters/A5-quarto-reference.qmd`, `SB/chapters/A6-latex-reference.qmd`, `SB/chapters/A7-greek-letters.qmd`, and the Quarto section of `SW/Lecture_Folder/Week1.qmd` (lines 1399-1866; Week2 only uses LaTeX tabs for statistical formulas).
 
-Overall finding: the Comp Tools chapters 12 and 16 already cover almost everything in SB ch. 05 and Week1, often better; `appendix-latex.qmd` is a verbatim copy of A6 (only table captions/ids differ). The real gaps were in A5 (citations, output-format options, CLI commands, subfigures, code-generated tables) and A7 (letter names/pronunciation). No images are involved in any of these sources.
+Overall finding: the Comp Tools chapters 12 and 16 already cover almost everything in SB ch. 05 and Week1, often better; `appendix-E-latex.qmd` is a verbatim copy of A6 (only table captions/ids differ). The real gaps were in A5 (citations, output-format options, CLI commands, subfigures, code-generated tables) and A7 (letter names/pronunciation). No images are involved in any of these sources.
 
 ## 1. Edits
 
-### `/home/claude/work_Book/chapters/12-quarto-documents.qmd`
+### `/home/claude/work_Book/chapters/16-quarto-documents.qmd`
 
 - **Learning Objectives** — added "Cite sources from a BibTeX file"; widened the rendering bullet to "from RStudio and the command line".
 - **Lists (`#sec-quarto-lists`)** — added task-list syntax (`- [ ]` / `- [x]`) from A5.
@@ -258,7 +258,7 @@ Overall finding: the Comp Tools chapters 12 and 16 already cover almost everythi
 - **Summary** — cross-references bullet now mentions citations.
 - **Exercises** — Exercise 4 step 2 uses `--to all`; added **Exercise 5: Tables, Cross-References, and Citations** (adapted from SB exercise M.4 plus the new citations section).
 
-### `/home/claude/work_Book/chapters/16-latex-basics.qmd`
+### `/home/claude/work_Book/chapters/17-latex-basics.qmd`
 
 - **Uppercase Greek tip** — extended with `\var...` variants and `\boldsymbol` for bold Greek (A6), pointer to the new @tbl-greek-names.
 - **NEW callout "Greek letters in R plot labels"** (after the Greek section) — `expression()` / `latex2exp` for ggplot labels and raw LaTeX strings in matplotlib. From A7 "In R". Nothing in the book previously covered Greek symbols in plot labels.
@@ -269,7 +269,7 @@ Overall finding: the Comp Tools chapters 12 and 16 already cover almost everythi
 - **Formatting Tips — FIX**: tip said `\;` is "medium" spacing; corrected to `\:` medium / `\;` thick, added `\qquad` and `\!`, cross-ref to @sec-latex-spacing; numbering tip now points to the new section.
 - **Summary** — added bullet for numbered/aligned equations.
 
-### `/home/claude/work_Book/chapters/appendix-latex.qmd`
+### `/home/claude/work_Book/chapters/appendix-E-latex.qmd`
 
 - Content already identical to SB A6; no changes to existing tables.
 - **NEW subsection `### Names and Pronunciation {#sec-latex-greek-names}`** with @tbl-greek-names: all 24 letters, name, pronunciation, and the LaTeX command for lower/upper case (showing the Latin letter where no command exists). Adapted from A7's alphabet table with the statistical-uses column dropped. Note: A7 itself lists `\Alpha`/`\Beta` as commands, which do not exist in standard LaTeX/MathJax; the table here gives the correct Latin-letter form.
@@ -299,13 +299,13 @@ None. None of the assigned sources contain figures, and no image references were
 
 # E-tidy-viz change log
 
-Sources read: `SB/chapters/06-tidy-data.qmd`, `SB/chapters/07-data-wrangling.qmd`, `SB/chapters/09-data-visualization.qmd`, the tooling parts of `SB/chapters/08-exploratory-data-analysis.qmd` (data inspection, duplicates), and the tidyverse/ggplot mechanics slides of `SW/Lecture_Folder/Week2.qmd` (lines 115–830). `Week3.qmd` was skimmed by header and contains no tidyverse/ggplot mechanics (hypothesis testing, bootstrapping, loops), so nothing was pulled from it.
+Sources read: `SB/chapters/06-tidy-data.qmd`, `SB/chapters/07-data-wrangling.qmd`, `SB/chapters/12-data-visualization.qmd`, the tooling parts of `SB/chapters/08-exploratory-data-analysis.qmd` (data inspection, duplicates), and the tidyverse/ggplot mechanics slides of `SW/Lecture_Folder/Week2.qmd` (lines 115–830). `Week3.qmd` was skimmed by header and contains no tidyverse/ggplot mechanics (hypothesis testing, bootstrapping, loops), so nothing was pulled from it.
 
-Targets: `/home/claude/work_Book/chapters/08-tidy-data.qmd`, `/home/claude/work_Book/chapters/09-data-visualization.qmd`. Neither target chapter uses R/Python tabsets, so none were added. R is not installed in this environment, so code was checked by reading, not by rendering.
+Targets: `/home/claude/work_Book/chapters/11-tidy-data.qmd`, `/home/claude/work_Book/chapters/12-data-visualization.qmd`. Neither target chapter uses R/Python tabsets, so none were added. R is not installed in this environment, so code was checked by reading, not by rendering.
 
 ## 1. Edits
 
-### `work_Book/chapters/08-tidy-data.qmd`
+### `work_Book/chapters/11-tidy-data.qmd`
 
 | Section | Change |
 |:--|:--|
@@ -341,7 +341,7 @@ Targets: `/home/claude/work_Book/chapters/08-tidy-data.qmd`, `/home/claude/work_
 | Summary | **Fix:** the "see @sec-appendix-r" callout had been inserted in the middle of the data.table bullet list, splitting it; moved the callout after the list. Updated bullets for missing values, `glimpse()`, and pivot options. |
 | Exercises | Added Exercise 12 (missing data + `airquality`/`glimpse`), adapted from SB ch07 Exercise 6 and SB ch06 Exercise 7.6. |
 
-### `work_Book/chapters/09-data-visualization.qmd`
+### `work_Book/chapters/12-data-visualization.qmd`
 
 | Section | Change |
 |:--|:--|
@@ -415,7 +415,7 @@ Overall finding: the Comp Tools book chapters are already broader and newer than
 
 ## 1. Edits
 
-### `work_Book/chapters/02-computer-systems.qmd`
+### `work_Book/chapters/04-computer-systems.qmd`
 - **What Is a Computer System?** — replaced the Mermaid `fig-computer-components` with the SVG export `appendix_A_S02_computer_components.svg` (same fig id); added a short paragraph on the input/output system (Appendix A "I/O Systems" slide), including the point that a network interface is both input and output.
 - **Fetch-Decode-Execute** — replaced Mermaid `fig-fetch-decode-execute` with `appendix_A_S03_fetch_decode_execute.svg` (same id).
 - **RAM** — added "Bandwidth and Latency" (with dual channel) from the Appendix A RAM slide; expanded the DRAM/SRAM bullets (DDR4/DDR5, refresh, cost). This also fixes the "Types." run-in list that BOOK_AUDIT #20 flagged as broken.
@@ -426,7 +426,7 @@ Overall finding: the Comp Tools book chapters are already broader and newer than
 - **Cloud Computing** — replaced Mermaid `fig-cloud-architecture` with `appendix_A_S27_cloud_computing.svg`; added the one-line characterizations of the three providers and an explanation of regions/availability zones; added "compliance/data residency" and "noisy neighbours" disadvantages.
 - **Evolution of Scientific Computing** — replaced Mermaid `fig-computing-evolution` with `appendix_A_S18_computing_timeline.svg` and put the six eras into the lead sentence so the text is self-contained (BOOK_AUDIT #21).
 
-### `work_Book/chapters/10-git-github.qmd`
+### `work_Book/chapters/19-git-github.qmd`
 - **Key Concepts** — replaced Mermaid `fig-git-workflow` with `appendix_E_S03_git_workflow.svg` (same id).
 - **Viewing History** — added `git log -p` to the example block and a sentence on what a commit records (hash, author, date, message).
 - **Working with GitHub** — added a "for a research project specifically" block (reproducibility, README/wiki/Pages, Issues with `#12` linking, Releases + Zenodo DOI with cross-refs to `@sec-git-tags` and `@sec-general-repositories`) from Appendix E "GitHub for Scientific Collaboration" (closes BOOK_AUDIT #67).
@@ -435,23 +435,23 @@ Overall finding: the Comp Tools book chapters are already broader and newer than
 - **GitHub Pages** — replaced Mermaid `fig-github-pages` with `appendix_E_S16_github_pages.svg`.
 - **Useful Commands Reference** — added rows for `git fetch`, `git log -p`, `git help <command>`; clarified `git pull` as "download and merge" (BOOK_AUDIT #68).
 
-### `work_Book/chapters/appendix-git.qmd`
+### `work_Book/chapters/appendix-B-git.qmd`
 - **Setup and Configuration** table — added `git --version` and `git help CMD` rows.
 - **Common .gitignore Entries** — added `.ipynb_checkpoints/`, `.Rproj.user/`, and the bioinformatics data patterns (`*.fastq`, `*.fastq.gz`, `*.bam`, `*.vcf`, `data/raw/`) from Appendix E so the appendix matches ch. 10.
 
-### `work_Book/chapters/11-hpc-talapas.qmd`
+### `work_Book/chapters/20-hpc-talapas.qmd`
 - **Talapas Architecture** — replaced Mermaid `fig-talapas-architecture` with `appendix_F_S03_talapas_architecture.svg` (same id; caption notes the SVG's "fat nodes" = high-memory nodes and the `sbatch`/`srun` paths).
 - **SLURM: The Job Scheduler** — replaced Mermaid `fig-slurm-workflow` with `appendix_F_S10_slurm_workflow.svg`; added the three-term vocabulary sentence (job / partition / account) from Appendix F "Key Concepts".
 - Storage diagram (`fig-storage-structure`) deliberately **kept as Mermaid**: the book's version includes `/scratch` and quotas, which the SVG `appendix_F_S09_storage_structure.svg` lacks (it only shows `/home`, `/projects`, `/tmp`).
 
-### `work_Book/chapters/appendix-slurm.qmd`
+### `work_Book/chapters/appendix-F-slurm.qmd`
 - **Talapas-Specific Information** — new `### Talapas Helper Commands {#sec-talapas-helpers}` table (`groups`, `/packages/racs/bin/slurm-show-gpus`, `SBATCH_ACCOUNT` default, `df -h ~`/`du -sh`) collecting the Appendix F helper commands that were only in ch. 11 prose.
 - **Example Job Scripts → Basic R Script** — fix: added `set -euo pipefail` and `module purge` so the example follows the rule the appendix itself states a few lines earlier ("modules must be loaded INSIDE the script").
 
 ### `work_Book/chapters/14-parallel-computing.qmd`
 - **The Future Ecosystem** — added a callout "Base R's `parallel` package" (`detectCores`/`makeCluster`/`parLapply`/`stopCluster`, `eval: false`) from SB A11 "Parallelization in R", framed as "read it when you meet it, write `future`/`furrr`". Nothing else in A11 adds to the book (its hostname `talapas-login.uoregon.edu` and partition `short` are out of date).
 
-### `work_Book/chapters/appendix-shortcuts.qmd`
+### `work_Book/chapters/appendix-H-shortcuts.qmd`
 - Intro — now names Vim, Jupyter, VS Code, Positron and points to the new platform section.
 - **RStudio → Code Execution** — fixes: `Cmd/Ctrl+Alt+R` is *Run all* (was "run all code above"), `Cmd/Ctrl+Alt+E` is *run from current line to end* (was "beginning to current line"), added the correct `Cmd/Ctrl+Alt+B` (beginning to current line); replaced the "`Cmd/Ctrl+Shift+P` = run previous code again" row with *Command palette* (that is the binding in RStudio ≥ 1.4); `Cmd/Ctrl+Shift+Enter` now says "source with echo / run current chunk". Added `Esc` (interrupt), `Ctrl+L` (clear console), `Cmd/Ctrl+↑` (history popup), `Cmd/Ctrl+Shift+F10` (restart R) from SB A2.
 - **RStudio → Editing** — added `Cmd/Ctrl+Shift+R` (insert section) and `Cmd/Ctrl+F` (find/replace) from A2.
@@ -471,18 +471,18 @@ All book references use `../images/<basename>`. The first ten are already listed
 
 | Source path on disk | Destination path | Referenced from |
 |:--|:--|:--|
-| `BioE_Stats_Wi2026 copy/Lecture_Folder/images/appendix_A_S02_computer_components.svg` | `Book/images/appendix_A_S02_computer_components.svg` (already present) | `02-computer-systems.qmd` fig-computer-components |
-| `BioE_Stats_Wi2026 copy/Lecture_Folder/images/appendix_A_S03_fetch_decode_execute.svg` | `Book/images/appendix_A_S03_fetch_decode_execute.svg` (already present) | `02-computer-systems.qmd` fig-fetch-decode-execute |
-| `BioE_Stats_Wi2026 copy/Lecture_Folder/images/appendix_A_S13_os_architecture.svg` | `Book/images/appendix_A_S13_os_architecture.svg` (already present) | `02-computer-systems.qmd` fig-os-architecture |
-| `BioE_Stats_Wi2026 copy/Lecture_Folder/images/appendix_A_S18_computing_timeline.svg` | `Book/images/appendix_A_S18_computing_timeline.svg` (already present) | `02-computer-systems.qmd` fig-computing-evolution |
-| `BioE_Stats_Wi2026 copy/Lecture_Folder/images/appendix_A_S21_local_computing_arch.svg` | `Book/images/appendix_A_S21_local_computing_arch.svg` (already present) | `02-computer-systems.qmd` fig-local-architecture |
-| `BioE_Stats_Wi2026 copy/Lecture_Folder/images/appendix_A_S24_cluster_computing.svg` | `Book/images/appendix_A_S24_cluster_computing.svg` (already present) | `02-computer-systems.qmd` fig-cluster-architecture |
-| `BioE_Stats_Wi2026 copy/Lecture_Folder/images/appendix_A_S27_cloud_computing.svg` | `Book/images/appendix_A_S27_cloud_computing.svg` (already present) | `02-computer-systems.qmd` fig-cloud-architecture |
-| `BioE_Stats_Wi2026 copy/Lecture_Folder/images/appendix_E_S03_git_workflow.svg` | `Book/images/appendix_E_S03_git_workflow.svg` (already present) | `10-git-github.qmd` fig-git-workflow |
-| `BioE_Stats_Wi2026 copy/Lecture_Folder/images/appendix_E_S12_git_branching.svg` | `Book/images/appendix_E_S12_git_branching.svg` (already present) | `10-git-github.qmd` fig-git-branching |
-| `BioE_Stats_Wi2026 copy/Lecture_Folder/images/appendix_E_S16_github_pages.svg` | `Book/images/appendix_E_S16_github_pages.svg` (already present) | `10-git-github.qmd` fig-github-pages |
-| `BioE_Stats_Wi2026 copy/Lecture_Folder/images/appendix_F_S03_talapas_architecture.svg` | `Book/images/appendix_F_S03_talapas_architecture.svg` (**new copy**; the same file already exists in `Lecture_Folder/images/`) | `11-hpc-talapas.qmd` fig-talapas-architecture |
-| `BioE_Stats_Wi2026 copy/Lecture_Folder/images/appendix_F_S10_slurm_workflow.svg` | `Book/images/appendix_F_S10_slurm_workflow.svg` (**new copy**; also in `Lecture_Folder/images/`) | `11-hpc-talapas.qmd` fig-slurm-workflow |
+| `BioE_Stats_Wi2026 copy/Lecture_Folder/images/appendix_A_S02_computer_components.svg` | `Book/images/appendix_A_S02_computer_components.svg` (already present) | `04-computer-systems.qmd` fig-computer-components |
+| `BioE_Stats_Wi2026 copy/Lecture_Folder/images/appendix_A_S03_fetch_decode_execute.svg` | `Book/images/appendix_A_S03_fetch_decode_execute.svg` (already present) | `04-computer-systems.qmd` fig-fetch-decode-execute |
+| `BioE_Stats_Wi2026 copy/Lecture_Folder/images/appendix_A_S13_os_architecture.svg` | `Book/images/appendix_A_S13_os_architecture.svg` (already present) | `04-computer-systems.qmd` fig-os-architecture |
+| `BioE_Stats_Wi2026 copy/Lecture_Folder/images/appendix_A_S18_computing_timeline.svg` | `Book/images/appendix_A_S18_computing_timeline.svg` (already present) | `04-computer-systems.qmd` fig-computing-evolution |
+| `BioE_Stats_Wi2026 copy/Lecture_Folder/images/appendix_A_S21_local_computing_arch.svg` | `Book/images/appendix_A_S21_local_computing_arch.svg` (already present) | `04-computer-systems.qmd` fig-local-architecture |
+| `BioE_Stats_Wi2026 copy/Lecture_Folder/images/appendix_A_S24_cluster_computing.svg` | `Book/images/appendix_A_S24_cluster_computing.svg` (already present) | `04-computer-systems.qmd` fig-cluster-architecture |
+| `BioE_Stats_Wi2026 copy/Lecture_Folder/images/appendix_A_S27_cloud_computing.svg` | `Book/images/appendix_A_S27_cloud_computing.svg` (already present) | `04-computer-systems.qmd` fig-cloud-architecture |
+| `BioE_Stats_Wi2026 copy/Lecture_Folder/images/appendix_E_S03_git_workflow.svg` | `Book/images/appendix_E_S03_git_workflow.svg` (already present) | `19-git-github.qmd` fig-git-workflow |
+| `BioE_Stats_Wi2026 copy/Lecture_Folder/images/appendix_E_S12_git_branching.svg` | `Book/images/appendix_E_S12_git_branching.svg` (already present) | `19-git-github.qmd` fig-git-branching |
+| `BioE_Stats_Wi2026 copy/Lecture_Folder/images/appendix_E_S16_github_pages.svg` | `Book/images/appendix_E_S16_github_pages.svg` (already present) | `19-git-github.qmd` fig-github-pages |
+| `BioE_Stats_Wi2026 copy/Lecture_Folder/images/appendix_F_S03_talapas_architecture.svg` | `Book/images/appendix_F_S03_talapas_architecture.svg` (**new copy**; the same file already exists in `Lecture_Folder/images/`) | `20-hpc-talapas.qmd` fig-talapas-architecture |
+| `BioE_Stats_Wi2026 copy/Lecture_Folder/images/appendix_F_S10_slurm_workflow.svg` | `Book/images/appendix_F_S10_slurm_workflow.svg` (**new copy**; also in `Lecture_Folder/images/`) | `20-hpc-talapas.qmd` fig-slurm-workflow |
 
 Not used: `appendix_F_S09_storage_structure.svg` (book's Mermaid storage figure is more complete, see above); `00.not_used/*` and `00.Maybe_use/week5_Talapas.jpg` (excluded folders).
 

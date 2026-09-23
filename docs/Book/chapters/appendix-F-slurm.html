@@ -1,0 +1,2470 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.9.38">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="description" content="A comprehensive guide to essential computational tools for graduate students in bioengineering and life sciences, covering Unix/Linux, R and Python, editors and IDEs, computing resources at the University of Oregon, AI-assisted coding, reproducible documents, version control with Git/GitHub, and high-performance computing.">
+
+<title>Appendix F — SLURM Command Reference – Foundational Computational Tools for Bioengineers</title>
+<style>
+/* Default styles provided by pandoc.
+** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+*/
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+/* CSS for citations */
+div.csl-bib-body { }
+div.csl-entry {
+  clear: both;
+  margin-bottom: 0em;
+}
+.hanging-indent div.csl-entry {
+  margin-left:2em;
+  text-indent:-2em;
+}
+div.csl-left-margin {
+  min-width:2em;
+  float:left;
+}
+div.csl-right-inline {
+  margin-left:2em;
+  padding-left:1em;
+}
+div.csl-indent {
+  margin-left: 2em;
+}</style>
+
+
+<script src="../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../">
+<link href="../chapters/appendix-G-regex.html" rel="next">
+<link href="../chapters/appendix-E-latex.html" rel="prev">
+<script src="../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../site_libs/quarto-html/popper.min.js"></script>
+<script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-3836fb1e46d4cb83c75cfb618a44b85e.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-text-highlighting-styles">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-dark-4234edb6284ff370703ce34fde7cc7c8.css" rel="stylesheet" class="quarto-color-scheme quarto-color-alternate" id="quarto-text-highlighting-styles">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-3836fb1e46d4cb83c75cfb618a44b85e.css" rel="stylesheet" class="quarto-color-scheme-extra" id="quarto-text-highlighting-styles">
+<script src="../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../site_libs/bootstrap/bootstrap-882387fc1d6267d1b7263d283c4866b5.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
+<link href="../site_libs/bootstrap/bootstrap-dark-814ca0c199338aa1abdb5ae469f0d636.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
+<link href="../site_libs/bootstrap/bootstrap-882387fc1d6267d1b7263d283c4866b5.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "sidebar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "start",
+  "type": "textbox",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+
+
+</head>
+
+<body class="nav-sidebar docked quarto-light"><script id="quarto-html-before-body" type="application/javascript">
+    const toggleBodyColorMode = (bsSheetEl) => {
+      const mode = bsSheetEl.getAttribute("data-mode");
+      const bodyEl = window.document.querySelector("body");
+      if (mode === "dark") {
+        bodyEl.classList.add("quarto-dark");
+        bodyEl.classList.remove("quarto-light");
+      } else {
+        bodyEl.classList.add("quarto-light");
+        bodyEl.classList.remove("quarto-dark");
+      }
+    }
+    const toggleBodyColorPrimary = () => {
+      const bsSheetEl = window.document.querySelector("link#quarto-bootstrap:not([rel=disabled-stylesheet])");
+      if (bsSheetEl) {
+        toggleBodyColorMode(bsSheetEl);
+      }
+    }
+    const setColorSchemeToggle = (alternate) => {
+      const toggles = window.document.querySelectorAll('.quarto-color-scheme-toggle');
+      for (let i=0; i < toggles.length; i++) {
+        const toggle = toggles[i];
+        if (toggle) {
+          if (alternate) {
+            toggle.classList.add("alternate");
+          } else {
+            toggle.classList.remove("alternate");
+          }
+        }
+      }
+    };
+    const toggleColorMode = (alternate) => {
+      // Switch the stylesheets
+      const primaryStylesheets = window.document.querySelectorAll('link.quarto-color-scheme:not(.quarto-color-alternate)');
+      const alternateStylesheets = window.document.querySelectorAll('link.quarto-color-scheme.quarto-color-alternate');
+      manageTransitions('#quarto-margin-sidebar .nav-link', false);
+      if (alternate) {
+        // note: dark is layered on light, we don't disable primary!
+        enableStylesheet(alternateStylesheets);
+        for (const sheetNode of alternateStylesheets) {
+          if (sheetNode.id === "quarto-bootstrap") {
+            toggleBodyColorMode(sheetNode);
+          }
+        }
+      } else {
+        disableStylesheet(alternateStylesheets);
+        enableStylesheet(primaryStylesheets)
+        toggleBodyColorPrimary();
+      }
+      manageTransitions('#quarto-margin-sidebar .nav-link', true);
+      // Switch the toggles
+      setColorSchemeToggle(alternate)
+      // Hack to workaround the fact that safari doesn't
+      // properly recolor the scrollbar when toggling (#1455)
+      if (navigator.userAgent.indexOf('Safari') > 0 && navigator.userAgent.indexOf('Chrome') == -1) {
+        manageTransitions("body", false);
+        window.scrollTo(0, 1);
+        setTimeout(() => {
+          window.scrollTo(0, 0);
+          manageTransitions("body", true);
+        }, 40);
+      }
+    }
+    const disableStylesheet = (stylesheets) => {
+      for (let i=0; i < stylesheets.length; i++) {
+        const stylesheet = stylesheets[i];
+        stylesheet.rel = 'disabled-stylesheet';
+      }
+    }
+    const enableStylesheet = (stylesheets) => {
+      for (let i=0; i < stylesheets.length; i++) {
+        const stylesheet = stylesheets[i];
+        if(stylesheet.rel !== 'stylesheet') { // for Chrome, which will still FOUC without this check
+          stylesheet.rel = 'stylesheet';
+        }
+      }
+    }
+    const manageTransitions = (selector, allowTransitions) => {
+      const els = window.document.querySelectorAll(selector);
+      for (let i=0; i < els.length; i++) {
+        const el = els[i];
+        if (allowTransitions) {
+          el.classList.remove('notransition');
+        } else {
+          el.classList.add('notransition');
+        }
+      }
+    }
+    const isFileUrl = () => {
+      return window.location.protocol === 'file:';
+    }
+    const hasAlternateSentinel = () => {
+      let styleSentinel = getColorSchemeSentinel();
+      if (styleSentinel !== null) {
+        return styleSentinel === "alternate";
+      } else {
+        return false;
+      }
+    }
+    const setStyleSentinel = (alternate) => {
+      const value = alternate ? "alternate" : "default";
+      if (!isFileUrl()) {
+        window.localStorage.setItem("quarto-color-scheme", value);
+      } else {
+        localAlternateSentinel = value;
+      }
+    }
+    const getColorSchemeSentinel = () => {
+      if (!isFileUrl()) {
+        const storageValue = window.localStorage.getItem("quarto-color-scheme");
+        return storageValue != null ? storageValue : localAlternateSentinel;
+      } else {
+        return localAlternateSentinel;
+      }
+    }
+    const toggleGiscusIfUsed = (isAlternate, darkModeDefault) => {
+      const baseTheme = document.querySelector('#giscus-base-theme')?.value ?? 'light';
+      const alternateTheme = document.querySelector('#giscus-alt-theme')?.value ?? 'dark';
+      let newTheme = '';
+      if(authorPrefersDark) {
+        newTheme = isAlternate ? baseTheme : alternateTheme;
+      } else {
+        newTheme = isAlternate ? alternateTheme : baseTheme;
+      }
+      const changeGiscusTheme = () => {
+        // From: https://github.com/giscus/giscus/issues/336
+        const sendMessage = (message) => {
+          const iframe = document.querySelector('iframe.giscus-frame');
+          if (!iframe) return;
+          iframe.contentWindow.postMessage({ giscus: message }, 'https://giscus.app');
+        }
+        sendMessage({
+          setConfig: {
+            theme: newTheme
+          }
+        });
+      }
+      const isGiscussLoaded = window.document.querySelector('iframe.giscus-frame') !== null;
+      if (isGiscussLoaded) {
+        changeGiscusTheme();
+      }
+    };
+    const authorPrefersDark = false;
+    const darkModeDefault = authorPrefersDark;
+      document.querySelector('link#quarto-text-highlighting-styles.quarto-color-scheme-extra').rel = 'disabled-stylesheet';
+      document.querySelector('link#quarto-bootstrap.quarto-color-scheme-extra').rel = 'disabled-stylesheet';
+    let localAlternateSentinel = darkModeDefault ? 'alternate' : 'default';
+    // Dark / light mode switch
+    window.quartoToggleColorScheme = () => {
+      // Read the current dark / light value
+      let toAlternate = !hasAlternateSentinel();
+      toggleColorMode(toAlternate);
+      setStyleSentinel(toAlternate);
+      toggleGiscusIfUsed(toAlternate, darkModeDefault);
+      window.dispatchEvent(new Event('resize'));
+    };
+    // Switch to dark mode if need be
+    if (hasAlternateSentinel()) {
+      toggleColorMode(true);
+    } else {
+      toggleColorMode(false);
+    }
+  </script>
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../chapters/appendix-A-unix.html">Appendices</a></li><li class="breadcrumb-item"><a href="../chapters/appendix-F-slurm.html"><span class="chapter-number">F</span>&nbsp; <span class="chapter-title">SLURM Command Reference</span></a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+      <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
+        <i class="bi bi-search"></i>
+      </button>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation docked overflow-auto">
+    <div class="pt-lg-2 mt-2 text-left sidebar-header">
+    <div class="sidebar-title mb-0 py-0">
+      <a href="../">Foundational Computational Tools for Bioengineers</a> 
+        <div class="sidebar-tools-main">
+    <a href="https://github.com/wcresko/BioE_Comp_Tools_Fa2026/tree/main/Book/" title="Source Code" class="quarto-navigation-tool px-1" aria-label="Source Code"><i class="bi bi-github"></i></a>
+  <a href="" class="quarto-color-scheme-toggle quarto-navigation-tool  px-1" onclick="window.quartoToggleColorScheme(); return false;" title="Toggle dark mode"><i class="bi"></i></a>
+</div>
+    </div>
+      </div>
+        <div class="mt-2 flex-shrink-0 align-items-center">
+        <div class="sidebar-search">
+        <div id="quarto-search" class="" title="Search"></div>
+        </div>
+        </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Preface</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/01-introduction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">Introduction to Computational Tools</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/02-your-toolkit.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">Your Computational Toolkit: Installing and Using Editors and IDEs</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/03-computing-at-uo.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Computing Resources at the University of Oregon</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/04-computer-systems.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Computer Systems Architecture</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/05-unix-fundamentals.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Unix Fundamentals</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/06-files-pipes.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Files, Pipes, and Redirection</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/07-grep-regex.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">GREP and Regular Expressions</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/08-shell-scripting.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">8</span>&nbsp; <span class="chapter-title">Shell Scripting</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/09-r-programming.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">9</span>&nbsp; <span class="chapter-title">R Programming Fundamentals</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/10-python-programming.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">10</span>&nbsp; <span class="chapter-title">Python Programming Fundamentals</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/11-tidy-data.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">11</span>&nbsp; <span class="chapter-title">Tidy Data Principles</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/12-data-visualization.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">12</span>&nbsp; <span class="chapter-title">Data Visualization with ggplot2</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/13-writing-functions.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">13</span>&nbsp; <span class="chapter-title">Writing Functions in R</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/14-parallel-computing.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">14</span>&nbsp; <span class="chapter-title">Parallel Computing in R</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/15-databases.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">15</span>&nbsp; <span class="chapter-title">Working with Databases</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/16-quarto-documents.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">16</span>&nbsp; <span class="chapter-title">Reproducible Documents with Quarto</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/17-latex-basics.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">17</span>&nbsp; <span class="chapter-title">LaTeX for Scientific Documents</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/18-ai-assisted-coding.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">18</span>&nbsp; <span class="chapter-title">Coding with AI Assistants</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/19-git-github.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">19</span>&nbsp; <span class="chapter-title">Version Control with Git and GitHub</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/20-hpc-talapas.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">20</span>&nbsp; <span class="chapter-title">High-Performance Computing with Talapas</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../references.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">References</span></a>
+  </div>
+</li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true">
+ <span class="menu-text">Appendices</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/appendix-A-unix.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">A</span>&nbsp; <span class="chapter-title">Unix Command Reference</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/appendix-B-git.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">B</span>&nbsp; <span class="chapter-title">Git Command Reference</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/appendix-C-r.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">C</span>&nbsp; <span class="chapter-title">R Command Reference</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/appendix-D-python.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">D</span>&nbsp; <span class="chapter-title">Python Quick Reference</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/appendix-E-latex.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">E</span>&nbsp; <span class="chapter-title">LaTeX Command Reference</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/appendix-F-slurm.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text"><span class="chapter-number">F</span>&nbsp; <span class="chapter-title">SLURM Command Reference</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/appendix-G-regex.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">G</span>&nbsp; <span class="chapter-title">Regular Expression Reference</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/appendix-H-shortcuts.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">H</span>&nbsp; <span class="chapter-title">Keyboard Shortcuts Reference</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/appendix-I-data-formats.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">I</span>&nbsp; <span class="chapter-title">Common Data Formats &amp; Public Repositories</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/appendix-J-glossary.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">J</span>&nbsp; <span class="chapter-title">Glossary</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">Table of contents</h2>
+   
+  <ul>
+  <li><a href="#sec-common-commands-ref" id="toc-sec-common-commands-ref" class="nav-link active" data-scroll-target="#sec-common-commands-ref"><span class="header-section-number">F.1</span> The Ten Commands You Will Actually Use</a></li>
+  <li><a href="#sec-slurm-submit" id="toc-sec-slurm-submit" class="nav-link" data-scroll-target="#sec-slurm-submit"><span class="header-section-number">F.2</span> Job Submission</a></li>
+  <li><a href="#sec-slurm-manage" id="toc-sec-slurm-manage" class="nav-link" data-scroll-target="#sec-slurm-manage"><span class="header-section-number">F.3</span> Job Management</a></li>
+  <li><a href="#sec-slurm-info" id="toc-sec-slurm-info" class="nav-link" data-scroll-target="#sec-slurm-info"><span class="header-section-number">F.4</span> Job Information</a>
+  <ul class="collapse">
+  <li><a href="#sec-sacct-fields" id="toc-sec-sacct-fields" class="nav-link" data-scroll-target="#sec-sacct-fields">Useful sacct Format Fields</a></li>
+  <li><a href="#sec-rightsizing-ref" id="toc-sec-rightsizing-ref" class="nav-link" data-scroll-target="#sec-rightsizing-ref">Reading <code>seff</code> and Right-Sizing</a></li>
+  <li><a href="#sec-pd-reasons-ref" id="toc-sec-pd-reasons-ref" class="nav-link" data-scroll-target="#sec-pd-reasons-ref">Why Is My Job Pending?</a></li>
+  </ul></li>
+  <li><a href="#sec-slurm-cluster" id="toc-sec-slurm-cluster" class="nav-link" data-scroll-target="#sec-slurm-cluster"><span class="header-section-number">F.5</span> Cluster Information</a>
+  <ul class="collapse">
+  <li><a href="#sec-node-states" id="toc-sec-node-states" class="nav-link" data-scroll-target="#sec-node-states">Node States</a></li>
+  <li><a href="#sec-job-states" id="toc-sec-job-states" class="nav-link" data-scroll-target="#sec-job-states">Job States</a></li>
+  </ul></li>
+  <li><a href="#sec-sbatch-directives" id="toc-sec-sbatch-directives" class="nav-link" data-scroll-target="#sec-sbatch-directives"><span class="header-section-number">F.6</span> SBATCH Directives</a>
+  <ul class="collapse">
+  <li><a href="#sec-essential-directives" id="toc-sec-essential-directives" class="nav-link" data-scroll-target="#sec-essential-directives">Essential Directives</a></li>
+  <li><a href="#sec-output-directives" id="toc-sec-output-directives" class="nav-link" data-scroll-target="#sec-output-directives">Output Directives</a></li>
+  <li><a href="#sec-resource-directives" id="toc-sec-resource-directives" class="nav-link" data-scroll-target="#sec-resource-directives">Resource Directives</a></li>
+  <li><a href="#sec-dependency-directives" id="toc-sec-dependency-directives" class="nav-link" data-scroll-target="#sec-dependency-directives">Dependency Directives</a></li>
+  </ul></li>
+  <li><a href="#sec-sbatch-reference" id="toc-sec-sbatch-reference" class="nav-link" data-scroll-target="#sec-sbatch-reference"><span class="header-section-number">F.7</span> Complete SBATCH Directive Reference</a>
+  <ul class="collapse">
+  <li><a href="#sec-filename-patterns" id="toc-sec-filename-patterns" class="nav-link" data-scroll-target="#sec-filename-patterns">Output Filename Patterns</a></li>
+  </ul></li>
+  <li><a href="#sec-module-commands" id="toc-sec-module-commands" class="nav-link" data-scroll-target="#sec-module-commands"><span class="header-section-number">F.8</span> Module Commands</a></li>
+  <li><a href="#sec-job-arrays" id="toc-sec-job-arrays" class="nav-link" data-scroll-target="#sec-job-arrays"><span class="header-section-number">F.9</span> Job Arrays</a>
+  <ul class="collapse">
+  <li><a href="#sec-array-template-ref" id="toc-sec-array-template-ref" class="nav-link" data-scroll-target="#sec-array-template-ref">Template: One Script, Many Samples</a></li>
+  <li><a href="#sec-array-variants-ref" id="toc-sec-array-variants-ref" class="nav-link" data-scroll-target="#sec-array-variants-ref">Array Index Variants</a></li>
+  </ul></li>
+  <li><a href="#sec-slurm-env" id="toc-sec-slurm-env" class="nav-link" data-scroll-target="#sec-slurm-env"><span class="header-section-number">F.10</span> Environment Variables</a></li>
+  <li><a href="#sec-example-scripts" id="toc-sec-example-scripts" class="nav-link" data-scroll-target="#sec-example-scripts"><span class="header-section-number">F.11</span> Example Job Scripts</a>
+  <ul class="collapse">
+  <li><a href="#sec-example-r" id="toc-sec-example-r" class="nav-link" data-scroll-target="#sec-example-r">Basic R Script</a></li>
+  <li><a href="#sec-example-python" id="toc-sec-example-python" class="nav-link" data-scroll-target="#sec-example-python">Python with Conda</a></li>
+  <li><a href="#sec-example-gpu" id="toc-sec-example-gpu" class="nav-link" data-scroll-target="#sec-example-gpu">GPU Job</a></li>
+  <li><a href="#sec-example-mpi" id="toc-sec-example-mpi" class="nav-link" data-scroll-target="#sec-example-mpi">MPI Job</a></li>
+  </ul></li>
+  <li><a href="#sec-talapas-specific" id="toc-sec-talapas-specific" class="nav-link" data-scroll-target="#sec-talapas-specific"><span class="header-section-number">F.12</span> Talapas-Specific Information</a>
+  <ul class="collapse">
+  <li><a href="#sec-talapas-partitions" id="toc-sec-talapas-partitions" class="nav-link" data-scroll-target="#sec-talapas-partitions">Common Partitions</a></li>
+  <li><a href="#sec-talapas-helpers" id="toc-sec-talapas-helpers" class="nav-link" data-scroll-target="#sec-talapas-helpers">Talapas Helper Commands</a></li>
+  <li><a href="#sec-talapas-storage-ref" id="toc-sec-talapas-storage-ref" class="nav-link" data-scroll-target="#sec-talapas-storage-ref">Storage Locations</a></li>
+  </ul></li>
+  </ul>
+<div class="toc-actions"><ul><li><a href="https://github.com/wcresko/BioE_Comp_Tools_Fa2026/edit/main/Book/chapters/appendix-F-slurm.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li><li><a href="https://github.com/wcresko/BioE_Comp_Tools_Fa2026/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+
+<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../chapters/appendix-A-unix.html">Appendices</a></li><li class="breadcrumb-item"><a href="../chapters/appendix-F-slurm.html"><span class="chapter-number">F</span>&nbsp; <span class="chapter-title">SLURM Command Reference</span></a></li></ol></nav>
+<div class="quarto-title">
+<h1 class="title"><span id="sec-appendix-slurm" class="quarto-section-identifier">Appendix F — SLURM Command Reference</span></h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<p>This appendix is a compact reference for SLURM (Simple Linux Utility for Resource Management) <span class="citation" data-cites="yoo2003slurm">(<a href="../references.html#ref-yoo2003slurm" role="doc-biblioref">Yoo et al., 2003</a>)</span> commands and directives on clusters like Talapas. The concepts behind them (fair-share scheduling, right-sizing, pipeline design) are explained in <a href="20-hpc-talapas.html" class="quarto-xref"><span>Chapter 20</span></a>.</p>
+<section id="sec-common-commands-ref" class="level2" data-number="F.1">
+<h2 data-number="F.1" class="anchored" data-anchor-id="sec-common-commands-ref"><span class="header-section-number">F.1</span> The Ten Commands You Will Actually Use</h2>
+<div id="tbl-common-commands-ref" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-common-commands-ref-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;F.1: The SLURM commands used day to day
+</figcaption>
+<div aria-describedby="tbl-common-commands-ref-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<table class="caption-top table">
+<colgroup>
+<col style="width: 40%">
+<col style="width: 60%">
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: left;">Task</th>
+<th style="text-align: left;">Command</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">Submit a batch script</td>
+<td style="text-align: left;"><code>sbatch script.sh</code></td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Submit with a one-off override</td>
+<td style="text-align: left;"><code>sbatch --mem=64G --time=08:00:00 script.sh</code></td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Interactive shell on a compute node</td>
+<td style="text-align: left;"><code>srun --account=myPIRG --partition=interactive --time=2:00:00 --cpus-per-task=2 --mem=8G --pty bash</code></td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">List your jobs (with pending reason)</td>
+<td style="text-align: left;"><code>squeue -u $USER</code></td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Estimated start time of a pending job</td>
+<td style="text-align: left;"><code>squeue -j JOBID --start</code></td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Cancel a job / all your pending jobs</td>
+<td style="text-align: left;"><code>scancel JOBID</code> / <code>scancel -u $USER -t PENDING</code></td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Efficiency report for a finished job</td>
+<td style="text-align: left;"><code>seff JOBID</code></td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Accounting fields for a finished job</td>
+<td style="text-align: left;"><code>sacct -j JOBID --format=JobID,ReqMem,MaxRSS,Elapsed,State,ExitCode</code></td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Everything SLURM knows about a job</td>
+<td style="text-align: left;"><code>scontrol show job JOBID</code></td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Partition and node availability</td>
+<td style="text-align: left;"><code>sinfo</code></td>
+</tr>
+</tbody>
+</table>
+</div>
+</figure>
+</div>
+</section>
+<section id="sec-slurm-submit" class="level2" data-number="F.2">
+<h2 data-number="F.2" class="anchored" data-anchor-id="sec-slurm-submit"><span class="header-section-number">F.2</span> Job Submission</h2>
+<div id="tbl-slurm-submit" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-slurm-submit-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;F.2: Job submission commands
+</figcaption>
+<div aria-describedby="tbl-slurm-submit-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<table class="caption-top table">
+<colgroup>
+<col style="width: 29%">
+<col style="width: 41%">
+<col style="width: 29%">
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: left;">Command</th>
+<th style="text-align: left;">Description</th>
+<th style="text-align: left;">Example</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;"><code>sbatch</code></td>
+<td style="text-align: left;">Submit batch job</td>
+<td style="text-align: left;"><code>sbatch script.sh</code></td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><code>sbatch --parsable</code></td>
+<td style="text-align: left;">Return only job ID</td>
+<td style="text-align: left;"><code>sbatch --parsable script.sh</code></td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><code>srun</code></td>
+<td style="text-align: left;">Run interactive command</td>
+<td style="text-align: left;"><code>srun --pty bash</code></td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><code>srun --pty</code></td>
+<td style="text-align: left;">Allocate pseudo-terminal</td>
+<td style="text-align: left;"><code>srun --pty -p interactive bash</code></td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><code>salloc</code></td>
+<td style="text-align: left;">Allocate resources</td>
+<td style="text-align: left;"><code>salloc -N 1 -t 1:00:00</code></td>
+</tr>
+</tbody>
+</table>
+</div>
+</figure>
+</div>
+</section>
+<section id="sec-slurm-manage" class="level2" data-number="F.3">
+<h2 data-number="F.3" class="anchored" data-anchor-id="sec-slurm-manage"><span class="header-section-number">F.3</span> Job Management</h2>
+<div id="tbl-slurm-manage" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-slurm-manage-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;F.3: Job management commands
+</figcaption>
+<div aria-describedby="tbl-slurm-manage-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<table class="caption-top table">
+<colgroup>
+<col style="width: 29%">
+<col style="width: 41%">
+<col style="width: 29%">
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: left;">Command</th>
+<th style="text-align: left;">Description</th>
+<th style="text-align: left;">Example</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;"><code>squeue</code></td>
+<td style="text-align: left;">Show job queue</td>
+<td style="text-align: left;"><code>squeue</code></td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><code>squeue -u $USER</code></td>
+<td style="text-align: left;">Show your jobs</td>
+<td style="text-align: left;"><code>squeue -u $USER</code></td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><code>squeue -p partition</code></td>
+<td style="text-align: left;">Show partition jobs</td>
+<td style="text-align: left;"><code>squeue -p compute</code></td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><code>squeue -j JOBID</code></td>
+<td style="text-align: left;">Show specific job</td>
+<td style="text-align: left;"><code>squeue -j 123456</code></td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><code>squeue -l</code></td>
+<td style="text-align: left;">Long format</td>
+<td style="text-align: left;"><code>squeue -l</code></td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><code>squeue --start</code></td>
+<td style="text-align: left;">Show start times</td>
+<td style="text-align: left;"><code>squeue --start</code></td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><code>scancel JOBID</code></td>
+<td style="text-align: left;">Cancel specific job</td>
+<td style="text-align: left;"><code>scancel 123456</code></td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><code>scancel -u $USER</code></td>
+<td style="text-align: left;">Cancel all your jobs</td>
+<td style="text-align: left;"><code>scancel -u $USER</code></td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><code>scancel -n NAME</code></td>
+<td style="text-align: left;">Cancel by job name</td>
+<td style="text-align: left;"><code>scancel -n analysis</code></td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><code>scancel -p PARTITION</code></td>
+<td style="text-align: left;">Cancel by partition</td>
+<td style="text-align: left;"><code>scancel -p compute</code></td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><code>scontrol hold JOBID</code></td>
+<td style="text-align: left;">Hold job</td>
+<td style="text-align: left;"><code>scontrol hold 123456</code></td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><code>scontrol release JOBID</code></td>
+<td style="text-align: left;">Release held job</td>
+<td style="text-align: left;"><code>scontrol release 123456</code></td>
+</tr>
+</tbody>
+</table>
+</div>
+</figure>
+</div>
+</section>
+<section id="sec-slurm-info" class="level2" data-number="F.4">
+<h2 data-number="F.4" class="anchored" data-anchor-id="sec-slurm-info"><span class="header-section-number">F.4</span> Job Information</h2>
+<div id="tbl-slurm-info" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-slurm-info-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;F.4: Job information commands
+</figcaption>
+<div aria-describedby="tbl-slurm-info-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<table class="caption-top table">
+<colgroup>
+<col style="width: 29%">
+<col style="width: 41%">
+<col style="width: 29%">
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: left;">Command</th>
+<th style="text-align: left;">Description</th>
+<th style="text-align: left;">Example</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;"><code>scontrol show job JOBID</code></td>
+<td style="text-align: left;">Detailed job info</td>
+<td style="text-align: left;"><code>scontrol show job 123456</code></td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><code>scontrol show node NODE</code></td>
+<td style="text-align: left;">Node information</td>
+<td style="text-align: left;"><code>scontrol show node n001</code></td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><code>sacct</code></td>
+<td style="text-align: left;">Job accounting</td>
+<td style="text-align: left;"><code>sacct</code></td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><code>sacct -j JOBID</code></td>
+<td style="text-align: left;">Accounting for job</td>
+<td style="text-align: left;"><code>sacct -j 123456</code></td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><code>sacct --format</code></td>
+<td style="text-align: left;">Custom format</td>
+<td style="text-align: left;"><code>sacct --format=JobID,Elapsed,MaxRSS</code></td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><code>sacct -S YYYY-MM-DD</code></td>
+<td style="text-align: left;">Jobs since date</td>
+<td style="text-align: left;"><code>sacct -S 2024-01-01</code></td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><code>seff JOBID</code></td>
+<td style="text-align: left;">Job efficiency report</td>
+<td style="text-align: left;"><code>seff 123456</code></td>
+</tr>
+</tbody>
+</table>
+</div>
+</figure>
+</div>
+<section id="sec-sacct-fields" class="level3">
+<h3 class="anchored" data-anchor-id="sec-sacct-fields">Useful sacct Format Fields</h3>
+<div id="tbl-sacct-fields" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-sacct-fields-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;F.5: sacct format fields
+</figcaption>
+<div aria-describedby="tbl-sacct-fields-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th style="text-align: left;">Field</th>
+<th style="text-align: left;">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;"><code>JobID</code></td>
+<td style="text-align: left;">Job identifier</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><code>JobName</code></td>
+<td style="text-align: left;">Job name</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><code>Partition</code></td>
+<td style="text-align: left;">Partition used</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><code>Account</code></td>
+<td style="text-align: left;">Account charged</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><code>State</code></td>
+<td style="text-align: left;">Job state</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><code>ExitCode</code></td>
+<td style="text-align: left;">Exit code</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><code>Elapsed</code></td>
+<td style="text-align: left;">Wall time used</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><code>TotalCPU</code></td>
+<td style="text-align: left;">CPU time used</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><code>MaxRSS</code></td>
+<td style="text-align: left;">Max memory used</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><code>MaxVMSize</code></td>
+<td style="text-align: left;">Max virtual memory</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><code>ReqMem</code></td>
+<td style="text-align: left;">Requested memory</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><code>ReqCPUS</code></td>
+<td style="text-align: left;">Requested CPUs</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><code>AllocCPUS</code></td>
+<td style="text-align: left;">Allocated CPUs</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><code>NodeList</code></td>
+<td style="text-align: left;">Nodes used</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><code>Start</code></td>
+<td style="text-align: left;">Start time</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><code>End</code></td>
+<td style="text-align: left;">End time</td>
+</tr>
+</tbody>
+</table>
+</div>
+</figure>
+</div>
+</section>
+<section id="sec-rightsizing-ref" class="level3">
+<h3 class="anchored" data-anchor-id="sec-rightsizing-ref">Reading <code>seff</code> and Right-Sizing</h3>
+<p>Run <code>seff JOBID</code> after every job. The loop: first run with a modest over-estimate; then set the next run from what was actually used.</p>
+<div id="tbl-seff-ref" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-seff-ref-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;F.6: Turning <code>seff</code> output into the next job’s requests
+</figcaption>
+<div aria-describedby="tbl-seff-ref-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<table class="caption-top table">
+<colgroup>
+<col style="width: 46%">
+<col style="width: 53%">
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: left;"><code>seff</code> line</th>
+<th style="text-align: left;">Use it to set</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;"><code>State: COMPLETED</code> (else <code>FAILED</code>, <code>OUT_OF_MEMORY</code>, <code>TIMEOUT</code>, <code>CANCELLED</code>)</td>
+<td style="text-align: left;">Whether to trust the output at all; read the <code>.err</code> log if not <code>COMPLETED</code></td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><code>Memory Utilized</code> (= <code>MaxRSS</code> in <code>sacct</code>)</td>
+<td style="text-align: left;">Next <code>--mem</code> = this × 1.2</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><code>Memory Efficiency</code></td>
+<td style="text-align: left;">Under 50%? Shrink <code>--mem</code></td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><code>Job Wall-clock time</code> (= <code>Elapsed</code>)</td>
+<td style="text-align: left;">Next <code>--time</code> = this × 1.2</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><code>CPU Efficiency</code></td>
+<td style="text-align: left;">Low on a multi-core request means the tool is not using the cores; reduce <code>--cpus-per-task</code></td>
+</tr>
+</tbody>
+</table>
+</div>
+</figure>
+</div>
+<p>Defaults on Talapas if you do not specify: about 3.7 GB memory per core, 1 core, and the partition’s maximum time (24 h on <code>compute</code>). There is no default partition or account; both are required.</p>
+</section>
+<section id="sec-pd-reasons-ref" class="level3">
+<h3 class="anchored" data-anchor-id="sec-pd-reasons-ref">Why Is My Job Pending?</h3>
+<p>Shown in the <code>NODELIST(REASON)</code> column of <code>squeue -u $USER</code>.</p>
+<div id="tbl-pd-reasons-ref" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-pd-reasons-ref-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;F.7: Common pending reasons
+</figcaption>
+<div aria-describedby="tbl-pd-reasons-ref-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<table class="caption-top table">
+<colgroup>
+<col style="width: 32%">
+<col style="width: 36%">
+<col style="width: 32%">
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: left;">Reason</th>
+<th style="text-align: left;">Meaning</th>
+<th style="text-align: left;">Action</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;"><code>Priority</code></td>
+<td style="text-align: left;">Higher fair-share priority jobs are ahead</td>
+<td style="text-align: left;">Wait</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><code>Resources</code></td>
+<td style="text-align: left;">Requested resources not free yet</td>
+<td style="text-align: left;">Wait; check requests are not oversized</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><code>QOSMaxCpuPerUserLimit</code> / <code>QOSMaxJobsPerUserLimit</code> / <code>QOSMaxMemoryPerUser</code></td>
+<td style="text-align: left;">Per-user cap on cores / jobs / memory reached</td>
+<td style="text-align: left;">Wait for your own jobs to finish; throttle arrays with <code>%M</code></td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><code>ReqNodeNotAvail, Reserved for maintenance</code></td>
+<td style="text-align: left;"><code>--time</code> runs into a maintenance window</td>
+<td style="text-align: left;">Shorten <code>--time</code> or add <code>--time-min</code></td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><code>PartitionTimeLimit</code></td>
+<td style="text-align: left;"><code>--time</code> exceeds the partition maximum</td>
+<td style="text-align: left;">Shorten, or use the <code>*long</code> partition</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><code>AssocGrpCPUMinutesLimit</code></td>
+<td style="text-align: left;">PIRG allocation exhausted</td>
+<td style="text-align: left;">Contact RACS</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><code>Dependency</code></td>
+<td style="text-align: left;">Waiting on <code>--dependency=</code> job</td>
+<td style="text-align: left;">Normal</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><code>InvalidAccount</code></td>
+<td style="text-align: left;"><code>--account</code> missing or wrong</td>
+<td style="text-align: left;"><code>groups</code>; fix <code>--account=</code></td>
+</tr>
+</tbody>
+</table>
+</div>
+</figure>
+</div>
+</section>
+</section>
+<section id="sec-slurm-cluster" class="level2" data-number="F.5">
+<h2 data-number="F.5" class="anchored" data-anchor-id="sec-slurm-cluster"><span class="header-section-number">F.5</span> Cluster Information</h2>
+<div id="tbl-slurm-cluster" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-slurm-cluster-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;F.8: Cluster information commands
+</figcaption>
+<div aria-describedby="tbl-slurm-cluster-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<table class="caption-top table">
+<colgroup>
+<col style="width: 29%">
+<col style="width: 41%">
+<col style="width: 29%">
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: left;">Command</th>
+<th style="text-align: left;">Description</th>
+<th style="text-align: left;">Example</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;"><code>sinfo</code></td>
+<td style="text-align: left;">Partition overview</td>
+<td style="text-align: left;"><code>sinfo</code></td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><code>sinfo -p PARTITION</code></td>
+<td style="text-align: left;">Specific partition</td>
+<td style="text-align: left;"><code>sinfo -p compute</code></td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><code>sinfo -N</code></td>
+<td style="text-align: left;">Node-oriented view</td>
+<td style="text-align: left;"><code>sinfo -N</code></td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><code>sinfo -l</code></td>
+<td style="text-align: left;">Long format</td>
+<td style="text-align: left;"><code>sinfo -l</code></td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><code>sinfo --states=idle</code></td>
+<td style="text-align: left;">Nodes in state</td>
+<td style="text-align: left;"><code>sinfo --states=idle</code></td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><code>scontrol show partition</code></td>
+<td style="text-align: left;">Partition details</td>
+<td style="text-align: left;"><code>scontrol show partition compute</code></td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><code>scontrol show config</code></td>
+<td style="text-align: left;">SLURM configuration</td>
+<td style="text-align: left;"><code>scontrol show config</code></td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><code>sprio</code></td>
+<td style="text-align: left;">Job priority factors</td>
+<td style="text-align: left;"><code>sprio</code></td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><code>sshare</code></td>
+<td style="text-align: left;">Share information</td>
+<td style="text-align: left;"><code>sshare -u $USER</code></td>
+</tr>
+</tbody>
+</table>
+</div>
+</figure>
+</div>
+<section id="sec-node-states" class="level3">
+<h3 class="anchored" data-anchor-id="sec-node-states">Node States</h3>
+<div id="tbl-node-states" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-node-states-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;F.9: Node states
+</figcaption>
+<div aria-describedby="tbl-node-states-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th style="text-align: left;">State</th>
+<th style="text-align: left;">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;"><code>idle</code></td>
+<td style="text-align: left;">Available, no jobs</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><code>alloc</code></td>
+<td style="text-align: left;">Fully allocated</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><code>mix</code></td>
+<td style="text-align: left;">Partially allocated</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><code>down</code></td>
+<td style="text-align: left;">Unavailable</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><code>drain</code></td>
+<td style="text-align: left;">Not accepting new jobs</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><code>maint</code></td>
+<td style="text-align: left;">Under maintenance</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><code>resv</code></td>
+<td style="text-align: left;">Reserved</td>
+</tr>
+</tbody>
+</table>
+</div>
+</figure>
+</div>
+</section>
+<section id="sec-job-states" class="level3">
+<h3 class="anchored" data-anchor-id="sec-job-states">Job States</h3>
+<div id="tbl-job-states" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-job-states-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;F.10: Job states
+</figcaption>
+<div aria-describedby="tbl-job-states-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th style="text-align: left;">State</th>
+<th style="text-align: left;">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;"><code>PD</code></td>
+<td style="text-align: left;">Pending (waiting to run)</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><code>R</code></td>
+<td style="text-align: left;">Running</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><code>CG</code></td>
+<td style="text-align: left;">Completing</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><code>CD</code></td>
+<td style="text-align: left;">Completed</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><code>F</code></td>
+<td style="text-align: left;">Failed</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><code>TO</code></td>
+<td style="text-align: left;">Timeout</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><code>CA</code></td>
+<td style="text-align: left;">Cancelled</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><code>NF</code></td>
+<td style="text-align: left;">Node failure</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><code>OOM</code></td>
+<td style="text-align: left;">Out of memory</td>
+</tr>
+</tbody>
+</table>
+</div>
+</figure>
+</div>
+</section>
+</section>
+<section id="sec-sbatch-directives" class="level2" data-number="F.6">
+<h2 data-number="F.6" class="anchored" data-anchor-id="sec-sbatch-directives"><span class="header-section-number">F.6</span> SBATCH Directives</h2>
+<section id="sec-essential-directives" class="level3">
+<h3 class="anchored" data-anchor-id="sec-essential-directives">Essential Directives</h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1"></a><span class="co">#!/bin/bash</span></span>
+<span id="cb1-2"><a href="#cb1-2"></a><span class="co">#SBATCH --job-name=my_job       # Job name (displayed in queue)</span></span>
+<span id="cb1-3"><a href="#cb1-3"></a><span class="co">#SBATCH --partition=compute     # Partition to use (required)</span></span>
+<span id="cb1-4"><a href="#cb1-4"></a><span class="co">#SBATCH --account=PIRG          # Account to charge (required)</span></span>
+<span id="cb1-5"><a href="#cb1-5"></a><span class="co">#SBATCH --time=04:00:00         # Time limit (HH:MM:SS or D-HH:MM:SS)</span></span>
+<span id="cb1-6"><a href="#cb1-6"></a><span class="co">#SBATCH --nodes=1               # Number of nodes</span></span>
+<span id="cb1-7"><a href="#cb1-7"></a><span class="co">#SBATCH --ntasks=1              # Number of tasks (MPI ranks)</span></span>
+<span id="cb1-8"><a href="#cb1-8"></a><span class="co">#SBATCH --cpus-per-task=4       # CPUs per task (threads)</span></span>
+<span id="cb1-9"><a href="#cb1-9"></a><span class="co">#SBATCH --mem=16G               # Memory per node</span></span>
+<span id="cb1-10"><a href="#cb1-10"></a></span>
+<span id="cb1-11"><a href="#cb1-11"></a><span class="bu">set</span> <span class="at">-euo</span> pipefail               <span class="co"># stop on error / unset var / failed pipe stage</span></span>
+<span id="cb1-12"><a href="#cb1-12"></a><span class="ex">module</span> purge                    <span class="co"># modules must be loaded INSIDE the script</span></span>
+<span id="cb1-13"><a href="#cb1-13"></a><span class="ex">module</span> load R/4.3.3</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="sec-output-directives" class="level3">
+<h3 class="anchored" data-anchor-id="sec-output-directives">Output Directives</h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1"></a><span class="co">#SBATCH --output=output_%j.log  # Standard output (%j = job ID)</span></span>
+<span id="cb2-2"><a href="#cb2-2"></a><span class="co">#SBATCH --error=error_%j.log    # Standard error</span></span>
+<span id="cb2-3"><a href="#cb2-3"></a><span class="co">#SBATCH --output=%x_%j.out      # %x = job name</span></span>
+<span id="cb2-4"><a href="#cb2-4"></a><span class="co">#SBATCH --mail-user=email@uoregon.edu  # Email address</span></span>
+<span id="cb2-5"><a href="#cb2-5"></a><span class="co">#SBATCH --mail-type=</span><span class="re">BEGIN</span><span class="co">,</span><span class="re">END</span><span class="co">,FAIL     # When to email</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="sec-resource-directives" class="level3">
+<h3 class="anchored" data-anchor-id="sec-resource-directives">Resource Directives</h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb3"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1"></a><span class="co">#SBATCH --mem-per-cpu=4G        # Memory per CPU</span></span>
+<span id="cb3-2"><a href="#cb3-2"></a><span class="co">#SBATCH --gres=gpu:1            # Request 1 GPU</span></span>
+<span id="cb3-3"><a href="#cb3-3"></a><span class="co">#SBATCH --gres=gpu:v100:2       # Request 2 V100 GPUs</span></span>
+<span id="cb3-4"><a href="#cb3-4"></a><span class="co">#SBATCH --constraint=intel      # Node constraint</span></span>
+<span id="cb3-5"><a href="#cb3-5"></a><span class="co">#SBATCH --exclusive             # Exclusive node access</span></span>
+<span id="cb3-6"><a href="#cb3-6"></a><span class="co">#SBATCH --array=1-100           # Job array</span></span>
+<span id="cb3-7"><a href="#cb3-7"></a><span class="co">#SBATCH --array=1-100%10        # Array with max 10 running</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="sec-dependency-directives" class="level3">
+<h3 class="anchored" data-anchor-id="sec-dependency-directives">Dependency Directives</h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb4"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1"></a><span class="co">#SBATCH --dependency=afterok:JOBID      # Run after job succeeds</span></span>
+<span id="cb4-2"><a href="#cb4-2"></a><span class="co">#SBATCH --dependency=afterany:JOBID     # Run after job completes</span></span>
+<span id="cb4-3"><a href="#cb4-3"></a><span class="co">#SBATCH --dependency=afternotok:JOBID   # Run after job fails</span></span>
+<span id="cb4-4"><a href="#cb4-4"></a><span class="co">#SBATCH --dependency=singleton          # Only one job with this name</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+</section>
+<section id="sec-sbatch-reference" class="level2" data-number="F.7">
+<h2 data-number="F.7" class="anchored" data-anchor-id="sec-sbatch-reference"><span class="header-section-number">F.7</span> Complete SBATCH Directive Reference</h2>
+<div id="tbl-sbatch-all" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-sbatch-all-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;F.11: Complete SBATCH directives
+</figcaption>
+<div aria-describedby="tbl-sbatch-all-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<table class="caption-top table">
+<colgroup>
+<col style="width: 33%">
+<col style="width: 39%">
+<col style="width: 27%">
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: left;">Directive</th>
+<th style="text-align: left;">Description</th>
+<th style="text-align: left;">Example</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;"><code>--job-name</code> / <code>-J</code></td>
+<td style="text-align: left;">Job name</td>
+<td style="text-align: left;"><code>--job-name=analysis</code></td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><code>--partition</code> / <code>-p</code></td>
+<td style="text-align: left;">Partition</td>
+<td style="text-align: left;"><code>--partition=compute</code></td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><code>--account</code> / <code>-A</code></td>
+<td style="text-align: left;">Account</td>
+<td style="text-align: left;"><code>--account=myPIRG</code></td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><code>--time</code> / <code>-t</code></td>
+<td style="text-align: left;">Time limit; exceeded → <code>TIMEOUT</code></td>
+<td style="text-align: left;"><code>--time=04:00:00</code></td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><code>--time-min</code></td>
+<td style="text-align: left;">Minimum acceptable time (lets backfill start the job in a shorter gap)</td>
+<td style="text-align: left;"><code>--time-min=01:00:00</code></td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><code>--nodes</code> / <code>-N</code></td>
+<td style="text-align: left;">Number of nodes</td>
+<td style="text-align: left;"><code>--nodes=2</code></td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><code>--ntasks</code> / <code>-n</code></td>
+<td style="text-align: left;">Number of tasks</td>
+<td style="text-align: left;"><code>--ntasks=8</code></td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><code>--ntasks-per-node</code></td>
+<td style="text-align: left;">Tasks per node</td>
+<td style="text-align: left;"><code>--ntasks-per-node=4</code></td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><code>--cpus-per-task</code> / <code>-c</code></td>
+<td style="text-align: left;">CPUs per task</td>
+<td style="text-align: left;"><code>--cpus-per-task=4</code></td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><code>--mem</code></td>
+<td style="text-align: left;">Memory per node; exceeded → <code>OUT_OF_MEMORY</code></td>
+<td style="text-align: left;"><code>--mem=32G</code></td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><code>--mem-per-cpu</code></td>
+<td style="text-align: left;">Memory per CPU</td>
+<td style="text-align: left;"><code>--mem-per-cpu=4G</code></td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><code>--gres</code></td>
+<td style="text-align: left;">Generic resources</td>
+<td style="text-align: left;"><code>--gres=gpu:1</code></td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><code>--output</code> / <code>-o</code></td>
+<td style="text-align: left;">Stdout file (<code>%j</code> job ID, <code>%x</code> name, <code>%A_%a</code> array)</td>
+<td style="text-align: left;"><code>--output=logs/%x_%j.out</code></td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><code>--error</code> / <code>-e</code></td>
+<td style="text-align: left;">Stderr file (omit to merge into <code>--output</code>)</td>
+<td style="text-align: left;"><code>--error=logs/%x_%j.err</code></td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><code>--mail-user</code></td>
+<td style="text-align: left;">Email address</td>
+<td style="text-align: left;"><code>--mail-user=me@uoregon.edu</code></td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><code>--mail-type</code></td>
+<td style="text-align: left;">Email events</td>
+<td style="text-align: left;"><code>--mail-type=ALL</code></td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><code>--array</code></td>
+<td style="text-align: left;">Job array (<code>%M</code> = max concurrent)</td>
+<td style="text-align: left;"><code>--array=1-100%10</code></td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><code>--dependency</code></td>
+<td style="text-align: left;">Job dependencies</td>
+<td style="text-align: left;"><code>--dependency=afterok:123</code></td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><code>--constraint</code></td>
+<td style="text-align: left;">Node features</td>
+<td style="text-align: left;"><code>--constraint=intel</code></td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><code>--exclusive</code></td>
+<td style="text-align: left;">Exclusive access</td>
+<td style="text-align: left;"><code>--exclusive</code></td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><code>--nodelist</code></td>
+<td style="text-align: left;">Specific nodes</td>
+<td style="text-align: left;"><code>--nodelist=n[001-004]</code></td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><code>--exclude</code></td>
+<td style="text-align: left;">Exclude nodes</td>
+<td style="text-align: left;"><code>--exclude=n001</code></td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><code>--qos</code></td>
+<td style="text-align: left;">Quality of service</td>
+<td style="text-align: left;"><code>--qos=long</code></td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><code>--reservation</code></td>
+<td style="text-align: left;">Use reservation</td>
+<td style="text-align: left;"><code>--reservation=workshop</code></td>
+</tr>
+</tbody>
+</table>
+</div>
+</figure>
+</div>
+<section id="sec-filename-patterns" class="level3">
+<h3 class="anchored" data-anchor-id="sec-filename-patterns">Output Filename Patterns</h3>
+<div id="tbl-filename-patterns" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-filename-patterns-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;F.12: Filename patterns
+</figcaption>
+<div aria-describedby="tbl-filename-patterns-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th style="text-align: left;">Pattern</th>
+<th style="text-align: left;">Replaced With</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;"><code>%j</code></td>
+<td style="text-align: left;">Job ID</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><code>%x</code></td>
+<td style="text-align: left;">Job name</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><code>%N</code></td>
+<td style="text-align: left;">Short hostname</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><code>%n</code></td>
+<td style="text-align: left;">Node identifier</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><code>%A</code></td>
+<td style="text-align: left;">Array job ID</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><code>%a</code></td>
+<td style="text-align: left;">Array task ID</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><code>%u</code></td>
+<td style="text-align: left;">Username</td>
+</tr>
+</tbody>
+</table>
+</div>
+</figure>
+</div>
+</section>
+</section>
+<section id="sec-module-commands" class="level2" data-number="F.8">
+<h2 data-number="F.8" class="anchored" data-anchor-id="sec-module-commands"><span class="header-section-number">F.8</span> Module Commands</h2>
+<div id="tbl-module-commands" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-module-commands-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;F.13: Module commands
+</figcaption>
+<div aria-describedby="tbl-module-commands-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<table class="caption-top table">
+<colgroup>
+<col style="width: 29%">
+<col style="width: 41%">
+<col style="width: 29%">
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: left;">Command</th>
+<th style="text-align: left;">Description</th>
+<th style="text-align: left;">Example</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;"><code>module avail</code></td>
+<td style="text-align: left;">List available modules</td>
+<td style="text-align: left;"><code>module avail</code></td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><code>module avail NAME</code></td>
+<td style="text-align: left;">Search modules</td>
+<td style="text-align: left;"><code>module avail python</code></td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><code>module spider NAME</code></td>
+<td style="text-align: left;">Detailed search</td>
+<td style="text-align: left;"><code>module spider R</code></td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><code>module load NAME</code></td>
+<td style="text-align: left;">Load module</td>
+<td style="text-align: left;"><code>module load R/4.3.3</code></td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><code>module load NAME/VER</code></td>
+<td style="text-align: left;">Load specific version</td>
+<td style="text-align: left;"><code>module load miniconda3/20240410</code></td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><code>module unload NAME</code></td>
+<td style="text-align: left;">Unload module</td>
+<td style="text-align: left;"><code>module unload R</code></td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><code>module list</code></td>
+<td style="text-align: left;">Show loaded modules</td>
+<td style="text-align: left;"><code>module list</code></td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><code>module purge</code></td>
+<td style="text-align: left;">Unload all modules</td>
+<td style="text-align: left;"><code>module purge</code></td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><code>module show NAME</code></td>
+<td style="text-align: left;">Show module details</td>
+<td style="text-align: left;"><code>module show R/4.3.3</code></td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><code>module help NAME</code></td>
+<td style="text-align: left;">Module help</td>
+<td style="text-align: left;"><code>module help python</code></td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><code>module swap OLD NEW</code></td>
+<td style="text-align: left;">Replace module</td>
+<td style="text-align: left;"><code>module swap gcc/9 gcc/11</code></td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><code>module save NAME</code></td>
+<td style="text-align: left;">Save collection</td>
+<td style="text-align: left;"><code>module save mymodules</code></td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><code>module restore NAME</code></td>
+<td style="text-align: left;">Restore collection</td>
+<td style="text-align: left;"><code>module restore mymodules</code></td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><code>module savelist</code></td>
+<td style="text-align: left;">List collections</td>
+<td style="text-align: left;"><code>module savelist</code></td>
+</tr>
+</tbody>
+</table>
+</div>
+</figure>
+</div>
+</section>
+<section id="sec-job-arrays" class="level2" data-number="F.9">
+<h2 data-number="F.9" class="anchored" data-anchor-id="sec-job-arrays"><span class="header-section-number">F.9</span> Job Arrays</h2>
+<section id="sec-array-template-ref" class="level3">
+<h3 class="anchored" data-anchor-id="sec-array-template-ref">Template: One Script, Many Samples</h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb5"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1"></a><span class="co">#!/bin/bash</span></span>
+<span id="cb5-2"><a href="#cb5-2"></a><span class="co">#SBATCH --job-name=align</span></span>
+<span id="cb5-3"><a href="#cb5-3"></a><span class="co">#SBATCH --partition=compute</span></span>
+<span id="cb5-4"><a href="#cb5-4"></a><span class="co">#SBATCH --account=myPIRG</span></span>
+<span id="cb5-5"><a href="#cb5-5"></a><span class="co">#SBATCH --time=02:00:00</span></span>
+<span id="cb5-6"><a href="#cb5-6"></a><span class="co">#SBATCH --cpus-per-task=8</span></span>
+<span id="cb5-7"><a href="#cb5-7"></a><span class="co">#SBATCH --mem=16G</span></span>
+<span id="cb5-8"><a href="#cb5-8"></a><span class="co">#SBATCH --array=1-24%8               # 24 tasks, at most 8 running at once</span></span>
+<span id="cb5-9"><a href="#cb5-9"></a><span class="co">#SBATCH --output=logs/%x_%A_%a.out   # %A = array job ID, %a = task ID</span></span>
+<span id="cb5-10"><a href="#cb5-10"></a><span class="co">#SBATCH --error=logs/%x_%A_%a.err</span></span>
+<span id="cb5-11"><a href="#cb5-11"></a></span>
+<span id="cb5-12"><a href="#cb5-12"></a><span class="bu">set</span> <span class="at">-euo</span> pipefail</span>
+<span id="cb5-13"><a href="#cb5-13"></a><span class="ex">module</span> purge</span>
+<span id="cb5-14"><a href="#cb5-14"></a><span class="ex">module</span> load bwa/0.7.17 samtools/1.17</span>
+<span id="cb5-15"><a href="#cb5-15"></a></span>
+<span id="cb5-16"><a href="#cb5-16"></a><span class="va">SAMPLE</span><span class="op">=</span><span class="va">$(</span><span class="fu">sed</span> <span class="at">-n</span> <span class="st">"</span><span class="va">${SLURM_ARRAY_TASK_ID}</span><span class="st">p"</span> samples.txt<span class="va">)</span>   <span class="co"># line N = task N</span></span>
+<span id="cb5-17"><a href="#cb5-17"></a><span class="va">OUT</span><span class="op">=</span><span class="st">"results/</span><span class="va">${SAMPLE}</span><span class="st">.bam"</span></span>
+<span id="cb5-18"><a href="#cb5-18"></a><span class="kw">[[</span> <span class="ot">-s</span> <span class="st">"</span><span class="va">$OUT</span><span class="st">"</span> <span class="kw">]]</span> <span class="kw">&amp;&amp;</span> <span class="kw">{</span> <span class="bu">echo</span> <span class="st">"</span><span class="va">$SAMPLE</span><span class="st"> done, skipping"</span><span class="kw">;</span> <span class="bu">exit</span> 0<span class="kw">;</span> <span class="kw">}</span>   <span class="co"># resumable</span></span>
+<span id="cb5-19"><a href="#cb5-19"></a></span>
+<span id="cb5-20"><a href="#cb5-20"></a><span class="ex">bwa</span> mem <span class="at">-t</span> <span class="st">"</span><span class="va">$SLURM_CPUS_PER_TASK</span><span class="st">"</span> ref.fa <span class="st">"raw/</span><span class="va">${SAMPLE}</span><span class="st">_R1.fastq.gz"</span> <span class="st">"raw/</span><span class="va">${SAMPLE}</span><span class="st">_R2.fastq.gz"</span> <span class="dt">\</span></span>
+<span id="cb5-21"><a href="#cb5-21"></a>    <span class="kw">|</span> <span class="ex">samtools</span> sort <span class="at">-@</span> <span class="st">"</span><span class="va">$SLURM_CPUS_PER_TASK</span><span class="st">"</span> <span class="at">-o</span> <span class="st">"</span><span class="va">$OUT</span><span class="st">.tmp"</span></span>
+<span id="cb5-22"><a href="#cb5-22"></a><span class="fu">mv</span> <span class="st">"</span><span class="va">$OUT</span><span class="st">.tmp"</span> <span class="st">"</span><span class="va">$OUT</span><span class="st">"</span>          <span class="co"># rename only after success: no truncated outputs</span></span>
+<span id="cb5-23"><a href="#cb5-23"></a><span class="bu">echo</span> <span class="st">"Wrote </span><span class="va">$OUT</span><span class="st">"</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Run <code>mkdir -p logs results</code> before submitting. The <code>logs/</code> directory must exist or the job fails silently.</p>
+</section>
+<section id="sec-array-variants-ref" class="level3">
+<h3 class="anchored" data-anchor-id="sec-array-variants-ref">Array Index Variants</h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb6"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb6-1"><a href="#cb6-1"></a><span class="co">#SBATCH --array=0-100:10        # 0, 10, 20, ..., 100</span></span>
+<span id="cb6-2"><a href="#cb6-2"></a><span class="co">#SBATCH --array=1-1000%50       # Max 50 running at once</span></span>
+<span id="cb6-3"><a href="#cb6-3"></a><span class="co">#SBATCH --array=3,7,12          # Rerun only specific tasks</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>To size the array from a file at submit time: <code>sbatch --array=1-$(wc -l &lt; samples.txt) align.sh</code>. To run a step only after every task succeeds: <code>sbatch --dependency=afterok:ARRAY_JOB_ID next_step.sh</code>.</p>
+</section>
+</section>
+<section id="sec-slurm-env" class="level2" data-number="F.10">
+<h2 data-number="F.10" class="anchored" data-anchor-id="sec-slurm-env"><span class="header-section-number">F.10</span> Environment Variables</h2>
+<div id="tbl-slurm-env" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-slurm-env-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;F.14: SLURM environment variables
+</figcaption>
+<div aria-describedby="tbl-slurm-env-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th style="text-align: left;">Variable</th>
+<th style="text-align: left;">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;"><code>$SLURM_JOB_ID</code></td>
+<td style="text-align: left;">Job ID</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><code>$SLURM_JOB_NAME</code></td>
+<td style="text-align: left;">Job name</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><code>$SLURM_SUBMIT_DIR</code></td>
+<td style="text-align: left;">Directory where job was submitted</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><code>$SLURM_JOB_NODELIST</code></td>
+<td style="text-align: left;">List of nodes</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><code>$SLURM_NNODES</code></td>
+<td style="text-align: left;">Number of nodes</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><code>$SLURM_NTASKS</code></td>
+<td style="text-align: left;">Number of tasks</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><code>$SLURM_CPUS_PER_TASK</code></td>
+<td style="text-align: left;">CPUs per task</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><code>$SLURM_MEM_PER_NODE</code></td>
+<td style="text-align: left;">Memory per node</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><code>$SLURM_ARRAY_TASK_ID</code></td>
+<td style="text-align: left;">Array task ID</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><code>$SLURM_ARRAY_JOB_ID</code></td>
+<td style="text-align: left;">Array job ID</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><code>$SLURM_TMPDIR</code></td>
+<td style="text-align: left;">Temporary directory</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><code>$SLURM_NODEID</code></td>
+<td style="text-align: left;">Node ID within job</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><code>$SLURM_PROCID</code></td>
+<td style="text-align: left;">Task ID within job</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><code>$SLURM_LOCALID</code></td>
+<td style="text-align: left;">Local task ID on node</td>
+</tr>
+</tbody>
+</table>
+</div>
+</figure>
+</div>
+</section>
+<section id="sec-example-scripts" class="level2" data-number="F.11">
+<h2 data-number="F.11" class="anchored" data-anchor-id="sec-example-scripts"><span class="header-section-number">F.11</span> Example Job Scripts</h2>
+<section id="sec-example-r" class="level3">
+<h3 class="anchored" data-anchor-id="sec-example-r">Basic R Script</h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb7"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb7-1"><a href="#cb7-1"></a><span class="co">#!/bin/bash</span></span>
+<span id="cb7-2"><a href="#cb7-2"></a><span class="co">#SBATCH --job-name=r_analysis</span></span>
+<span id="cb7-3"><a href="#cb7-3"></a><span class="co">#SBATCH --partition=compute</span></span>
+<span id="cb7-4"><a href="#cb7-4"></a><span class="co">#SBATCH --account=myPIRG</span></span>
+<span id="cb7-5"><a href="#cb7-5"></a><span class="co">#SBATCH --time=02:00:00</span></span>
+<span id="cb7-6"><a href="#cb7-6"></a><span class="co">#SBATCH --nodes=1</span></span>
+<span id="cb7-7"><a href="#cb7-7"></a><span class="co">#SBATCH --cpus-per-task=4</span></span>
+<span id="cb7-8"><a href="#cb7-8"></a><span class="co">#SBATCH --mem=16G</span></span>
+<span id="cb7-9"><a href="#cb7-9"></a><span class="co">#SBATCH --output=r_job_%j.log</span></span>
+<span id="cb7-10"><a href="#cb7-10"></a></span>
+<span id="cb7-11"><a href="#cb7-11"></a><span class="bu">set</span> <span class="at">-euo</span> pipefail</span>
+<span id="cb7-12"><a href="#cb7-12"></a></span>
+<span id="cb7-13"><a href="#cb7-13"></a><span class="co"># Load required modules (inside the script, with a version number)</span></span>
+<span id="cb7-14"><a href="#cb7-14"></a><span class="ex">module</span> purge</span>
+<span id="cb7-15"><a href="#cb7-15"></a><span class="ex">module</span> load R/4.3.3</span>
+<span id="cb7-16"><a href="#cb7-16"></a></span>
+<span id="cb7-17"><a href="#cb7-17"></a><span class="co"># Run R script</span></span>
+<span id="cb7-18"><a href="#cb7-18"></a><span class="ex">Rscript</span> my_analysis.R</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="sec-example-python" class="level3">
+<h3 class="anchored" data-anchor-id="sec-example-python">Python with Conda</h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb8"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb8-1"><a href="#cb8-1"></a><span class="co">#!/bin/bash</span></span>
+<span id="cb8-2"><a href="#cb8-2"></a><span class="co">#SBATCH --job-name=python_job</span></span>
+<span id="cb8-3"><a href="#cb8-3"></a><span class="co">#SBATCH --partition=compute</span></span>
+<span id="cb8-4"><a href="#cb8-4"></a><span class="co">#SBATCH --account=myPIRG</span></span>
+<span id="cb8-5"><a href="#cb8-5"></a><span class="co">#SBATCH --time=04:00:00</span></span>
+<span id="cb8-6"><a href="#cb8-6"></a><span class="co">#SBATCH --cpus-per-task=8</span></span>
+<span id="cb8-7"><a href="#cb8-7"></a><span class="co">#SBATCH --mem=32G</span></span>
+<span id="cb8-8"><a href="#cb8-8"></a><span class="co">#SBATCH --output=python_%j.log</span></span>
+<span id="cb8-9"><a href="#cb8-9"></a></span>
+<span id="cb8-10"><a href="#cb8-10"></a><span class="co"># Load conda and activate your environment</span></span>
+<span id="cb8-11"><a href="#cb8-11"></a><span class="ex">module</span> load miniconda3/20240410</span>
+<span id="cb8-12"><a href="#cb8-12"></a><span class="ex">conda</span> activate myenv</span>
+<span id="cb8-13"><a href="#cb8-13"></a></span>
+<span id="cb8-14"><a href="#cb8-14"></a><span class="co"># Run Python script</span></span>
+<span id="cb8-15"><a href="#cb8-15"></a><span class="ex">python</span> analysis.py <span class="at">--input</span> data.csv <span class="at">--output</span> results/</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="sec-example-gpu" class="level3">
+<h3 class="anchored" data-anchor-id="sec-example-gpu">GPU Job</h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb9"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb9-1"><a href="#cb9-1"></a><span class="co">#!/bin/bash</span></span>
+<span id="cb9-2"><a href="#cb9-2"></a><span class="co">#SBATCH --job-name=gpu_job</span></span>
+<span id="cb9-3"><a href="#cb9-3"></a><span class="co">#SBATCH --partition=gpu</span></span>
+<span id="cb9-4"><a href="#cb9-4"></a><span class="co">#SBATCH --account=myPIRG</span></span>
+<span id="cb9-5"><a href="#cb9-5"></a><span class="co">#SBATCH --time=08:00:00</span></span>
+<span id="cb9-6"><a href="#cb9-6"></a><span class="co">#SBATCH --nodes=1</span></span>
+<span id="cb9-7"><a href="#cb9-7"></a><span class="co">#SBATCH --cpus-per-task=4</span></span>
+<span id="cb9-8"><a href="#cb9-8"></a><span class="co">#SBATCH --mem=32G</span></span>
+<span id="cb9-9"><a href="#cb9-9"></a><span class="co">#SBATCH --gres=gpu:1</span></span>
+<span id="cb9-10"><a href="#cb9-10"></a><span class="co">#SBATCH --output=gpu_%j.log</span></span>
+<span id="cb9-11"><a href="#cb9-11"></a></span>
+<span id="cb9-12"><a href="#cb9-12"></a><span class="ex">module</span> load cuda/12.4</span>
+<span id="cb9-13"><a href="#cb9-13"></a><span class="ex">module</span> load miniconda3/20240410</span>
+<span id="cb9-14"><a href="#cb9-14"></a><span class="ex">conda</span> activate ml_env</span>
+<span id="cb9-15"><a href="#cb9-15"></a></span>
+<span id="cb9-16"><a href="#cb9-16"></a><span class="ex">python</span> train_model.py</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="sec-example-mpi" class="level3">
+<h3 class="anchored" data-anchor-id="sec-example-mpi">MPI Job</h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb10"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb10-1"><a href="#cb10-1"></a><span class="co">#!/bin/bash</span></span>
+<span id="cb10-2"><a href="#cb10-2"></a><span class="co">#SBATCH --job-name=mpi_job</span></span>
+<span id="cb10-3"><a href="#cb10-3"></a><span class="co">#SBATCH --partition=compute</span></span>
+<span id="cb10-4"><a href="#cb10-4"></a><span class="co">#SBATCH --account=myPIRG</span></span>
+<span id="cb10-5"><a href="#cb10-5"></a><span class="co">#SBATCH --time=04:00:00</span></span>
+<span id="cb10-6"><a href="#cb10-6"></a><span class="co">#SBATCH --nodes=4</span></span>
+<span id="cb10-7"><a href="#cb10-7"></a><span class="co">#SBATCH --ntasks-per-node=16</span></span>
+<span id="cb10-8"><a href="#cb10-8"></a><span class="co">#SBATCH --mem-per-cpu=4G</span></span>
+<span id="cb10-9"><a href="#cb10-9"></a><span class="co">#SBATCH --output=mpi_%j.log</span></span>
+<span id="cb10-10"><a href="#cb10-10"></a></span>
+<span id="cb10-11"><a href="#cb10-11"></a><span class="ex">module</span> load openmpi/4.1</span>
+<span id="cb10-12"><a href="#cb10-12"></a></span>
+<span id="cb10-13"><a href="#cb10-13"></a><span class="ex">mpirun</span> <span class="at">-np</span> 64 ./my_mpi_program</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+</section>
+<section id="sec-talapas-specific" class="level2" data-number="F.12">
+<h2 data-number="F.12" class="anchored" data-anchor-id="sec-talapas-specific"><span class="header-section-number">F.12</span> Talapas-Specific Information</h2>
+<section id="sec-talapas-partitions" class="level3">
+<h3 class="anchored" data-anchor-id="sec-talapas-partitions">Common Partitions</h3>
+<div id="tbl-talapas-partitions" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-talapas-partitions-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;F.15: Talapas partitions
+</figcaption>
+<div aria-describedby="tbl-talapas-partitions-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th style="text-align: left;">Partition</th>
+<th style="text-align: left;">Description</th>
+<th style="text-align: left;">Time Limit</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;"><code>compute</code></td>
+<td style="text-align: left;">Standard CPU nodes</td>
+<td style="text-align: left;">1 day</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><code>computelong</code></td>
+<td style="text-align: left;">Extended-time CPU jobs</td>
+<td style="text-align: left;">14 days</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><code>gpu</code></td>
+<td style="text-align: left;">GPU nodes</td>
+<td style="text-align: left;">1 day</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><code>gpulong</code></td>
+<td style="text-align: left;">Extended-time GPU jobs</td>
+<td style="text-align: left;">14 days</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><code>interactive</code></td>
+<td style="text-align: left;">Interactive CPU sessions</td>
+<td style="text-align: left;">12 hours</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><code>interactivegpu</code></td>
+<td style="text-align: left;">Interactive GPU sessions</td>
+<td style="text-align: left;">8 hours</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><code>memory</code></td>
+<td style="text-align: left;">High-memory nodes (up to 4 TB)</td>
+<td style="text-align: left;">1 day</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><code>memorylong</code></td>
+<td style="text-align: left;">Extended-time high-memory jobs</td>
+<td style="text-align: left;">14 days</td>
+</tr>
+</tbody>
+</table>
+</div>
+</figure>
+</div>
+<p>Run <code>sinfo</code> to list every partition, including your lab’s condo partitions. Interactive sessions should use <code>--partition=interactive</code> (or <code>interactivegpu</code>).</p>
+</section>
+<section id="sec-talapas-helpers" class="level3">
+<h3 class="anchored" data-anchor-id="sec-talapas-helpers">Talapas Helper Commands</h3>
+<div id="tbl-talapas-helpers" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-talapas-helpers-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;F.16: Talapas-specific helper commands (see <a href="20-hpc-talapas.html#sec-connecting-talapas" class="quarto-xref"><span>Section 20.4</span></a> for access details)
+</figcaption>
+<div aria-describedby="tbl-talapas-helpers-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<table class="caption-top table">
+<colgroup>
+<col style="width: 40%">
+<col style="width: 60%">
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: left;">Task</th>
+<th style="text-align: left;">Command</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">Which PIRGs (accounts) am I in?</td>
+<td style="text-align: left;"><code>groups</code></td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Which GPUs exist and which are free?</td>
+<td style="text-align: left;"><code>/packages/racs/bin/slurm-show-gpus</code></td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Set my default account once</td>
+<td style="text-align: left;"><code>echo 'export SBATCH_ACCOUNT=myPIRG' &gt;&gt; ~/.bash_profile</code></td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Home and project usage</td>
+<td style="text-align: left;"><code>df -h ~</code> / <code>du -sh /projects/myPIRG/$USER</code></td>
+</tr>
+</tbody>
+</table>
+</div>
+</figure>
+</div>
+</section>
+<section id="sec-talapas-storage-ref" class="level3">
+<h3 class="anchored" data-anchor-id="sec-talapas-storage-ref">Storage Locations</h3>
+<div id="tbl-talapas-storage" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-talapas-storage-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;F.17: Talapas storage. Nothing is backed up by RACS; use Globus for large transfers (<a href="20-hpc-talapas.html#sec-file-transfer" class="quarto-xref"><span>Section 20.5.3</span></a>).
+</figcaption>
+<div aria-describedby="tbl-talapas-storage-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<table class="caption-top table">
+<colgroup>
+<col style="width: 38%">
+<col style="width: 26%">
+<col style="width: 34%">
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: left;">Location</th>
+<th style="text-align: left;">Quota</th>
+<th style="text-align: left;">Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;"><code>/home/$USER</code></td>
+<td style="text-align: left;">250 GB</td>
+<td style="text-align: left;">Config files, small data</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><code>/projects/PIRG/$USER</code></td>
+<td style="text-align: left;">Shared (2 TB default)</td>
+<td style="text-align: left;">Large data, analysis</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><code>/projects/PIRG/shared</code></td>
+<td style="text-align: left;">Shared</td>
+<td style="text-align: left;">Shared group data</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><code>/scratch/PIRG</code></td>
+<td style="text-align: left;">Large per-PIRG quota</td>
+<td style="text-align: left;">Working data; <strong>purged after 90 days without access</strong></td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><code>$SLURM_TMPDIR</code></td>
+<td style="text-align: left;">Local</td>
+<td style="text-align: left;">Temporary scratch</td>
+</tr>
+</tbody>
+</table>
+</div>
+</figure>
+</div>
+
+
+<div id="refs" class="references csl-bib-body hanging-indent" data-entry-spacing="0" data-line-spacing="2" role="list" style="display: none">
+<div id="ref-yoo2003slurm" class="csl-entry" role="listitem">
+Yoo, A. B., Jette, M. A., &amp; Grondona, M. (2003). <a href="https://doi.org/10.1007/10968987_3">SLURM: Simple linux utility for resource management</a>.
+</div>
+</div>
+</section>
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    // Ensure there is a toggle, if there isn't float one in the top right
+    if (window.document.querySelector('.quarto-color-scheme-toggle') === null) {
+      const a = window.document.createElement('a');
+      a.classList.add('top-right');
+      a.classList.add('quarto-color-scheme-toggle');
+      a.href = "";
+      a.onclick = function() { try { window.quartoToggleColorScheme(); } catch {} return false; };
+      const i = window.document.createElement("i");
+      i.classList.add('bi');
+      a.appendChild(i);
+      window.document.body.appendChild(a);
+    }
+    setColorSchemeToggle(hasAlternateSentinel())
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+            // target, if specified
+            link.setAttribute("target", "_blank");
+            if (link.getAttribute("rel") === null) {
+              link.setAttribute("rel", "noopener");
+            }
+            // default icon
+            link.classList.add("external");
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        const annoteTargets = window.document.querySelectorAll('.code-annotation-anchor');
+        for (let i=0; i<annoteTargets.length; i++) {
+          const annoteTarget = annoteTargets[i];
+          const targetCell = annoteTarget.getAttribute("data-target-cell");
+          const targetAnnotation = annoteTarget.getAttribute("data-target-annotation");
+          const contentFn = () => {
+            const content = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+            if (content) {
+              const tipContent = content.cloneNode(true);
+              tipContent.classList.add("code-annotation-tip-content");
+              return tipContent.outerHTML;
+            }
+          }
+          const config = {
+            allowHTML: true,
+            content: contentFn,
+            onShow: (instance) => {
+              selectCodeLines(instance.reference);
+              instance.reference.classList.add('code-annotation-active');
+              window.tippy.hideAll();
+            },
+            onHide: (instance) => {
+              unselectCodeLines();
+              instance.reference.classList.remove('code-annotation-active');
+            },
+            maxWidth: 300,
+            delay: [50, 0],
+            duration: [200, 0],
+            offset: [5, 10],
+            arrow: true,
+            appendTo: function(el) {
+              return el.parentElement.parentElement.parentElement;
+            },
+            interactive: true,
+            interactiveBorder: 10,
+            theme: 'quarto',
+            placement: 'right',
+            popperOptions: {
+              modifiers: [
+              {
+                name: 'flip',
+                options: {
+                  flipVariations: false, // true by default
+                  allowedAutoPlacements: ['right'],
+                  fallbackPlacements: ['right', 'top', 'top-start', 'top-end', 'bottom', 'bottom-start', 'bottom-end', 'left'],
+                },
+              },
+              {
+                name: 'preventOverflow',
+                options: {
+                  mainAxis: false,
+                  altAxis: false
+                }
+              }
+              ]        
+            }      
+          };
+          window.tippy(annoteTarget, config); 
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+<nav class="page-navigation">
+  <div class="nav-page nav-page-previous">
+      <a href="../chapters/appendix-E-latex.html" class="pagination-link" aria-label="LaTeX Command Reference">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">E</span>&nbsp; <span class="chapter-title">LaTeX Command Reference</span></span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+      <a href="../chapters/appendix-G-regex.html" class="pagination-link" aria-label="Regular Expression Reference">
+        <span class="nav-page-text"><span class="chapter-number">G</span>&nbsp; <span class="chapter-title">Regular Expression Reference</span></span> <i class="bi bi-arrow-right-short"></i>
+      </a>
+  </div>
+</nav>
+</div> <!-- /content -->
+<footer class="footer">
+  <div class="nav-footer">
+    <div class="nav-footer-left">
+<p>© 2026 William A. Cresko | Knight Campus for Accelerating Scientific Impact</p>
+</div>   
+    <div class="nav-footer-center">
+      &nbsp;
+    <div class="toc-actions d-sm-block d-md-none"><ul><li><a href="https://github.com/wcresko/BioE_Comp_Tools_Fa2026/edit/main/Book/chapters/appendix-F-slurm.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li><li><a href="https://github.com/wcresko/BioE_Comp_Tools_Fa2026/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></div>
+    <div class="nav-footer-right">
+<p><a href="https://wcresko.github.io/BioE_Comp_Tools_Fa2026/">Course website</a> | Built with <a href="https://quarto.org/">Quarto</a></p>
+</div>
+  </div>
+</footer>
+
+
+
+
+</body></html>

@@ -1,0 +1,2010 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.9.38">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+<meta name="description" content="A comprehensive guide to essential computational tools for graduate students in bioengineering and life sciences, covering Unix/Linux, R and Python, editors and IDEs, computing resources at the University of Oregon, AI-assisted coding, reproducible documents, version control with Git/GitHub, and high-performance computing.">
+<title>7&nbsp; GREP and Regular Expressions – Foundational Computational Tools for Bioengineers</title>
+<style>
+/* Default styles provided by pandoc.
+** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+*/
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+/* CSS for citations */
+div.csl-bib-body { }
+div.csl-entry {
+  clear: both;
+  margin-bottom: 0em;
+}
+.hanging-indent div.csl-entry {
+  margin-left:2em;
+  text-indent:-2em;
+}
+div.csl-left-margin {
+  min-width:2em;
+  float:left;
+}
+div.csl-right-inline {
+  margin-left:2em;
+  padding-left:1em;
+}
+div.csl-indent {
+  margin-left: 2em;
+}</style>
+
+<script src="../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../">
+<link href="../chapters/08-shell-scripting.html" rel="next">
+<link href="../chapters/06-files-pipes.html" rel="prev">
+<script src="../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../site_libs/quarto-html/popper.min.js"></script>
+<script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-3836fb1e46d4cb83c75cfb618a44b85e.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-text-highlighting-styles">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-dark-4234edb6284ff370703ce34fde7cc7c8.css" rel="stylesheet" class="quarto-color-scheme quarto-color-alternate" id="quarto-text-highlighting-styles">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-3836fb1e46d4cb83c75cfb618a44b85e.css" rel="stylesheet" class="quarto-color-scheme-extra" id="quarto-text-highlighting-styles">
+<script src="../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../site_libs/bootstrap/bootstrap-882387fc1d6267d1b7263d283c4866b5.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
+<link href="../site_libs/bootstrap/bootstrap-dark-814ca0c199338aa1abdb5ae469f0d636.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
+<link href="../site_libs/bootstrap/bootstrap-882387fc1d6267d1b7263d283c4866b5.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light"><script id="quarto-search-options" type="application/json">{
+  "location": "sidebar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "start",
+  "type": "textbox",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+</head>
+<body class="nav-sidebar docked quarto-light"><script id="quarto-html-before-body" type="application/javascript">
+    const toggleBodyColorMode = (bsSheetEl) => {
+      const mode = bsSheetEl.getAttribute("data-mode");
+      const bodyEl = window.document.querySelector("body");
+      if (mode === "dark") {
+        bodyEl.classList.add("quarto-dark");
+        bodyEl.classList.remove("quarto-light");
+      } else {
+        bodyEl.classList.add("quarto-light");
+        bodyEl.classList.remove("quarto-dark");
+      }
+    }
+    const toggleBodyColorPrimary = () => {
+      const bsSheetEl = window.document.querySelector("link#quarto-bootstrap:not([rel=disabled-stylesheet])");
+      if (bsSheetEl) {
+        toggleBodyColorMode(bsSheetEl);
+      }
+    }
+    const setColorSchemeToggle = (alternate) => {
+      const toggles = window.document.querySelectorAll('.quarto-color-scheme-toggle');
+      for (let i=0; i < toggles.length; i++) {
+        const toggle = toggles[i];
+        if (toggle) {
+          if (alternate) {
+            toggle.classList.add("alternate");
+          } else {
+            toggle.classList.remove("alternate");
+          }
+        }
+      }
+    };
+    const toggleColorMode = (alternate) => {
+      // Switch the stylesheets
+      const primaryStylesheets = window.document.querySelectorAll('link.quarto-color-scheme:not(.quarto-color-alternate)');
+      const alternateStylesheets = window.document.querySelectorAll('link.quarto-color-scheme.quarto-color-alternate');
+      manageTransitions('#quarto-margin-sidebar .nav-link', false);
+      if (alternate) {
+        // note: dark is layered on light, we don't disable primary!
+        enableStylesheet(alternateStylesheets);
+        for (const sheetNode of alternateStylesheets) {
+          if (sheetNode.id === "quarto-bootstrap") {
+            toggleBodyColorMode(sheetNode);
+          }
+        }
+      } else {
+        disableStylesheet(alternateStylesheets);
+        enableStylesheet(primaryStylesheets)
+        toggleBodyColorPrimary();
+      }
+      manageTransitions('#quarto-margin-sidebar .nav-link', true);
+      // Switch the toggles
+      setColorSchemeToggle(alternate)
+      // Hack to workaround the fact that safari doesn't
+      // properly recolor the scrollbar when toggling (#1455)
+      if (navigator.userAgent.indexOf('Safari') > 0 && navigator.userAgent.indexOf('Chrome') == -1) {
+        manageTransitions("body", false);
+        window.scrollTo(0, 1);
+        setTimeout(() => {
+          window.scrollTo(0, 0);
+          manageTransitions("body", true);
+        }, 40);
+      }
+    }
+    const disableStylesheet = (stylesheets) => {
+      for (let i=0; i < stylesheets.length; i++) {
+        const stylesheet = stylesheets[i];
+        stylesheet.rel = 'disabled-stylesheet';
+      }
+    }
+    const enableStylesheet = (stylesheets) => {
+      for (let i=0; i < stylesheets.length; i++) {
+        const stylesheet = stylesheets[i];
+        if(stylesheet.rel !== 'stylesheet') { // for Chrome, which will still FOUC without this check
+          stylesheet.rel = 'stylesheet';
+        }
+      }
+    }
+    const manageTransitions = (selector, allowTransitions) => {
+      const els = window.document.querySelectorAll(selector);
+      for (let i=0; i < els.length; i++) {
+        const el = els[i];
+        if (allowTransitions) {
+          el.classList.remove('notransition');
+        } else {
+          el.classList.add('notransition');
+        }
+      }
+    }
+    const isFileUrl = () => {
+      return window.location.protocol === 'file:';
+    }
+    const hasAlternateSentinel = () => {
+      let styleSentinel = getColorSchemeSentinel();
+      if (styleSentinel !== null) {
+        return styleSentinel === "alternate";
+      } else {
+        return false;
+      }
+    }
+    const setStyleSentinel = (alternate) => {
+      const value = alternate ? "alternate" : "default";
+      if (!isFileUrl()) {
+        window.localStorage.setItem("quarto-color-scheme", value);
+      } else {
+        localAlternateSentinel = value;
+      }
+    }
+    const getColorSchemeSentinel = () => {
+      if (!isFileUrl()) {
+        const storageValue = window.localStorage.getItem("quarto-color-scheme");
+        return storageValue != null ? storageValue : localAlternateSentinel;
+      } else {
+        return localAlternateSentinel;
+      }
+    }
+    const toggleGiscusIfUsed = (isAlternate, darkModeDefault) => {
+      const baseTheme = document.querySelector('#giscus-base-theme')?.value ?? 'light';
+      const alternateTheme = document.querySelector('#giscus-alt-theme')?.value ?? 'dark';
+      let newTheme = '';
+      if(authorPrefersDark) {
+        newTheme = isAlternate ? baseTheme : alternateTheme;
+      } else {
+        newTheme = isAlternate ? alternateTheme : baseTheme;
+      }
+      const changeGiscusTheme = () => {
+        // From: https://github.com/giscus/giscus/issues/336
+        const sendMessage = (message) => {
+          const iframe = document.querySelector('iframe.giscus-frame');
+          if (!iframe) return;
+          iframe.contentWindow.postMessage({ giscus: message }, 'https://giscus.app');
+        }
+        sendMessage({
+          setConfig: {
+            theme: newTheme
+          }
+        });
+      }
+      const isGiscussLoaded = window.document.querySelector('iframe.giscus-frame') !== null;
+      if (isGiscussLoaded) {
+        changeGiscusTheme();
+      }
+    };
+    const authorPrefersDark = false;
+    const darkModeDefault = authorPrefersDark;
+      document.querySelector('link#quarto-text-highlighting-styles.quarto-color-scheme-extra').rel = 'disabled-stylesheet';
+      document.querySelector('link#quarto-bootstrap.quarto-color-scheme-extra').rel = 'disabled-stylesheet';
+    let localAlternateSentinel = darkModeDefault ? 'alternate' : 'default';
+    // Dark / light mode switch
+    window.quartoToggleColorScheme = () => {
+      // Read the current dark / light value
+      let toAlternate = !hasAlternateSentinel();
+      toggleColorMode(toAlternate);
+      setStyleSentinel(toAlternate);
+      toggleGiscusIfUsed(toAlternate, darkModeDefault);
+      window.dispatchEvent(new Event('resize'));
+    };
+    // Switch to dark mode if need be
+    if (hasAlternateSentinel()) {
+      toggleColorMode(true);
+    } else {
+      toggleColorMode(false);
+    }
+  </script>
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top"><nav class="quarto-secondary-nav"><div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../chapters/07-grep-regex.html"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">GREP and Regular Expressions</span></a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+      <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
+        <i class="bi bi-search"></i>
+      </button>
+    </div>
+  </nav></header><!-- content --><div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation docked overflow-auto"><div class="pt-lg-2 mt-2 text-left sidebar-header">
+    <div class="sidebar-title mb-0 py-0">
+      <a href="../">Foundational Computational Tools for Bioengineers</a> 
+        <div class="sidebar-tools-main">
+    <a href="https://github.com/wcresko/BioE_Comp_Tools_Fa2026/tree/main/Book/" title="Source Code" class="quarto-navigation-tool px-1" aria-label="Source Code"><i class="bi bi-github"></i></a>
+  <a href="" class="quarto-color-scheme-toggle quarto-navigation-tool  px-1" onclick="window.quartoToggleColorScheme(); return false;" title="Toggle dark mode"><i class="bi"></i></a>
+</div>
+    </div>
+      </div>
+        <div class="mt-2 flex-shrink-0 align-items-center">
+        <div class="sidebar-search">
+        <div id="quarto-search" class="" title="Search"></div>
+        </div>
+        </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+<li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Preface</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/01-introduction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">Introduction to Computational Tools</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/02-your-toolkit.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">Your Computational Toolkit: Installing and Using Editors and IDEs</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/03-computing-at-uo.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Computing Resources at the University of Oregon</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/04-computer-systems.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Computer Systems Architecture</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/05-unix-fundamentals.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Unix Fundamentals</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/06-files-pipes.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Files, Pipes, and Redirection</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/07-grep-regex.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">GREP and Regular Expressions</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/08-shell-scripting.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">8</span>&nbsp; <span class="chapter-title">Shell Scripting</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/09-r-programming.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">9</span>&nbsp; <span class="chapter-title">R Programming Fundamentals</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/10-python-programming.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">10</span>&nbsp; <span class="chapter-title">Python Programming Fundamentals</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/11-tidy-data.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">11</span>&nbsp; <span class="chapter-title">Tidy Data Principles</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/12-data-visualization.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">12</span>&nbsp; <span class="chapter-title">Data Visualization with ggplot2</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/13-writing-functions.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">13</span>&nbsp; <span class="chapter-title">Writing Functions in R</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/14-parallel-computing.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">14</span>&nbsp; <span class="chapter-title">Parallel Computing in R</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/15-databases.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">15</span>&nbsp; <span class="chapter-title">Working with Databases</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/16-quarto-documents.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">16</span>&nbsp; <span class="chapter-title">Reproducible Documents with Quarto</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/17-latex-basics.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">17</span>&nbsp; <span class="chapter-title">LaTeX for Scientific Documents</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/18-ai-assisted-coding.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">18</span>&nbsp; <span class="chapter-title">Coding with AI Assistants</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/19-git-github.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">19</span>&nbsp; <span class="chapter-title">Version Control with Git and GitHub</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/20-hpc-talapas.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">20</span>&nbsp; <span class="chapter-title">High-Performance Computing with Talapas</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../references.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">References</span></a>
+  </div>
+</li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="false">
+ <span class="menu-text">Appendices</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="false" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 ">
+<li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/appendix-A-unix.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">A</span>&nbsp; <span class="chapter-title">Unix Command Reference</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/appendix-B-git.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">B</span>&nbsp; <span class="chapter-title">Git Command Reference</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/appendix-C-r.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">C</span>&nbsp; <span class="chapter-title">R Command Reference</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/appendix-D-python.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">D</span>&nbsp; <span class="chapter-title">Python Quick Reference</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/appendix-E-latex.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">E</span>&nbsp; <span class="chapter-title">LaTeX Command Reference</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/appendix-F-slurm.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">F</span>&nbsp; <span class="chapter-title">SLURM Command Reference</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/appendix-G-regex.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">G</span>&nbsp; <span class="chapter-title">Regular Expression Reference</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/appendix-H-shortcuts.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">H</span>&nbsp; <span class="chapter-title">Keyboard Shortcuts Reference</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/appendix-I-data-formats.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">I</span>&nbsp; <span class="chapter-title">Common Data Formats &amp; Public Repositories</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/appendix-J-glossary.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">J</span>&nbsp; <span class="chapter-title">Glossary</span></span></a>
+  </div>
+</li>
+      </ul>
+</li>
+    </ul>
+</div>
+</nav><div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active"><h2 id="toc-title">Table of contents</h2>
+   
+  <ul>
+<li><a href="#sec-pattern-matching" id="toc-sec-pattern-matching" class="nav-link active" data-scroll-target="#sec-pattern-matching"><span class="header-section-number">7.1</span> Introduction to Pattern Matching</a></li>
+  <li>
+<a href="#sec-basic-grep" id="toc-sec-basic-grep" class="nav-link" data-scroll-target="#sec-basic-grep"><span class="header-section-number">7.2</span> Basic GREP Usage</a>
+  <ul class="collapse">
+<li><a href="#sec-essential-grep-options" id="toc-sec-essential-grep-options" class="nav-link" data-scroll-target="#sec-essential-grep-options">Essential GREP Options</a></li>
+  <li><a href="#sec-grep-examples" id="toc-sec-grep-examples" class="nav-link" data-scroll-target="#sec-grep-examples">Examples</a></li>
+  </ul>
+</li>
+  <li>
+<a href="#sec-regex-intro" id="toc-sec-regex-intro" class="nav-link" data-scroll-target="#sec-regex-intro"><span class="header-section-number">7.3</span> Introduction to Regular Expressions</a>
+  <ul class="collapse">
+<li><a href="#sec-grep-metacharacters" id="toc-sec-grep-metacharacters" class="nav-link" data-scroll-target="#sec-grep-metacharacters">Metacharacters: Characters with Special Meaning</a></li>
+  <li><a href="#sec-grep-anchors" id="toc-sec-grep-anchors" class="nav-link" data-scroll-target="#sec-grep-anchors">Anchors: Position Matching</a></li>
+  <li><a href="#sec-character-classes" id="toc-sec-character-classes" class="nav-link" data-scroll-target="#sec-character-classes">Character Classes</a></li>
+  <li><a href="#sec-quantifiers" id="toc-sec-quantifiers" class="nav-link" data-scroll-target="#sec-quantifiers">Quantifiers</a></li>
+  </ul>
+</li>
+  <li>
+<a href="#sec-extended-regex" id="toc-sec-extended-regex" class="nav-link" data-scroll-target="#sec-extended-regex"><span class="header-section-number">7.4</span> Extended Regular Expressions</a>
+  <ul class="collapse">
+<li><a href="#sec-grep-alternation" id="toc-sec-grep-alternation" class="nav-link" data-scroll-target="#sec-grep-alternation">Alternation: Matching Multiple Patterns</a></li>
+  <li><a href="#sec-grouping" id="toc-sec-grouping" class="nav-link" data-scroll-target="#sec-grouping">Grouping</a></li>
+  <li><a href="#sec-grep-plus-quantifier" id="toc-sec-grep-plus-quantifier" class="nav-link" data-scroll-target="#sec-grep-plus-quantifier">The Plus Quantifier</a></li>
+  </ul>
+</li>
+  <li>
+<a href="#sec-regex-bioinformatics" id="toc-sec-regex-bioinformatics" class="nav-link" data-scroll-target="#sec-regex-bioinformatics"><span class="header-section-number">7.5</span> Practical Bioinformatics Examples</a>
+  <ul class="collapse">
+<li><a href="#sec-working-with-fasta-files" id="toc-sec-working-with-fasta-files" class="nav-link" data-scroll-target="#sec-working-with-fasta-files">Working with FASTA Files</a></li>
+  <li><a href="#sec-searching-for-biological-motifs" id="toc-sec-searching-for-biological-motifs" class="nav-link" data-scroll-target="#sec-searching-for-biological-motifs">Searching for Biological Motifs</a></li>
+  <li><a href="#sec-analyzing-gff-gtf-files" id="toc-sec-analyzing-gff-gtf-files" class="nav-link" data-scroll-target="#sec-analyzing-gff-gtf-files">Analyzing GFF/GTF Files</a></li>
+  <li><a href="#sec-log-file-analysis" id="toc-sec-log-file-analysis" class="nav-link" data-scroll-target="#sec-log-file-analysis">Log File Analysis</a></li>
+  </ul>
+</li>
+  <li>
+<a href="#sec-grep-pipes" id="toc-sec-grep-pipes" class="nav-link" data-scroll-target="#sec-grep-pipes"><span class="header-section-number">7.6</span> Combining GREP with Pipes</a>
+  <ul class="collapse">
+<li><a href="#sec-extracting-matching-regions" id="toc-sec-extracting-matching-regions" class="nav-link" data-scroll-target="#sec-extracting-matching-regions">Extracting Matching Regions</a></li>
+  <li><a href="#sec-context-searches" id="toc-sec-context-searches" class="nav-link" data-scroll-target="#sec-context-searches">Context Searches</a></li>
+  </ul>
+</li>
+  <li>
+<a href="#sec-genomic-processing" id="toc-sec-genomic-processing" class="nav-link" data-scroll-target="#sec-genomic-processing"><span class="header-section-number">7.7</span> Processing Genomic Data: A Complete Example</a>
+  <ul class="collapse">
+<li><a href="#sec-downloading-the-data" id="toc-sec-downloading-the-data" class="nav-link" data-scroll-target="#sec-downloading-the-data">Downloading the Data</a></li>
+  <li><a href="#sec-analyzing-sequence-content" id="toc-sec-analyzing-sequence-content" class="nav-link" data-scroll-target="#sec-analyzing-sequence-content">Analyzing Sequence Content</a></li>
+  <li><a href="#sec-finding-restriction-enzyme-sites" id="toc-sec-finding-restriction-enzyme-sites" class="nav-link" data-scroll-target="#sec-finding-restriction-enzyme-sites">Finding Restriction Enzyme Sites</a></li>
+  <li><a href="#sec-finding-simple-sequence-repeats" id="toc-sec-finding-simple-sequence-repeats" class="nav-link" data-scroll-target="#sec-finding-simple-sequence-repeats">Finding Simple Sequence Repeats</a></li>
+  <li><a href="#sec-stream-processing-large-files" id="toc-sec-stream-processing-large-files" class="nav-link" data-scroll-target="#sec-stream-processing-large-files">Stream Processing Large Files</a></li>
+  </ul>
+</li>
+  <li><a href="#sec-common-patterns" id="toc-sec-common-patterns" class="nav-link" data-scroll-target="#sec-common-patterns"><span class="header-section-number">7.8</span> Common Patterns Reference</a></li>
+  <li>
+<a href="#sec-sed" id="toc-sec-sed" class="nav-link" data-scroll-target="#sec-sed"><span class="header-section-number">7.9</span> Editing Text Streams with sed</a>
+  <ul class="collapse">
+<li><a href="#sec-sed-substitution" id="toc-sec-sed-substitution" class="nav-link" data-scroll-target="#sec-sed-substitution">Substitution: <code>s/old/new/</code></a></li>
+  <li><a href="#sec-printing-and-deleting-lines" id="toc-sec-printing-and-deleting-lines" class="nav-link" data-scroll-target="#sec-printing-and-deleting-lines">Printing and Deleting Lines</a></li>
+  <li><a href="#sec-capture-groups" id="toc-sec-capture-groups" class="nav-link" data-scroll-target="#sec-capture-groups">Capture Groups</a></li>
+  <li><a href="#sec-editing-files-in-place" id="toc-sec-editing-files-in-place" class="nav-link" data-scroll-target="#sec-editing-files-in-place">Editing Files in Place</a></li>
+  </ul>
+</li>
+  <li>
+<a href="#sec-awk" id="toc-sec-awk" class="nav-link" data-scroll-target="#sec-awk"><span class="header-section-number">7.10</span> Working with Columns: awk</a>
+  <ul class="collapse">
+<li><a href="#sec-awk-pattern-action" id="toc-sec-awk-pattern-action" class="nav-link" data-scroll-target="#sec-awk-pattern-action">The <code>pattern { action }</code> Model</a></li>
+  <li><a href="#sec-awk-delimiter" id="toc-sec-awk-delimiter" class="nav-link" data-scroll-target="#sec-awk-delimiter">Choosing the Delimiter</a></li>
+  <li><a href="#sec-awk-filtering" id="toc-sec-awk-filtering" class="nav-link" data-scroll-target="#sec-awk-filtering">Skipping Headers and Filtering Rows</a></li>
+  <li><a href="#sec-awk-end" id="toc-sec-awk-end" class="nav-link" data-scroll-target="#sec-awk-end">Computing Sums and Means with <code>END</code></a></li>
+  <li><a href="#sec-awk-ofs" id="toc-sec-awk-ofs" class="nav-link" data-scroll-target="#sec-awk-ofs">Controlling Output: <code>OFS</code></a></li>
+  <li><a href="#sec-awk-mean-per-treatment" id="toc-sec-awk-mean-per-treatment" class="nav-link" data-scroll-target="#sec-awk-mean-per-treatment">A Bioengineering Example: Mean per Treatment</a></li>
+  <li><a href="#sec-grep-choosing-the-right-tool" id="toc-sec-grep-choosing-the-right-tool" class="nav-link" data-scroll-target="#sec-grep-choosing-the-right-tool">Choosing the Right Tool</a></li>
+  <li><a href="#sec-text-tools-together" id="toc-sec-text-tools-together" class="nav-link" data-scroll-target="#sec-text-tools-together">Putting It Together</a></li>
+  </ul>
+</li>
+  <li><a href="#sec-regex-summary" id="toc-sec-regex-summary" class="nav-link" data-scroll-target="#sec-regex-summary"><span class="header-section-number">7.11</span> Summary</a></li>
+  <li><a href="#sec-grep-additional-reading" id="toc-sec-grep-additional-reading" class="nav-link" data-scroll-target="#sec-grep-additional-reading">Additional Reading</a></li>
+  <li><a href="#sec-grep-exercises" id="toc-sec-grep-exercises" class="nav-link" data-scroll-target="#sec-grep-exercises">Exercises</a></li>
+  </ul><div class="toc-actions"><ul><li><a href="https://github.com/wcresko/BioE_Comp_Tools_Fa2026/edit/main/Book/chapters/07-grep-regex.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li><li><a href="https://github.com/wcresko/BioE_Comp_Tools_Fa2026/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content"><header id="title-block-header" class="quarto-title-block default"><div class="quarto-title">
+<h1 class="title"><span id="sec-grep-regex" class="quarto-section-identifier"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">GREP and Regular Expressions</span></span></h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header><div class="callout callout-style-default callout-note callout-titled" title="Learning Objectives">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>Learning Objectives
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>After completing this chapter, you will be able to:</p>
+<ul>
+<li>Use <code>grep</code> to search for patterns in files and data streams</li>
+<li>Construct regular expressions to match complex patterns</li>
+<li>Apply extended regular expressions for advanced pattern matching</li>
+<li>Combine <code>grep</code> with other Unix tools for sophisticated text processing</li>
+<li>Search genomic data for biological patterns like restriction sites and motifs</li>
+<li>Edit text streams with <code>sed</code> and filter, reformat, and summarize columns with <code>awk</code>
+</li>
+</ul>
+</div>
+</div>
+<section id="sec-pattern-matching" class="level2" data-number="7.1"><h2 data-number="7.1" class="anchored" data-anchor-id="sec-pattern-matching">
+<span class="header-section-number">7.1</span> Introduction to Pattern Matching</h2>
+<p>While the tools in <a href="06-files-pipes.html" class="quarto-xref"><span>Chapter 6</span></a> can filter and transform data, they work on whole lines or fixed positions. <strong>Pattern matching</strong> lets you search based on the <em>content</em> of text—finding lines that contain specific sequences of characters.</p>
+<p><strong>GREP</strong> (<strong>G</strong>lobal <strong>R</strong>egular <strong>E</strong>xpression <strong>P</strong>rint) is the Unix standard for pattern matching. Originally developed for the ed text editor in the 1970s, <code>grep</code> remains essential for bioinformatics, log analysis, and text processing.</p>
+</section><section id="sec-basic-grep" class="level2" data-number="7.2"><h2 data-number="7.2" class="anchored" data-anchor-id="sec-basic-grep">
+<span class="header-section-number">7.2</span> Basic GREP Usage</h2>
+<p>At its simplest, <code>grep</code> finds lines containing a specific string:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1"></a><span class="co"># Find lines containing "error"</span></span>
+<span id="cb1-2"><a href="#cb1-2"></a><span class="ex">$</span> grep <span class="st">"error"</span> logfile.txt</span>
+<span id="cb1-3"><a href="#cb1-3"></a></span>
+<span id="cb1-4"><a href="#cb1-4"></a><span class="co"># Search multiple files</span></span>
+<span id="cb1-5"><a href="#cb1-5"></a><span class="ex">$</span> grep <span class="st">"mutation"</span> <span class="pp">*</span>.txt</span>
+<span id="cb1-6"><a href="#cb1-6"></a></span>
+<span id="cb1-7"><a href="#cb1-7"></a><span class="co"># Search recursively in directories</span></span>
+<span id="cb1-8"><a href="#cb1-8"></a><span class="ex">$</span> grep <span class="at">-r</span> <span class="st">"BRCA1"</span> data/</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<section id="sec-essential-grep-options" class="level3"><h3 class="anchored" data-anchor-id="sec-essential-grep-options">Essential GREP Options</h3>
+<div id="tbl-grep-options" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure"><figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-grep-options-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;7.1: Common <code>grep</code> options
+</figcaption><div aria-describedby="tbl-grep-options-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<table class="caption-top table">
+<thead><tr class="header">
+<th style="text-align: left;">Option</th>
+<th style="text-align: left;">Description</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;"><code>-i</code></td>
+<td style="text-align: left;">Case-insensitive search</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><code>-v</code></td>
+<td style="text-align: left;">Invert match (lines NOT containing pattern)</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><code>-c</code></td>
+<td style="text-align: left;">Count matching lines</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><code>-n</code></td>
+<td style="text-align: left;">Show line numbers</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><code>-l</code></td>
+<td style="text-align: left;">List only filenames with matches</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><code>-o</code></td>
+<td style="text-align: left;">Print only the matched part</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><code>-w</code></td>
+<td style="text-align: left;">Match whole words only</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><code>-A n</code></td>
+<td style="text-align: left;">Show n lines after match</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><code>-B n</code></td>
+<td style="text-align: left;">Show n lines before match</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><code>-C n</code></td>
+<td style="text-align: left;">Show n lines before and after match</td>
+</tr>
+</tbody>
+</table>
+</div>
+</figure>
+</div>
+</section><section id="sec-grep-examples" class="level3"><h3 class="anchored" data-anchor-id="sec-grep-examples">Examples</h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1"></a><span class="co"># Case-insensitive search</span></span>
+<span id="cb2-2"><a href="#cb2-2"></a><span class="ex">$</span> grep <span class="at">-i</span> <span class="st">"gene"</span> annotations.txt</span>
+<span id="cb2-3"><a href="#cb2-3"></a></span>
+<span id="cb2-4"><a href="#cb2-4"></a><span class="co"># Count matches (not lines, just the count)</span></span>
+<span id="cb2-5"><a href="#cb2-5"></a><span class="ex">$</span> grep <span class="at">-c</span> <span class="st">"&gt;"</span> sequences.fasta</span>
+<span id="cb2-6"><a href="#cb2-6"></a></span>
+<span id="cb2-7"><a href="#cb2-7"></a><span class="co"># Show line numbers</span></span>
+<span id="cb2-8"><a href="#cb2-8"></a><span class="ex">$</span> grep <span class="at">-n</span> <span class="st">"ERROR"</span> application.log</span>
+<span id="cb2-9"><a href="#cb2-9"></a></span>
+<span id="cb2-10"><a href="#cb2-10"></a><span class="co"># Find files containing pattern</span></span>
+<span id="cb2-11"><a href="#cb2-11"></a><span class="ex">$</span> grep <span class="at">-l</span> <span class="st">"experimental"</span> <span class="pp">*</span>.md</span>
+<span id="cb2-12"><a href="#cb2-12"></a></span>
+<span id="cb2-13"><a href="#cb2-13"></a><span class="co"># Remove comment lines (inverted match)</span></span>
+<span id="cb2-14"><a href="#cb2-14"></a><span class="ex">$</span> grep <span class="at">-v</span> <span class="st">"^#"</span> config.txt</span>
+<span id="cb2-15"><a href="#cb2-15"></a></span>
+<span id="cb2-16"><a href="#cb2-16"></a><span class="co"># Show context around matches</span></span>
+<span id="cb2-17"><a href="#cb2-17"></a><span class="ex">$</span> grep <span class="at">-C</span> 2 <span class="st">"significant"</span> results.txt</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section></section><section id="sec-regex-intro" class="level2" data-number="7.3"><h2 data-number="7.3" class="anchored" data-anchor-id="sec-regex-intro">
+<span class="header-section-number">7.3</span> Introduction to Regular Expressions</h2>
+<p>So far we’ve searched for literal text. <strong>Regular expressions</strong> (regex) let you describe patterns that match multiple strings <span class="citation" data-cites="friedl2006regex">(<a href="../references.html#ref-friedl2006regex" role="doc-biblioref">Friedl, 2006</a>)</span>. A condensed syntax reference is in <a href="appendix-G-regex.html" class="quarto-xref"><span>Appendix G</span></a>, and the same patterns work in R (<code>stringr</code>) and Python (<code>re</code>).</p>
+<p>For example, the pattern <code>[ACGT]+</code> matches any sequence of DNA bases, while <code>colou?r</code> matches both “color” and “colour”.</p>
+<section id="sec-grep-metacharacters" class="level3"><h3 class="anchored" data-anchor-id="sec-grep-metacharacters">Metacharacters: Characters with Special Meaning</h3>
+<p>Regular expressions use certain characters as pattern-building blocks (<a href="#tbl-regex-basic" class="quarto-xref">Table&nbsp;<span>7.2</span></a>):</p>
+<div id="tbl-regex-basic" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure"><figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-regex-basic-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;7.2: Basic regular expression metacharacters
+</figcaption><div aria-describedby="tbl-regex-basic-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<table class="caption-top table">
+<thead><tr class="header">
+<th style="text-align: left;">Character</th>
+<th style="text-align: left;">Meaning</th>
+<th style="text-align: left;">Example</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;"><code>.</code></td>
+<td style="text-align: left;">Any single character</td>
+<td style="text-align: left;">
+<code>a.c</code> matches “abc”, “a1c”, “a-c”</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><code>*</code></td>
+<td style="text-align: left;">Zero or more of preceding</td>
+<td style="text-align: left;">
+<code>ab*c</code> matches “ac”, “abc”, “abbc”</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><code>^</code></td>
+<td style="text-align: left;">Start of line</td>
+<td style="text-align: left;">
+<code>^Hello</code> matches lines starting with “Hello”</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><code>$</code></td>
+<td style="text-align: left;">End of line</td>
+<td style="text-align: left;">
+<code>end$</code> matches lines ending with “end”</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><code>[]</code></td>
+<td style="text-align: left;">Character class</td>
+<td style="text-align: left;">
+<code>[aeiou]</code> matches any vowel</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><code>[^]</code></td>
+<td style="text-align: left;">Negated class</td>
+<td style="text-align: left;">
+<code>[^0-9]</code> matches non-digits</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><code>\</code></td>
+<td style="text-align: left;">Escape special characters</td>
+<td style="text-align: left;">
+<code>\.</code> matches literal period</td>
+</tr>
+</tbody>
+</table>
+</div>
+</figure>
+</div>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Note
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>The <code>*</code> in regular expressions is different from the <code>*</code> wildcard in the shell. In regex, <code>*</code> means “zero or more of the preceding character.” In shell globbing, <code>*</code> means “any characters.”</p>
+</div>
+</div>
+</section><section id="sec-grep-anchors" class="level3"><h3 class="anchored" data-anchor-id="sec-grep-anchors">Anchors: Position Matching</h3>
+<p>Anchors don’t match characters—they match positions:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb3"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1"></a><span class="co"># Lines starting with "Chr"</span></span>
+<span id="cb3-2"><a href="#cb3-2"></a><span class="ex">$</span> grep <span class="st">"^Chr"</span> genome.gff</span>
+<span id="cb3-3"><a href="#cb3-3"></a></span>
+<span id="cb3-4"><a href="#cb3-4"></a><span class="co"># Lines ending with "protein"</span></span>
+<span id="cb3-5"><a href="#cb3-5"></a><span class="ex">$</span> grep <span class="st">"protein$"</span> annotations.txt</span>
+<span id="cb3-6"><a href="#cb3-6"></a></span>
+<span id="cb3-7"><a href="#cb3-7"></a><span class="co"># Empty lines</span></span>
+<span id="cb3-8"><a href="#cb3-8"></a><span class="ex">$</span> grep <span class="st">"^$"</span> file.txt</span>
+<span id="cb3-9"><a href="#cb3-9"></a></span>
+<span id="cb3-10"><a href="#cb3-10"></a><span class="co"># Lines with exactly "gene"</span></span>
+<span id="cb3-11"><a href="#cb3-11"></a><span class="ex">$</span> grep <span class="st">"^gene$"</span> list.txt</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section><section id="sec-character-classes" class="level3"><h3 class="anchored" data-anchor-id="sec-character-classes">Character Classes</h3>
+<p>Character classes match any single character from a set:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb4"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1"></a><span class="co"># Match any vowel</span></span>
+<span id="cb4-2"><a href="#cb4-2"></a><span class="ex">$</span> grep <span class="st">"[aeiou]"</span> words.txt</span>
+<span id="cb4-3"><a href="#cb4-3"></a></span>
+<span id="cb4-4"><a href="#cb4-4"></a><span class="co"># Match any digit</span></span>
+<span id="cb4-5"><a href="#cb4-5"></a><span class="ex">$</span> grep <span class="st">"[0-9]"</span> data.txt</span>
+<span id="cb4-6"><a href="#cb4-6"></a></span>
+<span id="cb4-7"><a href="#cb4-7"></a><span class="co"># Match any uppercase letter</span></span>
+<span id="cb4-8"><a href="#cb4-8"></a><span class="ex">$</span> grep <span class="st">"[A-Z]"</span> text.txt</span>
+<span id="cb4-9"><a href="#cb4-9"></a></span>
+<span id="cb4-10"><a href="#cb4-10"></a><span class="co"># Match DNA bases</span></span>
+<span id="cb4-11"><a href="#cb4-11"></a><span class="ex">$</span> grep <span class="st">"[ACGT]"</span> sequence.txt</span>
+<span id="cb4-12"><a href="#cb4-12"></a></span>
+<span id="cb4-13"><a href="#cb4-13"></a><span class="co"># Match non-DNA characters (errors in sequence)</span></span>
+<span id="cb4-14"><a href="#cb4-14"></a><span class="ex">$</span> grep <span class="st">"[^ACGTN]"</span> sequence.txt</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p><strong>Predefined character classes:</strong></p>
+<ul>
+<li>
+<code>[[:alpha:]]</code> — letters</li>
+<li>
+<code>[[:digit:]]</code> — digits (same as <code>[0-9]</code>)</li>
+<li>
+<code>[[:alnum:]]</code> — letters and digits</li>
+<li>
+<code>[[:space:]]</code> — whitespace</li>
+<li>
+<code>[[:upper:]]</code> — uppercase letters</li>
+<li>
+<code>[[:lower:]]</code> — lowercase letters</li>
+</ul></section><section id="sec-quantifiers" class="level3"><h3 class="anchored" data-anchor-id="sec-quantifiers">Quantifiers</h3>
+<p>Quantifiers specify how many times a pattern should repeat:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb5"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1"></a><span class="co"># Match "color" or "colour" (zero or one 'u')</span></span>
+<span id="cb5-2"><a href="#cb5-2"></a><span class="ex">$</span> grep <span class="st">"colou\?r"</span> text.txt</span>
+<span id="cb5-3"><a href="#cb5-3"></a></span>
+<span id="cb5-4"><a href="#cb5-4"></a><span class="co"># Three consecutive A's</span></span>
+<span id="cb5-5"><a href="#cb5-5"></a><span class="ex">$</span> grep <span class="st">"A\{3\}"</span> sequence.txt</span>
+<span id="cb5-6"><a href="#cb5-6"></a></span>
+<span id="cb5-7"><a href="#cb5-7"></a><span class="co"># Two to four T's</span></span>
+<span id="cb5-8"><a href="#cb5-8"></a><span class="ex">$</span> grep <span class="st">"T\{2,4\}"</span> sequence.txt</span>
+<span id="cb5-9"><a href="#cb5-9"></a></span>
+<span id="cb5-10"><a href="#cb5-10"></a><span class="co"># At least three G's</span></span>
+<span id="cb5-11"><a href="#cb5-11"></a><span class="ex">$</span> grep <span class="st">"G\{3,\}"</span> sequence.txt</span>
+<span id="cb5-12"><a href="#cb5-12"></a></span>
+<span id="cb5-13"><a href="#cb5-13"></a><span class="co"># G followed by zero or more C's: matches "G", "GC", "GCC", ...</span></span>
+<span id="cb5-14"><a href="#cb5-14"></a><span class="ex">$</span> grep <span class="st">"GC*"</span> sequence.txt</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Read the last example carefully: a quantifier applies only to the single character (or group) immediately before it. <code>GC*</code> does <em>not</em> mean “GC repeated”; it means “one G, then any number of C’s,” so it matches every line containing a G. To repeat the pair, group it: <code>\(GC\)*</code> in basic regex, or <code>(GC)*</code> with <code>-E</code>.</p>
+<div class="callout callout-style-default callout-warning callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Warning
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>In basic <code>grep</code>, quantifiers like <code>?</code>, <code>+</code>, and <code><a href="https://rdrr.io/r/base/Paren.html">{}</a></code> must be escaped with <code>\</code>. Use <code>grep -E</code> or <code>egrep</code> to avoid escaping.</p>
+</div>
+</div>
+</section></section><section id="sec-extended-regex" class="level2" data-number="7.4"><h2 data-number="7.4" class="anchored" data-anchor-id="sec-extended-regex">
+<span class="header-section-number">7.4</span> Extended Regular Expressions</h2>
+<p>Extended regular expressions (ERE) add more metacharacters (<a href="#tbl-regex-extended" class="quarto-xref">Table&nbsp;<span>7.3</span></a>) and don’t require escaping common quantifiers. Use <code>grep -E</code> or <code>egrep</code>:</p>
+<div id="tbl-regex-extended" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure"><figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-regex-extended-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;7.3: Extended regular expression metacharacters
+</figcaption><div aria-describedby="tbl-regex-extended-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<table class="caption-top table">
+<thead><tr class="header">
+<th style="text-align: left;">Character</th>
+<th style="text-align: left;">Meaning</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;"><code>+</code></td>
+<td style="text-align: left;">One or more of preceding</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><code>?</code></td>
+<td style="text-align: left;">Zero or one of preceding</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><code>{n}</code></td>
+<td style="text-align: left;">Exactly n of preceding</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><code>{n,m}</code></td>
+<td style="text-align: left;">Between n and m of preceding</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><code>\|</code></td>
+<td style="text-align: left;">Alternation (OR)</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><code>()</code></td>
+<td style="text-align: left;">Grouping</td>
+</tr>
+</tbody>
+</table>
+</div>
+</figure>
+</div>
+<section id="sec-grep-alternation" class="level3"><h3 class="anchored" data-anchor-id="sec-grep-alternation">Alternation: Matching Multiple Patterns</h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb6"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb6-1"><a href="#cb6-1"></a><span class="co"># Match "start" OR "stop" OR "pause"</span></span>
+<span id="cb6-2"><a href="#cb6-2"></a><span class="ex">$</span> grep <span class="at">-E</span> <span class="st">"start|stop|pause"</span> commands.txt</span>
+<span id="cb6-3"><a href="#cb6-3"></a></span>
+<span id="cb6-4"><a href="#cb6-4"></a><span class="co"># Match any start codon</span></span>
+<span id="cb6-5"><a href="#cb6-5"></a><span class="ex">$</span> grep <span class="at">-E</span> <span class="st">"ATG|GTG|TTG"</span> sequences.fa</span>
+<span id="cb6-6"><a href="#cb6-6"></a></span>
+<span id="cb6-7"><a href="#cb6-7"></a><span class="co"># Match file extensions</span></span>
+<span id="cb6-8"><a href="#cb6-8"></a><span class="ex">$</span> grep <span class="at">-E</span> <span class="st">"\.(txt|csv|tsv)$"</span> filelist.txt</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section><section id="sec-grouping" class="level3"><h3 class="anchored" data-anchor-id="sec-grouping">Grouping</h3>
+<p>Parentheses group patterns together:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb7"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb7-1"><a href="#cb7-1"></a><span class="co"># Match "gray" or "grey"</span></span>
+<span id="cb7-2"><a href="#cb7-2"></a><span class="ex">$</span> grep <span class="at">-E</span> <span class="st">"gr(a|e)y"</span> text.txt</span>
+<span id="cb7-3"><a href="#cb7-3"></a></span>
+<span id="cb7-4"><a href="#cb7-4"></a><span class="co"># Match "ab", "abab", "ababab", etc.</span></span>
+<span id="cb7-5"><a href="#cb7-5"></a><span class="ex">$</span> grep <span class="at">-E</span> <span class="st">"(ab)+"</span> data.txt</span>
+<span id="cb7-6"><a href="#cb7-6"></a></span>
+<span id="cb7-7"><a href="#cb7-7"></a><span class="co"># Match repeated dinucleotide</span></span>
+<span id="cb7-8"><a href="#cb7-8"></a><span class="ex">$</span> grep <span class="at">-E</span> <span class="st">"(AT){3,}"</span> sequence.txt</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section><section id="sec-grep-plus-quantifier" class="level3"><h3 class="anchored" data-anchor-id="sec-grep-plus-quantifier">The Plus Quantifier</h3>
+<p>Unlike <code>*</code> (zero or more), <code>+</code> requires at least one match:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb8"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb8-1"><a href="#cb8-1"></a><span class="co"># One or more A's followed by one or more T's</span></span>
+<span id="cb8-2"><a href="#cb8-2"></a><span class="ex">$</span> grep <span class="at">-E</span> <span class="st">"A+T+"</span> sequence.txt</span>
+<span id="cb8-3"><a href="#cb8-3"></a></span>
+<span id="cb8-4"><a href="#cb8-4"></a><span class="co"># One or more digits</span></span>
+<span id="cb8-5"><a href="#cb8-5"></a><span class="ex">$</span> grep <span class="at">-E</span> <span class="st">"[0-9]+"</span> data.txt</span>
+<span id="cb8-6"><a href="#cb8-6"></a></span>
+<span id="cb8-7"><a href="#cb8-7"></a><span class="co"># Runs of at least 20 DNA bases (e.g. primer sequences)</span></span>
+<span id="cb8-8"><a href="#cb8-8"></a><span class="ex">$</span> grep <span class="at">-E</span> <span class="st">"[ACGT]{20,}"</span> primers.txt</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section></section><section id="sec-regex-bioinformatics" class="level2" data-number="7.5"><h2 data-number="7.5" class="anchored" data-anchor-id="sec-regex-bioinformatics">
+<span class="header-section-number">7.5</span> Practical Bioinformatics Examples</h2>
+<section id="sec-working-with-fasta-files" class="level3"><h3 class="anchored" data-anchor-id="sec-working-with-fasta-files">Working with FASTA Files</h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb9"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb9-1"><a href="#cb9-1"></a><span class="co"># Count sequences (lines starting with &gt;)</span></span>
+<span id="cb9-2"><a href="#cb9-2"></a><span class="ex">$</span> grep <span class="at">-c</span> <span class="st">"^&gt;"</span> sequences.fa</span>
+<span id="cb9-3"><a href="#cb9-3"></a></span>
+<span id="cb9-4"><a href="#cb9-4"></a><span class="co"># Extract all headers</span></span>
+<span id="cb9-5"><a href="#cb9-5"></a><span class="ex">$</span> grep <span class="st">"^&gt;"</span> sequences.fa</span>
+<span id="cb9-6"><a href="#cb9-6"></a></span>
+<span id="cb9-7"><a href="#cb9-7"></a><span class="co"># Find specific gene headers</span></span>
+<span id="cb9-8"><a href="#cb9-8"></a><span class="ex">$</span> grep <span class="at">-i</span> <span class="st">"kinase"</span> sequences.fa</span>
+<span id="cb9-9"><a href="#cb9-9"></a></span>
+<span id="cb9-10"><a href="#cb9-10"></a><span class="co"># Find sequences by organism</span></span>
+<span id="cb9-11"><a href="#cb9-11"></a><span class="ex">$</span> grep <span class="at">-E</span> <span class="st">"^&gt;.*Homo sapiens"</span> proteins.fa</span>
+<span id="cb9-12"><a href="#cb9-12"></a></span>
+<span id="cb9-13"><a href="#cb9-13"></a><span class="co"># UniProt headers look like "&gt;sp|P69905|HBA_HUMAN ..."; match the</span></span>
+<span id="cb9-14"><a href="#cb9-14"></a><span class="co"># accession field (the | is a literal pipe, so it must be escaped)</span></span>
+<span id="cb9-15"><a href="#cb9-15"></a><span class="ex">$</span> grep <span class="at">-E</span> <span class="st">"^&gt;sp\|[A-Z0-9]+\|"</span> uniprot.fasta</span>
+<span id="cb9-16"><a href="#cb9-16"></a></span>
+<span id="cb9-17"><a href="#cb9-17"></a><span class="co"># Sequences with no stop codon anywhere on the line</span></span>
+<span id="cb9-18"><a href="#cb9-18"></a><span class="ex">$</span> grep <span class="at">-v</span> <span class="at">-E</span> <span class="st">"TAA|TAG|TGA"</span> orfs.txt</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section><section id="sec-searching-for-biological-motifs" class="level3"><h3 class="anchored" data-anchor-id="sec-searching-for-biological-motifs">Searching for Biological Motifs</h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb10"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb10-1"><a href="#cb10-1"></a><span class="co"># Find restriction enzyme sites</span></span>
+<span id="cb10-2"><a href="#cb10-2"></a><span class="ex">$</span> grep <span class="at">-E</span> <span class="st">"GAATTC"</span> genome.fa         <span class="co"># EcoRI</span></span>
+<span id="cb10-3"><a href="#cb10-3"></a><span class="ex">$</span> grep <span class="at">-E</span> <span class="st">"GGATCC"</span> genome.fa         <span class="co"># BamHI</span></span>
+<span id="cb10-4"><a href="#cb10-4"></a><span class="ex">$</span> grep <span class="at">-E</span> <span class="st">"G[ACGT]A[ACGT]TC"</span> genome.fa    <span class="co"># Degenerate site (N = any base)</span></span>
+<span id="cb10-5"><a href="#cb10-5"></a></span>
+<span id="cb10-6"><a href="#cb10-6"></a><span class="co"># Find potential ORFs (start followed by codons, then the first stop)</span></span>
+<span id="cb10-7"><a href="#cb10-7"></a><span class="ex">$</span> grep <span class="at">-oP</span> <span class="st">"ATG([ACGT]{3})*?(TAA|TAG|TGA)"</span> cds.fa</span>
+<span id="cb10-8"><a href="#cb10-8"></a></span>
+<span id="cb10-9"><a href="#cb10-9"></a><span class="co"># Find poly-A tails</span></span>
+<span id="cb10-10"><a href="#cb10-10"></a><span class="ex">$</span> grep <span class="at">-E</span> <span class="st">"A{10,}"</span> transcripts.fa</span>
+<span id="cb10-11"><a href="#cb10-11"></a></span>
+<span id="cb10-12"><a href="#cb10-12"></a><span class="co"># Find microsatellites (dinucleotide repeats)</span></span>
+<span id="cb10-13"><a href="#cb10-13"></a><span class="ex">$</span> grep <span class="at">-E</span> <span class="st">"(AT){5,}"</span> genome.fa</span>
+<span id="cb10-14"><a href="#cb10-14"></a><span class="ex">$</span> grep <span class="at">-E</span> <span class="st">"(CA){5,}"</span> genome.fa</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="callout callout-style-default callout-note callout-titled" title="Lazy quantifiers need Perl regex">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>Lazy quantifiers need Perl regex
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Notice the <code>*?</code> in the ORF pattern. A plain <code>*</code> is <em>greedy</em>—it grabs as many codons as it can, so <code>ATG([ACGT]{3})*(TAA|TAG|TGA)</code> would run all the way to the <em>last</em> stop codon on the line. Adding <code>?</code> makes the quantifier <em>lazy</em>, stopping at the <em>first</em> in-frame stop codon. Lazy quantifiers are not part of extended regular expressions (<code>-E</code>); they require Perl-compatible regex, which <code>grep -P</code> provides on GNU grep (Linux, WSL, Talapas). The BSD <code>grep</code> that ships with macOS lacks <code>-P</code>; there, install GNU grep with Homebrew (<code>brew install grep</code>, then use <code>ggrep</code>) or drop the <code>?</code> and accept greedy matching. Also note that <code>N</code> is not a regex wildcard—write <code>[ACGT]</code> for “any base.”</p>
+</div>
+</div>
+</section><section id="sec-analyzing-gff-gtf-files" class="level3"><h3 class="anchored" data-anchor-id="sec-analyzing-gff-gtf-files">Analyzing GFF/GTF Files</h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb11"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb11-1"><a href="#cb11-1"></a><span class="co"># Find all genes</span></span>
+<span id="cb11-2"><a href="#cb11-2"></a><span class="ex">$</span> grep <span class="at">-P</span> <span class="st">"\tgene\t"</span> annotations.gff</span>
+<span id="cb11-3"><a href="#cb11-3"></a></span>
+<span id="cb11-4"><a href="#cb11-4"></a><span class="co"># Find genes on chromosome 1</span></span>
+<span id="cb11-5"><a href="#cb11-5"></a><span class="ex">$</span> grep <span class="st">"^chr1"</span> genes.gff <span class="kw">|</span> <span class="fu">grep</span> <span class="at">-P</span> <span class="st">"\tgene\t"</span></span>
+<span id="cb11-6"><a href="#cb11-6"></a></span>
+<span id="cb11-7"><a href="#cb11-7"></a><span class="co"># Extract gene IDs</span></span>
+<span id="cb11-8"><a href="#cb11-8"></a><span class="ex">$</span> grep <span class="at">-oE</span> <span class="st">"gene_id </span><span class="dt">\"</span><span class="st">[^</span><span class="dt">\"</span><span class="st">]+</span><span class="dt">\"</span><span class="st">"</span> annotations.gtf</span>
+<span id="cb11-9"><a href="#cb11-9"></a></span>
+<span id="cb11-10"><a href="#cb11-10"></a><span class="co"># Find protein-coding genes</span></span>
+<span id="cb11-11"><a href="#cb11-11"></a><span class="ex">$</span> grep <span class="st">"protein_coding"</span> annotations.gtf</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section><section id="sec-log-file-analysis" class="level3"><h3 class="anchored" data-anchor-id="sec-log-file-analysis">Log File Analysis</h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb12"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb12-1"><a href="#cb12-1"></a><span class="co"># Find errors in logs</span></span>
+<span id="cb12-2"><a href="#cb12-2"></a><span class="ex">$</span> grep <span class="at">-i</span> <span class="st">"error"</span> application.log</span>
+<span id="cb12-3"><a href="#cb12-3"></a></span>
+<span id="cb12-4"><a href="#cb12-4"></a><span class="co"># Find specific error codes</span></span>
+<span id="cb12-5"><a href="#cb12-5"></a><span class="ex">$</span> grep <span class="at">-E</span> <span class="st">"error\s*[0-9]{3}"</span> application.log</span>
+<span id="cb12-6"><a href="#cb12-6"></a></span>
+<span id="cb12-7"><a href="#cb12-7"></a><span class="co"># Extract timestamps of errors</span></span>
+<span id="cb12-8"><a href="#cb12-8"></a><span class="ex">$</span> grep <span class="at">-E</span> <span class="st">"^[0-9]{4}-[0-9]{2}-[0-9]{2}.*error"</span> log.txt</span>
+<span id="cb12-9"><a href="#cb12-9"></a></span>
+<span id="cb12-10"><a href="#cb12-10"></a><span class="co"># Count errors per type</span></span>
+<span id="cb12-11"><a href="#cb12-11"></a><span class="ex">$</span> grep <span class="at">-oE</span> <span class="st">"ERROR: [A-Za-z]+"</span> log.txt <span class="kw">|</span> <span class="fu">sort</span> <span class="kw">|</span> <span class="fu">uniq</span> <span class="at">-c</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section></section><section id="sec-grep-pipes" class="level2" data-number="7.6"><h2 data-number="7.6" class="anchored" data-anchor-id="sec-grep-pipes">
+<span class="header-section-number">7.6</span> Combining GREP with Pipes</h2>
+<p>The real power of <code>grep</code> emerges when combined with other tools through pipes (<a href="06-files-pipes.html" class="quarto-xref"><span>Chapter 6</span></a>):</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb13"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb13-1"><a href="#cb13-1"></a><span class="co"># Count unique patterns</span></span>
+<span id="cb13-2"><a href="#cb13-2"></a><span class="ex">$</span> grep <span class="st">"^&gt;"</span> sequences.fa <span class="kw">|</span> <span class="fu">sort</span> <span class="kw">|</span> <span class="fu">uniq</span> <span class="kw">|</span> <span class="fu">wc</span> <span class="at">-l</span></span>
+<span id="cb13-3"><a href="#cb13-3"></a></span>
+<span id="cb13-4"><a href="#cb13-4"></a><span class="co"># Extract sequence names without &gt; symbol</span></span>
+<span id="cb13-5"><a href="#cb13-5"></a><span class="ex">$</span> grep <span class="st">"^&gt;"</span> sequences.fa <span class="kw">|</span> <span class="fu">cut</span> <span class="at">-c2-</span></span>
+<span id="cb13-6"><a href="#cb13-6"></a></span>
+<span id="cb13-7"><a href="#cb13-7"></a><span class="co"># Find headers, then get organism names</span></span>
+<span id="cb13-8"><a href="#cb13-8"></a><span class="ex">$</span> grep <span class="st">"^&gt;"</span> proteins.fa <span class="kw">|</span> <span class="fu">grep</span> <span class="at">-oE</span> <span class="st">"\[.*\]"</span> <span class="kw">|</span> <span class="fu">sort</span> <span class="kw">|</span> <span class="fu">uniq</span> <span class="at">-c</span> <span class="kw">|</span> <span class="fu">sort</span> <span class="at">-rn</span></span>
+<span id="cb13-9"><a href="#cb13-9"></a></span>
+<span id="cb13-10"><a href="#cb13-10"></a><span class="co"># Process FASTA: count bases per sequence</span></span>
+<span id="cb13-11"><a href="#cb13-11"></a><span class="ex">$</span> grep <span class="at">-v</span> <span class="st">"^&gt;"</span> sequence.fa <span class="kw">|</span> <span class="cf">while</span> <span class="bu">read</span> <span class="va">line</span><span class="kw">;</span> <span class="cf">do</span></span>
+<span id="cb13-12"><a href="#cb13-12"></a>    <span class="bu">echo</span> <span class="st">"</span><span class="va">$line</span><span class="st">"</span> <span class="kw">|</span> <span class="fu">wc</span> <span class="at">-c</span></span>
+<span id="cb13-13"><a href="#cb13-13"></a>  <span class="cf">done</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<section id="sec-extracting-matching-regions" class="level3"><h3 class="anchored" data-anchor-id="sec-extracting-matching-regions">Extracting Matching Regions</h3>
+<p>The <code>-o</code> flag prints only the matched portion:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb14"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb14-1"><a href="#cb14-1"></a><span class="co"># Extract all email addresses</span></span>
+<span id="cb14-2"><a href="#cb14-2"></a><span class="ex">$</span> grep <span class="at">-oE</span> <span class="st">"[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}"</span> contacts.txt</span>
+<span id="cb14-3"><a href="#cb14-3"></a></span>
+<span id="cb14-4"><a href="#cb14-4"></a><span class="co"># Extract all URLs</span></span>
+<span id="cb14-5"><a href="#cb14-5"></a><span class="ex">$</span> grep <span class="at">-oE</span> <span class="st">"https?://[a-zA-Z0-9./?=_-]+"</span> webpage.html</span>
+<span id="cb14-6"><a href="#cb14-6"></a></span>
+<span id="cb14-7"><a href="#cb14-7"></a><span class="co"># Extract gene names from headers</span></span>
+<span id="cb14-8"><a href="#cb14-8"></a><span class="ex">$</span> grep <span class="st">"^&gt;"</span> genes.fa <span class="kw">|</span> <span class="fu">grep</span> <span class="at">-oE</span> <span class="st">"gene=[^;]+"</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section><section id="sec-context-searches" class="level3"><h3 class="anchored" data-anchor-id="sec-context-searches">Context Searches</h3>
+<p>When you need to see what surrounds a match:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb15"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb15-1"><a href="#cb15-1"></a><span class="co"># Show 3 lines after each match (including the sequence)</span></span>
+<span id="cb15-2"><a href="#cb15-2"></a><span class="ex">$</span> grep <span class="at">-A</span> 3 <span class="st">"^&gt;interesting_gene"</span> sequences.fa</span>
+<span id="cb15-3"><a href="#cb15-3"></a></span>
+<span id="cb15-4"><a href="#cb15-4"></a><span class="co"># Show lines before and after</span></span>
+<span id="cb15-5"><a href="#cb15-5"></a><span class="ex">$</span> grep <span class="at">-C</span> 5 <span class="st">"error"</span> logfile.txt</span>
+<span id="cb15-6"><a href="#cb15-6"></a></span>
+<span id="cb15-7"><a href="#cb15-7"></a><span class="co"># Extract sequence following a header</span></span>
+<span id="cb15-8"><a href="#cb15-8"></a><span class="ex">$</span> grep <span class="at">-A</span> 1 <span class="st">"^&gt;target_gene"</span> sequences.fa <span class="kw">|</span> <span class="fu">grep</span> <span class="at">-v</span> <span class="st">"^&gt;"</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section></section><section id="sec-genomic-processing" class="level2" data-number="7.7"><h2 data-number="7.7" class="anchored" data-anchor-id="sec-genomic-processing">
+<span class="header-section-number">7.7</span> Processing Genomic Data: A Complete Example</h2>
+<p>Let’s work through a realistic analysis pipeline for human chromosome data.</p>
+<section id="sec-downloading-the-data" class="level3"><h3 class="anchored" data-anchor-id="sec-downloading-the-data">Downloading the Data</h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb16"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb16-1"><a href="#cb16-1"></a><span class="co"># Download human chromosome 21 from UCSC (~13 MB compressed; the</span></span>
+<span id="cb16-2"><a href="#cb16-2"></a><span class="co"># smallest human autosome, so it is a good size for practice)</span></span>
+<span id="cb16-3"><a href="#cb16-3"></a><span class="ex">$</span> wget https://hgdownload.soe.ucsc.edu/goldenPath/hg38/chromosomes/chr21.fa.gz</span>
+<span id="cb16-4"><a href="#cb16-4"></a></span>
+<span id="cb16-5"><a href="#cb16-5"></a><span class="co"># Decompress it to a plain FASTA file</span></span>
+<span id="cb16-6"><a href="#cb16-6"></a><span class="ex">$</span> gunzip <span class="at">-k</span> chr21.fa.gz</span>
+<span id="cb16-7"><a href="#cb16-7"></a><span class="ex">$</span> mv chr21.fa genome.fa</span>
+<span id="cb16-8"><a href="#cb16-8"></a></span>
+<span id="cb16-9"><a href="#cb16-9"></a><span class="co"># Or work with a subset without decompressing everything</span></span>
+<span id="cb16-10"><a href="#cb16-10"></a><span class="ex">$</span> zcat chr21.fa.gz <span class="kw">|</span> <span class="fu">head</span> <span class="at">-1000</span> <span class="op">&gt;</span> sample.fa</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Note
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>The UCSC file is <em>soft-masked</em>: repetitive regions are written in lowercase (<code>acgt</code>) rather than uppercase. Patterns like <code>GAATTC</code> will therefore miss sites that fall in masked regions. Add <code>-i</code> to <code>grep</code>, or convert everything to uppercase first with <code>tr 'acgt' 'ACGT'</code>, if you want to count every occurrence.</p>
+</div>
+</div>
+</section><section id="sec-analyzing-sequence-content" class="level3"><h3 class="anchored" data-anchor-id="sec-analyzing-sequence-content">Analyzing Sequence Content</h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb17"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb17-1"><a href="#cb17-1"></a><span class="co"># Count sequences in the file</span></span>
+<span id="cb17-2"><a href="#cb17-2"></a><span class="ex">$</span> grep <span class="at">-c</span> <span class="st">"^&gt;"</span> genome.fa</span>
+<span id="cb17-3"><a href="#cb17-3"></a></span>
+<span id="cb17-4"><a href="#cb17-4"></a><span class="co"># View headers</span></span>
+<span id="cb17-5"><a href="#cb17-5"></a><span class="ex">$</span> grep <span class="st">"^&gt;"</span> genome.fa <span class="kw">|</span> <span class="fu">head</span></span>
+<span id="cb17-6"><a href="#cb17-6"></a></span>
+<span id="cb17-7"><a href="#cb17-7"></a><span class="co"># Total bases (excluding headers and newlines)</span></span>
+<span id="cb17-8"><a href="#cb17-8"></a><span class="ex">$</span> grep <span class="at">-v</span> <span class="st">"^&gt;"</span> genome.fa <span class="kw">|</span> <span class="fu">tr</span> <span class="at">-d</span> <span class="st">'\n'</span> <span class="kw">|</span> <span class="fu">wc</span> <span class="at">-c</span></span>
+<span id="cb17-9"><a href="#cb17-9"></a></span>
+<span id="cb17-10"><a href="#cb17-10"></a><span class="co"># Nucleotide frequencies</span></span>
+<span id="cb17-11"><a href="#cb17-11"></a><span class="ex">$</span> grep <span class="at">-v</span> <span class="st">"^&gt;"</span> genome.fa <span class="kw">|</span> <span class="fu">tr</span> <span class="at">-d</span> <span class="st">'\n'</span> <span class="kw">|</span> <span class="fu">fold</span> <span class="at">-w1</span> <span class="kw">|</span> <span class="fu">sort</span> <span class="kw">|</span> <span class="fu">uniq</span> <span class="at">-c</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section><section id="sec-finding-restriction-enzyme-sites" class="level3"><h3 class="anchored" data-anchor-id="sec-finding-restriction-enzyme-sites">Finding Restriction Enzyme Sites</h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb18"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb18-1"><a href="#cb18-1"></a><span class="co"># Count EcoRI sites (GAATTC)</span></span>
+<span id="cb18-2"><a href="#cb18-2"></a><span class="ex">$</span> grep <span class="at">-v</span> <span class="st">"^&gt;"</span> genome.fa <span class="kw">|</span> <span class="fu">tr</span> <span class="at">-d</span> <span class="st">'\n'</span> <span class="kw">|</span> <span class="fu">grep</span> <span class="at">-o</span> <span class="st">"GAATTC"</span> <span class="kw">|</span> <span class="fu">wc</span> <span class="at">-l</span></span>
+<span id="cb18-3"><a href="#cb18-3"></a></span>
+<span id="cb18-4"><a href="#cb18-4"></a><span class="co"># Count multiple restriction sites</span></span>
+<span id="cb18-5"><a href="#cb18-5"></a><span class="ex">$</span> for site in GAATTC GGATCC AAGCTT CTCGAG<span class="kw">;</span> <span class="cf">do</span></span>
+<span id="cb18-6"><a href="#cb18-6"></a>    <span class="va">count</span><span class="op">=</span><span class="va">$(</span><span class="fu">grep</span> <span class="at">-v</span> <span class="st">"^&gt;"</span> genome.fa <span class="kw">|</span> <span class="fu">tr</span> <span class="at">-d</span> <span class="st">'\n'</span> <span class="kw">|</span> <span class="fu">grep</span> <span class="at">-o</span> <span class="st">"</span><span class="va">$site</span><span class="st">"</span> <span class="kw">|</span> <span class="fu">wc</span> <span class="at">-l</span><span class="va">)</span></span>
+<span id="cb18-7"><a href="#cb18-7"></a>    <span class="bu">echo</span> <span class="st">"</span><span class="va">$site</span><span class="st">: </span><span class="va">$count</span><span class="st">"</span></span>
+<span id="cb18-8"><a href="#cb18-8"></a>  <span class="cf">done</span></span>
+<span id="cb18-9"><a href="#cb18-9"></a></span>
+<span id="cb18-10"><a href="#cb18-10"></a><span class="co"># Find context around restriction sites (50 bases each side)</span></span>
+<span id="cb18-11"><a href="#cb18-11"></a><span class="ex">$</span> grep <span class="at">-v</span> <span class="st">"^&gt;"</span> genome.fa <span class="kw">|</span> <span class="fu">tr</span> <span class="at">-d</span> <span class="st">'\n'</span> <span class="kw">|</span> <span class="fu">grep</span> <span class="at">-oE</span> <span class="st">".{50}GAATTC.{50}"</span> <span class="kw">|</span> <span class="fu">head</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section><section id="sec-finding-simple-sequence-repeats" class="level3"><h3 class="anchored" data-anchor-id="sec-finding-simple-sequence-repeats">Finding Simple Sequence Repeats</h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb19"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb19-1"><a href="#cb19-1"></a><span class="co"># Dinucleotide repeats</span></span>
+<span id="cb19-2"><a href="#cb19-2"></a><span class="ex">$</span> grep <span class="at">-v</span> <span class="st">"^&gt;"</span> genome.fa <span class="kw">|</span> <span class="fu">tr</span> <span class="at">-d</span> <span class="st">'\n'</span> <span class="kw">|</span> <span class="fu">grep</span> <span class="at">-oE</span> <span class="st">"(AT){5,}"</span> <span class="kw">|</span> <span class="fu">wc</span> <span class="at">-l</span></span>
+<span id="cb19-3"><a href="#cb19-3"></a><span class="ex">$</span> grep <span class="at">-v</span> <span class="st">"^&gt;"</span> genome.fa <span class="kw">|</span> <span class="fu">tr</span> <span class="at">-d</span> <span class="st">'\n'</span> <span class="kw">|</span> <span class="fu">grep</span> <span class="at">-oE</span> <span class="st">"(CA){5,}"</span> <span class="kw">|</span> <span class="fu">wc</span> <span class="at">-l</span></span>
+<span id="cb19-4"><a href="#cb19-4"></a></span>
+<span id="cb19-5"><a href="#cb19-5"></a><span class="co"># Homopolymer runs (consecutive same base)</span></span>
+<span id="cb19-6"><a href="#cb19-6"></a><span class="ex">$</span> grep <span class="at">-v</span> <span class="st">"^&gt;"</span> genome.fa <span class="kw">|</span> <span class="fu">tr</span> <span class="at">-d</span> <span class="st">'\n'</span> <span class="kw">|</span> <span class="fu">grep</span> <span class="at">-oE</span> <span class="st">"A{10,}"</span> <span class="kw">|</span> <span class="fu">wc</span> <span class="at">-l</span></span>
+<span id="cb19-7"><a href="#cb19-7"></a><span class="ex">$</span> grep <span class="at">-v</span> <span class="st">"^&gt;"</span> genome.fa <span class="kw">|</span> <span class="fu">tr</span> <span class="at">-d</span> <span class="st">'\n'</span> <span class="kw">|</span> <span class="fu">grep</span> <span class="at">-oE</span> <span class="st">"T{10,}"</span> <span class="kw">|</span> <span class="fu">wc</span> <span class="at">-l</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section><section id="sec-stream-processing-large-files" class="level3"><h3 class="anchored" data-anchor-id="sec-stream-processing-large-files">Stream Processing Large Files</h3>
+<p>Process data without loading it entirely into memory:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb20"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb20-1"><a href="#cb20-1"></a><span class="co"># Download, decompress, and analyze in one pipeline</span></span>
+<span id="cb20-2"><a href="#cb20-2"></a><span class="ex">$</span> curl <span class="at">-sL</span> https://hgdownload.soe.ucsc.edu/goldenPath/hg38/chromosomes/chr21.fa.gz <span class="kw">|</span> <span class="dt">\</span></span>
+<span id="cb20-3"><a href="#cb20-3"></a>  <span class="fu">gunzip</span> <span class="at">-c</span> <span class="kw">|</span> <span class="dt">\</span></span>
+<span id="cb20-4"><a href="#cb20-4"></a>  <span class="fu">grep</span> <span class="at">-v</span> <span class="st">"^&gt;"</span> <span class="kw">|</span> <span class="dt">\</span></span>
+<span id="cb20-5"><a href="#cb20-5"></a>  <span class="fu">tr</span> <span class="at">-d</span> <span class="st">'\n'</span> <span class="kw">|</span> <span class="dt">\</span></span>
+<span id="cb20-6"><a href="#cb20-6"></a>  <span class="fu">grep</span> <span class="at">-o</span> <span class="st">"GAATTC"</span> <span class="kw">|</span> <span class="dt">\</span></span>
+<span id="cb20-7"><a href="#cb20-7"></a>  <span class="fu">wc</span> <span class="at">-l</span></span>
+<span id="cb20-8"><a href="#cb20-8"></a></span>
+<span id="cb20-9"><a href="#cb20-9"></a><span class="co"># Process compressed file directly</span></span>
+<span id="cb20-10"><a href="#cb20-10"></a><span class="ex">$</span> zgrep <span class="at">-c</span> <span class="st">"^&gt;"</span> chr21.fa.gz</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section></section><section id="sec-common-patterns" class="level2" data-number="7.8"><h2 data-number="7.8" class="anchored" data-anchor-id="sec-common-patterns">
+<span class="header-section-number">7.8</span> Common Patterns Reference</h2>
+<p><a href="#tbl-common-patterns" class="quarto-xref">Table&nbsp;<span>7.4</span></a> is a quick reference for frequently needed patterns:</p>
+<div id="tbl-common-patterns" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure"><figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-common-patterns-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;7.4: Common regular expression patterns for bioinformatics
+</figcaption><div aria-describedby="tbl-common-patterns-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<table class="caption-top table">
+<thead><tr class="header">
+<th style="text-align: left;">Pattern</th>
+<th style="text-align: left;">What It Matches</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;"><code>^&gt;</code></td>
+<td style="text-align: left;">FASTA headers</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><code>^#</code></td>
+<td style="text-align: left;">Comment lines</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><code>^$</code></td>
+<td style="text-align: left;">Empty lines</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><code>[ACGT]+</code></td>
+<td style="text-align: left;">DNA sequence</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><code>[ACGU]+</code></td>
+<td style="text-align: left;">RNA sequence</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><code>[A-Z]{3}</code></td>
+<td style="text-align: left;">Uppercase triplet (codon)</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><code>ATG([ACGT]{3})*</code></td>
+<td style="text-align: left;">Potential ORF</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><code>(TAA\|TAG\|TGA)</code></td>
+<td style="text-align: left;">Stop codons</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><code>A{n,}</code></td>
+<td style="text-align: left;">Poly-A of at least n</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><code>\t</code></td>
+<td style="text-align: left;">Tab character</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><code>\s+</code></td>
+<td style="text-align: left;">One or more whitespace</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><code>[0-9]+\.[0-9]+</code></td>
+<td style="text-align: left;">Decimal number</td>
+</tr>
+</tbody>
+</table>
+</div>
+</figure>
+</div>
+</section><section id="sec-sed" class="level2" data-number="7.9"><h2 data-number="7.9" class="anchored" data-anchor-id="sec-sed">
+<span class="header-section-number">7.9</span> Editing Text Streams with sed</h2>
+<p><code>grep</code> tells you <em>which</em> lines match a pattern, but it never changes them. When you want to <em>edit</em> text as it flows through a pipe—replace one string with another, delete unwanted lines, or pull out just part of each line—the tool is <strong>sed</strong>, the <strong>s</strong>tream <strong>ed</strong>itor. Like <code>grep</code>, <code>sed</code> reads input one line at a time, applies your instructions, and prints the result. It never opens an interactive window; you describe the edit on the command line and <code>sed</code> performs it on every line.</p>
+<section id="sec-sed-substitution" class="level3"><h3 class="anchored" data-anchor-id="sec-sed-substitution">Substitution: <code>s/old/new/</code>
+</h3>
+<p>The workhorse <code>sed</code> command is substitution. The syntax is <code>s/pattern/replacement/</code>, where <em>pattern</em> is a regular expression using the same metacharacters you learned for <code>grep</code>:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb21"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb21-1"><a href="#cb21-1"></a><span class="co"># Replace the first "chr" on each line with "chromosome"</span></span>
+<span id="cb21-2"><a href="#cb21-2"></a><span class="ex">$</span> sed <span class="st">'s/chr/chromosome/'</span> regions.bed</span>
+<span id="cb21-3"><a href="#cb21-3"></a></span>
+<span id="cb21-4"><a href="#cb21-4"></a><span class="co"># Replace tabs with commas (first tab on each line only!)</span></span>
+<span id="cb21-5"><a href="#cb21-5"></a><span class="ex">$</span> sed <span class="st">'s/\t/,/'</span> data.tsv</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>By default <code>s</code> replaces only the <em>first</em> match on each line. Add the <code>g</code> (global) flag to replace every occurrence:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb22"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb22-1"><a href="#cb22-1"></a><span class="co"># Replace every tab, converting TSV to CSV</span></span>
+<span id="cb22-2"><a href="#cb22-2"></a><span class="ex">$</span> sed <span class="st">'s/\t/,/g'</span> data.tsv <span class="op">&gt;</span> data.csv</span>
+<span id="cb22-3"><a href="#cb22-3"></a></span>
+<span id="cb22-4"><a href="#cb22-4"></a><span class="co"># Convert a DNA sequence to RNA: every T becomes U</span></span>
+<span id="cb22-5"><a href="#cb22-5"></a><span class="ex">$</span> grep <span class="at">-v</span> <span class="st">"^&gt;"</span> gene.fa <span class="kw">|</span> <span class="fu">sed</span> <span class="st">'s/T/U/g'</span></span>
+<span id="cb22-6"><a href="#cb22-6"></a></span>
+<span id="cb22-7"><a href="#cb22-7"></a><span class="co"># Anchors work too: add a prefix to the start of every line</span></span>
+<span id="cb22-8"><a href="#cb22-8"></a><span class="ex">$</span> sed <span class="st">'s/^/sample_/'</span> ids.txt</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>The <code>/</code> character is only a convention. If your pattern or replacement itself contains slashes (file paths, for example), pick a different delimiter such as <code>|</code> or <code>#</code>, and <code>sed</code> will use whatever character follows the <code>s</code>:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb23"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb23-1"><a href="#cb23-1"></a><span class="co"># Rewrite a directory prefix without escaping every slash</span></span>
+<span id="cb23-2"><a href="#cb23-2"></a><span class="ex">$</span> sed <span class="st">'s|/home/old_user/|/home/new_user/|g'</span> paths.txt</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section><section id="sec-printing-and-deleting-lines" class="level3"><h3 class="anchored" data-anchor-id="sec-printing-and-deleting-lines">Printing and Deleting Lines</h3>
+<p><code>sed</code> normally prints every line, edited or not. The <code>-n</code> option suppresses that automatic output, and the <code>p</code> command prints explicitly. Together they let you select lines by number—something <code>head</code> and <code>tail</code> can do only awkwardly:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb24"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb24-1"><a href="#cb24-1"></a><span class="co"># Print lines 10 through 20 (inclusive)</span></span>
+<span id="cb24-2"><a href="#cb24-2"></a><span class="ex">$</span> sed <span class="at">-n</span> <span class="st">'10,20p'</span> results.txt</span>
+<span id="cb24-3"><a href="#cb24-3"></a></span>
+<span id="cb24-4"><a href="#cb24-4"></a><span class="co"># Print only the lines where a substitution actually happened</span></span>
+<span id="cb24-5"><a href="#cb24-5"></a><span class="ex">$</span> sed <span class="at">-n</span> <span class="st">'s/ERROR/**ERROR**/p'</span> pipeline.log</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>An <em>address</em> can be a line number, a range, or a regular expression between slashes. Combined with the <code>d</code> (delete) command, this is a concise way to strip unwanted lines:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb25"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb25-1"><a href="#cb25-1"></a><span class="co"># Delete comment lines</span></span>
+<span id="cb25-2"><a href="#cb25-2"></a><span class="ex">$</span> sed <span class="st">'/^#/d'</span> annotations.gff</span>
+<span id="cb25-3"><a href="#cb25-3"></a></span>
+<span id="cb25-4"><a href="#cb25-4"></a><span class="co"># Delete blank lines</span></span>
+<span id="cb25-5"><a href="#cb25-5"></a><span class="ex">$</span> sed <span class="st">'/^$/d'</span> notes.txt</span>
+<span id="cb25-6"><a href="#cb25-6"></a></span>
+<span id="cb25-7"><a href="#cb25-7"></a><span class="co"># Delete the header line (line 1) of a table</span></span>
+<span id="cb25-8"><a href="#cb25-8"></a><span class="ex">$</span> sed <span class="st">'1d'</span> measurements.tsv</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Note that <code>sed '/^#/d'</code> and <code>grep -v '^#'</code> produce the same output; use whichever reads more naturally in your pipeline.</p>
+</section><section id="sec-capture-groups" class="level3"><h3 class="anchored" data-anchor-id="sec-capture-groups">Capture Groups</h3>
+<p>With <code>-E</code> (extended regex, exactly as in <code>grep -E</code>), parentheses capture part of the match, and <code>\1</code>, <code>\2</code>, … refer back to those captured pieces in the replacement. This is how you <em>rearrange</em> text rather than just replace it:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb26"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb26-1"><a href="#cb26-1"></a><span class="co"># Turn "sample_12_rep3" into "12-3"</span></span>
+<span id="cb26-2"><a href="#cb26-2"></a><span class="ex">$</span> echo <span class="st">"sample_12_rep3"</span> <span class="kw">|</span> <span class="fu">sed</span> <span class="at">-E</span> <span class="st">'s/sample_([0-9]+)_rep([0-9]+)/\1-\2/'</span></span>
+<span id="cb26-3"><a href="#cb26-3"></a><span class="ex">12-3</span></span>
+<span id="cb26-4"><a href="#cb26-4"></a></span>
+<span id="cb26-5"><a href="#cb26-5"></a><span class="co"># Shorten FASTA headers to just the first word</span></span>
+<span id="cb26-6"><a href="#cb26-6"></a><span class="ex">$</span> sed <span class="at">-E</span> <span class="st">'s/^&gt;([^ ]+).*/&gt;\1/'</span> proteins.fa</span>
+<span id="cb26-7"><a href="#cb26-7"></a></span>
+<span id="cb26-8"><a href="#cb26-8"></a><span class="co"># Swap the first two tab-separated columns</span></span>
+<span id="cb26-9"><a href="#cb26-9"></a><span class="ex">$</span> sed <span class="at">-E</span> <span class="st">'s/^([^\t]+)\t([^\t]+)/\2\t\1/'</span> data.tsv</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Read the second example carefully: <code>^&gt;</code> anchors to the header, <code>([^ ]+)</code> captures everything up to the first space, <code>.*</code> swallows the rest of the line, and the replacement <code>&gt;\1</code> writes back only the captured identifier.</p>
+</section><section id="sec-editing-files-in-place" class="level3"><h3 class="anchored" data-anchor-id="sec-editing-files-in-place">Editing Files in Place</h3>
+<p>Everything above writes to standard output and leaves the input file untouched. The <code>-i</code> option instead edits the file <em>in place</em>—and here two warnings are in order.</p>
+<div class="callout callout-style-default callout-warning callout-titled" title="`sed -i` overwrites your file">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Warning</span><code>sed -i</code> overwrites your file
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>There is no undo. A typo in the pattern can silently corrupt a file you spent hours creating. <strong>Write to a new file until you are confident the edit does what you expect:</strong></p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb27"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb27-1"><a href="#cb27-1"></a><span class="co"># Safe: check the result first</span></span>
+<span id="cb27-2"><a href="#cb27-2"></a><span class="ex">$</span> sed <span class="st">'s/T/U/g'</span> gene.fa <span class="op">&gt;</span> gene_rna.fa</span>
+<span id="cb27-3"><a href="#cb27-3"></a><span class="ex">$</span> head gene_rna.fa</span>
+<span id="cb27-4"><a href="#cb27-4"></a></span>
+<span id="cb27-5"><a href="#cb27-5"></a><span class="co"># Only once you are sure</span></span>
+<span id="cb27-6"><a href="#cb27-6"></a><span class="ex">$</span> sed <span class="at">-i</span> <span class="st">'s/T/U/g'</span> gene.fa</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+</div>
+<div class="callout callout-style-default callout-important callout-titled" title="Linux and macOS disagree about `-i`">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Important</span>Linux and macOS disagree about <code>-i</code>
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>GNU <code>sed</code> (Linux, WSL, Talapas) and BSD <code>sed</code> (macOS) interpret <code>-i</code> differently. On macOS, <code>-i</code> <em>requires</em> an argument giving a backup suffix, and you must pass an empty string to mean “no backup”:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb28"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb28-1"><a href="#cb28-1"></a><span class="co"># Linux / WSL / Talapas</span></span>
+<span id="cb28-2"><a href="#cb28-2"></a><span class="ex">$</span> sed <span class="at">-i</span> <span class="st">'s/a/b/'</span> file.txt</span>
+<span id="cb28-3"><a href="#cb28-3"></a></span>
+<span id="cb28-4"><a href="#cb28-4"></a><span class="co"># macOS</span></span>
+<span id="cb28-5"><a href="#cb28-5"></a><span class="ex">$</span> sed <span class="at">-i</span> <span class="st">''</span> <span class="st">'s/a/b/'</span> file.txt</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>If you use the Linux form on a Mac, <code>sed</code> treats <code>s/a/b/</code> as the backup suffix and then complains that <code>file.txt</code> is not a valid command. A portable alternative that works everywhere is to give a real suffix, e.g.&nbsp;<code>sed -i.bak 's/a/b/' file.txt</code>, which also leaves you a backup. On macOS you can also install GNU sed with Homebrew (<code>brew install gnu-sed</code>, invoked as <code>gsed</code>).</p>
+</div>
+</div>
+</section></section><section id="sec-awk" class="level2" data-number="7.10"><h2 data-number="7.10" class="anchored" data-anchor-id="sec-awk">
+<span class="header-section-number">7.10</span> Working with Columns: awk</h2>
+<p>Much biological data is tabular: GFF and BED annotations, VCF variant calls, and the tab- or comma-separated spreadsheets that come off plate readers and flow cytometers. <code>cut</code> can pull out columns, but it cannot do arithmetic on them or decide which rows to keep based on a column’s value. <strong>awk</strong> (named for its authors Aho, Weinberger, and Kernighan) is a small programming language built exactly for this: it splits each line into fields and lets you filter, compute, and reformat by column.</p>
+<section id="sec-awk-pattern-action" class="level3"><h3 class="anchored" data-anchor-id="sec-awk-pattern-action">The <code>pattern { action }</code> Model</h3>
+<p>An <code>awk</code> program is a list of rules of the form <code>pattern { action }</code>. For every input line, <code>awk</code> tests each pattern; when a pattern matches, it runs the action. Either half is optional: a pattern alone prints matching lines, and an action alone runs on every line.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb29"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb29-1"><a href="#cb29-1"></a><span class="co"># No pattern: print the first column of every line</span></span>
+<span id="cb29-2"><a href="#cb29-2"></a><span class="ex">$</span> awk <span class="st">'{ print $1 }'</span> annotations.gff</span>
+<span id="cb29-3"><a href="#cb29-3"></a></span>
+<span id="cb29-4"><a href="#cb29-4"></a><span class="co"># Pattern only: print whole lines where column 3 is "gene"</span></span>
+<span id="cb29-5"><a href="#cb29-5"></a><span class="ex">$</span> awk <span class="st">'$3 == "gene"'</span> annotations.gff</span>
+<span id="cb29-6"><a href="#cb29-6"></a></span>
+<span id="cb29-7"><a href="#cb29-7"></a><span class="co"># Both: print columns 1, 4, and 5 for gene lines</span></span>
+<span id="cb29-8"><a href="#cb29-8"></a><span class="ex">$</span> awk <span class="st">'$3 == "gene" { print $1, $4, $5 }'</span> annotations.gff</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Inside an action, <code>$1</code>, <code>$2</code>, … refer to the fields of the current line, <code>$0</code> is the whole line, and <code>$NF</code> is the <em>last</em> field (<code>NF</code> is the number of fields). The variable <code>NR</code> is the current line (record) number. By default fields are separated by any run of spaces or tabs, so <code>awk</code> works on a GFF or BED file without any extra options.</p>
+</section><section id="sec-awk-delimiter" class="level3"><h3 class="anchored" data-anchor-id="sec-awk-delimiter">Choosing the Delimiter</h3>
+<p>For CSV files, tell <code>awk</code> to split on commas with <code>-F','</code>. If the field separator is a single tab and some columns may be empty, use <code>-F'\t'</code> so that consecutive tabs are not collapsed into one:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb30"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb30-1"><a href="#cb30-1"></a><span class="co"># Third column of a CSV</span></span>
+<span id="cb30-2"><a href="#cb30-2"></a><span class="ex">$</span> awk <span class="at">-F</span><span class="st">','</span> <span class="st">'{ print $3 }'</span> od600_readings.csv</span>
+<span id="cb30-3"><a href="#cb30-3"></a></span>
+<span id="cb30-4"><a href="#cb30-4"></a><span class="co"># Tab-delimited with possibly empty fields</span></span>
+<span id="cb30-5"><a href="#cb30-5"></a><span class="ex">$</span> awk <span class="at">-F</span><span class="st">'\t'</span> <span class="st">'{ print $1, $9 }'</span> annotations.gff</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section><section id="sec-awk-filtering" class="level3"><h3 class="anchored" data-anchor-id="sec-awk-filtering">Skipping Headers and Filtering Rows</h3>
+<p>Because <code>NR</code> counts lines, <code>NR &gt; 1</code> is the idiom for “skip the header.” Patterns can be any comparison or regular expression, and several can be combined with <code>&amp;&amp;</code> (and) or <code>||</code> (or):</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb31"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb31-1"><a href="#cb31-1"></a><span class="co"># Skip the header, print sample and OD600 columns</span></span>
+<span id="cb31-2"><a href="#cb31-2"></a><span class="ex">$</span> awk <span class="at">-F</span><span class="st">','</span> <span class="st">'NR &gt; 1 { print $1, $4 }'</span> od600_readings.csv</span>
+<span id="cb31-3"><a href="#cb31-3"></a></span>
+<span id="cb31-4"><a href="#cb31-4"></a><span class="co"># Rows where the OD600 (column 4) exceeds 0.8</span></span>
+<span id="cb31-5"><a href="#cb31-5"></a><span class="ex">$</span> awk <span class="at">-F</span><span class="st">','</span> <span class="st">'NR &gt; 1 &amp;&amp; $4 &gt; 0.8'</span> od600_readings.csv</span>
+<span id="cb31-6"><a href="#cb31-6"></a></span>
+<span id="cb31-7"><a href="#cb31-7"></a><span class="co"># BED intervals on chr21 longer than 1 kb</span></span>
+<span id="cb31-8"><a href="#cb31-8"></a><span class="ex">$</span> awk <span class="st">'$1 == "chr21" &amp;&amp; ($3 - $2) &gt; 1000'</span> peaks.bed</span>
+<span id="cb31-9"><a href="#cb31-9"></a></span>
+<span id="cb31-10"><a href="#cb31-10"></a><span class="co"># Genes on the minus strand (regex match on column 7)</span></span>
+<span id="cb31-11"><a href="#cb31-11"></a><span class="ex">$</span> awk <span class="st">'$3 == "gene" &amp;&amp; $7 ~ /-/'</span> annotations.gff</span>
+<span id="cb31-12"><a href="#cb31-12"></a></span>
+<span id="cb31-13"><a href="#cb31-13"></a><span class="co"># Rows where column 2 is exactly "control"</span></span>
+<span id="cb31-14"><a href="#cb31-14"></a><span class="ex">$</span> awk <span class="st">'$2 == "control"'</span> samples.tsv</span>
+<span id="cb31-15"><a href="#cb31-15"></a></span>
+<span id="cb31-16"><a href="#cb31-16"></a><span class="co"># Number every line (like cat -n), then the whole line</span></span>
+<span id="cb31-17"><a href="#cb31-17"></a><span class="ex">$</span> awk <span class="st">'{ print NR, $0 }'</span> data.txt</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Actions can also transform values on the way out—<code>awk</code> does arithmetic on any field that looks like a number:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb32"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb32-1"><a href="#cb32-1"></a><span class="co"># Print column 1 and column 2 converted from kb to bp</span></span>
+<span id="cb32-2"><a href="#cb32-2"></a><span class="ex">$</span> awk <span class="st">'{ print $1, $2 * 1000 }'</span> lengths.tsv</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section><section id="sec-awk-end" class="level3"><h3 class="anchored" data-anchor-id="sec-awk-end">Computing Sums and Means with <code>END</code>
+</h3>
+<p>Two special patterns run outside the line-by-line loop: <code>BEGIN</code> before any input is read and <code>END</code> after the last line. <code>END</code> is where you report a total that you accumulated along the way. Variables spring into existence at first use and start at zero:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb33"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb33-1"><a href="#cb33-1"></a><span class="co"># Total length of all BED intervals</span></span>
+<span id="cb33-2"><a href="#cb33-2"></a><span class="ex">$</span> awk <span class="st">'{ total += $3 - $2 } END { print total }'</span> peaks.bed</span>
+<span id="cb33-3"><a href="#cb33-3"></a></span>
+<span id="cb33-4"><a href="#cb33-4"></a><span class="co"># Mean of column 4, skipping the header</span></span>
+<span id="cb33-5"><a href="#cb33-5"></a><span class="ex">$</span> awk <span class="at">-F</span><span class="st">','</span> <span class="st">'NR &gt; 1 { sum += $4; n++ } END { print sum / n }'</span> od600_readings.csv</span>
+<span id="cb33-6"><a href="#cb33-6"></a></span>
+<span id="cb33-7"><a href="#cb33-7"></a><span class="co"># Count gene features (equivalent to grep -c but by column)</span></span>
+<span id="cb33-8"><a href="#cb33-8"></a><span class="ex">$</span> awk <span class="st">'$3 == "gene" { n++ } END { print n }'</span> annotations.gff</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section><section id="sec-awk-ofs" class="level3"><h3 class="anchored" data-anchor-id="sec-awk-ofs">Controlling Output: <code>OFS</code>
+</h3>
+<p>When you <code>print</code> several fields separated by commas, <code>awk</code> joins them with the <em>output field separator</em>, <code>OFS</code>, which defaults to a single space. Set it in a <code>BEGIN</code> block (or with <code>-v OFS=...</code>) to produce tab- or comma-separated output:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb34"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb34-1"><a href="#cb34-1"></a><span class="co"># Convert a GFF to a simple three-column TSV</span></span>
+<span id="cb34-2"><a href="#cb34-2"></a><span class="ex">$</span> awk <span class="st">'BEGIN { OFS = "\t" } $3 == "gene" { print $1, $4, $5 }'</span> annotations.gff</span>
+<span id="cb34-3"><a href="#cb34-3"></a></span>
+<span id="cb34-4"><a href="#cb34-4"></a><span class="co"># Convert TSV to CSV (rebuilding $0 forces awk to apply the new OFS)</span></span>
+<span id="cb34-5"><a href="#cb34-5"></a><span class="ex">$</span> awk <span class="at">-F</span><span class="st">'\t'</span> <span class="at">-v</span> OFS=<span class="st">','</span> <span class="st">'{ $1 = $1; print }'</span> measurements.tsv</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section><section id="sec-awk-mean-per-treatment" class="level3"><h3 class="anchored" data-anchor-id="sec-awk-mean-per-treatment">A Bioengineering Example: Mean per Treatment</h3>
+<p>Suppose a plate reader exports a CSV with sample name, treatment, and OD600 columns:</p>
+<pre><code>sample,treatment,od600
+S01,control,0.42
+S02,control,0.45
+S03,IPTG,0.81
+S04,IPTG,0.79
+S05,IPTG,0.85</code></pre>
+<p>To compute the mean OD600 for each treatment we need one running sum and one count <em>per treatment</em>. <code>awk</code>’s <strong>associative arrays</strong>—arrays indexed by a string instead of a number—make this a one-liner:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb36"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb36-1"><a href="#cb36-1"></a><span class="ex">$</span> awk <span class="at">-F</span><span class="st">','</span> <span class="st">'NR &gt; 1 { sum[$2] += $3; n[$2]++ }</span></span>
+<span id="cb36-2"><a href="#cb36-2"></a><span class="st">             END { for (t in sum) print t, sum[t] / n[t] }'</span> od600_readings.csv</span>
+<span id="cb36-3"><a href="#cb36-3"></a><span class="ex">control</span> 0.435</span>
+<span id="cb36-4"><a href="#cb36-4"></a><span class="ex">IPTG</span> 0.816667</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>For each data line, <code>sum[$2]</code> accumulates the OD600 under the treatment name in column 2 and <code>n[$2]</code> counts the samples. In <code>END</code>, <code>for (t in sum)</code> loops over every treatment seen (in no particular order—pipe the output through <code>sort</code> if you want it alphabetical). This same pattern—group by one column, aggregate another—answers a large share of everyday questions about tabular data, and it runs at the speed of the disk on files far too big to open in a spreadsheet.</p>
+</section><section id="sec-grep-choosing-the-right-tool" class="level3"><h3 class="anchored" data-anchor-id="sec-grep-choosing-the-right-tool">Choosing the Right Tool</h3>
+<p>A useful rule of thumb: <strong>grep finds lines, sed edits text, awk works with columns.</strong> They overlap—each can delete comment lines, for instance—but each is clearest at its own job, and they chain together naturally in a pipeline (<a href="#tbl-grep-sed-awk" class="quarto-xref">Table&nbsp;<span>7.5</span></a>).</p>
+<div id="tbl-grep-sed-awk" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure"><figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-grep-sed-awk-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;7.5: Comparing <code>grep</code>, <code>sed</code>, and <code>awk</code>
+</figcaption><div aria-describedby="tbl-grep-sed-awk-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<table class="caption-top table">
+<colgroup>
+<col style="width: 15%">
+<col style="width: 23%">
+<col style="width: 36%">
+<col style="width: 23%">
+</colgroup>
+<thead><tr class="header">
+<th style="text-align: left;">Tool</th>
+<th style="text-align: left;">Best at</th>
+<th style="text-align: left;">Typical call</th>
+<th style="text-align: left;">Example</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;"><code>grep</code></td>
+<td style="text-align: left;">Selecting lines that match a pattern</td>
+<td style="text-align: left;"><code>grep -E 'pattern' file</code></td>
+<td style="text-align: left;"><code>grep -c "^&gt;" seqs.fa</code></td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><code>sed</code></td>
+<td style="text-align: left;">Editing text within lines</td>
+<td style="text-align: left;"><code>sed 's/old/new/g' file</code></td>
+<td style="text-align: left;"><code>sed 's/T/U/g' gene.fa</code></td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><code>awk</code></td>
+<td style="text-align: left;">Filtering and computing on columns</td>
+<td style="text-align: left;"><code>awk 'pattern { action }' file</code></td>
+<td style="text-align: left;"><code>awk '$3 == "gene"' genes.gff</code></td>
+</tr>
+</tbody>
+</table>
+</div>
+</figure>
+</div>
+</section><section id="sec-text-tools-together" class="level3"><h3 class="anchored" data-anchor-id="sec-text-tools-together">Putting It Together</h3>
+<p>The real power of these tools comes from combining them with the pipeline tools of <a href="06-files-pipes.html" class="quarto-xref"><span>Chapter 6</span></a>. Each of the following answers a question you are likely to ask of a real data file in a single line:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb37"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb37-1"><a href="#cb37-1"></a><span class="co"># How many distinct gene names are in column 1 (skipping the header)?</span></span>
+<span id="cb37-2"><a href="#cb37-2"></a><span class="ex">$</span> tail <span class="at">-n</span> +2 data.tsv <span class="kw">|</span> <span class="fu">cut</span> <span class="at">-f1</span> <span class="kw">|</span> <span class="fu">sort</span> <span class="kw">|</span> <span class="fu">uniq</span> <span class="kw">|</span> <span class="fu">wc</span> <span class="at">-l</span></span>
+<span id="cb37-3"><a href="#cb37-3"></a></span>
+<span id="cb37-4"><a href="#cb37-4"></a><span class="co"># The 20 rows with p &lt; 0.05 (column 5) with the largest effect size (column 3)</span></span>
+<span id="cb37-5"><a href="#cb37-5"></a><span class="ex">$</span> awk <span class="st">'$5 &lt; 0.05'</span> results.tsv <span class="kw">|</span> <span class="fu">sort</span> <span class="at">-k3,3</span> <span class="at">-nr</span> <span class="kw">|</span> <span class="fu">head</span> <span class="at">-20</span></span>
+<span id="cb37-6"><a href="#cb37-6"></a></span>
+<span id="cb37-7"><a href="#cb37-7"></a><span class="co"># Convert a CSV to tab-delimited and keep three columns</span></span>
+<span id="cb37-8"><a href="#cb37-8"></a><span class="ex">$</span> sed <span class="st">'s/,/\t/g'</span> data.csv <span class="kw">|</span> <span class="fu">cut</span> <span class="at">-f1,3,5</span> <span class="op">&gt;</span> subset.tsv</span>
+<span id="cb37-9"><a href="#cb37-9"></a></span>
+<span id="cb37-10"><a href="#cb37-10"></a><span class="co"># How many times does each value in column 2 occur, most common first?</span></span>
+<span id="cb37-11"><a href="#cb37-11"></a><span class="ex">$</span> cut <span class="at">-f2</span> data.tsv <span class="kw">|</span> <span class="fu">sort</span> <span class="kw">|</span> <span class="fu">uniq</span> <span class="at">-c</span> <span class="kw">|</span> <span class="fu">sort</span> <span class="at">-nr</span></span>
+<span id="cb37-12"><a href="#cb37-12"></a></span>
+<span id="cb37-13"><a href="#cb37-13"></a><span class="co"># How many sequences per chromosome in a FASTA whose headers look like "&gt;chr1:1000-2000"?</span></span>
+<span id="cb37-14"><a href="#cb37-14"></a><span class="ex">$</span> grep <span class="st">"^&gt;"</span> sequences.fasta <span class="kw">|</span> <span class="fu">cut</span> <span class="at">-d</span><span class="st">":"</span> <span class="at">-f1</span> <span class="kw">|</span> <span class="fu">sort</span> <span class="kw">|</span> <span class="fu">uniq</span> <span class="at">-c</span></span>
+<span id="cb37-15"><a href="#cb37-15"></a></span>
+<span id="cb37-16"><a href="#cb37-16"></a><span class="co"># Which feature types does a GFF file contain, and how many of each?</span></span>
+<span id="cb37-17"><a href="#cb37-17"></a><span class="ex">$</span> grep <span class="at">-v</span> <span class="st">"^#"</span> annotations.gff <span class="kw">|</span> <span class="fu">cut</span> <span class="at">-f3</span> <span class="kw">|</span> <span class="fu">sort</span> <span class="kw">|</span> <span class="fu">uniq</span> <span class="at">-c</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Notice the recurring shape: <em>select</em> lines (<code>grep</code>, <code>awk</code>, <code>tail -n +2</code>), <em>extract</em> a column (<code>cut</code>), <em>sort</em> so that identical values are adjacent, then <em>count</em> (<code>uniq -c</code>, <code>wc -l</code>). Once this idiom is in your fingers, most “how many of each?” questions take seconds.</p>
+</section></section><section id="sec-regex-summary" class="level2" data-number="7.11"><h2 data-number="7.11" class="anchored" data-anchor-id="sec-regex-summary">
+<span class="header-section-number">7.11</span> Summary</h2>
+<p>This chapter covered pattern matching with <code>grep</code> and regular expressions, and the two companion tools that edit and compute on the text <code>grep</code> finds:</p>
+<ul>
+<li>
+<code>grep</code> finds lines matching patterns in files or streams</li>
+<li>Basic regex uses metacharacters: <code>.</code>, <code>*</code>, <code>^</code>, <code>$</code>, <code>[]</code>
+</li>
+<li>Extended regex (<code>grep -E</code>) adds: <code>+</code>, <code>?</code>, <code>|</code>, <code><a href="https://rdrr.io/r/base/Paren.html">{}</a></code>
+</li>
+<li>Character classes match sets of characters</li>
+<li>Anchors match positions (start/end of line)</li>
+<li>Combining <code>grep</code> with pipes enables powerful analysis</li>
+<li>Genomic data analysis uses these tools for motif searching</li>
+<li>
+<code>sed</code> edits text streams: <code>s/old/new/g</code> substitutes, <code>-n 'a,bp'</code> prints ranges, <code>/pattern/d</code> deletes, and <code>-E</code> with <code>\1</code> rearranges captured text</li>
+<li>
+<code>sed -i</code> edits files in place—write to a new file until you are confident, and remember that macOS needs <code>sed -i ''</code>
+</li>
+<li>
+<code>awk</code> works with columns: <code>$1 ... $NF</code>, <code>NR</code>, <code>-F','</code>, <code>NR &gt; 1</code> to skip headers, <code>END</code> blocks for sums and means, and associative arrays for per-group summaries</li>
+<li>Rule of thumb: grep finds lines, sed edits text, awk works with columns</li>
+</ul>
+<p>Regular expressions are a foundational skill. While the syntax can seem cryptic initially, investment in learning regex pays off enormously across all aspects of computational biology. Keep <a href="appendix-G-regex.html" class="quarto-xref"><span>Appendix G</span></a> at hand while you practice.</p>
+<div class="callout callout-style-default callout-tip callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Tip
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>For a comprehensive reference of regular expression patterns and <code>grep</code> command syntax, see <a href="appendix-G-regex.html" class="quarto-xref"><span>Appendix G</span></a>. For other Unix commands, see <a href="appendix-A-unix.html" class="quarto-xref"><span>Appendix A</span></a>.</p>
+</div>
+</div>
+</section><section id="sec-grep-additional-reading" class="level2 unnumbered"><h2 class="unnumbered anchored" data-anchor-id="sec-grep-additional-reading">Additional Reading</h2>
+<p>To deepen your understanding of regular expressions:</p>
+<ul>
+<li>
+<strong><a href="https://www.regular-expressions.info/">Regular-Expressions.info</a></strong> — A comprehensive tutorial and reference site for regex</li>
+<li>
+<strong><a href="https://regexone.com/">RegexOne</a></strong> — An interactive tutorial for learning regular expressions step by step</li>
+<li>
+<strong><a href="https://regex101.com/">regex101.com</a></strong> — An online regex tester with explanations of each component</li>
+<li>
+<strong>“Mastering Regular Expressions”</strong> by Jeffrey Friedl <span class="citation" data-cites="friedl2006regex">(<a href="../references.html#ref-friedl2006regex" role="doc-biblioref">Friedl, 2006</a>)</span> — The definitive book on regex theory and practice</li>
+</ul>
+<p>For bioinformatics-specific pattern matching:</p>
+<ul>
+<li>
+<strong><a href="https://www.biostars.org/">BioStars: Regular Expressions in Bioinformatics</a></strong> — Community Q&amp;A with many regex examples</li>
+<li>
+<strong><a href="http://rosalind.info/">Rosalind.info</a></strong> — Bioinformatics problem sets that often require regex solutions</li>
+<li>
+<strong>GNU Grep Manual</strong> — Official documentation with advanced options: <code>man grep</code> or online at <a href="https://www.gnu.org/software/grep/manual/">gnu.org</a>
+</li>
+</ul></section><section id="sec-grep-exercises" class="level2 unnumbered"><h2 class="unnumbered anchored" data-anchor-id="sec-grep-exercises">Exercises</h2>
+<div class="callout callout-style-default callout-tip callout-titled" title="Practice Exercises">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Tip</span>Practice Exercises
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p><strong>Exercise 1: Basic Pattern Matching</strong></p>
+<p>Create a file with various text and practice: 1. Find all lines containing “the” (case-insensitive) 2. Find lines starting with a capital letter 3. Find lines ending with a period 4. Count empty lines</p>
+<p><strong>Exercise 2: Biological Patterns</strong></p>
+<p>Using a FASTA file: 1. Count the number of sequences 2. Extract headers for sequences longer than 1000 bp (hint: you’ll need multiple commands) 3. Find all sequences containing the pattern “TATAAA” (TATA box) 4. Count how many sequences have “chromosome” in their header</p>
+<p><strong>Exercise 3: Regular Expression Practice</strong></p>
+<p>Write <code>grep</code> commands to match: 1. Phone numbers in format: (555) 555-5555 2. Email addresses 3. Dates in YYYY-MM-DD format 4. DNA sequences that are exactly 20 bases long</p>
+<p><strong>Exercise 4: Genomic Analysis Pipeline</strong></p>
+<p>Download a bacterial genome and: 1. Calculate the genome size 2. Count all restriction sites for at least 3 different enzymes 3. Find the longest homopolymer run 4. Calculate GC content using only Unix tools 5. Document your pipeline in a shell script</p>
+</div>
+</div>
+
+
+<div id="refs" class="references csl-bib-body hanging-indent" data-entry-spacing="0" data-line-spacing="2" role="list" style="display: none">
+<div id="ref-friedl2006regex" class="csl-entry" role="listitem">
+Friedl, J. E. F. (2006). <em>Mastering regular expressions</em>.
+</div>
+</div>
+</section></main><!-- /main --><script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    // Ensure there is a toggle, if there isn't float one in the top right
+    if (window.document.querySelector('.quarto-color-scheme-toggle') === null) {
+      const a = window.document.createElement('a');
+      a.classList.add('top-right');
+      a.classList.add('quarto-color-scheme-toggle');
+      a.href = "";
+      a.onclick = function() { try { window.quartoToggleColorScheme(); } catch {} return false; };
+      const i = window.document.createElement("i");
+      i.classList.add('bi');
+      a.appendChild(i);
+      window.document.body.appendChild(a);
+    }
+    setColorSchemeToggle(hasAlternateSentinel())
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+            // target, if specified
+            link.setAttribute("target", "_blank");
+            if (link.getAttribute("rel") === null) {
+              link.setAttribute("rel", "noopener");
+            }
+            // default icon
+            link.classList.add("external");
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        const annoteTargets = window.document.querySelectorAll('.code-annotation-anchor');
+        for (let i=0; i<annoteTargets.length; i++) {
+          const annoteTarget = annoteTargets[i];
+          const targetCell = annoteTarget.getAttribute("data-target-cell");
+          const targetAnnotation = annoteTarget.getAttribute("data-target-annotation");
+          const contentFn = () => {
+            const content = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+            if (content) {
+              const tipContent = content.cloneNode(true);
+              tipContent.classList.add("code-annotation-tip-content");
+              return tipContent.outerHTML;
+            }
+          }
+          const config = {
+            allowHTML: true,
+            content: contentFn,
+            onShow: (instance) => {
+              selectCodeLines(instance.reference);
+              instance.reference.classList.add('code-annotation-active');
+              window.tippy.hideAll();
+            },
+            onHide: (instance) => {
+              unselectCodeLines();
+              instance.reference.classList.remove('code-annotation-active');
+            },
+            maxWidth: 300,
+            delay: [50, 0],
+            duration: [200, 0],
+            offset: [5, 10],
+            arrow: true,
+            appendTo: function(el) {
+              return el.parentElement.parentElement.parentElement;
+            },
+            interactive: true,
+            interactiveBorder: 10,
+            theme: 'quarto',
+            placement: 'right',
+            popperOptions: {
+              modifiers: [
+              {
+                name: 'flip',
+                options: {
+                  flipVariations: false, // true by default
+                  allowedAutoPlacements: ['right'],
+                  fallbackPlacements: ['right', 'top', 'top-start', 'top-end', 'bottom', 'bottom-start', 'bottom-end', 'left'],
+                },
+              },
+              {
+                name: 'preventOverflow',
+                options: {
+                  mainAxis: false,
+                  altAxis: false
+                }
+              }
+              ]        
+            }      
+          };
+          window.tippy(annoteTarget, config); 
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script><nav class="page-navigation"><div class="nav-page nav-page-previous">
+      <a href="../chapters/06-files-pipes.html" class="pagination-link" aria-label="Files, Pipes, and Redirection">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Files, Pipes, and Redirection</span></span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+      <a href="../chapters/08-shell-scripting.html" class="pagination-link" aria-label="Shell Scripting">
+        <span class="nav-page-text"><span class="chapter-number">8</span>&nbsp; <span class="chapter-title">Shell Scripting</span></span> <i class="bi bi-arrow-right-short"></i>
+      </a>
+  </div>
+</nav>
+</div> <!-- /content -->
+<footer class="footer"><div class="nav-footer">
+    <div class="nav-footer-left">
+<p>© 2026 William A. Cresko | Knight Campus for Accelerating Scientific Impact</p>
+</div>   
+    <div class="nav-footer-center">
+      &nbsp;
+    <div class="toc-actions d-sm-block d-md-none"><ul><li><a href="https://github.com/wcresko/BioE_Comp_Tools_Fa2026/edit/main/Book/chapters/07-grep-regex.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li><li><a href="https://github.com/wcresko/BioE_Comp_Tools_Fa2026/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></div>
+    <div class="nav-footer-right">
+<p><a href="https://wcresko.github.io/BioE_Comp_Tools_Fa2026/">Course website</a> | Built with <a href="https://quarto.org/">Quarto</a></p>
+</div>
+  </div>
+</footer>
+
+
+</body></html>
