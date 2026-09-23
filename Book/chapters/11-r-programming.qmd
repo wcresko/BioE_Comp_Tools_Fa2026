@@ -13,14 +13,14 @@ After completing this chapter, you will be able to:
 
 - Explain why R is well-suited for scientific computing
 - Understand R's object-oriented nature and examine objects with `class()`, `typeof()`, and `str()`
-- Use RStudio as an integrated development environment
+- Use Positron as an integrated development environment for R
 - Perform basic arithmetic and variable assignment in R
 - Work with vectors and understand vectorized operations
 - Use logical operators and handle floating-point comparisons correctly
 - Create and manipulate data frames, lists, and matrices
 - Use built-in functions and access help documentation including vignettes
 - Interpret common error messages and handle missing values (`NA`) correctly
-- Manage the working directory with RStudio Projects
+- Manage the working directory by working in a project folder
 - Install packages and resolve namespace conflicts
 - Create basic visualizations
 - Read and write data files
@@ -94,9 +94,9 @@ ggplot(hydrogel, aes(x = concentration, y = compression)) +
   geom_boxplot()
 ```
 
-In RStudio, create a script with File → New File → R Script, and run the current line or selection with `Ctrl+Enter` (`Cmd+Enter` on a Mac). Comment lines ending in four or more dashes, as above, become collapsible sections in the editor's outline. Quarto documents (@sec-quarto-documents) extend the same idea by interleaving code chunks with formatted narrative.
+In Positron or VS Code, create a script with File → New File (choose R), and run the current line or selection with `Ctrl+Enter` (`Cmd+Enter` on a Mac). Comment lines ending in four or more dashes, as above, become collapsible sections in the editor's outline. Quarto documents (@sec-quarto-documents) extend the same idea by interleaving code chunks with formatted narrative.
 
-A script can also be run from the shell without opening RStudio at all, which is how analyses run on Talapas (@sec-hpc-talapas). The same small program looks like this in R and in Python; the shell side of running scripts is covered in @sec-rscript.
+A script can also be run from the shell without opening an IDE at all, which is how analyses run on Talapas (@sec-hpc-talapas). The same small program looks like this in R and in Python; the shell side of running scripts is covered in @sec-rscript.
 
 ::: {.panel-tabset}
 ### R
@@ -137,33 +137,31 @@ python3 summarize.py experiment.csv
 ```
 :::
 
-## RStudio: Your R Environment {#sec-rstudio}
+## Positron: Your R Environment {#sec-rstudio}
 
-While R can run from the command line, most users work in **RStudio**, an integrated development environment (IDE) that makes R more accessible and productive.
+While R can run from the command line, most users work in an integrated development environment (IDE). In this course that is **Positron** (@sec-positron), which is built on the same core as VS Code and adds the panes a data scientist needs.
 
-### The RStudio Interface {#sec-the-rstudio-interface}
+### The Positron Interface {#sec-the-rstudio-interface}
 
-RStudio organizes your workspace into four panes:
+Positron organizes your workspace into a few key regions:
 
-**Source (top-left).** Where you write and edit scripts. Code here isn't executed until you explicitly run it.
+**Editor (center).** Where you write and edit scripts and Quarto documents. Code here isn't executed until you explicitly run it.
 
-**Console (bottom-left).** The interactive R session. Commands typed here execute immediately. Output appears here.
+**Console (bottom).** The interactive R (or Python) session. Commands typed here execute immediately, and lines sent from the editor appear here with their output.
 
-**Environment/History (top-right).** Shows variables you've created (Environment tab) and commands you've run (History tab).
+**Variables (right).** Shows the objects you've created in the current session, with their type and size; click a data frame to open it in the **Data Explorer**.
 
-**Files/Plots/Help (bottom-right).** File browser, plot viewer, and help documentation.
+**Plots, Help, and Explorer (right and left).** The plot viewer, help documentation, and the file browser for the folder you have open.
 
-![The RStudio interface showing all four panes: Source (top-left) with R code, Console (bottom-left) showing command output, Environment/Workspace (top-right) displaying variables and data, and Plots (bottom-right) showing a visualization.](../images/Chap09_img001.png){#fig-rstudio-interface width="100%"}
-
-::: {.callout-note title="R is not RStudio"}
-`R` is the programming language; `RStudio` is the integrated development environment that lets you write and run R (and other languages such as Python) comfortably. R must be installed first, and RStudio then finds it. If you prefer Positron or VS Code, the panes have different names but the same jobs (@sec-which-ide).
+::: {.callout-note title="R is not the IDE"}
+`R` is the programming language; Positron (or VS Code) is the integrated development environment that lets you write and run R and Python comfortably. R must be installed first, and Positron then finds it. If you ever need to, you can run R directly from the shell by typing `R`.
 :::
 
 ::: {.callout-tip}
-Learn keyboard shortcuts! `Ctrl+Enter` (Windows/Linux) or `Cmd+Enter` (Mac) runs the current line or selection. `Ctrl+Shift+S` runs the entire script. The pane layout can be rearranged under Tools → Global Options → Pane Layout, and the Packages and Help tabs in the bottom-right pane are worth clicking through on your first day.
+Learn keyboard shortcuts! `Ctrl+Enter` (Windows/Linux) or `Cmd+Enter` (Mac) runs the current line or selection in the console. The essential editor shortcuts are collected in @sec-appendix-shortcuts.
 :::
 
-### RStudio Projects and the Working Directory {#sec-rstudio-projects}
+### Project Folders and the Working Directory {#sec-rstudio-projects}
 
 Every R session has a **working directory**: the folder that relative paths such as `"data/results.csv"` are resolved against, exactly as in the shell (@sec-unix-fundamentals). You can inspect and change it from R:
 
@@ -177,14 +175,13 @@ list.files()                  # What files are here?
 list.files("data")            # ...and in a subfolder
 ```
 
-RStudio Projects organize your work with self-contained directories and remove the need for `setwd()` altogether:
+Working in a project folder removes the need for `setwd()` altogether:
 
-1. Go to File → New Project
-2. Choose New Directory → New Project
-3. Name your project and select a location
-4. RStudio creates a `.Rproj` file
+1. Keep each project in its own directory (see @sec-quarto-projects for a typical layout)
+2. In Positron, use **File → Open Folder** to open that directory, not a single file
+3. The R console starts with the working directory set to that folder
 
-Opening the `.Rproj` file sets the working directory to the project folder automatically, so paths in your scripts can be relative to the project root and the code runs unchanged on a collaborator's computer. A `setwd("/Users/yourname/...")` line at the top of a script, by contrast, breaks the moment anyone else runs it.
+Because the working directory is the project folder, paths in your scripts can be relative to the project root and the code runs unchanged on a collaborator's computer. A `setwd("/Users/yourname/...")` line at the top of a script is a red flag: it will fail for everyone but you.
 
 ## Understanding R: Everything is an Object {#sec-r-objects}
 
@@ -1035,7 +1032,7 @@ install.packages(c("ggplot2", "readr", "tidyr"))
 ```
 
 ::: {.callout-note}
-Package names are case-sensitive and must be in quotation marks when installing. You only need to install a package once on your system (and again after upgrading R). RStudio offers the same thing through a dialog at Tools → Install Packages, and the Packages tab in the bottom-right pane lists what is installed. Bioconductor packages are installed with `BiocManager::install()` instead (@sec-install-checklist).
+Package names are case-sensitive and must be in quotation marks when installing. You only need to install a package once on your system (and again after upgrading R). Positron offers the same thing through the Command Palette (Cmd/Ctrl-Shift-P → **R: Install Packages**), and `installed.packages()` or the Packages view lists what is installed. Bioconductor packages are installed with `BiocManager::install()` instead (@sec-install-checklist).
 :::
 
 ### Loading Packages {#sec-loading-packages}
@@ -1178,13 +1175,13 @@ names(experiment)
 colnames(experiment)
 ```
 
-In RStudio, you can also use `View()` to open a spreadsheet-like viewer for interactive exploration:
+In Positron, you can also use `View()` to open the Data Explorer, a spreadsheet-like viewer for interactive exploration:
 
 ```{r}
 #| label: view-df
 #| eval: false
 
-# Opens data in a viewer pane (RStudio only)
+# Opens data in the Data Explorer (Positron)
 View(experiment)
 ```
 
@@ -1383,7 +1380,7 @@ measurements <- read_tsv("data.tsv")
 ```
 
 ::: {.callout-warning title="Always check what you imported"}
-Reading a file rarely fails loudly; it fails quietly by giving you the wrong column types. Immediately after any import, look at the result with `str()` or `glimpse()`, `head()`, `dim()`, and `summary()` (or `View()` in RStudio). A numeric column that shows up as `character` means a non-numeric entry is hiding somewhere in the file.
+Reading a file rarely fails loudly; it fails quietly by giving you the wrong column types. Immediately after any import, look at the result with `str()` or `glimpse()`, `head()`, `dim()`, and `summary()` (or `View()` in Positron). A numeric column that shows up as `character` means a non-numeric entry is hiding somewhere in the file.
 :::
 
 ### Writing Files {#sec-r-writing-files}
@@ -1979,7 +1976,7 @@ This chapter introduced R programming fundamentals:
 
 - R is designed for statistical computing with excellent graphics
 - Everything in R is an object with a class and type; use `class()`, `typeof()`, and `str()` to explore objects
-- RStudio provides an integrated development environment
+- Positron provides an integrated development environment with a console, Variables pane, Plots pane, and Data Explorer
 - Variables are assigned with `<-`; R is case-sensitive; avoid reserved words and shadowing built-in functions
 - Vectors are the fundamental data structure; operations are vectorized
 - Logical operators (`&`, `|`, `!`, `%in%`) and comparison operators enable conditional logic
@@ -2058,9 +2055,9 @@ Using the built-in `mtcars` dataset:
 4. Verify the data matches the original
 5. Repeat the round trip with `write.csv()` *without* `row.names = FALSE`, read the file back, and explain the extra column
 
-**Exercise 8: Exploring RStudio and the Help System**
+**Exercise 8: Exploring Positron and the Help System**
 
-1. Locate the four panes; click through the Packages and Help tabs in the bottom-right pane
+1. Locate the editor, Console, Variables, and Plots panes; open the Help pane
 2. Create a new R script and a new Quarto document (File → New File) and compare them
 3. Run `?sd`, then `args(sd)` and `example(sd)`; from the help page alone, work out how to compute the standard deviation of a vector containing `NA`
 4. Deliberately trigger three errors from @tbl-common-r-errors (an undefined object, a missing package, an unbalanced bracket) and confirm you can read each message
@@ -2084,7 +2081,7 @@ Using the built-in `mtcars` dataset:
 **Quick References**
 
 - [Quick-R](https://www.statmethods.net) — Concise reference for common R tasks
-- [RStudio Cheat Sheets](https://posit.co/resources/cheatsheets/) — One-page references for popular packages
+- [Posit Cheat Sheets](https://posit.co/resources/cheatsheets/) — One-page references for popular packages
 
 **Bioinformatics-Specific**
 
