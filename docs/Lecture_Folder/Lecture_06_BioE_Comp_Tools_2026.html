@@ -217,7 +217,7 @@ Bill Cresko
 <ul>
 <li><a href="../book/chapters/11-r-programming.html">Ch. 11: R Programming Fundamentals</a></li>
 <li><a href="../book/chapters/12-python-programming.html">Ch. 12: Python Programming Fundamentals</a></li>
-<li><a href="../book/chapters/13-data-visualization.html">Ch. 13: Data Visualization with ggplot2</a></li>
+<li><a href="../book/chapters/14-data-visualization.html">Ch. 14: Data Visualization with ggplot2</a></li>
 <li><em>Reference:</em> <a href="../book/chapters/appendix-E-r.html">App. E: R Command Reference</a> · <a href="../book/chapters/appendix-F-python.html">App. F: Python Quick Reference</a></li>
 </ul>
 </section>
@@ -601,7 +601,7 @@ Figure&nbsp;6: Four plots arranged in a 2 x 2 grid with par(mfrow)
 </div>
 <ul>
 <li>Now you have a hand-made data frame with row names</li>
-<li>Take a look at it in the <strong>Data Explorer</strong> in Positron (R and Python)</li>
+<li>Take a look at it in the Environment pane of RStudio, or the <strong>Data Explorer</strong> in Positron (R and Python)</li>
 </ul>
 </section>
 <section id="reading-in-and-exporting-data-frames" class="slide level2">
@@ -643,6 +643,100 @@ Figure&nbsp;6: Four plots arranged in a 2 x 2 grid with par(mfrow)
 </div>
 </div>
 </section>
+<section id="running-example-the-stickleback-table-as-a-data-frame" class="slide level2">
+<h2>Running example: the stickleback table as a data frame</h2>
+<div class="panel-tabset">
+<ul id="tabset-10" class="panel-tabset-tabby"><li><a data-tabby-default="" href="#tabset-10-1">R</a></li><li><a href="#tabset-10-2">Python</a></li></ul>
+<div class="tab-content">
+<div id="tabset-10-1">
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb23"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a></a>stickle <span class="ot">&lt;-</span> <span class="fu">read.delim</span>(<span class="st">"../Data_Folder/Stickle_RNAseq.tsv"</span>, <span class="at">check.names =</span> <span class="cn">FALSE</span>)</span>
+<span id="cb23-2"><a></a><span class="fu">dim</span>(stickle)                          <span class="co"># 80 fish x 604 columns</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1]  80 604</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb25"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb25-1"><a></a>stickle[<span class="dv">1</span><span class="sc">:</span><span class="dv">4</span>, <span class="dv">1</span><span class="sc">:</span><span class="dv">7</span>]                     <span class="co"># first rows, first columns</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>  Individual Genotype   Microbiota Geno&amp;Micro Gene1 Gene2 Gene3
+1        AC1        A conventional      convA    16    15    71
+2        AC2        A conventional      convA     7     6    72
+3        AC3        A conventional      convA     9     8    22
+4        AC4        A conventional      convA     8    18    15</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb27"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb27-1"><a></a><span class="fu">table</span>(stickle<span class="sc">$</span>Genotype, stickle<span class="sc">$</span>Microbiota)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>   
+    conventional mono
+  A           20   20
+  B           20   20</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb29"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb29-1"><a></a><span class="fu">summary</span>(stickle<span class="sc">$</span>Gene1)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>   Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+  0.000   1.000   3.500   7.675  12.250  39.000 </code></pre>
+</div>
+</div>
+</div>
+<div id="tabset-10-2">
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb31"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb31-1"><a></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
+<span id="cb31-2"><a></a>stickle <span class="op">=</span> pd.read_csv(<span class="st">"../Data_Folder/Stickle_RNAseq.tsv"</span>, sep<span class="op">=</span><span class="st">"</span><span class="ch">\t</span><span class="st">"</span>)</span>
+<span id="cb31-3"><a></a>stickle.shape                          <span class="co"># (80, 604)</span></span>
+<span id="cb31-4"><a></a>stickle.iloc[:<span class="dv">4</span>, :<span class="dv">7</span>]</span>
+<span id="cb31-5"><a></a>pd.crosstab(stickle[<span class="st">"Genotype"</span>], stickle[<span class="st">"Microbiota"</span>])</span>
+<span id="cb31-6"><a></a>stickle[<span class="st">"Gene1"</span>].describe()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<section id="running-example-a-first-figure" class="slide level2">
+<h2>Running example: a first figure</h2>
+<div class="panel-tabset">
+<ul id="tabset-11" class="panel-tabset-tabby"><li><a data-tabby-default="" href="#tabset-11-1">R</a></li><li><a href="#tabset-11-2">Python</a></li></ul>
+<div class="tab-content">
+<div id="tabset-11-1">
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb32"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb32-1"><a></a><span class="fu">boxplot</span>(Gene1 <span class="sc">~</span> Genotype <span class="sc">+</span> Microbiota, <span class="at">data =</span> stickle,</span>
+<span id="cb32-2"><a></a>        <span class="at">col =</span> <span class="fu">c</span>(<span class="st">"steelblue"</span>, <span class="st">"tomato"</span>, <span class="st">"steelblue"</span>, <span class="st">"tomato"</span>),</span>
+<span id="cb32-3"><a></a>        <span class="at">ylab =</span> <span class="st">"Gene1 read count"</span>, <span class="at">las =</span> <span class="dv">2</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div id="fig-lec06-stickle-boxplot" class="quarto-float quarto-figure quarto-figure-center">
+<figure class="quarto-float quarto-float-fig">
+<div aria-describedby="fig-lec06-stickle-boxplot-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img data-src="Lecture_06_BioE_Comp_Tools_2026_files/figure-revealjs/fig-lec06-stickle-boxplot-1.png" style="width:60.0%">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-lec06-stickle-boxplot-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;7: Gene1 counts by host genotype and microbiota treatment
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+</div>
+<div id="tabset-11-2">
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb33"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb33-1"><a></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
+<span id="cb33-2"><a></a>stickle.boxplot(column<span class="op">=</span><span class="st">"Gene1"</span>, by<span class="op">=</span>[<span class="st">"Genotype"</span>, <span class="st">"Microbiota"</span>])</span>
+<span id="cb33-3"><a></a>plt.ylabel(<span class="st">"Gene1 read count"</span>)<span class="op">;</span> plt.show()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+</div>
+</div>
+</div>
+<div class="callout callout-tip callout-titled callout-style-default">
+<div class="callout-body">
+<div class="callout-title">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<p><strong>Tip</strong></p>
+</div>
+<div class="callout-content">
+<p><code>check.names = FALSE</code> keeps the column name <code>Geno&amp;Micro</code> as it is in the file; without it R would rename it <code>Geno.Micro</code>. Either way, back-ticks let you refer to awkward names: <code>stickle$`Geno&amp;Micro`</code>.</p>
+</div>
+</div>
+</div>
+</section>
 <section id="indexing-in-data-frames" class="slide level2">
 <h2>Indexing in data frames</h2>
 <ul>
@@ -652,24 +746,24 @@ Figure&nbsp;6: Four plots arranged in a 2 x 2 grid with par(mfrow)
 <li>pandas: <code>.iloc[row, col]</code> indexes by <strong>position</strong> (from 0), <code>.loc[row, col]</code> by <strong>name</strong>; <code>df["col"]</code> or <code>df.col</code> picks a column</li>
 </ul>
 <div class="panel-tabset">
-<ul id="tabset-10" class="panel-tabset-tabby"><li><a data-tabby-default="" href="#tabset-10-1">R</a></li><li><a href="#tabset-10-2">Python</a></li></ul>
+<ul id="tabset-12" class="panel-tabset-tabby"><li><a data-tabby-default="" href="#tabset-12-1">R</a></li><li><a href="#tabset-12-2">Python</a></li></ul>
 <div class="tab-content">
-<div id="tabset-10-1">
+<div id="tabset-12-1">
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb23"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a></a><span class="fu">print</span> (YourFile[,<span class="dv">2</span>])</span>
-<span id="cb23-2"><a></a><span class="fu">print</span> (YourFile<span class="sc">$</span>variable)</span>
-<span id="cb23-3"><a></a><span class="fu">print</span> (YourFile[<span class="dv">2</span>,])</span>
-<span id="cb23-4"><a></a><span class="fu">plot</span> (YourFile<span class="sc">$</span>variable1, YourFile<span class="sc">$</span>variable2)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb34"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb34-1"><a></a><span class="fu">print</span> (YourFile[,<span class="dv">2</span>])</span>
+<span id="cb34-2"><a></a><span class="fu">print</span> (YourFile<span class="sc">$</span>variable)</span>
+<span id="cb34-3"><a></a><span class="fu">print</span> (YourFile[<span class="dv">2</span>,])</span>
+<span id="cb34-4"><a></a><span class="fu">plot</span> (YourFile<span class="sc">$</span>variable1, YourFile<span class="sc">$</span>variable2)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 </div>
-<div id="tabset-10-2">
+<div id="tabset-12-2">
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb24"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb24-1"><a></a><span class="bu">print</span>(YourFile.iloc[:, <span class="dv">1</span>])          <span class="co"># 2nd column (position 1) - R's YourFile[,2]</span></span>
-<span id="cb24-2"><a></a><span class="bu">print</span>(YourFile[<span class="st">"variable"</span>])         <span class="co"># column by name        - R's YourFile$variable</span></span>
-<span id="cb24-3"><a></a><span class="bu">print</span>(YourFile.iloc[<span class="dv">1</span>])             <span class="co"># 2nd row               - R's YourFile[2,]</span></span>
-<span id="cb24-4"><a></a><span class="bu">print</span>(YourFile.loc[<span class="st">"Sample_2"</span>])     <span class="co"># row by its name</span></span>
-<span id="cb24-5"><a></a>plt.scatter(YourFile[<span class="st">"variable1"</span>], YourFile[<span class="st">"variable2"</span>])</span>
-<span id="cb24-6"><a></a>plt.show()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb35"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb35-1"><a></a><span class="bu">print</span>(YourFile.iloc[:, <span class="dv">1</span>])          <span class="co"># 2nd column (position 1) - R's YourFile[,2]</span></span>
+<span id="cb35-2"><a></a><span class="bu">print</span>(YourFile[<span class="st">"variable"</span>])         <span class="co"># column by name        - R's YourFile$variable</span></span>
+<span id="cb35-3"><a></a><span class="bu">print</span>(YourFile.iloc[<span class="dv">1</span>])             <span class="co"># 2nd row               - R's YourFile[2,]</span></span>
+<span id="cb35-4"><a></a><span class="bu">print</span>(YourFile.loc[<span class="st">"Sample_2"</span>])     <span class="co"># row by its name</span></span>
+<span id="cb35-5"><a></a>plt.scatter(YourFile[<span class="st">"variable1"</span>], YourFile[<span class="st">"variable2"</span>])</span>
+<span id="cb35-6"><a></a>plt.show()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 </div>
 </div>
@@ -678,36 +772,36 @@ Figure&nbsp;6: Four plots arranged in a 2 x 2 grid with par(mfrow)
 <section id="practice-reading-in-transcriptomic-data" class="slide level2">
 <h2>Practice reading in transcriptomic data</h2>
 <div class="panel-tabset">
-<ul id="tabset-11" class="panel-tabset-tabby"><li><a data-tabby-default="" href="#tabset-11-1">R</a></li><li><a href="#tabset-11-2">Python</a></li></ul>
+<ul id="tabset-13" class="panel-tabset-tabby"><li><a data-tabby-default="" href="#tabset-13-1">R</a></li><li><a href="#tabset-13-2">Python</a></li></ul>
 <div class="tab-content">
-<div id="tabset-11-1">
+<div id="tabset-13-1">
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb25"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb25-1"><a></a>RNAseq_Data <span class="ot">&lt;-</span> <span class="fu">read.table</span>(<span class="st">'&lt;name_of_file&gt;'</span>, <span class="at">header=</span><span class="cn">TRUE</span>, <span class="at">sep=</span><span class="st">','</span>)</span>
-<span id="cb25-2"><a></a></span>
-<span id="cb25-3"><a></a><span class="fu">print</span> (RNAseq_Data)</span>
-<span id="cb25-4"><a></a><span class="fu">head</span> (RNAseq_Data)</span>
-<span id="cb25-5"><a></a><span class="fu">tail</span> (RNAseq_Data)</span>
-<span id="cb25-6"><a></a></span>
-<span id="cb25-7"><a></a><span class="fu">print</span> (RNAseq_Data[,<span class="dv">2</span>])</span>
-<span id="cb25-8"><a></a><span class="fu">print</span> (RNAseq_Data[<span class="dv">1</span>,])</span>
-<span id="cb25-9"><a></a><span class="fu">print</span> (RNAseq_Data[<span class="dv">1</span>,<span class="dv">2</span>])</span>
-<span id="cb25-10"><a></a><span class="fu">print</span> (RNAseq_Data<span class="sc">$</span>ENSGACG00000000010)</span>
-<span id="cb25-11"><a></a><span class="fu">print</span> (RNAseq_Data<span class="sc">$</span>ENSGACG00000000010<span class="sc">&gt;</span><span class="fl">45.0</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb36"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb36-1"><a></a>RNAseq_Data <span class="ot">&lt;-</span> <span class="fu">read.table</span>(<span class="st">'&lt;name_of_file&gt;'</span>, <span class="at">header=</span><span class="cn">TRUE</span>, <span class="at">sep=</span><span class="st">','</span>)</span>
+<span id="cb36-2"><a></a></span>
+<span id="cb36-3"><a></a><span class="fu">print</span> (RNAseq_Data)</span>
+<span id="cb36-4"><a></a><span class="fu">head</span> (RNAseq_Data)</span>
+<span id="cb36-5"><a></a><span class="fu">tail</span> (RNAseq_Data)</span>
+<span id="cb36-6"><a></a></span>
+<span id="cb36-7"><a></a><span class="fu">print</span> (RNAseq_Data[,<span class="dv">2</span>])</span>
+<span id="cb36-8"><a></a><span class="fu">print</span> (RNAseq_Data[<span class="dv">1</span>,])</span>
+<span id="cb36-9"><a></a><span class="fu">print</span> (RNAseq_Data[<span class="dv">1</span>,<span class="dv">2</span>])</span>
+<span id="cb36-10"><a></a><span class="fu">print</span> (RNAseq_Data<span class="sc">$</span>ENSGACG00000000010)</span>
+<span id="cb36-11"><a></a><span class="fu">print</span> (RNAseq_Data<span class="sc">$</span>ENSGACG00000000010<span class="sc">&gt;</span><span class="fl">45.0</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 </div>
-<div id="tabset-11-2">
+<div id="tabset-13-2">
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb26"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb26-1"><a></a>RNAseq_Data <span class="op">=</span> pd.read_csv(<span class="st">"&lt;name_of_file&gt;"</span>)</span>
-<span id="cb26-2"><a></a></span>
-<span id="cb26-3"><a></a><span class="bu">print</span>(RNAseq_Data)</span>
-<span id="cb26-4"><a></a>RNAseq_Data.head()</span>
-<span id="cb26-5"><a></a>RNAseq_Data.tail()</span>
-<span id="cb26-6"><a></a></span>
-<span id="cb26-7"><a></a><span class="bu">print</span>(RNAseq_Data.iloc[:, <span class="dv">1</span>])</span>
-<span id="cb26-8"><a></a><span class="bu">print</span>(RNAseq_Data.iloc[<span class="dv">0</span>])          <span class="co"># first row is 0!</span></span>
-<span id="cb26-9"><a></a><span class="bu">print</span>(RNAseq_Data.iloc[<span class="dv">0</span>, <span class="dv">1</span>])</span>
-<span id="cb26-10"><a></a><span class="bu">print</span>(RNAseq_Data[<span class="st">"ENSGACG00000000010"</span>])</span>
-<span id="cb26-11"><a></a><span class="bu">print</span>(RNAseq_Data[<span class="st">"ENSGACG00000000010"</span>] <span class="op">&gt;</span> <span class="fl">45.0</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb37"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb37-1"><a></a>RNAseq_Data <span class="op">=</span> pd.read_csv(<span class="st">"&lt;name_of_file&gt;"</span>)</span>
+<span id="cb37-2"><a></a></span>
+<span id="cb37-3"><a></a><span class="bu">print</span>(RNAseq_Data)</span>
+<span id="cb37-4"><a></a>RNAseq_Data.head()</span>
+<span id="cb37-5"><a></a>RNAseq_Data.tail()</span>
+<span id="cb37-6"><a></a></span>
+<span id="cb37-7"><a></a><span class="bu">print</span>(RNAseq_Data.iloc[:, <span class="dv">1</span>])</span>
+<span id="cb37-8"><a></a><span class="bu">print</span>(RNAseq_Data.iloc[<span class="dv">0</span>])          <span class="co"># first row is 0!</span></span>
+<span id="cb37-9"><a></a><span class="bu">print</span>(RNAseq_Data.iloc[<span class="dv">0</span>, <span class="dv">1</span>])</span>
+<span id="cb37-10"><a></a><span class="bu">print</span>(RNAseq_Data[<span class="st">"ENSGACG00000000010"</span>])</span>
+<span id="cb37-11"><a></a><span class="bu">print</span>(RNAseq_Data[<span class="st">"ENSGACG00000000010"</span>] <span class="op">&gt;</span> <span class="fl">45.0</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 </div>
 </div>
@@ -716,42 +810,42 @@ Figure&nbsp;6: Four plots arranged in a 2 x 2 grid with par(mfrow)
 <section id="summary-stats-and-figures" class="slide level2">
 <h2>Summary stats and figures</h2>
 <div class="panel-tabset">
-<ul id="tabset-12" class="panel-tabset-tabby"><li><a data-tabby-default="" href="#tabset-12-1">R</a></li><li><a href="#tabset-12-2">Python</a></li></ul>
+<ul id="tabset-14" class="panel-tabset-tabby"><li><a data-tabby-default="" href="#tabset-14-1">R</a></li><li><a href="#tabset-14-2">Python</a></li></ul>
 <div class="tab-content">
-<div id="tabset-12-1">
+<div id="tabset-14-1">
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb27"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb27-1"><a></a>summary1 <span class="ot">&lt;-</span> <span class="fu">summary</span>(RNAseq_Data <span class="sc">$</span>ENSGACG00000000003)</span>
-<span id="cb27-2"><a></a><span class="fu">print</span> (summary1)</span>
-<span id="cb27-3"><a></a></span>
-<span id="cb27-4"><a></a><span class="fu">hist</span>(RNAseq_Data <span class="sc">$</span>ENSGACG00000000003)</span>
-<span id="cb27-5"><a></a><span class="fu">boxplot</span>(RNAseq_Data<span class="sc">$</span>ENSGACG00000000003)</span>
-<span id="cb27-6"><a></a><span class="fu">boxplot</span>(RNAseq_Data<span class="sc">$</span>ENSGACG00000000003<span class="sc">~</span>RNAseq_Data<span class="sc">$</span>Population)</span>
-<span id="cb27-7"><a></a><span class="fu">plot</span>(RNAseq_Data <span class="sc">$</span>ENSGACG00000000003, RNAseq_Data<span class="sc">$</span>ENSGACG00000000003)</span>
-<span id="cb27-8"><a></a></span>
-<span id="cb27-9"><a></a><span class="fu">boxplot</span>(RNAseq_Data <span class="sc">$</span>ENSGACG00000000003<span class="sc">~</span>RNAseq_Data<span class="sc">$</span>Treatment,</span>
-<span id="cb27-10"><a></a>        <span class="at">col =</span> <span class="st">"red"</span>, <span class="at">ylab =</span> <span class="st">"Expression Level"</span>, <span class="at">xlab =</span> <span class="st">"Treatment level"</span>,</span>
-<span id="cb27-11"><a></a>        <span class="at">border =</span><span class="st">"orange"</span>,</span>
-<span id="cb27-12"><a></a>        <span class="at">main =</span> <span class="st">"Boxplot of variation in gene expression across microbiota treatments"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb38"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb38-1"><a></a>summary1 <span class="ot">&lt;-</span> <span class="fu">summary</span>(RNAseq_Data <span class="sc">$</span>ENSGACG00000000003)</span>
+<span id="cb38-2"><a></a><span class="fu">print</span> (summary1)</span>
+<span id="cb38-3"><a></a></span>
+<span id="cb38-4"><a></a><span class="fu">hist</span>(RNAseq_Data <span class="sc">$</span>ENSGACG00000000003)</span>
+<span id="cb38-5"><a></a><span class="fu">boxplot</span>(RNAseq_Data<span class="sc">$</span>ENSGACG00000000003)</span>
+<span id="cb38-6"><a></a><span class="fu">boxplot</span>(RNAseq_Data<span class="sc">$</span>ENSGACG00000000003<span class="sc">~</span>RNAseq_Data<span class="sc">$</span>Population)</span>
+<span id="cb38-7"><a></a><span class="fu">plot</span>(RNAseq_Data <span class="sc">$</span>ENSGACG00000000003, RNAseq_Data<span class="sc">$</span>ENSGACG00000000003)</span>
+<span id="cb38-8"><a></a></span>
+<span id="cb38-9"><a></a><span class="fu">boxplot</span>(RNAseq_Data <span class="sc">$</span>ENSGACG00000000003<span class="sc">~</span>RNAseq_Data<span class="sc">$</span>Treatment,</span>
+<span id="cb38-10"><a></a>        <span class="at">col =</span> <span class="st">"red"</span>, <span class="at">ylab =</span> <span class="st">"Expression Level"</span>, <span class="at">xlab =</span> <span class="st">"Treatment level"</span>,</span>
+<span id="cb38-11"><a></a>        <span class="at">border =</span><span class="st">"orange"</span>,</span>
+<span id="cb38-12"><a></a>        <span class="at">main =</span> <span class="st">"Boxplot of variation in gene expression across microbiota treatments"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 </div>
-<div id="tabset-12-2">
+<div id="tabset-14-2">
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb28"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb28-1"><a></a><span class="im">import</span> seaborn <span class="im">as</span> sns</span>
-<span id="cb28-2"><a></a></span>
-<span id="cb28-3"><a></a>gene <span class="op">=</span> RNAseq_Data[<span class="st">"ENSGACG00000000003"</span>]</span>
-<span id="cb28-4"><a></a>summary1 <span class="op">=</span> gene.describe()          <span class="co"># count, mean, std, min, quartiles, max</span></span>
-<span id="cb28-5"><a></a><span class="bu">print</span>(summary1)</span>
-<span id="cb28-6"><a></a></span>
-<span id="cb28-7"><a></a>gene.hist()</span>
-<span id="cb28-8"><a></a>gene.plot.box()</span>
-<span id="cb28-9"><a></a>RNAseq_Data.boxplot(column<span class="op">=</span><span class="st">"ENSGACG00000000003"</span>, by<span class="op">=</span><span class="st">"Population"</span>)</span>
-<span id="cb28-10"><a></a>plt.scatter(gene, gene)</span>
-<span id="cb28-11"><a></a></span>
-<span id="cb28-12"><a></a>sns.boxplot(data<span class="op">=</span>RNAseq_Data, x<span class="op">=</span><span class="st">"Treatment"</span>, y<span class="op">=</span><span class="st">"ENSGACG00000000003"</span>, color<span class="op">=</span><span class="st">"red"</span>)</span>
-<span id="cb28-13"><a></a>plt.xlabel(<span class="st">"Treatment level"</span>)</span>
-<span id="cb28-14"><a></a>plt.ylabel(<span class="st">"Expression Level"</span>)</span>
-<span id="cb28-15"><a></a>plt.title(<span class="st">"Boxplot of variation in gene expression across microbiota treatments"</span>)</span>
-<span id="cb28-16"><a></a>plt.show()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb39"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb39-1"><a></a><span class="im">import</span> seaborn <span class="im">as</span> sns</span>
+<span id="cb39-2"><a></a></span>
+<span id="cb39-3"><a></a>gene <span class="op">=</span> RNAseq_Data[<span class="st">"ENSGACG00000000003"</span>]</span>
+<span id="cb39-4"><a></a>summary1 <span class="op">=</span> gene.describe()          <span class="co"># count, mean, std, min, quartiles, max</span></span>
+<span id="cb39-5"><a></a><span class="bu">print</span>(summary1)</span>
+<span id="cb39-6"><a></a></span>
+<span id="cb39-7"><a></a>gene.hist()</span>
+<span id="cb39-8"><a></a>gene.plot.box()</span>
+<span id="cb39-9"><a></a>RNAseq_Data.boxplot(column<span class="op">=</span><span class="st">"ENSGACG00000000003"</span>, by<span class="op">=</span><span class="st">"Population"</span>)</span>
+<span id="cb39-10"><a></a>plt.scatter(gene, gene)</span>
+<span id="cb39-11"><a></a></span>
+<span id="cb39-12"><a></a>sns.boxplot(data<span class="op">=</span>RNAseq_Data, x<span class="op">=</span><span class="st">"Treatment"</span>, y<span class="op">=</span><span class="st">"ENSGACG00000000003"</span>, color<span class="op">=</span><span class="st">"red"</span>)</span>
+<span id="cb39-13"><a></a>plt.xlabel(<span class="st">"Treatment level"</span>)</span>
+<span id="cb39-14"><a></a>plt.ylabel(<span class="st">"Expression Level"</span>)</span>
+<span id="cb39-15"><a></a>plt.title(<span class="st">"Boxplot of variation in gene expression across microbiota treatments"</span>)</span>
+<span id="cb39-16"><a></a>plt.show()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 </div>
 </div>

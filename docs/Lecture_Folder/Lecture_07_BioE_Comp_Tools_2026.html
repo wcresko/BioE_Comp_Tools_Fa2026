@@ -216,8 +216,9 @@ Bill Cresko
 <p>The course book goes deeper on everything in this lecture. Read before or after class:</p>
 <ul>
 <li><a href="../book/chapters/08-tidy-data.html">Ch. 8: Tidy Data Principles</a></li>
-<li><a href="../book/chapters/13-data-visualization.html">Ch. 13: Data Visualization with ggplot2</a></li>
-<li><a href="../book/chapters/14-writing-functions.html">Ch. 14: Writing Functions in R</a></li>
+<li><a href="../book/chapters/13-data-wrangling.html">Ch. 13: Data Wrangling with the Tidyverse</a></li>
+<li><a href="../book/chapters/14-data-visualization.html">Ch. 14: Data Visualization with ggplot2</a></li>
+<li><a href="../book/chapters/15-writing-functions.html">Ch. 15: Writing Functions in R</a></li>
 <li><em>Reference:</em> <a href="../book/chapters/appendix-E-r.html">App. E: R Command Reference</a> · <a href="../book/chapters/appendix-F-python.html">App. F: Python Quick Reference</a></li>
 </ul>
 </section>
@@ -308,7 +309,7 @@ Bill Cresko
 <p><strong>Tip</strong></p>
 </div>
 <div class="callout-content">
-<p>When an object surprises you, run <code>str()</code> (R) or <code>.info()</code> / <code>type()</code> (Python) on it first. In <strong>Positron</strong>, the Variables pane shows the same information.</p>
+<p>When an object surprises you, run <code>str()</code> (R) or <code>.info()</code> / <code>type()</code> (Python) on it first. In <strong>Positron</strong> or <strong>RStudio</strong>, the Variables/Environment pane shows the same information.</p>
 </div>
 </div>
 </div>
@@ -954,7 +955,7 @@ Bill Cresko
 <p><strong>Tip</strong></p>
 </div>
 <div class="callout-content">
-<p><code>facet_wrap(~ group)</code> splits any plot into one panel per group, and <code>ggsave("figure.pdf")</code> writes the last plot to a file. Data-visualization mechanics get a full chapter in the <a href="../book/chapters/13-data-visualization.html">course book</a>.</p>
+<p><code>facet_wrap(~ group)</code> splits any plot into one panel per group, and <code>ggsave("figure.pdf")</code> writes the last plot to a file. Data-visualization mechanics get a full chapter in the <a href="../book/chapters/14-data-visualization.html">course book</a>.</p>
 </div>
 </div>
 </div>
@@ -963,6 +964,75 @@ Bill Cresko
 <h2>Choosing the right kind of plot</h2>
 
 <img data-src="images/Lec07_img005.svg" style="width:90.0%" class="r-stretch quarto-figure-center"><p class="caption">Start from the question and the type of data you have</p></section>
+<section id="running-example-wide-to-long-then-summarize" class="slide level2">
+<h2>Running example: wide to long, then summarize</h2>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb16"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a></a><span class="fu">library</span>(tidyverse)</span>
+<span id="cb16-2"><a></a>stickle <span class="ot">&lt;-</span> <span class="fu">read_tsv</span>(<span class="st">"../Data_Folder/Stickle_RNAseq.tsv"</span>, <span class="at">show_col_types =</span> <span class="cn">FALSE</span>) <span class="sc">|&gt;</span></span>
+<span id="cb16-3"><a></a>  <span class="fu">rename</span>(<span class="at">geno_micro =</span> <span class="st">`</span><span class="at">Geno&amp;Micro</span><span class="st">`</span>)          <span class="co"># fix the awkward name once</span></span>
+<span id="cb16-4"><a></a></span>
+<span id="cb16-5"><a></a>stickle_long <span class="ot">&lt;-</span> stickle <span class="sc">|&gt;</span></span>
+<span id="cb16-6"><a></a>  <span class="fu">pivot_longer</span>(<span class="fu">starts_with</span>(<span class="st">"Gene"</span>), <span class="at">names_to =</span> <span class="st">"gene"</span>, <span class="at">values_to =</span> <span class="st">"count"</span>)</span>
+<span id="cb16-7"><a></a>stickle_long                                  <span class="co"># 80 x 600 = 48,000 rows: one per fish x gene</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 48,000 × 6
+   Individual Genotype Microbiota   geno_micro gene   count
+   &lt;chr&gt;      &lt;chr&gt;    &lt;chr&gt;        &lt;chr&gt;      &lt;chr&gt;  &lt;dbl&gt;
+ 1 AC1        A        conventional convA      Gene1     16
+ 2 AC1        A        conventional convA      Gene2     15
+ 3 AC1        A        conventional convA      Gene3     71
+ 4 AC1        A        conventional convA      Gene4    153
+ 5 AC1        A        conventional convA      Gene5      2
+ 6 AC1        A        conventional convA      Gene6     11
+ 7 AC1        A        conventional convA      Gene7      9
+ 8 AC1        A        conventional convA      Gene8     11
+ 9 AC1        A        conventional convA      Gene9    540
+10 AC1        A        conventional convA      Gene10   104
+# ℹ 47,990 more rows</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb18"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a></a>gene_means <span class="ot">&lt;-</span> stickle_long <span class="sc">|&gt;</span></span>
+<span id="cb18-2"><a></a>  <span class="fu">group_by</span>(gene, Genotype, Microbiota) <span class="sc">|&gt;</span></span>
+<span id="cb18-3"><a></a>  <span class="fu">summarize</span>(<span class="at">mean_count =</span> <span class="fu">mean</span>(count), <span class="at">.groups =</span> <span class="st">"drop"</span>)</span>
+<span id="cb18-4"><a></a>gene_means <span class="sc">|&gt;</span> <span class="fu">filter</span>(gene <span class="sc">==</span> <span class="st">"Gene1"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 4 × 4
+  gene  Genotype Microbiota   mean_count
+  &lt;chr&gt; &lt;chr&gt;    &lt;chr&gt;             &lt;dbl&gt;
+1 Gene1 A        conventional      12.1 
+2 Gene1 A        mono              15.8 
+3 Gene1 B        conventional       0.6 
+4 Gene1 B        mono               2.15</code></pre>
+</div>
+</div>
+</section>
+<section id="running-example-the-same-figure-the-grammar-of-graphics-way" class="slide level2">
+<h2>Running example: the same figure, the grammar-of-graphics way</h2>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb20"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a></a>stickle_long <span class="sc">|&gt;</span></span>
+<span id="cb20-2"><a></a>  <span class="fu">filter</span>(gene <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"Gene1"</span>, <span class="st">"Gene2"</span>, <span class="st">"Gene3"</span>, <span class="st">"Gene4"</span>)) <span class="sc">|&gt;</span></span>
+<span id="cb20-3"><a></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> Genotype, <span class="at">y =</span> count, <span class="at">fill =</span> Microbiota)) <span class="sc">+</span></span>
+<span id="cb20-4"><a></a>  <span class="fu">geom_boxplot</span>() <span class="sc">+</span></span>
+<span id="cb20-5"><a></a>  <span class="fu">facet_wrap</span>(<span class="sc">~</span> gene, <span class="at">scales =</span> <span class="st">"free_y"</span>) <span class="sc">+</span></span>
+<span id="cb20-6"><a></a>  <span class="fu">labs</span>(<span class="at">y =</span> <span class="st">"Read count"</span>, <span class="at">title =</span> <span class="st">"Stickleback gut RNA-seq"</span>) <span class="sc">+</span></span>
+<span id="cb20-7"><a></a>  <span class="fu">theme_minimal</span>(<span class="at">base_size =</span> <span class="dv">14</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+
+</div>
+<img data-src="Lecture_07_BioE_Comp_Tools_2026_files/figure-revealjs/fig-lec07-stickle-ggplot-1.png" style="width:70.0%" class="r-stretch quarto-figure-center" id="fig-lec07-stickle-ggplot"><p class="caption">
+Figure&nbsp;1: Counts for four genes by genotype and microbiota treatment
+</p><div class="callout callout-tip callout-titled callout-style-default">
+<div class="callout-body">
+<div class="callout-title">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<p><strong>Tip</strong></p>
+</div>
+<div class="callout-content">
+<p>Same data, three tools: <code>awk</code> gave us one gene’s mean per group in Week 4, base R’s <code>boxplot()</code> one figure in Week 6, and one <code>pivot_longer()</code> now unlocks <em>every</em> gene at once. This is the payoff of tidy, long-format data.</p>
+</div>
+</div>
+</div>
+</section>
 <section id="key-takeaways" class="slide level2">
 <h2>Key Takeaways</h2>
 <ul>

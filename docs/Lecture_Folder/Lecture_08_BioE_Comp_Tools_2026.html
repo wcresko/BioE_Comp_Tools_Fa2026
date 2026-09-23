@@ -215,8 +215,8 @@ Bill Cresko
 <h2>Book reading for this lecture</h2>
 <p>The course book goes deeper on everything in this lecture. Read before or after class:</p>
 <ul>
-<li><a href="../book/chapters/15-hpc-talapas.html">Ch. 15: High-Performance Computing with Talapas</a></li>
-<li><a href="../book/chapters/16-parallel-computing.html">Ch. 16: Parallel Computing in R</a></li>
+<li><a href="../book/chapters/16-hpc-talapas.html">Ch. 16: High-Performance Computing with Talapas</a></li>
+<li><a href="../book/chapters/17-parallel-computing.html">Ch. 17: Parallel Computing in R</a></li>
 <li><em>Reference:</em> <a href="../book/chapters/appendix-G-slurm.html">App. G: SLURM Command Reference</a></li>
 </ul>
 </section>
@@ -690,6 +690,41 @@ Bill Cresko
 </div>
 </div>
 </section>
+<section id="running-example-the-stickleback-summary-as-a-batch-job" class="slide level2">
+<h2>Running example: the stickleback summary as a batch job</h2>
+<p>Put the Week 7 code in a script, <code>stickle_means.R</code>, that writes <code>results/gene_means.tsv</code>, then wrap it in a Slurm script:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb8"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb8-1"><a></a><span class="co">#!/bin/bash</span></span>
+<span id="cb8-2"><a></a><span class="co">#SBATCH --job-name=stickle_means</span></span>
+<span id="cb8-3"><a></a><span class="co">#SBATCH --account=&lt;your_pirg&gt;</span></span>
+<span id="cb8-4"><a></a><span class="co">#SBATCH --partition=compute</span></span>
+<span id="cb8-5"><a></a><span class="co">#SBATCH --time=00:10:00</span></span>
+<span id="cb8-6"><a></a><span class="co">#SBATCH --mem=4G</span></span>
+<span id="cb8-7"><a></a><span class="co">#SBATCH --cpus-per-task=1</span></span>
+<span id="cb8-8"><a></a><span class="co">#SBATCH --output=logs/stickle_%j.out</span></span>
+<span id="cb8-9"><a></a><span class="co">#SBATCH --error=logs/stickle_%j.err</span></span>
+<span id="cb8-10"><a></a></span>
+<span id="cb8-11"><a></a><span class="ex">module</span> load R/4.4.0</span>
+<span id="cb8-12"><a></a><span class="bu">cd</span> ~/projects/comptools</span>
+<span id="cb8-13"><a></a><span class="ex">Rscript</span> stickle_means.R data/Stickle_RNAseq.tsv results/gene_means.tsv</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb9"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb9-1"><a></a><span class="fu">mkdir</span> <span class="at">-p</span> logs results</span>
+<span id="cb9-2"><a></a><span class="ex">sbatch</span> stickle_means.sbatch          <span class="co"># Submitted batch job 1234567</span></span>
+<span id="cb9-3"><a></a><span class="ex">squeue</span> <span class="at">-u</span> <span class="va">$USER</span>                      <span class="co"># is it running?</span></span>
+<span id="cb9-4"><a></a><span class="fu">cat</span> logs/stickle_1234567.out         <span class="co"># what did it print?</span></span>
+<span id="cb9-5"><a></a><span class="fu">head</span> results/gene_means.tsv</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="callout callout-tip callout-titled callout-style-default">
+<div class="callout-body">
+<div class="callout-title">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<p><strong>Tip</strong></p>
+</div>
+<div class="callout-content">
+<p>Nothing about the R script changed between your laptop and Talapas - only <em>where</em> it runs and <em>who</em> launches it (<code>sbatch</code> instead of you). For the term project, this same pattern scales to files thousands of times larger.</p>
+</div>
+</div>
+</div>
+</section>
 <section id="what-the-job-actually-runs" class="slide level2">
 <h2>What the job actually runs</h2>
 <p>The scripts are ordinary R and Python programs - the same ones you test on your laptop first. Arguments come from the command line so nothing is hard-coded.</p>
@@ -698,34 +733,34 @@ Bill Cresko
 <div class="tab-content">
 <div id="tabset-2-1">
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a></a><span class="co">#!/usr/bin/env Rscript</span></span>
-<span id="cb8-2"><a></a><span class="fu">library</span>(tidyverse)</span>
-<span id="cb8-3"><a></a></span>
-<span id="cb8-4"><a></a>args <span class="ot">&lt;-</span> <span class="fu">commandArgs</span>(<span class="at">trailingOnly =</span> <span class="cn">TRUE</span>)      <span class="co"># c("results/fasta_stats.tsv", "results/fasta_stats.png")</span></span>
-<span id="cb8-5"><a></a>stats <span class="ot">&lt;-</span> <span class="fu">read_tsv</span>(args[<span class="dv">1</span>])</span>
-<span id="cb8-6"><a></a></span>
-<span id="cb8-7"><a></a>p <span class="ot">&lt;-</span> <span class="fu">ggplot</span>(stats, <span class="fu">aes</span>(<span class="at">x =</span> file, <span class="at">y =</span> gc_percent)) <span class="sc">+</span></span>
-<span id="cb8-8"><a></a>  <span class="fu">geom_col</span>() <span class="sc">+</span></span>
-<span id="cb8-9"><a></a>  <span class="fu">labs</span>(<span class="at">x =</span> <span class="cn">NULL</span>, <span class="at">y =</span> <span class="st">"GC content (%)"</span>) <span class="sc">+</span></span>
-<span id="cb8-10"><a></a>  <span class="fu">theme_minimal</span>()</span>
-<span id="cb8-11"><a></a></span>
-<span id="cb8-12"><a></a><span class="fu">ggsave</span>(args[<span class="dv">2</span>], p, <span class="at">width =</span> <span class="dv">8</span>, <span class="at">height =</span> <span class="dv">4</span>)</span>
-<span id="cb8-13"><a></a><span class="fu">cat</span>(<span class="st">"Wrote"</span>, args[<span class="dv">2</span>], <span class="st">"</span><span class="sc">\n</span><span class="st">"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb10"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a></a><span class="co">#!/usr/bin/env Rscript</span></span>
+<span id="cb10-2"><a></a><span class="fu">library</span>(tidyverse)</span>
+<span id="cb10-3"><a></a></span>
+<span id="cb10-4"><a></a>args <span class="ot">&lt;-</span> <span class="fu">commandArgs</span>(<span class="at">trailingOnly =</span> <span class="cn">TRUE</span>)      <span class="co"># c("results/fasta_stats.tsv", "results/fasta_stats.png")</span></span>
+<span id="cb10-5"><a></a>stats <span class="ot">&lt;-</span> <span class="fu">read_tsv</span>(args[<span class="dv">1</span>])</span>
+<span id="cb10-6"><a></a></span>
+<span id="cb10-7"><a></a>p <span class="ot">&lt;-</span> <span class="fu">ggplot</span>(stats, <span class="fu">aes</span>(<span class="at">x =</span> file, <span class="at">y =</span> gc_percent)) <span class="sc">+</span></span>
+<span id="cb10-8"><a></a>  <span class="fu">geom_col</span>() <span class="sc">+</span></span>
+<span id="cb10-9"><a></a>  <span class="fu">labs</span>(<span class="at">x =</span> <span class="cn">NULL</span>, <span class="at">y =</span> <span class="st">"GC content (%)"</span>) <span class="sc">+</span></span>
+<span id="cb10-10"><a></a>  <span class="fu">theme_minimal</span>()</span>
+<span id="cb10-11"><a></a></span>
+<span id="cb10-12"><a></a><span class="fu">ggsave</span>(args[<span class="dv">2</span>], p, <span class="at">width =</span> <span class="dv">8</span>, <span class="at">height =</span> <span class="dv">4</span>)</span>
+<span id="cb10-13"><a></a><span class="fu">cat</span>(<span class="st">"Wrote"</span>, args[<span class="dv">2</span>], <span class="st">"</span><span class="sc">\n</span><span class="st">"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 </div>
 <div id="tabset-2-2">
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a></a><span class="co">#!/usr/bin/env python3</span></span>
-<span id="cb9-2"><a></a><span class="im">import</span> sys</span>
-<span id="cb9-3"><a></a><span class="im">from</span> pathlib <span class="im">import</span> Path</span>
-<span id="cb9-4"><a></a></span>
-<span id="cb9-5"><a></a><span class="bu">print</span>(<span class="st">"file</span><span class="ch">\t</span><span class="st">n_seqs</span><span class="ch">\t</span><span class="st">total_bp</span><span class="ch">\t</span><span class="st">gc_percent"</span>)           <span class="co"># header of the TSV</span></span>
-<span id="cb9-6"><a></a><span class="cf">for</span> path <span class="kw">in</span> <span class="bu">map</span>(Path, sys.argv[<span class="dv">1</span>:]):                 <span class="co"># every file given on the command line</span></span>
-<span id="cb9-7"><a></a>    lines <span class="op">=</span> path.read_text().splitlines()</span>
-<span id="cb9-8"><a></a>    n_seqs <span class="op">=</span> <span class="bu">sum</span>(line.startswith(<span class="st">"&gt;"</span>) <span class="cf">for</span> line <span class="kw">in</span> lines)</span>
-<span id="cb9-9"><a></a>    seq <span class="op">=</span> <span class="st">""</span>.join(line <span class="cf">for</span> line <span class="kw">in</span> lines <span class="cf">if</span> <span class="kw">not</span> line.startswith(<span class="st">"&gt;"</span>)).upper()</span>
-<span id="cb9-10"><a></a>    gc <span class="op">=</span> <span class="dv">100</span> <span class="op">*</span> (seq.count(<span class="st">"G"</span>) <span class="op">+</span> seq.count(<span class="st">"C"</span>)) <span class="op">/</span> <span class="bu">len</span>(seq)</span>
-<span id="cb9-11"><a></a>    <span class="bu">print</span>(<span class="ss">f"</span><span class="sc">{</span>path<span class="sc">.</span>name<span class="sc">}</span><span class="ch">\t</span><span class="sc">{</span>n_seqs<span class="sc">}</span><span class="ch">\t</span><span class="sc">{</span><span class="bu">len</span>(seq)<span class="sc">}</span><span class="ch">\t</span><span class="sc">{</span>gc<span class="sc">:.1f}</span><span class="ss">"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb11"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a></a><span class="co">#!/usr/bin/env python3</span></span>
+<span id="cb11-2"><a></a><span class="im">import</span> sys</span>
+<span id="cb11-3"><a></a><span class="im">from</span> pathlib <span class="im">import</span> Path</span>
+<span id="cb11-4"><a></a></span>
+<span id="cb11-5"><a></a><span class="bu">print</span>(<span class="st">"file</span><span class="ch">\t</span><span class="st">n_seqs</span><span class="ch">\t</span><span class="st">total_bp</span><span class="ch">\t</span><span class="st">gc_percent"</span>)           <span class="co"># header of the TSV</span></span>
+<span id="cb11-6"><a></a><span class="cf">for</span> path <span class="kw">in</span> <span class="bu">map</span>(Path, sys.argv[<span class="dv">1</span>:]):                 <span class="co"># every file given on the command line</span></span>
+<span id="cb11-7"><a></a>    lines <span class="op">=</span> path.read_text().splitlines()</span>
+<span id="cb11-8"><a></a>    n_seqs <span class="op">=</span> <span class="bu">sum</span>(line.startswith(<span class="st">"&gt;"</span>) <span class="cf">for</span> line <span class="kw">in</span> lines)</span>
+<span id="cb11-9"><a></a>    seq <span class="op">=</span> <span class="st">""</span>.join(line <span class="cf">for</span> line <span class="kw">in</span> lines <span class="cf">if</span> <span class="kw">not</span> line.startswith(<span class="st">"&gt;"</span>)).upper()</span>
+<span id="cb11-10"><a></a>    gc <span class="op">=</span> <span class="dv">100</span> <span class="op">*</span> (seq.count(<span class="st">"G"</span>) <span class="op">+</span> seq.count(<span class="st">"C"</span>)) <span class="op">/</span> <span class="bu">len</span>(seq)</span>
+<span id="cb11-11"><a></a>    <span class="bu">print</span>(<span class="ss">f"</span><span class="sc">{</span>path<span class="sc">.</span>name<span class="sc">}</span><span class="ch">\t</span><span class="sc">{</span>n_seqs<span class="sc">}</span><span class="ch">\t</span><span class="sc">{</span><span class="bu">len</span>(seq)<span class="sc">}</span><span class="ch">\t</span><span class="sc">{</span>gc<span class="sc">:.1f}</span><span class="ss">"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 </div>
 </div>
@@ -750,24 +785,24 @@ Bill Cresko
 <ul id="tabset-3" class="panel-tabset-tabby"><li><a data-tabby-default="" href="#tabset-3-1">R</a></li><li><a href="#tabset-3-2">Python</a></li></ul>
 <div class="tab-content">
 <div id="tabset-3-1">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb10"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb10-1"><a></a><span class="ex">module</span> load R/4.3.3</span>
-<span id="cb10-2"><a></a><span class="ex">R</span>                                   <span class="co"># interactive, on an interactive node</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb11"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a></a><span class="fu">install.packages</span>(<span class="st">"tidyverse"</span>)       <span class="co"># goes to your personal library in ~/R/ - once</span></span>
-<span id="cb11-2"><a></a><span class="fu">library</span>(tidyverse)                  <span class="co"># every session / every script</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb12"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb12-1"><a></a><span class="ex">module</span> load R/4.3.3</span>
+<span id="cb12-2"><a></a><span class="ex">R</span>                                   <span class="co"># interactive, on an interactive node</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb13"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a></a><span class="fu">install.packages</span>(<span class="st">"tidyverse"</span>)       <span class="co"># goes to your personal library in ~/R/ - once</span></span>
+<span id="cb13-2"><a></a><span class="fu">library</span>(tidyverse)                  <span class="co"># every session / every script</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <ul>
 <li>Modules give you R itself; <strong>you</strong> install packages into your home directory</li>
 <li>For a reproducible project, <code>renv::init()</code> records exact package versions in the project folder</li>
 </ul>
 </div>
 <div id="tabset-3-2">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb12"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb12-1"><a></a><span class="ex">module</span> load miniconda3/20240410</span>
-<span id="cb12-2"><a></a><span class="ex">conda</span> create <span class="at">-n</span> my_env python=3.11 pandas matplotlib biopython   <span class="co"># once</span></span>
-<span id="cb12-3"><a></a><span class="ex">conda</span> activate my_env                                            <span class="co"># every session / job</span></span>
-<span id="cb12-4"><a></a></span>
-<span id="cb12-5"><a></a><span class="co"># or, with the plain python3 module and a virtual environment:</span></span>
-<span id="cb12-6"><a></a><span class="ex">module</span> load python3/3.11.4</span>
-<span id="cb12-7"><a></a><span class="ex">python3</span> <span class="at">-m</span> venv ~/envs/my_env <span class="kw">&amp;&amp;</span> <span class="bu">source</span> ~/envs/my_env/bin/activate</span>
-<span id="cb12-8"><a></a><span class="ex">pip</span> install pandas matplotlib biopython</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb14"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb14-1"><a></a><span class="ex">module</span> load miniconda3/20240410</span>
+<span id="cb14-2"><a></a><span class="ex">conda</span> create <span class="at">-n</span> my_env python=3.11 pandas matplotlib biopython   <span class="co"># once</span></span>
+<span id="cb14-3"><a></a><span class="ex">conda</span> activate my_env                                            <span class="co"># every session / job</span></span>
+<span id="cb14-4"><a></a></span>
+<span id="cb14-5"><a></a><span class="co"># or, with the plain python3 module and a virtual environment:</span></span>
+<span id="cb14-6"><a></a><span class="ex">module</span> load python3/3.11.4</span>
+<span id="cb14-7"><a></a><span class="ex">python3</span> <span class="at">-m</span> venv ~/envs/my_env <span class="kw">&amp;&amp;</span> <span class="bu">source</span> ~/envs/my_env/bin/activate</span>
+<span id="cb14-8"><a></a><span class="ex">pip</span> install pandas matplotlib biopython</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <ul>
 <li><code>conda</code> (with the <strong>bioconda</strong> channel) installs compiled bioinformatics tools too - <code>conda install -c bioconda samtools</code></li>
 <li>Put the same <code>module load</code> + <code>conda activate</code> / <code>source .../activate</code> lines in your <code>sbatch</code> script</li>
@@ -838,55 +873,55 @@ Bill Cresko
 </section>
 <section id="gpu-jobs" class="slide level2">
 <h2>GPU Jobs</h2>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb13"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb13-1"><a></a><span class="co">#!/bin/bash</span></span>
-<span id="cb13-2"><a></a><span class="co">#SBATCH --job-name=gpu_job</span></span>
-<span id="cb13-3"><a></a><span class="co">#SBATCH --partition=gpu             # GPU partition</span></span>
-<span id="cb13-4"><a></a><span class="co">#SBATCH --account=myPIRG</span></span>
-<span id="cb13-5"><a></a><span class="co">#SBATCH --time=1-00:00:00           # 1 day</span></span>
-<span id="cb13-6"><a></a><span class="co">#SBATCH --nodes=1</span></span>
-<span id="cb13-7"><a></a><span class="co">#SBATCH --ntasks-per-node=1</span></span>
-<span id="cb13-8"><a></a><span class="co">#SBATCH --gres=gpu:1                # Request 1 GPU</span></span>
-<span id="cb13-9"><a></a><span class="co">#SBATCH --mem=32G</span></span>
-<span id="cb13-10"><a></a></span>
-<span id="cb13-11"><a></a><span class="co"># Load CUDA and your software</span></span>
-<span id="cb13-12"><a></a></span>
-<span id="cb13-13"><a></a><span class="ex">module</span> load cuda/12.4</span>
-<span id="cb13-14"><a></a><span class="ex">module</span> load miniconda3/20240410</span>
-<span id="cb13-15"><a></a></span>
-<span id="cb13-16"><a></a><span class="co"># Activate your conda environment</span></span>
-<span id="cb13-17"><a></a></span>
-<span id="cb13-18"><a></a><span class="ex">conda</span> activate my_ml_env</span>
-<span id="cb13-19"><a></a></span>
-<span id="cb13-20"><a></a><span class="co"># Run your GPU code</span></span>
-<span id="cb13-21"><a></a></span>
-<span id="cb13-22"><a></a><span class="ex">python</span> train_model.py</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb15"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb15-1"><a></a><span class="co">#!/bin/bash</span></span>
+<span id="cb15-2"><a></a><span class="co">#SBATCH --job-name=gpu_job</span></span>
+<span id="cb15-3"><a></a><span class="co">#SBATCH --partition=gpu             # GPU partition</span></span>
+<span id="cb15-4"><a></a><span class="co">#SBATCH --account=myPIRG</span></span>
+<span id="cb15-5"><a></a><span class="co">#SBATCH --time=1-00:00:00           # 1 day</span></span>
+<span id="cb15-6"><a></a><span class="co">#SBATCH --nodes=1</span></span>
+<span id="cb15-7"><a></a><span class="co">#SBATCH --ntasks-per-node=1</span></span>
+<span id="cb15-8"><a></a><span class="co">#SBATCH --gres=gpu:1                # Request 1 GPU</span></span>
+<span id="cb15-9"><a></a><span class="co">#SBATCH --mem=32G</span></span>
+<span id="cb15-10"><a></a></span>
+<span id="cb15-11"><a></a><span class="co"># Load CUDA and your software</span></span>
+<span id="cb15-12"><a></a></span>
+<span id="cb15-13"><a></a><span class="ex">module</span> load cuda/12.4</span>
+<span id="cb15-14"><a></a><span class="ex">module</span> load miniconda3/20240410</span>
+<span id="cb15-15"><a></a></span>
+<span id="cb15-16"><a></a><span class="co"># Activate your conda environment</span></span>
+<span id="cb15-17"><a></a></span>
+<span id="cb15-18"><a></a><span class="ex">conda</span> activate my_ml_env</span>
+<span id="cb15-19"><a></a></span>
+<span id="cb15-20"><a></a><span class="co"># Run your GPU code</span></span>
+<span id="cb15-21"><a></a></span>
+<span id="cb15-22"><a></a><span class="ex">python</span> train_model.py</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p><br>
 <br>
 </p>
 <h3 id="check-available-gpus">Check available GPUs:</h3>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb14"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb14-1"><a></a><span class="ex">/packages/racs/bin/slurm-show-gpus</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb16"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb16-1"><a></a><span class="ex">/packages/racs/bin/slurm-show-gpus</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </section>
 <section id="talapas-uses-software-modules-lmod" class="slide level2">
 <h2>Talapas Uses Software Modules (LMOD)</h2>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb15"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb15-1"><a></a><span class="co"># List all available modules</span></span>
-<span id="cb15-2"><a></a><span class="ex">module</span> avail</span>
-<span id="cb15-3"><a></a></span>
-<span id="cb15-4"><a></a><span class="co"># Search for specific software</span></span>
-<span id="cb15-5"><a></a><span class="ex">module</span> spider R</span>
-<span id="cb15-6"><a></a><span class="ex">module</span> spider python          <span class="co"># python3/3.x.y modules, plus miniconda3 for conda environments</span></span>
-<span id="cb15-7"><a></a></span>
-<span id="cb15-8"><a></a><span class="co"># Load a module</span></span>
-<span id="cb15-9"><a></a><span class="ex">module</span> load R/4.3.3</span>
-<span id="cb15-10"><a></a><span class="ex">module</span> load miniconda3/20240410</span>
-<span id="cb15-11"><a></a></span>
-<span id="cb15-12"><a></a><span class="co"># See what's loaded</span></span>
-<span id="cb15-13"><a></a><span class="ex">module</span> list</span>
-<span id="cb15-14"><a></a></span>
-<span id="cb15-15"><a></a><span class="co"># Unload a module</span></span>
-<span id="cb15-16"><a></a><span class="ex">module</span> unload R</span>
-<span id="cb15-17"><a></a></span>
-<span id="cb15-18"><a></a><span class="co"># Reset to default</span></span>
-<span id="cb15-19"><a></a><span class="ex">module</span> purge</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb17"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb17-1"><a></a><span class="co"># List all available modules</span></span>
+<span id="cb17-2"><a></a><span class="ex">module</span> avail</span>
+<span id="cb17-3"><a></a></span>
+<span id="cb17-4"><a></a><span class="co"># Search for specific software</span></span>
+<span id="cb17-5"><a></a><span class="ex">module</span> spider R</span>
+<span id="cb17-6"><a></a><span class="ex">module</span> spider python          <span class="co"># python3/3.x.y modules, plus miniconda3 for conda environments</span></span>
+<span id="cb17-7"><a></a></span>
+<span id="cb17-8"><a></a><span class="co"># Load a module</span></span>
+<span id="cb17-9"><a></a><span class="ex">module</span> load R/4.3.3</span>
+<span id="cb17-10"><a></a><span class="ex">module</span> load miniconda3/20240410</span>
+<span id="cb17-11"><a></a></span>
+<span id="cb17-12"><a></a><span class="co"># See what's loaded</span></span>
+<span id="cb17-13"><a></a><span class="ex">module</span> list</span>
+<span id="cb17-14"><a></a></span>
+<span id="cb17-15"><a></a><span class="co"># Unload a module</span></span>
+<span id="cb17-16"><a></a><span class="ex">module</span> unload R</span>
+<span id="cb17-17"><a></a></span>
+<span id="cb17-18"><a></a><span class="co"># Reset to default</span></span>
+<span id="cb17-19"><a></a><span class="ex">module</span> purge</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="callout callout-note callout-titled callout-style-default">
 <div class="callout-body">
 <div class="callout-title">
@@ -903,17 +938,17 @@ Bill Cresko
 </section>
 <section id="monitoring-your-jobs" class="slide level2">
 <h2>Monitoring Your Jobs</h2>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb16"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb16-1"><a></a><span class="co"># Check job status</span></span>
-<span id="cb16-2"><a></a></span>
-<span id="cb16-3"><a></a><span class="ex">squeue</span> <span class="at">-u</span> <span class="va">$USER</span></span>
-<span id="cb16-4"><a></a></span>
-<span id="cb16-5"><a></a><span class="co"># Detailed job information</span></span>
-<span id="cb16-6"><a></a></span>
-<span id="cb16-7"><a></a><span class="ex">scontrol</span> show job JOBID</span>
-<span id="cb16-8"><a></a></span>
-<span id="cb16-9"><a></a><span class="co"># After job completes - see resource usage</span></span>
-<span id="cb16-10"><a></a></span>
-<span id="cb16-11"><a></a><span class="ex">sacct</span> <span class="at">-j</span> JOBID <span class="at">--format</span><span class="op">=</span>JobID,JobName,Elapsed,MaxRSS,State</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb18"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb18-1"><a></a><span class="co"># Check job status</span></span>
+<span id="cb18-2"><a></a></span>
+<span id="cb18-3"><a></a><span class="ex">squeue</span> <span class="at">-u</span> <span class="va">$USER</span></span>
+<span id="cb18-4"><a></a></span>
+<span id="cb18-5"><a></a><span class="co"># Detailed job information</span></span>
+<span id="cb18-6"><a></a></span>
+<span id="cb18-7"><a></a><span class="ex">scontrol</span> show job JOBID</span>
+<span id="cb18-8"><a></a></span>
+<span id="cb18-9"><a></a><span class="co"># After job completes - see resource usage</span></span>
+<span id="cb18-10"><a></a></span>
+<span id="cb18-11"><a></a><span class="ex">sacct</span> <span class="at">-j</span> JOBID <span class="at">--format</span><span class="op">=</span>JobID,JobName,Elapsed,MaxRSS,State</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p><br>
 <br>
 </p>

@@ -216,7 +216,8 @@ Bill Cresko
 <p>The course book goes deeper on everything in this lecture. Read before or after class:</p>
 <ul>
 <li><a href="../book/chapters/10-shell-scripting.html">Ch. 10: Shell Scripting</a></li>
-<li><em>Reference:</em> <a href="../book/chapters/appendix-B-unix.html">App. B: Unix Command Reference</a></li>
+<li><a href="../book/chapters/09-grep-regex.html">Ch. 9: GREP and Regular Expressions</a> - the <code>sed</code> and <code>awk</code> sections</li>
+<li><em>Reference:</em> <a href="../book/chapters/appendix-B-unix.html">App. B: Unix Command Reference</a> · <a href="../book/chapters/appendix-D-regex.html">App. D: Regular Expression Reference</a></li>
 </ul>
 </section>
 <section id="goals-for-today" class="slide level2">
@@ -225,8 +226,9 @@ Bill Cresko
 <li>Introduction to scripts in Unix, R and Python</li>
 <li>Writing shell scripts: variables, conditionals, loops and functions</li>
 <li>Error handling and best practices</li>
+<li><code>sed</code> and <code>awk</code> for editing text and working with columns inside a pipeline</li>
 <li>The same script written in R (<code>Rscript</code>) and in Python (<code>python3</code>)</li>
-<li>Using R Studio, Positron and Visual Studio Code (VSC) as script editors</li>
+<li>Using Positron, VS Code or RStudio as script editors</li>
 </ul>
 </section>
 <section>
@@ -299,7 +301,7 @@ Bill Cresko
 <p><strong>Tip</strong></p>
 </div>
 <div class="callout-content">
-<p>Today is mostly about <strong>shell</strong> scripts. At the end we will write the same FASTA-statistics script in R and in Python - and <strong>Lecture 07</strong> goes deep on both languages.</p>
+<p>Today is mostly about <strong>shell</strong> scripts. At the end we will write the same FASTA-statistics script in R and in Python - and <strong>Lectures 05-07</strong> go deep on both languages.</p>
 </div>
 </div>
 </div>
@@ -599,45 +601,137 @@ Bill Cresko
 <span id="cb8-24"><a></a><span class="cf">if</span> <span class="ot">! </span><span class="fu">grep</span> <span class="st">"pattern"</span> file.txt <span class="op">&gt;</span> /dev/null <span class="dv">2</span><span class="op">&gt;&amp;</span><span class="dv">1</span><span class="kw">;</span> <span class="cf">then</span></span>
 <span id="cb8-25"><a></a>    <span class="bu">echo</span> <span class="st">"Pattern not found"</span></span>
 <span id="cb8-26"><a></a><span class="cf">fi</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section></section>
+<section>
+<section id="two-more-tools-for-scripts-sed-and-awk" class="title-slide slide level1 center">
+<h1>Two more tools for scripts: <code>sed</code> and <code>awk</code></h1>
+
+</section>
+<section id="editing-streams-inside-a-script" class="slide level2">
+<h2>Editing streams inside a script</h2>
+<p>Shell scripts rarely do arithmetic or text editing themselves - they <strong>glue together</strong> small tools. Two of the most useful in a pipeline are <code>sed</code> (edit text as it streams past) and <code>awk</code> (work with columns). You met <code>grep</code> last week; these complete the trio.</p>
+</section>
+<section id="beyond-grep-sed-for-search-and-replace" class="slide level2">
+<h2>Beyond grep: <code>sed</code> for search-and-replace</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb9"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb9-1"><a></a><span class="co"># Substitute the first match on each line (s/pattern/replacement/)</span></span>
+<span id="cb9-2"><a></a><span class="fu">sed</span> <span class="st">'s/chr/Chr/'</span> regions.bed</span>
+<span id="cb9-3"><a></a></span>
+<span id="cb9-4"><a></a><span class="co"># Substitute every match on each line (g = global)</span></span>
+<span id="cb9-5"><a></a><span class="fu">sed</span> <span class="st">'s/T/U/g'</span> dna.txt <span class="op">&gt;</span> rna.txt</span>
+<span id="cb9-6"><a></a></span>
+<span id="cb9-7"><a></a><span class="co"># Delete lines matching a pattern (e.g. comment lines)</span></span>
+<span id="cb9-8"><a></a><span class="fu">sed</span> <span class="st">'/^#/d'</span> annotation.gff</span>
+<span id="cb9-9"><a></a></span>
+<span id="cb9-10"><a></a><span class="co"># Print only lines 10-20</span></span>
+<span id="cb9-11"><a></a><span class="fu">sed</span> <span class="at">-n</span> <span class="st">'10,20p'</span> big_file.txt</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="callout callout-warning callout-titled callout-style-default">
+<div class="callout-body">
+<div class="callout-title">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<p><strong>Warning</strong></p>
+</div>
+<div class="callout-content">
+<p><code>sed -i</code> edits a file <strong>in place</strong> - and the syntax differs between Linux (<code>sed -i 's/a/b/' f</code>) and macOS (<code>sed -i '' 's/a/b/' f</code>). Write to a new file until you’re confident.</p>
+</div>
+</div>
+</div>
+</section>
+<section id="beyond-grep-awk-for-columns" class="slide level2">
+<h2>Beyond grep: <code>awk</code> for columns</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb10"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb10-1"><a></a><span class="co"># Print columns 1 and 3 of a tab- or space-separated file</span></span>
+<span id="cb10-2"><a></a><span class="fu">awk</span> <span class="st">'{print $1, $3}'</span> data.tsv</span>
+<span id="cb10-3"><a></a></span>
+<span id="cb10-4"><a></a><span class="co"># Keep rows where column 5 is greater than 30</span></span>
+<span id="cb10-5"><a></a><span class="fu">awk</span> <span class="st">'$5 &gt; 30'</span> measurements.tsv</span>
+<span id="cb10-6"><a></a></span>
+<span id="cb10-7"><a></a><span class="co"># Comma-separated file: set the field separator, skip the header</span></span>
+<span id="cb10-8"><a></a><span class="fu">awk</span> <span class="at">-F</span><span class="st">','</span> <span class="st">'NR &gt; 1 {print $2}'</span> samples.csv</span>
+<span id="cb10-9"><a></a></span>
+<span id="cb10-10"><a></a><span class="co"># Sum and average a column</span></span>
+<span id="cb10-11"><a></a><span class="fu">awk</span> <span class="at">-F</span><span class="st">','</span> <span class="st">'NR &gt; 1 {sum += $3; n++} END {print sum, sum/n}'</span> samples.csv</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="callout callout-tip callout-titled callout-style-default">
+<div class="callout-body">
+<div class="callout-title">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<p><strong>Tip</strong></p>
+</div>
+<div class="callout-content">
+<p>Rule of thumb: <strong><code>grep</code></strong> finds lines, <strong><code>sed</code></strong> edits text, <strong><code>awk</code></strong> works with columns. More in the course book’s <a href="../book/chapters/09-grep-regex.html#sec-sed">sed and awk sections</a> and <a href="../book/chapters/appendix-D-regex.html">Regular Expression Reference</a>.</p>
+</div>
+</div>
+</div>
+</section>
+<section id="running-example-sed-awk-and-a-script-on-the-stickleback-table" class="slide level2">
+<h2>Running example: <code>sed</code>, <code>awk</code> and a script on the stickleback table</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb11"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb11-1"><a></a><span class="bu">cd</span> ~/projects/comptools <span class="kw">&amp;&amp;</span> <span class="fu">mkdir</span> <span class="at">-p</span> results</span>
+<span id="cb11-2"><a></a></span>
+<span id="cb11-3"><a></a><span class="co"># Fix the awkward column name once, writing a new file (never edit raw data in place)</span></span>
+<span id="cb11-4"><a></a><span class="fu">sed</span> <span class="st">'1s/Geno&amp;Micro/Geno_Micro/'</span> data/Stickle_RNAseq.tsv <span class="op">&gt;</span> results/stickle_clean.tsv</span>
+<span id="cb11-5"><a></a></span>
+<span id="cb11-6"><a></a><span class="co"># Mean of Gene1 (column 5) across all 80 fish</span></span>
+<span id="cb11-7"><a></a><span class="fu">awk</span> <span class="at">-F</span><span class="st">'\t'</span> <span class="st">'NR &gt; 1 { sum += $5; n++ } END { print "Gene1 mean:", sum/n }'</span> results/stickle_clean.tsv</span>
+<span id="cb11-8"><a></a></span>
+<span id="cb11-9"><a></a><span class="co"># Mean of Gene1 by genotype - awk arrays keyed by the group</span></span>
+<span id="cb11-10"><a></a><span class="fu">awk</span> <span class="at">-F</span><span class="st">'\t'</span> <span class="st">'NR &gt; 1 { sum[$2] += $5; n[$2]++ } END { for (g in sum) print g, sum[g]/n[g] }'</span> results/stickle_clean.tsv</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="turn-it-into-a-script" class="slide level2">
+<h2>Turn it into a script</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb12"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb12-1"><a></a><span class="co">#!/bin/bash</span></span>
+<span id="cb12-2"><a></a><span class="co"># gene_means.sh - mean count of one gene per treatment group</span></span>
+<span id="cb12-3"><a></a><span class="co"># Usage: ./gene_means.sh &lt;gene column number&gt;</span></span>
+<span id="cb12-4"><a></a><span class="bu">set</span> <span class="at">-euo</span> pipefail</span>
+<span id="cb12-5"><a></a><span class="va">col</span><span class="op">=</span><span class="va">${1</span><span class="op">:?</span>Give a gene column number, e.g. 5 for Gene1<span class="va">}</span></span>
+<span id="cb12-6"><a></a><span class="va">infile</span><span class="op">=</span>results/stickle_clean.tsv</span>
+<span id="cb12-7"><a></a></span>
+<span id="cb12-8"><a></a><span class="va">gene</span><span class="op">=</span><span class="va">$(</span><span class="fu">head</span> <span class="at">-n</span> 1 <span class="st">"</span><span class="va">$infile</span><span class="st">"</span> <span class="kw">|</span> <span class="fu">cut</span> <span class="at">-f</span> <span class="st">"</span><span class="va">$col</span><span class="st">"</span><span class="va">)</span></span>
+<span id="cb12-9"><a></a><span class="bu">echo</span> <span class="st">"Mean of </span><span class="va">$gene</span><span class="st"> by group:"</span></span>
+<span id="cb12-10"><a></a><span class="fu">awk</span> <span class="at">-F</span><span class="st">'\t'</span> <span class="at">-v</span> c=<span class="st">"</span><span class="va">$col</span><span class="st">"</span> <span class="st">'NR &gt; 1 { sum[$4] += $c; n[$4]++ } END { for (g in sum) printf "  %-6s %8.1f\n", g, sum[g]/n[g] }'</span> <span class="st">"</span><span class="va">$infile</span><span class="st">"</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb13"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb13-1"><a></a><span class="fu">chmod</span> +x gene_means.sh</span>
+<span id="cb13-2"><a></a><span class="ex">./gene_means.sh</span> 5            <span class="co"># Gene1</span></span>
+<span id="cb13-3"><a></a><span class="cf">for</span> c <span class="kw">in</span> 5 6 7<span class="kw">;</span> <span class="cf">do</span> <span class="ex">./gene_means.sh</span> <span class="va">$c</span><span class="kw">;</span> <span class="cf">done</span>    <span class="co"># loop over the first three genes</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </section>
 <section id="real-bioinformatics-script-example" class="slide level2">
 <h2>Real Bioinformatics Script Example</h2>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb9"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb9-1"><a></a><span class="co">#!/bin/bash</span></span>
-<span id="cb9-2"><a></a><span class="co"># Script: fasta_stats.sh</span></span>
-<span id="cb9-3"><a></a><span class="co"># Purpose: Calculate basic statistics for FASTA files</span></span>
-<span id="cb9-4"><a></a></span>
-<span id="cb9-5"><a></a><span class="co"># Check arguments</span></span>
-<span id="cb9-6"><a></a><span class="cf">if</span> <span class="bu">[</span> <span class="va">$#</span> <span class="ot">-ne</span> 1 <span class="bu">]</span><span class="kw">;</span> <span class="cf">then</span></span>
-<span id="cb9-7"><a></a>    <span class="bu">echo</span> <span class="st">"Usage: </span><span class="va">$0</span><span class="st"> sequences.fasta"</span></span>
-<span id="cb9-8"><a></a>    <span class="bu">exit</span> 1</span>
-<span id="cb9-9"><a></a><span class="cf">fi</span></span>
-<span id="cb9-10"><a></a></span>
-<span id="cb9-11"><a></a><span class="va">INPUT</span><span class="op">=</span><span class="va">$1</span></span>
-<span id="cb9-12"><a></a></span>
-<span id="cb9-13"><a></a><span class="co"># Check if file exists</span></span>
-<span id="cb9-14"><a></a><span class="cf">if</span> <span class="bu">[</span> <span class="ot">!</span> <span class="ot">-f</span> <span class="st">"</span><span class="va">$INPUT</span><span class="st">"</span> <span class="bu">]</span><span class="kw">;</span> <span class="cf">then</span></span>
-<span id="cb9-15"><a></a>    <span class="bu">echo</span> <span class="st">"Error: File </span><span class="va">$INPUT</span><span class="st"> not found!"</span></span>
-<span id="cb9-16"><a></a>    <span class="bu">exit</span> 1</span>
-<span id="cb9-17"><a></a><span class="cf">fi</span></span>
-<span id="cb9-18"><a></a></span>
-<span id="cb9-19"><a></a><span class="bu">echo</span> <span class="st">"=== FASTA Statistics for </span><span class="va">$INPUT</span><span class="st"> ==="</span></span>
-<span id="cb9-20"><a></a></span>
-<span id="cb9-21"><a></a><span class="co"># Count sequences</span></span>
-<span id="cb9-22"><a></a><span class="va">SEQ_COUNT</span><span class="op">=</span><span class="va">$(</span><span class="fu">grep</span> <span class="at">-c</span> <span class="st">"^&gt;"</span> <span class="st">"</span><span class="va">$INPUT</span><span class="st">"</span><span class="va">)</span></span>
-<span id="cb9-23"><a></a><span class="bu">echo</span> <span class="st">"Number of sequences: </span><span class="va">$SEQ_COUNT</span><span class="st">"</span></span>
-<span id="cb9-24"><a></a></span>
-<span id="cb9-25"><a></a><span class="co"># Calculate total length</span></span>
-<span id="cb9-26"><a></a><span class="va">TOTAL_LENGTH</span><span class="op">=</span><span class="va">$(</span><span class="fu">grep</span> <span class="at">-v</span> <span class="st">"^&gt;"</span> <span class="st">"</span><span class="va">$INPUT</span><span class="st">"</span> <span class="kw">|</span> <span class="fu">tr</span> <span class="at">-d</span> <span class="st">'\n'</span> <span class="kw">|</span> <span class="fu">wc</span> <span class="at">-c</span><span class="va">)</span></span>
-<span id="cb9-27"><a></a><span class="bu">echo</span> <span class="st">"Total length: </span><span class="va">$TOTAL_LENGTH</span><span class="st"> bp"</span></span>
-<span id="cb9-28"><a></a></span>
-<span id="cb9-29"><a></a><span class="co"># Average length</span></span>
-<span id="cb9-30"><a></a><span class="va">AVG_LENGTH</span><span class="op">=</span><span class="va">$((TOTAL_LENGTH</span> <span class="op">/</span> <span class="va">SEQ_COUNT))</span></span>
-<span id="cb9-31"><a></a><span class="bu">echo</span> <span class="st">"Average length: </span><span class="va">$AVG_LENGTH</span><span class="st"> bp"</span></span>
-<span id="cb9-32"><a></a></span>
-<span id="cb9-33"><a></a><span class="co"># GC content</span></span>
-<span id="cb9-34"><a></a><span class="va">GC_COUNT</span><span class="op">=</span><span class="va">$(</span><span class="fu">grep</span> <span class="at">-v</span> <span class="st">"^&gt;"</span> <span class="st">"</span><span class="va">$INPUT</span><span class="st">"</span> <span class="kw">|</span> <span class="fu">tr</span> <span class="at">-d</span> <span class="st">'\n'</span> <span class="kw">|</span> <span class="fu">grep</span> <span class="at">-o</span> <span class="st">"[GC]"</span> <span class="kw">|</span> <span class="fu">wc</span> <span class="at">-l</span><span class="va">)</span></span>
-<span id="cb9-35"><a></a><span class="va">GC_PERCENT</span><span class="op">=</span><span class="va">$((GC_COUNT</span> <span class="op">*</span> <span class="dv">100</span> <span class="op">/</span> <span class="va">TOTAL_LENGTH))</span></span>
-<span id="cb9-36"><a></a><span class="bu">echo</span> <span class="st">"GC content: </span><span class="va">$GC_PERCENT</span><span class="st">%"</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb14"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb14-1"><a></a><span class="co">#!/bin/bash</span></span>
+<span id="cb14-2"><a></a><span class="co"># Script: fasta_stats.sh</span></span>
+<span id="cb14-3"><a></a><span class="co"># Purpose: Calculate basic statistics for FASTA files</span></span>
+<span id="cb14-4"><a></a></span>
+<span id="cb14-5"><a></a><span class="co"># Check arguments</span></span>
+<span id="cb14-6"><a></a><span class="cf">if</span> <span class="bu">[</span> <span class="va">$#</span> <span class="ot">-ne</span> 1 <span class="bu">]</span><span class="kw">;</span> <span class="cf">then</span></span>
+<span id="cb14-7"><a></a>    <span class="bu">echo</span> <span class="st">"Usage: </span><span class="va">$0</span><span class="st"> sequences.fasta"</span></span>
+<span id="cb14-8"><a></a>    <span class="bu">exit</span> 1</span>
+<span id="cb14-9"><a></a><span class="cf">fi</span></span>
+<span id="cb14-10"><a></a></span>
+<span id="cb14-11"><a></a><span class="va">INPUT</span><span class="op">=</span><span class="va">$1</span></span>
+<span id="cb14-12"><a></a></span>
+<span id="cb14-13"><a></a><span class="co"># Check if file exists</span></span>
+<span id="cb14-14"><a></a><span class="cf">if</span> <span class="bu">[</span> <span class="ot">!</span> <span class="ot">-f</span> <span class="st">"</span><span class="va">$INPUT</span><span class="st">"</span> <span class="bu">]</span><span class="kw">;</span> <span class="cf">then</span></span>
+<span id="cb14-15"><a></a>    <span class="bu">echo</span> <span class="st">"Error: File </span><span class="va">$INPUT</span><span class="st"> not found!"</span></span>
+<span id="cb14-16"><a></a>    <span class="bu">exit</span> 1</span>
+<span id="cb14-17"><a></a><span class="cf">fi</span></span>
+<span id="cb14-18"><a></a></span>
+<span id="cb14-19"><a></a><span class="bu">echo</span> <span class="st">"=== FASTA Statistics for </span><span class="va">$INPUT</span><span class="st"> ==="</span></span>
+<span id="cb14-20"><a></a></span>
+<span id="cb14-21"><a></a><span class="co"># Count sequences</span></span>
+<span id="cb14-22"><a></a><span class="va">SEQ_COUNT</span><span class="op">=</span><span class="va">$(</span><span class="fu">grep</span> <span class="at">-c</span> <span class="st">"^&gt;"</span> <span class="st">"</span><span class="va">$INPUT</span><span class="st">"</span><span class="va">)</span></span>
+<span id="cb14-23"><a></a><span class="bu">echo</span> <span class="st">"Number of sequences: </span><span class="va">$SEQ_COUNT</span><span class="st">"</span></span>
+<span id="cb14-24"><a></a></span>
+<span id="cb14-25"><a></a><span class="co"># Calculate total length</span></span>
+<span id="cb14-26"><a></a><span class="va">TOTAL_LENGTH</span><span class="op">=</span><span class="va">$(</span><span class="fu">grep</span> <span class="at">-v</span> <span class="st">"^&gt;"</span> <span class="st">"</span><span class="va">$INPUT</span><span class="st">"</span> <span class="kw">|</span> <span class="fu">tr</span> <span class="at">-d</span> <span class="st">'\n'</span> <span class="kw">|</span> <span class="fu">wc</span> <span class="at">-c</span><span class="va">)</span></span>
+<span id="cb14-27"><a></a><span class="bu">echo</span> <span class="st">"Total length: </span><span class="va">$TOTAL_LENGTH</span><span class="st"> bp"</span></span>
+<span id="cb14-28"><a></a></span>
+<span id="cb14-29"><a></a><span class="co"># Average length</span></span>
+<span id="cb14-30"><a></a><span class="va">AVG_LENGTH</span><span class="op">=</span><span class="va">$((TOTAL_LENGTH</span> <span class="op">/</span> <span class="va">SEQ_COUNT))</span></span>
+<span id="cb14-31"><a></a><span class="bu">echo</span> <span class="st">"Average length: </span><span class="va">$AVG_LENGTH</span><span class="st"> bp"</span></span>
+<span id="cb14-32"><a></a></span>
+<span id="cb14-33"><a></a><span class="co"># GC content</span></span>
+<span id="cb14-34"><a></a><span class="va">GC_COUNT</span><span class="op">=</span><span class="va">$(</span><span class="fu">grep</span> <span class="at">-v</span> <span class="st">"^&gt;"</span> <span class="st">"</span><span class="va">$INPUT</span><span class="st">"</span> <span class="kw">|</span> <span class="fu">tr</span> <span class="at">-d</span> <span class="st">'\n'</span> <span class="kw">|</span> <span class="fu">grep</span> <span class="at">-o</span> <span class="st">"[GC]"</span> <span class="kw">|</span> <span class="fu">wc</span> <span class="at">-l</span><span class="va">)</span></span>
+<span id="cb14-35"><a></a><span class="va">GC_PERCENT</span><span class="op">=</span><span class="va">$((GC_COUNT</span> <span class="op">*</span> <span class="dv">100</span> <span class="op">/</span> <span class="va">TOTAL_LENGTH))</span></span>
+<span id="cb14-36"><a></a><span class="bu">echo</span> <span class="st">"GC content: </span><span class="va">$GC_PERCENT</span><span class="st">%"</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </section>
 <section id="the-same-script-in-r-and-python" class="slide level2">
 <h2>The same script in R and Python</h2>
@@ -647,60 +741,60 @@ Bill Cresko
 <div class="tab-content">
 <div id="tabset-1-1">
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb10"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a></a><span class="co">#!/usr/bin/env Rscript</span></span>
-<span id="cb10-2"><a></a><span class="co"># Script: fasta_stats.R</span></span>
-<span id="cb10-3"><a></a><span class="co"># Purpose: Calculate basic statistics for a FASTA file</span></span>
-<span id="cb10-4"><a></a></span>
-<span id="cb10-5"><a></a>args <span class="ot">&lt;-</span> <span class="fu">commandArgs</span>(<span class="at">trailingOnly =</span> <span class="cn">TRUE</span>)     <span class="co"># like $1 $2 ... in bash</span></span>
-<span id="cb10-6"><a></a><span class="cf">if</span> (<span class="fu">length</span>(args) <span class="sc">!=</span> <span class="dv">1</span>) {</span>
-<span id="cb10-7"><a></a>  <span class="fu">cat</span>(<span class="st">"Usage: Rscript fasta_stats.R sequences.fasta</span><span class="sc">\n</span><span class="st">"</span>)</span>
-<span id="cb10-8"><a></a>  <span class="fu">quit</span>(<span class="at">status =</span> <span class="dv">1</span>)</span>
-<span id="cb10-9"><a></a>}</span>
-<span id="cb10-10"><a></a>input <span class="ot">&lt;-</span> args[<span class="dv">1</span>]</span>
-<span id="cb10-11"><a></a><span class="cf">if</span> (<span class="sc">!</span><span class="fu">file.exists</span>(input)) {</span>
-<span id="cb10-12"><a></a>  <span class="fu">cat</span>(<span class="st">"Error: File"</span>, input, <span class="st">"not found!</span><span class="sc">\n</span><span class="st">"</span>)</span>
-<span id="cb10-13"><a></a>  <span class="fu">quit</span>(<span class="at">status =</span> <span class="dv">1</span>)</span>
-<span id="cb10-14"><a></a>}</span>
-<span id="cb10-15"><a></a></span>
-<span id="cb10-16"><a></a>lines   <span class="ot">&lt;-</span> <span class="fu">readLines</span>(input)</span>
-<span id="cb10-17"><a></a>headers <span class="ot">&lt;-</span> <span class="fu">grepl</span>(<span class="st">"^&gt;"</span>, lines)                <span class="co"># TRUE for header lines</span></span>
-<span id="cb10-18"><a></a>seq     <span class="ot">&lt;-</span> <span class="fu">paste</span>(lines[<span class="sc">!</span>headers], <span class="at">collapse =</span> <span class="st">""</span>)</span>
-<span id="cb10-19"><a></a></span>
-<span id="cb10-20"><a></a><span class="fu">cat</span>(<span class="st">"=== FASTA Statistics for"</span>, input, <span class="st">"===</span><span class="sc">\n</span><span class="st">"</span>)</span>
-<span id="cb10-21"><a></a><span class="fu">cat</span>(<span class="st">"Number of sequences:"</span>, <span class="fu">sum</span>(headers), <span class="st">"</span><span class="sc">\n</span><span class="st">"</span>)</span>
-<span id="cb10-22"><a></a><span class="fu">cat</span>(<span class="st">"Total length:"</span>, <span class="fu">nchar</span>(seq), <span class="st">"bp</span><span class="sc">\n</span><span class="st">"</span>)</span>
-<span id="cb10-23"><a></a><span class="fu">cat</span>(<span class="st">"Average length:"</span>, <span class="fu">nchar</span>(seq) <span class="sc">/</span> <span class="fu">sum</span>(headers), <span class="st">"bp</span><span class="sc">\n</span><span class="st">"</span>)</span>
-<span id="cb10-24"><a></a>gc <span class="ot">&lt;-</span> <span class="fu">sum</span>(<span class="fu">strsplit</span>(seq, <span class="st">""</span>)[[<span class="dv">1</span>]] <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"G"</span>, <span class="st">"C"</span>))</span>
-<span id="cb10-25"><a></a><span class="fu">cat</span>(<span class="st">"GC content:"</span>, <span class="fu">round</span>(<span class="dv">100</span> <span class="sc">*</span> gc <span class="sc">/</span> <span class="fu">nchar</span>(seq), <span class="dv">1</span>), <span class="st">"%</span><span class="sc">\n</span><span class="st">"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb15"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a></a><span class="co">#!/usr/bin/env Rscript</span></span>
+<span id="cb15-2"><a></a><span class="co"># Script: fasta_stats.R</span></span>
+<span id="cb15-3"><a></a><span class="co"># Purpose: Calculate basic statistics for a FASTA file</span></span>
+<span id="cb15-4"><a></a></span>
+<span id="cb15-5"><a></a>args <span class="ot">&lt;-</span> <span class="fu">commandArgs</span>(<span class="at">trailingOnly =</span> <span class="cn">TRUE</span>)     <span class="co"># like $1 $2 ... in bash</span></span>
+<span id="cb15-6"><a></a><span class="cf">if</span> (<span class="fu">length</span>(args) <span class="sc">!=</span> <span class="dv">1</span>) {</span>
+<span id="cb15-7"><a></a>  <span class="fu">cat</span>(<span class="st">"Usage: Rscript fasta_stats.R sequences.fasta</span><span class="sc">\n</span><span class="st">"</span>)</span>
+<span id="cb15-8"><a></a>  <span class="fu">quit</span>(<span class="at">status =</span> <span class="dv">1</span>)</span>
+<span id="cb15-9"><a></a>}</span>
+<span id="cb15-10"><a></a>input <span class="ot">&lt;-</span> args[<span class="dv">1</span>]</span>
+<span id="cb15-11"><a></a><span class="cf">if</span> (<span class="sc">!</span><span class="fu">file.exists</span>(input)) {</span>
+<span id="cb15-12"><a></a>  <span class="fu">cat</span>(<span class="st">"Error: File"</span>, input, <span class="st">"not found!</span><span class="sc">\n</span><span class="st">"</span>)</span>
+<span id="cb15-13"><a></a>  <span class="fu">quit</span>(<span class="at">status =</span> <span class="dv">1</span>)</span>
+<span id="cb15-14"><a></a>}</span>
+<span id="cb15-15"><a></a></span>
+<span id="cb15-16"><a></a>lines   <span class="ot">&lt;-</span> <span class="fu">readLines</span>(input)</span>
+<span id="cb15-17"><a></a>headers <span class="ot">&lt;-</span> <span class="fu">grepl</span>(<span class="st">"^&gt;"</span>, lines)                <span class="co"># TRUE for header lines</span></span>
+<span id="cb15-18"><a></a>seq     <span class="ot">&lt;-</span> <span class="fu">paste</span>(lines[<span class="sc">!</span>headers], <span class="at">collapse =</span> <span class="st">""</span>)</span>
+<span id="cb15-19"><a></a></span>
+<span id="cb15-20"><a></a><span class="fu">cat</span>(<span class="st">"=== FASTA Statistics for"</span>, input, <span class="st">"===</span><span class="sc">\n</span><span class="st">"</span>)</span>
+<span id="cb15-21"><a></a><span class="fu">cat</span>(<span class="st">"Number of sequences:"</span>, <span class="fu">sum</span>(headers), <span class="st">"</span><span class="sc">\n</span><span class="st">"</span>)</span>
+<span id="cb15-22"><a></a><span class="fu">cat</span>(<span class="st">"Total length:"</span>, <span class="fu">nchar</span>(seq), <span class="st">"bp</span><span class="sc">\n</span><span class="st">"</span>)</span>
+<span id="cb15-23"><a></a><span class="fu">cat</span>(<span class="st">"Average length:"</span>, <span class="fu">nchar</span>(seq) <span class="sc">/</span> <span class="fu">sum</span>(headers), <span class="st">"bp</span><span class="sc">\n</span><span class="st">"</span>)</span>
+<span id="cb15-24"><a></a>gc <span class="ot">&lt;-</span> <span class="fu">sum</span>(<span class="fu">strsplit</span>(seq, <span class="st">""</span>)[[<span class="dv">1</span>]] <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"G"</span>, <span class="st">"C"</span>))</span>
+<span id="cb15-25"><a></a><span class="fu">cat</span>(<span class="st">"GC content:"</span>, <span class="fu">round</span>(<span class="dv">100</span> <span class="sc">*</span> gc <span class="sc">/</span> <span class="fu">nchar</span>(seq), <span class="dv">1</span>), <span class="st">"%</span><span class="sc">\n</span><span class="st">"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 </div>
 <div id="tabset-1-2">
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb11"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a></a><span class="co">#!/usr/bin/env python3</span></span>
-<span id="cb11-2"><a></a><span class="co"># Script: fasta_stats.py</span></span>
-<span id="cb11-3"><a></a><span class="co"># Purpose: Calculate basic statistics for a FASTA file</span></span>
-<span id="cb11-4"><a></a></span>
-<span id="cb11-5"><a></a><span class="im">import</span> sys</span>
-<span id="cb11-6"><a></a><span class="im">from</span> pathlib <span class="im">import</span> Path</span>
-<span id="cb11-7"><a></a></span>
-<span id="cb11-8"><a></a><span class="cf">if</span> <span class="bu">len</span>(sys.argv) <span class="op">!=</span> <span class="dv">2</span>:                       <span class="co"># sys.argv[0] is the script name, like $0</span></span>
-<span id="cb11-9"><a></a>    <span class="bu">print</span>(<span class="st">"Usage: python3 fasta_stats.py sequences.fasta"</span>)</span>
-<span id="cb11-10"><a></a>    sys.exit(<span class="dv">1</span>)</span>
-<span id="cb11-11"><a></a>input_file <span class="op">=</span> Path(sys.argv[<span class="dv">1</span>])</span>
-<span id="cb11-12"><a></a><span class="cf">if</span> <span class="kw">not</span> input_file.is_file():</span>
-<span id="cb11-13"><a></a>    <span class="bu">print</span>(<span class="ss">f"Error: File </span><span class="sc">{</span>input_file<span class="sc">}</span><span class="ss"> not found!"</span>)</span>
-<span id="cb11-14"><a></a>    sys.exit(<span class="dv">1</span>)</span>
-<span id="cb11-15"><a></a></span>
-<span id="cb11-16"><a></a>lines   <span class="op">=</span> input_file.read_text().splitlines()</span>
-<span id="cb11-17"><a></a>headers <span class="op">=</span> [line <span class="cf">for</span> line <span class="kw">in</span> lines <span class="cf">if</span> line.startswith(<span class="st">"&gt;"</span>)]</span>
-<span id="cb11-18"><a></a>seq     <span class="op">=</span> <span class="st">""</span>.join(line <span class="cf">for</span> line <span class="kw">in</span> lines <span class="cf">if</span> <span class="kw">not</span> line.startswith(<span class="st">"&gt;"</span>))</span>
-<span id="cb11-19"><a></a></span>
-<span id="cb11-20"><a></a><span class="bu">print</span>(<span class="ss">f"=== FASTA Statistics for </span><span class="sc">{</span>input_file<span class="sc">}</span><span class="ss"> ==="</span>)</span>
-<span id="cb11-21"><a></a><span class="bu">print</span>(<span class="ss">f"Number of sequences: </span><span class="sc">{</span><span class="bu">len</span>(headers)<span class="sc">}</span><span class="ss">"</span>)</span>
-<span id="cb11-22"><a></a><span class="bu">print</span>(<span class="ss">f"Total length: </span><span class="sc">{</span><span class="bu">len</span>(seq)<span class="sc">}</span><span class="ss"> bp"</span>)</span>
-<span id="cb11-23"><a></a><span class="bu">print</span>(<span class="ss">f"Average length: </span><span class="sc">{</span><span class="bu">len</span>(seq) <span class="op">/</span> <span class="bu">len</span>(headers)<span class="sc">:.1f}</span><span class="ss"> bp"</span>)</span>
-<span id="cb11-24"><a></a>gc <span class="op">=</span> seq.count(<span class="st">"G"</span>) <span class="op">+</span> seq.count(<span class="st">"C"</span>)</span>
-<span id="cb11-25"><a></a><span class="bu">print</span>(<span class="ss">f"GC content: </span><span class="sc">{</span><span class="dv">100</span> <span class="op">*</span> gc <span class="op">/</span> <span class="bu">len</span>(seq)<span class="sc">:.1f}</span><span class="ss">%"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb16"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb16-1"><a></a><span class="co">#!/usr/bin/env python3</span></span>
+<span id="cb16-2"><a></a><span class="co"># Script: fasta_stats.py</span></span>
+<span id="cb16-3"><a></a><span class="co"># Purpose: Calculate basic statistics for a FASTA file</span></span>
+<span id="cb16-4"><a></a></span>
+<span id="cb16-5"><a></a><span class="im">import</span> sys</span>
+<span id="cb16-6"><a></a><span class="im">from</span> pathlib <span class="im">import</span> Path</span>
+<span id="cb16-7"><a></a></span>
+<span id="cb16-8"><a></a><span class="cf">if</span> <span class="bu">len</span>(sys.argv) <span class="op">!=</span> <span class="dv">2</span>:                       <span class="co"># sys.argv[0] is the script name, like $0</span></span>
+<span id="cb16-9"><a></a>    <span class="bu">print</span>(<span class="st">"Usage: python3 fasta_stats.py sequences.fasta"</span>)</span>
+<span id="cb16-10"><a></a>    sys.exit(<span class="dv">1</span>)</span>
+<span id="cb16-11"><a></a>input_file <span class="op">=</span> Path(sys.argv[<span class="dv">1</span>])</span>
+<span id="cb16-12"><a></a><span class="cf">if</span> <span class="kw">not</span> input_file.is_file():</span>
+<span id="cb16-13"><a></a>    <span class="bu">print</span>(<span class="ss">f"Error: File </span><span class="sc">{</span>input_file<span class="sc">}</span><span class="ss"> not found!"</span>)</span>
+<span id="cb16-14"><a></a>    sys.exit(<span class="dv">1</span>)</span>
+<span id="cb16-15"><a></a></span>
+<span id="cb16-16"><a></a>lines   <span class="op">=</span> input_file.read_text().splitlines()</span>
+<span id="cb16-17"><a></a>headers <span class="op">=</span> [line <span class="cf">for</span> line <span class="kw">in</span> lines <span class="cf">if</span> line.startswith(<span class="st">"&gt;"</span>)]</span>
+<span id="cb16-18"><a></a>seq     <span class="op">=</span> <span class="st">""</span>.join(line <span class="cf">for</span> line <span class="kw">in</span> lines <span class="cf">if</span> <span class="kw">not</span> line.startswith(<span class="st">"&gt;"</span>))</span>
+<span id="cb16-19"><a></a></span>
+<span id="cb16-20"><a></a><span class="bu">print</span>(<span class="ss">f"=== FASTA Statistics for </span><span class="sc">{</span>input_file<span class="sc">}</span><span class="ss"> ==="</span>)</span>
+<span id="cb16-21"><a></a><span class="bu">print</span>(<span class="ss">f"Number of sequences: </span><span class="sc">{</span><span class="bu">len</span>(headers)<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb16-22"><a></a><span class="bu">print</span>(<span class="ss">f"Total length: </span><span class="sc">{</span><span class="bu">len</span>(seq)<span class="sc">}</span><span class="ss"> bp"</span>)</span>
+<span id="cb16-23"><a></a><span class="bu">print</span>(<span class="ss">f"Average length: </span><span class="sc">{</span><span class="bu">len</span>(seq) <span class="op">/</span> <span class="bu">len</span>(headers)<span class="sc">:.1f}</span><span class="ss"> bp"</span>)</span>
+<span id="cb16-24"><a></a>gc <span class="op">=</span> seq.count(<span class="st">"G"</span>) <span class="op">+</span> seq.count(<span class="st">"C"</span>)</span>
+<span id="cb16-25"><a></a><span class="bu">print</span>(<span class="ss">f"GC content: </span><span class="sc">{</span><span class="dv">100</span> <span class="op">*</span> gc <span class="op">/</span> <span class="bu">len</span>(seq)<span class="sc">:.1f}</span><span class="ss">%"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 </div>
 </div>
@@ -712,26 +806,26 @@ Bill Cresko
 <ul id="tabset-2" class="panel-tabset-tabby"><li><a data-tabby-default="" href="#tabset-2-1">R</a></li><li><a href="#tabset-2-2">Python</a></li></ul>
 <div class="tab-content">
 <div id="tabset-2-1">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb12"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb12-1"><a></a><span class="ex">Rscript</span> fasta_stats.R proteins.fasta        <span class="co"># run with the interpreter ...</span></span>
-<span id="cb12-2"><a></a></span>
-<span id="cb12-3"><a></a><span class="fu">chmod</span> +x fasta_stats.R                      <span class="co"># ... or make it executable</span></span>
-<span id="cb12-4"><a></a><span class="ex">./fasta_stats.R</span> proteins.fasta              <span class="co">#     (needs the #!/usr/bin/env Rscript shebang)</span></span>
-<span id="cb12-5"><a></a></span>
-<span id="cb12-6"><a></a><span class="ex">Rscript</span> <span class="at">-e</span> <span class="st">'mean(c(1, 2, 3))'</span>               <span class="co"># one-liner without a file</span></span>
-<span id="cb12-7"><a></a><span class="ex">R</span>                                           <span class="co"># interactive console; quit with q()</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb17"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb17-1"><a></a><span class="ex">Rscript</span> fasta_stats.R proteins.fasta        <span class="co"># run with the interpreter ...</span></span>
+<span id="cb17-2"><a></a></span>
+<span id="cb17-3"><a></a><span class="fu">chmod</span> +x fasta_stats.R                      <span class="co"># ... or make it executable</span></span>
+<span id="cb17-4"><a></a><span class="ex">./fasta_stats.R</span> proteins.fasta              <span class="co">#     (needs the #!/usr/bin/env Rscript shebang)</span></span>
+<span id="cb17-5"><a></a></span>
+<span id="cb17-6"><a></a><span class="ex">Rscript</span> <span class="at">-e</span> <span class="st">'mean(c(1, 2, 3))'</span>               <span class="co"># one-liner without a file</span></span>
+<span id="cb17-7"><a></a><span class="ex">R</span>                                           <span class="co"># interactive console; quit with q()</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <ul>
 <li><code>Rscript</code> runs the file top to bottom and prints only what you <code>cat()</code> or <code>print()</code></li>
-<li>In <strong>Positron</strong> / <strong>VS Code</strong>: open the <code>.R</code> file and press <code>Cmd/Ctrl-Enter</code> to send lines to the console</li>
+<li>In <strong>Positron</strong> / <strong>VS Code</strong> / <strong>RStudio</strong>: open the <code>.R</code> file and press <code>Cmd/Ctrl-Enter</code> to send lines to the console</li>
 </ul>
 </div>
 <div id="tabset-2-2">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb13"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb13-1"><a></a><span class="ex">python3</span> fasta_stats.py proteins.fasta       <span class="co"># run with the interpreter ...</span></span>
-<span id="cb13-2"><a></a></span>
-<span id="cb13-3"><a></a><span class="fu">chmod</span> +x fasta_stats.py                     <span class="co"># ... or make it executable</span></span>
-<span id="cb13-4"><a></a><span class="ex">./fasta_stats.py</span> proteins.fasta             <span class="co">#     (needs the #!/usr/bin/env python3 shebang)</span></span>
-<span id="cb13-5"><a></a></span>
-<span id="cb13-6"><a></a><span class="ex">python3</span> <span class="at">-c</span> <span class="st">'print(sum([1, 2, 3]) / 3)'</span>      <span class="co"># one-liner without a file</span></span>
-<span id="cb13-7"><a></a><span class="ex">python3</span>                                     <span class="co"># interactive REPL; quit with exit() or Ctrl-D</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb18"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb18-1"><a></a><span class="ex">python3</span> fasta_stats.py proteins.fasta       <span class="co"># run with the interpreter ...</span></span>
+<span id="cb18-2"><a></a></span>
+<span id="cb18-3"><a></a><span class="fu">chmod</span> +x fasta_stats.py                     <span class="co"># ... or make it executable</span></span>
+<span id="cb18-4"><a></a><span class="ex">./fasta_stats.py</span> proteins.fasta             <span class="co">#     (needs the #!/usr/bin/env python3 shebang)</span></span>
+<span id="cb18-5"><a></a></span>
+<span id="cb18-6"><a></a><span class="ex">python3</span> <span class="at">-c</span> <span class="st">'print(sum([1, 2, 3]) / 3)'</span>      <span class="co"># one-liner without a file</span></span>
+<span id="cb18-7"><a></a><span class="ex">python3</span>                                     <span class="co"># interactive REPL; quit with exit() or Ctrl-D</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <ul>
 <li><code>python3 script.py</code> runs the file top to bottom and prints only what you <code>print()</code></li>
 <li>In <strong>VS Code</strong> / <strong>Positron</strong>: open the <code>.py</code> file and press <code>Cmd/Ctrl-Enter</code>, or use the Run button</li>
@@ -749,7 +843,7 @@ Bill Cresko
 <p><strong>Tip</strong></p>
 </div>
 <div class="callout-content">
-<p>Both scripts return an <strong>exit status</strong> (<code>quit(status = 1)</code> / <code>sys.exit(1)</code>), so a shell pipeline or SLURM job can tell whether they succeeded - just like <code>exit 1</code> in bash. In Lecture 10 we submit these scripts to Talapas with <code>Rscript</code> and <code>python3</code> inside an <code>sbatch</code> job.</p>
+<p>Both scripts return an <strong>exit status</strong> (<code>quit(status = 1)</code> / <code>sys.exit(1)</code>), so a shell pipeline or SLURM job can tell whether they succeeded - just like <code>exit 1</code> in bash. In Lecture 08 we submit these scripts to Talapas with <code>Rscript</code> and <code>python3</code> inside an <code>sbatch</code> job.</p>
 </div>
 </div>
 </div>
