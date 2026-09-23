@@ -1,6 +1,6 @@
 ---
 title: "Lecture 10 - Computational Tools for Bioengineers"
-subtitle: "Talapas and High Performance Computing"
+subtitle: "Git, GitHub and GitHub Pages"
 date: "Monday, November 30, 2026"
 author: "Bill Cresko"
 ---
@@ -26,552 +26,350 @@ set.seed(2026)
 
 The course book goes deeper on everything in this lecture. Read before or after class:
 
--   [Ch. 20: High-Performance Computing with Talapas](../book/chapters/20-hpc-talapas.html)
--   [Ch. 14: Parallel Computing in R](../book/chapters/14-parallel-computing.html)
--   *Reference:* [App. F: SLURM Command Reference](../book/chapters/appendix-F-slurm.html)
+-   [Ch. 19: Version Control with Git and GitHub](../book/chapters/19-git-github.html)
+-   *Reference:* [App. I: Git Command Reference](../book/chapters/appendix-I-git.html)
 
 ## Goals for today
 
--   Basics of working with Talapas
--   The SLURM job scheduler
--   Software modules and monitoring jobs
--   Running R (`Rscript`) and Python (`python3`) scripts as batch jobs
+-   Finish Git and GitHub
+-   Publishing websites with GitHub Pages
 -   <https://wcresko.github.io/computational_tools_book/>
 
+## Git and GitHub
 
+### What is Git?
 
-# Talapas and High Performance Computing
+-   **Git** is a distributed version control system
+-   Tracks changes in your code over time
+-   Allows collaboration with others
+-   Maintains complete history of all changes
 
-## What is Talapas?
+### What is GitHub?
 
--   **Talapas** is UO's high-performance computing (HPC) cluster
--   Named from Chinook word for coyote (educator and keeper of knowledge)
--   Managed by Research Advanced Computing Services (RACS)
--   Located in the Allen Hall Data Center
--   https://uoracs.github.io/talapas2-knowledge-base/
+-   **GitHub** is a web-based hosting service for Git repositories
+-   Provides cloud storage for your code
+-   Enables collaboration features
+-   Hosts documentation and websites (GitHub Pages)
+-   Free for public repositories
 
-### Key Resources:
+## Git Workflow Concept
 
--   Over 14,520 CPU cores
--   129 TB of memory
--   89 GPUs (including A100, H100, V100)
--   3+ Petabytes of storage
+![Git workflow: working directory, staging area, local and remote repositories](images/Lec08_img001.svg){fig-align="center" width="100%"}
 
-## Talapas Architecture
+-   **Track Changes**: Every modification is recorded
+-   **Collaboration**: Multiple people can work simultaneously
+-   **Backup**: Your code is safe in multiple places
+-   **Experimentation**: Try new things without breaking working code
 
-![](images/Lec10_img001.svg){fig-align="center" width="95%"}
+## Setting Up Git
 
-## Login Nodes vs Compute Nodes
-
-### Login Nodes (Head Nodes)
-
--   Where you land when you SSH into Talapas
--   For **light tasks only**: file management, editing, job submission
--   Shared by all users - be considerate!
--   Heavy processes will be killed
-
-### Compute Nodes
-
--   Where your actual work runs
--   Accessed through the SLURM scheduler
--   Different types for different needs:
-    -   Standard CPU nodes
-    -   GPU nodes
-    -   High-memory ("fat") nodes
-
-## Node Types on Talapas
-
-| Node type (general use)  | How many | Cores per node | Memory per node | Purpose                         |
-|--------------------------|----------|----------------|-----------------|---------------------------------|
-| Standard CPU (AMD Milan) | 43       | 128            | 512 GB          | General computation             |
-| GPU                      | 24       | 48             | 256 - 512 GB    | Machine learning, CUDA (52 NVIDIA A100 GPUs in total) |
-| Large memory             | a few    | varies         | up to 4 TB      | Memory-hungry jobs (e.g. genome assembly) |
-| Interactive              | 19       | varies         | varies          | Testing, development, Open OnDemand sessions |
-
-::: callout-note
-Researchers can also buy **condo** nodes that their group gets priority on - about 166 more CPU nodes plus V100, A100, and H100 GPUs. Numbers from [RACS](https://racs.uoregon.edu/services); check the [Knowledge Base](https://uoracs.github.io/talapas2-knowledge-base/) for the current list.
-:::
-
-## Partitions (Queues)
-
-| Partition        | Time limit | Use it for                                   |
-|------------------|------------|----------------------------------------------|
-| `compute`        | 1 day      | General CPU jobs (the default choice)        |
-| `computelong`    | 14 days    | Long CPU jobs                                |
-| `gpu`            | 1 day      | Jobs that need a GPU                         |
-| `gpulong`        | 14 days    | Long GPU jobs                                |
-| `interactive`    | 12 hours   | Shorter interactive CPU sessions             |
-| `interactivegpu` | 8 hours    | Shorter interactive GPU sessions             |
-| `memory`         | 1 day      | Jobs needing lots of memory (up to 4 TB)     |
-| `memorylong`     | 14 days    | Long, memory-hungry jobs                     |
-
-::: callout-tip
-Run `sinfo` on Talapas to see every partition, including your lab's condo partitions.
-:::
-
-## Getting Access to Talapas
-
-### Step 1: Join or Create a PIRG
-
--   **PIRG** = Principal Investigator Research Group
--   Contact your PI to be added to their PIRG
--   Or contact RACS to create a new PIRG
-
-### Step 2: Request Access
-
--   Visit [racs.uoregon.edu/request-access](https://racs.uoregon.edu/request-access)
--   Your username = your Duck ID
--   Your password = your UO password
-
-## Logging Into Talapas - web browser
-
-[ondemand.talapas.uoregon.edu](https://ondemand.talapas.uoregon.edu)
-
--   No command line needed!
--   File browser for uploads/downloads
--   Interactive applications:
-    -   JupyterLab/Notebooks
-    -   RStudio
-    -   MATLAB
-    -   Remote desktop
-
-### Great for:
-
--   Beginners learning HPC
--   Quick file management
--   Interactive data analysis
--   Running GUI applications
-
-## Logging Into Talapas - command line
-
-### From a terminal (macOS, Ubuntu/WSL, VS Code, Positron):
+### 1. Install Git
 
 ``` bash
-# Through the load balancer - works from anywhere (expect a Duo prompt)
+# Check if Git is installed
 
-ssh yourduckid@login.talapas.uoregon.edu
+git --version
 
-# With the UO VPN connected you can also pick a specific login node
+# macOS (with Homebrew)
 
-ssh yourduckid@login1.talapas.uoregon.edu
-ssh yourduckid@login2.talapas.uoregon.edu
-ssh yourduckid@login3.talapas.uoregon.edu
-ssh yourduckid@login4.talapas.uoregon.edu
+brew install git
+
+# Ubuntu/Debian
+
+sudo apt-get install git
+
+# Windows: Download from git-scm.com
 ```
 
-### From Windows:
-
--   Use the Ubuntu (WSL) terminal
--   Or VS Code / Positron with the Remote-SSH extension
-
-::: callout-note
-The Knowledge Base says the UO VPN is **recommended, not required**. Off campus without the VPN: SSH to the load balancer `login.talapas.uoregon.edu` and answer the Duo two-step prompts.
-:::
-
-## Connecting VS Code to Talapas (Remote-SSH)
-
-![](images/Lec10_img002.svg){fig-align="center" width="100%"}
-
-::: callout-tip
-With **Remote - SSH**, VS Code (or Positron) runs its editor on your laptop while the files, terminal, and code live on Talapas - it feels just like working locally.
-:::
-
-## Storage on Talapas
-
-![](images/Lec10_img003.svg){fig-align="center" width="85%"}
-
-### Directory Structure:
-
-| Location                | Quota                 | Purpose                     |
-|-------------------------|-----------------------|-----------------------------|
-| `/home/duckid`          | 250 GB                | Config files, small scripts |
-| `/projects/PIRG/duckid` | Shared (2 TB default) | Large data, analysis        |
-| `/projects/PIRG/shared` | Shared                | Files shared with group     |
-| `/tmp`                  | Local to node         | Temporary scratch space     |
-
-## Important Notes:
-
--   **Data is NOT automatically backed up!**
--   Use `/projects` for large files
--   Clean up when done
+### 2. Configure Git
 
 ``` bash
-# Check your storage usage
-df -h ~
-du -sh /projects/myPIRG/myusername
+# Set your name and email
+
+git config --global user.name "Your Name"
+git config --global user.email "your.email@example.com"
+
+# Check your settings
+
+git config --list
 ```
 
-## What is SLURM?
+# GitHub
 
--   **S**imple **L**inux **U**tility for **R**esource **M**anagement
--   Job scheduler and workload manager
--   Allocates resources fairly among users
--   Ensures efficient cluster utilization
+## GitHub for Scientific Collaboration
 
-![](images/Lec10_img004.svg){fig-align="center" width="95%"}
+### Perfect for Research Projects:
 
-### Key Concepts:
+-   **Reproducibility**: Complete history of analysis development
+-   **Collaboration**: Work with colleagues worldwide
+-   **Documentation**: README files, wikis, and GitHub Pages
+-   **Issues**: Track bugs, ideas, and to-dos
+-   **Releases**: Tag specific versions for publications
+-   **DOI Integration**: Link with Zenodo for citations
 
--   **Jobs**: Units of work you submit
--   **Partitions**: Queues with different properties
--   **Accounts**: Your PIRG for resource tracking
+## Resources and Help
 
-## Essential SLURM Commands
+### Learning Resources:
+
+-   **GitHub Docs** `(https://docs.github.com)`
+-   **Pro Git Book** `(https://git-scm.com/book) (free online)`
+-   **GitHub Skills** `(https://skills.github.com)`
+-   **Quarto + GitHub Pages** `(https://quarto.org/docs/publishing/github-pages.html)`
+
+## Creating a GitHub Account
+
+### Steps to Get Started:
+
+1.  Go to [github.com](https://github.com)
+2.  Click "Sign up"
+3.  Choose a username (professional, memorable)
+4.  Add your university email
+5.  Verify your account
+6.  Consider GitHub Student Developer Pack:
+    -   Free GitHub Pro while you're a student
+    -   Access to development tools
+    -   Apply at [education.github.com](https://education.github.com)
+
+## Basic Git Commands
+
+### Initialize a Repository
+
+There are two ways to do this: create a new repository, or clone an existing repository
 
 ``` bash
-# Submit a batch job
+# Create a new repository
 
-sbatch myscript.sh
+git init
 
-# Check your jobs in the queue
+# Clone an existing repository
 
-squeue -u $USER
-
-# Check all jobs on a partition
-
-squeue -p compute
-
-# Cancel a job
-
-scancel JOBID
-
-# Get detailed job info
-
-scontrol show job JOBID
-
-# Check job history and resource usage
-
-sacct -j JOBID --format=JobID,Elapsed,MaxRSS
-
-# View partition information
-
-sinfo -p compute
+git clone https://github.com/username/repository.git
 ```
 
-## Interactive Jobs
+## Creating a template repo on GitHub
 
-### For testing and development:
+I created a template website repository for you to clone and edit
+
+-   Open GitHub and log into it (important that you're logged in)
+-   Go to this repository in my GitHub account:
+
+`https://github.com/wcresko/academic_website_template`
+
+-   Click the green button in the upper right hand corner that says 'Use this template'
+-   This will clone the template into your GitHub account.
+
+## Cloning the template repository to your local machine
+
+-   Now you can clone the repository to you local machine
+
+-   Open your terminal and `cd` to a location where you want to clone the repository
 
 ``` bash
-# Start an interactive session
+## type the following command
 
-srun --pty --partition=interactive --account=myPIRG \
-     --time=2:00:00 --cpus-per-task=4 --mem=8G /bin/bash
+git clone << Link to your repository on GitHub >>
 ```
 
-\
-\
+-   I'll show you how to find the link on GitHub to use
 
-### When to use interactive jobs:
-
--   Testing your workflow before batch submission
--   Debugging code
--   Quick data exploration
--   Running GUI applications
-
-**Note**: Your prompt will change from `login1` to something like `n049`
-
-## Writing a SLURM Batch Script
-
-A batch script is a **shell script** with `#SBATCH` directives on top. The last lines are the same commands you would type on your laptop - `Rscript` or `python3`.
-
-::: panel-tabset
-### R
+## Track Changes
 
 ``` bash
-#!/bin/bash
-#SBATCH --job-name=my_analysis      # Job name
-#SBATCH --partition=compute         # Partition (queue)
-#SBATCH --account=myPIRG            # Your PIRG name
-#SBATCH --output=output_%j.log      # Standard output (%j = job ID)
-#SBATCH --error=error_%j.log        # Standard error
-#SBATCH --time=04:00:00             # Time limit (HH:MM:SS)
-#SBATCH --nodes=1                   # Number of nodes
-#SBATCH --ntasks-per-node=1         # Tasks per node
-#SBATCH --cpus-per-task=4           # CPUs per task
-#SBATCH --mem=16G                   # Memory per node
+# Check status
 
-# Load required modules
+git status
 
-module load R/4.3.3
+# Add files to staging
 
-# Run your program
+git add filename.txt        # Add specific file
+git add .                   # Add all changes
 
-Rscript my_analysis.R
+# Commit changes
+
+git commit -m "Descriptive message about changes"
 ```
 
-### Python
+## Working with Remotes
 
 ``` bash
-#!/bin/bash
-#SBATCH --job-name=my_analysis_py   # Job name
-#SBATCH --partition=compute         # Partition (queue)
-#SBATCH --account=myPIRG            # Your PIRG name
-#SBATCH --output=output_%j.log      # Standard output (%j = job ID)
-#SBATCH --error=error_%j.log        # Standard error
-#SBATCH --time=04:00:00             # Time limit (HH:MM:SS)
-#SBATCH --nodes=1                   # Number of nodes
-#SBATCH --ntasks-per-node=1         # Tasks per node
-#SBATCH --cpus-per-task=4           # CPUs per task
-#SBATCH --mem=16G                   # Memory per node
+# Add a remote repository
 
-# Load required modules
+git remote add origin https://github.com/username/repo.git
 
-module load python3/3.11.4          # or: module load miniconda3/20240410
-                                    #     conda activate my_env
+# View remotes
 
-# Run your program
+git remote -v
 
-python3 my_analysis.py
+# Push changes to GitHub
+
+git push origin main
+
+# Pull changes from GitHub
+
+git pull origin main
+
+# Fetch without merging
+
+git fetch origin
 ```
 
-### R + Python in one job
+## Branching and Merging
+
+![Branching and merging](images/Lec08_img002.svg){fig-align="center" width="100%"}
 
 ``` bash
-#!/bin/bash
-#SBATCH --job-name=fasta_pipeline
-#SBATCH --partition=compute
-#SBATCH --account=myPIRG
-#SBATCH --output=output_%j.log
-#SBATCH --error=error_%j.log
-#SBATCH --time=01:00:00
-#SBATCH --cpus-per-task=2
-#SBATCH --mem=8G
+# Create and switch to new branch
 
-set -e                              # stop the job if any step fails
+git switch -c feature-branch
 
-module load python3/3.11.4
-module load R/4.3.3
+# Switch branches
 
-# Step 1 (Python): summarise every FASTA file into one table
-python3 fasta_stats.py data/*.fasta > results/fasta_stats.tsv
+git switch main
 
-# Step 2 (R): read that table, make the figure
-Rscript plot_stats.R results/fasta_stats.tsv results/fasta_stats.png
-```
-:::
+# Merge branch
 
-## What the job actually runs
-
-The scripts are ordinary R and Python programs - the same ones you test on your laptop first. Arguments come from the command line so nothing is hard-coded.
-
-::: panel-tabset
-### R (`plot_stats.R`)
-
-```{r}
-#| label: lec10-plot-stats-r
-#| echo: true
-#| eval: false
-
-#!/usr/bin/env Rscript
-library(tidyverse)
-
-args <- commandArgs(trailingOnly = TRUE)      # c("results/fasta_stats.tsv", "results/fasta_stats.png")
-stats <- read_tsv(args[1])
-
-p <- ggplot(stats, aes(x = file, y = gc_percent)) +
-  geom_col() +
-  labs(x = NULL, y = "GC content (%)") +
-  theme_minimal()
-
-ggsave(args[2], p, width = 8, height = 4)
-cat("Wrote", args[2], "\n")
+git merge feature-branch
 ```
 
-### Python (`fasta_stats.py`)
+Note: `git checkout -b` / `git checkout main` is the older syntax - it still works and you will see it everywhere
 
-```{python}
-#| label: lec10-fasta-stats-py
-#| echo: true
-#| eval: false
+## Common Git Workflow
 
-#!/usr/bin/env python3
-import sys
-from pathlib import Path
-
-print("file\tn_seqs\ttotal_bp\tgc_percent")           # header of the TSV
-for path in map(Path, sys.argv[1:]):                 # every file given on the command line
-    lines = path.read_text().splitlines()
-    n_seqs = sum(line.startswith(">") for line in lines)
-    seq = "".join(line for line in lines if not line.startswith(">")).upper()
-    gc = 100 * (seq.count("G") + seq.count("C")) / len(seq)
-    print(f"{path.name}\t{n_seqs}\t{len(seq)}\t{gc:.1f}")
-```
-:::
-
-::: callout-tip
-Test on a **tiny input on the login node** first (`python3 fasta_stats.py small.fasta`), then submit: `sbatch run_pipeline.sh`. Output and errors land in `output_JOBID.log` and `error_JOBID.log`.
-:::
-
-## R and Python packages on Talapas
-
-::: panel-tabset
-### R
+### Daily Development Cycle
 
 ``` bash
-module load R/4.3.3
-R                                   # interactive, on an interactive node
+# 1. Start your day - update your local copy
+
+git pull origin main
+
+# 2. Create a feature branch
+
+git switch -c new-feature
+
+# 3. Make changes and commit regularly
+
+git add .
+git commit -m "Add new analysis function"
+
+# 4. Push your branch
+
+git push origin new-feature
+
+# 5. Create pull request on GitHub (via website)
 ```
 
-``` r
-install.packages("tidyverse")       # goes to your personal library in ~/R/ - once
-library(tidyverse)                  # every session / every script
-```
-
--   Modules give you R itself; **you** install packages into your home directory
--   For a reproducible project, `renv::init()` records exact package versions in the project folder
-
-### Python
+## Viewing Commit History
 
 ``` bash
-module load miniconda3/20240410
-conda create -n my_env python=3.11 pandas matplotlib biopython   # once
-conda activate my_env                                            # every session / job
+# View commit history
 
-# or, with the plain python3 module and a virtual environment:
-module load python3/3.11.4
-python3 -m venv ~/envs/my_env && source ~/envs/my_env/bin/activate
-pip install pandas matplotlib biopython
+git log
+
+# Prettier one-line format
+
+git log --oneline
+
+# With graph
+
+git log --graph --oneline --all
+
+# Show changes in commits
+
+git log -p
+
+# Show last n commits
+
+git log -3
 ```
 
--   `conda` (with the **bioconda** channel) installs compiled bioinformatics tools too - `conda install -c bioconda samtools`
--   Put the same `module load` + `conda activate` / `source .../activate` lines in your `sbatch` script
-:::
+## .gitignore File
 
-## Understanding SLURM Directives
-
-| Directive         | Description         | Example                           |
-|-------------------|---------------------|-----------------------------------|
-| `--partition`     | Queue to use        | `compute`, `computelong`, `gpu`, `memory` |
-| `--account`       | PIRG for accounting | `myPIRG`                          |
-| `--time`          | Max runtime         | `1-12:00:00` (1 day, 12 hrs)      |
-| `--nodes`         | Number of nodes     | `1`                               |
-| `--cpus-per-task` | Cores per task      | `8`                               |
-| `--mem`           | Memory per node     | `32G`                             |
-| `--mem-per-cpu`   | Memory per CPU      | `4G`                              |
-| `--gres`          | Generic resources   | `gpu:1`                           |
-
-**Tip**: Request only what you need - smaller jobs run sooner!
-
-## GPU Jobs
+### Exclude files from version control:
 
 ``` bash
-#!/bin/bash
-#SBATCH --job-name=gpu_job
-#SBATCH --partition=gpu             # GPU partition
-#SBATCH --account=myPIRG
-#SBATCH --time=1-00:00:00           # 1 day
-#SBATCH --nodes=1
-#SBATCH --ntasks-per-node=1
-#SBATCH --gres=gpu:1                # Request 1 GPU
-#SBATCH --mem=32G
-
-# Load CUDA and your software
-
-module load cuda/12.4
-module load miniconda3/20240410
-
-# Activate your conda environment
-
-conda activate my_ml_env
-
-# Run your GPU code
-
-python train_model.py
+# Create .gitignore file
+touch .gitignore
 ```
 
-\
-\
-
-### Check available GPUs:
+### Common patterns to exclude:
 
 ``` bash
-/packages/racs/bin/slurm-show-gpus
+# Data files
+*.fastq
+*.fasta
+*.bam
+*.vcf
+data/raw/*
+
+# R files
+.Rhistory
+.RData
+.Rproj.user
+
+# Python files
+__pycache__/
+*.pyc
+.venv/
+.ipynb_checkpoints/
+
+# Output files
+results/temp/*
+*.log
+
+# System files
+.DS_Store
 ```
 
-## Talapas Uses Software Modules (LMOD)
+## Best Practices
 
-``` bash
-# List all available modules
-module avail
+### Commit Messages
 
-# Search for specific software
-module spider R
-module spider python          # python3/3.x.y modules, plus miniconda3 for conda environments
+-   Be descriptive and concise
+-   Use present tense: "Add feature" not "Added feature"
+-   Reference issues: "Fix bug #123"
 
-# Load a module
-module load R/4.3.3
-module load miniconda3/20240410
+### Repository Organization
 
-# See what's loaded
-module list
-
-# Unload a module
-module unload R
-
-# Reset to default
-module purge
+```         
+project/
+├── README.md          # Project description
+├── data/              # Raw data (consider .gitignore)
+├── analysis/          # Analysis scripts (.R, .py, .sh, .qmd)
+├── results/           # Output files
+└── docs/              # Documentation
 ```
 
-::: callout-note
-In your batch scripts, always load modules after the SBATCH directives!
-:::
+## GitHub Pages
 
-## Monitoring Your Jobs
+### Host Your Research Website for Free!
 
-``` bash
-# Check job status
+![From Quarto source to a live website](images/Lec08_img003.svg){fig-align="center" width="100%"}
 
-squeue -u $USER
+### Setup Steps:
 
-# Detailed job information
+1.  Create repository
+2.  Clone to your local computer
+3.  Make changes in RStudio, VS Code or Positron (`.qmd` files with R or Python chunks)
+4.  Add and Commit your changes
+5.  Push your changes and files to the remote repository
+6.  Enable Pages in repository settings
+7.  Your site is live at `https://username.github.io/repo_name`
 
-scontrol show job JOBID
+## GitHub Pages Configuration
 
-# After job completes - see resource usage
+### In your repository:
 
-sacct -j JOBID --format=JobID,JobName,Elapsed,MaxRSS,State
+1.  Go to Settings → Pages
+2.  Source: Deploy from a branch
+3.  Branch: main (or gh-pages)
+4.  Folder: `/docs` (preferable) or `/` (root)
+
+### For Quarto projects:
+
+``` yaml
+# In _quarto.yml
+
+project:
+  type: website
+  output-dir: docs
 ```
-
-\
-\
-
-### Common Status Codes:
-
-| Code | Meaning           |
-|------|-------------------|
-| PD   | Pending (waiting) |
-| R    | Running           |
-| CG   | Completing        |
-| CD   | Completed         |
-| F    | Failed            |
-
-## Best Practices for Talapas
-
-### Do:
-
--   Request only resources you need
--   Test with small datasets first
--   Use `--time` conservatively
--   Clean up old files regularly
--   Use `/projects` for large data
-
-### Don't:
-
--   Run heavy computation on login nodes
--   Leave jobs running indefinitely
--   Store sensitive data without encryption
--   Forget to acknowledge RACS in publications
-
-## Getting Help with Talapas
-
-### Resources:
-
--   Documentation: [uoracs.github.io/talapas2-knowledge-base](https://uoracs.github.io/talapas2-knowledge-base/)
--   Service Desk: [hpcrcf.atlassian.net/servicedesk](https://hpcrcf.atlassian.net/servicedesk/customer/portal/1)
--   Email: racs\@uoregon.edu
--   Office Hours: Knight Library, Dream Lab 122E (Wednesdays 1-3pm)
-
-### Acknowledgment Text:
-
-> "The authors acknowledge Research Advanced Computing Services (RACS) at the University of Oregon for providing computing resources that have contributed to the research results reported within this publication."

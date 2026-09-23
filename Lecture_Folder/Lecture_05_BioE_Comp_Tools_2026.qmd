@@ -1,6 +1,6 @@
 ---
 title: "Lecture 05 - Computational Tools for Bioengineers"
-subtitle: "GREP and Regular Expressions"
+subtitle: "R and Python Fundamentals 1: Scripts, Variables, Vectors and Types"
 date: "Monday, October 26, 2026"
 author: "Bill Cresko"
 ---
@@ -22,291 +22,682 @@ set.seed(2026)
 ```
 
 
+
 ## Book reading for this lecture
 
 The course book goes deeper on everything in this lecture. Read before or after class:
 
--   [Ch. 7: GREP and Regular Expressions](../book/chapters/07-grep-regex.html)
--   *Reference:* [App. G: Regular Expression Reference](../book/chapters/appendix-G-regex.html)
+-   [Ch. 11: R Programming Fundamentals](../book/chapters/11-r-programming.html)
+-   [Ch. 12: Python Programming Fundamentals](../book/chapters/12-python-programming.html)
+-   *Reference:* [App. E: R Command Reference](../book/chapters/appendix-E-r.html) · [App. F: Python Quick Reference](../book/chapters/appendix-F-python.html)
 
 ## Goals for today
 
--   Finish using GREP for large files
--   Working with compressed files
--   Homework 1 - microbial genome analysis
-
-# Working with Large Genomic Data Files
-
-## Human Chromosome Data
-
--   Genomic data files can be massive (human genome \~6 billion base pairs)
--   FASTA format is standard for sequence data
--   Perfect use case for Unix pipes and redirection
--   Let's work with human genome assembly version 38 (\~3.1 GB)
-
-## Downloading Genomic Data
-
-Download version 38 of the human genome from NCBI:
-
-``` bash
-
-# Using `wget` to download human genome
-
-wget https://ftp.ncbi.nlm.nih.gov/genomes/all/GCF/000/001/405/\
-GCF_000001405.40_GRCh38.p14/GCF_000001405.40_GRCh38.p14_genomic.fna.gz
-
-# Or using `curl` and save with specific name
-
-curl -o human_genome.fa.gz https://ftp.ncbi.nlm.nih.gov/genomes/all/GCF/000/001/405/\
-GCF_000001405.40_GRCh38.p14/GCF_000001405.40_GRCh38.p14_genomic.fna.gz
-```
-
--   `wget` and `curl` are both tools for downloading files
--   The backslash (`\`) allows long URLs to span multiple lines
--   `.gz` extension means the file is compressed
-
-# GREP and Regular Expressions
-
-## What is GREP?
-
--   **GREP** = Global Regular Expression Print
--   Powerful text search tool in Unix
--   Searches for patterns in files or input streams
--   Returns lines that match the pattern
--   Essential for large data processing
-
-Basic syntax:
-
-``` bash
-grep [options] pattern [file...]
-```
-
-## Basic GREP Usage
-
-``` bash
-# Search for a simple pattern
-grep "ACGT" sequences.txt
-
-# Case-insensitive search
-grep -i "gene" annotations.txt
-
-# Count matching lines
-grep -c ">" proteins.fasta
-
-# Show line numbers
-grep -n "ERROR" logfile.txt
-
-# Invert match (show non-matching lines)
-grep -v "^#" data.txt    # Skip comment lines
-
-# Search multiple files
-grep "mutation" *.txt
-```
-
-## Introduction to Regular Expressions
-
-Regular expressions (regex) are patterns for matching text:
-
--   **`.`** = any single character
--   **`*`** = zero or more of preceding character
--   **`+`** = one or more of preceding character
--   **`?`** = zero or one of preceding character
--   **`^`** = start of line
--   **`$`** = end of line
--   **`[abc]`** = any character in set
--   **`[^abc]`** = any character NOT in set
--   **`\`** = escape special characters
-
-## Basic Regex Examples
-
-``` bash
-# Match DNA sequences
-grep "^ATG" genes.txt         # Lines starting with ATG
-grep "TAG$" genes.txt         # Lines ending with TAG
-grep "A.G" sequences.txt      # A, any char, then G
-
-# Character classes
-grep "[ACGT]" dna.txt         # Any DNA base
-grep "[^ACGT]" dna.txt        # Non-DNA characters
-grep "[0-9]" data.txt         # Any digit
-grep "[A-Za-z]" text.txt      # Any letter
-
-# Quantifiers
-grep "A\{3\}" sequence.txt    # Exactly 3 A's
-grep "T\{2,4\}" sequence.txt  # 2 to 4 T's
-grep "GC*" sequence.txt       # G followed by 0+ C's
-```
-
-## Extended Regular Expressions
-
-Use `grep -E` or `egrep` for extended regex:
-
-``` bash
-# Alternation (OR)
-grep -E "start|stop|pause" commands.txt
-
-# Grouping
-grep -E "(ATG|GTG|TTG)" codons.txt
-
-# Plus quantifier (one or more)
-grep -E "A+T+G+" sequences.txt
-
-# Question mark (optional)
-grep -E "colou?r" british_american.txt
-
-# Complex patterns for bioinformatics
-grep -E "^>sp\|[A-Z0-9]+\|" uniprot.fasta  # UniProt headers
-grep -E "[ACGT]{20,}" primers.txt          # Sequences 20bp+
-```
-
-## Combining GREP with Pipes
-
-``` bash
-# Count unique sequence headers
-grep "^>" sequences.fasta | sort | uniq | wc -l
-
-# Extract gene names from GFF file
-grep -v "^#" annotation.gff | cut -f9 | grep -oE "gene=[^;]+"
-
-# Find sequences without stop codons
-grep -v -E "(TAA|TAG|TGA)" orfs.txt
-
-# Quality control pipeline: count reads containing an N
-# FASTQ records are 4 lines; the sequence is always line 2 of each,
-# so awk 'NR % 4 == 2' pulls out sequence lines. (grep "^@" is NOT
-# safe here - quality lines can start with @ too, since @ is a valid
-# quality character.)
-zcat reads.fastq.gz | awk 'NR % 4 == 2' | grep -c "N"
-
-# Search and replace with sed (uses regex)
-grep "gene" data.txt | sed 's/gene/GENE/g'
-```
-
-## Analyzing Sequence Content
-
-Combine Unix tools to analyze genomic data:
-
-``` bash
-# Count total bases in chromosome 21
-
-grep -v "^>" human_genome.fa | tr -d '\n' | wc -c
-
-# Count each type of base
-
-grep -v "^>" human_genome.fa | tr -d '\n' | 
-  fold -w1 | sort | uniq -c
-
-# Calculate GC content
-
-grep -v "^>" human_genome.fa | tr -d '\n' | 
-  tr -cd 'GCgc' | wc -c
-
-# Find simple sequence repeats (e.g., "ATATAT...")
-
-grep -v "^>" human_genome.fa | grep -oE "(AT){5,}"
-```
-
-## Working with Compressed Files
-
-Most genomic data is compressed to save space:
-
-``` bash
-# View compressed files without extracting
-
-zcat file.gz | head
-zless file.gz
-zgrep "pattern" file.gz
-
-# Compress and decompress
-
-gzip file.txt          # Creates file.txt.gz
-gunzip file.txt.gz     # Restores file.txt
-gzip -k file.txt       # Keep original file
-
-# Work directly with compressed files
-# (count reads: every 4th line is a header; don't grep "^@" - quality lines can start with @)
-
-zcat reads.fastq.gz | awk 'NR % 4 == 1' | wc -l
-
-# Concatenate compressed files
-
-zcat file1.gz file2.gz | gzip > combined.gz
-```
-
-## Examining Large Files Efficiently
-
-Don't use `cat` on huge files! Use these approaches:
-
-``` bash
-# Decompress and look at first 10 lines
-
-gunzip -c human_genome.fa.gz | head -10
-
-# Check file size before and after decompression
-
-ls -lh human_genome.fa.gz
-gunzip human_genome.fa.gz
-ls -lh human_genome.fa
-
-# Count sequences in FASTA file (lines starting with >)
-
-grep "^>" human_genome.fa | wc -l
-
-# View sequence headers only
-
-grep "^>" human_genome.fa | less
-```
-
-## Beyond grep: `sed` for search-and-replace
-
-``` bash
-# Substitute the first match on each line (s/pattern/replacement/)
-sed 's/chr/Chr/' regions.bed
-
-# Substitute every match on each line (g = global)
-sed 's/T/U/g' dna.txt > rna.txt
-
-# Delete lines matching a pattern (e.g. comment lines)
-sed '/^#/d' annotation.gff
-
-# Print only lines 10-20
-sed -n '10,20p' big_file.txt
-```
-
-::: callout-warning
-`sed -i` edits a file **in place** - and the syntax differs between Linux (`sed -i 's/a/b/' f`) and macOS (`sed -i '' 's/a/b/' f`). Write to a new file until you're confident.
-:::
-
-## Beyond grep: `awk` for columns
-
-``` bash
-# Print columns 1 and 3 of a tab- or space-separated file
-awk '{print $1, $3}' data.tsv
-
-# Keep rows where column 5 is greater than 30
-awk '$5 > 30' measurements.tsv
-
-# Comma-separated file: set the field separator, skip the header
-awk -F',' 'NR > 1 {print $2}' samples.csv
-
-# Sum and average a column
-awk -F',' 'NR > 1 {sum += $3; n++} END {print sum, sum/n}' samples.csv
-```
+-   Using RStudio, Positron and Visual Studio Code as script editors
+-   Why R *and* Python - same ideas, different syntax
+-   Scripts, variables, arithmetic, strings and vectors
+-   Types of data and getting help
+
+# R and Python: two scripting languages for data
+
+## Why use `R`?
+
+-   Good general scripting tool for statistics and mathematics
+-   Powerful and flexible and free
+-   Runs on all computer platforms
+-   New enhancements coming out all the time
+-   Superb data management & graphics capabilities
+-   Reproducibility - can keep your scripts to see exactly what was done
+-   You can write your own functions
+-   Lots of online help available
+-   Can use a nice GUI front end such as `Rstudio`
+-   Can embed your `R` analyses in dynamic, polished files using `Quarto Markdown`
+-   Quarto Markdown can be reused for websites, papers, books, presentations...
+
+## Why use `Python`?
+
+-   A general-purpose language that is also excellent for data analysis (`pandas`, `numpy`, `matplotlib`, `scipy`)
+-   The language of machine learning, image analysis and instrument control (`scikit-learn`, `PyTorch`, `scikit-image`)
+-   Free, open source, runs everywhere - including Talapas (`module load python3`)
+-   Huge ecosystem: `pip install` gives you access to \>500,000 packages on PyPI; `conda` adds compiled scientific tools
+-   Readable syntax; indentation *is* the structure of the code
+-   Runs as scripts (`python3 script.py`), interactively (REPL / IPython), in **Jupyter notebooks**, and in **Quarto** `{python}` chunks
+-   Same IDEs: **Positron** and **VS Code** run R and Python side by side
 
 ::: callout-tip
-Rule of thumb: **`grep`** finds lines, **`sed`** edits text, **`awk`** works with columns. More in the course book's [GREP chapter](../book/chapters/07-grep-regex.html) and [Regular Expression Reference](../book/chapters/appendix-G-regex.html).
+You do not have to choose. Most computational biologists use **both**: R for statistics and figures, Python for pipelines, images and machine learning. This lecture shows every idea in both languages - use the tabs.
 :::
 
-## Homework - microbial genome analysis
+## Your IDE: the four panes
 
-With a sample FASTA file:
+![](images/Lec06_img001.png){fig-align="center" width="70%"}
 
-1.  Download a bacterial genome from NCBI
-2.  Count the number of genes (sequences)
-3.  Calculate the total genome size
-4.  Find the longest and shortest genes
-5.  Calculate overall GC content
-6.  Search for specific motifs or restriction sites
-7.  Extract protein-coding sequences based on headers
+| Pane                     | RStudio location | Positron equivalent            | Purpose                               |
+|:-------------------------|:-----------------|:-------------------------------|:--------------------------------------|
+| **Code editor**          | Top-left         | Editor tabs                    | Write/edit scripts and `.qmd` files   |
+| **Console**              | Bottom-left      | Console (R *or* Python)        | Interactive session; run one line     |
+| **Environment**          | Top-right        | Variables                      | Objects you have created, history     |
+| **Files / Plots / Help** | Bottom-right     | Explorer, Plots, Help, Data Explorer | Navigate files, view plots, read docs |
 
-------------------------------------------------------------------------
+::: callout-tip
+`R` and `Python` are the languages; **RStudio**, **Positron** and **VS Code** are the IDEs you write them in. Write code in the *editor* so it is saved, and send lines to the *console* with `Cmd/Ctrl-Enter`. Customize the RStudio layout in Tools → Global Options → Pane Layout.
+:::
+
+## R vs Python: same ideas, different syntax
+
+| Idea | R | Python |
+|---|---|---|
+| Assignment | `x <- 5` | `x = 5` |
+| Counting starts at | **1**: `x[1]` is the first element | **0**: `x[0]` is the first element |
+| Last element | `x[length(x)]`; `x[-1]` *drops* the first | `x[-1]` *is* the last |
+| Sequence of values | vector `c(1, 2, 3)` | list `[1, 2, 3]` or `numpy` array `np.array([1, 2, 3])` |
+| Vector arithmetic | `x^2` on any vector | `x**2` only on a numpy array (a list needs a loop) |
+| Table of data | `data.frame` / tibble | `pandas` `DataFrame` |
+| Load a package | `library(dplyr)` | `import pandas as pd` |
+| Install a package | `install.packages("dplyr")` | `pip install pandas` (or `uv`, `conda`) |
+| Chain steps | pipe `x \|> f() \|> g()` | method chaining `x.f().g()` |
+| Blocks | curly braces `{ }` | indentation (4 spaces) |
+| Missing value | `NA` | `None`, `float("nan")`, `pd.NA` |
+| Help | `?mean` | `help(statistics.mean)` or `mean?` in Jupyter |
+
+## `R scripts` and `Quarto Markdown`
+
+-   Often we want to write scripts that can just be run - `R scripts`
+-   We can also embed code in Quarto Markdown files that provide more annotations
+-   This improves interpertability and reproducibility
+-   You can insert `R code chunks` into `Quarto Markdown` documents
+
+## `Python scripts`, `notebooks` and `Quarto Markdown`
+
+-   A `Python script` (`script.py`) is a text file of Python commands run top to bottom with `python3 script.py`
+-   A **Jupyter notebook** (`.ipynb`) mixes code cells, output and Markdown - popular in Python, but stored as JSON (hard to read in Git)
+-   The same `Quarto Markdown` file can hold `{python}` code chunks - Quarto runs them through Jupyter
+-   So the R and Python workflows are the same: **script** for things that just run, **Quarto** when you want prose + code + output
+
+## `R script` basics
+
+-   A series of R commands that will be executed\
+
+-   Can add comments using hashtags `#`\
+
+-   Can have pipes (`|>`) to connect one step to the next\
+
+## `Python script` basics
+
+-   A series of Python commands that will be executed, top to bottom\
+
+-   Comments also use hashtags `#`\
+
+-   Steps are connected with **method chaining** (`data.dropna().groupby("x").mean()`) rather than pipes\
+
+-   Whitespace matters: the body of a loop, `if` or function is **indented** (4 spaces)\
+
+-   Start scripts with `#!/usr/bin/env python3` and run them with `python3 script.py` (or `./script.py` after `chmod +x`)
+
+## BASICS of `R` and `Python`
+
+-   Commands can be submitted through the terminal, console or scripts (R: `R` / `Rscript`; Python: `python3` / `python3 script.py`)
+-   Notice on these slides I'm evaluating the code chunks and showing output
+-   Also notice that both languages follow the normal priority of mathematical evaluation
+-   Careful: exponent is `^` in R but `**` in Python (`^` in Python is bitwise XOR!)
+
+::: panel-tabset
+### R
+
+```{r}
+#| label: lec07-basic-multiplication
+#| echo: true
+#| eval: true
+
+4*4
+```
+
+```{r}
+#| label: lec07-more-multiplication
+#| echo: true
+#| eval: true
+
+(4+3*2^2)
+```
+
+### Python
+
+```{python}
+#| label: lec07-basic-multiplication-py
+#| echo: true
+#| eval: false
+
+4*4
+# 16
+```
+
+```{python}
+#| label: lec07-more-multiplication-py
+#| echo: true
+#| eval: false
+
+(4+3*2**2)
+# 16
+```
+:::
+## Assigning Variables
+
+-   A better way to do this is to assign variables
+-   Variables are assigned values using the `<-` operator in R and the `=` operator in Python.
+-   Variable names must begin with a letter (or `_` in Python), but other than that, just about anything goes.
+-   Do keep in mind that both `R` and `Python` are case sensitive.
+
+## Assigning Variables
+
+::: panel-tabset
+### R
+
+```{r}
+#| label: lec07-assigning-variables
+#| echo: true
+#| eval: true
+
+x <- 2
+x*3
+y <- x * 3
+y-2
+
+```
+
+These do not work
+
+```{r}
+#| label: lec07-assigning-variables-2
+#| echo: true
+#| eval: false
+
+3y <- 3
+3*y <- 3
+```
+
+### Python
+
+```{python}
+#| label: lec07-assigning-variables-py
+#| echo: true
+#| eval: false
+
+x = 2
+x*3
+# 6
+y = x * 3
+y-2
+# 4
+```
+
+These do not work either (`SyntaxError`)
+
+```{python}
+#| label: lec07-assigning-variables-2-py
+#| echo: true
+#| eval: false
+
+3y = 3
+3*y = 3
+```
+:::
+
+## Arithmetic operations on functions
+
+-   Arithmetic operations can be performed easily on functions as well as numbers.
+-   Try the following, and then your own.
+
+::: panel-tabset
+### R
+
+```{r}
+#| label: lec07-functions
+#| echo: true
+#| eval: false
+
+x+2
+x^2
+log(x)
+```
+
+### Python
+
+```{python}
+#| label: lec07-functions-py
+#| echo: true
+#| eval: false
+
+import math
+
+x+2
+x**2
+math.log(x)
+```
+:::
+
+-   Note that the last of these - `log` - is a built in function of `R`, and therefore the object of the function needs to be put in parentheses
+-   In Python, `log` lives in the `math` module, so we `import math` once and call `math.log(x)` (`numpy` has `np.log()` for whole arrays)
+-   These parentheses will be important, and we'll come back to them later when we add arguments after the object in the parentheses\
+-   The outcome of calculations can be assigned to new variables as well, and the results can be checked using the 'print' command
+
+## Arithmetic operations on functions
+
+::: panel-tabset
+### R
+
+```{r}
+#| label: lec07-arithmetic-operations-on-functions
+#| echo: true
+#| eval: true
+
+y <- 67
+print(y)
+
+x <- 124
+z <- (x*y)^2
+print(z)
+```
+
+### Python
+
+```{python}
+#| label: lec07-arithmetic-operations-on-functions-py
+#| echo: true
+#| eval: false
+
+y = 67
+print(y)
+# 67
+
+x = 124
+z = (x*y)**2
+print(z)
+# 69022864
+```
+:::
+
+## STRINGS
+
+-   Variables and operations can be performed on characters as well
+-   Note that characters need to be set off by quotation marks to differentiate them from numbers
+-   The `c` stands for `concatenate`; in Python square brackets `[ ]` build a **list**
+-   Note that we are using the same variable names as we did previously, which means that we're overwriting our previous assignment
+-   A good rule of thumb is to use new names for each variable, and make them short but still descriptive
+
+## STRINGS
+
+::: panel-tabset
+### R
+
+```{r}
+#| label: lec07-strings
+#| echo: true
+#| eval: true
+
+x <- "I Love"
+print (x)
+y <- "Bioengineering"
+print (y)
+z <- c(x,y)
+print (z)
+```
+
+### Python
+
+```{python}
+#| label: lec07-strings-py
+#| echo: true
+#| eval: false
+
+x = "I Love"
+print(x)
+# I Love
+y = "Bioengineering"
+print(y)
+# Bioengineering
+z = [x, y]
+print(z)
+# ['I Love', 'Bioengineering']
+print(x + " " + y)      # + joins strings
+# I Love Bioengineering
+```
+:::
+
+## VECTORS
+
+-   In general `R` thinks in terms of vectors (a list of characters, factors or numerical values).
+-   It will benefit any `R` user to try to write programs with that in mind, as it will simplify most things.
+-   Vectors can be assigned directly using the `c()` function and then entering the exact values.
+-   Python has **lists** (`[ ]`) for any collection, and **numpy arrays** (`np.array()`) when you want R-style vector math
+-   `x^2` squares every element of an R vector; in Python that only works on a numpy array - a list needs a loop or a *list comprehension*
+
+## VECTORS
+
+::: panel-tabset
+### R
+
+```{r}
+#| label: lec07-example-vectors
+#| echo: true
+#| eval: true
+
+x <- c(2,3,4,2,1,2,4,5,10,8,9)
+print(x)
+```
+
+```{r}
+#| label: lec07-example-vector-multiplication
+#| echo: true
+#| eval: true
+
+x <- c(2,3,4,2,1,2,4,5,10,8,9)
+y <- x^2
+print(x)
+print(y)
+```
+
+### Python
+
+```{python}
+#| label: lec07-example-vectors-py
+#| echo: true
+#| eval: false
+
+x = [2,3,4,2,1,2,4,5,10,8,9]     # a list
+print(x)
+# [2, 3, 4, 2, 1, 2, 4, 5, 10, 8, 9]
+```
+
+```{python}
+#| label: lec07-example-vector-multiplication-py
+#| echo: true
+#| eval: false
+
+import numpy as np
+
+x = np.array([2,3,4,2,1,2,4,5,10,8,9])   # a numpy array
+y = x**2                                 # element-wise, like R
+print(x)
+# [ 2  3  4  2  1  2  4  5 10  8  9]
+print(y)
+# [  4   9  16   4   1   4  16  25 100  64  81]
+# with a plain list you would write: y = [v**2 for v in x]
+```
+:::
+
+## VECTORS (cont.)
+
+::: panel-tabset
+### R
+
+```{r}
+#| label: fig-lec07-example-vector-plot
+#| fig-cap: "Each value of x plotted against its square (y = x^2)"
+#| echo: true
+#| eval: true
+
+plot(x,y)
+```
+
+### Python
+
+```{python}
+#| label: fig-lec07-example-vector-plot-py
+#| fig-cap: "Each value of x plotted against its square (y = x^2), with matplotlib"
+#| echo: true
+#| eval: false
+
+import matplotlib.pyplot as plt
+
+plt.scatter(x, y)
+plt.xlabel("x")
+plt.ylabel("y")
+plt.show()
+```
+:::
+
+## Basic Statistics
+
+-   Many functions exist to operate on vectors.
+-   Combine these with your previous variable to see what happens.
+-   Also, try to find other functions (e.g. standard deviation).
+
+::: panel-tabset
+### R
+
+```{r}
+#| label: lec07-basic-statistics
+#| echo: true
+#| eval: false
+
+mean(x)
+median(x)
+var(x)
+log(x)  # natural log
+sqrt(x)
+sum(x)
+length(x)
+sample(x, replace = TRUE)
+```
+
+### Python
+
+```{python}
+#| label: lec07-basic-statistics-py
+#| echo: true
+#| eval: false
+
+import numpy as np
+import random
+
+x.mean()                     # or np.mean(x)
+np.median(x)
+x.var(ddof=1)                # sample variance, like R's var()
+np.log(x)                    # natural log, element-wise
+np.sqrt(x)
+x.sum()                      # sum(x) also works
+len(x)                       # length(x)
+random.choices(list(x), k=len(x))   # sample with replacement
+```
+:::
+
+-   Notice that the last function (`sample`) has an argument (`replace=T`); in Python `random.choices()` samples *with* replacement and `k=` sets how many
+-   Python functions come in two flavours: `np.median(x)` (function) and `x.mean()` (a **method** attached to the array)
+-   Arguments simply modify or direct the function in some way
+-   There are many arguments for each function, some of which are defaults
+
+## Getting Help
+
+-   Getting Help on any function is very easy - just type a question mark and the name of the function (R), or `help(function)` in Python.
+-   There are functions for just about anything within `R` and it is easy enough to write your own functions if none already exist to do what you want to do.
+-   In general, function calls have a simple structure: a function name, a set of parentheses and an optional set of parameters to send to the function.
+-   Help pages exist for all functions that, at a minimum, explain what parameters exist for the function.\
+-   Help can be accessed a few ways - try them :
+
+## Getting Help
+
+::: panel-tabset
+### R
+
+```{r}
+#| label: lec07-getting-help
+#| echo: true
+#| eval: false
+
+- help(mean)
+- ?mean
+- example(mean)
+- help.search("mean")
+- apropos("mean")
+- args(mean)
+```
+
+### Python
+
+```{python}
+#| label: lec07-getting-help-py
+#| echo: true
+#| eval: false
+
+import numpy as np, inspect
+
+help(np.mean)                # full documentation, any Python
+np.mean?                     # short help - IPython, Jupyter, Positron only
+np.mean??                    # ... plus the source code
+dir(np)                      # list everything inside a module
+[n for n in dir(np) if "mean" in n]   # like apropos("mean")
+inspect.signature(np.mean)   # like args(mean)
+```
+:::
+
+-   Online: <https://docs.python.org/3/>, <https://numpy.org/doc/>, <https://pandas.pydata.org/docs/>
+
+## Creating vectors
+
+-   Creating vector of new data by entering it by hand can be a drag
+-   However, it is also very easy to use functions such as `seq` and `sample` (Python: `range()`, `np.arange()`, `np.linspace()`)
+-   Try the examples below; can you figure out what the three arguments in the parentheses mean?
+-   Try varying the arguments to see what happens.
+-   Don't go too crazy with the last one or your computer might slow way down
+
+## Creating vectors
+
+::: panel-tabset
+### R
+
+```{r}
+#| label: lec07-creating-vectors
+#| echo: true
+#| eval: true
+
+seq_1 <- seq(0.0, 10.0, by = 0.1)
+print(seq_1)
+seq_2 <- seq(10.0, 0.0, by = -0.1)
+print(seq_2)
+```
+
+### Python
+
+```{python}
+#| label: lec07-creating-vectors-py
+#| echo: true
+#| eval: false
+
+import numpy as np
+
+seq_1 = np.linspace(0.0, 10.0, 101)    # 101 points from 0 to 10 (step 0.1)
+print(seq_1)
+# [ 0.   0.1  0.2 ...  9.8  9.9 10. ]
+seq_2 = np.linspace(10.0, 0.0, 101)
+print(seq_2)
+# [10.   9.9  9.8 ...  0.2  0.1  0. ]
+list(range(0, 10))                     # integers only: 0, 1, ..., 9 (stop is excluded!)
+```
+:::
+
+## Creating vectors
+
+::: panel-tabset
+### R
+
+```{r}
+#| label: lec07-creating-vectors-2
+#| echo: true
+#| eval: true
+
+seq_square <- (seq_2)*(seq_2)
+print(seq_square)
+```
+
+### Python
+
+```{python}
+#| label: lec07-creating-vectors-2-py
+#| echo: true
+#| eval: false
+
+seq_square = (seq_2)*(seq_2)
+print(seq_square)
+# [100.    98.01  96.04 ...   0.04   0.01   0.  ]
+```
+:::
+
+## Creating vectors
+
+::: panel-tabset
+### R
+
+```{r}
+#| label: lec07-creating-vectors-3
+#| echo: true
+#| eval: true
+
+seq_square_new <- (seq_2)^2
+print(seq_square_new)
+```
+
+### Python
+
+```{python}
+#| label: lec07-creating-vectors-3-py
+#| echo: true
+#| eval: false
+
+seq_square_new = (seq_2)**2
+print(seq_square_new)
+# [100.    98.01  96.04 ...   0.04   0.01   0.  ]
+```
+:::
+
+## Types of vectors of data
+
+-   `int` stands for integers
+
+-   `dbl` stands for doubles, or real numbers
+
+-   `chr` stands for character vectors, or strings
+
+-   `dttm` stands for date-times (a date + a time)
+
+-   `lgl` stands for logical, vectors that contain only TRUE or FALSE
+
+-   `fctr` stands for factors, which R uses to represent categorical variables with fixed possible values
+
+-   `date` stands for dates
+
+<!-- -->
+
+-   Integer and double vectors are known collectively as numeric vectors.
+-   In `R` numbers are doubles by default.
+
+## The hierarchy of R vector types
+
+![Atomic vectors (logical, numeric, character) and the augmented types built on them (factors, dates, date-times)](images/Lec07_img001.svg){fig-align="center" width="85%"}
+
+## Types of vectors of data
+
+-   Logical vectors can take only three possible values:
+    -   `FALSE`
+    -   `TRUE`
+    -   `NA` which is 'not available'.
+-   Integers have one special value: NA, while doubles have four:
+    -   `NA`
+    -   `NaN` which is 'not a number'
+    -   `Inf`
+    -   `-Inf`
+
+## Types of data in Python
+
+| R                | Python                                   | Example                        |
+|------------------|------------------------------------------|--------------------------------|
+| `int`            | `int`                                    | `3`                            |
+| `dbl`            | `float`                                  | `3.0`, `2.5e-3`                |
+| `chr`            | `str`                                    | `"low"`                        |
+| `lgl`            | `bool`                                   | `True`, `False`                |
+| `fctr`           | `pandas.Categorical`                     | `pd.Categorical(["low", "high"])` |
+| `date` / `dttm`  | `datetime.date` / `datetime.datetime`    | `datetime.date(2026, 11, 9)`   |
+| `NA`             | `None`, `float("nan")`, `np.nan`, `pd.NA` |                               |
+| `Inf` / `-Inf`   | `math.inf` / `-math.inf`                 |                                |
+
+-   Ask with `type(x)`; a numpy array or pandas column has one **dtype** for all its values (`x.dtype`)
+-   `7 / 2` is `3.5` (always a float); `7 // 2` is `3` (integer division); `7 % 2` is the remainder `1`

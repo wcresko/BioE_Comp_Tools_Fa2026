@@ -33,7 +33,7 @@ This book accompanies a graduate-level course taught at the University of Oregon
 
 Appendices A-J: Unix, Git, R, Python, LaTeX, SLURM and regex references; keyboard shortcuts; data formats & public repositories; glossary.
 
-Chapter files in `chapters/` are numbered to match this order (`05-unix-fundamentals.qmd` is Chapter 5; `appendix-A-unix.qmd` is Appendix A), and their figures are named `images/Chap05_img001.svg`, `images/AppA_img001.png`, etc. (see `images/README.md`).
+Chapter files in `chapters/` are numbered to match this order (`04-unix-fundamentals.qmd` is Chapter 5; `appendix-B-unix.qmd` is Appendix A), and their figures are named `images/Chap05_img001.svg`, `images/AppA_img001.png`, etc. (see `images/README.md`).
 
 ## Building the Book
 
@@ -78,23 +78,23 @@ BioE_Comp_Tools_Fa2026/Book/
 ├── apa.csl              # Citation style
 ├── chapters/            # Chapter content
 │   ├── 01-introduction.qmd
-│   ├── 04-computer-systems.qmd
-│   ├── 05-unix-fundamentals.qmd
-│   ├── 06-files-pipes.qmd
-│   ├── 07-grep-regex.qmd
-│   ├── 08-shell-scripting.qmd
-│   ├── 09-r-programming.qmd
-│   ├── 11-tidy-data.qmd
-│   ├── 12-data-visualization.qmd
+│   ├── 06-computer-systems.qmd
+│   ├── 04-unix-fundamentals.qmd
+│   ├── 07-files-pipes.qmd
+│   ├── 09-grep-regex.qmd
+│   ├── 10-shell-scripting.qmd
+│   ├── 11-r-programming.qmd
+│   ├── 08-tidy-data.qmd
+│   ├── 13-data-visualization.qmd
 │   ├── 19-git-github.qmd
-│   ├── 20-hpc-talapas.qmd
-│   ├── 16-quarto-documents.qmd
-│   ├── 13-writing-functions.qmd
-│   ├── 14-parallel-computing.qmd
-│   ├── 15-databases.qmd
+│   ├── 15-hpc-talapas.qmd
+│   ├── 05-quarto-documents.qmd
+│   ├── 14-writing-functions.qmd
+│   ├── 16-parallel-computing.qmd
+│   ├── 20-databases.qmd
 │   ├── 17-latex-basics.qmd
 │   ├── 18-ai-assisted-coding.qmd
-│   ├── 10-python-programming.qmd
+│   ├── 12-python-programming.qmd
 │   └── appendix-*.qmd   # unix, git, r, python, latex, slurm, regex, shortcuts, data-formats, glossary
 ├── images/              # Image assets
 └── (renders to ../docs/book/)

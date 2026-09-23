@@ -1,7 +1,7 @@
 # Book audit: lecture content missing from (or enhanceable in) the course book
 
 > **Status (2026-09-22, second pass):** implemented — new chapters *Your Computational Toolkit* (#1, 2, 4, 5, 6, 13, 47, 56-57, 77 in part), *Computing Resources at UO* (#7-11, 17, 72-73), *Coding with AI Assistants* (#16); Talapas updates (#15, 69-71, 74-75); sed/awk (#39-40); book error fixes (#3, 20, 30, 43, 63-65); glossary additions (#79 in part); all lecture-side errors listed at the end, plus Lecture 08's vibe-coding slides.
-> **Third pass (2026-09-22):** Python given equal weight — new chapter *Python Programming Fundamentals* (`10-python-programming.qmd`) and *Python Quick Reference* appendix; R/Python tabsets in ch. 6, 7 and 12 (#12, 13); toolkit chapter gained compiler tools, laptop minimums and a setup-troubleshooting section (#5, 6); HPC chapter gained fair-share/backfill, right-sizing (`seff`/`sacct`), pending-reason and `#SBATCH` directive tables, `SLURM_*` variables, software layers, `/scratch` purge, Globus, pipeline design, job arrays and workflow managers (#66-68, 70 in part); data-formats appendix gained *FAIR Data and Public Repositories*; every heading, chunk, figure and table in the book now carries an id and prose cross-references were added throughout; `references.bib` merged with the workshop bibliography and citations added.
+> **Third pass (2026-09-22):** Python given equal weight — new chapter *Python Programming Fundamentals* (`12-python-programming.qmd`) and *Python Quick Reference* appendix; R/Python tabsets in ch. 6, 7 and 12 (#12, 13); toolkit chapter gained compiler tools, laptop minimums and a setup-troubleshooting section (#5, 6); HPC chapter gained fair-share/backfill, right-sizing (`seff`/`sacct`), pending-reason and `#SBATCH` directive tables, `SLURM_*` variables, software layers, `/scratch` purge, Globus, pipeline design, job arrays and workflow managers (#66-68, 70 in part); data-formats appendix gained *FAIR Data and Public Repositories*; every heading, chunk, figure and table in the book now carries an id and prose cross-references were added throughout; `references.bib` merged with the workshop bibliography and citations added.
 > **Still open:** #12, 14, 18-19, 21-29, 31-38, 41-42, 44-46, 48-55, 58-62, 66-68, 76, 78.
 
 Prepared 2026-09-22 after moving the book into `Book/`. Numbers are for picking items to implement.
@@ -26,7 +26,7 @@ Prepared 2026-09-22 after moving the book into `Book/`. Numbers are for picking 
 15. **!** Book says "off-campus Talapas access requires the UO VPN"; Lecture 00 says the VPN is only for campus-restricted resources. Verify against the Talapas KB and make ch. 1, ch. 11 and the glossary agree.
 16. **M** "Vibe coding"/LLM-assisted coding has no real section anywhere (Lecture 08 has only an empty header). Write one: the prompt → run → read → test loop; where the tools live (Copilot, Positron Assistant, Claude/ChatGPT); failure modes (invented functions, outdated APIs, silently wrong statistics); what never to paste (unpublished data, PHI, credentials); attribution expectations. Could be ch. 1 or a short standalone chapter.
 
-## Ch. 2 – Computer Systems (`04-computer-systems.qmd`)
+## Ch. 2 – Computer Systems (`06-computer-systems.qmd`)
 
 17. **M** The laptop vs. Talapas node vs. whole-cluster comparison table and its "30× RAM, 10× cores" takeaway.
 18. **E** Add the callout "the usual bottleneck is RAM — 'out of memory' means more RAM or the cluster, not a faster CPU".
@@ -35,7 +35,7 @@ Prepared 2026-09-22 after moving the book into `Book/`. Numbers are for picking 
 21. **E** Reuse the local/cluster/cloud SVGs (`appendix_A_S21/S24/S27`) and the computing-timeline SVG as figures in "Computing Environments" and "Evolution of Scientific Computing".
 22. **E** Exercise 1: add the concrete how-to (`uname -m`, About This Mac, Settings → About).
 
-## Ch. 3 – Unix Fundamentals (`05-unix-fundamentals.qmd`)
+## Ch. 3 – Unix Fundamentals (`04-unix-fundamentals.qmd`)
 
 23. **M** "Spaces in names are trouble": the `cd University of Oregon Dropbox` fail / quoted / backslash-escaped trio, and "Tab completion adds the escapes".
 24. **M** Example OneDrive/Dropbox paths on macOS and via `/mnt/c/` in WSL (ties UO storage to paths).
@@ -46,7 +46,7 @@ Prepared 2026-09-22 after moving the book into `Book/`. Numbers are for picking 
 29. **E** Add the Unix file-hierarchy and shell-command-anatomy SVGs (now in `Book/images/`) — the book has only an ASCII tree and a jpeg.
 30. **!** "`/c/Users/yourusername` on Git Bash for Windows" — the course uses WSL; change to `/home/yourname`. "Bash… is what you'll use throughout" vs. macOS defaulting to zsh — reconcile early. "awk is covered in the grep chapter" — it isn't (see #40).
 
-## Ch. 4 – Files, Pipes, Redirection (`06-files-pipes.qmd`)
+## Ch. 4 – Files, Pipes, Redirection (`07-files-pipes.qmd`)
 
 31. **M** The FASTQ pipeline with per-stage `2>` logs (Lecture 04 "Bioinformatics Example") plus `cat *_errors.log | grep -E "ERROR|WARNING"` — the best motivating example for stderr.
 32. **M** `<<` here-documents and explicit `1>` — one short example each.
@@ -57,7 +57,7 @@ Prepared 2026-09-22 after moving the book into `Book/`. Numbers are for picking 
 37. **E** Best practices: "never load a whole genome into memory — stream it", "work with `.gz` directly", "save pipelines as scripts".
 38. **E** Optional: the redirection/pipe figures (`w1_pipes_3/4/5.jpeg`) alongside the ASCII stream diagram.
 
-## Ch. 5 – GREP and Regular Expressions (`07-grep-regex.qmd`)
+## Ch. 5 – GREP and Regular Expressions (`09-grep-regex.qmd`)
 
 39. **M** A `sed` section: `s/old/new/`, `/g`, `/^#/d`, `-n '10,20p'`, and the `sed -i` Linux vs macOS (`-i ''`) warning (also missing from appendix-unix).
 40. **M** An `awk` section: `{print $1,$3}`, `$5 > 30`, `-F',' 'NR>1'`, sum/average, and "grep finds lines, sed edits text, awk works with columns".
@@ -65,13 +65,13 @@ Prepared 2026-09-22 after moving the book into `Book/`. Numbers are for picking 
 42. **E** Add the UniProt header pattern `^>sp\|[A-Z0-9]+\|` and the `grep "GC*"` example showing `*` binds to the preceding character.
 43. **!** "Download human chromosome 21 (smaller for practice)" but the URL is the full GRCh38 genome — fix text or URL. `grep -oE "ATG([ACGT]{3})*?(TAA|TAG|TGA)"` uses a lazy `*?` that ERE doesn't support (needs `-P`). The "degenerate site" `G[ACGT]ANTC` should be `G[ACGT]A[ACGT]TC`.
 
-## Ch. 6 – Shell Scripting (`08-shell-scripting.qmd`)
+## Ch. 6 – Shell Scripting (`10-shell-scripting.qmd`)
 
 44. **E** Add "spaces inside the brackets are required (`[ $x -gt 5 ]`, not `[$x -gt 5]`)" to the existing quoting callout.
 45. **M** Where to write scripts: `.sh` files in VS Code/Positron/RStudio, LF line endings, the ShellCheck extension, run from the integrated terminal.
 46. (Lecture fix, not book) Lecture 06 uses `return $COUNT` in a function (breaks above 255); the book's echo/stdout pattern is correct — fix the lecture.
 
-## Ch. 7 – R Programming (`09-r-programming.qmd`) and R appendix
+## Ch. 7 – R Programming (`11-r-programming.qmd`) and R appendix
 
 47. **M** A Positron subsection next to RStudio (Console/Variables/Plots/Data Explorer panes, R and Python, VS Code extensions); rename the section "RStudio and Positron".
 48. **E** Packages: add `BiocManager::install()`, what "there is no package called …" means, and `pkg::fun()` framed as "use one function without `library()`".
@@ -81,7 +81,7 @@ Prepared 2026-09-22 after moving the book into `Book/`. Numbers are for picking 
 52. **E** Recommend `sessionInfo()` at the end of scripts/reports (currently only in ch. 12).
 53. **E** appendix-r: add rows for `BiocManager::install()` and `pkg::fun()`.
 
-## Ch. 12 (book order 13) – Quarto (`16-quarto-documents.qmd`)
+## Ch. 12 (book order 13) – Quarto (`05-quarto-documents.qmd`)
 
 54. **M** Installing Quarto and TinyTeX (`quarto install tinytex`, why PDF needs LaTeX, `quarto check`).
 55. **E** Add the rendering-pipeline diagram (source → Quarto runs code, calls Pandoc → HTML/PDF/Word/slides).
@@ -105,7 +105,7 @@ Prepared 2026-09-22 after moving the book into `Book/`. Numbers are for picking 
 67. **E** Add tags/releases + Zenodo DOI for citing code (currently only in the data-formats appendix).
 68. **E** Add `git help <cmd>`, `git fetch`, and `git log -p` to the ch. 10 command table. (Lectures still list the retired GitHub Learning Lab — replace with GitHub Skills.)
 
-## Ch. 11 (book order 16) – HPC / Talapas (`20-hpc-talapas.qmd`) and SLURM appendix
+## Ch. 11 (book order 16) – HPC / Talapas (`15-hpc-talapas.qmd`) and SLURM appendix
 
 69. **!** Node table is out of date. Replace with the Lecture 10 table: 43 standard AMD Milan nodes (128 cores, 512 GB); 24 GPU nodes (48 cores, 256–512 GB, 52 A100 total); large-memory up to 4 TB; 19 interactive nodes; condo-node callout (~166 CPU nodes, V100/A100/H100); RACS source link. Change "89 GPUs (A100 and H100)" to "A100, H100, V100".
 70. **!** Partition table lists Talapas-1 names (`short`, `long`, `longgpu`, `fat`, `longfat`, `preempt`). Replace with `compute`/`computelong` (1 d/14 d), `gpu`/`gpulong`, `interactive` (12 h), `interactivegpu` (8 h), `memory`/`memorylong` (up to 4 TB) plus the `sinfo` tip; fix the SLURM-directives example (`fat` → `memory`) and the interactive-job example (`--partition=interactive`).

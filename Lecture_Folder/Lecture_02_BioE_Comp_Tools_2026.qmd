@@ -1,6 +1,6 @@
 ---
 title: "Lecture 02 - Computational Tools for Bioengineers"
-subtitle: "Local, Cluster and Cloud Computing; Intro to the Command Line"
+subtitle: "Unix Navigation, Files, Pipes and Tidy Data"
 date: "Monday, October 5, 2026"
 author: "Bill Cresko"
 ---
@@ -26,190 +26,17 @@ set.seed(2026)
 
 The course book goes deeper on everything in this lecture. Read before or after class:
 
--   [Ch. 4: Computer Systems Architecture](../book/chapters/04-computer-systems.html)
--   [Ch. 5: Unix Fundamentals](../book/chapters/05-unix-fundamentals.html)
--   *Reference:* [App. A: Unix Command Reference](../book/chapters/appendix-A-unix.html)
+-   [Ch. 4: Unix Fundamentals](../book/chapters/04-unix-fundamentals.html)
+-   [Ch. 7: Files, Pipes, and Redirection](../book/chapters/07-files-pipes.html)
+-   [Ch. 8: Tidy Data Principles](../book/chapters/08-tidy-data.html)
+-   *Reference:* [App. B: Unix Command Reference](../book/chapters/appendix-B-unix.html)
 
 ## Goals for today
 
--   Evolution of computing
--   Local, cluster and cloud computing
--   Introduction to Unix and the shell
-
-
-# Computing Evolution
-
-## 
-
-![](images/Lec02_img001.svg){fig-align="center" width="100%"}
-
-### Key Drivers of Change
-
--   **Performance Needs**: Growing computational demands
--   **Economics**: Cost optimization and economies of scale
--   **Connectivity**: Internet bandwidth improvements
--   **Virtualization**: Hardware abstraction technologies
-
-# Local Computing
-
-## Local Computing Overview
-
-:::: callout-note
-::: callout-important
-Computing resources that are physically present and directly controlled by the user or organization
-:::
-::::
-
-::::: columns
-::: {.column width="50%"}
-**Characteristics**
-
--   [x] Complete control over hardware
--   [x] Data stays on-premises
--   [x] No network dependency for compute
--   [x] Predictable performance
--   [x] One-time purchase model
-:::
-
-::: {.column width="50%"}
-**Common Setups**
-
--   Desktop workstations
--   Laptop computers
--   On-premises servers
--   Local development machines
-:::
-:::::
-
-## Local Computing Architecture
-
-![](images/Lec00_img001.svg){fig-align="center" width="85%"}
-
-## Local Computing: Pros and Cons
-
-::::: columns
-::: {.column width="50%"}
-### Advantages ✓
-
--   **Low Latency**: No network overhead
--   **Data Control**: Complete ownership
--   **Privacy**: Data never leaves premises
--   **Predictable Costs**: One-time investment
--   **Offline Capability**: Works without internet
--   **Customization**: Full hardware/software control
-:::
-
-::: {.column width="50%"}
-### Disadvantages ✗
-
--   **Limited Scale**: Hardware constraints
--   **Maintenance**: User responsibility
--   **Upfront Costs**: High initial investment
--   **Disaster Recovery**: Manual backup needed
--   **Resource Waste**: Idle during off-hours
--   **Upgrade Complexity**: Physical intervention
-:::
-:::::
-
-# Cluster Computing
-
-## Cluster Computing Overview
-
-A collection of interconnected computers working together as a single system
-
-![](images/Lec00_img002.svg){fig-align="center" width="80%"}
-
-**Key Components**
-
--   **Head Node**: Job scheduling and management
--   **Compute Nodes**: Worker machines
--   **Interconnect**: High-speed network (InfiniBand, 10GbE+)
--   **Shared Storage**: Parallel file systems (Lustre, GPFS)
-
-## Resource Managers
-
-**These are used to schedule computing jobs on computer clusters.**
-
-| System     | Use Case        | Key Features                          |
-|------------|-----------------|---------------------------------------|
-| SLURM      | HPC             | Advanced scheduling, power management |
-| PBS/Torque | Traditional HPC | Mature, stable, wide support          |
-| SGE/UGE    | Mixed workloads | Flexible policies                     |
-| Kubernetes | Containers      | Microservices, auto-scaling           |
-
-::: callout-important
-We use SLURM on Talapas at the University of Oregon for scheduling compute jobs
-:::
-
-## Cluster Computing: Pros and Cons
-
-::::: columns
-::: {.column width="50%"}
-### Advantages ✓
-
--   **Scalability**: Add nodes as needed
--   **Performance**: Parallel processing power
--   **Cost-Effective**: Commodity hardware
--   **Fault Tolerance**: Node redundancy
--   **Resource Sharing**: Multiple users/projects
--   **Specialized Hardware**: GPUs, high-mem nodes
-:::
-
-::: {.column width="50%"}
-### Disadvantages ✗
-
--   **Complexity**: Requires expertise
--   **Infrastructure**: Space, power, cooling
--   **Network Dependency**: Interconnect bottlenecks
--   **Software Licenses**: Per-node costs
--   **Maintenance**: Hardware failures
--   **Initial Setup**: Complex configuration
-:::
-:::::
-
-# Cloud Computing
-
-## Cloud Computing Overview
-
-On-demand delivery of computing resources over the internet with pay-as-you-go pricing
-
-![](images/Lec00_img003.svg){fig-align="center" width="85%"}
-
-### Major Providers
-
--   **Amazon Web Services (AWS)**: Market leader, 200+ services
--   **Microsoft Azure**: Enterprise integration
--   **Google Cloud Platform**: AI/ML focus
--   **Others**: IBM Cloud, Oracle Cloud, Alibaba Cloud
-
-## Cloud Computing: Pros and Cons
-
-::::: columns
-::: {.column width="50%"}
-### Advantages ✓
-
--   **Elastic Scaling**: Instant resource adjustment
--   **Pay-per-Use**: No idle resource costs
--   **Global Reach**: Multiple regions
--   **Managed Services**: Reduced operations
--   **Innovation Speed**: Latest technologies
--   **Disaster Recovery**: Built-in redundancy
--   **No CAPEX**: Operating expense model
-:::
-
-::: {.column width="50%"}
-### Disadvantages ✗
-
--   **Ongoing Costs**: Can exceed on-prem
--   **Vendor Lock-in**: Proprietary services
--   **Internet Dependency**: Connectivity required
--   **Data Transfer Costs**: Egress fees
--   **Compliance Complexity**: Data residency
--   **Less Control**: Shared responsibility
--   **Performance Variability**: Noisy neighbors
-:::
-:::::
-
+-   Deeper dive into Unix tools
+-   Reading and writing files
+-   Tidy data
+-   Advanced Unix tools to manipulate large files
 
 # Computational Tools - The Command Line
 
@@ -217,13 +44,11 @@ On-demand delivery of computing resources over the internet with pay-as-you-go p
 
 ## What is Unix?
 
-::: incremental
 -   An operating system developed at Bell Labs in 1969, released in 1973
 -   Now a family of operating systems: Linux, macOS, and others share the Unix design
 -   Runs both locally on your computer and on large clusters like Talapas
 -   Its **shell** gives you a scripting language for talking to the operating system
 -   Linux is an open-source operating system built on the same design
-:::
 
 ## What is a shell? {background-image="images/Lec02_img003.jpeg"}
 
@@ -265,4 +90,390 @@ On-demand delivery of computing resources over the internet with pay-as-you-go p
     -   Type `man [command_name]` to access the manual for a specific command
     -   Type `q` to exit
 -   Also...the internet!
--   Also... Generative AI (ChatGPT, Claude, etc.) - but read and test what it gives you
+-   Also... Generative AI (ChatGPT, Claude, etc.)
+
+# Common navigation commands
+
+![](images/Lec03_img001.jpeg){fig-align="center" width="90%"}
+
+## 
+
+![](images/Lec03_img002.jpeg){fig-align="center" width="90%"}
+
+## The way you normally navigate
+
+![](images/Lec03_img003.jpeg){fig-align="center" width="90%"}
+
+## 
+
+![](images/Lec03_img004.jpeg){fig-align="center" width="90%"}
+
+## How is a computer organized?
+
+-   System of directories (folders) and files
+-   / = the root directory, which holds all other directories
+-   Most of your files will be located under /Users in a directory of your username
+-   the `~` is shorthand for your home folder
+-   Navigation in the shell consists of jumping up and down between directories and seeing what’s in them
+-   The "path" refers to the location a file is in
+    -   ex: "/Users/wcresko/Documents"
+
+![](images/Lec03_img005.svg){fig-align="center" width="100%"}
+
+## The Unix file hierarchy
+
+![](images/Lec00_img004.svg){fig-align="center" width="90%"}
+
+## Paths - the address of a file in the tree
+
+![](images/Lec00_img005.svg){fig-align="center" width="90%"}
+
+## Special files - the 'dot' entries
+
+![](images/Lec03_img006.svg){fig-align="center" width="90%"}
+
+## `.` refers to the directory you are in
+
+![](images/Lec03_img007.svg){fig-align="center" width="90%"}
+
+## `..` refers to the parent directory
+
+![](images/Lec03_img008.svg){fig-align="center" width="90%"}
+
+## Navigating with `..`
+
+![](images/Lec00_img007.svg){fig-align="center" width="90%"}
+
+## Relative vs. absolute paths
+
+::: panel-tabset
+### Concept
+
+-   **Absolute path**: the full path from the root `/` (e.g., `/Users/wcresko/Documents`) - works from anywhere
+-   **Relative path**: the path from where you are right now (e.g., `../Documents`) - portable, but depends on your current directory
+-   `.` refers to the current directory
+-   `..` refers to the parent directory
+-   `~` refers to your home directory
+
+### Examples
+
+``` bash
+# Absolute path
+cd /Users/wcresko/Documents
+
+# Relative paths
+cd ..           # Go up one directory
+cd ./data       # Go into data directory (same as cd data)
+cd ../scripts   # Go up one, then into scripts
+cd ~            # Go to home directory
+cd -            # Go to previous directory
+```
+:::
+
+## Common navigation commands
+
+::: incremental
+-   **`pwd`** = “print working directory”, which will print where you currently are in the system
+-   **`ls`** = “list”, list all directories and files in your current position
+    -   `ls –F` = denote which results are directories, files, etc.
+    -   `ls –l` = ”long format”, lists total file sizes
+    -   `ls –r` = “reverse”, lists the results in reverse order
+    -   `ls –S` = “size”, sort results by size
+    -   `ls –t` = “time”, sort results by time created, from most recent to last
+:::
+
+## Common Navigation Commands
+
+-   `cd` = “change directory”, will place you in a new position based on your path argument
+    -   `cd ..` "go up one directory"
+    -   `cd –` "go to the directory you were at last (like the back arrow on an internet browser)"
+    -   `cd ~` "go to my home directory"
+
+## Let's practice!
+
+-   Try navigating around your computer using `cd` and `ls`
+-   If you are on Ubuntu, you may need to create some empty directories in your Ubuntu folder before navigating in the terminal
+
+# Working with files
+
+## Making new files
+
+::: incremental
+-   Make new folders: `mkdir`
+-   Make new files: `nano`, `touch`
+-   Rename files: `mv`
+-   Move files: `mv`
+-   Copy files: `cp`
+-   Delete files: `rm`
+-   Delete directories: `rmdir`
+-   Examining file length: `wc`
+-   Reading files: `cat`
+-   Looking at beginning or end: `head` or `tail`
+:::
+
+## Things to keep in mind
+
+-   The shell trusts you
+    -   It will delete files you say to delete
+    -   It will override files if you name 2 things the same
+-   Naming conventions
+    -   Avoid spaces
+    -   Don’t start with a –
+    -   Stick to letters, numbers, . , -, and \_
+-   Use appropriate file extensions in file names
+    -   Some software expect files with certain extensions (.fasta, .txt, etc.)
+
+## Let's try it out
+
+-   Make a new directory called whatever you'd like.
+-   Add a file named “Practice.txt” to the directory and add some text to it
+-   Read the contents of the file and get its length
+-   Rename the file to “Super_practice.txt”
+-   Move the file to a new folder named “Testing”
+-   Make a copy of the file named “Super_practice_copy.txt”
+-   Read the contents of the file and get its length to make sure it’s the same as Super_practice.txt
+-   Delete the original “Super_practice.txt”
+
+## Useful flags for file commands
+
+| Command            | Effect                                                     |
+|--------------------|------------------------------------------------------------|
+| `ls -l`            | Long listing: permissions, owner, size, date               |
+| `ls -a`            | Show hidden "dot" files (names starting with `.`)          |
+| `ls -lh`           | Human-readable sizes (K, M, G)                             |
+| `ls -lt`           | Sort by modification time, newest first                    |
+| `cp -r src/ dst/`  | Copy a directory and everything in it                      |
+| `rm -i file`       | Ask before deleting each file                              |
+| `rm -r dir/`       | Delete a directory **and all its contents** - no undo!     |
+| `mkdir -p a/b/c`   | Make nested directories in one step                       |
+
+::: callout-warning
+The shell has **no Trash**. Double-check the path before `rm -r`, and never combine it with a wildcard (`rm -r *`) without thinking twice.
+:::
+
+# Wildcards
+
+## Wildcards - one command, many files
+
+``` bash
+touch sample_01.fastq sample_02.fastq sample_03.fastq control.fastq notes.md
+
+ls *.fastq              # everything ending in .fastq
+ls sample_*.fastq       # the three sample_ files
+ls sample_0?.fastq      # ? matches exactly one character
+ls sample_0[12].fastq   # only sample_01 and sample_02
+ls *.{fastq,md}         # brace expansion: .fastq OR .md
+```
+
+| Pattern     | Matches                                   |
+|-------------|-------------------------------------------|
+| `*`         | Any string of characters (including none) |
+| `?`         | Exactly one character                     |
+| `[abc]`     | Any one character in the set              |
+| `[a-z]`     | Any one character in the range            |
+| `{foo,bar}` | Either `foo` or `bar` (brace expansion)   |
+
+::: callout-tip
+The **shell** expands wildcards *before* the command runs - so `rm *.fastq` deletes every matching file at once. Run `ls *.fastq` first to see exactly what will be affected. More in the [Unix Fundamentals chapter](../book/chapters/04-unix-fundamentals.html) of the course book.
+:::
+
+# Reading Files in Unix
+
+## Commands for Reading Files
+
+::: incremental
+-   **`cat`** = concatenate and display files
+    -   Shows entire file at once
+    -   Good for small files
+-   **`less`** = view file page by page
+    -   Navigate with space (forward), b (back), q (quit)
+    -   Search with /pattern
+-   **`more`** = similar to less but simpler
+    -   Space to go forward, q to quit
+-   **`head`** = display first 10 lines (default)
+    -   `head -n 20 file.txt` shows first 20 lines
+-   **`tail`** = display last 10 lines (default)
+    -   `tail -n 20 file.txt` shows last 20 lines
+    -   `tail -f file.txt` follows file as it grows (useful for logs)
+:::
+
+## Input Redirection
+
+::: incremental
+-   **`<`** = redirect input from a file
+    -   `command < input.txt`
+    -   Sends contents of file as input to command
+-   **`<<`** = here document (multi-line input)
+    -   Allows you to provide multi-line input directly in the terminal
+-   Example uses:
+    -   `wc -l < data.txt` counts lines in data.txt
+    -   `sort < names.txt` sorts contents of names.txt
+    -   Many commands can read from files directly OR from `stdin`
+:::
+
+# Writing Files in Unix
+
+## Output Redirection
+
+::: incremental
+-   **`>`** = redirect output to a file (overwrites)
+    -   `ls -l > filelist.txt`
+    -   Creates new file or overwrites existing
+-   **`>>`** = append output to a file
+    -   `echo "new line" >> existing.txt`
+    -   Adds to the end of existing file
+-   **`2>`** = redirect error messages
+    -   `command 2> errors.txt`
+    -   Captures error messages separately
+-   **`&>`** = redirect both output and errors
+    -   `command &> all_output.txt`
+:::
+
+## Redirection, visually
+
+::::: columns
+::: {.column width="50%"}
+![Normally a command's output goes to the screen](images/Lec00_img008.svg){width="100%"}
+:::
+
+::: {.column width="50%"}
+![`>` sends that output to a file instead](images/Lec00_img009.svg){width="100%"}
+:::
+:::::
+
+# Unix Pipes
+
+## What are Pipes?
+
+::: incremental
+-   **`|`** = the pipe operator
+    -   Takes output from one command as input to another
+    -   Chains commands together
+    -   No intermediate files needed!
+-   Basic syntax:
+    -   `command1 | command2 | command3`
+-   Power of Unix philosophy:
+    -   Small tools that do one thing well
+    -   Combine them to do complex tasks
+:::
+
+## Pipes, visually
+
+![Each command's output becomes the next command's input](images/Lec00_img010.svg){fig-align="center" width="90%"}
+
+## Common Pipe Patterns
+
+::: incremental
+-   **Counting patterns:**
+    -   `grep "pattern" file.txt | wc -l`
+    -   Count lines matching a pattern
+-   **Sorting and uniqueness:**
+    -   `cat file.txt | sort | uniq`
+    -   Sort lines and remove duplicates
+-   **Finding top/bottom items:**
+    -   `sort data.txt | head -5`
+    -   Get top 5 after sorting
+-   **Filtering and processing:**
+    -   `ls -l | grep ".txt" | awk '{print $5, $9}'`
+    -   List txt files with sizes
+:::
+
+## Advanced Pipe Examples
+
+::: incremental
+-   **Multi-step data processing:**
+    -   `cat data.csv | cut -d',' -f2 | sort | uniq -c | sort -rn`
+    -   Extract column 2, count unique values, sort by frequency
+-   **Real-time monitoring:**
+    -   `tail -f logfile.txt | grep ERROR`
+    -   Watch log file for errors in real-time
+-   **Complex transformations:**
+    -   `find . -name "*.txt" | xargs wc -l | sort -n`
+    -   Find all txt files and sort by line count
+:::
+
+## Combining It All Together
+
+Example workflow:
+
+``` bash
+# Read a file, process it, save results, and display
+cat data.txt | \
+  grep -v "^#" | \       # Remove comment lines
+  cut -f1,3 | \          # Extract columns 1 and 3
+  sort -k2 -n | \        # Sort by column 2 numerically
+  tee results.txt | \    # Save to file
+  head -10               # Show top 10
+```
+
+::: notes
+The backslash allows you to continue commands on multiple lines for readability
+:::
+
+## Practice Exercise: Files and Pipes
+
+Try these exercises:
+
+1.  Create a file with a list of numbers (one per line)
+2.  Use pipes to sort them numerically
+3.  Save the sorted list to a new file using redirection
+4.  Use `tee` to display and save the top 5 numbers
+5.  Count how many unique numbers you have using pipes
+6.  Append the count to your results file
+
+## Tips for Working with Files and Pipes
+
+::: incremental
+-   Test pipes step by step
+    -   Build complex pipes incrementally
+    -   Check output at each stage
+-   Use `less` for large files instead of `cat`
+-   Remember: `>` overwrites, `>>` appends
+-   Pipe efficiency:
+    -   Filter early in the pipeline
+    -   Reduces data passed between commands
+-   Save intermediate results when debugging complex pipes
+:::
+
+
+------------------------------------------------------------------------
+
+# Tidy Data
+
+## An example to get us started
+
+## 
+
+![](images/Lec03_img009.jpeg){fig-align="center" width="100%"}
+
+## 
+
+![](images/Lec03_img010.jpeg){fig-align="center" width="90%"}
+
+## Data set rules of thumb (aka Tidy Data)
+
+-   Store a copy of data in nonproprietary software and hardware formats, such as plain ASCII text (aka a flat file)
+-   Leave an uncorrected file when doing analyses
+-   Use descriptive names for your data files and variables
+-   Include a header line with descriptive variable names
+-   Maintain effective metadata about the data (data dictionary)
+-   When you add observations to a database, add rows
+-   When you add variables to a database, add columns, not rows
+-   A column of data should contain only one data type
+
+## Not all data are tidy to begin with
+
+-   Sometimes need to do some data wrangling
+
+-   But also contingency tables
+
+## Types of data
+
+|  |  |  |  |
+|:--:|:--:|:--:|:--:|
+| Categorical |  | Quantitative |  |
+| Ordinal | Nominal | Ratio | Interval |
+| small, medium, large | apples, oranges, bananas | kilograms, dollars, years | temperature, calendar year |
+| ordered character | character | numeric | integer |
+
+'Factor' is a special type of character variable that we will explore more later

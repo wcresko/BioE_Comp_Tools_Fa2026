@@ -1,6 +1,6 @@
 ---
 title: "Lecture 06 - Computational Tools for Bioengineers"
-subtitle: "Shell Scripting"
+subtitle: "R and Python Fundamentals 2: Data Frames, Distributions and Figures"
 date: "Monday, November 2, 2026"
 author: "Bill Cresko"
 ---
@@ -22,466 +22,566 @@ set.seed(2026)
 ```
 
 
+
 ## Book reading for this lecture
 
 The course book goes deeper on everything in this lecture. Read before or after class:
 
--   [Ch. 8: Shell Scripting](../book/chapters/08-shell-scripting.html)
--   *Reference:* [App. A: Unix Command Reference](../book/chapters/appendix-A-unix.html)
+-   [Ch. 11: R Programming Fundamentals](../book/chapters/11-r-programming.html)
+-   [Ch. 12: Python Programming Fundamentals](../book/chapters/12-python-programming.html)
+-   [Ch. 13: Data Visualization with ggplot2](../book/chapters/13-data-visualization.html)
+-   *Reference:* [App. E: R Command Reference](../book/chapters/appendix-E-r.html) · [App. F: Python Quick Reference](../book/chapters/appendix-F-python.html)
 
 ## Goals for today
 
--   Introduction to scripts in Unix, R and Python
--   Writing shell scripts: variables, conditionals, loops and functions
--   Error handling and best practices
--   The same script written in R (`Rscript`) and in Python (`python3`)
--   Using R Studio, Positron and Visual Studio Code (VSC) as script editors
-
-
-# Scripting in Unix, R and Python
-
-![](images/Lec06_img001.png){fig-align="center" width="75%"}
-
-------------------------------------------------------------------------
-
-## Three languages, one idea: a script
-
-| | **Shell** (`bash`) | **R** | **Python** |
-|---|---|---|---|
-| File | `script.sh` | `script.R` | `script.py` |
-| Shebang (line 1) | `#!/bin/bash` | `#!/usr/bin/env Rscript` | `#!/usr/bin/env python3` |
-| Run it | `bash script.sh` or `./script.sh` | `Rscript script.R` | `python3 script.py` |
-| Comments | `#` | `#` | `#` |
-| Arguments | `$1`, `$2`, `$@` | `commandArgs(trailingOnly = TRUE)` | `sys.argv[1:]` (or `argparse`) |
-| Best at | gluing programs and files together | statistics, data frames, figures | general programming, images, ML |
-
-::: callout-tip
-Today is mostly about **shell** scripts. At the end we will write the same FASTA-statistics script in R and in Python - and **Lecture 07** goes deep on both languages.
-:::
-
-## What is a Shell Script?
-
--   Text file containing Unix commands
--   Automates repetitive tasks
--   Makes complex workflows reproducible
--   Essential for bioinformatics pipelines
--   Can include:
-    -   Variables and arrays
-    -   Conditionals (if/then/else)
-    -   Loops (for/while)
-    -   Functions
-    -   Command-line arguments
-
-## Creating Your First Script
-
-``` bash
-#!/bin/bash
-# This is a shebang - tells system which interpreter to use
-
-# This is a comment - documents your code
-echo "Hello, Bioengineering!"
-
-# Set a variable
-NAME="DNA Analysis"
-echo "Running $NAME"
-
-# Use command output as variable
-DATE=$(date +%Y-%m-%d)
-echo "Analysis date: $DATE"
-
-# Simple calculation
-COUNT=5
-DOUBLE=$((COUNT * 2))
-echo "Double of $COUNT is $DOUBLE"
-```
-
-Save as `first_script.sh` and run with `bash first_script.sh`
-
-## Making Scripts Executable
-
-``` bash
-# Check current permissions
-ls -l first_script.sh
-
-# Make executable (add execute permission)
-chmod +x first_script.sh
-
-# Now you can run it directly
-./first_script.sh
-```
-
-Best practice: Always use `chmod +x` for your scripts
-
-## Command-Line Arguments
-
-``` bash
-#!/bin/bash
-# Script: process_fasta.sh
-
-# $0 is the script name
-
-echo "Script name: $0"
-
-# $# is the number of arguments
-
-echo "Number of arguments: $#"
-
-# Check if enough arguments provided FIRST
-
-if [ $# -lt 2 ]; then
-    echo "Usage: $0 input.fasta output.txt"
-    exit 1
-fi
-
-# Now safe to use the arguments
-
-echo "Processing file: $1"
-echo "Output will be: $2"
-
-# $@ is all arguments (should be quoted)
-
-echo "All arguments: $@"
-```
-
-Run as: `./process_fasta.sh input.fa results.txt`
-
-## Variables and Arrays
-
-``` bash
-#!/bin/bash
-
-# Variables (no spaces around =)
-SPECIES="Homo sapiens"
-CHROMOSOME=21
-GENE_COUNT=234
-
-# Arrays
-BASES=(A C G T)
-echo "First base: ${BASES[0]}"
-echo "All bases: ${BASES[@]}"
-
-# Add to array
-BASES+=(N)
-
-# Array length
-echo "Number of bases: ${#BASES[@]}"
-
-# String operations
-FILE="sample_001.fastq.gz"
-NAME="${FILE%.fastq.gz}"     # Remove suffix
-echo "Sample name: $NAME"
-```
-
-## Conditionals (if/then/else)
-
-``` bash
-#!/bin/bash
-
-# Numeric comparisons
-COUNT=100
-if [ $COUNT -gt 50 ]; then
-    echo "High read count"
-elif [ $COUNT -gt 10 ]; then
-    echo "Medium read count"
-else
-    echo "Low read count"
-fi
-
-# String comparisons
-FILETYPE="fasta"
-if [ "$FILETYPE" = "fasta" ]; then
-    echo "Processing FASTA file"
-fi
-
-# File tests
-if [ -f "data.txt" ]; then
-    echo "File exists"
-fi
-
-if [ -d "results" ]; then
-    echo "Directory exists"
-else
-    mkdir results
-fi
-```
-
-## Test operators for `[ ]`
-
-| Operator | Meaning                  | Operator | Meaning               |
-|----------|--------------------------|----------|-----------------------|
-| `-eq`    | Equal (numbers)          | `=`      | Strings are equal     |
-| `-ne`    | Not equal (numbers)      | `!=`     | Strings differ        |
-| `-gt`    | Greater than             | `-z`     | String is empty       |
-| `-lt`    | Less than                | `-f`     | File exists           |
-| `-ge`    | Greater than or equal    | `-d`     | Directory exists      |
-| `-le`    | Less than or equal       | `-s`     | File exists, not empty|
-
-::: callout-tip
-Always put **spaces inside the brackets** (`[ $x -gt 5 ]`, not `[$x -gt 5]`) and **quote your variables** (`"$FILE"`) so file names with spaces don't break your script.
-:::
-
-## Loops in Shell Scripts
-
-``` bash
-#!/bin/bash
-
-# For loop over list
-for BASE in A C G T; do
-    echo "Processing base: $BASE"
-done
-
-# For loop over files
-for FILE in *.fasta; do
-    echo "Analyzing $FILE"
-    grep -c ">" "$FILE"
-done
-
-# For loop with counter
-for i in {1..10}; do
-    echo "Iteration $i"
-done
-
-# While loop
-COUNT=1
-while [ $COUNT -le 5 ]; do
-    echo "Count: $COUNT"
-    COUNT=$((COUNT + 1))
-done
-
-# Read file line by line
-while read LINE; do
-    echo "Processing: $LINE"
-done < input.txt
-```
-
-## Functions in Scripts
-
-``` bash
-#!/bin/bash
-
-# Define a function
-count_sequences() {
-    local FILE=$1  # Local variable
-    local COUNT=$(grep -c "^>" "$FILE")
-    echo "$COUNT"  # "Return" a value by printing it
-}
-# Note: bash 'return' only carries an exit status (0-255), not data -
-# so functions hand back results via echo, captured with $(...)
-n=$(count_sequences proteins.fasta)
-echo "proteins.fasta has $n sequences"
-
-# Another function with multiple parameters
-process_fasta() {
-    local INPUT=$1
-    local OUTPUT=$2
-    
-    echo "Processing $INPUT..."
-    grep "^>" "$INPUT" > "$OUTPUT"
-    echo "$INPUT has $(count_sequences "$INPUT") sequences"
-}
-
-# Call functions
-process_fasta "input.fasta" "headers.txt"
-```
-
-## Error Handling
-
-``` bash
-#!/bin/bash
-
-# Exit on error
-set -e
-
-# Exit on undefined variable
-set -u
-
-# Pipe failure detection
-set -o pipefail
-
-# Custom error handling
-check_file() {
-    if [ ! -f "$1" ]; then
-        echo "Error: File $1 not found!" >&2
-        exit 1
-    fi
-}
-
-# Trap errors
-trap 'echo "Error on line $LINENO"' ERR
-
-# Try-catch style
-if ! grep "pattern" file.txt > /dev/null 2>&1; then
-    echo "Pattern not found"
-fi
-```
-
-## Real Bioinformatics Script Example
-
-``` bash
-#!/bin/bash
-# Script: fasta_stats.sh
-# Purpose: Calculate basic statistics for FASTA files
-
-# Check arguments
-if [ $# -ne 1 ]; then
-    echo "Usage: $0 sequences.fasta"
-    exit 1
-fi
-
-INPUT=$1
-
-# Check if file exists
-if [ ! -f "$INPUT" ]; then
-    echo "Error: File $INPUT not found!"
-    exit 1
-fi
-
-echo "=== FASTA Statistics for $INPUT ==="
-
-# Count sequences
-SEQ_COUNT=$(grep -c "^>" "$INPUT")
-echo "Number of sequences: $SEQ_COUNT"
-
-# Calculate total length
-TOTAL_LENGTH=$(grep -v "^>" "$INPUT" | tr -d '\n' | wc -c)
-echo "Total length: $TOTAL_LENGTH bp"
-
-# Average length
-AVG_LENGTH=$((TOTAL_LENGTH / SEQ_COUNT))
-echo "Average length: $AVG_LENGTH bp"
-
-# GC content
-GC_COUNT=$(grep -v "^>" "$INPUT" | tr -d '\n' | grep -o "[GC]" | wc -l)
-GC_PERCENT=$((GC_COUNT * 100 / TOTAL_LENGTH))
-echo "GC content: $GC_PERCENT%"
-```
-
-## The same script in R and Python
-
-The shell version of `fasta_stats.sh` works, but counting and arithmetic get awkward in bash. Here is the same program as an **R script** and a **Python script** - both take the file name as a command-line argument.
+-   Reading, creating and exporting data frames
+-   Drawing samples from distributions
+-   Visualizing data and combining plots into one figure
+-   Indexing data frames and computing summary statistics
+
+## Reading in Data Frames in R
+
+-   A strength of `R` is being able to import data from an external source
+-   Create the same table that you did above in a spreadsheet like Excel
+-   Export it to comma separated and tab separated text files for importing into `R`.
+-   The first will read in a comma-delimited file, whereas the second is a tab-delimited
+-   In both cases the header and row.names arguments indicate that there is a header row and row label column
+-   Note that the name of the file by itself will have R look in the CWD, whereas a full path can also be used
+-   In Python the same job is done by **pandas**: `pd.read_csv()` for comma-separated, `pd.read_csv(sep="\t")` for tab-separated; `pathlib.Path` builds paths that work on every operating system
+
+## Drawing samples from distributions
+
+-   Here is a way to create your own data sets that are random samples.
+-   Again, play around with the arguments in the parentheses to see what happens.
+-   In Python random numbers come from a numpy **generator**: `rng = np.random.default_rng(2026)` (the number is the seed, like `set.seed(2026)` in R)
+
+## Drawing samples from distributions
 
 ::: panel-tabset
 ### R
 
 ```{r}
-#| label: lec06-fasta-stats-r
+#| label: fig-lec07-samples-from-distributions-1
+#| fig-cap: "10,000 normal draws (x) plotted against 10,000 uniform draws (y)"
+#| out-width: "100%"
 #| echo: true
-#| eval: false
+#| eval: true
 
-#!/usr/bin/env Rscript
-# Script: fasta_stats.R
-# Purpose: Calculate basic statistics for a FASTA file
-
-args <- commandArgs(trailingOnly = TRUE)     # like $1 $2 ... in bash
-if (length(args) != 1) {
-  cat("Usage: Rscript fasta_stats.R sequences.fasta\n")
-  quit(status = 1)
-}
-input <- args[1]
-if (!file.exists(input)) {
-  cat("Error: File", input, "not found!\n")
-  quit(status = 1)
-}
-
-lines   <- readLines(input)
-headers <- grepl("^>", lines)                # TRUE for header lines
-seq     <- paste(lines[!headers], collapse = "")
-
-cat("=== FASTA Statistics for", input, "===\n")
-cat("Number of sequences:", sum(headers), "\n")
-cat("Total length:", nchar(seq), "bp\n")
-cat("Average length:", nchar(seq) / sum(headers), "bp\n")
-gc <- sum(strsplit(seq, "")[[1]] %in% c("G", "C"))
-cat("GC content:", round(100 * gc / nchar(seq), 1), "%\n")
+x <- rnorm (10000, 0, 10)
+y <- sample (1:10000, 10000, replace = TRUE)
+xy <- cbind(x,y)
+plot(x,y)
 ```
 
 ### Python
 
 ```{python}
-#| label: lec06-fasta-stats-py
+#| label: fig-lec07-samples-from-distributions-1-py
+#| fig-cap: "10,000 normal draws (x) plotted against 10,000 uniform draws (y), with matplotlib"
 #| echo: true
 #| eval: false
 
-#!/usr/bin/env python3
-# Script: fasta_stats.py
-# Purpose: Calculate basic statistics for a FASTA file
+import numpy as np
+import matplotlib.pyplot as plt
 
-import sys
-from pathlib import Path
-
-if len(sys.argv) != 2:                       # sys.argv[0] is the script name, like $0
-    print("Usage: python3 fasta_stats.py sequences.fasta")
-    sys.exit(1)
-input_file = Path(sys.argv[1])
-if not input_file.is_file():
-    print(f"Error: File {input_file} not found!")
-    sys.exit(1)
-
-lines   = input_file.read_text().splitlines()
-headers = [line for line in lines if line.startswith(">")]
-seq     = "".join(line for line in lines if not line.startswith(">"))
-
-print(f"=== FASTA Statistics for {input_file} ===")
-print(f"Number of sequences: {len(headers)}")
-print(f"Total length: {len(seq)} bp")
-print(f"Average length: {len(seq) / len(headers):.1f} bp")
-gc = seq.count("G") + seq.count("C")
-print(f"GC content: {100 * gc / len(seq):.1f}%")
+rng = np.random.default_rng(2026)
+x = rng.normal(0, 10, 10000)               # rnorm(10000, 0, 10)
+y = rng.integers(1, 10001, size=10000)     # sample(1:10000, 10000, replace = TRUE)
+xy = np.column_stack([x, y])               # cbind(x, y)
+plt.scatter(x, y, s=2)
+plt.show()
 ```
 :::
 
-## Running R and Python scripts from the shell
+## Drawing samples from distributions
 
 ::: panel-tabset
 ### R
 
-``` bash
-Rscript fasta_stats.R proteins.fasta        # run with the interpreter ...
+```{r}
+#| label: fig-lec07-samples-from-distributions-2
+#| fig-cap: "The same samples plotted from a two-column matrix made with cbind()"
+#| out-width: "100%"
+#| echo: true
+#| eval: true
 
-chmod +x fasta_stats.R                      # ... or make it executable
-./fasta_stats.R proteins.fasta              #     (needs the #!/usr/bin/env Rscript shebang)
-
-Rscript -e 'mean(c(1, 2, 3))'               # one-liner without a file
-R                                           # interactive console; quit with q()
+x <- rnorm (10000, 0, 10)
+y <- sample (1:10000, 10000, replace = TRUE)
+xy <- cbind(x,y)
+plot(xy)
 ```
-
--   `Rscript` runs the file top to bottom and prints only what you `cat()` or `print()`
--   In **RStudio** / **Positron**: open the `.R` file and press `Cmd/Ctrl-Enter` to send lines to the console
 
 ### Python
 
-``` bash
-python3 fasta_stats.py proteins.fasta       # run with the interpreter ...
+```{python}
+#| label: fig-lec07-samples-from-distributions-2-py
+#| fig-cap: "The same samples plotted from the columns of a two-column array"
+#| echo: true
+#| eval: false
 
-chmod +x fasta_stats.py                     # ... or make it executable
-./fasta_stats.py proteins.fasta             #     (needs the #!/usr/bin/env python3 shebang)
+xy = np.column_stack([x, y])
+print(xy.shape)
+# (10000, 2)
+plt.scatter(xy[:, 0], xy[:, 1], s=2)       # column 0 vs column 1
+plt.show()
+```
+:::
 
-python3 -c 'print(sum([1, 2, 3]) / 3)'      # one-liner without a file
-python3                                     # interactive REPL; quit with exit() or Ctrl-D
+## Drawing samples from distributions
+
+::: panel-tabset
+### R
+
+```{r}
+#| label: fig-lec07-samples-from-distributions-3
+#| fig-cap: "Histogram of 10,000 draws from a normal distribution (mean 0, sd 10)"
+#| out-width: "100%"
+#| echo: true
+#| eval: true
+
+x <- rnorm (10000, 0, 10)
+y <- sample (1:10000, 10000, replace = TRUE)
+xy <- cbind(x,y)
+hist(x)
 ```
 
--   `python3 script.py` runs the file top to bottom and prints only what you `print()`
--   In **VS Code** / **Positron**: open the `.py` file and press `Cmd/Ctrl-Enter`, or use the Run button
--   Keep project packages in a virtual environment: `python3 -m venv .venv && source .venv/bin/activate`
+### Python
+
+```{python}
+#| label: fig-lec07-samples-from-distributions-3-py
+#| fig-cap: "Histogram of 10,000 draws from a normal distribution (mean 0, sd 10), with matplotlib"
+#| echo: true
+#| eval: false
+
+plt.hist(x, bins=30)
+plt.xlabel("x")
+plt.ylabel("Frequency")
+plt.show()
+```
 :::
 
-::: callout-tip
-Both scripts return an **exit status** (`quit(status = 1)` / `sys.exit(1)`), so a shell pipeline or SLURM job can tell whether they succeeded - just like `exit 1` in bash. In Lecture 10 we submit these scripts to Talapas with `Rscript` and `python3` inside an `sbatch` job.
+## Drawing samples from distributions
+
+-   You’ve probably figured out that y from the last example is drawing numbers with equal probability.
+-   What if you want to draw from a distribution?
+-   Again, play around with the arguments in the parentheses to see what happens.
+
+## Drawing samples from distributions
+
+::: panel-tabset
+### R
+
+```{r}
+#| label: fig-lec07-drawing-samples-from-distributions
+#| fig-cap: "Histogram of normal draws with the theoretical density curve overlaid"
+#| out-width: "100%"
+#| echo: true
+#| eval: true
+
+x <-rnorm(1000, 0, 100)
+hist(x, xlim = c(-500,500))
+curve(50000*dnorm(x, 0, 100), xlim = c(-500,500), add=TRUE, col='Red')
+```
+
+### Python
+
+```{python}
+#| label: fig-lec07-drawing-samples-from-distributions-py
+#| fig-cap: "Histogram of normal draws with the theoretical density curve overlaid (scipy.stats)"
+#| echo: true
+#| eval: false
+
+from scipy.stats import norm
+
+x = rng.normal(0, 100, 1000)
+plt.hist(x, bins=20, range=(-500, 500))    # bins 50 wide, like R's default here
+grid = np.linspace(-500, 500, 200)
+plt.plot(grid, 50000 * norm.pdf(grid, 0, 100), color="red")
+plt.show()
+```
 :::
 
-## Best Practices for Shell Scripts
+-   `dnorm()` generates the probability density, which can be plotted using the `curve()` function.
+-   Note that is curve is added to the plot using `add=TRUE`
+-   In Python `norm.pdf()` from `scipy.stats` is the density; every `plt.` call draws on the same figure until `plt.show()`
 
-1.  **Always include a shebang**: `#!/bin/bash`
-2.  **Comment your code**: Explain what and why
-3.  **Use meaningful variable names**: `GENE_COUNT` not `GC`
-4.  **Check inputs**: Validate files exist and arguments are correct
-5.  **Handle errors gracefully**: Use `set -e` and error checking
-6.  **Make scripts portable**: Don't hardcode paths
-7.  **Use version control**: Track changes with git
-8.  **Test incrementally**: Build scripts step by step
-9.  **Create help messages**: Document usage
-10. **Log important steps**: Keep records of what was done
+## Visualizing Data
 
-::: callout-note
-Every one of these applies to **R and Python scripts** too: shebang line, comments, checking `commandArgs()` / `sys.argv`, meaningful names, relative paths, Git, and testing on a tiny input first.
+-   So far you've been visualizing just the list of output numbers
+-   Except for the last example where I snuck in a `hist` function.
+-   You can also visualize all of the variables that you've created using the `plot` function (as well as a number of more sophisticated plotting functions).
+-   Each of these is called a `high level` plotting function, which sets the stage
+-   `Low level` plotting functions will tweak the plots and make them beautiful
+
+## Visualizing Data
+
+-   What do you think that each of the arguments means for the plot function?
+-   A cool thing about `R` is that the options for the arguments make sense.
+-   Try adjusting an argument and see if it works
+-   Note- most people use the package `GGPlot2` for nice scientific graphics
+-   In Python the base library is `matplotlib` (`plt.plot`, `plt.scatter`, `plt.hist`); `seaborn` and `plotnine` (a ggplot2 clone) sit on top of it
+
+## Visualizing Data
+
+::: panel-tabset
+### R
+
+```{r}
+#| label: fig-lec07-visualizing-data
+#| fig-cap: "A sequence from 0 to 10 plotted as points"
+#| echo: true
+#| eval: true
+
+seq_1 <- seq(0.0, 10.0, by = 0.1)
+plot (seq_1, xlab="space", ylab ="function of space", type = "p", col = "red")
+```
+
+### Python
+
+```{python}
+#| label: fig-lec07-visualizing-data-py
+#| fig-cap: "A sequence from 0 to 10 plotted as points, with matplotlib"
+#| echo: true
+#| eval: false
+
+seq_1 = np.linspace(0.0, 10.0, 101)
+plt.plot(seq_1, "o", color="red")          # "o" = points; default is a line
+plt.xlabel("space")
+plt.ylabel("function of space")
+plt.show()
+```
+:::
+
+## Putting plots in a single figure
+
+-   On the next slide
+-   The first line of the lower script tells R that you are going to create a composite figure that has two rows and two columns. Can you tell how?
+-   In Python, `plt.subplots(2, 2)` does the same job and hands back a grid of **axes** to draw on
+-   Now, modify the code to add two more variables and add one more row of two panels.
+
+::: panel-tabset
+### R
+
+```{r}
+#| label: lec07-putting-plots-in-a-single
+#| out-width: "50%"
+#| out-height: "20%"
+#| echo: true
+#| eval: true
+
+seq_1 <- seq(0.0, 10.0, by = 0.1)
+seq_2 <- seq(10.0, 0.0, by = -0.1)
+```
+
+### Python
+
+```{python}
+#| label: lec07-putting-plots-in-a-single-py
+#| echo: true
+#| eval: false
+
+seq_1 = np.linspace(0.0, 10.0, 101)
+seq_2 = np.linspace(10.0, 0.0, 101)
+seq_square = seq_2 * seq_2
+seq_square_new = seq_2**2
+```
+:::
+
+## Putting plots in a single figure
+
+::: panel-tabset
+### R
+
+```{r}
+#| label: fig-lec07-composite-figure
+#| fig-cap: "Four plots arranged in a 2 x 2 grid with par(mfrow)"
+#| out-width: "50%"
+#| out-height: "50%"
+#| echo: true
+#| eval: true
+
+par(mfrow=c(2,2))
+plot (seq_1, xlab="time", ylab ="p in population 1", type = "p", col = 'red')
+plot (seq_2, xlab="time", ylab ="p in population 2", type = "p", col = 'green')
+plot (seq_square, xlab="time", ylab ="p2 in population 2", type = "p", col = 'blue')
+plot (seq_square_new, xlab="time", ylab ="p in population 1", type = "l", col = 'yellow')
+```
+
+### Python
+
+```{python}
+#| label: fig-lec07-composite-figure-py
+#| fig-cap: "Four plots arranged in a 2 x 2 grid with plt.subplots()"
+#| echo: true
+#| eval: false
+
+fig, ax = plt.subplots(2, 2, figsize=(8, 6))
+ax[0, 0].plot(seq_1, "o", color="red")
+ax[0, 0].set(xlabel="time", ylabel="p in population 1")
+ax[0, 1].plot(seq_2, "o", color="green")
+ax[0, 1].set(xlabel="time", ylabel="p in population 2")
+ax[1, 0].plot(seq_square, "o", color="blue")
+ax[1, 0].set(xlabel="time", ylabel="p2 in population 2")
+ax[1, 1].plot(seq_square_new, "-", color="yellow")   # "-" = line
+ax[1, 1].set(xlabel="time", ylabel="p in population 1")
+fig.tight_layout()
+plt.show()
+```
+:::
+
+## Creating Data Frames in R and Python
+
+-   As you have seen, in R you can generate your own random data set drawn from nearly any distribution very easily.
+-   Often we will want to use collected data.
+-   Now, let’s make a dummy dataset to get used to dealing with data frames
+-   Set up three variables (hydrogel_concentration, compression and conductivity) as vectors
+-   In Python the data frame comes from **pandas** (`import pandas as pd`); it has the same idea - rows are samples, columns are variables
+
+## Creating Data Frames in R and Python
+
+::: panel-tabset
+### R
+
+```{r}
+#| label: lec07-creating-data-frames-in-r
+#| echo: true
+#| eval: true
+
+hydrogel_concentration <- factor(c("low", "high", "high", "high", "medium", "medium", "medium","low"))
+compression <- c(3.4, 3.4, 8.4, 3, 5.6, 8.1, 8.3, 4.5)
+conductivity <- c(0, 9.2, 3.8, 5, 5.6, 4.1, 7.1, 5.3)
+```
+
+-   Create a data frame where vectors become columns
+
+```{r}
+#| label: lec07-creating-data-frames-in-r-2
+#| echo: true
+#| eval: true
+
+mydata <- data.frame(hydrogel_concentration, compression, conductivity)
+row.names(mydata) <- c("Sample_1", "Sample_2", "Sample_3", "Sample_4",
+                       "Sample_5", "Sample_6", "Sample_7", "Sample_8")
+```
+
+### Python
+
+```{python}
+#| label: lec07-creating-data-frames-py
+#| echo: true
+#| eval: false
+
+import pandas as pd
+
+hydrogel_concentration = pd.Categorical(["low", "high", "high", "high", "medium", "medium", "medium", "low"])
+compression = [3.4, 3.4, 8.4, 3, 5.6, 8.1, 8.3, 4.5]
+conductivity = [0, 9.2, 3.8, 5, 5.6, 4.1, 7.1, 5.3]
+```
+
+-   Create a DataFrame from a dictionary of `column name: values`
+
+```{python}
+#| label: lec07-creating-data-frames-2-py
+#| echo: true
+#| eval: false
+
+mydata = pd.DataFrame({"hydrogel_concentration": hydrogel_concentration,
+                       "compression": compression,
+                       "conductivity": conductivity})
+mydata.index = [f"Sample_{i}" for i in range(1, 9)]   # row names = the index
+mydata.head(3)
+#          hydrogel_concentration  compression  conductivity
+# Sample_1                    low          3.4           0.0
+# Sample_2                   high          3.4           9.2
+# Sample_3                   high          8.4           3.8
+```
+:::
+
+-   Now you have a hand-made data frame with row names
+-   Take a look at it in the data section of RStudio, or the **Data Explorer** in Positron (R and Python)
+
+## Reading in and Exporting Data Frames
+
+\
+
+::: panel-tabset
+### R
+
+```{r}
+#| label: lec07-reading-in-and-exporting-data
+#| echo: true
+#| eval: false
+
+YourFile <- read.table('yourfile.csv', header=T, row.names=1, sep=',')
+YourFile <- read.table('yourfile.txt', header=T, row.names=1, sep='\t')
+```
+
+\
+
+```{r}
+#| label: lec07-reading-in-and-exporting-data-2
+#| echo: true
+#| eval: false
+
+write.table(YourFile, "yourfile.csv", quote=F, row.names=T, sep=",")
+write.table(YourFile, "yourfile.txt", quote=F, row.names=T, sep="\t")
+```
+
+### Python
+
+```{python}
+#| label: lec07-reading-in-and-exporting-data-py
+#| echo: true
+#| eval: false
+
+import pandas as pd
+from pathlib import Path
+
+YourFile = pd.read_csv("yourfile.csv", index_col=0)             # header row is the default
+YourFile = pd.read_csv("yourfile.txt", index_col=0, sep="\t")
+YourFile = pd.read_csv(Path("data") / "raw" / "yourfile.csv")   # portable paths with pathlib
+```
+
+\
+
+```{python}
+#| label: lec07-reading-in-and-exporting-data-2-py
+#| echo: true
+#| eval: false
+
+YourFile.to_csv("yourfile.csv")                 # index (row names) is written by default
+YourFile.to_csv("yourfile.txt", sep="\t")
+YourFile.to_csv("yourfile.csv", index=False)    # drop the row names
+```
+:::
+
+## Indexing in data frames
+
+-   Next up - indexing just a subset of the data
+-   This is a very important idea in R, that you can analyze just a subset of the data.
+-   This is analyzing only the data in the file you made that has the factor value 'mixed'.
+-   pandas: `.iloc[row, col]` indexes by **position** (from 0), `.loc[row, col]` by **name**; `df["col"]` or `df.col` picks a column
+
+::: panel-tabset
+### R
+
+```{r}
+#| label: lec07-indexing-in-data-frames
+#| echo: true
+#| eval: false
+
+print (YourFile[,2])
+print (YourFile$variable)
+print (YourFile[2,])
+plot (YourFile$variable1, YourFile$variable2)
+```
+
+### Python
+
+```{python}
+#| label: lec07-indexing-in-data-frames-py
+#| echo: true
+#| eval: false
+
+print(YourFile.iloc[:, 1])          # 2nd column (position 1) - R's YourFile[,2]
+print(YourFile["variable"])         # column by name        - R's YourFile$variable
+print(YourFile.iloc[1])             # 2nd row               - R's YourFile[2,]
+print(YourFile.loc["Sample_2"])     # row by its name
+plt.scatter(YourFile["variable1"], YourFile["variable2"])
+plt.show()
+```
+:::
+
+## Practice reading in transcriptomic data
+
+::: panel-tabset
+### R
+
+```{r}
+#| label: lec07-practice-reading-in-transcriptomic-data
+#| echo: true
+#| eval: false
+
+RNAseq_Data <- read.table('<name_of_file>', header=TRUE, sep=',')
+
+print (RNAseq_Data)
+head (RNAseq_Data)
+tail (RNAseq_Data)
+
+print (RNAseq_Data[,2])
+print (RNAseq_Data[1,])
+print (RNAseq_Data[1,2])
+print (RNAseq_Data$ENSGACG00000000010)
+print (RNAseq_Data$ENSGACG00000000010>45.0)
+```
+
+### Python
+
+```{python}
+#| label: lec07-practice-reading-in-transcriptomic-data-py
+#| echo: true
+#| eval: false
+
+RNAseq_Data = pd.read_csv("<name_of_file>")
+
+print(RNAseq_Data)
+RNAseq_Data.head()
+RNAseq_Data.tail()
+
+print(RNAseq_Data.iloc[:, 1])
+print(RNAseq_Data.iloc[0])          # first row is 0!
+print(RNAseq_Data.iloc[0, 1])
+print(RNAseq_Data["ENSGACG00000000010"])
+print(RNAseq_Data["ENSGACG00000000010"] > 45.0)
+```
+:::
+
+## Summary stats and figures
+
+::: panel-tabset
+### R
+
+```{r}
+#| label: lec07-summary-stats-and-figures
+#| echo: true
+#| eval: false
+
+summary1 <- summary(RNAseq_Data $ENSGACG00000000003)
+print (summary1)
+
+hist(RNAseq_Data $ENSGACG00000000003)
+boxplot(RNAseq_Data$ENSGACG00000000003)
+boxplot(RNAseq_Data$ENSGACG00000000003~RNAseq_Data$Population)
+plot(RNAseq_Data $ENSGACG00000000003, RNAseq_Data$ENSGACG00000000003)
+
+boxplot(RNAseq_Data $ENSGACG00000000003~RNAseq_Data$Treatment,
+        col = "red", ylab = "Expression Level", xlab = "Treatment level",
+        border ="orange",
+        main = "Boxplot of variation in gene expression across microbiota treatments")
+```
+
+### Python
+
+```{python}
+#| label: lec07-summary-stats-and-figures-py
+#| echo: true
+#| eval: false
+
+import seaborn as sns
+
+gene = RNAseq_Data["ENSGACG00000000003"]
+summary1 = gene.describe()          # count, mean, std, min, quartiles, max
+print(summary1)
+
+gene.hist()
+gene.plot.box()
+RNAseq_Data.boxplot(column="ENSGACG00000000003", by="Population")
+plt.scatter(gene, gene)
+
+sns.boxplot(data=RNAseq_Data, x="Treatment", y="ENSGACG00000000003", color="red")
+plt.xlabel("Treatment level")
+plt.ylabel("Expression Level")
+plt.title("Boxplot of variation in gene expression across microbiota treatments")
+plt.show()
+```
 :::

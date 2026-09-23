@@ -1,6 +1,6 @@
 ---
 title: "Lecture 04 - Computational Tools for Bioengineers"
-subtitle: "Unix Data Streams and Large Genomic Data Files"
+subtitle: "Shell Scripting"
 date: "Monday, October 19, 2026"
 author: "Bill Cresko"
 ---
@@ -26,430 +26,462 @@ set.seed(2026)
 
 The course book goes deeper on everything in this lecture. Read before or after class:
 
--   [Ch. 6: Files, Pipes, and Redirection](../book/chapters/06-files-pipes.html)
--   *Reference:* [App. I: Common Data Formats & Public Repositories](../book/chapters/appendix-I-data-formats.html)
+-   [Ch. 10: Shell Scripting](../book/chapters/10-shell-scripting.html)
+-   *Reference:* [App. B: Unix Command Reference](../book/chapters/appendix-B-unix.html)
 
 ## Goals for today
 
--   Finish advanced Unix
--   Work with human chromosome 1 sequence data
--   Tidy Data
--   R and RStudio
-
-# The Command Line
-
-![](images/Lec02_img002.jpeg){fig-align="center" width="90%"}
-
-## Making new files
-
--   Make new folders: `mkdir`
--   Make new files: `nano`, `touch`
--   Rename files: `mv`
--   Move files: `mv`
--   Copy files: `cp`
--   Delete files: `rm`
--   Delete directories: `rmdir`
--   Examining file length: `wc`
--   Reading files: `cat`
--   Looking at beginning or end: `head` or `tail`
-
-## Things to keep in mind
-
--   The shell trusts you
-    -   It will delete files you say to delete
-    -   It will override files if you name 2 things the same
--   Naming conventions
-    -   Avoid spaces
-    -   Don’t start with a –
-    -   Stick to letters, numbers, . , -, and \_
--   Use appropriate file extensions in file names
-    -   Some software expect files with certain extensions (.fasta, .txt, etc.)
-
-## Practice making files and directories
-
--   Make a new directory called whatever you'd like.
--   Add a file named `Practice.txt` to the directory and add some text to it
--   Read the contents of the file and get its length
--   Rename the file to `Super_practice.txt`
--   Move the file to a new folder named `Testing`
--   Make a copy of the file named `Super_practice_copy.txt`
--   Read the contents of the file and get its length to make sure it’s the same as `Super_practice.txt`
--   Delete the original `Super_practice.txt`
-
-# Reading and Writing Files in Unix
-
-## Commands for Reading Files
-
--   **`cat`** = concatenate and display files
-    -   Shows entire file at once
-    -   Good for small files
--   **`less`** = view file page by page
-    -   Navigate with `space` (forward), `b` (back), `q` (quit)
-    -   Search with `/pattern`
--   **`more`** = similar to less but simpler
-    -   Space to go forward, `q` to quit
--   **`head`** = display first 10 lines (default)
-    -   `head -n 20 file.txt` shows first 20 lines
--   **`tail`** = display last 10 lines (default)
-    -   `tail -n 20 file.txt` shows last 20 lines
-    -   `tail -f file.txt` follows file as it grows (useful for logs)
-
-## Input Redirection
-
--   **`<`** = redirect input from a file
-    -   `command < input.txt`
-    -   Sends contents of file as input to command
--   **`<<`** = here document (multi-line input)
-    -   Allows you to provide multi-line input directly in the terminal
--   Example uses:
-    -   `wc -l < data.txt` counts lines in data.txt
-    -   `sort < names.txt` sorts contents of names.txt
-
-## Output Redirection
-
--   **`>`** = redirect output to a file (overwrites)
-    -   `ls -l > filelist.txt`
-    -   Creates new file or overwrites existing
--   **`>>`** = append output to a file
-    -   `echo "new line" >> existing.txt`
-    -   Adds to the end of existing file
--   **`2>`** = redirect error messages
-    -   `command 2> errors.txt`
-    -   Captures error messages separately
--   **`&>`** = redirect both output and errors
-    -   `command &> all_output.txt`
-
-## Unix Three Standard Streams
-
--   **stdin (0)** = Standard Input
-    -   Where programs read input from
-    -   Default: keyboard
--   **stdout (1)** = Standard Output
-    -   Where programs write normal output
-    -   Default: terminal screen
--   **stderr (2)** = Standard Error
-    -   Where programs write error messages
-    -   Default: terminal screen (same as stdout)
-
-## Visualizing Data Streams
-
-``` bash
-# Every Unix program has these three streams
-         ┌──────────────┐
-stdin ───>│              │───> stdout
-    (0)  │   Program    │      (1)
-         │              │───> stderr
-         └──────────────┘      (2)
-```
-
--   File descriptor numbers: 0, 1, 2
--   Can redirect each stream independently
--   Programs don't know if streams are redirected
--   This abstraction is key to Unix philosophy
-
-## Basic Stream Redirection
-
-``` bash
-# Redirect stdout to file (equivalent ways)
-
-ls -l > files.txt
-ls -l 1> files.txt      # Explicitly using fd 1
-
-# Redirect stderr to file
-
-ls /nonexistent 2> errors.txt
-
-# Redirect both stdout and stderr to same file
-
-ls -l /nonexistent &> all_output.txt
-```
-
-## Bioinformatics Example
-
-Processing sequence data with stream control:
-
-``` bash
-# FASTQ processing pipeline with error handling
-
-zcat reads.fastq.gz 2> unzip_errors.log | 
-fastqc stdin 2> qc_errors.log | 
-trimmomatic 2> trim_errors.log | 
-bowtie2 -x genome - 2> alignment_stats.txt | 
-samtools sort 2> sort_errors.log | 
-samtools index - 2> index_errors.log
-
-# Check all error logs at once
-
-cat *_errors.log | grep -E "ERROR|WARNING"
-```
-
-# Unix Pipes
-
-## What are Pipes?
-
--   **`|`** = the pipe operator
-    -   Takes output from one command as input to another
-    -   Chains commands together
-    -   No intermediate files needed!
--   Basic syntax:
-    -   `command1 | command2 | command3`
--   Power of Unix philosophy:
-    -   Small tools that do one thing well
-    -   Combine them to do complex tasks
-
-## Common Pipe Patterns
-
--   **Counting patterns:**
-    -   `grep "pattern" file.txt | wc -l`
-    -   Count lines matching a pattern
--   **Sorting and uniqueness:**
-    -   `cat file.txt | sort | uniq`
-    -   Sort lines and remove duplicates
--   **Finding top/bottom items:**
-    -   `sort data.txt | head -5`
-    -   Get top 5 after sorting
--   **Filtering and processing:**
-    -   `ls -l | grep ".txt" | awk '{print $5, $9}'`
-    -   List txt files with sizes
-
-## Advanced Pipe Examples
-
--   **Multi-step data processing:**
-    -   `cat data.csv | cut -d',' -f2 | sort | uniq -c | sort -rn`
-    -   Extract column 2, count unique values, sort by frequency
--   **Complex transformations:**
-    -   `find . -name "*.txt" | xargs wc -l | sort -n`
-    -   Find all txt files and sort by line count
--   **Real-time monitoring:**
-    -   `tail -f logfile.txt | grep ERROR`
-    -   Watch log file for errors in real-time
-
-## Tips for Working with Files and Pipes
-
--   Test pipes step by step
-    -   Build complex pipes incrementally
-    -   Check output at each stage
--   Use `less` for large files instead of `cat`
--   Remember: `>` overwrites, `>>` appends
--   Pipe efficiency:
-    -   Filter early in the pipeline
-    -   Reduces data passed between commands
--   Save intermediate results when debugging complex pipes \# Unix Data Streams
+-   Introduction to scripts in Unix, R and Python
+-   Writing shell scripts: variables, conditionals, loops and functions
+-   Error handling and best practices
+-   The same script written in R (`Rscript`) and in Python (`python3`)
+-   Using R Studio, Positron and Visual Studio Code (VSC) as script editors
 
 
-## Sequence file formats: FASTA and FASTQ
+# Scripting in Unix, R and Python
 
-::::: columns
-::: {.column width="50%"}
-**FASTA** - sequences (genomes, genes, proteins)
+![](images/Lec06_img001.png){fig-align="center" width="75%"}
 
-``` bash
->chr21 Homo sapiens chromosome 21
-NNNNNNNNNNGATCCTTGAAGCGCCCCCAAGG
-GCATCTTCTCTACTTTCACCTAACAGATCCCA
-```
+------------------------------------------------------------------------
 
--   Header line starts with `>`
--   Sequence on one or more lines
--   Count sequences: `grep -c "^>" file.fa`
-:::
+## Three languages, one idea: a script
 
-::: {.column width="50%"}
-**FASTQ** - raw sequencing reads
-
-``` bash
-@SRR12345.1 read_1
-NCATGCAGCGTACGGTAATTGGCAG
-+
-#AAAAFFFFFFFFFFFFFFFFFFFF
-```
-
--   **4 lines per read**: `@` header, sequence, `+`, per-base quality
--   Quality letters encode Phred scores (`!` = lowest, `I` = Q40)
--   Count reads: `echo $(( $(wc -l < reads.fastq) / 4 ))`
-:::
-:::::
+| | **Shell** (`bash`) | **R** | **Python** |
+|---|---|---|---|
+| File | `script.sh` | `script.R` | `script.py` |
+| Shebang (line 1) | `#!/bin/bash` | `#!/usr/bin/env Rscript` | `#!/usr/bin/env python3` |
+| Run it | `bash script.sh` or `./script.sh` | `Rscript script.R` | `python3 script.py` |
+| Comments | `#` | `#` | `#` |
+| Arguments | `$1`, `$2`, `$@` | `commandArgs(trailingOnly = TRUE)` | `sys.argv[1:]` (or `argparse`) |
+| Best at | gluing programs and files together | statistics, data frames, figures | general programming, images, ML |
 
 ::: callout-tip
-Both are usually gzip-compressed (`.fa.gz`, `.fastq.gz`) - use `zcat` / `zless` / `zgrep` to read them without unpacking. More formats (CSV/TSV, GFF, BED, VCF, HDF5) in the [Data Formats appendix](../book/chapters/appendix-I-data-formats.html) of the course book.
+Today is mostly about **shell** scripts. At the end we will write the same FASTA-statistics script in R and in Python - and **Lecture 07** goes deep on both languages.
 :::
 
-# Working with Large Genomic Data Files
+## What is a Shell Script?
 
-## Human Chromosome Data
+-   Text file containing Unix commands
+-   Automates repetitive tasks
+-   Makes complex workflows reproducible
+-   Essential for bioinformatics pipelines
+-   Can include:
+    -   Variables and arrays
+    -   Conditionals (if/then/else)
+    -   Loops (for/while)
+    -   Functions
+    -   Command-line arguments
 
--   Genomic data files can be massive (the full human genome is \~3.1 GB compressed)
--   FASTA format is standard for sequence data
--   Perfect use case for Unix pipes and redirection
--   We will practice on **human chromosome 21** - the smallest autosome (\~13 MB compressed, \~46 Mb of sequence), so every command finishes in seconds
--   The same commands work unchanged on the whole genome - only the wait time changes
--   The course book works through the same file in [Chapter 5](../book/chapters/07-grep-regex.html#sec-genomic-processing)
-
-## Downloading Genomic Data
-
-Download chromosome 21 of the human genome (hg38 / GRCh38) from UCSC:
-
-``` bash
-# Using `wget` to download chr21 (~13 MB)
-
-wget https://hgdownload.soe.ucsc.edu/goldenPath/hg38/chromosomes/chr21.fa.gz
-
-# Or using `curl` and save with a specific name (-L follows redirects)
-
-curl -L -o chr21.fa.gz \
-  https://hgdownload.soe.ucsc.edu/goldenPath/hg38/chromosomes/chr21.fa.gz
-```
-
--   `wget` and `curl` are both tools for downloading files (macOS ships `curl`; install `wget` with Homebrew if you want it)
--   The backslash lets a long command span multiple lines
--   `.gz` extension means the file is compressed
--   The whole genome lives in the same directory as `hg38.fa.gz` (\~1 GB) - same commands, much longer runs
-
-## Examining Large Files Efficiently
-
-Don't use `cat` on huge files! Use these approaches:
+## Creating Your First Script
 
 ``` bash
-# Decompress and look at first 10 lines
+#!/bin/bash
+# This is a shebang - tells system which interpreter to use
 
-gunzip -c chr21.fa.gz | head -10
+# This is a comment - documents your code
+echo "Hello, Bioengineering!"
 
-# Check file size before and after decompression (-k keeps the .gz)
+# Set a variable
+NAME="DNA Analysis"
+echo "Running $NAME"
 
-ls -lh chr21.fa.gz
-gunzip -k chr21.fa.gz
-ls -lh chr21.fa
+# Use command output as variable
+DATE=$(date +%Y-%m-%d)
+echo "Analysis date: $DATE"
 
-# Count sequences in FASTA file (lines starting with >)
-# grep can't read gzip data directly - use zgrep (or zcat | grep)
-
-zgrep "^>" chr21.fa.gz | wc -l
-
-# View sequence headers only
-
-zgrep "^>" chr21.fa.gz | less
+# Simple calculation
+COUNT=5
+DOUBLE=$((COUNT * 2))
+echo "Double of $COUNT is $DOUBLE"
 ```
+
+Save as `first_script.sh` and run with `bash first_script.sh`
+
+## Making Scripts Executable
+
+``` bash
+# Check current permissions
+ls -l first_script.sh
+
+# Make executable (add execute permission)
+chmod +x first_script.sh
+
+# Now you can run it directly
+./first_script.sh
+```
+
+Best practice: Always use `chmod +x` for your scripts
+
+## Command-Line Arguments
+
+``` bash
+#!/bin/bash
+# Script: process_fasta.sh
+
+# $0 is the script name
+
+echo "Script name: $0"
+
+# $# is the number of arguments
+
+echo "Number of arguments: $#"
+
+# Check if enough arguments provided FIRST
+
+if [ $# -lt 2 ]; then
+    echo "Usage: $0 input.fasta output.txt"
+    exit 1
+fi
+
+# Now safe to use the arguments
+
+echo "Processing file: $1"
+echo "Output will be: $2"
+
+# $@ is all arguments (should be quoted)
+
+echo "All arguments: $@"
+```
+
+Run as: `./process_fasta.sh input.fa results.txt`
+
+## Variables and Arrays
+
+``` bash
+#!/bin/bash
+
+# Variables (no spaces around =)
+SPECIES="Homo sapiens"
+CHROMOSOME=21
+GENE_COUNT=234
+
+# Arrays
+BASES=(A C G T)
+echo "First base: ${BASES[0]}"
+echo "All bases: ${BASES[@]}"
+
+# Add to array
+BASES+=(N)
+
+# Array length
+echo "Number of bases: ${#BASES[@]}"
+
+# String operations
+FILE="sample_001.fastq.gz"
+NAME="${FILE%.fastq.gz}"     # Remove suffix
+echo "Sample name: $NAME"
+```
+
+## Conditionals (if/then/else)
+
+``` bash
+#!/bin/bash
+
+# Numeric comparisons
+COUNT=100
+if [ $COUNT -gt 50 ]; then
+    echo "High read count"
+elif [ $COUNT -gt 10 ]; then
+    echo "Medium read count"
+else
+    echo "Low read count"
+fi
+
+# String comparisons
+FILETYPE="fasta"
+if [ "$FILETYPE" = "fasta" ]; then
+    echo "Processing FASTA file"
+fi
+
+# File tests
+if [ -f "data.txt" ]; then
+    echo "File exists"
+fi
+
+if [ -d "results" ]; then
+    echo "Directory exists"
+else
+    mkdir results
+fi
+```
+
+## Test operators for `[ ]`
+
+| Operator | Meaning                  | Operator | Meaning               |
+|----------|--------------------------|----------|-----------------------|
+| `-eq`    | Equal (numbers)          | `=`      | Strings are equal     |
+| `-ne`    | Not equal (numbers)      | `!=`     | Strings differ        |
+| `-gt`    | Greater than             | `-z`     | String is empty       |
+| `-lt`    | Less than                | `-f`     | File exists           |
+| `-ge`    | Greater than or equal    | `-d`     | Directory exists      |
+| `-le`    | Less than or equal       | `-s`     | File exists, not empty|
+
+::: callout-tip
+Always put **spaces inside the brackets** (`[ $x -gt 5 ]`, not `[$x -gt 5]`) and **quote your variables** (`"$FILE"`) so file names with spaces don't break your script.
+:::
+
+## Loops in Shell Scripts
+
+``` bash
+#!/bin/bash
+
+# For loop over list
+for BASE in A C G T; do
+    echo "Processing base: $BASE"
+done
+
+# For loop over files
+for FILE in *.fasta; do
+    echo "Analyzing $FILE"
+    grep -c ">" "$FILE"
+done
+
+# For loop with counter
+for i in {1..10}; do
+    echo "Iteration $i"
+done
+
+# While loop
+COUNT=1
+while [ $COUNT -le 5 ]; do
+    echo "Count: $COUNT"
+    COUNT=$((COUNT + 1))
+done
+
+# Read file line by line
+while read LINE; do
+    echo "Processing: $LINE"
+done < input.txt
+```
+
+## Functions in Scripts
+
+``` bash
+#!/bin/bash
+
+# Define a function
+count_sequences() {
+    local FILE=$1  # Local variable
+    local COUNT=$(grep -c "^>" "$FILE")
+    echo "$COUNT"  # "Return" a value by printing it
+}
+# Note: bash 'return' only carries an exit status (0-255), not data -
+# so functions hand back results via echo, captured with $(...)
+n=$(count_sequences proteins.fasta)
+echo "proteins.fasta has $n sequences"
+
+# Another function with multiple parameters
+process_fasta() {
+    local INPUT=$1
+    local OUTPUT=$2
+    
+    echo "Processing $INPUT..."
+    grep "^>" "$INPUT" > "$OUTPUT"
+    echo "$INPUT has $(count_sequences "$INPUT") sequences"
+}
+
+# Call functions
+process_fasta "input.fasta" "headers.txt"
+```
+
+## Error Handling
+
+``` bash
+#!/bin/bash
+
+# Exit on error
+set -e
+
+# Exit on undefined variable
+set -u
+
+# Pipe failure detection
+set -o pipefail
+
+# Custom error handling
+check_file() {
+    if [ ! -f "$1" ]; then
+        echo "Error: File $1 not found!" >&2
+        exit 1
+    fi
+}
+
+# Trap errors
+trap 'echo "Error on line $LINENO"' ERR
+
+# Try-catch style
+if ! grep "pattern" file.txt > /dev/null 2>&1; then
+    echo "Pattern not found"
+fi
+```
+
+## Real Bioinformatics Script Example
+
+``` bash
+#!/bin/bash
+# Script: fasta_stats.sh
+# Purpose: Calculate basic statistics for FASTA files
+
+# Check arguments
+if [ $# -ne 1 ]; then
+    echo "Usage: $0 sequences.fasta"
+    exit 1
+fi
+
+INPUT=$1
+
+# Check if file exists
+if [ ! -f "$INPUT" ]; then
+    echo "Error: File $INPUT not found!"
+    exit 1
+fi
+
+echo "=== FASTA Statistics for $INPUT ==="
+
+# Count sequences
+SEQ_COUNT=$(grep -c "^>" "$INPUT")
+echo "Number of sequences: $SEQ_COUNT"
+
+# Calculate total length
+TOTAL_LENGTH=$(grep -v "^>" "$INPUT" | tr -d '\n' | wc -c)
+echo "Total length: $TOTAL_LENGTH bp"
+
+# Average length
+AVG_LENGTH=$((TOTAL_LENGTH / SEQ_COUNT))
+echo "Average length: $AVG_LENGTH bp"
+
+# GC content
+GC_COUNT=$(grep -v "^>" "$INPUT" | tr -d '\n' | grep -o "[GC]" | wc -l)
+GC_PERCENT=$((GC_COUNT * 100 / TOTAL_LENGTH))
+echo "GC content: $GC_PERCENT%"
+```
+
+## The same script in R and Python
+
+The shell version of `fasta_stats.sh` works, but counting and arithmetic get awkward in bash. Here is the same program as an **R script** and a **Python script** - both take the file name as a command-line argument.
+
+::: panel-tabset
+### R
+
+```{r}
+#| label: lec06-fasta-stats-r
+#| echo: true
+#| eval: false
+
+#!/usr/bin/env Rscript
+# Script: fasta_stats.R
+# Purpose: Calculate basic statistics for a FASTA file
+
+args <- commandArgs(trailingOnly = TRUE)     # like $1 $2 ... in bash
+if (length(args) != 1) {
+  cat("Usage: Rscript fasta_stats.R sequences.fasta\n")
+  quit(status = 1)
+}
+input <- args[1]
+if (!file.exists(input)) {
+  cat("Error: File", input, "not found!\n")
+  quit(status = 1)
+}
+
+lines   <- readLines(input)
+headers <- grepl("^>", lines)                # TRUE for header lines
+seq     <- paste(lines[!headers], collapse = "")
+
+cat("=== FASTA Statistics for", input, "===\n")
+cat("Number of sequences:", sum(headers), "\n")
+cat("Total length:", nchar(seq), "bp\n")
+cat("Average length:", nchar(seq) / sum(headers), "bp\n")
+gc <- sum(strsplit(seq, "")[[1]] %in% c("G", "C"))
+cat("GC content:", round(100 * gc / nchar(seq), 1), "%\n")
+```
+
+### Python
+
+```{python}
+#| label: lec06-fasta-stats-py
+#| echo: true
+#| eval: false
+
+#!/usr/bin/env python3
+# Script: fasta_stats.py
+# Purpose: Calculate basic statistics for a FASTA file
+
+import sys
+from pathlib import Path
+
+if len(sys.argv) != 2:                       # sys.argv[0] is the script name, like $0
+    print("Usage: python3 fasta_stats.py sequences.fasta")
+    sys.exit(1)
+input_file = Path(sys.argv[1])
+if not input_file.is_file():
+    print(f"Error: File {input_file} not found!")
+    sys.exit(1)
+
+lines   = input_file.read_text().splitlines()
+headers = [line for line in lines if line.startswith(">")]
+seq     = "".join(line for line in lines if not line.startswith(">"))
+
+print(f"=== FASTA Statistics for {input_file} ===")
+print(f"Number of sequences: {len(headers)}")
+print(f"Total length: {len(seq)} bp")
+print(f"Average length: {len(seq) / len(headers):.1f} bp")
+gc = seq.count("G") + seq.count("C")
+print(f"GC content: {100 * gc / len(seq):.1f}%")
+```
+:::
+
+## Running R and Python scripts from the shell
+
+::: panel-tabset
+### R
+
+``` bash
+Rscript fasta_stats.R proteins.fasta        # run with the interpreter ...
+
+chmod +x fasta_stats.R                      # ... or make it executable
+./fasta_stats.R proteins.fasta              #     (needs the #!/usr/bin/env Rscript shebang)
+
+Rscript -e 'mean(c(1, 2, 3))'               # one-liner without a file
+R                                           # interactive console; quit with q()
+```
+
+-   `Rscript` runs the file top to bottom and prints only what you `cat()` or `print()`
+-   In **RStudio** / **Positron**: open the `.R` file and press `Cmd/Ctrl-Enter` to send lines to the console
+
+### Python
+
+``` bash
+python3 fasta_stats.py proteins.fasta       # run with the interpreter ...
+
+chmod +x fasta_stats.py                     # ... or make it executable
+./fasta_stats.py proteins.fasta             #     (needs the #!/usr/bin/env python3 shebang)
+
+python3 -c 'print(sum([1, 2, 3]) / 3)'      # one-liner without a file
+python3                                     # interactive REPL; quit with exit() or Ctrl-D
+```
+
+-   `python3 script.py` runs the file top to bottom and prints only what you `print()`
+-   In **VS Code** / **Positron**: open the `.py` file and press `Cmd/Ctrl-Enter`, or use the Run button
+-   Keep project packages in a virtual environment: `python3 -m venv .venv && source .venv/bin/activate`
+:::
+
+::: callout-tip
+Both scripts return an **exit status** (`quit(status = 1)` / `sys.exit(1)`), so a shell pipeline or SLURM job can tell whether they succeeded - just like `exit 1` in bash. In Lecture 10 we submit these scripts to Talapas with `Rscript` and `python3` inside an `sbatch` job.
+:::
+
+## Best Practices for Shell Scripts
+
+1.  **Always include a shebang**: `#!/bin/bash`
+2.  **Comment your code**: Explain what and why
+3.  **Use meaningful variable names**: `GENE_COUNT` not `GC`
+4.  **Check inputs**: Validate files exist and arguments are correct
+5.  **Handle errors gracefully**: Use `set -e` and error checking
+6.  **Make scripts portable**: Don't hardcode paths
+7.  **Use version control**: Track changes with git
+8.  **Test incrementally**: Build scripts step by step
+9.  **Create help messages**: Document usage
+10. **Log important steps**: Keep records of what was done
 
 ::: callout-note
-The UCSC file is *soft-masked*: repeats are written in lowercase (`acgt`). Patterns like `GAATTC` will miss sites inside masked regions - add `-i` to `grep`, or uppercase everything first with `tr 'acgt' 'ACGT'`.
+Every one of these applies to **R and Python scripts** too: shebang line, comments, checking `commandArgs()` / `sys.argv`, meaningful names, relative paths, Git, and testing on a tiny input first.
 :::
-
-## Creating a Subset for Analysis
-
-Make a smaller working file for testing:
-
-``` bash
-# Extract the first ~1 Mb of sequence for testing (50 bases per line)
-
-zcat chr21.fa.gz | head -n 20000 > chr21_subset.fa
-
-# Extract a specific record by name from a multi-sequence FASTA
-# (e.g. from hg38.fa - chr21.fa has only one record)
-
-awk '/^>chr21$/,/^>chr22$/' hg38.fa | head -n -1 > chr21_from_genome.fa
-
-# Pull out a window of lines from the middle of the chromosome
-
-sed -n '400000,420000p' chr21.fa > region_of_interest.fa
-```
-
-## Processing FASTA Files with Pipes
-
-Extract specific regions or sequences:
-
-``` bash
-# Extract just the sequence (no headers) and count bases
-
-grep -v "^>" chr21.fa | tr -d '\n' | wc -c
-
-# Count each type of nucleotide (uppercase first so a == A)
-
-grep -v "^>" chr21.fa | \
-  tr 'acgtn' 'ACGTN' | \
-  tr -d '\n' | \
-  fold -w1 | \
-  sort | \
-  uniq -c
-```
-
--   `grep -v` inverts the match (excludes lines)
--   `tr -d '\n'` removes newlines
--   `fold -w1` puts each character on its own line
--   Expect a lot of `N` - the first \~5 Mb of chr21 is unassembled
-
-## Finding Patterns in Genomic Data
-
-Search for specific sequences and motifs:
-
-``` bash
-# Find all instances of a restriction enzyme site (EcoRI: GAATTC)
-
-grep -v "^>" chr21.fa | \
-  tr 'acgt' 'ACGT' | \
-  tr -d '\n' | \
-  grep -o "GAATTC" | \
-  wc -l
-
-# Extract 100 bases around each EcoRI site
-
-grep -v "^>" chr21.fa | \
-  tr 'acgt' 'ACGT' | \
-  tr -d '\n' | \
-  grep -oE ".{100}GAATTC.{100}" > ecori_contexts.txt
-
-# Find all start codons (ATG) and their byte offsets
-
-grep -v "^>" chr21.fa | \
-  tr 'acgt' 'ACGT' | \
-  tr -d '\n' | \
-  grep -b -o "ATG" | \
-  head -20
-```
-
-## Combining Downloads with Processing
-
-Stream processing without saving intermediate files:
-
-``` bash
-# Download, decompress, and process in one pipeline
-curl -sL https://hgdownload.soe.ucsc.edu/goldenPath/hg38/chromosomes/chr21.fa.gz | \
-  gunzip -c | \
-  grep -v "^>" | \
-  tr -d '\n' | \
-  cut -c1-1000000 > first_megabase.txt
-
-# Download and immediately analyze GC content
-wget -qO - https://hgdownload.soe.ucsc.edu/goldenPath/hg38/chromosomes/chr21.fa.gz | \
-  gunzip -c | \
-  grep -v "^>" | \
-  tr 'acgtn' 'ACGTN' | \
-  tr -d 'N\n' | \
-  tr 'ATGC' '0011' | \
-  awk '{n = length($0); gc = gsub(/1/, ""); print "GC%:", 100 * gc / n}'
-```
-
-::: notes
--   The `-O -` flag tells wget to output to stdout
--   This approach saves disk space and time
-:::
-
-## Key Takeaways
-
--   **Real bioinformatics often involves gigabytes of data - these Unix tools scale beautifully!**
--   **Never load entire genome files into memory** - use streaming
--   **Combine tools** - each does one thing well
--   **Test on subsets first** - extract small portions for development
--   **Document your pipelines** - save commands in scripts
--   **Use compression** - work with .gz files directly when possible
--   **Think in streams** - data flows through pipes without intermediate files
-
-## Practice Exercise: Genomic Data Pipeline
-
-Build a complete analysis pipeline:
-
-1.  Download a bacterial genome (smaller, \~5 MB)
-2.  Count the total number of genes (hint: count headers)
-3.  Calculate the genome size in base pairs
-4.  Find the 10 most common 6-base sequences
-5.  Extract all genes with "ribosomal" in the header
-6.  Save your pipeline as a shell script for reproducibility

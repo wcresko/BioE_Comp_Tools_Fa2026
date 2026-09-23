@@ -1,6 +1,6 @@
 ---
 title: "Lecture 08 - Computational Tools for Bioengineers"
-subtitle: "Quarto Markdown, LaTeX, Vibe Coding and Git"
+subtitle: "Talapas and High Performance Computing"
 date: "Monday, November 16, 2026"
 author: "Bill Cresko"
 ---
@@ -26,866 +26,552 @@ set.seed(2026)
 
 The course book goes deeper on everything in this lecture. Read before or after class:
 
--   [Ch. 16: Reproducible Documents with Quarto](../book/chapters/16-quarto-documents.html)
--   [Ch. 17: LaTeX for Scientific Documents](../book/chapters/17-latex-basics.html)
--   [Ch. 18: Coding with AI Assistants](../book/chapters/18-ai-assisted-coding.html)
--   [Ch. 19: Version Control with Git and GitHub](../book/chapters/19-git-github.html)
--   *Reference:* [App. E: LaTeX Command Reference](../book/chapters/appendix-E-latex.html)
+-   [Ch. 15: High-Performance Computing with Talapas](../book/chapters/15-hpc-talapas.html)
+-   [Ch. 16: Parallel Computing in R](../book/chapters/16-parallel-computing.html)
+-   *Reference:* [App. G: SLURM Command Reference](../book/chapters/appendix-G-slurm.html)
 
 ## Goals for today
 
--   Quarto Markdown - with R **and Python** code chunks
--   Vibe Coding with LLMs
--   Git and GitHub
+-   Basics of working with Talapas
+-   The SLURM job scheduler
+-   Software modules and monitoring jobs
+-   Running R (`Rscript`) and Python (`python3`) scripts as batch jobs
+-   <https://wcresko.github.io/computational_tools_book/>
 
-# Markdown and Quarto Markdown
 
-## What is Markdown?
 
-::: {.incremental}
--   a very light weight but flexible editing language
--   allows the `rendering` of markdown text to a variety of different formats (pdf, html, web pages, powerpoint, etc....)
--   very simple and common across science and engineering
--   involves a `yaml` header (YAML stands for `YAML Ain't Markup Language`, originally `Yet Another Markup Language`)
--   similar to `html` but simpler
+# Talapas and High Performance Computing
+
+## What is Talapas?
+
+-   **Talapas** is UO's high-performance computing (HPC) cluster
+-   Named from Chinook word for coyote (educator and keeper of knowledge)
+-   Managed by Research Advanced Computing Services (RACS)
+-   Located in the Allen Hall Data Center
+-   https://uoracs.github.io/talapas2-knowledge-base/
+
+### Key Resources:
+
+-   Over 14,520 CPU cores
+-   129 TB of memory
+-   89 GPUs (including A100, H100, V100)
+-   3+ Petabytes of storage
+
+## Talapas Architecture
+
+![](images/Lec10_img001.svg){fig-align="center" width="95%"}
+
+## Login Nodes vs Compute Nodes
+
+### Login Nodes (Head Nodes)
+
+-   Where you land when you SSH into Talapas
+-   For **light tasks only**: file management, editing, job submission
+-   Shared by all users - be considerate!
+-   Heavy processes will be killed
+
+### Compute Nodes
+
+-   Where your actual work runs
+-   Accessed through the SLURM scheduler
+-   Different types for different needs:
+    -   Standard CPU nodes
+    -   GPU nodes
+    -   High-memory ("fat") nodes
+
+## Node Types on Talapas
+
+| Node type (general use)  | How many | Cores per node | Memory per node | Purpose                         |
+|--------------------------|----------|----------------|-----------------|---------------------------------|
+| Standard CPU (AMD Milan) | 43       | 128            | 512 GB          | General computation             |
+| GPU                      | 24       | 48             | 256 - 512 GB    | Machine learning, CUDA (52 NVIDIA A100 GPUs in total) |
+| Large memory             | a few    | varies         | up to 4 TB      | Memory-hungry jobs (e.g. genome assembly) |
+| Interactive              | 19       | varies         | varies          | Testing, development, Open OnDemand sessions |
+
+::: callout-note
+Researchers can also buy **condo** nodes that their group gets priority on - about 166 more CPU nodes plus V100, A100, and H100 GPUs. Numbers from [RACS](https://racs.uoregon.edu/services); check the [Knowledge Base](https://uoracs.github.io/talapas2-knowledge-base/) for the current list.
 :::
 
-## What is Quarto Markdown?
+## Partitions (Queues)
 
-Quarto `(https://quarto.org/)` provides a next-generation authoring framework for data science.
-
--   `Quarto Markdown` is a powerful scientific and technical publishing system that extends the lightweight markup language Markdown for creating formatted text using a plain-text editor
--   You can use `Quarto Markdown` files to save and execute code \*and\* generate high quality reports that can be shared with an audience.
--   You can make html, pdf, docx, websites, slides, books, and more.
-
-When you save your document, the output will be in the format indicated in your YAML header. This could be an html document, Word document, pdf, website, book, etc.
-
-## Getting started
-
--   Open a new Quarto Markdown document from RStudio (or **File → New File → Quarto Document** in VS Code / Positron)
-
--   You should see a document that is already populated with some example text and code
-
-## This is Quarto Markdown
-
-``` yaml
----
-title: "My Analysis"
-author: "Your Name"
-format: html
----
-```
-
--   Note that `---` delineates the `yaml header`.
--   This controls document-level settings and rendering - `format:` picks the output (`html`, `pdf`, `docx`, `revealjs`, ...)
--   There are a lot of options that you can put in the `yaml header`
--   (Older R Markdown files use `output: html_document` here - Quarto uses `format:`)
-
-## This is Quarto Markdown
-
-```markdown
-# Header size 1
-
-## Header size 2
-
-I can write text and it will look normal!
-
-I can still run code!
-```
-
-## This is Quarto Markdown
-
-::: panel-tabset
-### R
-
-````markdown
-```{{r}}
-#| label: my-first-chunk
-#| echo: true
-
-x <- 5
-print(x^2)
-```
-````
-
-### Python
-
-````markdown
-```{{python}}
-#| label: my-first-chunk-py
-#| echo: true
-
-x = 5
-print(x**2)
-```
-````
-:::
-
--   By default, the code and output will print to your document
--   Note the back tick marks - these delineate the code
--   The {r} indicates this is r code; {python} indicates Python code - everything else about the chunk is identical
-
-## Rendered, the chunks look like this
-
-::: panel-tabset
-### R
-
-```{r}
-#| label: lec08-first-chunk-r
-#| echo: true
-#| eval: true
-
-x <- 5
-print(x^2)
-```
-
-### Python
-
-```{python}
-#| label: lec08-first-chunk-py
-#| echo: true
-#| eval: false
-
-x = 5
-print(x**2)
-# 25
-```
-:::
-
--   Code first, output underneath - Quarto ran the code while rendering
--   R chunks run through **knitr**; Python chunks run through **Jupyter** (see the next slides)
-
-## Navigating chunks
-
--   Easy to run chunks - a few ways to do this
--   Top right of each chunk - just run, run all above, etc.
--   Cog wheel at the top of the Quarto Markdown document - run options
--   Keyboard shortcuts
-
-## Chunk options, Quarto style
-
-Quarto puts chunk options *inside* the chunk with `#|` - one per line, the **same options in every language**:
-
-::: panel-tabset
-### R
-
-````markdown
-```{{r}}
-#| label: fig-stiffness
-#| echo: false
-#| fig-cap: "Stiffness by hydrogel concentration"
-#| fig-width: 6
-boxplot(compression ~ hydrogel_concentration, data = mydata)
-```
-````
-
-### Python
-
-````markdown
-```{{python}}
-#| label: fig-stiffness-py
-#| echo: false
-#| fig-cap: "Stiffness by hydrogel concentration"
-#| fig-width: 6
-mydata.boxplot(column="compression", by="hydrogel_concentration")
-```
-````
-:::
-
-| Option                | Effect                                        |
-|-----------------------|-----------------------------------------------|
-| `echo: false`         | Run the code, **hide** the code               |
-| `eval: false`         | **Show** the code, don't run it               |
-| `include: false`      | Run it, show **nothing** (setup chunks)       |
-| `warning: false`      | Hide warnings (`message: false` for messages) |
-| `fig-cap:`            | Figure caption                                |
-| `cache: true`         | Don't re-run slow chunks unless they change   |
+| Partition        | Time limit | Use it for                                   |
+|------------------|------------|----------------------------------------------|
+| `compute`        | 1 day      | General CPU jobs (the default choice)        |
+| `computelong`    | 14 days    | Long CPU jobs                                |
+| `gpu`            | 1 day      | Jobs that need a GPU                         |
+| `gpulong`        | 14 days    | Long GPU jobs                                |
+| `interactive`    | 12 hours   | Shorter interactive CPU sessions             |
+| `interactivegpu` | 8 hours    | Shorter interactive GPU sessions             |
+| `memory`         | 1 day      | Jobs needing lots of memory (up to 4 TB)     |
+| `memorylong`     | 14 days    | Long, memory-hungry jobs                     |
 
 ::: callout-tip
-Set defaults for the whole document in the YAML header under `execute:` and override chunk-by-chunk only where needed.
+Run `sinfo` on Talapas to see every partition, including your lab's condo partitions.
 :::
 
-## Python in Quarto: engines, Jupyter and notebooks
+## Getting Access to Talapas
 
-::: panel-tabset
-### Setup
+### Step 1: Join or Create a PIRG
+
+-   **PIRG** = Principal Investigator Research Group
+-   Contact your PI to be added to their PIRG
+-   Or contact RACS to create a new PIRG
+
+### Step 2: Request Access
+
+-   Visit [racs.uoregon.edu/request-access](https://racs.uoregon.edu/request-access)
+-   Your username = your Duck ID
+-   Your password = your UO password
+
+## Logging Into Talapas - web browser
+
+[ondemand.talapas.uoregon.edu](https://ondemand.talapas.uoregon.edu)
+
+-   No command line needed!
+-   File browser for uploads/downloads
+-   Interactive applications:
+    -   JupyterLab/Notebooks
+    -   RStudio
+    -   MATLAB
+    -   Remote desktop
+
+### Great for:
+
+-   Beginners learning HPC
+-   Quick file management
+-   Interactive data analysis
+-   Running GUI applications
+
+## Logging Into Talapas - command line
+
+### From a terminal (macOS, Ubuntu/WSL, VS Code, Positron):
 
 ``` bash
-python3 -m venv .venv && source .venv/bin/activate   # a project environment
-pip install jupyter pandas matplotlib                # Quarto runs {python} chunks through Jupyter
-quarto check jupyter                                 # does Quarto see it?
+# Through the load balancer - works from anywhere (expect a Duo prompt)
+
+ssh yourduckid@login.talapas.uoregon.edu
+
+# With the UO VPN connected you can also pick a specific login node
+
+ssh yourduckid@login1.talapas.uoregon.edu
+ssh yourduckid@login2.talapas.uoregon.edu
+ssh yourduckid@login3.talapas.uoregon.edu
+ssh yourduckid@login4.talapas.uoregon.edu
 ```
 
-``` yaml
----
-title: "My analysis"
-format: html
-jupyter: python3        # optional: name the kernel explicitly
----
-```
+### From Windows:
 
-### Which engine runs my chunks?
+-   Use the Ubuntu (WSL) terminal
+-   Or VS Code / Positron with the Remote-SSH extension
 
--   Only `{r}` chunks → **knitr** (R) runs the document
--   Only `{python}` chunks → **Jupyter** runs the document
--   **Both** in one file → knitr runs it and hands Python chunks to R's `reticulate` package (`install.packages("reticulate")`) - objects can even be shared: `py$x` in R, `r.x` in Python
--   `` `{python} 1 + 1` `` and `` `{r} 1 + 1` `` also work **inline** in the text
-
-### Notebooks
-
-``` bash
-quarto render notebook.ipynb              # a Jupyter notebook is a valid Quarto input
-quarto convert notebook.ipynb             # .ipynb  ->  .qmd (plain text, Git-friendly)
-quarto convert analysis.qmd               # .qmd    ->  .ipynb (to hand to a Jupyter user)
-quarto preview notebook.ipynb
-```
-
--   `.ipynb` stores code, Markdown **and saved output** as JSON - handy interactively, noisy in Git
--   `.qmd` stores only the source; output is regenerated when you render
+::: callout-note
+The Knowledge Base says the UO VPN is **recommended, not required**. Off campus without the VPN: SSH to the load balancer `login.talapas.uoregon.edu` and answer the Duo two-step prompts.
 :::
 
-## Rendering your document
+## Connecting VS Code to Talapas (Remote-SSH)
 
-``` bash
-quarto render report.qmd              # default format from the YAML
-quarto render report.qmd --to pdf     # PDF (needs LaTeX / TinyTeX)
-quarto render report.qmd --to docx    # Word document
-quarto preview report.qmd             # live preview - re-renders every time you save
-quarto render                         # render a whole project/website (_quarto.yml)
-quarto render notebook.ipynb          # Jupyter notebooks render the same way
-```
-
-::: incremental
--   In **VS Code** (Quarto extension) or **Positron**: the **Preview** button or `Cmd/Ctrl-Shift-K`
--   In **RStudio**: the **Render** button
--   Same source, many outputs: HTML, PDF, Word, slides, websites
-:::
-
-## One source, several output formats
-
-List more than one format in the YAML header and `quarto render` makes them all:
-
-``` yaml
----
-title: "My Analysis"
-format:
-  html: default
-  pdf: default
-  docx: default
----
-```
-
-| Output type       | Formats                                          |
-|-------------------|--------------------------------------------------|
-| **Documents**     | HTML, PDF (via LaTeX), Word (`.docx`), Markdown  |
-| **Presentations** | RevealJS (these slides!), PowerPoint, Beamer     |
-| **Websites and books** | HTML (all of our class material!)           |
-
-## Callouts and cross-references
-
-``` markdown
-::: {.callout-tip title="Pro tip"}
-Callouts come in five types: note, tip, warning, important, caution.
-:::
-
-![Scaffold under SEM](images/scaffold.png){#fig-sem width=60%}
-
-As shown in @fig-sem, the pores are uniform.
-```
-
-::: incremental
--   A **callout** is a colored box - great for tips, warnings, and definitions (you've seen many in these slides)
--   **Cross-references**: label a figure `#fig-...`, a table `#tbl-...`, or an equation `#eq-...`, then refer to it with `@fig-...` - Quarto numbers them automatically
--   Full syntax reference: the course book's [Quarto chapter](../book/chapters/16-quarto-documents.html)
-:::
-
-## Cross-referencing everything
-
-Every labelled element can be referenced from the text, and the numbers update automatically each time you render:
-
-| Type      | Where the label goes            | Reference syntax |
-|:----------|:--------------------------------|:-----------------|
-| Figures   | `#| label: fig-name` (code chunk) or `{#fig-name}` (image) | `@fig-name` |
-| Tables    | `#| label: tbl-name` or `{#tbl-name}` | `@tbl-name` |
-| Equations | `$$ ... $$ {#eq-name}`          | `@eq-name`       |
-| Sections  | `## Heading {#sec-name}`        | `@sec-name`      |
-
-``` markdown
-![Alt text](images/your_image.png){#fig-scaffold fig-align="center" width="70%"}
-
-See @fig-scaffold and @sec-methods for details.
-```
-
-## Quarto Markdown formatting
-
-``` markdown
-*italic*
-**bold**
-$A = \pi \times r^{2}$
-```
-
-*italic*
-
-**bold**
-
-$A = \pi \times r^{2}$
-
-## Quarto Markdown lists
-
-``` markdown
-* Item 1
-* Item 2
-    + Item 2a
-    + Item 2b
-```
-
--   Item 1
--   Item 2
-    -   Item 2a
-    -   Item 2b
-
-## Quarto Markdown lists
-
-``` markdown
-1. Item 1
-2. Item 2
-3. Item 3
-    + Item 3a
-    + Item 3b
-```
-
-1.  Item 1
-2.  Item 2
-3.  Item 3
-    -   Item 3a
-    -   Item 3b
-
-## Typesetting Mathematics
-
--   Since 'tex' is embedded in Quarto Markdown you can typeset mathematics easily using LaTeX (https://en.wikibooks.org/wiki/LaTeX)
-
--   Essentially, just surround your mathematics in \$ symbols
-
--   \$\$ centers the expressions
-
-## Typeset mathematics
-
-Poisson Sampling Equation
-
-``` markdown
-$$\large Pr(Y=r) = \frac{e^{-\mu}\mu^r}{r!}$$
-```
-
-$$\large Pr(Y=r) = \frac{e^{-\mu}\mu^r}{r!}$$
-
-## Differential Equations
-
-``` markdown
-$$\iint xy^2\,dx\,dy =\frac{1}{6}x^2y^3$$
-```
-
-$$\iint xy^2\,dx\,dy =\frac{1}{6}x^2y^3$$
-
-## In-line versus fenced
-
-``` markdown
-This equation, $y=\frac{1}{2}$, is included inline
-```
-
-This equation, $y=\frac{1}{2}$, is included inline
-
-``` markdown
-Whereas this equation, $$y=\frac{1}{2}$$, is put on a separate line
-```
-
-Whereas this equation $$y=\frac{1}{2}$$ is put on a separate line
-
-## Matrix formulations
-
-``` markdown
-$$	\begin{matrix}
-		-2 & 1 & 0 & 0 & \cdots & 0  \\
-		1 & -2 & 1 & 0 & \cdots & 0  \\
-		0 & 1 & -2 & 1 & \cdots & 0  \\
-		0 & 0 & 1 & -2 & \ddots & \vdots \\
-		\vdots & \vdots & \vdots & \ddots & \ddots & 1  \\
-		0 & 0 & 0 & \cdots & 1 & -2
-	\end{matrix} $$
-```
-
-$$  \begin{matrix}
-        -2 & 1 & 0 & 0 & \cdots & 0  \\
-        1 & -2 & 1 & 0 & \cdots & 0  \\
-        0 & 1 & -2 & 1 & \cdots & 0  \\
-        0 & 0 & 1 & -2 & \ddots & \vdots \\
-        \vdots & \vdots & \vdots & \ddots & \ddots & 1  \\
-        0 & 0 & 0 & \cdots & 1 & -2
-    \end{matrix} $$
-
-## Quarto Markdown is very flexible
-
--   You can use Quarto templates and open as a new Quarto Markdown file
--   Better yet there are extensions that add functionality
-    -   books
-    -   journal articles
-    -   slide shows (these slides!)
-    -   interactive exercises
-
-## More on Quarto Markdown
-
--   https://quarto.org/docs/authoring/
--   https://quarto.org/docs/reference/
--   Lots more fun stuff you can do!
-
-------------------------------------------------------------------------
-
-# `Vibe coding` with the ***help*** of Large Language Models (LLMs)
-
-## What is "vibe coding"?
-
-::: incremental
--   A **large language model (LLM)** predicts the most *plausible* next text - including code
--   **Vibe coding** = describe what you want, accept what comes back, run it, paste the error, repeat - *without reading the code*
--   Fun for a weekend project; a problem for science:
-    -   you have to **defend** every result
-    -   scientific bugs are usually **silent** (wrong number, no crash)
-    -   you stop **learning**
--   Our version: keep the speed, drop the blindness - **the assistant writes, you read, a tiny test decides**
-:::
-
-## The tools - three flavors
-
-| Flavor        | Examples                                                        | Sees               | Can run things? |
-|---------------|-----------------------------------------------------------------|--------------------|-----------------|
-| **Chat**      | ChatGPT, Claude, Gemini, **UO Microsoft Copilot Chat**          | only what you paste | no             |
-| **In-editor** | **GitHub Copilot** (VS Code), **Positron Assistant**            | your open files, console | no        |
-| **Agentic**   | Claude Code, Copilot agent mode                                 | your whole project | **yes** - edits files, runs commands |
+![](images/Lec10_img002.svg){fig-align="center" width="100%"}
 
 ::: callout-tip
--   **Microsoft Copilot Chat** signed in with your **UO account** is covered by UO's data agreement
--   **GitHub Copilot** is free for verified students via the [Student Developer Pack](https://education.github.com/pack)
--   Start with chat; try agents only with everything committed in Git
+With **Remote - SSH**, VS Code (or Positron) runs its editor on your laptop while the files, terminal, and code live on Talapas - it feels just like working locally.
 :::
 
-## The loop
+## Storage on Talapas
 
-::: incremental
-1.  **Describe** the goal precisely - language, versions, sample input, expected output
-2.  **Get** code
-3.  **READ** it - every line; look up anything you don't recognize
-4.  **Run** it on a tiny test you can check by hand
-5.  **Check** the result against something you already know
-6.  **Iterate** - paste the exact error or wrong output, say what you expected
-:::
+![](images/Lec10_img003.svg){fig-align="center" width="85%"}
 
-::: callout-important
-Steps 3 and 5 are the ones people skip. Don't.
-:::
+### Directory Structure:
 
-## Live demo - the prompt
+| Location                | Quota                 | Purpose                     |
+|-------------------------|-----------------------|-----------------------------|
+| `/home/duckid`          | 250 GB                | Config files, small scripts |
+| `/projects/PIRG/duckid` | Shared (2 TB default) | Large data, analysis        |
+| `/projects/PIRG/shared` | Shared                | Files shared with group     |
+| `/tmp`                  | Local to node         | Temporary scratch space     |
 
-> I am on Linux with bash. In the current directory there are files ending in `.fasta`. Write a short script that prints, for each file, the file name and the number of sequences (lines starting with `>`), one per line as `filename<TAB>count`.
+## Important Notes:
 
-Expected shape of the answer:
+-   **Data is NOT automatically backed up!**
+-   Use `/projects` for large files
+-   Clean up when done
+
+``` bash
+# Check your storage usage
+df -h ~
+du -sh /projects/myPIRG/myusername
+```
+
+## What is SLURM?
+
+-   **S**imple **L**inux **U**tility for **R**esource **M**anagement
+-   Job scheduler and workload manager
+-   Allocates resources fairly among users
+-   Ensures efficient cluster utilization
+
+![](images/Lec10_img004.svg){fig-align="center" width="95%"}
+
+### Key Concepts:
+
+-   **Jobs**: Units of work you submit
+-   **Partitions**: Queues with different properties
+-   **Accounts**: Your PIRG for resource tracking
+
+## Essential SLURM Commands
+
+``` bash
+# Submit a batch job
+
+sbatch myscript.sh
+
+# Check your jobs in the queue
+
+squeue -u $USER
+
+# Check all jobs on a partition
+
+squeue -p compute
+
+# Cancel a job
+
+scancel JOBID
+
+# Get detailed job info
+
+scontrol show job JOBID
+
+# Check job history and resource usage
+
+sacct -j JOBID --format=JobID,Elapsed,MaxRSS
+
+# View partition information
+
+sinfo -p compute
+```
+
+## Interactive Jobs
+
+### For testing and development:
+
+``` bash
+# Start an interactive session
+
+srun --pty --partition=interactive --account=myPIRG \
+     --time=2:00:00 --cpus-per-task=4 --mem=8G /bin/bash
+```
+
+\
+\
+
+### When to use interactive jobs:
+
+-   Testing your workflow before batch submission
+-   Debugging code
+-   Quick data exploration
+-   Running GUI applications
+
+**Note**: Your prompt will change from `login1` to something like `n049`
+
+## Writing a SLURM Batch Script
+
+A batch script is a **shell script** with `#SBATCH` directives on top. The last lines are the same commands you would type on your laptop - `Rscript` or `python3`.
+
+::: panel-tabset
+### R
 
 ``` bash
 #!/bin/bash
-# Count sequences in every FASTA file in the current directory
-for f in *.fasta; do
-    n=$(grep -c '^>' "$f")
-    printf '%s\t%d\n' "$f" "$n"
-done
+#SBATCH --job-name=my_analysis      # Job name
+#SBATCH --partition=compute         # Partition (queue)
+#SBATCH --account=myPIRG            # Your PIRG name
+#SBATCH --output=output_%j.log      # Standard output (%j = job ID)
+#SBATCH --error=error_%j.log        # Standard error
+#SBATCH --time=04:00:00             # Time limit (HH:MM:SS)
+#SBATCH --nodes=1                   # Number of nodes
+#SBATCH --ntasks-per-node=1         # Tasks per node
+#SBATCH --cpus-per-task=4           # CPUs per task
+#SBATCH --mem=16G                   # Memory per node
+
+# Load required modules
+
+module load R/4.3.3
+
+# Run your program
+
+Rscript my_analysis.R
 ```
 
--   Read it: `for` over the files, `grep -c '^>'` counts header lines, `printf` formats the output
--   Is `"$f"` quoted? Is the pattern anchored with `^`?
-
-## Now verify it
-
-Build inputs where **you** know the answer:
+### Python
 
 ``` bash
-mkdir ai_test && cd ai_test
-printf '>seq1\nACGT\n>seq2\nGGCC\n' > two.fasta
-printf '>only\nACGTACGT\n'          > one.fasta
-printf ''                            > empty.fasta
-bash count_fasta.sh
+#!/bin/bash
+#SBATCH --job-name=my_analysis_py   # Job name
+#SBATCH --partition=compute         # Partition (queue)
+#SBATCH --account=myPIRG            # Your PIRG name
+#SBATCH --output=output_%j.log      # Standard output (%j = job ID)
+#SBATCH --error=error_%j.log        # Standard error
+#SBATCH --time=04:00:00             # Time limit (HH:MM:SS)
+#SBATCH --nodes=1                   # Number of nodes
+#SBATCH --ntasks-per-node=1         # Tasks per node
+#SBATCH --cpus-per-task=4           # CPUs per task
+#SBATCH --mem=16G                   # Memory per node
+
+# Load required modules
+
+module load python3/3.11.4          # or: module load miniconda3/20240410
+                                    #     conda activate my_env
+
+# Run your program
+
+python3 my_analysis.py
 ```
 
+### R + Python in one job
+
+``` bash
+#!/bin/bash
+#SBATCH --job-name=fasta_pipeline
+#SBATCH --partition=compute
+#SBATCH --account=myPIRG
+#SBATCH --output=output_%j.log
+#SBATCH --error=error_%j.log
+#SBATCH --time=01:00:00
+#SBATCH --cpus-per-task=2
+#SBATCH --mem=8G
+
+set -e                              # stop the job if any step fails
+
+module load python3/3.11.4
+module load R/4.3.3
+
+# Step 1 (Python): summarise every FASTA file into one table
+python3 fasta_stats.py data/*.fasta > results/fasta_stats.tsv
+
+# Step 2 (R): read that table, make the figure
+Rscript plot_stats.R results/fasta_stats.tsv results/fasta_stats.png
 ```
-empty.fasta	0
-one.fasta	1
-two.fasta	2
+:::
+
+## What the job actually runs
+
+The scripts are ordinary R and Python programs - the same ones you test on your laptop first. Arguments come from the command line so nothing is hard-coded.
+
+::: panel-tabset
+### R (`plot_stats.R`)
+
+```{r}
+#| label: lec10-plot-stats-r
+#| echo: true
+#| eval: false
+
+#!/usr/bin/env Rscript
+library(tidyverse)
+
+args <- commandArgs(trailingOnly = TRUE)      # c("results/fasta_stats.tsv", "results/fasta_stats.png")
+stats <- read_tsv(args[1])
+
+p <- ggplot(stats, aes(x = file, y = gc_percent)) +
+  geom_col() +
+  labs(x = NULL, y = "GC content (%)") +
+  theme_minimal()
+
+ggsave(args[2], p, width = 8, height = 4)
+cat("Wrote", args[2], "\n")
 ```
 
-::: callout-warning
-What if there are **no** `.fasta` files? `*.fasta` stays literal and `grep` errors. The assistant didn't mention that - you only find it by testing. (`shopt -s nullglob` fixes it.)
+### Python (`fasta_stats.py`)
+
+```{python}
+#| label: lec10-fasta-stats-py
+#| echo: true
+#| eval: false
+
+#!/usr/bin/env python3
+import sys
+from pathlib import Path
+
+print("file\tn_seqs\ttotal_bp\tgc_percent")           # header of the TSV
+for path in map(Path, sys.argv[1:]):                 # every file given on the command line
+    lines = path.read_text().splitlines()
+    n_seqs = sum(line.startswith(">") for line in lines)
+    seq = "".join(line for line in lines if not line.startswith(">")).upper()
+    gc = 100 * (seq.count("G") + seq.count("C")) / len(seq)
+    print(f"{path.name}\t{n_seqs}\t{len(seq)}\t{gc:.1f}")
+```
 :::
-
-## Where LLMs fail
-
-::: incremental
--   **Hallucinated** functions, packages, arguments - `read_fasta()` from a package that doesn't exist; `na.ignore = TRUE`
--   **Outdated APIs** - `gather()`/`spread()` instead of `pivot_longer()`/`pivot_wider()`
--   **Subtly wrong statistics** - `sd(x) / n` instead of `sd(x) / sqrt(n)`; `mean()` when you asked for `median()`
--   **Off-by-one / precedence** - `x[1:n-1]` is `x[0:(n-1)]`, not "all but the last"; in Python `x[1:n]` *excludes* element `n`
--   **Mixing up R and Python** - `x^2` in Python (that's XOR), `df.append()` (removed from pandas 2.0), `len(x)` in R
--   **Silently changing your data** - drops every row with an `NA`, re-sorts and breaks an alignment
--   **Confident nonsense** - an invented file-format spec, delivered with authority
--   **Security-sensitive code** - shell commands built from pasted strings, keys in plain text
-:::
-
-## What you must never paste
-
-::: incremental
--   **Unpublished data or results** - describe the *shape* with 3 made-up rows instead
--   **Human-subjects data / PHI** - anything under an IRB protocol or HIPAA is **red** data
--   **Credentials** - API keys, passwords, SSH keys, `.Renviron`; if you paste one, rotate it
--   Anything above **green** classification - unless the tool is **UO-supported** (Copilot Chat with your UO login)
--   In-editor tools send your **open files** as context - close data and secrets first
-:::
-
-::: callout-important
-UO data classes: **green** (published data, your code) / **amber** (unpublished research, FERPA) / **red** (HIPAA, SSNs). Unsupported AI tools: **green only**. See UO's [AI Service Offerings](https://service.uoregon.edu/TDClient/2030/Portal/KB/Article/140911/AI-Service-Offerings).
-:::
-
-## Course policy on AI
-
-::: callout-important
--   AI may help you **learn, explore, and debug** - explain concepts, explain errors, review your code
--   **Submitted work must be your own**
--   You must be able to **explain every line** you turn in - what it does, why it's there, what breaks if you remove it
--   Note AI help in a comment or your README
--   If you can't explain it, don't submit it - we may ask you to walk through it in person
-:::
-
-Same idea for publications: disclose the tool in your methods or README; the humans remain responsible.
-
-## Use it to learn, not to avoid learning
-
-::: incremental
--   Ask **"why?"** - "why `map()` instead of a loop?" - then check the docs (`?median`, `man grep`)
--   Have it **quiz you** - "five short exercises on joins, hidden answers, then grade mine"
--   Ask for the **wrong version** - "how would a beginner get this wrong?"
--   **Explain your code to it** - "I think this does X because Y - am I right?"
--   Turn **off inline suggestions** while learning new syntax - write it yourself first
--   The test: close the assistant and rewrite the core piece from memory. Can't? You were vibe coding.
-:::
-
-## Read more
-
--   Course book chapter: [Coding with AI Assistants](../book/chapters/18-ai-assisted-coding.html) - worked examples in R and bash, a review checklist, prompting template, exercises with planted bugs
--   Try the live-demo prompt again asking for **Python** instead of bash (`pathlib.Path(".").glob("*.fasta")`) - does it handle the empty-directory case?
--   [GitHub Student Developer Pack](https://education.github.com/pack) - free Copilot
--   [UO AI Service Offerings](https://service.uoregon.edu/TDClient/2030/Portal/KB/Article/140911/AI-Service-Offerings) - which tools, which data
 
 ::: callout-tip
-Vendor menus and keybindings change every few months - the loop, the failure modes, and the data rules don't.
+Test on a **tiny input on the login node** first (`python3 fasta_stats.py small.fasta`), then submit: `sbatch run_pipeline.sh`. Output and errors land in `output_JOBID.log` and `error_JOBID.log`.
 :::
 
-------------------------------------------------------------------------
+## R and Python packages on Talapas
 
-# Git and GitHub
-
-## What is Git?
-
--   **Git** is a distributed version control system
--   Tracks changes in your code over time
--   Allows collaboration with others
--   Maintains complete history of all changes
--   Essential tool for reproducible research
--   Works locally on your computer
-
-## What is GitHub?
-
--   **GitHub** is a web-based hosting service for Git repositories
--   Provides cloud storage for your code
--   Enables collaboration features:
-    -   Pull requests
-    -   Issues tracking
-    -   Project management
--   Hosts documentation and websites (GitHub Pages)
--   Free for public repositories
-
-## Git Workflow Concept
-
-![Git workflow: working directory, staging area, local and remote repositories](images/Lec08_img001.svg){fig-align="center" width="100%"}
-
--   **Track Changes**: Every modification is recorded
--   **Collaboration**: Multiple people can work simultaneously
--   **Backup**: Your code is safe in multiple places
--   **Experimentation**: Try new things without breaking working code
-
-## Setting Up Git
-
-### 1. Install Git
+::: panel-tabset
+### R
 
 ``` bash
-# Check if Git is installed
-git --version
-
-# Ubuntu/Debian
-sudo apt-get install git
-
-# macOS (with Homebrew)
-brew install git
-
-# Windows: Download from git-scm.com
+module load R/4.3.3
+R                                   # interactive, on an interactive node
 ```
 
-### 2. Configure Git
+``` r
+install.packages("tidyverse")       # goes to your personal library in ~/R/ - once
+library(tidyverse)                  # every session / every script
+```
+
+-   Modules give you R itself; **you** install packages into your home directory
+-   For a reproducible project, `renv::init()` records exact package versions in the project folder
+
+### Python
 
 ``` bash
-# Set your name and email
-git config --global user.name "Your Name"
-git config --global user.email "your.email@example.com"
+module load miniconda3/20240410
+conda create -n my_env python=3.11 pandas matplotlib biopython   # once
+conda activate my_env                                            # every session / job
 
-# Check your settings
-git config --list
+# or, with the plain python3 module and a virtual environment:
+module load python3/3.11.4
+python3 -m venv ~/envs/my_env && source ~/envs/my_env/bin/activate
+pip install pandas matplotlib biopython
 ```
 
-# GitHub
+-   `conda` (with the **bioconda** channel) installs compiled bioinformatics tools too - `conda install -c bioconda samtools`
+-   Put the same `module load` + `conda activate` / `source .../activate` lines in your `sbatch` script
+:::
 
-## GitHub for Scientific Collaboration
+## Understanding SLURM Directives
 
-### Perfect for Research Projects:
+| Directive         | Description         | Example                           |
+|-------------------|---------------------|-----------------------------------|
+| `--partition`     | Queue to use        | `compute`, `computelong`, `gpu`, `memory` |
+| `--account`       | PIRG for accounting | `myPIRG`                          |
+| `--time`          | Max runtime         | `1-12:00:00` (1 day, 12 hrs)      |
+| `--nodes`         | Number of nodes     | `1`                               |
+| `--cpus-per-task` | Cores per task      | `8`                               |
+| `--mem`           | Memory per node     | `32G`                             |
+| `--mem-per-cpu`   | Memory per CPU      | `4G`                              |
+| `--gres`          | Generic resources   | `gpu:1`                           |
 
--   **Reproducibility**: Complete history of analysis development
--   **Collaboration**: Work with colleagues worldwide
--   **Documentation**: README files, wikis, and GitHub Pages
--   **Issues**: Track bugs, ideas, and to-dos
--   **Releases**: Tag specific versions for publications
--   **DOI Integration**: Link with Zenodo for citations
+**Tip**: Request only what you need - smaller jobs run sooner!
 
-## Resources and Help
-
-### Learning Resources:
-
--   GitHub Docs `(https://docs.github.com)`
--   Pro Git Book `(https://git-scm.com/book) (free online)`
--   GitHub Skills `(https://skills.github.com)`
--   Quarto + GitHub Pages `(https://quarto.org/docs/publishing/github-pages.html)`
-
-### Getting Help:
+## GPU Jobs
 
 ``` bash
-# Git help
-git help <command>
-git <command> --help
+#!/bin/bash
+#SBATCH --job-name=gpu_job
+#SBATCH --partition=gpu             # GPU partition
+#SBATCH --account=myPIRG
+#SBATCH --time=1-00:00:00           # 1 day
+#SBATCH --nodes=1
+#SBATCH --ntasks-per-node=1
+#SBATCH --gres=gpu:1                # Request 1 GPU
+#SBATCH --mem=32G
 
-# Quick reference
-git help everyday
+# Load CUDA and your software
+
+module load cuda/12.4
+module load miniconda3/20240410
+
+# Activate your conda environment
+
+conda activate my_ml_env
+
+# Run your GPU code
+
+python train_model.py
 ```
 
-## Creating a GitHub Account
+\
+\
 
-### Steps to Get Started:
-
-1.  Go to [github.com](https://github.com)
-2.  Click "Sign up"
-3.  Choose a username (professional, memorable)
-4.  Add your university email
-5.  Verify your account
-6.  Consider GitHub Student Developer Pack:
-    -   Free GitHub Pro while you're a student
-    -   Access to development tools
-    -   Apply at [education.github.com](https://education.github.com)
-
-## Basic Git Commands
-
-### Initialize a Repository
+### Check available GPUs:
 
 ``` bash
-# Create a new repository
-git init
-
-# Clone an existing repository
-git clone https://github.com/username/repository.git
+/packages/racs/bin/slurm-show-gpus
 ```
 
-### Track Changes
+## Talapas Uses Software Modules (LMOD)
 
 ``` bash
-# Check status
-git status
+# List all available modules
+module avail
 
-# Add files to staging
-git add filename.txt        # Add specific file
-git add .                   # Add all changes
+# Search for specific software
+module spider R
+module spider python          # python3/3.x.y modules, plus miniconda3 for conda environments
 
-# Commit changes
-git commit -m "Descriptive message about changes"
+# Load a module
+module load R/4.3.3
+module load miniconda3/20240410
+
+# See what's loaded
+module list
+
+# Unload a module
+module unload R
+
+# Reset to default
+module purge
 ```
 
-## Working with Remotes
+::: callout-note
+In your batch scripts, always load modules after the SBATCH directives!
+:::
+
+## Monitoring Your Jobs
 
 ``` bash
-# Add a remote repository
-git remote add origin https://github.com/username/repo.git
+# Check job status
 
-# View remotes
-git remote -v
+squeue -u $USER
 
-# Push changes to GitHub
-git push origin main
+# Detailed job information
 
-# Pull changes from GitHub
-git pull origin main
+scontrol show job JOBID
 
-# Fetch without merging
-git fetch origin
+# After job completes - see resource usage
+
+sacct -j JOBID --format=JobID,JobName,Elapsed,MaxRSS,State
 ```
 
-## Branching and Merging
+\
+\
 
-![Branching and merging](images/Lec08_img002.svg){fig-align="center" width="100%"}
+### Common Status Codes:
 
-``` bash
-# Create and switch to new branch
-git switch -c feature-branch
+| Code | Meaning           |
+|------|-------------------|
+| PD   | Pending (waiting) |
+| R    | Running           |
+| CG   | Completing        |
+| CD   | Completed         |
+| F    | Failed            |
 
-# Switch branches
-git switch main
+## Best Practices for Talapas
 
-# Merge branch
-git merge feature-branch
-```
+### Do:
 
-`git checkout -b` / `git checkout main` is the older syntax you'll still see everywhere - it does the same thing.
+-   Request only resources you need
+-   Test with small datasets first
+-   Use `--time` conservatively
+-   Clean up old files regularly
+-   Use `/projects` for large data
 
-## Common Git Workflow
+### Don't:
 
-### Daily Development Cycle
+-   Run heavy computation on login nodes
+-   Leave jobs running indefinitely
+-   Store sensitive data without encryption
+-   Forget to acknowledge RACS in publications
 
-``` bash
-# 1. Start your day - update your local copy
-git pull origin main
+## Getting Help with Talapas
 
-# 2. Create a feature branch
-git switch -c new-feature
+### Resources:
 
-# 3. Make changes and commit regularly
-git add .
-git commit -m "Add new analysis function"
+-   Documentation: [uoracs.github.io/talapas2-knowledge-base](https://uoracs.github.io/talapas2-knowledge-base/)
+-   Service Desk: [hpcrcf.atlassian.net/servicedesk](https://hpcrcf.atlassian.net/servicedesk/customer/portal/1)
+-   Email: racs\@uoregon.edu
+-   Office Hours: Knight Library, Dream Lab 122E (Wednesdays 1-3pm)
 
-# 4. Push your branch
-git push origin new-feature
+### Acknowledgment Text:
 
-# 5. Create pull request on GitHub (via website)
-```
-
-## Viewing History
-
-``` bash
-# View commit history
-git log
-
-# Prettier one-line format
-git log --oneline
-
-# With graph
-git log --graph --oneline --all
-
-# Show changes in commits
-git log -p
-
-# Show last n commits
-git log -3
-```
-
-## GitHub Pages
-
-### Host Your Research Website for Free!
-
-![From Quarto source to a live website](images/Lec08_img003.svg){fig-align="center" width="100%"}
-
-### Setup Steps:
-
-1.  Create repository
-2.  Push your HTML files
-3.  Enable Pages in repository settings
-4.  Your site is live at `https://username.github.io/repo_name`
-
-## GitHub Pages Configuration
-
-### In your repository:
-
-1.  Go to Settings → Pages
-2.  Source: Deploy from a branch
-3.  Branch: main (or gh-pages)
-4.  Folder: / (root) or /docs
-
-### For Quarto projects:
-
-``` yaml
-# In _quarto.yml
-project:
-  type: website
-  output-dir: docs
-
-publish:
-  gh-pages:
-    branch: gh-pages
-```
-
-``` bash
-# Publish with Quarto
-quarto publish gh-pages
-```
-
-## Best Practices
-
-### Commit Messages
-
--   Be descriptive and concise
--   Use present tense: "Add feature" not "Added feature"
--   Reference issues: "Fix bug #123"
-
-### Repository Organization
-
-```         
-project/
-├── README.md           # Project description
-├── data/              # Raw data (consider .gitignore)
-├── analysis/          # Analysis scripts
-├── results/           # Output files
-└── docs/              # Documentation
-```
-
-## .gitignore File
-
-### Exclude files from version control:
-
-``` bash
-# Create .gitignore file
-touch .gitignore
-```
-
-### Common patterns to exclude:
-
-``` bash
-# Data files
-*.fastq
-*.fasta
-*.bam
-*.vcf
-data/raw/*
-
-# R files
-.Rhistory
-.RData
-.Rproj.user
-
-# Python files
-__pycache__/
-*.pyc
-.venv/
-.ipynb_checkpoints/
-
-# Output files
-results/temp/*
-*.log
-
-# System files
-.DS_Store
-```
+> "The authors acknowledge Research Advanced Computing Services (RACS) at the University of Oregon for providing computing resources that have contributed to the research results reported within this publication."

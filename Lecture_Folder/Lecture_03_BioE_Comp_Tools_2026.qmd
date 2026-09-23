@@ -1,6 +1,6 @@
 ---
 title: "Lecture 03 - Computational Tools for Bioengineers"
-subtitle: "Unix Navigation, Files, Pipes and Tidy Data"
+subtitle: "Data Streams, Large Genomic Files, GREP and Regular Expressions"
 date: "Monday, October 12, 2026"
 author: "Bill Cresko"
 ---
@@ -26,179 +26,23 @@ set.seed(2026)
 
 The course book goes deeper on everything in this lecture. Read before or after class:
 
--   [Ch. 5: Unix Fundamentals](../book/chapters/05-unix-fundamentals.html)
--   [Ch. 6: Files, Pipes, and Redirection](../book/chapters/06-files-pipes.html)
--   [Ch. 11: Tidy Data Principles](../book/chapters/11-tidy-data.html)
--   *Reference:* [App. A: Unix Command Reference](../book/chapters/appendix-A-unix.html)
+-   [Ch. 7: Files, Pipes, and Redirection](../book/chapters/07-files-pipes.html)
+-   [Ch. 9: GREP and Regular Expressions](../book/chapters/09-grep-regex.html)
+-   *Reference:* [App. C: Common Data Formats & Public Repositories](../book/chapters/appendix-C-data-formats.html) · [App. D: Regular Expression Reference](../book/chapters/appendix-D-regex.html)
 
 ## Goals for today
 
--   Deeper dive into Unix tools
--   Reading and writing files
--   Tidy data
--   Advanced Unix tools to manipulate large files
+-   Unix standard streams and redirection
+-   Working with large genomic data files (FASTA and FASTQ)
+-   GREP and regular expressions
+-   Working with compressed files; search-and-replace with `sed`
 
-# Computational Tools - The Command Line
+# The Command Line
 
 ![](images/Lec02_img002.jpeg){fig-align="center" width="90%"}
 
-## What is Unix?
-
--   An operating system developed at Bell Labs in 1969, released in 1973
--   Now a family of operating systems: Linux, macOS, and others share the Unix design
--   Runs both locally on your computer and on large clusters like Talapas
--   Its **shell** gives you a scripting language for talking to the operating system
--   Linux is an open-source operating system built on the same design
-
-## What is a shell? {background-image="images/Lec02_img003.jpeg"}
-
--   The ‘shell’ is a program that runs UNIX and takes in commands and gives them to the operating system
-
--   **`bash`** (Linux, WSL, Talapas) and **`zsh`** (macOS default) are the common shells - nearly identical for our purposes
-
--   You can access the shell via a **`terminal window`**
-
-##  {background-image="images/Lec02_img003.jpeg"}
-
-![](images/Lec02_img004.jpeg){width="90%" fig-align="center"}
-
-## Recipes for a shell command
-
--   **Prompt**: notation used to indicate your computer is ready to accept a new command
--   **Command**: the building blocks of programming, tell computer to do a specific task
--   **Options**: change the behavior of a command
--   **Argument**: what the command should operate on
-
-![](images/Lec00_img006.svg){width="80%" fig-align="center"}
-
-## Why use the shell?
-
-::: incremental
--   Speed
--   Can handle extremely large file sizes
--   Use programs only available via shell
--   The commands work almost identically across platforms
--   You can even use them on a large computer cluster like Talapas and AWS
--   It is incredibly powerful particularly for repeated actions
--   It allows you to do thousands of ‘clicks’ with single commands
-:::
-
-## Where do you get help?
-
--   Manual pages!
-    -   The shell has manuals for all basic commands
-    -   Type `man [command_name]` to access the manual for a specific command
-    -   Type `q` to exit
--   Also...the internet!
--   Also... Generative AI (ChatGPT, Claude, etc.)
-
-# Common navigation commands
-
-![](images/Lec03_img001.jpeg){fig-align="center" width="90%"}
-
-## 
-
-![](images/Lec03_img002.jpeg){fig-align="center" width="90%"}
-
-## The way you normally navigate
-
-![](images/Lec03_img003.jpeg){fig-align="center" width="90%"}
-
-## 
-
-![](images/Lec03_img004.jpeg){fig-align="center" width="90%"}
-
-## How is a computer organized?
-
--   System of directories (folders) and files
--   / = the root directory, which holds all other directories
--   Most of your files will be located under /Users in a directory of your username
--   the `~` is shorthand for your home folder
--   Navigation in the shell consists of jumping up and down between directories and seeing what’s in them
--   The "path" refers to the location a file is in
-    -   ex: "/Users/wcresko/Documents"
-
-![](images/Lec03_img005.svg){fig-align="center" width="100%"}
-
-## The Unix file hierarchy
-
-![](images/Lec00_img004.svg){fig-align="center" width="90%"}
-
-## Paths - the address of a file in the tree
-
-![](images/Lec00_img005.svg){fig-align="center" width="90%"}
-
-## Special files - the 'dot' entries
-
-![](images/Lec03_img006.svg){fig-align="center" width="90%"}
-
-## `.` refers to the directory you are in
-
-![](images/Lec03_img007.svg){fig-align="center" width="90%"}
-
-## `..` refers to the parent directory
-
-![](images/Lec03_img008.svg){fig-align="center" width="90%"}
-
-## Navigating with `..`
-
-![](images/Lec00_img007.svg){fig-align="center" width="90%"}
-
-## Relative vs. absolute paths
-
-::: panel-tabset
-### Concept
-
--   **Absolute path**: the full path from the root `/` (e.g., `/Users/wcresko/Documents`) - works from anywhere
--   **Relative path**: the path from where you are right now (e.g., `../Documents`) - portable, but depends on your current directory
--   `.` refers to the current directory
--   `..` refers to the parent directory
--   `~` refers to your home directory
-
-### Examples
-
-``` bash
-# Absolute path
-cd /Users/wcresko/Documents
-
-# Relative paths
-cd ..           # Go up one directory
-cd ./data       # Go into data directory (same as cd data)
-cd ../scripts   # Go up one, then into scripts
-cd ~            # Go to home directory
-cd -            # Go to previous directory
-```
-:::
-
-## Common navigation commands
-
-::: incremental
--   **`pwd`** = “print working directory”, which will print where you currently are in the system
--   **`ls`** = “list”, list all directories and files in your current position
-    -   `ls –F` = denote which results are directories, files, etc.
-    -   `ls –l` = ”long format”, lists total file sizes
-    -   `ls –r` = “reverse”, lists the results in reverse order
-    -   `ls –S` = “size”, sort results by size
-    -   `ls –t` = “time”, sort results by time created, from most recent to last
-:::
-
-## Common Navigation Commands
-
--   `cd` = “change directory”, will place you in a new position based on your path argument
-    -   `cd ..` "go up one directory"
-    -   `cd –` "go to the directory you were at last (like the back arrow on an internet browser)"
-    -   `cd ~` "go to my home directory"
-
-## Let's practice!
-
--   Try navigating around your computer using `cd` and `ls`
--   If you are on Ubuntu, you may need to create some empty directories in your Ubuntu folder before navigating in the terminal
-
-# Working with files
-
 ## Making new files
 
-::: incremental
 -   Make new folders: `mkdir`
 -   Make new files: `nano`, `touch`
 -   Rename files: `mv`
@@ -209,7 +53,6 @@ cd -            # Go to previous directory
 -   Examining file length: `wc`
 -   Reading files: `cat`
 -   Looking at beginning or end: `head` or `tail`
-:::
 
 ## Things to keep in mind
 
@@ -223,83 +66,37 @@ cd -            # Go to previous directory
 -   Use appropriate file extensions in file names
     -   Some software expect files with certain extensions (.fasta, .txt, etc.)
 
-## Let's try it out
+## Practice making files and directories
 
 -   Make a new directory called whatever you'd like.
--   Add a file named “Practice.txt” to the directory and add some text to it
+-   Add a file named `Practice.txt` to the directory and add some text to it
 -   Read the contents of the file and get its length
--   Rename the file to “Super_practice.txt”
--   Move the file to a new folder named “Testing”
--   Make a copy of the file named “Super_practice_copy.txt”
--   Read the contents of the file and get its length to make sure it’s the same as Super_practice.txt
--   Delete the original “Super_practice.txt”
+-   Rename the file to `Super_practice.txt`
+-   Move the file to a new folder named `Testing`
+-   Make a copy of the file named `Super_practice_copy.txt`
+-   Read the contents of the file and get its length to make sure it’s the same as `Super_practice.txt`
+-   Delete the original `Super_practice.txt`
 
-## Useful flags for file commands
-
-| Command            | Effect                                                     |
-|--------------------|------------------------------------------------------------|
-| `ls -l`            | Long listing: permissions, owner, size, date               |
-| `ls -a`            | Show hidden "dot" files (names starting with `.`)          |
-| `ls -lh`           | Human-readable sizes (K, M, G)                             |
-| `ls -lt`           | Sort by modification time, newest first                    |
-| `cp -r src/ dst/`  | Copy a directory and everything in it                      |
-| `rm -i file`       | Ask before deleting each file                              |
-| `rm -r dir/`       | Delete a directory **and all its contents** - no undo!     |
-| `mkdir -p a/b/c`   | Make nested directories in one step                       |
-
-::: callout-warning
-The shell has **no Trash**. Double-check the path before `rm -r`, and never combine it with a wildcard (`rm -r *`) without thinking twice.
-:::
-
-# Wildcards
-
-## Wildcards - one command, many files
-
-``` bash
-touch sample_01.fastq sample_02.fastq sample_03.fastq control.fastq notes.md
-
-ls *.fastq              # everything ending in .fastq
-ls sample_*.fastq       # the three sample_ files
-ls sample_0?.fastq      # ? matches exactly one character
-ls sample_0[12].fastq   # only sample_01 and sample_02
-ls *.{fastq,md}         # brace expansion: .fastq OR .md
-```
-
-| Pattern     | Matches                                   |
-|-------------|-------------------------------------------|
-| `*`         | Any string of characters (including none) |
-| `?`         | Exactly one character                     |
-| `[abc]`     | Any one character in the set              |
-| `[a-z]`     | Any one character in the range            |
-| `{foo,bar}` | Either `foo` or `bar` (brace expansion)   |
-
-::: callout-tip
-The **shell** expands wildcards *before* the command runs - so `rm *.fastq` deletes every matching file at once. Run `ls *.fastq` first to see exactly what will be affected. More in the [Unix Fundamentals chapter](../book/chapters/05-unix-fundamentals.html) of the course book.
-:::
-
-# Reading Files in Unix
+# Reading and Writing Files in Unix
 
 ## Commands for Reading Files
 
-::: incremental
 -   **`cat`** = concatenate and display files
     -   Shows entire file at once
     -   Good for small files
 -   **`less`** = view file page by page
-    -   Navigate with space (forward), b (back), q (quit)
-    -   Search with /pattern
+    -   Navigate with `space` (forward), `b` (back), `q` (quit)
+    -   Search with `/pattern`
 -   **`more`** = similar to less but simpler
-    -   Space to go forward, q to quit
+    -   Space to go forward, `q` to quit
 -   **`head`** = display first 10 lines (default)
     -   `head -n 20 file.txt` shows first 20 lines
 -   **`tail`** = display last 10 lines (default)
     -   `tail -n 20 file.txt` shows last 20 lines
     -   `tail -f file.txt` follows file as it grows (useful for logs)
-:::
 
 ## Input Redirection
 
-::: incremental
 -   **`<`** = redirect input from a file
     -   `command < input.txt`
     -   Sends contents of file as input to command
@@ -308,14 +105,9 @@ The **shell** expands wildcards *before* the command runs - so `rm *.fastq` dele
 -   Example uses:
     -   `wc -l < data.txt` counts lines in data.txt
     -   `sort < names.txt` sorts contents of names.txt
-    -   Many commands can read from files directly OR from `stdin`
-:::
-
-# Writing Files in Unix
 
 ## Output Redirection
 
-::: incremental
 -   **`>`** = redirect output to a file (overwrites)
     -   `ls -l > filelist.txt`
     -   Creates new file or overwrites existing
@@ -327,25 +119,75 @@ The **shell** expands wildcards *before* the command runs - so `rm *.fastq` dele
     -   Captures error messages separately
 -   **`&>`** = redirect both output and errors
     -   `command &> all_output.txt`
-:::
 
-## Redirection, visually
+## Unix Three Standard Streams
 
-::::: columns
-::: {.column width="50%"}
-![Normally a command's output goes to the screen](images/Lec00_img008.svg){width="100%"}
-:::
+-   **stdin (0)** = Standard Input
+    -   Where programs read input from
+    -   Default: keyboard
+-   **stdout (1)** = Standard Output
+    -   Where programs write normal output
+    -   Default: terminal screen
+-   **stderr (2)** = Standard Error
+    -   Where programs write error messages
+    -   Default: terminal screen (same as stdout)
 
-::: {.column width="50%"}
-![`>` sends that output to a file instead](images/Lec00_img009.svg){width="100%"}
-:::
-:::::
+## Visualizing Data Streams
+
+``` bash
+# Every Unix program has these three streams
+         ┌──────────────┐
+stdin ───>│              │───> stdout
+    (0)  │   Program    │      (1)
+         │              │───> stderr
+         └──────────────┘      (2)
+```
+
+-   File descriptor numbers: 0, 1, 2
+-   Can redirect each stream independently
+-   Programs don't know if streams are redirected
+-   This abstraction is key to Unix philosophy
+
+## Basic Stream Redirection
+
+``` bash
+# Redirect stdout to file (equivalent ways)
+
+ls -l > files.txt
+ls -l 1> files.txt      # Explicitly using fd 1
+
+# Redirect stderr to file
+
+ls /nonexistent 2> errors.txt
+
+# Redirect both stdout and stderr to same file
+
+ls -l /nonexistent &> all_output.txt
+```
+
+## Bioinformatics Example
+
+Processing sequence data with stream control:
+
+``` bash
+# FASTQ processing pipeline with error handling
+
+zcat reads.fastq.gz 2> unzip_errors.log | 
+fastqc stdin 2> qc_errors.log | 
+trimmomatic 2> trim_errors.log | 
+bowtie2 -x genome - 2> alignment_stats.txt | 
+samtools sort 2> sort_errors.log | 
+samtools index - 2> index_errors.log
+
+# Check all error logs at once
+
+cat *_errors.log | grep -E "ERROR|WARNING"
+```
 
 # Unix Pipes
 
 ## What are Pipes?
 
-::: incremental
 -   **`|`** = the pipe operator
     -   Takes output from one command as input to another
     -   Chains commands together
@@ -355,15 +197,9 @@ The **shell** expands wildcards *before* the command runs - so `rm *.fastq` dele
 -   Power of Unix philosophy:
     -   Small tools that do one thing well
     -   Combine them to do complex tasks
-:::
-
-## Pipes, visually
-
-![Each command's output becomes the next command's input](images/Lec00_img010.svg){fig-align="center" width="90%"}
 
 ## Common Pipe Patterns
 
-::: incremental
 -   **Counting patterns:**
     -   `grep "pattern" file.txt | wc -l`
     -   Count lines matching a pattern
@@ -376,54 +212,21 @@ The **shell** expands wildcards *before* the command runs - so `rm *.fastq` dele
 -   **Filtering and processing:**
     -   `ls -l | grep ".txt" | awk '{print $5, $9}'`
     -   List txt files with sizes
-:::
 
 ## Advanced Pipe Examples
 
-::: incremental
 -   **Multi-step data processing:**
     -   `cat data.csv | cut -d',' -f2 | sort | uniq -c | sort -rn`
     -   Extract column 2, count unique values, sort by frequency
--   **Real-time monitoring:**
-    -   `tail -f logfile.txt | grep ERROR`
-    -   Watch log file for errors in real-time
 -   **Complex transformations:**
     -   `find . -name "*.txt" | xargs wc -l | sort -n`
     -   Find all txt files and sort by line count
-:::
-
-## Combining It All Together
-
-Example workflow:
-
-``` bash
-# Read a file, process it, save results, and display
-cat data.txt | \
-  grep -v "^#" | \       # Remove comment lines
-  cut -f1,3 | \          # Extract columns 1 and 3
-  sort -k2 -n | \        # Sort by column 2 numerically
-  tee results.txt | \    # Save to file
-  head -10               # Show top 10
-```
-
-::: notes
-The backslash allows you to continue commands on multiple lines for readability
-:::
-
-## Practice Exercise: Files and Pipes
-
-Try these exercises:
-
-1.  Create a file with a list of numbers (one per line)
-2.  Use pipes to sort them numerically
-3.  Save the sorted list to a new file using redirection
-4.  Use `tee` to display and save the top 5 numbers
-5.  Count how many unique numbers you have using pipes
-6.  Append the count to your results file
+-   **Real-time monitoring:**
+    -   `tail -f logfile.txt | grep ERROR`
+    -   Watch log file for errors in real-time
 
 ## Tips for Working with Files and Pipes
 
-::: incremental
 -   Test pipes step by step
     -   Build complex pipes incrementally
     -   Check output at each stage
@@ -432,48 +235,445 @@ Try these exercises:
 -   Pipe efficiency:
     -   Filter early in the pipeline
     -   Reduces data passed between commands
--   Save intermediate results when debugging complex pipes
+-   Save intermediate results when debugging complex pipes \# Unix Data Streams
+
+
+## Sequence file formats: FASTA and FASTQ
+
+::::: columns
+::: {.column width="50%"}
+**FASTA** - sequences (genomes, genes, proteins)
+
+``` bash
+>chr21 Homo sapiens chromosome 21
+NNNNNNNNNNGATCCTTGAAGCGCCCCCAAGG
+GCATCTTCTCTACTTTCACCTAACAGATCCCA
+```
+
+-   Header line starts with `>`
+-   Sequence on one or more lines
+-   Count sequences: `grep -c "^>" file.fa`
 :::
 
+::: {.column width="50%"}
+**FASTQ** - raw sequencing reads
+
+``` bash
+@SRR12345.1 read_1
+NCATGCAGCGTACGGTAATTGGCAG
++
+#AAAAFFFFFFFFFFFFFFFFFFFF
+```
+
+-   **4 lines per read**: `@` header, sequence, `+`, per-base quality
+-   Quality letters encode Phred scores (`!` = lowest, `I` = Q40)
+-   Count reads: `echo $(( $(wc -l < reads.fastq) / 4 ))`
+:::
+:::::
+
+::: callout-tip
+Both are usually gzip-compressed (`.fa.gz`, `.fastq.gz`) - use `zcat` / `zless` / `zgrep` to read them without unpacking. More formats (CSV/TSV, GFF, BED, VCF, HDF5) in the [Data Formats appendix](../book/chapters/appendix-C-data-formats.html) of the course book.
+:::
+
+# Working with Large Genomic Data Files
+
+## Human Chromosome Data
+
+-   Genomic data files can be massive (the full human genome is \~3.1 GB compressed)
+-   FASTA format is standard for sequence data
+-   Perfect use case for Unix pipes and redirection
+-   We will practice on **human chromosome 21** - the smallest autosome (\~13 MB compressed, \~46 Mb of sequence), so every command finishes in seconds
+-   The same commands work unchanged on the whole genome - only the wait time changes
+-   The course book works through the same file in [Chapter 9](../book/chapters/09-grep-regex.html#sec-genomic-processing)
+
+## Downloading Genomic Data
+
+Download chromosome 21 of the human genome (hg38 / GRCh38) from UCSC:
+
+``` bash
+# Using `wget` to download chr21 (~13 MB)
+
+wget https://hgdownload.soe.ucsc.edu/goldenPath/hg38/chromosomes/chr21.fa.gz
+
+# Or using `curl` and save with a specific name (-L follows redirects)
+
+curl -L -o chr21.fa.gz \
+  https://hgdownload.soe.ucsc.edu/goldenPath/hg38/chromosomes/chr21.fa.gz
+```
+
+-   `wget` and `curl` are both tools for downloading files (macOS ships `curl`; install `wget` with Homebrew if you want it)
+-   The backslash lets a long command span multiple lines
+-   `.gz` extension means the file is compressed
+-   The whole genome lives in the same directory as `hg38.fa.gz` (\~1 GB) - same commands, much longer runs
+
+## Examining Large Files Efficiently
+
+Don't use `cat` on huge files! Use these approaches:
+
+``` bash
+# Decompress and look at first 10 lines
+
+gunzip -c chr21.fa.gz | head -10
+
+# Check file size before and after decompression (-k keeps the .gz)
+
+ls -lh chr21.fa.gz
+gunzip -k chr21.fa.gz
+ls -lh chr21.fa
+
+# Count sequences in FASTA file (lines starting with >)
+# grep can't read gzip data directly - use zgrep (or zcat | grep)
+
+zgrep "^>" chr21.fa.gz | wc -l
+
+# View sequence headers only
+
+zgrep "^>" chr21.fa.gz | less
+```
+
+::: callout-note
+The UCSC file is *soft-masked*: repeats are written in lowercase (`acgt`). Patterns like `GAATTC` will miss sites inside masked regions - add `-i` to `grep`, or uppercase everything first with `tr 'acgt' 'ACGT'`.
+:::
+
+## Creating a Subset for Analysis
+
+Make a smaller working file for testing:
+
+``` bash
+# Extract the first ~1 Mb of sequence for testing (50 bases per line)
+
+zcat chr21.fa.gz | head -n 20000 > chr21_subset.fa
+
+# Extract a specific record by name from a multi-sequence FASTA
+# (e.g. from hg38.fa - chr21.fa has only one record)
+
+awk '/^>chr21$/,/^>chr22$/' hg38.fa | head -n -1 > chr21_from_genome.fa
+
+# Pull out a window of lines from the middle of the chromosome
+
+sed -n '400000,420000p' chr21.fa > region_of_interest.fa
+```
+
+## Processing FASTA Files with Pipes
+
+Extract specific regions or sequences:
+
+``` bash
+# Extract just the sequence (no headers) and count bases
+
+grep -v "^>" chr21.fa | tr -d '\n' | wc -c
+
+# Count each type of nucleotide (uppercase first so a == A)
+
+grep -v "^>" chr21.fa | \
+  tr 'acgtn' 'ACGTN' | \
+  tr -d '\n' | \
+  fold -w1 | \
+  sort | \
+  uniq -c
+```
+
+-   `grep -v` inverts the match (excludes lines)
+-   `tr -d '\n'` removes newlines
+-   `fold -w1` puts each character on its own line
+-   Expect a lot of `N` - the first \~5 Mb of chr21 is unassembled
+
+## Finding Patterns in Genomic Data
+
+Search for specific sequences and motifs:
+
+``` bash
+# Find all instances of a restriction enzyme site (EcoRI: GAATTC)
+
+grep -v "^>" chr21.fa | \
+  tr 'acgt' 'ACGT' | \
+  tr -d '\n' | \
+  grep -o "GAATTC" | \
+  wc -l
+
+# Extract 100 bases around each EcoRI site
+
+grep -v "^>" chr21.fa | \
+  tr 'acgt' 'ACGT' | \
+  tr -d '\n' | \
+  grep -oE ".{100}GAATTC.{100}" > ecori_contexts.txt
+
+# Find all start codons (ATG) and their byte offsets
+
+grep -v "^>" chr21.fa | \
+  tr 'acgt' 'ACGT' | \
+  tr -d '\n' | \
+  grep -b -o "ATG" | \
+  head -20
+```
+
+## Combining Downloads with Processing
+
+Stream processing without saving intermediate files:
+
+``` bash
+# Download, decompress, and process in one pipeline
+curl -sL https://hgdownload.soe.ucsc.edu/goldenPath/hg38/chromosomes/chr21.fa.gz | \
+  gunzip -c | \
+  grep -v "^>" | \
+  tr -d '\n' | \
+  cut -c1-1000000 > first_megabase.txt
+
+# Download and immediately analyze GC content
+wget -qO - https://hgdownload.soe.ucsc.edu/goldenPath/hg38/chromosomes/chr21.fa.gz | \
+  gunzip -c | \
+  grep -v "^>" | \
+  tr 'acgtn' 'ACGTN' | \
+  tr -d 'N\n' | \
+  tr 'ATGC' '0011' | \
+  awk '{n = length($0); gc = gsub(/1/, ""); print "GC%:", 100 * gc / n}'
+```
+
+::: notes
+-   The `-O -` flag tells wget to output to stdout
+-   This approach saves disk space and time
+:::
+
+## Key Takeaways
+
+-   **Real bioinformatics often involves gigabytes of data - these Unix tools scale beautifully!**
+-   **Never load entire genome files into memory** - use streaming
+-   **Combine tools** - each does one thing well
+-   **Test on subsets first** - extract small portions for development
+-   **Document your pipelines** - save commands in scripts
+-   **Use compression** - work with .gz files directly when possible
+-   **Think in streams** - data flows through pipes without intermediate files
+
+## Practice Exercise: Genomic Data Pipeline
+
+Build a complete analysis pipeline:
+
+1.  Download a bacterial genome (smaller, \~5 MB)
+2.  Count the total number of genes (hint: count headers)
+3.  Calculate the genome size in base pairs
+4.  Find the 10 most common 6-base sequences
+5.  Extract all genes with "ribosomal" in the header
+6.  Save your pipeline as a shell script for reproducibility
+
+
+# GREP and Regular Expressions
+
+## What is GREP?
+
+-   **GREP** = Global Regular Expression Print
+-   Powerful text search tool in Unix
+-   Searches for patterns in files or input streams
+-   Returns lines that match the pattern
+-   Essential for large data processing
+
+Basic syntax:
+
+``` bash
+grep [options] pattern [file...]
+```
+
+## Basic GREP Usage
+
+``` bash
+# Search for a simple pattern
+grep "ACGT" sequences.txt
+
+# Case-insensitive search
+grep -i "gene" annotations.txt
+
+# Count matching lines
+grep -c ">" proteins.fasta
+
+# Show line numbers
+grep -n "ERROR" logfile.txt
+
+# Invert match (show non-matching lines)
+grep -v "^#" data.txt    # Skip comment lines
+
+# Search multiple files
+grep "mutation" *.txt
+```
+
+## Introduction to Regular Expressions
+
+Regular expressions (regex) are patterns for matching text:
+
+-   **`.`** = any single character
+-   **`*`** = zero or more of preceding character
+-   **`+`** = one or more of preceding character
+-   **`?`** = zero or one of preceding character
+-   **`^`** = start of line
+-   **`$`** = end of line
+-   **`[abc]`** = any character in set
+-   **`[^abc]`** = any character NOT in set
+-   **`\`** = escape special characters
+
+## Basic Regex Examples
+
+``` bash
+# Match DNA sequences
+grep "^ATG" genes.txt         # Lines starting with ATG
+grep "TAG$" genes.txt         # Lines ending with TAG
+grep "A.G" sequences.txt      # A, any char, then G
+
+# Character classes
+grep "[ACGT]" dna.txt         # Any DNA base
+grep "[^ACGT]" dna.txt        # Non-DNA characters
+grep "[0-9]" data.txt         # Any digit
+grep "[A-Za-z]" text.txt      # Any letter
+
+# Quantifiers
+grep "A\{3\}" sequence.txt    # Exactly 3 A's
+grep "T\{2,4\}" sequence.txt  # 2 to 4 T's
+grep "GC*" sequence.txt       # G followed by 0+ C's
+```
+
+## Extended Regular Expressions
+
+Use `grep -E` or `egrep` for extended regex:
+
+``` bash
+# Alternation (OR)
+grep -E "start|stop|pause" commands.txt
+
+# Grouping
+grep -E "(ATG|GTG|TTG)" codons.txt
+
+# Plus quantifier (one or more)
+grep -E "A+T+G+" sequences.txt
+
+# Question mark (optional)
+grep -E "colou?r" british_american.txt
+
+# Complex patterns for bioinformatics
+grep -E "^>sp\|[A-Z0-9]+\|" uniprot.fasta  # UniProt headers
+grep -E "[ACGT]{20,}" primers.txt          # Sequences 20bp+
+```
+
+## Combining GREP with Pipes
+
+``` bash
+# Count unique sequence headers
+grep "^>" sequences.fasta | sort | uniq | wc -l
+
+# Extract gene names from GFF file
+grep -v "^#" annotation.gff | cut -f9 | grep -oE "gene=[^;]+"
+
+# Find sequences without stop codons
+grep -v -E "(TAA|TAG|TGA)" orfs.txt
+
+# Quality control pipeline: count reads containing an N
+# FASTQ records are 4 lines; the sequence is always line 2 of each,
+# so awk 'NR % 4 == 2' pulls out sequence lines. (grep "^@" is NOT
+# safe here - quality lines can start with @ too, since @ is a valid
+# quality character.)
+zcat reads.fastq.gz | awk 'NR % 4 == 2' | grep -c "N"
+
+# Search and replace with sed (uses regex)
+grep "gene" data.txt | sed 's/gene/GENE/g'
+```
+
+## Analyzing Sequence Content
+
+Combine Unix tools to analyze genomic data:
+
+``` bash
+# Count total bases in chromosome 21
+
+grep -v "^>" human_genome.fa | tr -d '\n' | wc -c
+
+# Count each type of base
+
+grep -v "^>" human_genome.fa | tr -d '\n' | 
+  fold -w1 | sort | uniq -c
+
+# Calculate GC content
+
+grep -v "^>" human_genome.fa | tr -d '\n' | 
+  tr -cd 'GCgc' | wc -c
+
+# Find simple sequence repeats (e.g., "ATATAT...")
+
+grep -v "^>" human_genome.fa | grep -oE "(AT){5,}"
+```
+
+## Working with Compressed Files
+
+Most genomic data is compressed to save space:
+
+``` bash
+# View compressed files without extracting
+
+zcat file.gz | head
+zless file.gz
+zgrep "pattern" file.gz
+
+# Compress and decompress
+
+gzip file.txt          # Creates file.txt.gz
+gunzip file.txt.gz     # Restores file.txt
+gzip -k file.txt       # Keep original file
+
+# Work directly with compressed files
+# (count reads: every 4th line is a header; don't grep "^@" - quality lines can start with @)
+
+zcat reads.fastq.gz | awk 'NR % 4 == 1' | wc -l
+
+# Concatenate compressed files
+
+zcat file1.gz file2.gz | gzip > combined.gz
+```
+
+## Beyond grep: `sed` for search-and-replace
+
+``` bash
+# Substitute the first match on each line (s/pattern/replacement/)
+sed 's/chr/Chr/' regions.bed
+
+# Substitute every match on each line (g = global)
+sed 's/T/U/g' dna.txt > rna.txt
+
+# Delete lines matching a pattern (e.g. comment lines)
+sed '/^#/d' annotation.gff
+
+# Print only lines 10-20
+sed -n '10,20p' big_file.txt
+```
+
+::: callout-warning
+`sed -i` edits a file **in place** - and the syntax differs between Linux (`sed -i 's/a/b/' f`) and macOS (`sed -i '' 's/a/b/' f`). Write to a new file until you're confident.
+:::
+
+## Beyond grep: `awk` for columns
+
+``` bash
+# Print columns 1 and 3 of a tab- or space-separated file
+awk '{print $1, $3}' data.tsv
+
+# Keep rows where column 5 is greater than 30
+awk '$5 > 30' measurements.tsv
+
+# Comma-separated file: set the field separator, skip the header
+awk -F',' 'NR > 1 {print $2}' samples.csv
+
+# Sum and average a column
+awk -F',' 'NR > 1 {sum += $3; n++} END {print sum, sum/n}' samples.csv
+```
+
+::: callout-tip
+Rule of thumb: **`grep`** finds lines, **`sed`** edits text, **`awk`** works with columns. More in the course book's [GREP chapter](../book/chapters/09-grep-regex.html) and [Regular Expression Reference](../book/chapters/appendix-D-regex.html).
+:::
+
+## Homework - microbial genome analysis
+
+With a sample FASTA file:
+
+1.  Download a bacterial genome from NCBI
+2.  Count the number of genes (sequences)
+3.  Calculate the total genome size
+4.  Find the longest and shortest genes
+5.  Calculate overall GC content
+6.  Search for specific motifs or restriction sites
+7.  Extract protein-coding sequences based on headers
 
 ------------------------------------------------------------------------
-
-# Tidy Data
-
-## An example to get us started
-
-## 
-
-![](images/Lec03_img009.jpeg){fig-align="center" width="100%"}
-
-## 
-
-![](images/Lec03_img010.jpeg){fig-align="center" width="90%"}
-
-## Data set rules of thumb (aka Tidy Data)
-
--   Store a copy of data in nonproprietary software and hardware formats, such as plain ASCII text (aka a flat file)
--   Leave an uncorrected file when doing analyses
--   Use descriptive names for your data files and variables
--   Include a header line with descriptive variable names
--   Maintain effective metadata about the data (data dictionary)
--   When you add observations to a database, add rows
--   When you add variables to a database, add columns, not rows
--   A column of data should contain only one data type
-
-## Not all data are tidy to begin with
-
--   Sometimes need to do some data wrangling
-
--   But also contingency tables
-
-## Types of data
-
-|  |  |  |  |
-|:--:|:--:|:--:|:--:|
-| Categorical |  | Quantitative |  |
-| Ordinal | Nominal | Ratio | Interval |
-| small, medium, large | apples, oranges, bananas | kilograms, dollars, years | temperature, calendar year |
-| ordered character | character | numeric | integer |
-
-'Factor' is a special type of character variable that we will explore more later
