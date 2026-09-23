@@ -58,13 +58,40 @@ The course book goes deeper on everything in this lecture. Read before or after 
 | 9:50 - 10:00  | *Break*                                                            |                                      |
 | 10:00 - 10:50 | **Part 2** - The shell and paths                                   | Finish Ubuntu (Windows)              |
 | 10:50 - 11:00 | *Break*                                                            |                                      |
-| 11:00 - 11:50 | **Part 3** - The UO computing ecosystem                            | VS Code, R, Python                   |
+| 11:00 - 11:50 | **Part 3** - Your editor and the UO computing ecosystem            | R, Python, Positron                  |
 | 11:50 - 12:00 | *Break*                                                            |                                      |
-| 12:00 - 1:00  | **Part 4** - IDEs, Markdown, and rendering                          | Quarto, TinyTeX, Positron            |
+| 12:00 - 1:00  | **Part 4** - Markdown and rendering with Quarto                     | (nothing new - Quarto ships with Positron) |
 
 ::: callout-tip
 Installs are **spread through the morning** so downloads can run while we talk. Work with your neighbors - if you finish early, help someone else!
 :::
+
+## The course at a glance
+
+::::: columns
+::: {.column width="48%"}
+**By the end of the term you will be able to**
+
+-   Set up and use a **computational toolkit**: shell, R, Python, Quarto, Git, and an IDE
+-   Work at the **Unix command line**: paths, files, pipes, `grep`, and large data files
+-   Write **scripts** in bash, R and Python, wrangle data frames, and make publication-quality figures
+-   Run big jobs on UO's cluster **Talapas** with Slurm
+-   Practice **reproducible science**: Quarto and LaTeX documents, responsible use of AI assistants, Git and GitHub
+:::
+
+::: {.column width="52%"}
+| Wk | Date   | Topic                              |
+|:--:|--------|------------------------------------|
+| 0  | Sep 24 | **Bootcamp** (today)               |
+| 1-3 | Sep 28 - Oct 12 | Computers and shells      |
+| 4-7 | Oct 19 - Nov 9 | Foundations of scripting: bash, R, Python, tidyverse and ggplot2 |
+| 8  | Nov 16 | High performance computing on Talapas |
+| 9-10 | Nov 23 - 30 | Reproducible science: Quarto, LaTeX, AI, Git and GitHub |
+| -  | Dec 11 | Term project due                   |
+
+Two problem sets, each assigned two weeks before it is due (HW1 due Nov 16, HW2 due Nov 30), and a term project on Talapas (one-page proposal due Nov 9; project due Dec 11). Full details on the [Schedule](../Schedule.html) and [Syllabus](../Syllabus.html) pages.
+:::
+:::::
 
 ## Before we start - is your laptop ready?
 
@@ -169,7 +196,7 @@ You do not need to become a software engineer. You need to know your tools well 
 -   **Operating system** - macOS, Linux, or Windows (with WSL) - all speaking the same Unix shell
 -   **Command line** - navigate, move data, run scripts, chain tools together
 -   **Languages** - **R** and **Python** for analysis
--   **IDEs** - **VS Code** and **Positron** to write and run code
+-   **IDEs** - **VS Code**, **Positron** (and **RStudio**) to write and run code
 -   **Markdown / Quarto / LaTeX** - prose + code + math + figures in one reproducible document
 -   **Institutional services** - Microsoft 365, Dropbox, site-licensed software
 :::
@@ -200,14 +227,14 @@ Imagine renaming 500 microscope images, or re-making 12 figures after a reviewer
 :::
 
 ::: callout-important
-**The lessons:** keep raw data in **plain-text** files (CSV/TSV), never "fix" data by hand in a spreadsheet, and let **scripts** do the transformations so every step is recorded. Much more on tidy data in **Lecture 03**.
+**The lessons:** keep raw data in **plain-text** files (CSV/TSV), never "fix" data by hand in a spreadsheet, and let **scripts** do the transformations so every step is recorded. Much more on tidy data in **Lecture 02**.
 :::
 
 ## A taste of scripting (just watch - you'll write these later!)
 
 ::::: columns
 ::: {.column width="50%"}
-**Shell (Lecture 06)** - rename 500 images at once
+**Shell (Lecture 04)** - rename 500 images at once
 
 ``` bash
 for f in IMG_*.tif; do
@@ -225,7 +252,7 @@ done
 :::
 
 ::: {.column width="50%"}
-**R (Lecture 07)** - summarize every file
+**R (Lecture 05)** - summarize every file
 
 ``` r
 files <- list.files("data/raw",
@@ -242,6 +269,32 @@ for (f in files) {
 
 ::: callout-note
 Different languages, same idea: **describe the task once, let the computer repeat it**.
+:::
+
+## Meet the course dataset - stickleback gut RNA-seq
+
+One small, real dataset runs through the whole term, so every new tool is used on data you already know.
+
+::::: columns
+::: {.column width="55%"}
+-   **80 threespine stickleback** from the Cresko Lab, gut RNA-seq
+-   **2 host genotypes** (A, B) x **2 microbiota treatments** (conventional, mono) = 4 groups of 20 fish
+-   **600 genes**, raw read counts; one row per fish, one column per gene
+-   A plain-text, tab-separated file (`.tsv`), 160 KB
+:::
+
+::: {.column width="45%"}
+Download it in Part 2, once you have a shell and a project folder:
+
+``` bash
+curl -L -o data/Stickle_RNAseq.tsv \
+  https://wcresko.github.io/BioE_Comp_Tools_Fa2026/Data_Folder/Stickle_RNAseq.tsv
+```
+:::
+:::::
+
+::: callout-tip
+Week 2: count its rows. Week 3: `grep` a group out of it. Week 4: `awk` a mean. Weeks 5-7: load, wrangle and plot it in R and Python. Week 8: run it on Talapas. Week 9: write it up in Quarto.
 :::
 
 ## Coding vs. scripting: compiled and interpreted languages
@@ -263,10 +316,10 @@ The line is blurry - Julia compiles "just in time", and fast R and Python packag
 | Language | What it's great for | In this course |
 |---|---|---|
 | **Bash** (the shell) | Moving and inspecting files, running programs, gluing tools together, clusters | Lectures 02 - 06, 10 |
-| **R** | Statistics, data wrangling, publication-quality figures, Bioconductor genomics | Lecture 07 (and BioE stats) |
-| **Python** | General programming, image analysis, machine learning, instrument control | Lecture 07, side by side with R |
+| **R** | Statistics, data wrangling, publication-quality figures, Bioconductor genomics | Lectures 05-07 (and BioE stats) |
+| **Python** | General programming, image analysis, machine learning, instrument control | Lectures 05-07, side by side with R |
 | **MATLAB** | Signal processing, modeling, many engineering labs (UO site license) | - |
-| **Markdown / LaTeX** | Writing documents, reports, slides, and equations | Today and Lecture 08 |
+| **Markdown / LaTeX** | Writing documents, reports, slides, and equations | Today and Lecture 09 |
 
 ::: callout-tip
 **Learn one well, and the next is much easier.** The concepts - variables, loops, functions, files - transfer between languages. And like a spoken language: use it or lose it!
@@ -303,7 +356,7 @@ my_project/
 -   **Be consistent with case** - Unix treats `Data.csv` and `data.csv` as *different* files
 -   **Dates as `YYYY-MM-DD`** so they sort correctly: `2026-09-24_plate_reader.csv`
 -   **Number scripts** to show their order: `01_clean.R`, `02_analyze.R`, `03_plot.R`
--   **Descriptive, not "final"**: `figure2_v3_final_FINAL.png` is a cry for help (and for Git - Lecture 08)
+-   **Descriptive, not "final"**: `figure2_v3_final_FINAL.png` is a cry for help (and for Git - Lectures 09-10)
 :::
 
 
@@ -344,7 +397,7 @@ Rented computing (AWS, Azure, Google Cloud): scales up on demand, pay by the hou
 :::
 
 ::: callout-note
-Much more in **Lecture 02** (local, cluster, cloud) and **Lecture 10** (Talapas).
+Much more in **Lecture 01** (local, cluster, cloud) and **Lecture 08** (Talapas).
 :::
 
 ## Your laptop vs. Talapas
@@ -387,7 +440,7 @@ Contact: **racs\@uoregon.edu** or the [RACS service desk](https://hpcrcf.atlassi
 
 -   Every Talapas user belongs to at least one **PIRG** (Principal Investigator Research Group) - your PI is responsible for it
 -   **Ask your PI (or rotation PI) to add you** - setup can take a few days, so do it early
--   For this course, we'll arrange class access through CBDS before Lecture 10
+-   For this course, we'll arrange class access through CBDS before Lecture 08
 -   Documentation: [Talapas Knowledge Base](https://uoracs.github.io/talapas2-knowledge-base/)
 :::
 
@@ -404,7 +457,7 @@ Contact: **racs\@uoregon.edu** or the [RACS service desk](https://hpcrcf.atlassi
 :::::
 
 ::: callout-note
-OnDemand apps run as jobs on compute nodes - they **keep running even if you close your browser**, so remember to end sessions you no longer need. Command-line access (SSH) and job scheduling come in **Lecture 10**.
+OnDemand apps run as jobs on compute nodes - they **keep running even if you close your browser**, so remember to end sessions you no longer need. Command-line access (SSH) and job scheduling come in **Lecture 08**.
 :::
 
 # BREAK - back at 10:00 {background-color="#2c3e50"}
@@ -793,47 +846,22 @@ Much more in Lectures 02 - 06: streams and error output, working with large file
 -   You'll spend *hours* in your IDE - a small upfront investment pays back every day
 :::
 
-## Installing VS Code
+## The minimum viable toolkit - install these today
 
-::: incremental
--   Download from <https://code.visualstudio.com/download> - free, no account needed
--   Run the installer for your operating system
--   Open VS Code; allow any permissions it asks for
--   **Windows users:** when prompted, install the **WSL** extension so VS Code can work inside Ubuntu
-    -   From an Ubuntu terminal, `code .` opens the current directory in VS Code
-:::
+| Install **today**              | Why                                                        |
+|--------------------------------|------------------------------------------------------------|
+| A **Unix shell**               | Terminal (macOS/Linux) or WSL + Ubuntu (Windows) - Part 2  |
+| **R** and **Python**           | The two languages we script in                             |
+| **Positron**                   | The IDE we will use in class; **Quarto is bundled** with it |
 
-::: callout-tip
-On macOS, open the Command Palette (`Cmd-Shift-P`) and run **"Shell Command: Install 'code' command in PATH"** so you can type `code .` in your terminal.
-:::
+| Install **later, when we need it**  | When                                  |
+|-------------------------------------|---------------------------------------|
+| **TinyTeX** (small LaTeX, for PDFs) | Week 9 - Quarto, LaTeX and PDF output |
+| **Git** + a GitHub account          | Weeks 9-10 (Macs already have Git from the Xcode tools) |
+| **VS Code**, **RStudio**            | Optional alternatives to Positron - any time you like |
 
-## The VS Code layout
-
--   **Activity Bar** (far left) - switch between Explorer, Search, Source Control, Extensions
--   **Explorer** - the file tree for your open folder
--   **Editor** - open multiple files in tabs; split with `Cmd/Ctrl-\`
--   **Integrated terminal** - a full shell at the bottom; toggle with ``Ctrl-` ``
--   **Command Palette** - `Cmd/Ctrl-Shift-P` - find *any* command by typing
-
-::: callout-tip
-Always use **File → Open Folder** on your whole project, not a single file. VS Code (and Positron) work best when they can see the entire project. The terminal opens in that folder automatically.
-:::
-
-## VS Code extensions for this course
-
-Open the **Extensions** panel (`Cmd/Ctrl-Shift-X`), search, and click **Install**:
-
-::: incremental
--   **Quarto** - edit and render `.qmd` documents
--   **Python** (Microsoft) - Python language support
--   **R** (REditorSupport) - R language support
--   **Jupyter** - notebooks and interactive Python
--   **WSL** (Windows users) - work inside Ubuntu
--   *Later in the term:* **Remote - SSH** for Talapas (Lecture 10)
-:::
-
-::: callout-note
-You can add or remove extensions any time. Start with this short list.
+::: callout-important
+**In class I will demo Positron.** Everything also works in VS Code (same editor underneath) and, for R, in RStudio - use them if you prefer, but if you are new to all of this, follow along in Positron. The [Software](../Software.html) page has full instructions for every tool.
 :::
 
 ## Keyboard shortcuts worth memorizing
@@ -849,7 +877,7 @@ You can add or remove extensions any time. Start with this short list.
 | Save                    | `Cmd-S`        | `Ctrl-S`        |
 
 ::: callout-tip
-The backtick (`` ` ``) is usually on the key above **Tab** - *not* the apostrophe. These same shortcuts work in Positron.
+The backtick (`` ` ``) is usually on the key above **Tab** - *not* the apostrophe. These shortcuts are identical in Positron and VS Code.
 :::
 
 ## Install R and Python now
@@ -1095,7 +1123,7 @@ Rule of thumb: **code → GitHub, documents → OneDrive/Dropbox, big data → T
 :::
 
 ::: callout-note
-We'll use citations in Quarto in **Lecture 08** - a Zotero library makes that painless.
+We'll use citations in Quarto in **Lecture 09** - a Zotero library makes that painless.
 :::
 
 ## Generative AI at UO
@@ -1108,7 +1136,7 @@ We'll use citations in Quarto in **Lecture 08** - a Zotero library makes that pa
 :::
 
 ::: callout-note
-We'll look at AI coding assistants ("vibe coding") in depth in **Lecture 08**.
+We'll look at AI coding assistants ("vibe coding") in depth in **Lecture 09**.
 :::
 
 ## Site-licensed software
@@ -1126,6 +1154,35 @@ UO pays for a number of software licenses you can install for free:
 
 ::: callout-note
 Check the Software Downloads site for the current list and eligibility - availability can differ for students and employees.
+:::
+
+## Installing Positron
+
+::: incremental
+-   **Positron** is a free, next-generation data-science IDE from **Posit** (the makers of RStudio)
+-   Download from <https://positron.posit.co/download>
+-   Install **R and Python first** (previous slide) - Positron finds them automatically and lets you switch between them
+-   Positron **includes Quarto** and the Quarto extension - nothing extra to install for Markdown and rendering
+-   Open Positron and use **File → Open Folder** on your `bootcamp` project
+-   Start an **R** or **Python** console from the interpreter picker at the top right
+:::
+
+::: callout-note
+If you've used **RStudio** before - it's still a great R IDE, and we'll see it alongside Positron in Lecture 05. Positron brings the RStudio-style data-science panes to a VS Code-style editor, for both R and Python.
+:::
+
+## The Positron layout
+
+-   **Explorer** (file tree for your open folder), **editor** tabs, an integrated **terminal** (toggle with ``Ctrl-` ``), and the **Command Palette** (`Cmd/Ctrl-Shift-P` - find *any* command by typing)
+-   Plus data-science panes:
+    -   **Console** - an interactive R or Python session
+    -   **Variables** - every object you've created
+    -   **Plots** - your figures, with history
+    -   **Data Explorer** - a spreadsheet-style view of data frames
+    -   **Help** - documentation for functions
+
+::: callout-tip
+Always use **File → Open Folder** on your whole project, not a single file - the terminal and console then start in that folder. Write code in the **editor** (so it's saved in a file) and send lines to the **console** with `Cmd/Ctrl-Enter`.
 :::
 
 ## Checkpoint: R and Python
@@ -1158,7 +1215,7 @@ deactivate                       # turn it off
 ```
 
 ::: callout-note
-On Talapas you'll use **conda** environments (Lecture 10); `uv` is a fast modern alternative; R has the same idea in the **renv** package. Nothing to do today - just know the word "environment".
+On Talapas you'll use **conda** environments (Lecture 08); `uv` is a fast modern alternative; R has the same idea in the **renv** package. Nothing to do today - just know the word "environment".
 :::
 
 ## R and Python side by side: running code
@@ -1325,54 +1382,27 @@ import pandas as pd             # load - in every script or session that uses it
 :::
 
 ::: callout-note
-That's the whole tour for today. **Lecture 07** goes deep on both languages - every example there is shown in R *and* Python.
+That's the whole tour for today. **Lectures 05-07** go deep on both languages - every example there is shown in R *and* Python.
 :::
 
 # BREAK - back at 12:00 {background-color="#2c3e50"}
 
-# Part 4 - Positron, Markdown, and Rendering {background-color="#2c3e50"}
+# Part 4 - Markdown and Rendering with Quarto {background-color="#2c3e50"}
 
-## Install Quarto and LaTeX now
+## Quarto - already installed with Positron
 
-**Quarto** turns Markdown + code into HTML pages, PDFs, Word documents, and slides - including these slides!
-
-1.  Download and run the installer from <https://quarto.org/docs/get-started/>
-2.  Then, in a terminal, install **TinyTeX** - a small LaTeX distribution Quarto uses to make PDFs:
+**Quarto** turns Markdown + code into HTML pages, PDFs, Word documents, and slides - including these slides! Positron ships with the Quarto CLI and extension, so check it works from Positron's terminal:
 
 ``` bash
 quarto --version
-quarto install tinytex     # takes several minutes - let it run while we continue
+quarto check          # reports what it found: R, Python, and (not yet) LaTeX
 ```
 
-::: callout-tip
-**LaTeX** is the standard for typesetting mathematics. Full distributions (MacTeX, MiKTeX) are several GB - TinyTeX installs only what's needed. If you already have one, Quarto will find it.
+::: callout-note
+**PDF output needs LaTeX.** We will install **TinyTeX** (`quarto install tinytex`, a few minutes) in **Week 9**, when we cover Quarto and LaTeX in depth. Today we render to **HTML** only. If you use VS Code or RStudio instead, install Quarto separately from <https://quarto.org/docs/get-started/> - RStudio also bundles it.
 :::
 
-## Installing Positron
-
-::: incremental
--   **Positron** is a free, next-generation data-science IDE from **Posit**
--   Download from <https://positron.posit.co/download>
--   Install **R and Python first** - Positron finds them automatically and lets you switch between them
--   Open Positron and use **File → Open Folder** on your `bootcamp` project
--   Start an **R** or **Python** console from the interpreter picker at the top right
-:::
-
-## The Positron layout
-
--   Everything from VS Code: **Explorer**, **editor** tabs, **terminal**, **Command Palette**
--   Plus data-science panes:
-    -   **Console** - an interactive R or Python session
-    -   **Variables** - every object you've created
-    -   **Plots** - your figures, with history
-    -   **Data Explorer** - a spreadsheet-style view of data frames
-    -   **Help** - documentation for functions
-
-::: callout-tip
-Write code in the **editor** (so it's saved in a file) and send lines to the **console** with `Cmd/Ctrl-Enter`. Use the console only for quick experiments.
-:::
-
-## VS Code vs. Positron
+## Positron vs. VS Code (and RStudio)
 
 ::::: columns
 ::: {.column width="50%"}
@@ -1402,9 +1432,10 @@ Write code in the **editor** (so it's saved in a file) and send lines to the **c
 | Analyze data interactively in R or Python         | **Positron** |
 | Write shell scripts, edit config files, work in many languages | **VS Code** |
 | Work on remote servers like Talapas               | Either       |
+| Already love RStudio for pure R work              | RStudio is fine too! |
 
 ::: callout-tip
-You don't have to choose forever. They share a lot of muscle memory - learn one and you mostly know the other. This term we will use both.
+You don't have to choose forever. Positron and VS Code share a lot of muscle memory - learn one and you mostly know the other. **Class demos use Positron**; the book covers all three.
 :::
 
 ## AI assistants inside your editor
@@ -1418,7 +1449,7 @@ You don't have to choose forever. They share a lot of muscle memory - learn one 
 :::
 
 ::: callout-note
-We'll try these (carefully!) in **Lecture 08** - no need to set them up today.
+We'll try these (carefully!) in **Lecture 09** - no need to set them up today.
 :::
 
 ## What is Markdown?
@@ -1510,7 +1541,7 @@ flowchart LR
 ::: incremental
 -   **Rendering** converts your source into a finished document
 -   One source → **many output formats**
--   **PDF** output goes through **LaTeX** - that's why we installed TinyTeX
+-   **PDF** output goes through **LaTeX** - we install TinyTeX for that in Week 9
 :::
 
 ## Exercise - your first Markdown document
@@ -1616,7 +1647,7 @@ $$
 $$
 
 ::: callout-tip
-Much more on Quarto, chunk options, and LaTeX math in **Lecture 08**.
+Much more on Quarto, chunk options, and LaTeX math in **Lecture 09**.
 :::
 
 ## Jupyter notebooks vs. Quarto documents
@@ -1657,14 +1688,14 @@ You don't have to choose: Quarto can **render Jupyter notebooks** too (`quarto r
 
 ## Checkpoint - does everything work?
 
-Open a terminal (in VS Code or Positron) and run:
+Open a terminal (in Positron: ``Ctrl-` ``) and run:
 
 ``` bash
 echo $SHELL
 R --version
 python3 --version     # Windows (not WSL): try  py --version
 quarto --version
-quarto check          # checks for R, Python, and LaTeX
+quarto check          # checks for R and Python (LaTeX comes in Week 9)
 ```
 
 ::: incremental
@@ -1698,7 +1729,7 @@ Still stuck? Copy the **exact error message** and raise your hand - see "How to 
 -   **Duck ID + Duo** unlock UO services; **OneDrive (1 TB)** for everyone, **Dropbox** for faculty/staff/GEs; know your **data classification** and follow **3-2-1** backups
 -   **Help:** Service Portal, Libraries Data Services, RACS, CBDS - and ask good questions
 -   **Paths**: absolute (from `/`) vs relative (from here); `pwd`, `ls`, `cd`, `mkdir`, `cp`, `mv`, `rm`; wildcards, `>`, `|`
--   **Toolkit**: shell, VS Code, R, Python, Quarto, LaTeX, Positron
+-   **Toolkit**: shell, R, Python, Positron (with Quarto built in); TinyTeX, Git and VS Code/RStudio come later
 -   **Markdown** is plain text; **Quarto renders** it (with code!) into HTML, PDF, and more
 :::
 
@@ -1721,7 +1752,7 @@ Stuck on an install? Email me or come to office hours (Tuesday 3:00 - 4:00, KC C
 ::: incremental
 -   An **SSH key** is a matched pair of files - a **public** key (the lock, safe to share) and a **private** key (the key, never share it)
 -   You give the public key to a server once; after that it recognizes your computer - no password typing
--   You'll use SSH keys to connect to **GitHub** (Lecture 09) and **Talapas** (Lecture 10)
+-   You'll use SSH keys to connect to **GitHub** (Lecture 10) and **Talapas** (Lecture 08)
 -   We'll create them together with one command: `ssh-keygen -t ed25519`
 :::
 

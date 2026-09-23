@@ -26,8 +26,8 @@ set.seed(2026)
 
 The course book goes deeper on everything in this lecture. Read before or after class:
 
--   [Ch. 15: High-Performance Computing with Talapas](../book/chapters/15-hpc-talapas.html)
--   [Ch. 16: Parallel Computing in R](../book/chapters/16-parallel-computing.html)
+-   [Ch. 16: High-Performance Computing with Talapas](../book/chapters/16-hpc-talapas.html)
+-   [Ch. 17: Parallel Computing in R](../book/chapters/17-parallel-computing.html)
 -   *Reference:* [App. G: SLURM Command Reference](../book/chapters/appendix-G-slurm.html)
 
 ## Goals for today
@@ -349,6 +349,38 @@ python3 fasta_stats.py data/*.fasta > results/fasta_stats.tsv
 # Step 2 (R): read that table, make the figure
 Rscript plot_stats.R results/fasta_stats.tsv results/fasta_stats.png
 ```
+:::
+
+## Running example: the stickleback summary as a batch job
+
+Put the Week 7 code in a script, `stickle_means.R`, that writes `results/gene_means.tsv`, then wrap it in a Slurm script:
+
+``` bash
+#!/bin/bash
+#SBATCH --job-name=stickle_means
+#SBATCH --account=<your_pirg>
+#SBATCH --partition=compute
+#SBATCH --time=00:10:00
+#SBATCH --mem=4G
+#SBATCH --cpus-per-task=1
+#SBATCH --output=logs/stickle_%j.out
+#SBATCH --error=logs/stickle_%j.err
+
+module load R/4.4.0
+cd ~/projects/comptools
+Rscript stickle_means.R data/Stickle_RNAseq.tsv results/gene_means.tsv
+```
+
+``` bash
+mkdir -p logs results
+sbatch stickle_means.sbatch          # Submitted batch job 1234567
+squeue -u $USER                      # is it running?
+cat logs/stickle_1234567.out         # what did it print?
+head results/gene_means.tsv
+```
+
+::: callout-tip
+Nothing about the R script changed between your laptop and Talapas - only *where* it runs and *who* launches it (`sbatch` instead of you). For the term project, this same pattern scales to files thousands of times larger.
 :::
 
 ## What the job actually runs

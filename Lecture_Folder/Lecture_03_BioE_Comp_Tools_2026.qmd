@@ -35,7 +35,7 @@ The course book goes deeper on everything in this lecture. Read before or after 
 -   Unix standard streams and redirection
 -   Working with large genomic data files (FASTA and FASTQ)
 -   GREP and regular expressions
--   Working with compressed files; search-and-replace with `sed`
+-   Working with compressed files
 
 # The Command Line
 
@@ -434,6 +434,30 @@ wget -qO - https://hgdownload.soe.ucsc.edu/goldenPath/hg38/chromosomes/chr21.fa.
 -   This approach saves disk space and time
 :::
 
+## Running example: streams and `grep` on the stickleback table
+
+``` bash
+cd ~/projects/comptools && mkdir -p results
+
+# Keep only the header plus the mono-associated fish, save to a new file
+head -n 1 data/Stickle_RNAseq.tsv > results/mono.tsv
+grep -w "mono" data/Stickle_RNAseq.tsv >> results/mono.tsv
+wc -l results/mono.tsv                        # 41 lines = header + 20 + 20 fish
+
+# Which individuals are genotype B raised conventionally?
+grep -w "convB" data/Stickle_RNAseq.tsv | cut -f 1
+
+# A regular expression: individuals whose ID ends in a 1
+grep -E "^[A-Z]+1\b" data/Stickle_RNAseq.tsv | cut -f 1-3
+
+# Send errors somewhere useful: a typo in the path goes to the log, not the screen
+grep -w "mono" data/Stickle_RNAseq.tsvv 2> results/errors.log; cat results/errors.log
+```
+
+::: callout-tip
+`>` creates the file, `>>` appends to it, `2>` captures **stderr**. `grep -w "mono"` matches `mono` only as a whole word, so it finds the 40 mono-associated fish through the third column but would *not* match `monoA` on its own. Try `grep -c mono` versus `grep -cw mono`: both give 40 here. Work out why (which column does each one match on?) - experiments like this are how you learn what a flag really does.
+:::
+
 ## Key Takeaways
 
 -   **Real bioinformatics often involves gigabytes of data - these Unix tools scale beautifully!**
@@ -623,46 +647,6 @@ zcat reads.fastq.gz | awk 'NR % 4 == 1' | wc -l
 
 zcat file1.gz file2.gz | gzip > combined.gz
 ```
-
-## Beyond grep: `sed` for search-and-replace
-
-``` bash
-# Substitute the first match on each line (s/pattern/replacement/)
-sed 's/chr/Chr/' regions.bed
-
-# Substitute every match on each line (g = global)
-sed 's/T/U/g' dna.txt > rna.txt
-
-# Delete lines matching a pattern (e.g. comment lines)
-sed '/^#/d' annotation.gff
-
-# Print only lines 10-20
-sed -n '10,20p' big_file.txt
-```
-
-::: callout-warning
-`sed -i` edits a file **in place** - and the syntax differs between Linux (`sed -i 's/a/b/' f`) and macOS (`sed -i '' 's/a/b/' f`). Write to a new file until you're confident.
-:::
-
-## Beyond grep: `awk` for columns
-
-``` bash
-# Print columns 1 and 3 of a tab- or space-separated file
-awk '{print $1, $3}' data.tsv
-
-# Keep rows where column 5 is greater than 30
-awk '$5 > 30' measurements.tsv
-
-# Comma-separated file: set the field separator, skip the header
-awk -F',' 'NR > 1 {print $2}' samples.csv
-
-# Sum and average a column
-awk -F',' 'NR > 1 {sum += $3; n++} END {print sum, sum/n}' samples.csv
-```
-
-::: callout-tip
-Rule of thumb: **`grep`** finds lines, **`sed`** edits text, **`awk`** works with columns. More in the course book's [GREP chapter](../book/chapters/09-grep-regex.html) and [Regular Expression Reference](../book/chapters/appendix-D-regex.html).
-:::
 
 ## Homework - microbial genome analysis
 

@@ -27,15 +27,17 @@ set.seed(2026)
 The course book goes deeper on everything in this lecture. Read before or after class:
 
 -   [Ch. 10: Shell Scripting](../book/chapters/10-shell-scripting.html)
--   *Reference:* [App. B: Unix Command Reference](../book/chapters/appendix-B-unix.html)
+-   [Ch. 9: GREP and Regular Expressions](../book/chapters/09-grep-regex.html) - the `sed` and `awk` sections
+-   *Reference:* [App. B: Unix Command Reference](../book/chapters/appendix-B-unix.html) · [App. D: Regular Expression Reference](../book/chapters/appendix-D-regex.html)
 
 ## Goals for today
 
 -   Introduction to scripts in Unix, R and Python
 -   Writing shell scripts: variables, conditionals, loops and functions
 -   Error handling and best practices
+-   `sed` and `awk` for editing text and working with columns inside a pipeline
 -   The same script written in R (`Rscript`) and in Python (`python3`)
--   Using R Studio, Positron and Visual Studio Code (VSC) as script editors
+-   Using Positron, VS Code or RStudio as script editors
 
 
 # Scripting in Unix, R and Python
@@ -56,7 +58,7 @@ The course book goes deeper on everything in this lecture. Read before or after 
 | Best at | gluing programs and files together | statistics, data frames, figures | general programming, images, ML |
 
 ::: callout-tip
-Today is mostly about **shell** scripts. At the end we will write the same FASTA-statistics script in R and in Python - and **Lecture 07** goes deep on both languages.
+Today is mostly about **shell** scripts. At the end we will write the same FASTA-statistics script in R and in Python - and **Lectures 05-07** go deep on both languages.
 :::
 
 ## What is a Shell Script?
@@ -315,6 +317,88 @@ if ! grep "pattern" file.txt > /dev/null 2>&1; then
 fi
 ```
 
+# Two more tools for scripts: `sed` and `awk`
+
+## Editing streams inside a script
+
+Shell scripts rarely do arithmetic or text editing themselves - they **glue together** small tools. Two of the most useful in a pipeline are `sed` (edit text as it streams past) and `awk` (work with columns). You met `grep` last week; these complete the trio.
+
+## Beyond grep: `sed` for search-and-replace
+
+``` bash
+# Substitute the first match on each line (s/pattern/replacement/)
+sed 's/chr/Chr/' regions.bed
+
+# Substitute every match on each line (g = global)
+sed 's/T/U/g' dna.txt > rna.txt
+
+# Delete lines matching a pattern (e.g. comment lines)
+sed '/^#/d' annotation.gff
+
+# Print only lines 10-20
+sed -n '10,20p' big_file.txt
+```
+
+::: callout-warning
+`sed -i` edits a file **in place** - and the syntax differs between Linux (`sed -i 's/a/b/' f`) and macOS (`sed -i '' 's/a/b/' f`). Write to a new file until you're confident.
+:::
+
+## Beyond grep: `awk` for columns
+
+``` bash
+# Print columns 1 and 3 of a tab- or space-separated file
+awk '{print $1, $3}' data.tsv
+
+# Keep rows where column 5 is greater than 30
+awk '$5 > 30' measurements.tsv
+
+# Comma-separated file: set the field separator, skip the header
+awk -F',' 'NR > 1 {print $2}' samples.csv
+
+# Sum and average a column
+awk -F',' 'NR > 1 {sum += $3; n++} END {print sum, sum/n}' samples.csv
+```
+
+::: callout-tip
+Rule of thumb: **`grep`** finds lines, **`sed`** edits text, **`awk`** works with columns. More in the course book's [sed and awk sections](../book/chapters/09-grep-regex.html#sec-sed) and [Regular Expression Reference](../book/chapters/appendix-D-regex.html).
+:::
+
+## Running example: `sed`, `awk` and a script on the stickleback table
+
+``` bash
+cd ~/projects/comptools && mkdir -p results
+
+# Fix the awkward column name once, writing a new file (never edit raw data in place)
+sed '1s/Geno&Micro/Geno_Micro/' data/Stickle_RNAseq.tsv > results/stickle_clean.tsv
+
+# Mean of Gene1 (column 5) across all 80 fish
+awk -F'\t' 'NR > 1 { sum += $5; n++ } END { print "Gene1 mean:", sum/n }' results/stickle_clean.tsv
+
+# Mean of Gene1 by genotype - awk arrays keyed by the group
+awk -F'\t' 'NR > 1 { sum[$2] += $5; n[$2]++ } END { for (g in sum) print g, sum[g]/n[g] }' results/stickle_clean.tsv
+```
+
+## Turn it into a script
+
+``` bash
+#!/bin/bash
+# gene_means.sh - mean count of one gene per treatment group
+# Usage: ./gene_means.sh <gene column number>
+set -euo pipefail
+col=${1:?Give a gene column number, e.g. 5 for Gene1}
+infile=results/stickle_clean.tsv
+
+gene=$(head -n 1 "$infile" | cut -f "$col")
+echo "Mean of $gene by group:"
+awk -F'\t' -v c="$col" 'NR > 1 { sum[$4] += $c; n[$4]++ } END { for (g in sum) printf "  %-6s %8.1f\n", g, sum[g]/n[g] }' "$infile"
+```
+
+``` bash
+chmod +x gene_means.sh
+./gene_means.sh 5            # Gene1
+for c in 5 6 7; do ./gene_means.sh $c; done    # loop over the first three genes
+```
+
 ## Real Bioinformatics Script Example
 
 ``` bash
@@ -446,7 +530,7 @@ R                                           # interactive console; quit with q()
 ```
 
 -   `Rscript` runs the file top to bottom and prints only what you `cat()` or `print()`
--   In **Positron** / **VS Code**: open the `.R` file and press `Cmd/Ctrl-Enter` to send lines to the console
+-   In **Positron** / **VS Code** / **RStudio**: open the `.R` file and press `Cmd/Ctrl-Enter` to send lines to the console
 
 ### Python
 
@@ -466,7 +550,7 @@ python3                                     # interactive REPL; quit with exit()
 :::
 
 ::: callout-tip
-Both scripts return an **exit status** (`quit(status = 1)` / `sys.exit(1)`), so a shell pipeline or SLURM job can tell whether they succeeded - just like `exit 1` in bash. In Lecture 10 we submit these scripts to Talapas with `Rscript` and `python3` inside an `sbatch` job.
+Both scripts return an **exit status** (`quit(status = 1)` / `sys.exit(1)`), so a shell pipeline or SLURM job can tell whether they succeeded - just like `exit 1` in bash. In Lecture 08 we submit these scripts to Talapas with `Rscript` and `python3` inside an `sbatch` job.
 :::
 
 ## Best Practices for Shell Scripts

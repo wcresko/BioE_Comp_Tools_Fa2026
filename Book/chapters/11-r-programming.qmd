@@ -13,14 +13,14 @@ After completing this chapter, you will be able to:
 
 - Explain why R is well-suited for scientific computing
 - Understand R's object-oriented nature and examine objects with `class()`, `typeof()`, and `str()`
-- Use Positron as an integrated development environment for R
+- Use Positron or RStudio as an integrated development environment for R
 - Perform basic arithmetic and variable assignment in R
 - Work with vectors and understand vectorized operations
 - Use logical operators and handle floating-point comparisons correctly
 - Create and manipulate data frames, lists, and matrices
 - Use built-in functions and access help documentation including vignettes
 - Interpret common error messages and handle missing values (`NA`) correctly
-- Manage the working directory by working in a project folder
+- Manage the working directory by working in a project folder (or an RStudio Project)
 - Install packages and resolve namespace conflicts
 - Create basic visualizations
 - Read and write data files
@@ -94,7 +94,7 @@ ggplot(hydrogel, aes(x = concentration, y = compression)) +
   geom_boxplot()
 ```
 
-In Positron or VS Code, create a script with File → New File (choose R), and run the current line or selection with `Ctrl+Enter` (`Cmd+Enter` on a Mac). Comment lines ending in four or more dashes, as above, become collapsible sections in the editor's outline. Quarto documents (@sec-quarto-documents) extend the same idea by interleaving code chunks with formatted narrative.
+In Positron or VS Code, create a script with File → New File (choose R); in RStudio, File → New File → R Script. Then and run the current line or selection with `Ctrl+Enter` (`Cmd+Enter` on a Mac). Comment lines ending in four or more dashes, as above, become collapsible sections in the editor's outline. Quarto documents (@sec-quarto-documents) extend the same idea by interleaving code chunks with formatted narrative.
 
 A script can also be run from the shell without opening an IDE at all, which is how analyses run on Talapas (@sec-hpc-talapas). The same small program looks like this in R and in Python; the shell side of running scripts is covered in @sec-rscript.
 
@@ -137,31 +137,31 @@ python3 summarize.py experiment.csv
 ```
 :::
 
-## Positron: Your R Environment {#sec-rstudio}
+## Positron and RStudio: Your R Environment {#sec-rstudio}
 
-While R can run from the command line, most users work in an integrated development environment (IDE). In this course that is **Positron** (@sec-positron), which is built on the same core as VS Code and adds the panes a data scientist needs.
+While R can run from the command line, most users work in an integrated development environment (IDE). In this course that is mainly **Positron** (@sec-positron), which is built on the same core as VS Code and adds the panes a data scientist needs; **RStudio** (@sec-rstudio-overview) offers the same panes in a fixed four-pane layout, and everything below applies to it with the pane names noted.
 
-### The Positron Interface {#sec-the-rstudio-interface}
+### The IDE Interface {#sec-the-rstudio-interface}
 
-Positron organizes your workspace into a few key regions:
+Positron organizes your workspace into a few key regions (RStudio's equivalents are in parentheses):
 
-**Editor (center).** Where you write and edit scripts and Quarto documents. Code here isn't executed until you explicitly run it.
+**Editor (center; RStudio: Source, top-left).** Where you write and edit scripts and Quarto documents. Code here isn't executed until you explicitly run it.
 
-**Console (bottom).** The interactive R (or Python) session. Commands typed here execute immediately, and lines sent from the editor appear here with their output.
+**Console (bottom; RStudio: bottom-left).** The interactive R (or Python) session. Commands typed here execute immediately, and lines sent from the editor appear here with their output.
 
-**Variables (right).** Shows the objects you've created in the current session, with their type and size; click a data frame to open it in the **Data Explorer**.
+**Variables (right; RStudio: Environment/History, top-right).** Shows the objects you've created in the current session, with their type and size; click a data frame to open it in the **Data Explorer**.
 
-**Plots, Help, and Explorer (right and left).** The plot viewer, help documentation, and the file browser for the folder you have open.
+**Plots, Help, and Explorer (right and left; RStudio: Files/Plots/Packages/Help, bottom-right).** The plot viewer, help documentation, and the file browser for the folder you have open.
 
 ::: {.callout-note title="R is not the IDE"}
-`R` is the programming language; Positron (or VS Code) is the integrated development environment that lets you write and run R and Python comfortably. R must be installed first, and Positron then finds it. If you ever need to, you can run R directly from the shell by typing `R`.
+`R` is the programming language; Positron, RStudio, or VS Code is the integrated development environment that lets you write and run R (and Python) comfortably. R must be installed first, and the IDE then finds it. If you ever need to, you can run R directly from the shell by typing `R`.
 :::
 
 ::: {.callout-tip}
 Learn keyboard shortcuts! `Ctrl+Enter` (Windows/Linux) or `Cmd+Enter` (Mac) runs the current line or selection in the console. The essential editor shortcuts are collected in @sec-appendix-shortcuts.
 :::
 
-### Project Folders and the Working Directory {#sec-rstudio-projects}
+### Project Folders, RStudio Projects, and the Working Directory {#sec-rstudio-projects}
 
 Every R session has a **working directory**: the folder that relative paths such as `"data/results.csv"` are resolved against, exactly as in the shell (@sec-unix-fundamentals). You can inspect and change it from R:
 
@@ -180,6 +180,8 @@ Working in a project folder removes the need for `setwd()` altogether:
 1. Keep each project in its own directory (see @sec-quarto-projects for a typical layout)
 2. In Positron, use **File → Open Folder** to open that directory, not a single file
 3. The R console starts with the working directory set to that folder
+
+RStudio does the same thing with **RStudio Projects**: File → New Project → New Directory (or Existing Directory) creates a `.Rproj` file, and opening that file sets the working directory to the project folder.
 
 Because the working directory is the project folder, paths in your scripts can be relative to the project root and the code runs unchanged on a collaborator's computer. A `setwd("/Users/yourname/...")` line at the top of a script is a red flag: it will fail for everyone but you.
 
@@ -536,7 +538,7 @@ R has several fundamental data types:
 | `factor` | `<fct>` | Categorical variables | Treatment levels |
 | `Date`, `POSIXct` | `<date>`, `<dttm>` | Dates and date-times | `Sys.Date()`, `Sys.time()` |
 
-: R data types. The abbreviations are what tibbles (@sec-tidy-data) and `glimpse()` print under each column name. {#tbl-data-types}
+: R data types. The abbreviations are what tibbles (@sec-tibbles) and `glimpse()` print under each column name. {#tbl-data-types}
 
 Numbers are doubles by default: `42` is numeric, and you must write `42L` to get an integer. Integer and double vectors together are called **numeric** vectors.
 
@@ -1032,7 +1034,7 @@ install.packages(c("ggplot2", "readr", "tidyr"))
 ```
 
 ::: {.callout-note}
-Package names are case-sensitive and must be in quotation marks when installing. You only need to install a package once on your system (and again after upgrading R). Positron offers the same thing through the Command Palette (Cmd/Ctrl-Shift-P → **R: Install Packages**), and `installed.packages()` or the Packages view lists what is installed. Bioconductor packages are installed with `BiocManager::install()` instead (@sec-install-checklist).
+Package names are case-sensitive and must be in quotation marks when installing. You only need to install a package once on your system (and again after upgrading R). Positron offers the same thing through the Command Palette (Cmd/Ctrl-Shift-P → **R: Install Packages**) and RStudio through *Tools → Install Packages*; `installed.packages()` (or RStudio's Packages tab) lists what is installed. Bioconductor packages are installed with `BiocManager::install()` instead (@sec-install-checklist).
 :::
 
 ### Loading Packages {#sec-loading-packages}
@@ -1147,7 +1149,7 @@ labelled
 ```
 
 ::: {.callout-note}
-Row names are a base R convenience. The tidyverse's tibbles (@sec-tidy-data) drop them, on the principle that a sample identifier is data and belongs in an ordinary column such as `sample_id`; `tibble::rownames_to_column()` makes the conversion. In this book we keep identifiers in columns.
+Row names are a base R convenience. The tidyverse's tibbles (@sec-tibbles) drop them, on the principle that a sample identifier is data and belongs in an ordinary column such as `sample_id`; `tibble::rownames_to_column()` makes the conversion. In this book we keep identifiers in columns.
 :::
 
 ### Examining Data Frames {#sec-examining-data-frames}
@@ -1175,13 +1177,13 @@ names(experiment)
 colnames(experiment)
 ```
 
-In Positron, you can also use `View()` to open the Data Explorer, a spreadsheet-like viewer for interactive exploration:
+In Positron or RStudio, you can also use `View()` to open a spreadsheet-like viewer (Positron's Data Explorer) for interactive exploration:
 
 ```{r}
 #| label: view-df
 #| eval: false
 
-# Opens data in the Data Explorer (Positron)
+# Opens data in a viewer pane (Positron or RStudio)
 View(experiment)
 ```
 
@@ -1368,7 +1370,7 @@ measurements <- read.csv("data.csv",
 - `na.strings`: which strings should become `NA`
 - `stringsAsFactors`: whether text columns become factors (the default has been `FALSE` since R 4.0)
 
-The tidyverse's **readr** package provides `read_csv()`, `read_tsv()`, and `read_delim()`, which are faster, never create row names or factors, report how each column was parsed, and return a **tibble** (an enhanced data frame). Both families are in everyday use and you will meet the readr versions in @sec-data-import-with-readr; the base functions are handy because they need no packages at all, for instance in a script run on a cluster.
+The tidyverse's **readr** package provides `read_csv()`, `read_tsv()`, and `read_delim()`, which are faster, never create row names or factors, report how each column was parsed, and return a **tibble** (an enhanced data frame). Both families are in everyday use and the readr versions are in @sec-data-import-with-readr; the base functions are handy because they need no packages at all, for instance in a script run on a cluster.
 
 ```{r}
 #| label: readr-preview
@@ -1380,7 +1382,7 @@ measurements <- read_tsv("data.tsv")
 ```
 
 ::: {.callout-warning title="Always check what you imported"}
-Reading a file rarely fails loudly; it fails quietly by giving you the wrong column types. Immediately after any import, look at the result with `str()` or `glimpse()`, `head()`, `dim()`, and `summary()` (or `View()` in Positron). A numeric column that shows up as `character` means a non-numeric entry is hiding somewhere in the file.
+Reading a file rarely fails loudly; it fails quietly by giving you the wrong column types. Immediately after any import, look at the result with `str()` or `glimpse()`, `head()`, `dim()`, and `summary()` (or `View()` in Positron or RStudio). A numeric column that shows up as `character` means a non-numeric entry is hiding somewhere in the file.
 :::
 
 ### Writing Files {#sec-r-writing-files}
@@ -1610,7 +1612,7 @@ sapply(my_list, mean)  # Simplified output
 ```
 
 ::: {.callout-tip}
-The tidyverse packages (covered in @sec-tidy-data) provide more intuitive alternatives like `group_by()` and `summarize()` for this workflow.
+The tidyverse packages (covered in @sec-data-wrangling) provide more intuitive alternatives like `group_by()` and `summarize()` for this workflow.
 :::
 
 ## Basic Programming Constructs {#sec-programming-constructs}
@@ -1976,7 +1978,7 @@ This chapter introduced R programming fundamentals:
 
 - R is designed for statistical computing with excellent graphics
 - Everything in R is an object with a class and type; use `class()`, `typeof()`, and `str()` to explore objects
-- Positron provides an integrated development environment with a console, Variables pane, Plots pane, and Data Explorer
+- Positron and RStudio provide integrated development environments with a console, variables/environment pane, plots pane, and data viewer
 - Variables are assigned with `<-`; R is case-sensitive; avoid reserved words and shadowing built-in functions
 - Vectors are the fundamental data structure; operations are vectorized
 - Logical operators (`&`, `|`, `!`, `%in%`) and comparison operators enable conditional logic
@@ -1994,7 +1996,7 @@ This chapter introduced R programming fundamentals:
 - Basic plotting is built-in; ggplot2 offers advanced graphics
 - Use `rm()` and `dev.off()` to clean up your environment and graphics devices
 
-These fundamentals prepare you for more advanced R programming, including the tidyverse packages covered in @sec-tidy-data and @sec-data-viz. A command reference is in @sec-appendix-r.
+These fundamentals prepare you for more advanced R programming, including the tidyverse packages covered in @sec-data-wrangling and @sec-data-viz. A command reference is in @sec-appendix-r.
 
 ::: {.callout-tip}
 For a comprehensive reference of R commands and functions, including base R and tidyverse, see @sec-appendix-r.
@@ -2055,9 +2057,9 @@ Using the built-in `mtcars` dataset:
 4. Verify the data matches the original
 5. Repeat the round trip with `write.csv()` *without* `row.names = FALSE`, read the file back, and explain the extra column
 
-**Exercise 8: Exploring Positron and the Help System**
+**Exercise 8: Exploring Your IDE and the Help System**
 
-1. Locate the editor, Console, Variables, and Plots panes; open the Help pane
+1. Locate the editor, Console, Variables (Environment), and Plots panes; open the Help pane (in RStudio, click through the Packages and Help tabs in the bottom-right pane)
 2. Create a new R script and a new Quarto document (File → New File) and compare them
 3. Run `?sd`, then `args(sd)` and `example(sd)`; from the help page alone, work out how to compute the standard deviation of a vector containing `NA`
 4. Deliberately trigger three errors from @tbl-common-r-errors (an undefined object, a missing package, an unbalanced bracket) and confirm you can read each message

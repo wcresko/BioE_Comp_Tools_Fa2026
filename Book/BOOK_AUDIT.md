@@ -96,7 +96,7 @@ Prepared 2026-09-22 after moving the book into `Book/`. Numbers are for picking 
 
 62. No gaps — Poisson, double integral, tridiagonal matrix, inline vs display are all there. (Lecture 08 shows `\int` in the source block but renders `\iint` — fix the lecture.)
 
-## Ch. 10 (book order 15) – Git and GitHub (`19-git-github.qmd`) and Git appendix
+## Ch. 10 (book order 15) – Git and GitHub (`20-git-github.qmd`) and Git appendix
 
 63. **!** Both lecture and book teach `git checkout -b` for branches. Switch primary examples to `git switch -c` / `git switch main` and `git restore`, keeping `checkout` as "older syntax you'll still see"; update the troubleshooting block too. (Update Lectures 08–09 to match.)
 64. **E** Authentication: add concrete steps students hit on their first push — `ssh-keygen -t ed25519` + add key at GitHub, or a fine-grained token (passwords were removed in 2021), or `gh auth login`. Cross-link from "Connecting Local to Remote".
@@ -105,7 +105,7 @@ Prepared 2026-09-22 after moving the book into `Book/`. Numbers are for picking 
 67. **E** Add tags/releases + Zenodo DOI for citing code (currently only in the data-formats appendix).
 68. **E** Add `git help <cmd>`, `git fetch`, and `git log -p` to the ch. 10 command table. (Lectures still list the retired GitHub Learning Lab — replace with GitHub Skills.)
 
-## Ch. 11 (book order 16) – HPC / Talapas (`15-hpc-talapas.qmd`) and SLURM appendix
+## Ch. 11 (book order 16) – HPC / Talapas (`16-hpc-talapas.qmd`) and SLURM appendix
 
 69. **!** Node table is out of date. Replace with the Lecture 10 table: 43 standard AMD Milan nodes (128 cores, 512 GB); 24 GPU nodes (48 cores, 256–512 GB, 52 A100 total); large-memory up to 4 TB; 19 interactive nodes; condo-node callout (~166 CPU nodes, V100/A100/H100); RACS source link. Change "89 GPUs (A100 and H100)" to "A100, H100, V100".
 70. **!** Partition table lists Talapas-1 names (`short`, `long`, `longgpu`, `fat`, `longfat`, `preempt`). Replace with `compute`/`computelong` (1 d/14 d), `gpu`/`gpulong`, `interactive` (12 h), `interactivegpu` (8 h), `memory`/`memorylong` (up to 4 TB) plus the `sinfo` tip; fix the SLURM-directives example (`fat` → `memory`) and the interactive-job example (`--partition=interactive`).

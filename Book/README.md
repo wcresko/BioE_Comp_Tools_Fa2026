@@ -85,15 +85,15 @@ BioE_Comp_Tools_Fa2026/Book/
 │   ├── 10-shell-scripting.qmd
 │   ├── 11-r-programming.qmd
 │   ├── 08-tidy-data.qmd
-│   ├── 13-data-visualization.qmd
-│   ├── 19-git-github.qmd
-│   ├── 15-hpc-talapas.qmd
+│   ├── 14-data-visualization.qmd
+│   ├── 20-git-github.qmd
+│   ├── 16-hpc-talapas.qmd
 │   ├── 05-quarto-documents.qmd
-│   ├── 14-writing-functions.qmd
-│   ├── 16-parallel-computing.qmd
-│   ├── 20-databases.qmd
-│   ├── 17-latex-basics.qmd
-│   ├── 18-ai-assisted-coding.qmd
+│   ├── 15-writing-functions.qmd
+│   ├── 17-parallel-computing.qmd
+│   ├── 21-databases.qmd
+│   ├── 18-latex-basics.qmd
+│   ├── 19-ai-assisted-coding.qmd
 │   ├── 12-python-programming.qmd
 │   └── appendix-*.qmd   # unix, git, r, python, latex, slurm, regex, shortcuts, data-formats, glossary
 ├── images/              # Image assets

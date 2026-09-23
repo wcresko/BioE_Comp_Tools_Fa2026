@@ -33,64 +33,19 @@ The course book goes deeper on everything in this lecture. Read before or after 
 
 ## Goals for today
 
--   Deeper dive into Unix tools
--   Reading and writing files
--   Tidy data
--   Advanced Unix tools to manipulate large files
+-   Navigating the file system: paths, `cd`, `ls`, wildcards
+-   Making, reading and writing files
+-   Redirection and Unix pipes
+-   Basics of data structures and tidy data
 
-# Computational Tools - The Command Line
-
-![](images/Lec02_img002.jpeg){fig-align="center" width="90%"}
-
-## What is Unix?
-
--   An operating system developed at Bell Labs in 1969, released in 1973
--   Now a family of operating systems: Linux, macOS, and others share the Unix design
--   Runs both locally on your computer and on large clusters like Talapas
--   Its **shell** gives you a scripting language for talking to the operating system
--   Linux is an open-source operating system built on the same design
-
-## What is a shell? {background-image="images/Lec02_img003.jpeg"}
-
--   The ‘shell’ is a program that runs UNIX and takes in commands and gives them to the operating system
-
--   **`bash`** (Linux, WSL, Talapas) and **`zsh`** (macOS default) are the common shells - nearly identical for our purposes
-
--   You can access the shell via a **`terminal window`**
-
-##  {background-image="images/Lec02_img003.jpeg"}
-
-![](images/Lec02_img004.jpeg){width="90%" fig-align="center"}
-
-## Recipes for a shell command
-
--   **Prompt**: notation used to indicate your computer is ready to accept a new command
--   **Command**: the building blocks of programming, tell computer to do a specific task
--   **Options**: change the behavior of a command
--   **Argument**: what the command should operate on
-
-![](images/Lec00_img006.svg){width="80%" fig-align="center"}
-
-## Why use the shell?
+## Recap from last time
 
 ::: incremental
--   Speed
--   Can handle extremely large file sizes
--   Use programs only available via shell
--   The commands work almost identically across platforms
--   You can even use them on a large computer cluster like Talapas and AWS
--   It is incredibly powerful particularly for repeated actions
--   It allows you to do thousands of ‘clicks’ with single commands
+-   **Unix** is the family of operating systems (macOS, Linux, WSL) that share one command-line toolkit
+-   A **shell** (bash, zsh) reads a command, runs it, and prints the result: `command -options arguments`
+-   Use the shell because it is **scriptable, repeatable, and works the same on your laptop and on Talapas**
+-   Help: `man cmd`, `cmd --help`, `tldr cmd`, and the book's [Unix Command Reference](../book/chapters/appendix-B-unix.html)
 :::
-
-## Where do you get help?
-
--   Manual pages!
-    -   The shell has manuals for all basic commands
-    -   Type `man [command_name]` to access the manual for a specific command
-    -   Type `q` to exit
--   Also...the internet!
--   Also... Generative AI (ChatGPT, Claude, etc.)
 
 # Common navigation commands
 
@@ -437,6 +392,43 @@ Try these exercises:
 
 
 ------------------------------------------------------------------------
+
+# Running example: the stickleback RNA-seq table
+
+## First look at a real data file
+
+Download it into your project (once), then use what you learned today:
+
+``` bash
+mkdir -p ~/projects/comptools/data && cd ~/projects/comptools
+curl -L -o data/Stickle_RNAseq.tsv https://wcresko.github.io/BioE_Comp_Tools_Fa2026/Data_Folder/Stickle_RNAseq.tsv
+
+ls -lh data/                       # how big is it?
+wc -l data/Stickle_RNAseq.tsv      # how many lines (fish + header)?
+head -n 3 data/Stickle_RNAseq.tsv | cut -f 1-6     # first rows, first 6 columns only
+cut -f 2 data/Stickle_RNAseq.tsv | sort | uniq -c  # how many fish per genotype?
+cut -f 3 data/Stickle_RNAseq.tsv | sort | uniq -c  # ...and per microbiota treatment
+head -n 1 data/Stickle_RNAseq.tsv | tr '\t' '\n' | wc -l   # how many columns?
+```
+
+::: callout-tip
+`cut -f` picks **columns** from a tab-separated file, `sort | uniq -c` **counts** categories, and `tr '\t' '\n'` turns one wide header line into one name per line so `wc -l` can count them. Every one of these is a one-word answer to a question about the data - no spreadsheet needed.
+:::
+
+## Is it tidy?
+
+``` bash
+head -n 2 data/Stickle_RNAseq.tsv | cut -f 1-8
+```
+
+    Individual  Genotype  Microbiota    Geno&Micro  Gene1  Gene2  Gene3  Gene4
+    AC1         A         conventional  convA       16     15     71     153
+
+::: incremental
+-   One row per **fish**, one column per **variable** - tidy for per-fish questions
+-   But **600 gene columns** is a "wide" layout: the *gene* is really a variable too. For per-gene questions we will reshape it to **long** format (one row per fish x gene) in Week 7
+-   The `Geno&Micro` column duplicates two other columns - and the `&` is a name that will annoy every tool we use. Keep an eye on it.
+:::
 
 # Tidy Data
 

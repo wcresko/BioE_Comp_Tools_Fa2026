@@ -28,8 +28,9 @@ set.seed(2026)
 The course book goes deeper on everything in this lecture. Read before or after class:
 
 -   [Ch. 8: Tidy Data Principles](../book/chapters/08-tidy-data.html)
--   [Ch. 13: Data Visualization with ggplot2](../book/chapters/13-data-visualization.html)
--   [Ch. 14: Writing Functions in R](../book/chapters/14-writing-functions.html)
+-   [Ch. 13: Data Wrangling with the Tidyverse](../book/chapters/13-data-wrangling.html)
+-   [Ch. 14: Data Visualization with ggplot2](../book/chapters/14-data-visualization.html)
+-   [Ch. 15: Writing Functions in R](../book/chapters/15-writing-functions.html)
 -   *Reference:* [App. E: R Command Reference](../book/chapters/appendix-E-r.html) · [App. F: Python Quick Reference](../book/chapters/appendix-F-python.html)
 
 ## Goals for today
@@ -120,7 +121,7 @@ import sys; print(sys.version); print(pd.__version__)   # versions - put at the 
 :::
 
 ::: callout-tip
-When an object surprises you, run `str()` (R) or `.info()` / `type()` (Python) on it first. In **Positron**, the Variables pane shows the same information.
+When an object surprises you, run `str()` (R) or `.info()` / `type()` (Python) on it first. In **Positron** or **RStudio**, the Variables/Environment pane shows the same information.
 :::
 
 ## Common gotchas that bite everyone
@@ -406,12 +407,56 @@ Source: Leland Wilkinson, *The Grammar of Graphics*, 1999
 | `geom_smooth()`    | Trend lines  | Two continuous          | `sns.regplot()`          |
 
 ::: callout-tip
-`facet_wrap(~ group)` splits any plot into one panel per group, and `ggsave("figure.pdf")` writes the last plot to a file. Data-visualization mechanics get a full chapter in the [course book](../book/chapters/13-data-visualization.html).
+`facet_wrap(~ group)` splits any plot into one panel per group, and `ggsave("figure.pdf")` writes the last plot to a file. Data-visualization mechanics get a full chapter in the [course book](../book/chapters/14-data-visualization.html).
 :::
 
 ## Choosing the right kind of plot
 
 ![Start from the question and the type of data you have](images/Lec07_img005.svg){fig-align="center" width="90%"}
+
+## Running example: wide to long, then summarize
+
+```{r}
+#| label: lec07-stickle-long
+#| echo: true
+#| eval: true
+#| message: false
+
+library(tidyverse)
+stickle <- read_tsv("../Data_Folder/Stickle_RNAseq.tsv", show_col_types = FALSE) |>
+  rename(geno_micro = `Geno&Micro`)          # fix the awkward name once
+
+stickle_long <- stickle |>
+  pivot_longer(starts_with("Gene"), names_to = "gene", values_to = "count")
+stickle_long                                  # 80 x 600 = 48,000 rows: one per fish x gene
+
+gene_means <- stickle_long |>
+  group_by(gene, Genotype, Microbiota) |>
+  summarize(mean_count = mean(count), .groups = "drop")
+gene_means |> filter(gene == "Gene1")
+```
+
+## Running example: the same figure, the grammar-of-graphics way
+
+```{r}
+#| label: fig-lec07-stickle-ggplot
+#| fig-cap: "Counts for four genes by genotype and microbiota treatment"
+#| out-width: "70%"
+#| echo: true
+#| eval: true
+
+stickle_long |>
+  filter(gene %in% c("Gene1", "Gene2", "Gene3", "Gene4")) |>
+  ggplot(aes(x = Genotype, y = count, fill = Microbiota)) +
+  geom_boxplot() +
+  facet_wrap(~ gene, scales = "free_y") +
+  labs(y = "Read count", title = "Stickleback gut RNA-seq") +
+  theme_minimal(base_size = 14)
+```
+
+::: callout-tip
+Same data, three tools: `awk` gave us one gene's mean per group in Week 4, base R's `boxplot()` one figure in Week 6, and one `pivot_longer()` now unlocks *every* gene at once. This is the payoff of tidy, long-format data.
+:::
 
 ## Key Takeaways
 

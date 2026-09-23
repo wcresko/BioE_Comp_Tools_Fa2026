@@ -9,7 +9,7 @@ Sources: the Winter 2026 stats book and course site (temporarily copied in as 'B
 
 Sources compared: `SB/chapters/01-introduction.qmd` (computational parts), `SB/chapters/02-installing-tools.qmd`, `SB/index.qmd` (framing), `SW/Lecture_Folder/Week1.qmd` ("Installing Programs", "Platform Considerations", "Accessing the Shell", Windows slides), `SW/Software.qmd`.
 
-Overall finding: the Comp Tools book's toolkit chapter is already broader and newer than the stats sources (Python, VS Code, Positron, compiler toolchains, WSL "which side" guidance, `quarto install tinytex`). What the stats book adds is a handful of concrete install/verify/update/troubleshoot steps that the target lacked; those were merged surgically. The site `Software.qmd` was a byte-for-byte copy of the *stats* site page (R + RStudio only, dead `rstudio.org` link, "Lastest" typos) and did not reflect the Comp Tools course, so it was rewritten in the same list style. The R/Python and VS Code/Positron/RStudio scope of the course was preserved throughout.
+Overall finding: the Comp Tools book's toolkit chapter is already broader and newer than the stats sources (Python, VS Code, Positron, compiler toolchains, WSL "which side" guidance, `quarto install tinytex`). What the stats book adds is a handful of concrete install/verify/update/troubleshoot steps that the target lacked; those were merged surgically. The site `Software.qmd` was a byte-for-byte copy of the *stats* site page (R + RStudio only, dead `rstudio.org` link, "Latest" typos) and did not reflect the Comp Tools course, so it was rewritten in the same list style. The R/Python and VS Code/Positron/RStudio scope of the course was preserved throughout.
 
 ## 1. Edits
 
@@ -31,7 +31,7 @@ Overall finding: the Comp Tools book's toolkit chapter is already broader and ne
 
 ### `/home/claude/work_site/Software.qmd`
 - Rewritten (same title, same bullet-list style) to reflect the Comp Tools course instead of the stats course: full install list (shell, R, Python, Quarto + TinyTeX, VS Code, Positron, optional RStudio, Git/GitHub) with laptop minimums; Mac/Linux/Windows shell sections updated with the stats site's WSL flow plus the newer `wsl --install -d Ubuntu`, "not PowerShell", virtualization troubleshooting, and "install R/Python/IDEs on the Windows side" guidance; R section gains chip check, Rtools, Ubuntu apt, tidyverse; new Python, Quarto/LaTeX, Editors sections; Git/GitHub section gains the Student Developer Pack; new "Check that it all works" command block; links into the book (`book/chapters/01-introduction.html#sec-intro-setup`, `book/chapters/02-your-toolkit.html`).
-- Fixed: dead/outdated `https://www.rstudio.org` link → `posit.co/download/rstudio-desktop/`; `r-project.org` → CRAN; two "Lastest" typos; the LaTeX bullet pointed at `latex-project.org/get/` with no mention of TinyTeX, which is what the course actually uses.
+- Fixed: dead/outdated `https://www.rstudio.org` link → `posit.co/download/rstudio-desktop/`; `r-project.org` → CRAN; two "Latest" typos; the LaTeX bullet pointed at `latex-project.org/get/` with no mention of TinyTeX, which is what the course actually uses.
 
 ## 2. Images to copy
 
@@ -163,7 +163,7 @@ Notes: the SVG was preferred over the matching `.jpeg` in every case (both exist
 # C-r change log — R basics / RStudio / R reference
 
 Sources read in full: `SB/chapters/04-r-rstudio.qmd`, `SB/chapters/A4-r-reference.qmd`, `SW/Lecture_Folder/Appendix_D.qmd`, R-basics portions of `SW/Lecture_Folder/Week1.qmd` (lines 518–1397) and the headings of `Week2.qmd` (its R content is dplyr/ggplot/probability, outside this assignment).
-Targets read in full: `work_Book/chapters/11-r-programming.qmd`, `work_Book/chapters/appendix-E-r.qmd`; headings of `14-writing-functions.qmd`; relevant sections of `02-your-toolkit.qmd` and `08-tidy-data.qmd` checked for duplication.
+Targets read in full: `work_Book/chapters/11-r-programming.qmd`, `work_Book/chapters/appendix-E-r.qmd`; headings of `15-writing-functions.qmd`; relevant sections of `02-your-toolkit.qmd` and `08-tidy-data.qmd` checked for duplication.
 
 Overall finding: the Comp Tools chapter 07 and appendix were already a superset of the stats book's R chapter and R reference on most topics (objects, vectors, sorting, `which()`, floating point, `near()`, vignettes, `conflicted`, lists, matrices, apply family, `replicate()`, cleanup). The additions below are the pieces the stats sources have that the target lacked, plus a few consistency fixes.
 
@@ -208,7 +208,7 @@ Overall finding: the Comp Tools chapter 07 and appendix were already a superset 
 | New `## Base R Graphics {#sec-r-base-graphics}` with `@tbl-r-base-graphics` | The appendix had ggplot2 tables but no base-graphics reference, although ch07 teaches `plot/hist/boxplot/barplot/curve/par(mfrow)/pdf()+dev.off()`. Table built from SB "Useful Plotting Arguments", SW Appendix D plotting slides, and the functions ch07 already uses. |
 | dplyr / tidyr / stringr / joins / selection helpers / package tables | Compared line-by-line with SB A4: the book's tables are identical or strict supersets (extra `map_*`, `vapply`, forcats, base strings, gotchas). No change. |
 
-### `work_Book/chapters/14-writing-functions.qmd`
+### `work_Book/chapters/15-writing-functions.qmd`
 
 No edits. The stats sources contain no function-writing material beyond the `function` reserved word; ch13 already covers everything relevant.
 
@@ -258,7 +258,7 @@ Overall finding: the Comp Tools chapters 12 and 16 already cover almost everythi
 - **Summary** — cross-references bullet now mentions citations.
 - **Exercises** — Exercise 4 step 2 uses `--to all`; added **Exercise 5: Tables, Cross-References, and Citations** (adapted from SB exercise M.4 plus the new citations section).
 
-### `/home/claude/work_Book/chapters/17-latex-basics.qmd`
+### `/home/claude/work_Book/chapters/18-latex-basics.qmd`
 
 - **Uppercase Greek tip** — extended with `\var...` variants and `\boldsymbol` for bold Greek (A6), pointer to the new @tbl-greek-names.
 - **NEW callout "Greek letters in R plot labels"** (after the Greek section) — `expression()` / `latex2exp` for ggplot labels and raw LaTeX strings in matplotlib. From A7 "In R". Nothing in the book previously covered Greek symbols in plot labels.
@@ -299,9 +299,9 @@ None. None of the assigned sources contain figures, and no image references were
 
 # E-tidy-viz change log
 
-Sources read: `SB/chapters/06-tidy-data.qmd`, `SB/chapters/07-data-wrangling.qmd`, `SB/chapters/13-data-visualization.qmd`, the tooling parts of `SB/chapters/08-exploratory-data-analysis.qmd` (data inspection, duplicates), and the tidyverse/ggplot mechanics slides of `SW/Lecture_Folder/Week2.qmd` (lines 115–830). `Week3.qmd` was skimmed by header and contains no tidyverse/ggplot mechanics (hypothesis testing, bootstrapping, loops), so nothing was pulled from it.
+Sources read: `SB/chapters/06-tidy-data.qmd`, `SB/chapters/07-data-wrangling.qmd`, `SB/chapters/14-data-visualization.qmd`, the tooling parts of `SB/chapters/08-exploratory-data-analysis.qmd` (data inspection, duplicates), and the tidyverse/ggplot mechanics slides of `SW/Lecture_Folder/Week2.qmd` (lines 115–830). `Week3.qmd` was skimmed by header and contains no tidyverse/ggplot mechanics (hypothesis testing, bootstrapping, loops), so nothing was pulled from it.
 
-Targets: `/home/claude/work_Book/chapters/08-tidy-data.qmd`, `/home/claude/work_Book/chapters/13-data-visualization.qmd`. Neither target chapter uses R/Python tabsets, so none were added. R is not installed in this environment, so code was checked by reading, not by rendering.
+Targets: `/home/claude/work_Book/chapters/08-tidy-data.qmd`, `/home/claude/work_Book/chapters/14-data-visualization.qmd`. Neither target chapter uses R/Python tabsets, so none were added. R is not installed in this environment, so code was checked by reading, not by rendering.
 
 ## 1. Edits
 
@@ -341,7 +341,7 @@ Targets: `/home/claude/work_Book/chapters/08-tidy-data.qmd`, `/home/claude/work_
 | Summary | **Fix:** the "see @sec-appendix-r" callout had been inserted in the middle of the data.table bullet list, splitting it; moved the callout after the list. Updated bullets for missing values, `glimpse()`, and pivot options. |
 | Exercises | Added Exercise 12 (missing data + `airquality`/`glimpse`), adapted from SB ch07 Exercise 6 and SB ch06 Exercise 7.6. |
 
-### `work_Book/chapters/13-data-visualization.qmd`
+### `work_Book/chapters/14-data-visualization.qmd`
 
 | Section | Change |
 |:--|:--|
@@ -426,7 +426,7 @@ Overall finding: the Comp Tools book chapters are already broader and newer than
 - **Cloud Computing** — replaced Mermaid `fig-cloud-architecture` with `appendix_A_S27_cloud_computing.svg`; added the one-line characterizations of the three providers and an explanation of regions/availability zones; added "compliance/data residency" and "noisy neighbours" disadvantages.
 - **Evolution of Scientific Computing** — replaced Mermaid `fig-computing-evolution` with `appendix_A_S18_computing_timeline.svg` and put the six eras into the lead sentence so the text is self-contained (BOOK_AUDIT #21).
 
-### `work_Book/chapters/19-git-github.qmd`
+### `work_Book/chapters/20-git-github.qmd`
 - **Key Concepts** — replaced Mermaid `fig-git-workflow` with `appendix_E_S03_git_workflow.svg` (same id).
 - **Viewing History** — added `git log -p` to the example block and a sentence on what a commit records (hash, author, date, message).
 - **Working with GitHub** — added a "for a research project specifically" block (reproducibility, README/wiki/Pages, Issues with `#12` linking, Releases + Zenodo DOI with cross-refs to `@sec-git-tags` and `@sec-general-repositories`) from Appendix E "GitHub for Scientific Collaboration" (closes BOOK_AUDIT #67).
@@ -439,7 +439,7 @@ Overall finding: the Comp Tools book chapters are already broader and newer than
 - **Setup and Configuration** table — added `git --version` and `git help CMD` rows.
 - **Common .gitignore Entries** — added `.ipynb_checkpoints/`, `.Rproj.user/`, and the bioinformatics data patterns (`*.fastq`, `*.fastq.gz`, `*.bam`, `*.vcf`, `data/raw/`) from Appendix E so the appendix matches ch. 10.
 
-### `work_Book/chapters/15-hpc-talapas.qmd`
+### `work_Book/chapters/16-hpc-talapas.qmd`
 - **Talapas Architecture** — replaced Mermaid `fig-talapas-architecture` with `appendix_F_S03_talapas_architecture.svg` (same id; caption notes the SVG's "fat nodes" = high-memory nodes and the `sbatch`/`srun` paths).
 - **SLURM: The Job Scheduler** — replaced Mermaid `fig-slurm-workflow` with `appendix_F_S10_slurm_workflow.svg`; added the three-term vocabulary sentence (job / partition / account) from Appendix F "Key Concepts".
 - Storage diagram (`fig-storage-structure`) deliberately **kept as Mermaid**: the book's version includes `/scratch` and quotas, which the SVG `appendix_F_S09_storage_structure.svg` lacks (it only shows `/home`, `/projects`, `/tmp`).
@@ -448,7 +448,7 @@ Overall finding: the Comp Tools book chapters are already broader and newer than
 - **Talapas-Specific Information** — new `### Talapas Helper Commands {#sec-talapas-helpers}` table (`groups`, `/packages/racs/bin/slurm-show-gpus`, `SBATCH_ACCOUNT` default, `df -h ~`/`du -sh`) collecting the Appendix F helper commands that were only in ch. 11 prose.
 - **Example Job Scripts → Basic R Script** — fix: added `set -euo pipefail` and `module purge` so the example follows the rule the appendix itself states a few lines earlier ("modules must be loaded INSIDE the script").
 
-### `work_Book/chapters/16-parallel-computing.qmd`
+### `work_Book/chapters/17-parallel-computing.qmd`
 - **The Future Ecosystem** — added a callout "Base R's `parallel` package" (`detectCores`/`makeCluster`/`parLapply`/`stopCluster`, `eval: false`) from SB A11 "Parallelization in R", framed as "read it when you meet it, write `future`/`furrr`". Nothing else in A11 adds to the book (its hostname `talapas-login.uoregon.edu` and partition `short` are out of date).
 
 ### `work_Book/chapters/appendix-A-shortcuts.qmd`
@@ -478,11 +478,11 @@ All book references use `../images/<basename>`. The first ten are already listed
 | `BioE_Stats_Wi2026 copy/Lecture_Folder/images/appendix_A_S21_local_computing_arch.svg` | `Book/images/appendix_A_S21_local_computing_arch.svg` (already present) | `06-computer-systems.qmd` fig-local-architecture |
 | `BioE_Stats_Wi2026 copy/Lecture_Folder/images/appendix_A_S24_cluster_computing.svg` | `Book/images/appendix_A_S24_cluster_computing.svg` (already present) | `06-computer-systems.qmd` fig-cluster-architecture |
 | `BioE_Stats_Wi2026 copy/Lecture_Folder/images/appendix_A_S27_cloud_computing.svg` | `Book/images/appendix_A_S27_cloud_computing.svg` (already present) | `06-computer-systems.qmd` fig-cloud-architecture |
-| `BioE_Stats_Wi2026 copy/Lecture_Folder/images/appendix_E_S03_git_workflow.svg` | `Book/images/appendix_E_S03_git_workflow.svg` (already present) | `19-git-github.qmd` fig-git-workflow |
-| `BioE_Stats_Wi2026 copy/Lecture_Folder/images/appendix_E_S12_git_branching.svg` | `Book/images/appendix_E_S12_git_branching.svg` (already present) | `19-git-github.qmd` fig-git-branching |
-| `BioE_Stats_Wi2026 copy/Lecture_Folder/images/appendix_E_S16_github_pages.svg` | `Book/images/appendix_E_S16_github_pages.svg` (already present) | `19-git-github.qmd` fig-github-pages |
-| `BioE_Stats_Wi2026 copy/Lecture_Folder/images/appendix_F_S03_talapas_architecture.svg` | `Book/images/appendix_F_S03_talapas_architecture.svg` (**new copy**; the same file already exists in `Lecture_Folder/images/`) | `15-hpc-talapas.qmd` fig-talapas-architecture |
-| `BioE_Stats_Wi2026 copy/Lecture_Folder/images/appendix_F_S10_slurm_workflow.svg` | `Book/images/appendix_F_S10_slurm_workflow.svg` (**new copy**; also in `Lecture_Folder/images/`) | `15-hpc-talapas.qmd` fig-slurm-workflow |
+| `BioE_Stats_Wi2026 copy/Lecture_Folder/images/appendix_E_S03_git_workflow.svg` | `Book/images/appendix_E_S03_git_workflow.svg` (already present) | `20-git-github.qmd` fig-git-workflow |
+| `BioE_Stats_Wi2026 copy/Lecture_Folder/images/appendix_E_S12_git_branching.svg` | `Book/images/appendix_E_S12_git_branching.svg` (already present) | `20-git-github.qmd` fig-git-branching |
+| `BioE_Stats_Wi2026 copy/Lecture_Folder/images/appendix_E_S16_github_pages.svg` | `Book/images/appendix_E_S16_github_pages.svg` (already present) | `20-git-github.qmd` fig-github-pages |
+| `BioE_Stats_Wi2026 copy/Lecture_Folder/images/appendix_F_S03_talapas_architecture.svg` | `Book/images/appendix_F_S03_talapas_architecture.svg` (**new copy**; the same file already exists in `Lecture_Folder/images/`) | `16-hpc-talapas.qmd` fig-talapas-architecture |
+| `BioE_Stats_Wi2026 copy/Lecture_Folder/images/appendix_F_S10_slurm_workflow.svg` | `Book/images/appendix_F_S10_slurm_workflow.svg` (**new copy**; also in `Lecture_Folder/images/`) | `16-hpc-talapas.qmd` fig-slurm-workflow |
 
 Not used: `appendix_F_S09_storage_structure.svg` (book's Mermaid storage figure is more complete, see above); `00.not_used/*` and `00.Maybe_use/week5_Talapas.jpg` (excluded folders).
 

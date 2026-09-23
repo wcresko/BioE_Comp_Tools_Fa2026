@@ -29,7 +29,7 @@ The course book goes deeper on everything in this lecture. Read before or after 
 
 -   [Ch. 11: R Programming Fundamentals](../book/chapters/11-r-programming.html)
 -   [Ch. 12: Python Programming Fundamentals](../book/chapters/12-python-programming.html)
--   [Ch. 13: Data Visualization with ggplot2](../book/chapters/13-data-visualization.html)
+-   [Ch. 14: Data Visualization with ggplot2](../book/chapters/14-data-visualization.html)
 -   *Reference:* [App. E: R Command Reference](../book/chapters/appendix-E-r.html) · [App. F: Python Quick Reference](../book/chapters/appendix-F-python.html)
 
 ## Goals for today
@@ -400,7 +400,7 @@ mydata.head(3)
 :::
 
 -   Now you have a hand-made data frame with row names
--   Take a look at it in the **Data Explorer** in Positron (R and Python)
+-   Take a look at it in the Environment pane of RStudio, or the **Data Explorer** in Positron (R and Python)
 
 ## Reading in and Exporting Data Frames
 
@@ -455,6 +455,73 @@ YourFile.to_csv("yourfile.csv")                 # index (row names) is written b
 YourFile.to_csv("yourfile.txt", sep="\t")
 YourFile.to_csv("yourfile.csv", index=False)    # drop the row names
 ```
+:::
+
+## Running example: the stickleback table as a data frame
+
+::: panel-tabset
+### R
+
+```{r}
+#| label: lec06-stickle-read-r
+#| echo: true
+#| eval: true
+
+stickle <- read.delim("../Data_Folder/Stickle_RNAseq.tsv", check.names = FALSE)
+dim(stickle)                          # 80 fish x 604 columns
+stickle[1:4, 1:7]                     # first rows, first columns
+table(stickle$Genotype, stickle$Microbiota)
+summary(stickle$Gene1)
+```
+
+### Python
+
+```{python}
+#| label: lec06-stickle-read-py
+#| echo: true
+#| eval: false
+
+import pandas as pd
+stickle = pd.read_csv("../Data_Folder/Stickle_RNAseq.tsv", sep="\t")
+stickle.shape                          # (80, 604)
+stickle.iloc[:4, :7]
+pd.crosstab(stickle["Genotype"], stickle["Microbiota"])
+stickle["Gene1"].describe()
+```
+:::
+
+## Running example: a first figure
+
+::: panel-tabset
+### R
+
+```{r}
+#| label: fig-lec06-stickle-boxplot
+#| fig-cap: "Gene1 counts by host genotype and microbiota treatment"
+#| out-width: "60%"
+#| echo: true
+#| eval: true
+
+boxplot(Gene1 ~ Genotype + Microbiota, data = stickle,
+        col = c("steelblue", "tomato", "steelblue", "tomato"),
+        ylab = "Gene1 read count", las = 2)
+```
+
+### Python
+
+```{python}
+#| label: lec06-stickle-boxplot-py
+#| echo: true
+#| eval: false
+
+import matplotlib.pyplot as plt
+stickle.boxplot(column="Gene1", by=["Genotype", "Microbiota"])
+plt.ylabel("Gene1 read count"); plt.show()
+```
+:::
+
+::: callout-tip
+`check.names = FALSE` keeps the column name `Geno&Micro` as it is in the file; without it R would rename it `Geno.Micro`. Either way, back-ticks let you refer to awkward names: `` stickle$`Geno&Micro` ``.
 :::
 
 ## Indexing in data frames

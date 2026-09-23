@@ -4,9 +4,9 @@
 After completing this chapter, you will be able to:
 
 - Explain what an editor and an integrated development environment (IDE) do for you, and why a small investment in learning one pays off every day
-- Install the core software for this course: a Unix shell, R, Python, Quarto, TinyTeX, VS Code, and Positron
+- Install the core software for this course: a Unix shell, R, Python, Quarto, TinyTeX, VS Code, and Positron (plus RStudio if you want it)
 - Navigate the layout of VS Code and Positron, use the Command Palette and the integrated terminal, and install the extensions we rely on
-- Choose sensibly between VS Code and Positron for a given task
+- Choose sensibly among VS Code, Positron, and RStudio for a given task
 - Keep track of which "side" of a Windows computer you are working on when using WSL
 - Distinguish Jupyter notebooks from Quarto documents, and know what a Python environment is
 - Install the compiler toolchain your operating system needs to build R and Python packages from source
@@ -22,7 +22,7 @@ The install list below mixes three different kinds of software, and it helps to 
 
 - **R**, **Python**, and **LaTeX** are **languages**. You write code (or markup) in them and a program executes it: R and Python turn analysis code into results and figures; LaTeX turns markup into a typeset document and is what produces PDF output.
 - **Quarto** is a **formatting and publishing system**. It weaves your prose together with code chunks, runs the code through R or Python, and renders the result into an HTML page, slide deck, or PDF. It is the layer that turns a `.qmd` file into a finished document.
-- **VS Code** and **Positron** are **integrated development environments (IDEs)**: the workbenches you sit in. Each gives you an editor, a place to run code and see output, and tools for managing projects. None of them is a language, and none is required by any other tool; they are where you do the work.
+- **VS Code**, **Positron**, and **RStudio** are **integrated development environments (IDEs)**: the workbenches you sit in. Each gives you an editor, a place to run code and see output, and tools for managing projects. None of them is a language, and none is required by any other tool; they are where you do the work.
 
 In short: R, Python, and LaTeX are languages, Quarto stitches and publishes them, and the IDEs are where you write.
 :::
@@ -31,7 +31,7 @@ In short: R, Python, and LaTeX are languages, Quarto stitches and publishes them
 
 Every program you write in this course, whether a Bash script, an R analysis, or a Quarto document, is a plain-text file. In principle you could write it with any tool that produces plain text, and for quick edits on a remote server, terminal editors such as `nano` and `vim` remain useful (we will meet them in @sec-unix-fundamentals). But plain editors do not scale to real projects. Once your work spans a dozen files across several directories, you want a tool that can show the whole project at once, that color-codes your code so structure and mistakes are visible at a glance, and that lets you run code right where you write it.
 
-An **Integrated Development Environment (IDE)** bundles those capabilities into one window: a text **editor** with syntax highlighting and completion, a **terminal** for shell commands, a **console** for an interactive R or Python session, and tools such as a file explorer, a search across the project, and an interface to version control (@sec-git-github). The two IDEs you will encounter in this course, VS Code and Positron, both provide these pieces; they differ mainly in emphasis, as we discuss in @sec-which-ide.
+An **Integrated Development Environment (IDE)** bundles those capabilities into one window: a text **editor** with syntax highlighting and completion, a **terminal** for shell commands, a **console** for an interactive R or Python session, and tools such as a file explorer, a search across the project, and an interface to version control (@sec-git-github). The three IDEs you will encounter in this course, VS Code, Positron, and RStudio, all provide these pieces; they differ mainly in emphasis, as we discuss in @sec-which-ide.
 
 ::: {.callout-tip title="Open the folder, not the file"}
 All three IDEs work best when they can see your entire project. Always use **File → Open Folder** (or its equivalent) on the project's top-level directory, rather than double-clicking a single file. The file explorer then shows the whole tree, project-wide search works, and the integrated terminal opens in that folder automatically, so relative paths in your scripts behave as expected.
@@ -63,7 +63,7 @@ On macOS and Linux you already have one: open **Terminal** (on macOS, press `Cmd
 
 ### R {#sec-toolkit-r}
 
-Download R from CRAN at <https://cran.r-project.org>. Install R *before* Positron, since it looks for an existing R when it first starts. On **macOS**, click "Download R for macOS" and choose the `.pkg` installer that matches your chip: **arm64** for Apple silicon (M1 through M4) or **x86_64** for Intel Macs. If you are unsure, run `uname -m` in Terminal (@tbl-chip-check). Open the downloaded file and follow the prompts; R ends up in your Applications folder. On **Windows**, click "Download R for Windows", then "base", then the link for the latest version; run the `.exe` installer, accepting the defaults, and R appears in the Start menu. On **Linux (Ubuntu/Debian)**, install from the package manager and confirm the version in one go:
+Download R from CRAN at <https://cran.r-project.org>. Install R *before* Positron or RStudio, since both look for an existing R when they first start. On **macOS**, click "Download R for macOS" and choose the `.pkg` installer that matches your chip: **arm64** for Apple silicon (M1 through M4) or **x86_64** for Intel Macs. If you are unsure, run `uname -m` in Terminal (@tbl-chip-check). Open the downloaded file and follow the prompts; R ends up in your Applications folder. On **Windows**, click "Download R for Windows", then "base", then the link for the latest version; run the `.exe` installer, accepting the defaults, and R appears in the Start menu. On **Linux (Ubuntu/Debian)**, install from the package manager and confirm the version in one go:
 
 ```bash
 sudo apt update
@@ -131,6 +131,10 @@ Download **Visual Studio Code** from <https://code.visualstudio.com/download>. I
 ### Positron {#sec-toolkit-positron}
 
 Download **Positron** from <https://positron.posit.co/download>. Install R and Python *before* Positron so that it can find them automatically. Details are in @sec-positron.
+
+### RStudio {#sec-toolkit-rstudio}
+
+**RStudio Desktop** is Posit's classic, R-focused IDE. It is optional for this course but worth having if you already know it, and it is the environment you will meet on Talapas through Open OnDemand (@sec-computing-at-uo). Download the free open-source edition from <https://posit.co/download/rstudio-desktop/>; the page detects your operating system and offers the right installer. On **macOS**, open the `.dmg` and drag RStudio to your Applications folder; on **Windows**, run the installer with the defaults; on **Ubuntu**, download the `.deb` and install it with `sudo apt install ./rstudio-*.deb`. Install R first: RStudio finds it automatically when it starts. Details are in @sec-rstudio-overview.
 
 ### Compiler tools {#sec-compiler-tools}
 
@@ -217,32 +221,37 @@ In addition to the VS Code regions, Positron adds a **Console**, an interactive 
 
 Positron installs extensions from **Open VSX**, an open extension registry, rather than from Microsoft's Visual Studio Marketplace. Most extensions you would want (Quarto, Python, Jupyter, and many others) are available there, but a few Microsoft-only extensions are not, and Positron provides its own equivalents for the important ones. In particular, the VS Code **R extension is not used in Positron**: R support is built in, so do not install it.
 
-## VS Code vs. Positron: Which Should I Use? {#sec-which-ide}
+## RStudio {#sec-rstudio-overview}
+
+**RStudio**, also from Posit, is the IDE that most R users learned on, and it remains an excellent environment for pure R work. Its window is divided into four fixed panes: the **Source** editor (top-left) for scripts and Quarto documents; the **Console** (bottom-left) for a live R session; the **Environment/History** pane (top-right) listing your objects and past commands; and the **Files/Plots/Packages/Help/Viewer** pane (bottom-right). The workflow is the same as in Positron: write in the Source pane and send lines to the Console with `Cmd-Enter` / `Ctrl-Enter`. RStudio has Quarto rendering built in (the **Render** button, `Cmd/Ctrl-Shift-K`), an **RStudio Projects** system (`.Rproj` files) that sets the working directory for you (@sec-rstudio-projects), and a **Tools → Install Packages** dialog. It runs Python through the `reticulate` package but is not designed for it, and it has no general extension marketplace, so this course uses it for R work only.
+
+## VS Code vs. Positron vs. RStudio: Which Should I Use? {#sec-which-ide}
 
 Because Positron is built on Code OSS, VS Code and Positron share their editor, Command Palette, terminal, keyboard shortcuts, settings format, and Quarto support; both are free, cross-platform, support extensions, and can connect to remote machines over SSH. The difference is focus. Positron is built *for data science*: R and Python are first-class, and the Console, Variables, Plots, and Data Explorer panes are always at hand. VS Code is *general-purpose*: any language works through extensions, its extension library and community are the largest, and it is the tool of choice for shell scripts, configuration files, and polyglot projects. @tbl-ide-comparison summarizes the trade-offs, and @tbl-which-ide gives a rule of thumb.
 
-| | VS Code | Positron |
-|:--|:--------|:---------|
-| Made by | Microsoft | Posit |
-| Built on | Code OSS | Code OSS |
-| Languages | Anything, via extensions | R and Python built in; others via extensions |
-| Data-science panes (Console, Variables, Plots, Data Explorer) | No (extensions approximate them) | Yes |
-| Extension source | Visual Studio Marketplace | Open VSX |
-| Quarto rendering | Yes (Quarto extension) | Yes (Quarto extension) |
-| Remote work over SSH | Remote - SSH extension | Remote - SSH |
-| Cost | Free | Free |
+| | VS Code | Positron | RStudio |
+|:--|:--------|:---------|:--------|
+| Made by | Microsoft | Posit | Posit |
+| Built on | Code OSS | Code OSS | Its own framework |
+| Languages | Anything, via extensions | R and Python built in; others via extensions | R (Python via `reticulate`) |
+| Data-science panes (Console, Variables, Plots, Data Explorer) | No (extensions approximate them) | Yes | Yes (Environment, Plots, Viewer) |
+| Extension source | Visual Studio Marketplace | Open VSX | RStudio add-ins |
+| Quarto rendering | Yes (Quarto extension) | Yes (Quarto extension) | Yes (built in) |
+| Remote work over SSH | Remote - SSH extension | Remote - SSH | RStudio Server / Open OnDemand |
+| Cost | Free | Free | Free (open-source edition) |
 
-: Comparison of the two IDEs used in this course {#tbl-ide-comparison}
+: Comparison of the three IDEs used in this course {#tbl-ide-comparison}
 
 | If you mostly... | Try |
 |:-----------------|:----|
 | Analyze data interactively in R or Python | **Positron** |
 | Write shell scripts, edit configuration files, work in many languages | **VS Code** |
 | Work on remote servers like Talapas | Either VS Code or Positron |
+| Already love RStudio for pure R work | RStudio is fine too |
 
 : Choosing an IDE {#tbl-which-ide}
 
-You do not have to choose forever. VS Code and Positron share so much muscle memory that learning one means you mostly know the other, and this course uses both.
+You do not have to choose forever. VS Code and Positron share so much muscle memory that learning one means you mostly know the other, and RStudio's panes map directly onto Positron's; this course shows all three.
 
 ## Windows: Which Side Am I On? {#sec-which-side}
 
@@ -312,7 +321,7 @@ Each should print a version number (or, for `quarto check`, a list of passing ch
 | Installer fails or reports "disk full" | Not enough free space | Check with `df -h ~` and free up at least 20 GB |
 | macOS: "cannot be opened because the developer cannot be verified" | Gatekeeper security | Right-click the app and choose **Open**, or allow it under System Settings → Privacy & Security |
 | Windows: `wsl --install` fails or Ubuntu never appears | Virtualization disabled, or Windows out of date | Run Windows Update, enable virtualization (VT-x/AMD-V) in the BIOS/UEFI settings, then `wsl --update` and `wsl --install -d Ubuntu` |
-| Positron cannot find R | R was installed after the IDE, or not at all | Install (or reinstall) R, then restart Positron and check the interpreter picker at the top right |
+| Positron or RStudio cannot find R | R was installed after the IDE, or not at all | Install (or reinstall) R, then restart the IDE; in Positron check the interpreter picker at the top right, in RStudio *Tools → Global Options → General → R version* |
 | R: "package 'x' is not available for this version of R" | Your R is older than the package requires | Install the current R from CRAN, then reinstall the package |
 | `install.packages()` fails partway | Network hiccup or missing dependency | Check your connection and retry with `install.packages("name", dependencies = TRUE)` |
 | Download is crawling | Many people on the same Wi-Fi | Pair up with a neighbor, or finish at home |
@@ -333,7 +342,7 @@ The Xcode command-line tools are missing or out of date. In Terminal:
 xcode-select --install
 ```
 
-Relaunch Positron after the install finishes. If the error instead mentions `gfortran not found` or `library not found for -lgfortran`, install gfortran from <https://mac.r-project.org/tools/> (see the compiler tools item in @sec-install-checklist) and try the package install again.
+Relaunch Positron or RStudio after the install finishes. If the error instead mentions `gfortran not found` or `library not found for -lgfortran`, install gfortran from <https://mac.r-project.org/tools/> (see the compiler tools item in @sec-install-checklist) and try the package install again.
 
 ### Windows: "WARNING: Rtools is required to build R packages" {#sec-trouble-rtools}
 
@@ -351,7 +360,7 @@ BiocManager::install("DESeq2")
 
 The first Bioconductor install compiles many dependencies and can genuinely take 20 to 60 minutes; do it the day before you need it, not the morning of.
 
-### Positron "can't find" a package you just installed {#sec-trouble-package-not-found}
+### Positron or RStudio "can't find" a package you just installed {#sec-trouble-package-not-found}
 
 Almost always a stale R session: the package was installed, but the running session was started before. Restart R (*Session → Restart R*, or `Ctrl/Cmd + Shift + F10`) and try `library()` again. If that does not help, the package may have been installed into the library of a *different* R version than the one the IDE is running:
 
@@ -361,7 +370,7 @@ installed.packages()[, "Package"]    # what is actually installed there?
 R.version.string                     # which R is this?
 ```
 
-If the versions do not match, point Positron at the correct R install (the interpreter picker at the top right) and reinstall the package there.
+If the versions do not match, point the IDE at the correct R install (Positron: the interpreter picker at the top right; RStudio: *Tools → Global Options → General → R version*) and reinstall the package there.
 
 ### Windows/WSL: R or Python is painfully slow, or cannot see the project files {#sec-trouble-wsl-slow}
 
@@ -385,7 +394,7 @@ If `quarto check` reports that no LaTeX installation was found at all, TinyTeX i
 
 ### Old results keep coming back after a fix {#sec-trouble-stale-results}
 
-R keeps every object you create for the whole session, so a later chunk can silently use an old object after you edit an earlier one. Restart R and run the script from the top; `rm(list = ls())` clears variables but not loaded packages, so a restart is more reliable. Do not save the workspace to `.RData` on exit (answer "no" if R asks), so that each session starts clean.
+R keeps every object you create for the whole session, so a later chunk can silently use an old object after you edit an earlier one. Restart R and run the script from the top; `rm(list = ls())` clears variables but not loaded packages, so a restart is more reliable. Do not save the workspace to `.RData` on exit (answer "no" if R asks; in RStudio, set *Tools → Global Options → General → Save workspace* to **Never**), so that each session starts clean.
 
 ## Keeping Software Updated {#sec-keeping-updated}
 
@@ -395,6 +404,7 @@ Nothing in this chapter is install-once-and-forget. New versions bring bug fixes
 |:-----|:--------------|
 | R | Download and run the current installer from CRAN (Linux: `sudo apt upgrade`); then reinstall packages if the major version changed |
 | R packages | In R: `update.packages(ask = FALSE)` |
+| RStudio | **Help → Check for Updates**, or download the current installer |
 | VS Code, Positron | Both check for updates automatically; **Help → Check for Updates** (or **Code → Check for Updates** on macOS) forces it |
 | Python (python.org) | Run the newer installer; `uv self update` if you use uv; `conda update conda` for conda |
 | Python packages | Inside the environment: `pip install --upgrade <package>` (or `uv pip install --upgrade`) |
@@ -414,7 +424,7 @@ This chapter assembled the software you will use for the rest of the course and,
 
 - An IDE combines an editor, terminal, console, and project tools in one window; always open the whole project folder, not a single file
 - The core installs are R (matching your chip), Python (with "Add to PATH" on Windows), Quarto with TinyTeX, VS Code, and Positron; Git comes later in @sec-git-github
-- VS Code is general-purpose with the largest ecosystem; Positron is built on the same core with R and Python and data-science panes built in
+- VS Code is general-purpose with the largest ecosystem; Positron is built on the same core with R and Python and data-science panes built in; RStudio remains a fine choice for pure R
 - On Windows, type shell commands in Ubuntu but install languages and IDEs on the Windows side, and watch for the "WSL: Ubuntu" badge
 - Quarto documents are plain text and regenerate their output; Jupyter notebooks store output in the file; Quarto can render both
 - Python environments (`venv`, conda, `uv`) and R's `renv` isolate each project's packages
