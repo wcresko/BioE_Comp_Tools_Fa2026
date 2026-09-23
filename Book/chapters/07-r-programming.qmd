@@ -19,6 +19,8 @@ After completing this chapter, you will be able to:
 - Use logical operators and handle floating-point comparisons correctly
 - Create and manipulate data frames, lists, and matrices
 - Use built-in functions and access help documentation including vignettes
+- Interpret common error messages and handle missing values (`NA`) correctly
+- Manage the working directory with RStudio Projects
 - Install packages and resolve namespace conflicts
 - Create basic visualizations
 - Read and write data files
@@ -67,6 +69,32 @@ But as your analyses become more complex, you'll want to save your work in **scr
 4. **Your future self will understand** what you did and why
 
 The workflow looks like this: explore in the console to understand your data, then move your successful commands into a script. Your script becomes the official record of your analysis—clean, organized, and executable.
+
+A good script is self-contained: it holds every command needed to reproduce the analysis from a fresh R session, in order. A conventional layout is a comment header, then package loading, then data import, then the analysis, with comments (anything after `#`) explaining *why* rather than restating *what* the code does:
+
+```{r}
+#| label: script-template
+#| eval: false
+
+# Analysis of hydrogel mechanical properties
+# Author: Your Name
+# Date: 2026-10-01
+
+# 1. Load packages ---------------------------------------------------------
+library(tidyverse)
+
+# 2. Read data -------------------------------------------------------------
+hydrogel <- read.csv("data/hydrogel_data.csv")
+
+# 3. Summarize -------------------------------------------------------------
+summary(hydrogel)
+
+# 4. Visualize -------------------------------------------------------------
+ggplot(hydrogel, aes(x = concentration, y = compression)) +
+  geom_boxplot()
+```
+
+In RStudio, create a script with File → New File → R Script, and run the current line or selection with `Ctrl+Enter` (`Cmd+Enter` on a Mac). Comment lines ending in four or more dashes, as above, become collapsible sections in the editor's outline. Quarto documents (@sec-quarto-documents) extend the same idea by interleaving code chunks with formatted narrative.
 
 A script can also be run from the shell without opening RStudio at all, which is how analyses run on Talapas (@sec-hpc-talapas). The same small program looks like this in R and in Python; the shell side of running scripts is covered in @sec-rscript.
 
@@ -127,20 +155,36 @@ RStudio organizes your workspace into four panes:
 
 ![The RStudio interface showing all four panes: Source (top-left) with R code, Console (bottom-left) showing command output, Environment/Workspace (top-right) displaying variables and data, and Plots (bottom-right) showing a visualization.](../images/rstudio_interface.png){#fig-rstudio-interface width="100%"}
 
-::: {.callout-tip}
-Learn keyboard shortcuts! `Ctrl+Enter` (Windows/Linux) or `Cmd+Enter` (Mac) runs the current line or selection. `Ctrl+Shift+S` runs the entire script.
+::: {.callout-note title="R is not RStudio"}
+`R` is the programming language; `RStudio` is the integrated development environment that lets you write and run R (and other languages such as Python) comfortably. R must be installed first, and RStudio then finds it. If you prefer Positron or VS Code, the panes have different names but the same jobs (@sec-which-ide).
 :::
 
-### RStudio Projects {#sec-rstudio-projects}
+::: {.callout-tip}
+Learn keyboard shortcuts! `Ctrl+Enter` (Windows/Linux) or `Cmd+Enter` (Mac) runs the current line or selection. `Ctrl+Shift+S` runs the entire script. The pane layout can be rearranged under Tools → Global Options → Pane Layout, and the Packages and Help tabs in the bottom-right pane are worth clicking through on your first day.
+:::
 
-RStudio Projects organize your work with self-contained directories:
+### RStudio Projects and the Working Directory {#sec-rstudio-projects}
+
+Every R session has a **working directory**: the folder that relative paths such as `"data/results.csv"` are resolved against, exactly as in the shell (@sec-unix-fundamentals). You can inspect and change it from R:
+
+```{r}
+#| label: working-directory
+#| eval: false
+
+getwd()                       # Where am I?
+setwd("/path/to/my/project")  # Move (avoid in scripts; see below)
+list.files()                  # What files are here?
+list.files("data")            # ...and in a subfolder
+```
+
+RStudio Projects organize your work with self-contained directories and remove the need for `setwd()` altogether:
 
 1. Go to File → New Project
 2. Choose New Directory → New Project
 3. Name your project and select a location
 4. RStudio creates a `.Rproj` file
 
-Projects set your working directory automatically and keep related files together—essential for reproducible research.
+Opening the `.Rproj` file sets the working directory to the project folder automatically, so paths in your scripts can be relative to the project root and the code runs unchanged on a collaborator's computer. A `setwd("/Users/yourname/...")` line at the top of a script, by contrast, breaks the moment anyone else runs it.
 
 ## Understanding R: Everything is an Object {#sec-r-objects}
 
@@ -164,9 +208,9 @@ class(mean)
 typeof(mean)
 
 # And data frames are objects
-df <- data.frame(a = 1:3, b = c("x", "y", "z"))
-class(df)
-typeof(df)
+samples_df <- data.frame(a = 1:3, b = c("x", "y", "z"))
+class(samples_df)
+typeof(samples_df)
 ```
 
 Every object has:
@@ -183,7 +227,7 @@ The `str()` function provides a compact display of an object's structure:
 # Examine structure of different objects
 str(x)
 str(name)
-str(df)
+str(samples_df)
 ```
 
 Understanding this object-oriented nature helps you:
@@ -248,6 +292,15 @@ z <- x * y
 z
 ```
 
+Notice that an assignment itself prints nothing: `z <- x * y` silently stores the value. To see what a variable holds, type its name alone or call `print()`:
+
+```{r}
+#| label: print-variable
+
+z
+print(z)
+```
+
 ::: {.callout-note}
 You can also use `=` for assignment in R, but `<-` is the traditional and preferred style. It makes assignment visually distinct from function arguments, which use `=`.
 :::
@@ -256,8 +309,10 @@ You can also use `=` for assignment in R, but `<-` is the traditional and prefer
 
 - Names must start with a letter
 - Can contain letters, numbers, periods, and underscores
-- R is case-sensitive: `Gene` and `gene` are different variables
+- Names cannot contain operators (`-`, `*`, `+`, spaces) because R would try to evaluate them
+- R is case-sensitive: `Gene`, `gene`, and `GENE` are three different variables
 - Use descriptive names: `sample_count` is better than `sc`
+- Prefer underscores to periods: `sample.count` is legal R, but the period has a different meaning in Python (@sec-python-programming), and snake_case names move between the two languages without surprises
 
 ```{r}
 #| label: naming
@@ -270,7 +325,8 @@ myData2 <- 42
 
 # Invalid (would cause errors)
 # 2samples <- 5      # Can't start with number
-# my-data <- 10      # Hyphens not allowed
+# 3*y <- 3           # Can't include operators
+# my-data <- 10      # Hyphens not allowed (R reads this as my minus data)
 ```
 
 ### Reserved Words {#sec-reserved-words}
@@ -306,8 +362,8 @@ mean <- 42   # Shadows the mean() function
 rm(c)        # Removes your 'c' variable, restoring access to c()
 ```
 
-::: {.callout-warning}
-Avoid using `T` and `F` as variable names—they are common abbreviations for `TRUE` and `FALSE`. Similarly, never name variables `c`, `t`, `mean`, `sum`, or other common function names.
+::: {.callout-warning title="Avoid Common Name Collisions"}
+Avoid using `T` and `F` as variable names—they are common abbreviations for `TRUE` and `FALSE`. Similarly, never name variables `c`, `t`, `mean`, `sum`, `data`, or `df`: these are all existing R functions (`df()` is the F-distribution density and `data()` loads built-in datasets), and shadowing them leads to confusing errors such as `object of type 'closure' is not subsettable`, which means "you tried to index a function." Names like `experiment`, `counts`, or `samples_df` are safer and more descriptive.
 :::
 
 ## Key R Terminology {#sec-r-terminology}
@@ -326,7 +382,7 @@ Note that R uses `<-` for assignment (right to left), while `=` is typically use
 
 ## Vectors: R's Fundamental Data Structure {#sec-vectors}
 
-R thinks in terms of **vectors**—ordered collections of values of the same type. Even a single number is a vector of length 1.
+R thinks in terms of **vectors**—ordered collections of values of the same type. Even a single number is a vector of length 1. Because all elements must share a type, mixing types in `c()` silently converts the whole vector to the most flexible one: `c(1, "a", TRUE)` becomes three character strings, and `c(1, TRUE)` becomes `1 1`.
 
 ### Creating Vectors {#sec-creating-vectors}
 
@@ -347,6 +403,19 @@ samples
 passed <- c(TRUE, FALSE, TRUE, TRUE, FALSE)
 passed
 ```
+
+A few functions tell you about any vector without printing all of it—essential once vectors have thousands of elements:
+
+```{r}
+#| label: vector-inspect
+
+length(measurements)   # How many elements?
+class(measurements)    # What type?
+head(measurements, 3)  # First few
+tail(measurements, 3)  # Last few
+```
+
+The numbers in square brackets at the start of each output line, such as `[1]`, are not part of the data: they give the index of the first element on that line, which helps you find your place in long output.
 
 ### Sequence Generation {#sec-sequence-generation}
 
@@ -461,15 +530,18 @@ R uses 1-based indexing! The first element is `[1]`, not `[0]` as in Python and 
 
 R has several fundamental data types:
 
-| Type | Description | Example |
-|:-----|:------------|:--------|
-| `numeric` | Real numbers (default) | `3.14`, `42` |
-| `integer` | Whole numbers | `1L`, `100L` |
-| `character` | Text strings | `"hello"`, `"gene1"` |
-| `logical` | Boolean values | `TRUE`, `FALSE` |
-| `factor` | Categorical variables | Treatment levels |
+| Type | Tibble abbreviation | Description | Example |
+|:-----|:--------------------|:------------|:--------|
+| `numeric` (double) | `<dbl>` | Real numbers (default) | `3.14`, `42` |
+| `integer` | `<int>` | Whole numbers | `1L`, `100L` |
+| `character` | `<chr>` | Text strings | `"hello"`, `"gene1"` |
+| `logical` | `<lgl>` | Boolean values | `TRUE`, `FALSE`, `NA` |
+| `factor` | `<fct>` | Categorical variables | Treatment levels |
+| `Date`, `POSIXct` | `<date>`, `<dttm>` | Dates and date-times | `Sys.Date()`, `Sys.time()` |
 
-: R data types {#tbl-data-types}
+: R data types. The abbreviations are what tibbles (@sec-tidy-data) and `glimpse()` print under each column name. {#tbl-data-types}
+
+Numbers are doubles by default: `42` is numeric, and you must write `42L` to get an integer. Integer and double vectors together are called **numeric** vectors.
 
 ```{r}
 #| label: types
@@ -484,7 +556,22 @@ as.numeric("42")
 as.character(123)
 as.logical(0)    # FALSE
 as.logical(1)    # TRUE
+as.numeric("hello")  # NA, with a warning
 ```
+
+::: {.callout-warning title="Coercing Factors to Numbers"}
+`as.numeric()` on a factor returns the internal integer codes of the levels, not the numbers you can see:
+
+```{r}
+#| label: factor-coercion
+
+doses <- factor(c("10", "50", "10", "100"))
+as.numeric(doses)                # Level codes: 1, 3, 1, 2
+as.numeric(as.character(doses))  # The actual values
+```
+
+Convert through `as.character()` first. This trap most often appears when a numeric column was read from a file as text or factor because of a stray non-numeric entry.
+:::
 
 ### Factors {#sec-r-factors}
 
@@ -530,7 +617,7 @@ str(treatment_factor)
 
 ### Special Values {#sec-special-values}
 
-R has special values for missing data and undefined results:
+R has special values for missing data and undefined results (@tbl-special-values):
 
 ```{r}
 #| label: special
@@ -547,7 +634,33 @@ log(-1)
 -1/0
 ```
 
-Handling `NA` values is a common task in data analysis.
+| Value | Meaning | Produced by | Test with |
+|:------|:--------|:------------|:----------|
+| `NA` | Not Available (missing data) | Blank cells in a file, failed coercion | `is.na()` |
+| `NaN` | Not a Number (undefined math) | `0/0`, `sqrt(-1)` | `is.nan()` (also `is.na()`) |
+| `Inf`, `-Inf` | Positive / negative infinity | `1/0`, `-1/0` | `is.infinite()`, `is.finite()` |
+| `NULL` | The empty object | Missing list elements, functions that return nothing | `is.null()` |
+
+: Special values in R {#tbl-special-values}
+
+Handling `NA` values is a common task in data analysis. Any blank entry in a data file becomes `NA` when read into R, and `NA` is contagious: most arithmetic and summary functions return `NA` if any input is missing, so that a missing value is never silently ignored.
+
+```{r}
+#| label: na-handling
+
+num <- c(0, 1, 2, NA, 4)
+
+mean(num)               # NA: one missing value poisons the result
+mean(num, na.rm = TRUE) # Most summary functions accept na.rm = TRUE
+
+is.na(num)              # Which elements are missing?
+sum(is.na(num))         # How many?
+num[!is.na(num)]        # Keep only the non-missing values
+```
+
+::: {.callout-important title="Never test for missing values with `==`"}
+`NA` means "unknown," so R cannot say whether an unknown value equals anything—`num == NA` returns `NA` for every element rather than `TRUE`/`FALSE`. Always use `is.na()`. Note also that `NA` is a logical constant (`class(NA)` is `"logical"`) and a reserved word: it is distinct from the string `"NA"`, from `0`, and from an empty string.
+:::
 
 ### Logical Operators and Comparisons {#sec-logical-operators-and-comparisons}
 
@@ -696,8 +809,8 @@ library(dplyr)
 near(0.1 + 0.2, 0.3)
 
 # Works well in filter() and mutate()
-df <- tibble(x = c(0.1 + 0.2, 0.5, 0.3))
-df |> filter(near(x, 0.3))
+values <- tibble(x = c(0.1 + 0.2, 0.5, 0.3))
+values |> filter(near(x, 0.3))
 
 # You can specify a custom tolerance
 near(1.0, 1.001, tol = 0.01)
@@ -881,6 +994,27 @@ The help page structure:
 - **Value**: What it returns
 - **Examples**: Working code examples
 
+#### Reading Error Messages {#sec-r-error-messages}
+
+R's error messages are terse but informative once you know the common ones (@tbl-common-r-errors). Read them from the bottom up: the last line usually says what went wrong, and the lines above say where.
+
+| Error message | Meaning | Fix |
+|:--------------|:--------|:----|
+| `object 'x' not found` | No variable with that name exists | Check spelling and case; run the line that creates it |
+| `could not find function "read_csv"` | The package that provides it is not loaded | `library()` the package, or check spelling |
+| `unexpected ')'` or `unexpected symbol` | Mismatched brackets or quotes, or a missing comma | Count opening and closing brackets; look at the line before |
+| `non-numeric argument to binary operator` | Arithmetic on text (or a factor) | Check the object with `class()`; coerce with `as.numeric()` |
+| `object of type 'closure' is not subsettable` | You indexed a function, usually because a variable was never created and its name matches a function (`df`, `data`) | Run the line that creates the object; rename it |
+| `argument "x" is missing, with no default` | A required argument was not supplied | Check `args(fun)` or `?fun` |
+| `cannot open file 'data.csv': No such file` | Wrong path or working directory | `getwd()`, `list.files()`; use a project and relative paths |
+| `+` prompt in the console instead of `>` | R is waiting for you to finish an expression | Press `Esc` and fix the unbalanced bracket or quote |
+
+: Common R error messages {#tbl-common-r-errors}
+
+::: {.callout-tip title="Asking for Help"}
+When the help page and a web search of the exact error text do not solve the problem, ask a person—but make it easy to help you. Provide a **minimal reproducible example**: the smallest piece of code that shows the problem, including a few rows of data (or a built-in dataset like `iris`), the exact error message, and what you expected instead. The `reprex` package formats such an example for pasting into Stack Overflow, a course forum, or an issue tracker. Preparing the example often reveals the bug by itself.
+:::
+
 ## Installing and Loading Packages {#sec-packages}
 
 Base R includes dozens of useful functions, but as you become a more advanced R user, you'll need functions for specialized analyses. Fortunately, thousands of additional functions are distributed in the form of R **packages**.
@@ -901,7 +1035,7 @@ install.packages(c("ggplot2", "readr", "tidyr"))
 ```
 
 ::: {.callout-note}
-Package names are case-sensitive and must be in quotation marks when installing. You only need to install a package once on your system.
+Package names are case-sensitive and must be in quotation marks when installing. You only need to install a package once on your system (and again after upgrading R). RStudio offers the same thing through a dialog at Tools → Install Packages, and the Packages tab in the bottom-right pane lists what is installed. Bioconductor packages are installed with `BiocManager::install()` instead (@sec-install-checklist).
 :::
 
 ### Loading Packages {#sec-loading-packages}
@@ -948,7 +1082,7 @@ When conflicts occur, you have several options:
 #| eval: false
 
 # Explicitly specify which package's function to use
-dplyr::select(data, column1, column2)
+dplyr::select(experiment, column1, column2)
 MASS::select(object)
 
 # This works even without loading the package
@@ -1004,6 +1138,20 @@ experiment <- data.frame(
 
 experiment
 ```
+
+All columns must have the same length, and every column holds a single type—a numeric column cannot contain a stray `"n/a"` without turning the whole column into text (see @sec-data-types). Rows can optionally carry names, which appear in printed output and are useful for labelling samples:
+
+```{r}
+#| label: dataframe-rownames
+
+labelled <- experiment
+rownames(labelled) <- paste0("Sample_", 1:5)
+labelled
+```
+
+::: {.callout-note}
+Row names are a base R convenience. The tidyverse's tibbles (@sec-tidy-data) drop them, on the principle that a sample identifier is data and belongs in an ordinary column such as `sample_id`; `tibble::rownames_to_column()` makes the conversion. In this book we keep identifiers in columns.
+:::
 
 ### Examining Data Frames {#sec-examining-data-frames}
 
@@ -1068,6 +1216,16 @@ experiment[1:3, c("treatment", "response")]
 experiment[experiment$treatment == "drug_A", ]
 experiment[experiment$response > 3, ]
 ```
+
+The `[row, column]` notation is the same one used for matrices: leaving a dimension empty selects everything along it, so `experiment[, 2]` is all rows of column 2 and `experiment[2, ]` is row 2 of every column. Conditional selection works because a comparison such as `experiment$response > 3` returns a logical vector with one `TRUE`/`FALSE` per row, and a logical vector inside the brackets keeps the `TRUE` rows:
+
+```{r}
+#| label: logical-row-index
+
+experiment$response > 3
+```
+
+Of the three ways to pull out a column, `experiment$response` is the most readable and the one you will use most; `experiment[["response"]]` is the choice when the column name is stored in a variable; and `experiment[, "response"]` is the matrix-style form.
 
 ### Adding and Modifying Columns {#sec-adding-and-modifying-columns}
 
@@ -1189,21 +1347,44 @@ Matrices are particularly useful for linear algebra operations and when you need
 #| eval: false
 
 # CSV files (comma-separated)
-data <- read.csv("data.csv")
+measurements <- read.csv("data.csv")
 
 # Tab-separated files
-data <- read.table("data.tsv", header = TRUE, sep = "\t")
+measurements <- read.table("data.tsv", header = TRUE, sep = "\t")
 
 # Excel files (requires readxl package)
 library(readxl)
-data <- read_excel("data.xlsx")
+measurements <- read_excel("data.xlsx")
 
 # Specify options
-data <- read.csv("data.csv",
+measurements <- read.csv("data.csv",
                  header = TRUE,
                  stringsAsFactors = FALSE,
                  na.strings = c("", "NA", "N/A"))
 ```
+
+`read.csv()` is a convenience wrapper around the general `read.table()`, and the arguments mean the same thing in both:
+
+- `header = TRUE`: the first line contains column names
+- `sep`: the delimiter between fields (`","` for CSV, `"\t"` for tab-separated)
+- `row.names = 1`: treat the first column as row names rather than data
+- `na.strings`: which strings should become `NA`
+- `stringsAsFactors`: whether text columns become factors (the default has been `FALSE` since R 4.0)
+
+The tidyverse's **readr** package provides `read_csv()`, `read_tsv()`, and `read_delim()`, which are faster, never create row names or factors, report how each column was parsed, and return a **tibble** (an enhanced data frame). Both families are in everyday use and you will meet the readr versions in @sec-data-import-with-readr; the base functions are handy because they need no packages at all, for instance in a script run on a cluster.
+
+```{r}
+#| label: readr-preview
+#| eval: false
+
+library(readr)
+measurements <- read_csv("data.csv")    # note the underscore
+measurements <- read_tsv("data.tsv")
+```
+
+::: {.callout-warning title="Always check what you imported"}
+Reading a file rarely fails loudly; it fails quietly by giving you the wrong column types. Immediately after any import, look at the result with `str()` or `glimpse()`, `head()`, `dim()`, and `summary()` (or `View()` in RStudio). A numeric column that shows up as `character` means a non-numeric entry is hiding somewhere in the file.
+:::
 
 ### Writing Files {#sec-r-writing-files}
 
@@ -1215,11 +1396,21 @@ data <- read.csv("data.csv",
 write.csv(experiment, "experiment_results.csv", row.names = FALSE)
 
 # Tab-separated
-write.table(experiment, "results.tsv", 
-            sep = "\t", 
-            quote = FALSE, 
+write.table(experiment, "results.tsv",
+            sep = "\t",
+            quote = FALSE,
             row.names = FALSE)
+
+# readr equivalents (never write row names, never quote unnecessarily)
+readr::write_csv(experiment, "experiment_results.csv")
+readr::write_tsv(experiment, "results.tsv")
 ```
+
+`row.names = FALSE` matters: without it, `write.csv()` adds an unnamed first column of row numbers that becomes a mystery column the next time the file is read. `quote = FALSE` keeps text fields free of quotation marks, which other programs (and shell tools such as `cut` and `awk`, @sec-files-pipes) expect.
+
+::: {.callout-tip title="Never overwrite the raw data"}
+Read the original data file, but write results to a *new* file with a different name. The raw file is the one thing in an analysis you cannot regenerate (@sec-preserving-raw-data).
+:::
 
 ## Basic Visualization {#sec-basic-viz}
 
@@ -1249,9 +1440,9 @@ plot(x, y,
 #| fig-cap: "Histogram of normally distributed data"
 
 # Generate random data
-data <- rnorm(1000, mean = 50, sd = 10)
+values <- rnorm(1000, mean = 50, sd = 10)
 
-hist(data,
+hist(values,
      main = "Distribution of Values",
      xlab = "Value",
      col = "steelblue",
@@ -1276,7 +1467,53 @@ boxplot(control, treatment,
         col = c("lightblue", "lightcoral"))
 ```
 
+When the data live in a data frame, the **formula** interface is more convenient: `y ~ group` reads as "y broken down by group," and `data =` says where to find the columns. The same formula notation reappears in statistical models throughout R.
+
+```{r}
+#| label: fig-base-boxplot-formula
+#| fig-cap: "Box plot of response by treatment using the formula interface"
+
+boxplot(response ~ treatment, data = experiment,
+        xlab = "Treatment", ylab = "Response",
+        col = "steelblue")
+```
+
+### Common Plot Arguments {#sec-plot-arguments}
+
+Most base graphics functions share the arguments in @tbl-plot-arguments.
+
+| Argument | Controls | Example |
+|:---------|:---------|:--------|
+| `main` | Plot title | `main = "Growth curve"` |
+| `xlab`, `ylab` | Axis labels | `ylab = "OD600"` |
+| `xlim`, `ylim` | Axis limits | `ylim = c(0, 1.5)` |
+| `type` | `"p"` points, `"l"` lines, `"b"` both, `"h"` vertical bars | `type = "l"` |
+| `col` | Color (name, hex code, or `rgb()`) | `col = "steelblue"` |
+| `pch` | Point character, 0–25 (`19` = filled circle) | `pch = 19` |
+| `cex` | Size multiplier for points and text | `cex = 1.5` |
+| `lwd`, `lty` | Line width and type | `lwd = 2, lty = "dashed"` |
+| `breaks` | Number of bins (`hist()` only) | `breaks = 30` |
+| `add = TRUE` | Draw onto the existing plot (`curve()`, `lines()`, `points()`) | `curve(dnorm(x), add = TRUE)` |
+
+: Common arguments to base R plotting functions {#tbl-plot-arguments}
+
+Graphical parameters such as `col`, `pch`, and `cex` are **vectorized**: give a vector with one entry per data point and each point gets its own value. Combined with `ifelse()` (@sec-ifelse) or a factor, this is how base graphics color points by group:
+
+```{r}
+#| label: fig-vectorized-col
+#| fig-cap: "Vectorized graphical parameters: each point's color and shape come from a vector of the same length as the data"
+
+x <- seq(0, 10, by = 0.1)
+y <- 10 - x
+point_colors <- ifelse(x < 3, "firebrick", "steelblue")
+
+plot(x, y, col = point_colors, pch = 19,
+     xlab = "x", ylab = "10 - x", main = "Two-color scatterplot")
+```
+
 ### Multiple Plots {#sec-multiple-plots}
+
+`par()` sets graphical parameters that persist for the rest of the session; `mfrow = c(rows, cols)` divides the plotting window into a grid that successive plots fill left to right, top to bottom.
 
 ```{r}
 #| label: fig-multipanel
@@ -1294,6 +1531,8 @@ barplot(c(3, 5, 2, 7), names.arg = c("A", "B", "C", "D"), main = "Bar Plot")
 # Reset to single plot
 par(mfrow = c(1, 1))
 ```
+
+Always reset with `par(mfrow = c(1, 1))` (or save the old settings with `old <- par(mfrow = c(2, 2))` and restore them with `par(old)`); otherwise every later plot in the session lands in the grid.
 
 ::: {.callout-tip}
 For publication-quality graphics, explore the **ggplot2** package [@wickham2016ggplot2], which provides a powerful and consistent grammar of graphics. We cover ggplot2 in detail in @sec-data-viz.
@@ -1473,8 +1712,8 @@ calculate_cv <- function(x) {
 }
 
 # Use the function
-data <- c(10, 12, 11, 13, 9, 14)
-calculate_cv(data)
+readings <- c(10, 12, 11, 13, 9, 14)
+calculate_cv(readings)
 
 # Function with multiple arguments and default values
 summarize_data <- function(x, digits = 2) {
@@ -1486,8 +1725,8 @@ summarize_data <- function(x, digits = 2) {
   return(result)
 }
 
-summarize_data(data)
-summarize_data(data, digits = 3)
+summarize_data(readings)
+summarize_data(readings, digits = 3)
 ```
 
 ## Random Sampling and Simulation {#sec-random-sampling}
@@ -1626,9 +1865,9 @@ row_number(x)    # Unique ranks (ties broken by position)
 min_rank(desc(x))
 
 # Practical example: find top 3 values
-df <- tibble(gene = c("A", "B", "C", "D", "E"),
-             expression = c(5.2, 8.1, 3.4, 9.7, 6.5))
-df |> filter(min_rank(desc(expression)) <= 3)
+expr <- tibble(gene = c("A", "B", "C", "D", "E"),
+               expression = c(5.2, 8.1, 3.4, 9.7, 6.5))
+expr |> filter(min_rank(desc(expression)) <= 3)
 ```
 
 ### Binning Numbers with `cut()` {#sec-cut-bins}
@@ -1745,10 +1984,11 @@ This chapter introduced R programming fundamentals:
 - Vectors are the fundamental data structure; operations are vectorized
 - Logical operators (`&`, `|`, `!`, `%in%`) and comparison operators enable conditional logic
 - Floating-point comparisons require `all.equal()` instead of `==`
+- `NA` propagates through calculations; test for it with `is.na()`, never `== NA`, and drop it with `na.rm = TRUE`
 - Data frames hold tabular data with columns of different types
 - Lists can contain elements of different types and lengths
 - Matrices are optimized for numerical computations
-- Functions perform operations; use `?function`, vignettes, and demos for help
+- Functions perform operations; use `?function`, vignettes, and demos for help, read error messages from the bottom up, and ask with a minimal reproducible example
 - Packages extend R's capabilities; watch for namespace conflicts when loading multiple packages
 - The split-apply-combine pattern (`tapply()`, `aggregate()`, `apply()`) is fundamental to data analysis
 - Conditional logic (`ifelse()`) and loops enable programmatic control
@@ -1816,6 +2056,21 @@ Using the built-in `mtcars` dataset:
 2. Save it as a CSV file
 3. Read it back into a new variable
 4. Verify the data matches the original
+5. Repeat the round trip with `write.csv()` *without* `row.names = FALSE`, read the file back, and explain the extra column
+
+**Exercise 8: Exploring RStudio and the Help System**
+
+1. Locate the four panes; click through the Packages and Help tabs in the bottom-right pane
+2. Create a new R script and a new Quarto document (File → New File) and compare them
+3. Run `?sd`, then `args(sd)` and `example(sd)`; from the help page alone, work out how to compute the standard deviation of a vector containing `NA`
+4. Deliberately trigger three errors from @tbl-common-r-errors (an undefined object, a missing package, an unbalanced bracket) and confirm you can read each message
+
+**Exercise 9: Base Plotting**
+
+1. Create a sequence with `seq()` and plot it three times, changing `type` to `"p"`, `"l"`, and `"b"`
+2. Generate 1000 values with `rnorm()` and draw histograms with `breaks = 10` and `breaks = 50`; what does `breaks` control?
+3. Use `par(mfrow = c(2, 2))` to place all four plots in one figure, then reset the layout
+4. Color the points in a scatterplot by whether they exceed a threshold, using a vector for `col`
 :::
 
 ## Additional Resources {#sec-r-additional-resources .unnumbered}

@@ -85,12 +85,14 @@ This appendix provides a comprehensive reference for Unix/Linux commands covered
 | `sort` | Sort lines | `sort names.txt` |
 | `sort -n` | Numeric sort | `sort -n numbers.txt` |
 | `sort -r` | Reverse sort | `sort -r names.txt` |
-| `sort -k` | Sort by column | `sort -k2 data.tsv` |
+| `sort -k` | Sort by column (use `-kN,N` to sort on that column only) | `sort -k2,2 -n data.tsv` |
+| `sort -t` | Specify field delimiter | `sort -t',' -k3,3 data.csv` |
 | `sort -u` | Sort and remove duplicates | `sort -u list.txt` |
-| `uniq` | Remove adjacent duplicates | `sort file | uniq` |
-| `uniq -c` | Count occurrences | `sort file | uniq -c` |
-| `uniq -d` | Show only duplicates | `sort file | uniq -d` |
-| `cut -f` | Extract fields (tab-delimited) | `cut -f2 data.tsv` |
+| `uniq` | Remove adjacent duplicates | `sort file \| uniq` |
+| `uniq -c` | Count occurrences | `sort file \| uniq -c` |
+| `uniq -d` | Show only duplicates | `sort file \| uniq -d` |
+| `uniq -u` | Show only lines that occur once | `sort file \| uniq -u` |
+| `cut -f` | Extract fields (tab-delimited); ranges allowed | `cut -f2-5 data.tsv` |
 | `cut -d` | Specify delimiter | `cut -d',' -f1,3 data.csv` |
 | `cut -c` | Extract characters | `cut -c1-10 file.txt` |
 | `tr` | Translate characters | `tr 'a-z' 'A-Z'` |
@@ -107,7 +109,9 @@ This appendix provides a comprehensive reference for Unix/Linux commands covered
 | `wc -w` | Count words only | `wc -w essay.txt` |
 | `wc -c` | Count bytes only | `wc -c file.bin` |
 | `paste` | Merge files line by line | `paste file1.txt file2.txt` |
-| `join` | Join files on common field | `join file1.txt file2.txt` |
+| `join` | Join sorted files on common field | `join file1.txt file2.txt` |
+| `join -1 -2` | Choose the key column in each file | `join -1 2 -2 1 file1.txt file2.txt` |
+| `fold -w` | Wrap lines to a fixed width (`-w1` = one character per line) | `tr -d '\n' < seq.fa \| fold -w1 \| sort \| uniq -c` |
 | `split` | Split file into pieces | `split -l 1000 large.txt` |
 | `shuf` | Randomly shuffle lines (or sample n lines) | `shuf -n 100 reads.txt` |
 
@@ -120,6 +124,8 @@ This appendix provides a comprehensive reference for Unix/Linux commands covered
 | `>` | Redirect output (overwrite) | `ls > files.txt` |
 | `>>` | Redirect output (append) | `echo "done" >> log.txt` |
 | `<` | Redirect input | `wc -l < data.txt` |
+| `<<` | Here-document (inline multi-line input up to a marker) | `sort << EOF` ... `EOF` |
+| `1>` | Redirect stdout (explicit form of `>`) | `cmd 1> out.txt` |
 | `2>` | Redirect stderr | `cmd 2> errors.txt` |
 | `2>&1` | Redirect stderr to stdout | `cmd > out.txt 2>&1` |
 | `&>` | Redirect both stdout and stderr | `cmd &> all.txt` |
@@ -138,6 +144,8 @@ This appendix provides a comprehensive reference for Unix/Linux commands covered
 | `gzip -k` | Keep original file | `gzip -k file.txt` |
 | `gzip -d` | Decompress | `gzip -d file.txt.gz` |
 | `gunzip` | Decompress .gz file | `gunzip file.txt.gz` |
+| `gunzip -k` | Decompress, keeping the .gz file | `gunzip -k file.txt.gz` |
+| `gunzip -c` | Decompress to stdout (same as `zcat`) | `gunzip -c data.gz \| head` |
 | `zcat` | View compressed file | `zcat data.gz \| head` |
 | `zgrep` | Search compressed file | `zgrep "pattern" file.gz` |
 | `zless` | Page through compressed file | `zless data.gz` |
@@ -306,3 +314,16 @@ This appendix provides a comprehensive reference for Unix/Linux commands covered
 | `$$` | Current process ID |
 
 : Common environment variables {#tbl-common-env}
+
+### Special Variables in Scripts {#sec-script-variables}
+
+| Variable | Description |
+|:---------|:------------|
+| `$0` | Name of the script |
+| `$1`, `$2`, ... `$9` | First, second, ... ninth command-line argument (`${10}` and up need braces) |
+| `$#` | Number of arguments |
+| `$@` | All arguments as separate words (quote it: `"$@"`) |
+| `$*` | All arguments as one word |
+| `$LINENO` | Current line number in the script (useful in error traps) |
+
+: Special variables available inside shell scripts (@sec-cli-arguments) {#tbl-script-variables}

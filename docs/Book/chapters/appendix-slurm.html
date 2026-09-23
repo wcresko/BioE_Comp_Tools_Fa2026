@@ -591,6 +591,7 @@ div.csl-indent {
   <li><a href="#sec-talapas-specific" id="toc-sec-talapas-specific" class="nav-link" data-scroll-target="#sec-talapas-specific"><span class="header-section-number">F.12</span> Talapas-Specific Information</a>
   <ul class="collapse">
   <li><a href="#sec-talapas-partitions" id="toc-sec-talapas-partitions" class="nav-link" data-scroll-target="#sec-talapas-partitions">Common Partitions</a></li>
+  <li><a href="#sec-talapas-helpers" id="toc-sec-talapas-helpers" class="nav-link" data-scroll-target="#sec-talapas-helpers">Talapas Helper Commands</a></li>
   <li><a href="#sec-talapas-storage-ref" id="toc-sec-talapas-storage-ref" class="nav-link" data-scroll-target="#sec-talapas-storage-ref">Storage Locations</a></li>
   </ul></li>
   </ul>
@@ -1743,11 +1744,14 @@ Table&nbsp;F.14: SLURM environment variables
 <span id="cb7-8"><a href="#cb7-8"></a><span class="co">#SBATCH --mem=16G</span></span>
 <span id="cb7-9"><a href="#cb7-9"></a><span class="co">#SBATCH --output=r_job_%j.log</span></span>
 <span id="cb7-10"><a href="#cb7-10"></a></span>
-<span id="cb7-11"><a href="#cb7-11"></a><span class="co"># Load required modules</span></span>
-<span id="cb7-12"><a href="#cb7-12"></a><span class="ex">module</span> load R/4.3.3</span>
-<span id="cb7-13"><a href="#cb7-13"></a></span>
-<span id="cb7-14"><a href="#cb7-14"></a><span class="co"># Run R script</span></span>
-<span id="cb7-15"><a href="#cb7-15"></a><span class="ex">Rscript</span> my_analysis.R</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb7-11"><a href="#cb7-11"></a><span class="bu">set</span> <span class="at">-euo</span> pipefail</span>
+<span id="cb7-12"><a href="#cb7-12"></a></span>
+<span id="cb7-13"><a href="#cb7-13"></a><span class="co"># Load required modules (inside the script, with a version number)</span></span>
+<span id="cb7-14"><a href="#cb7-14"></a><span class="ex">module</span> purge</span>
+<span id="cb7-15"><a href="#cb7-15"></a><span class="ex">module</span> load R/4.3.3</span>
+<span id="cb7-16"><a href="#cb7-16"></a></span>
+<span id="cb7-17"><a href="#cb7-17"></a><span class="co"># Run R script</span></span>
+<span id="cb7-18"><a href="#cb7-18"></a><span class="ex">Rscript</span> my_analysis.R</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </section>
 <section id="sec-example-python" class="level3">
 <h3 class="anchored" data-anchor-id="sec-example-python">Python with Conda</h3>
@@ -1869,12 +1873,54 @@ Table&nbsp;F.15: Talapas partitions
 </div>
 <p>Run <code>sinfo</code> to list every partition, including your lab’s condo partitions. Interactive sessions should use <code>--partition=interactive</code> (or <code>interactivegpu</code>).</p>
 </section>
+<section id="sec-talapas-helpers" class="level3">
+<h3 class="anchored" data-anchor-id="sec-talapas-helpers">Talapas Helper Commands</h3>
+<div id="tbl-talapas-helpers" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-talapas-helpers-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;F.16: Talapas-specific helper commands (see <a href="11-hpc-talapas.html#sec-connecting-talapas" class="quarto-xref"><span>Section 20.4</span></a> for access details)
+</figcaption>
+<div aria-describedby="tbl-talapas-helpers-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<table class="caption-top table">
+<colgroup>
+<col style="width: 40%">
+<col style="width: 60%">
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: left;">Task</th>
+<th style="text-align: left;">Command</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">Which PIRGs (accounts) am I in?</td>
+<td style="text-align: left;"><code>groups</code></td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Which GPUs exist and which are free?</td>
+<td style="text-align: left;"><code>/packages/racs/bin/slurm-show-gpus</code></td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Set my default account once</td>
+<td style="text-align: left;"><code>echo 'export SBATCH_ACCOUNT=myPIRG' &gt;&gt; ~/.bash_profile</code></td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Home and project usage</td>
+<td style="text-align: left;"><code>df -h ~</code> / <code>du -sh /projects/myPIRG/$USER</code></td>
+</tr>
+</tbody>
+</table>
+</div>
+</figure>
+</div>
+</section>
 <section id="sec-talapas-storage-ref" class="level3">
 <h3 class="anchored" data-anchor-id="sec-talapas-storage-ref">Storage Locations</h3>
 <div id="tbl-talapas-storage" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-tbl figure">
 <figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-talapas-storage-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Table&nbsp;F.16: Talapas storage. Nothing is backed up by RACS; use Globus for large transfers (<a href="11-hpc-talapas.html#sec-file-transfer" class="quarto-xref"><span>Section 20.5.3</span></a>).
+Table&nbsp;F.17: Talapas storage. Nothing is backed up by RACS; use Globus for large transfers (<a href="11-hpc-talapas.html#sec-file-transfer" class="quarto-xref"><span>Section 20.5.3</span></a>).
 </figcaption>
 <div aria-describedby="tbl-talapas-storage-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 <table class="caption-top table">

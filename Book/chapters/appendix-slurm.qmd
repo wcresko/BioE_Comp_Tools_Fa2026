@@ -361,7 +361,10 @@ To size the array from a file at submit time: `sbatch --array=1-$(wc -l < sample
 #SBATCH --mem=16G
 #SBATCH --output=r_job_%j.log
 
-# Load required modules
+set -euo pipefail
+
+# Load required modules (inside the script, with a version number)
+module purge
 module load R/4.3.3
 
 # Run R script
@@ -445,6 +448,17 @@ mpirun -np 64 ./my_mpi_program
 : Talapas partitions {#tbl-talapas-partitions}
 
 Run `sinfo` to list every partition, including your lab's condo partitions. Interactive sessions should use `--partition=interactive` (or `interactivegpu`).
+
+### Talapas Helper Commands {#sec-talapas-helpers}
+
+| Task | Command |
+|:-----|:--------|
+| Which PIRGs (accounts) am I in? | `groups` |
+| Which GPUs exist and which are free? | `/packages/racs/bin/slurm-show-gpus` |
+| Set my default account once | `echo 'export SBATCH_ACCOUNT=myPIRG' >> ~/.bash_profile` |
+| Home and project usage | `df -h ~` / `du -sh /projects/myPIRG/$USER` |
+
+: Talapas-specific helper commands (see @sec-connecting-talapas for access details) {#tbl-talapas-helpers}
 
 ### Storage Locations {#sec-talapas-storage-ref}
 

@@ -162,7 +162,22 @@ $$ \large \alpha, \beta, \gamma $$
 : Uppercase Greek letters {#tbl-greek-upper}
 
 ::: {.callout-tip}
-Many uppercase Greek letters look identical to Latin letters (A, B, E, H, I, K, M, N, O, P, T, X, Z) and don't have separate LaTeX commands—just use the Latin letter.
+Many uppercase Greek letters look identical to Latin letters (A, B, E, H, I, K, M, N, O, P, T, X, Z) and don't have separate LaTeX commands—just use the Latin letter. Several lowercase letters have a second form (`\varepsilon` $\varepsilon$, `\varphi` $\varphi$, `\vartheta` $\vartheta$), and a bold Greek letter needs `\boldsymbol{\beta}` rather than `\mathbf`. The names and pronunciations of all 24 letters are listed in @tbl-greek-names.
+:::
+
+::: {.callout-note title="Greek letters in R plot labels"}
+LaTeX works in Quarto text, not inside an R plot. For an axis label or title that needs a Greek letter, use R's `expression()` (or the `latex2exp` package, which translates LaTeX strings):
+
+```{r}
+#| label: greek-in-r
+#| eval: false
+ggplot(df, aes(x, y)) +
+  geom_point() +
+  labs(x = expression(mu), y = expression(sigma^2),
+       title = expression(paste("Mean = ", mu, ", SD = ", sigma)))
+```
+
+In matplotlib the label string itself can hold LaTeX: `plt.xlabel(r"$\mu$")`.
 :::
 
 ## Comparison and Relation Operators {#sec-comparison}
@@ -210,13 +225,20 @@ LaTeX provides a wide range of special mathematical symbols:
 | $\forall$ | `$\forall$` | For all |
 | $\exists$ | `$\exists$` | There exists |
 | $\emptyset$ | `$\emptyset$` | Empty set |
+| $\cup$ | `$\cup$` | Union |
+| $\cap$ | `$\cap$` | Intersection |
+| $\to$ | `$\to$` | Arrow (also `\rightarrow`, `\leftarrow`) |
+| $\Rightarrow$ | `$\Rightarrow$` | Implies (`\Leftrightarrow` for "if and only if") |
 | $\pm$ | `$\pm$` | Plus or minus |
 | $\cdot$ | `$\cdot$` | Centered dot |
-| $\cdots$ | `$\cdots$` | Horizontal dots |
+| $\ldots$ | `$\ldots$` | Baseline dots ($x_1, \ldots, x_n$) |
+| $\cdots$ | `$\cdots$` | Horizontal dots ($x_1 + \cdots + x_n$) |
 | $\vdots$ | `$\vdots$` | Vertical dots |
 | $\ddots$ | `$\ddots$` | Diagonal dots |
 
 : Special mathematical symbols {#tbl-special-symbols}
+
+Logic symbols, arrows, number sets, and many more are tabulated in @sec-appendix-latex.
 
 Example:
 
@@ -273,15 +295,21 @@ $$\large f(k) = {n \choose k} p^{k} (1-p)^{n-k}$$
 
 $$\large f(k) = {n \choose k} p^{k} (1-p)^{n-k}$$
 
+The binomial coefficient can equally be written `\binom{n}{k}`, which reads more clearly in source.
+
 ### Poisson Distribution {#sec-poisson-distribution}
 
 The probability mass function:
 
 ```markdown
-$$\large Pr(Y=r) = \frac{e^{-\mu}\mu^r}{r!}$$
+$$\large P(Y=r) = \frac{e^{-\mu}\mu^r}{r!}$$
 ```
 
-$$\large Pr(Y=r) = \frac{e^{-\mu}\mu^r}{r!}$$
+$$\large P(Y=r) = \frac{e^{-\mu}\mu^r}{r!}$$
+
+::: {.callout-tip}
+Multi-letter names in math mode are typeset as a product of italic variables (`Pr` becomes $Pr$, i.e. $P \times r$). Use `\Pr`, `\text{Var}`, `\operatorname{Cov}`, or `\mathrm{SE}` for upright function names: $\Pr(Y = r)$, $\text{Var}(X)$.
+:::
 
 ### Normal Distribution {#sec-normal-distribution}
 
@@ -424,6 +452,62 @@ LaTeX provides proper formatting for common functions:
 
 : Mathematical functions {#tbl-functions}
 
+## Numbered and Aligned Equations {#sec-latex-numbered-aligned}
+
+Quarto numbers a display equation when you attach an `{#eq-...}` label after the closing `$$`, and you refer to it with `@eq-...` exactly as for figures and tables (@sec-cross-references):
+
+```markdown
+$$
+E = mc^2
+$$ {#eq-einstein}
+
+@eq-einstein relates mass and energy.
+```
+
+$$
+E = mc^2
+$$ {#eq-einstein-demo}
+
+@eq-einstein-demo relates mass and energy.
+
+A multi-step derivation belongs in an `aligned` environment inside the `$$` pair. Each line ends with `\\`, and the `&` marks the point that lines up vertically (usually just before the `=`):
+
+```markdown
+$$
+\begin{aligned}
+\bar{x} &= \frac{1}{n}\sum_{i=1}^{n} x_i \\
+        &= \frac{x_1 + x_2 + \cdots + x_n}{n}
+\end{aligned}
+$$ {#eq-mean-aligned}
+```
+
+$$
+\begin{aligned}
+\bar{x} &= \frac{1}{n}\sum_{i=1}^{n} x_i \\
+        &= \frac{x_1 + x_2 + \cdots + x_n}{n}
+\end{aligned}
+$$ {#eq-mean-aligned}
+
+The whole block receives one number (@eq-mean-aligned). Use `cases` in the same way for a piecewise definition:
+
+```markdown
+$$
+f(x) =
+\begin{cases}
+  \lambda e^{-\lambda x} & x \geq 0 \\
+  0                      & x < 0
+\end{cases}
+$$
+```
+
+$$
+f(x) =
+\begin{cases}
+  \lambda e^{-\lambda x} & x \geq 0 \\
+  0                      & x < 0
+\end{cases}
+$$
+
 ## Practical Examples {#sec-practical-examples}
 
 ### Linear Regression Model {#sec-linear-regression-model}
@@ -456,10 +540,10 @@ $$p^2 + 2pq + q^2 = 1$$
 
 ### Formatting Tips {#sec-formatting-tips}
 
-1. **Spacing**: LaTeX ignores spaces in math mode. Use `\,` for thin space, `\;` for medium, and `\quad` for large spacing
+1. **Spacing**: LaTeX ignores spaces in math mode. Use `\,` for a thin space (as before $dx$ in an integral), `\:` for medium, `\;` for thick, `\quad` and `\qquad` for large gaps, and `\!` to pull symbols closer (full table in @sec-latex-spacing)
 2. **Text in equations**: Use `\text{...}` for words: $P(\text{event})$
 3. **Size**: Use `\large`, `\small`, etc. for size adjustments
-4. **Numbering**: In Quarto, add `{#eq-label}` after display equations for cross-referencing
+4. **Numbering**: In Quarto, add `{#eq-label}` after display equations for cross-referencing (@sec-latex-numbered-aligned)
 
 ### Common Mistakes {#sec-common-mistakes}
 
@@ -482,6 +566,7 @@ LaTeX provides powerful tools for mathematical typesetting (a complete symbol re
 - **Sums**, **products**, and **integrals** with limits
 - **Matrices** with various bracket styles
 - **Automatic sizing** of delimiters with `\left` and `\right`
+- **Numbered** (`{#eq-...}`) and **aligned** (`aligned`, `cases`) display equations
 
 Integration with Quarto and R Markdown means you can include precise mathematical notation alongside code and narrative—essential for reproducible scientific communication.
 

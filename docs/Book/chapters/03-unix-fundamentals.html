@@ -558,6 +558,7 @@ div.csl-indent {
   <ul class="collapse">
 <li><a href="#sec-the-directory-tree" id="toc-sec-the-directory-tree" class="nav-link" data-scroll-target="#sec-the-directory-tree">The Directory Tree</a></li>
   <li><a href="#sec-absolute-vs-relative-paths" id="toc-sec-absolute-vs-relative-paths" class="nav-link" data-scroll-target="#sec-absolute-vs-relative-paths">Absolute vs.&nbsp;Relative Paths</a></li>
+  <li><a href="#sec-dot-and-dotdot" id="toc-sec-dot-and-dotdot" class="nav-link" data-scroll-target="#sec-dot-and-dotdot">The Special Entries <code>.</code> and <code>..</code></a></li>
   </ul>
 </li>
   <li>
@@ -596,6 +597,7 @@ div.csl-indent {
   <ul class="collapse">
 <li><a href="#sec-understanding-permission-strings" id="toc-sec-understanding-permission-strings" class="nav-link" data-scroll-target="#sec-understanding-permission-strings">Understanding Permission Strings</a></li>
   <li><a href="#sec-chmod" id="toc-sec-chmod" class="nav-link" data-scroll-target="#sec-chmod">Changing Permissions: <code>chmod</code></a></li>
+  <li><a href="#sec-making-scripts-executable" id="toc-sec-making-scripts-executable" class="nav-link" data-scroll-target="#sec-making-scripts-executable">Making Scripts Executable</a></li>
   <li><a href="#sec-chown" id="toc-sec-chown" class="nav-link" data-scroll-target="#sec-chown">Changing Ownership: <code>chown</code></a></li>
   <li><a href="#sec-sudo" id="toc-sec-sudo" class="nav-link" data-scroll-target="#sec-sudo">Superuser Access: <code>sudo</code></a></li>
   </ul>
@@ -608,6 +610,7 @@ div.csl-indent {
   <li><a href="#sec-environment-variables" id="toc-sec-environment-variables" class="nav-link" data-scroll-target="#sec-environment-variables">Environment Variables</a></li>
   <li><a href="#sec-executables-and-the-path" id="toc-sec-executables-and-the-path" class="nav-link" data-scroll-target="#sec-executables-and-the-path">Executables and the PATH</a></li>
   <li><a href="#sec-shells-and-configuration-files" id="toc-sec-shells-and-configuration-files" class="nav-link" data-scroll-target="#sec-shells-and-configuration-files">Shells and Configuration Files</a></li>
+  <li><a href="#sec-ssh-scp" id="toc-sec-ssh-scp" class="nav-link" data-scroll-target="#sec-ssh-scp">Connecting to Remote Computers: <code>ssh</code> and <code>scp</code></a></li>
   <li><a href="#sec-commands-worth-learning" id="toc-sec-commands-worth-learning" class="nav-link" data-scroll-target="#sec-commands-worth-learning">Commands Worth Learning</a></li>
   <li><a href="#sec-file-manipulation-from-r" id="toc-sec-file-manipulation-from-r" class="nav-link" data-scroll-target="#sec-file-manipulation-from-r">File Manipulation from R</a></li>
   </ul>
@@ -825,10 +828,22 @@ Tip
 </div>
 </section></section><section id="sec-shell-command-anatomy" class="level2" data-number="5.3"><h2 data-number="5.3" class="anchored" data-anchor-id="sec-shell-command-anatomy">
 <span class="header-section-number">5.3</span> Anatomy of a Shell Command</h2>
-<p>Every shell command follows a consistent structure:</p>
+<p>Every shell command follows a consistent structure (<a href="#fig-shell-command-anatomy" class="quarto-xref">Figure&nbsp;<span>5.1</span></a>):</p>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb3"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1"></a><span class="bu">command</span> <span class="at">-options</span> arguments</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div id="fig-shell-command-anatomy" class="quarto-float quarto-figure quarto-figure-center anchored" data-fig-align="center">
+<figure class="quarto-float quarto-float-fig figure"><div aria-describedby="fig-shell-command-anatomy-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="../images/appendix_B_S38_shell_command_anatomy.svg" class="img-fluid quarto-figure quarto-figure-center figure-img" style="width:80.0%">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-shell-command-anatomy-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;5.1: The parts of a shell command. The prompt is printed by the shell to show it is ready; you type the command, any options that modify its behavior, and the arguments it should operate on.
+</figcaption></figure>
+</div>
 <p>Let’s break this down:</p>
 <dl>
+<dt><strong>Prompt</strong></dt>
+<dd>
+Printed by the shell, not typed by you. It signals that the computer is ready to accept a new command (<code>$</code> for a regular user, <code>#</code> for the administrator).
+</dd>
 <dt><strong>Command</strong></dt>
 <dd>
 The program or built-in function you want to run. This is required.
@@ -892,7 +907,15 @@ Tip
 </div>
 </section></section><section id="sec-file-system" class="level2" data-number="5.4"><h2 data-number="5.4" class="anchored" data-anchor-id="sec-file-system">
 <span class="header-section-number">5.4</span> Understanding the File System</h2>
-<p>We refer to all the files, folders, and programs on your computer as the <strong>filesystem</strong>. In Unix, everything is organized as files within a hierarchical directory structure. Keep in mind that folders and programs are technically also files, but this is a detail we rarely think about. Understanding this structure is essential for navigation.</p>
+<p>We refer to all the files, folders, and programs on your computer as the <strong>filesystem</strong>. In Unix, everything is organized as files within a hierarchical directory structure (<a href="#fig-file-structure" class="quarto-xref">Figure&nbsp;<span>5.2</span></a>). Keep in mind that folders and programs are technically also files, but this is a detail we rarely think about. Understanding this structure is essential for navigation.</p>
+<div id="fig-file-structure" class="quarto-float quarto-figure quarto-figure-center anchored" data-fig-align="center">
+<figure class="quarto-float quarto-float-fig figure"><div aria-describedby="fig-file-structure-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="../images/appendix_B_S42_file_structure.svg" class="img-fluid quarto-figure quarto-figure-center figure-img" style="width:85.0%">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-file-structure-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;5.2: A computer’s storage is a system of directories (folders) and files. The same folders you click through in Finder or File Explorer are what you will navigate from the shell.
+</figcaption></figure>
+</div>
 <section id="sec-the-directory-tree" class="level3"><h3 class="anchored" data-anchor-id="sec-the-directory-tree">The Directory Tree</h3>
 <p>The first concept you need to grasp to become a Unix user is how your filesystem is organized. You should think of it as a series of nested folders, each containing files, folders, and executable programs.</p>
 <p>In Unix, we refer to folders as <strong>directories</strong>. Directories that are inside other directories are called <strong>subdirectories</strong>. The entire file system branches from a single <strong>root directory</strong>, represented by <code>/</code>:</p>
@@ -905,6 +928,15 @@ Tip
 ├── Applications/
 ├── Library/
 └── tmp/</code></pre>
+<p><a href="#fig-unix-file-hierarchy" class="quarto-xref">Figure&nbsp;<span>5.3</span></a> shows the same idea as a tree: the root directory <code>/</code> at the top, system directories and user home directories branching below it, and your own files nested deeper still.</p>
+<div id="fig-unix-file-hierarchy" class="quarto-float quarto-figure quarto-figure-center anchored" data-fig-align="center">
+<figure class="quarto-float quarto-float-fig figure"><div aria-describedby="fig-unix-file-hierarchy-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="../images/appendix_B_S43_unix_file_hierarchy.svg" class="img-fluid quarto-figure quarto-figure-center figure-img" style="width:85.0%">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-unix-file-hierarchy-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;5.3: The Unix file hierarchy. Every file and directory on the system descends from the root directory <code>/</code>; user home directories sit under <code>/Users</code> (macOS) or <code>/home</code> (Linux).
+</figcaption></figure>
+</div>
 <p>Key directories include:</p>
 <dl>
 <dt><strong><code>/</code></strong></dt>
@@ -953,16 +985,16 @@ Start from the root directory (<code>/</code>). They work from anywhere because 
 <dl>
 <dt><strong>Relative Paths</strong></dt>
 <dd>
-Start from your current directory. Shorter but depend on where you are. If a path does not start with <code>/</code> or <code>~</code>, Unix assumes it is relative to your current working directory. <a href="#fig-paths" class="quarto-xref">Figure&nbsp;<span>5.1</span></a> shows how an absolute path is built up from the root of the tree.
+Start from your current directory. Shorter but depend on where you are. If a path does not start with <code>/</code> or <code>~</code>, Unix assumes it is relative to your current working directory. <a href="#fig-paths" class="quarto-xref">Figure&nbsp;<span>5.4</span></a> shows how an absolute path is built up from the root of the tree.
 </dd>
 </dl>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb9"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb9-1"><a href="#cb9-1"></a><span class="ex">Documents/analysis.R</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div id="fig-paths" class="quarto-float quarto-figure quarto-figure-center anchored">
+<div id="fig-paths" class="quarto-float quarto-figure quarto-figure-center anchored" data-fig-align="center">
 <figure class="quarto-float quarto-float-fig figure"><div aria-describedby="fig-paths-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<img src="../images/unix_directory_paths.jpeg" class="img-fluid figure-img" style="width:70.0%">
+<img src="../images/unix_paths_highlighted.svg" class="img-fluid quarto-figure quarto-figure-center figure-img" style="width:85.0%">
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-paths-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;5.1: Understanding file system paths: This diagram shows how an absolute path like <code>/home/catchen/working</code> is constructed by following the directory tree from root (<code>/</code>) through each level.
+Figure&nbsp;5.4: Understanding file system paths. An absolute path is built by following the directory tree from the root (<code>/</code>) down through each level to the file; the highlighted route spells out the path one directory at a time.
 </figcaption></figure>
 </div>
 <p>Unix provides shorthand symbols for common directory references:</p>
@@ -998,6 +1030,35 @@ Table&nbsp;5.2: Special directory symbols
 </figure>
 </div>
 <p>These symbols can be combined in paths. For example, <code>../..</code> means “go up two directories,” and <code>~/projects</code> means “the projects folder in my home directory.”</p>
+</section><section id="sec-dot-and-dotdot" class="level3"><h3 class="anchored" data-anchor-id="sec-dot-and-dotdot">The Special Entries <code>.</code> and <code>..</code>
+</h3>
+<p>The first two symbols in <a href="#tbl-dir-symbols" class="quarto-xref">Table&nbsp;<span>5.2</span></a> are not just shorthand: they are real entries that exist in <em>every</em> directory. You can see them with <code>ls -a</code>, which shows hidden files (anything whose name begins with a dot):</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb10"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb10-1"><a href="#cb10-1"></a><span class="ex">$</span> ls <span class="at">-a</span></span>
+<span id="cb10-2"><a href="#cb10-2"></a><span class="bu">.</span>  ..  .bashrc  analysis.R  data  README.md</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>The entry <code>.</code> (dot) refers to the directory itself, and <code>..</code> (dot dot) refers to its parent (<a href="#fig-unix-dot-files" class="quarto-xref">Figure&nbsp;<span>5.5</span></a>). This is why <code>cd ..</code> moves you up one level: you are literally entering the <code>..</code> entry of your current directory (<a href="#fig-unix-dotdot-navigation" class="quarto-xref">Figure&nbsp;<span>5.6</span></a>). It is also why you run a script in the current directory as <code>./script.sh</code>, meaning “the file <code>script.sh</code> inside the directory I am in right now.”</p>
+<div id="fig-unix-dot-files" class="quarto-float quarto-figure quarto-figure-center anchored" data-fig-align="center">
+<figure class="quarto-float quarto-float-fig figure"><div aria-describedby="fig-unix-dot-files-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="../images/unix_dot_files.svg" class="img-fluid quarto-figure quarto-figure-center figure-img" style="width:85.0%">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-unix-dot-files-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;5.5: Every directory contains two hidden entries: <code>.</code>, which points to the directory itself, and <code>..</code>, which points to its parent.
+</figcaption></figure>
+</div>
+<div id="fig-unix-dotdot-navigation" class="quarto-float quarto-figure quarto-figure-center anchored" data-fig-align="center">
+<figure class="quarto-float quarto-float-fig figure"><div aria-describedby="fig-unix-dotdot-navigation-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="../images/unix_dotdot_navigation.svg" class="img-fluid quarto-figure quarto-figure-center figure-img" style="width:85.0%">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-unix-dotdot-navigation-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;5.6: Navigating with <code>..</code>: <code>cd ..</code> follows the parent link up one level in the tree, and a path such as <code>../other_dir</code> goes up one level and then down into a sibling directory.
+</figcaption></figure>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb11"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb11-1"><a href="#cb11-1"></a><span class="co"># These three commands are equivalent</span></span>
+<span id="cb11-2"><a href="#cb11-2"></a><span class="ex">$</span> cd data</span>
+<span id="cb11-3"><a href="#cb11-3"></a><span class="ex">$</span> cd ./data</span>
+<span id="cb11-4"><a href="#cb11-4"></a><span class="ex">$</span> cd ././data</span>
+<span id="cb11-5"><a href="#cb11-5"></a></span>
+<span id="cb11-6"><a href="#cb11-6"></a><span class="co"># Up one level, then into a sibling directory</span></span>
+<span id="cb11-7"><a href="#cb11-7"></a><span class="ex">$</span> cd ../scripts</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="callout callout-style-default callout-tip callout-titled">
 <div class="callout-header d-flex align-content-center">
 <div class="callout-icon-container">
@@ -1017,15 +1078,15 @@ Tip
 <section id="sec-pwd" class="level3"><h3 class="anchored" data-anchor-id="sec-pwd">Where Am I? <code>pwd</code>
 </h3>
 <p>The <code>pwd</code> command (<strong>p</strong>rint <strong>w</strong>orking <strong>d</strong>irectory) shows your current location:</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb10"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb10-1"><a href="#cb10-1"></a><span class="ex">$</span> pwd</span>
-<span id="cb10-2"><a href="#cb10-2"></a><span class="ex">/Users/wcresko/projects/analysis</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb12"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb12-1"><a href="#cb12-1"></a><span class="ex">$</span> pwd</span>
+<span id="cb12-2"><a href="#cb12-2"></a><span class="ex">/Users/wcresko/projects/analysis</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>When you first open a terminal, it typically starts in your home directory. The output of <code>pwd</code> will vary depending on your system—you might see <code>/Users/yourusername</code> on macOS or <code>/home/yourusername</code> on Linux, including Ubuntu running under WSL on Windows.</p>
 <p>Always know where you are before running commands—especially destructive ones like <code>rm</code>!</p>
 </section><section id="sec-ls" class="level3"><h3 class="anchored" data-anchor-id="sec-ls">What’s Here? <code>ls</code>
 </h3>
 <p>In a graphical file manager, you know what’s in a directory because you see icons representing files and folders. In the terminal, we use the <code>ls</code> command (<strong>l</strong>i<strong>s</strong>t) to see directory contents:</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb11"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb11-1"><a href="#cb11-1"></a><span class="ex">$</span> ls</span>
-<span id="cb11-2"><a href="#cb11-2"></a><span class="ex">data/</span>  results/  analysis.R  README.md</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb13"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb13-1"><a href="#cb13-1"></a><span class="ex">$</span> ls</span>
+<span id="cb13-2"><a href="#cb13-2"></a><span class="ex">data/</span>  results/  analysis.R  README.md</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>By default, <code>ls</code> provides a compact listing. Common options make it more informative:</p>
 <div id="tbl-ls-options" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-tbl figure"><figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-ls-options-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
@@ -1075,34 +1136,34 @@ Table&nbsp;5.3: Common options for the <code>ls</code> command
 </figure>
 </div>
 <p>Example with multiple options:</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb12"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb12-1"><a href="#cb12-1"></a><span class="ex">$</span> ls <span class="at">-lah</span></span>
-<span id="cb12-2"><a href="#cb12-2"></a><span class="ex">total</span> 32K</span>
-<span id="cb12-3"><a href="#cb12-3"></a><span class="ex">drwxr-xr-x</span>  4 wcresko staff 128B Nov 15 14:30 .</span>
-<span id="cb12-4"><a href="#cb12-4"></a><span class="ex">drwxr-xr-x</span> 12 wcresko staff 384B Nov 14 09:15 ..</span>
-<span id="cb12-5"><a href="#cb12-5"></a><span class="ex">-rw-r--r--</span>  1 wcresko staff 2.1K Nov 15 14:30 analysis.R</span>
-<span id="cb12-6"><a href="#cb12-6"></a><span class="ex">drwxr-xr-x</span>  3 wcresko staff  96B Nov 15 10:00 data</span>
-<span id="cb12-7"><a href="#cb12-7"></a><span class="ex">-rw-r--r--</span>  1 wcresko staff  512 Nov 14 09:15 README.md</span>
-<span id="cb12-8"><a href="#cb12-8"></a><span class="ex">drwxr-xr-x</span>  2 wcresko staff  64B Nov 15 14:00 results</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb14"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb14-1"><a href="#cb14-1"></a><span class="ex">$</span> ls <span class="at">-lah</span></span>
+<span id="cb14-2"><a href="#cb14-2"></a><span class="ex">total</span> 32K</span>
+<span id="cb14-3"><a href="#cb14-3"></a><span class="ex">drwxr-xr-x</span>  4 wcresko staff 128B Nov 15 14:30 .</span>
+<span id="cb14-4"><a href="#cb14-4"></a><span class="ex">drwxr-xr-x</span> 12 wcresko staff 384B Nov 14 09:15 ..</span>
+<span id="cb14-5"><a href="#cb14-5"></a><span class="ex">-rw-r--r--</span>  1 wcresko staff 2.1K Nov 15 14:30 analysis.R</span>
+<span id="cb14-6"><a href="#cb14-6"></a><span class="ex">drwxr-xr-x</span>  3 wcresko staff  96B Nov 15 10:00 data</span>
+<span id="cb14-7"><a href="#cb14-7"></a><span class="ex">-rw-r--r--</span>  1 wcresko staff  512 Nov 14 09:15 README.md</span>
+<span id="cb14-8"><a href="#cb14-8"></a><span class="ex">drwxr-xr-x</span>  2 wcresko staff  64B Nov 15 14:00 results</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>The long format shows: permissions, links, owner, group, size, modification date, and name.</p>
 </section><section id="sec-cd" class="level3"><h3 class="anchored" data-anchor-id="sec-cd">Moving Around: <code>cd</code>
 </h3>
 <p>The <code>cd</code> command (<strong>c</strong>hange <strong>d</strong>irectory) moves you to a different location. When you use <code>cd</code>, you change your working directory just as you would double-click a folder in a graphical file manager.</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb13"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb13-1"><a href="#cb13-1"></a><span class="co"># Go to a specific directory (relative path)</span></span>
-<span id="cb13-2"><a href="#cb13-2"></a><span class="ex">$</span> cd Documents</span>
-<span id="cb13-3"><a href="#cb13-3"></a></span>
-<span id="cb13-4"><a href="#cb13-4"></a><span class="co"># Go up one directory (to parent)</span></span>
-<span id="cb13-5"><a href="#cb13-5"></a><span class="ex">$</span> cd ..</span>
-<span id="cb13-6"><a href="#cb13-6"></a></span>
-<span id="cb13-7"><a href="#cb13-7"></a><span class="co"># Go to home directory (three equivalent ways)</span></span>
-<span id="cb13-8"><a href="#cb13-8"></a><span class="ex">$</span> cd ~</span>
-<span id="cb13-9"><a href="#cb13-9"></a><span class="ex">$</span> cd <span class="va">$HOME</span></span>
-<span id="cb13-10"><a href="#cb13-10"></a><span class="ex">$</span> cd</span>
-<span id="cb13-11"><a href="#cb13-11"></a></span>
-<span id="cb13-12"><a href="#cb13-12"></a><span class="co"># Go to the previous directory (like "back" in a browser)</span></span>
-<span id="cb13-13"><a href="#cb13-13"></a><span class="ex">$</span> cd <span class="at">-</span></span>
-<span id="cb13-14"><a href="#cb13-14"></a></span>
-<span id="cb13-15"><a href="#cb13-15"></a><span class="co"># Go to an absolute path</span></span>
-<span id="cb13-16"><a href="#cb13-16"></a><span class="ex">$</span> cd /Users/wcresko/projects</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb15"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb15-1"><a href="#cb15-1"></a><span class="co"># Go to a specific directory (relative path)</span></span>
+<span id="cb15-2"><a href="#cb15-2"></a><span class="ex">$</span> cd Documents</span>
+<span id="cb15-3"><a href="#cb15-3"></a></span>
+<span id="cb15-4"><a href="#cb15-4"></a><span class="co"># Go up one directory (to parent)</span></span>
+<span id="cb15-5"><a href="#cb15-5"></a><span class="ex">$</span> cd ..</span>
+<span id="cb15-6"><a href="#cb15-6"></a></span>
+<span id="cb15-7"><a href="#cb15-7"></a><span class="co"># Go to home directory (three equivalent ways)</span></span>
+<span id="cb15-8"><a href="#cb15-8"></a><span class="ex">$</span> cd ~</span>
+<span id="cb15-9"><a href="#cb15-9"></a><span class="ex">$</span> cd <span class="va">$HOME</span></span>
+<span id="cb15-10"><a href="#cb15-10"></a><span class="ex">$</span> cd</span>
+<span id="cb15-11"><a href="#cb15-11"></a></span>
+<span id="cb15-12"><a href="#cb15-12"></a><span class="co"># Go to the previous directory (like "back" in a browser)</span></span>
+<span id="cb15-13"><a href="#cb15-13"></a><span class="ex">$</span> cd <span class="at">-</span></span>
+<span id="cb15-14"><a href="#cb15-14"></a></span>
+<span id="cb15-15"><a href="#cb15-15"></a><span class="co"># Go to an absolute path</span></span>
+<span id="cb15-16"><a href="#cb15-16"></a><span class="ex">$</span> cd /Users/wcresko/projects</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="callout callout-style-default callout-tip callout-titled" title="Pro Tip: Tab Completion">
 <div class="callout-header d-flex align-content-center">
 <div class="callout-icon-container">
@@ -1131,14 +1192,14 @@ Caution
 </div>
 </div>
 <p>You can chain directory moves with forward slashes. To navigate to a nested directory in one command:</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb14"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb14-1"><a href="#cb14-1"></a><span class="co"># Move through multiple directories</span></span>
-<span id="cb14-2"><a href="#cb14-2"></a><span class="ex">$</span> cd projects/analysis/data</span>
-<span id="cb14-3"><a href="#cb14-3"></a></span>
-<span id="cb14-4"><a href="#cb14-4"></a><span class="co"># Move up two levels</span></span>
-<span id="cb14-5"><a href="#cb14-5"></a><span class="ex">$</span> cd ../..</span>
-<span id="cb14-6"><a href="#cb14-6"></a></span>
-<span id="cb14-7"><a href="#cb14-7"></a><span class="co"># Move up one level and into a sibling directory</span></span>
-<span id="cb14-8"><a href="#cb14-8"></a><span class="ex">$</span> cd ../other_project</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb16"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb16-1"><a href="#cb16-1"></a><span class="co"># Move through multiple directories</span></span>
+<span id="cb16-2"><a href="#cb16-2"></a><span class="ex">$</span> cd projects/analysis/data</span>
+<span id="cb16-3"><a href="#cb16-3"></a></span>
+<span id="cb16-4"><a href="#cb16-4"></a><span class="co"># Move up two levels</span></span>
+<span id="cb16-5"><a href="#cb16-5"></a><span class="ex">$</span> cd ../..</span>
+<span id="cb16-6"><a href="#cb16-6"></a></span>
+<span id="cb16-7"><a href="#cb16-7"></a><span class="co"># Move up one level and into a sibling directory</span></span>
+<span id="cb16-8"><a href="#cb16-8"></a><span class="ex">$</span> cd ../other_project</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>Two more useful <code>cd</code> tricks: typing <code>cd -</code> returns you to whatever directory you were in before your last <code>cd</code> command, which is handy if you typed a long path and want to go back. And typing just <code>cd</code> with no arguments always returns you to your home directory.</p>
 </section><section id="sec-navigation-examples" class="level3"><h3 class="anchored" data-anchor-id="sec-navigation-examples">Navigation Examples</h3>
 <p>Let’s work through some examples to solidify these concepts. Consider this directory structure:</p>
@@ -1154,72 +1215,85 @@ Caution
     └── project-2/
         └── analysis.R</code></pre>
 <p><strong>Example 1:</strong> Starting from <code>~/projects</code>, navigate to <code>figs</code> in <code>project-1</code>:</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb16"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb16-1"><a href="#cb16-1"></a><span class="co"># Using a relative path</span></span>
-<span id="cb16-2"><a href="#cb16-2"></a><span class="ex">$</span> cd project-1/figs</span>
-<span id="cb16-3"><a href="#cb16-3"></a></span>
-<span id="cb16-4"><a href="#cb16-4"></a><span class="co"># Verify we're in the right place</span></span>
-<span id="cb16-5"><a href="#cb16-5"></a><span class="ex">$</span> pwd</span>
-<span id="cb16-6"><a href="#cb16-6"></a><span class="ex">/home/wcresko/projects/project-1/figs</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<p><strong>Example 2:</strong> From <code>~/projects</code>, navigate to <code>reports</code> in <code>docs</code>:</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb17"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb17-1"><a href="#cb17-1"></a><span class="co"># Using a relative path (go up, then into docs)</span></span>
-<span id="cb17-2"><a href="#cb17-2"></a><span class="ex">$</span> cd ../docs/reports</span>
-<span id="cb17-3"><a href="#cb17-3"></a></span>
-<span id="cb17-4"><a href="#cb17-4"></a><span class="co"># Or using an absolute path</span></span>
-<span id="cb17-5"><a href="#cb17-5"></a><span class="ex">$</span> cd ~/docs/reports</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<p><strong>Example 3:</strong> From <code>~/projects/project-1/figs</code>, navigate to <code>project-2</code>:</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb18"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb18-1"><a href="#cb18-1"></a><span class="co"># Go up two levels, then into project-2</span></span>
-<span id="cb18-2"><a href="#cb18-2"></a><span class="ex">$</span> cd ../../project-2</span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb18"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb18-1"><a href="#cb18-1"></a><span class="co"># Using a relative path</span></span>
+<span id="cb18-2"><a href="#cb18-2"></a><span class="ex">$</span> cd project-1/figs</span>
 <span id="cb18-3"><a href="#cb18-3"></a></span>
-<span id="cb18-4"><a href="#cb18-4"></a><span class="co"># Or use the full path</span></span>
-<span id="cb18-5"><a href="#cb18-5"></a><span class="ex">$</span> cd ~/projects/project-2</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb18-4"><a href="#cb18-4"></a><span class="co"># Verify we're in the right place</span></span>
+<span id="cb18-5"><a href="#cb18-5"></a><span class="ex">$</span> pwd</span>
+<span id="cb18-6"><a href="#cb18-6"></a><span class="ex">/home/wcresko/projects/project-1/figs</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p><strong>Example 2:</strong> From <code>~/projects</code>, navigate to <code>reports</code> in <code>docs</code>:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb19"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb19-1"><a href="#cb19-1"></a><span class="co"># Using a relative path (go up, then into docs)</span></span>
+<span id="cb19-2"><a href="#cb19-2"></a><span class="ex">$</span> cd ../docs/reports</span>
+<span id="cb19-3"><a href="#cb19-3"></a></span>
+<span id="cb19-4"><a href="#cb19-4"></a><span class="co"># Or using an absolute path</span></span>
+<span id="cb19-5"><a href="#cb19-5"></a><span class="ex">$</span> cd ~/docs/reports</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p><strong>Example 3:</strong> From <code>~/projects/project-1/figs</code>, navigate to <code>project-2</code>:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb20"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb20-1"><a href="#cb20-1"></a><span class="co"># Go up two levels, then into project-2</span></span>
+<span id="cb20-2"><a href="#cb20-2"></a><span class="ex">$</span> cd ../../project-2</span>
+<span id="cb20-3"><a href="#cb20-3"></a></span>
+<span id="cb20-4"><a href="#cb20-4"></a><span class="co"># Or use the full path</span></span>
+<span id="cb20-5"><a href="#cb20-5"></a><span class="ex">$</span> cd ~/projects/project-2</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>Notice how relative paths require you to think about where you are, while absolute paths work from anywhere but are longer to type. Both approaches are useful—Tab completion makes either one efficient.</p>
 </section></section><section id="sec-working-with-files" class="level2" data-number="5.6"><h2 data-number="5.6" class="anchored" data-anchor-id="sec-working-with-files">
 <span class="header-section-number">5.6</span> Working with Files and Directories</h2>
 <p>Now that you can navigate, let’s learn to manipulate files and directories.</p>
 <section id="sec-mkdir" class="level3"><h3 class="anchored" data-anchor-id="sec-mkdir">Creating Directories: <code>mkdir</code>
 </h3>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb19"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb19-1"><a href="#cb19-1"></a><span class="co"># Create a single directory</span></span>
-<span id="cb19-2"><a href="#cb19-2"></a><span class="ex">$</span> mkdir analysis</span>
-<span id="cb19-3"><a href="#cb19-3"></a></span>
-<span id="cb19-4"><a href="#cb19-4"></a><span class="co"># Create nested directories (use -p for parents)</span></span>
-<span id="cb19-5"><a href="#cb19-5"></a><span class="ex">$</span> mkdir <span class="at">-p</span> project/data/raw</span>
-<span id="cb19-6"><a href="#cb19-6"></a></span>
-<span id="cb19-7"><a href="#cb19-7"></a><span class="co"># Create multiple directories at once</span></span>
-<span id="cb19-8"><a href="#cb19-8"></a><span class="ex">$</span> mkdir results figures tables</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb21"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb21-1"><a href="#cb21-1"></a><span class="co"># Create a single directory</span></span>
+<span id="cb21-2"><a href="#cb21-2"></a><span class="ex">$</span> mkdir analysis</span>
+<span id="cb21-3"><a href="#cb21-3"></a></span>
+<span id="cb21-4"><a href="#cb21-4"></a><span class="co"># Create nested directories (use -p for parents)</span></span>
+<span id="cb21-5"><a href="#cb21-5"></a><span class="ex">$</span> mkdir <span class="at">-p</span> project/data/raw</span>
+<span id="cb21-6"><a href="#cb21-6"></a></span>
+<span id="cb21-7"><a href="#cb21-7"></a><span class="co"># Create multiple directories at once</span></span>
+<span id="cb21-8"><a href="#cb21-8"></a><span class="ex">$</span> mkdir results figures tables</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </section><section id="sec-touch-nano" class="level3"><h3 class="anchored" data-anchor-id="sec-touch-nano">Creating Files: <code>touch</code> and <code>nano</code>
 </h3>
 <p>The <code>touch</code> command creates an empty file (or updates the timestamp of an existing file):</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb20"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb20-1"><a href="#cb20-1"></a><span class="ex">$</span> touch notes.txt</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb22"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb22-1"><a href="#cb22-1"></a><span class="ex">$</span> touch notes.txt</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>For files with content, use a text editor. <code>nano</code> is a simple terminal-based editor:</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb21"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb21-1"><a href="#cb21-1"></a><span class="ex">$</span> nano notes.txt</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb23"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb23-1"><a href="#cb23-1"></a><span class="ex">$</span> nano notes.txt</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>In nano: - Type your content normally - <code>Ctrl+O</code> saves the file (press Enter to confirm) - <code>Ctrl+X</code> exits nano</p>
 </section><section id="sec-cp" class="level3"><h3 class="anchored" data-anchor-id="sec-cp">Copying Files: <code>cp</code>
 </h3>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb22"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb22-1"><a href="#cb22-1"></a><span class="co"># Copy a file</span></span>
-<span id="cb22-2"><a href="#cb22-2"></a><span class="ex">$</span> cp original.txt backup.txt</span>
-<span id="cb22-3"><a href="#cb22-3"></a></span>
-<span id="cb22-4"><a href="#cb22-4"></a><span class="co"># Copy a file to a directory</span></span>
-<span id="cb22-5"><a href="#cb22-5"></a><span class="ex">$</span> cp analysis.R scripts/</span>
-<span id="cb22-6"><a href="#cb22-6"></a></span>
-<span id="cb22-7"><a href="#cb22-7"></a><span class="co"># Copy a directory (requires -r for recursive)</span></span>
-<span id="cb22-8"><a href="#cb22-8"></a><span class="ex">$</span> cp <span class="at">-r</span> data/ data_backup/</span>
-<span id="cb22-9"><a href="#cb22-9"></a></span>
-<span id="cb22-10"><a href="#cb22-10"></a><span class="co"># Copy multiple files to a directory</span></span>
-<span id="cb22-11"><a href="#cb22-11"></a><span class="ex">$</span> cp <span class="pp">*</span>.txt documents/</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb24"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb24-1"><a href="#cb24-1"></a><span class="co"># Copy a file</span></span>
+<span id="cb24-2"><a href="#cb24-2"></a><span class="ex">$</span> cp original.txt backup.txt</span>
+<span id="cb24-3"><a href="#cb24-3"></a></span>
+<span id="cb24-4"><a href="#cb24-4"></a><span class="co"># Copy a file to a directory</span></span>
+<span id="cb24-5"><a href="#cb24-5"></a><span class="ex">$</span> cp analysis.R scripts/</span>
+<span id="cb24-6"><a href="#cb24-6"></a></span>
+<span id="cb24-7"><a href="#cb24-7"></a><span class="co"># Copy a directory (requires -r for recursive)</span></span>
+<span id="cb24-8"><a href="#cb24-8"></a><span class="ex">$</span> cp <span class="at">-r</span> data/ data_backup/</span>
+<span id="cb24-9"><a href="#cb24-9"></a></span>
+<span id="cb24-10"><a href="#cb24-10"></a><span class="co"># Copy multiple files to a directory</span></span>
+<span id="cb24-11"><a href="#cb24-11"></a><span class="ex">$</span> cp <span class="pp">*</span>.txt documents/</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </section><section id="sec-mv" class="level3"><h3 class="anchored" data-anchor-id="sec-mv">Moving and Renaming: <code>mv</code>
 </h3>
 <p>The <code>mv</code> command both moves and renames files:</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb23"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb23-1"><a href="#cb23-1"></a><span class="co"># Rename a file</span></span>
-<span id="cb23-2"><a href="#cb23-2"></a><span class="ex">$</span> mv oldname.txt newname.txt</span>
-<span id="cb23-3"><a href="#cb23-3"></a></span>
-<span id="cb23-4"><a href="#cb23-4"></a><span class="co"># Move a file to a directory</span></span>
-<span id="cb23-5"><a href="#cb23-5"></a><span class="ex">$</span> mv analysis.R scripts/</span>
-<span id="cb23-6"><a href="#cb23-6"></a></span>
-<span id="cb23-7"><a href="#cb23-7"></a><span class="co"># Move and rename simultaneously</span></span>
-<span id="cb23-8"><a href="#cb23-8"></a><span class="ex">$</span> mv data/raw.csv backup/raw_2024.csv</span>
-<span id="cb23-9"><a href="#cb23-9"></a></span>
-<span id="cb23-10"><a href="#cb23-10"></a><span class="co"># Move multiple files</span></span>
-<span id="cb23-11"><a href="#cb23-11"></a><span class="ex">$</span> mv <span class="pp">*</span>.R scripts/</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb25"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb25-1"><a href="#cb25-1"></a><span class="co"># Rename a file</span></span>
+<span id="cb25-2"><a href="#cb25-2"></a><span class="ex">$</span> mv oldname.txt newname.txt</span>
+<span id="cb25-3"><a href="#cb25-3"></a></span>
+<span id="cb25-4"><a href="#cb25-4"></a><span class="co"># Move a file to a directory</span></span>
+<span id="cb25-5"><a href="#cb25-5"></a><span class="ex">$</span> mv analysis.R scripts/</span>
+<span id="cb25-6"><a href="#cb25-6"></a></span>
+<span id="cb25-7"><a href="#cb25-7"></a><span class="co"># Move and rename simultaneously</span></span>
+<span id="cb25-8"><a href="#cb25-8"></a><span class="ex">$</span> mv data/raw.csv backup/raw_2024.csv</span>
+<span id="cb25-9"><a href="#cb25-9"></a></span>
+<span id="cb25-10"><a href="#cb25-10"></a><span class="co"># Move multiple files</span></span>
+<span id="cb25-11"><a href="#cb25-11"></a><span class="ex">$</span> mv <span class="pp">*</span>.R scripts/</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="callout callout-style-default callout-caution callout-titled" title="The shell trusts you">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Caution</span>The shell trusts you
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p><code>mv</code> and <code>cp</code> will silently overwrite an existing file if you give two things the same name, and <code>rm</code> will delete whatever you tell it to. There is no “Are you sure?” dialog. Add <code>-i</code> (<code>mv -i</code>, <code>cp -i</code>, <code>rm -i</code>) to be asked before anything is overwritten or removed.</p>
+</div>
+</div>
 </section><section id="sec-rm" class="level3"><h3 class="anchored" data-anchor-id="sec-rm">Deleting Files: <code>rm</code> and <code>rmdir</code>
 </h3>
 <div class="callout callout-style-default callout-warning callout-titled" title="Danger Zone">
@@ -1235,63 +1309,63 @@ Caution
 <p>The shell has no trash can! Deleted files are gone forever. Always double-check before using <code>rm</code>, especially with wildcards.</p>
 </div>
 </div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb24"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb24-1"><a href="#cb24-1"></a><span class="co"># Remove a file</span></span>
-<span id="cb24-2"><a href="#cb24-2"></a><span class="ex">$</span> rm unnecessary.txt</span>
-<span id="cb24-3"><a href="#cb24-3"></a></span>
-<span id="cb24-4"><a href="#cb24-4"></a><span class="co"># Remove multiple files</span></span>
-<span id="cb24-5"><a href="#cb24-5"></a><span class="ex">$</span> rm <span class="pp">*</span>.tmp</span>
-<span id="cb24-6"><a href="#cb24-6"></a></span>
-<span id="cb24-7"><a href="#cb24-7"></a><span class="co"># Remove a directory and all contents (DANGEROUS!)</span></span>
-<span id="cb24-8"><a href="#cb24-8"></a><span class="ex">$</span> rm <span class="at">-r</span> old_project/</span>
-<span id="cb24-9"><a href="#cb24-9"></a></span>
-<span id="cb24-10"><a href="#cb24-10"></a><span class="co"># Interactive mode (asks for confirmation)</span></span>
-<span id="cb24-11"><a href="#cb24-11"></a><span class="ex">$</span> rm <span class="at">-i</span> important.txt</span>
-<span id="cb24-12"><a href="#cb24-12"></a></span>
-<span id="cb24-13"><a href="#cb24-13"></a><span class="co"># Remove empty directories only</span></span>
-<span id="cb24-14"><a href="#cb24-14"></a><span class="ex">$</span> rmdir empty_folder/</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb26"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb26-1"><a href="#cb26-1"></a><span class="co"># Remove a file</span></span>
+<span id="cb26-2"><a href="#cb26-2"></a><span class="ex">$</span> rm unnecessary.txt</span>
+<span id="cb26-3"><a href="#cb26-3"></a></span>
+<span id="cb26-4"><a href="#cb26-4"></a><span class="co"># Remove multiple files</span></span>
+<span id="cb26-5"><a href="#cb26-5"></a><span class="ex">$</span> rm <span class="pp">*</span>.tmp</span>
+<span id="cb26-6"><a href="#cb26-6"></a></span>
+<span id="cb26-7"><a href="#cb26-7"></a><span class="co"># Remove a directory and all contents (DANGEROUS!)</span></span>
+<span id="cb26-8"><a href="#cb26-8"></a><span class="ex">$</span> rm <span class="at">-r</span> old_project/</span>
+<span id="cb26-9"><a href="#cb26-9"></a></span>
+<span id="cb26-10"><a href="#cb26-10"></a><span class="co"># Interactive mode (asks for confirmation)</span></span>
+<span id="cb26-11"><a href="#cb26-11"></a><span class="ex">$</span> rm <span class="at">-i</span> important.txt</span>
+<span id="cb26-12"><a href="#cb26-12"></a></span>
+<span id="cb26-13"><a href="#cb26-13"></a><span class="co"># Remove empty directories only</span></span>
+<span id="cb26-14"><a href="#cb26-14"></a><span class="ex">$</span> rmdir empty_folder/</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>The <code>-r</code> (recursive) option with <code>rm</code> is powerful but dangerous. Consider using <code>-i</code> (interactive) to confirm each deletion when learning.</p>
 </section><section id="sec-viewing-files" class="level3"><h3 class="anchored" data-anchor-id="sec-viewing-files">Viewing Files: <code>cat</code>, <code>head</code>, <code>tail</code>, <code>less</code>
 </h3>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb25"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb25-1"><a href="#cb25-1"></a><span class="co"># Display entire file</span></span>
-<span id="cb25-2"><a href="#cb25-2"></a><span class="ex">$</span> cat README.md</span>
-<span id="cb25-3"><a href="#cb25-3"></a></span>
-<span id="cb25-4"><a href="#cb25-4"></a><span class="co"># First 10 lines (or specify -n NUMBER)</span></span>
-<span id="cb25-5"><a href="#cb25-5"></a><span class="ex">$</span> head data.csv</span>
-<span id="cb25-6"><a href="#cb25-6"></a><span class="ex">$</span> head <span class="at">-n</span> 20 data.csv</span>
-<span id="cb25-7"><a href="#cb25-7"></a></span>
-<span id="cb25-8"><a href="#cb25-8"></a><span class="co"># Last 10 lines</span></span>
-<span id="cb25-9"><a href="#cb25-9"></a><span class="ex">$</span> tail data.csv</span>
-<span id="cb25-10"><a href="#cb25-10"></a><span class="ex">$</span> tail <span class="at">-n</span> 5 data.csv</span>
-<span id="cb25-11"><a href="#cb25-11"></a></span>
-<span id="cb25-12"><a href="#cb25-12"></a><span class="co"># Follow a file as it grows (great for logs)</span></span>
-<span id="cb25-13"><a href="#cb25-13"></a><span class="ex">$</span> tail <span class="at">-f</span> analysis.log</span>
-<span id="cb25-14"><a href="#cb25-14"></a></span>
-<span id="cb25-15"><a href="#cb25-15"></a><span class="co"># Page through a large file</span></span>
-<span id="cb25-16"><a href="#cb25-16"></a><span class="ex">$</span> less huge_data.txt</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb27"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb27-1"><a href="#cb27-1"></a><span class="co"># Display entire file</span></span>
+<span id="cb27-2"><a href="#cb27-2"></a><span class="ex">$</span> cat README.md</span>
+<span id="cb27-3"><a href="#cb27-3"></a></span>
+<span id="cb27-4"><a href="#cb27-4"></a><span class="co"># First 10 lines (or specify -n NUMBER)</span></span>
+<span id="cb27-5"><a href="#cb27-5"></a><span class="ex">$</span> head data.csv</span>
+<span id="cb27-6"><a href="#cb27-6"></a><span class="ex">$</span> head <span class="at">-n</span> 20 data.csv</span>
+<span id="cb27-7"><a href="#cb27-7"></a></span>
+<span id="cb27-8"><a href="#cb27-8"></a><span class="co"># Last 10 lines</span></span>
+<span id="cb27-9"><a href="#cb27-9"></a><span class="ex">$</span> tail data.csv</span>
+<span id="cb27-10"><a href="#cb27-10"></a><span class="ex">$</span> tail <span class="at">-n</span> 5 data.csv</span>
+<span id="cb27-11"><a href="#cb27-11"></a></span>
+<span id="cb27-12"><a href="#cb27-12"></a><span class="co"># Follow a file as it grows (great for logs)</span></span>
+<span id="cb27-13"><a href="#cb27-13"></a><span class="ex">$</span> tail <span class="at">-f</span> analysis.log</span>
+<span id="cb27-14"><a href="#cb27-14"></a></span>
+<span id="cb27-15"><a href="#cb27-15"></a><span class="co"># Page through a large file</span></span>
+<span id="cb27-16"><a href="#cb27-16"></a><span class="ex">$</span> less huge_data.txt</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>In <code>less</code>: - Space or <code>f</code> — next page - <code>b</code> — previous page - <code>/pattern</code> — search forward - <code>n</code> — next search result - <code>q</code> — quit</p>
 </section><section id="sec-wc" class="level3"><h3 class="anchored" data-anchor-id="sec-wc">File Information: <code>wc</code>
 </h3>
 <p>The <code>wc</code> (<strong>w</strong>ord <strong>c</strong>ount) command provides file statistics:</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb26"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb26-1"><a href="#cb26-1"></a><span class="ex">$</span> wc document.txt</span>
-<span id="cb26-2"><a href="#cb26-2"></a>  <span class="ex">100</span>   850  5420 document.txt</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb28"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb28-1"><a href="#cb28-1"></a><span class="ex">$</span> wc document.txt</span>
+<span id="cb28-2"><a href="#cb28-2"></a>  <span class="ex">100</span>   850  5420 document.txt</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>This shows: lines, words, and bytes. Useful options:</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb27"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb27-1"><a href="#cb27-1"></a><span class="ex">$</span> wc <span class="at">-l</span> data.csv   <span class="co"># Lines only</span></span>
-<span id="cb27-2"><a href="#cb27-2"></a><span class="ex">$</span> wc <span class="at">-w</span> essay.txt  <span class="co"># Words only</span></span>
-<span id="cb27-3"><a href="#cb27-3"></a><span class="ex">$</span> wc <span class="at">-c</span> file.bin   <span class="co"># Bytes only</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb29"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb29-1"><a href="#cb29-1"></a><span class="ex">$</span> wc <span class="at">-l</span> data.csv   <span class="co"># Lines only</span></span>
+<span id="cb29-2"><a href="#cb29-2"></a><span class="ex">$</span> wc <span class="at">-w</span> essay.txt  <span class="co"># Words only</span></span>
+<span id="cb29-3"><a href="#cb29-3"></a><span class="ex">$</span> wc <span class="at">-c</span> file.bin   <span class="co"># Bytes only</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </section><section id="sec-find" class="level3"><h3 class="anchored" data-anchor-id="sec-find">Finding Files: <code>find</code>
 </h3>
 <p>The <code>find</code> command searches for files and directories based on various criteria:</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb28"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb28-1"><a href="#cb28-1"></a><span class="co"># Find by name (case-insensitive with -iname)</span></span>
-<span id="cb28-2"><a href="#cb28-2"></a><span class="ex">$</span> find . <span class="at">-iname</span> <span class="st">"*.csv"</span></span>
-<span id="cb28-3"><a href="#cb28-3"></a></span>
-<span id="cb28-4"><a href="#cb28-4"></a><span class="co"># Find files modified in the last 7 days</span></span>
-<span id="cb28-5"><a href="#cb28-5"></a><span class="ex">$</span> find ~/projects <span class="at">-mtime</span> <span class="at">-7</span></span>
-<span id="cb28-6"><a href="#cb28-6"></a></span>
-<span id="cb28-7"><a href="#cb28-7"></a><span class="co"># Find files larger than 100MB</span></span>
-<span id="cb28-8"><a href="#cb28-8"></a><span class="ex">$</span> find . <span class="at">-size</span> +100M</span>
-<span id="cb28-9"><a href="#cb28-9"></a></span>
-<span id="cb28-10"><a href="#cb28-10"></a><span class="co"># Find and do something with results</span></span>
-<span id="cb28-11"><a href="#cb28-11"></a><span class="ex">$</span> find . <span class="at">-name</span> <span class="st">"*.tmp"</span> <span class="at">-delete</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb30"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb30-1"><a href="#cb30-1"></a><span class="co"># Find by name (case-insensitive with -iname)</span></span>
+<span id="cb30-2"><a href="#cb30-2"></a><span class="ex">$</span> find . <span class="at">-iname</span> <span class="st">"*.csv"</span></span>
+<span id="cb30-3"><a href="#cb30-3"></a></span>
+<span id="cb30-4"><a href="#cb30-4"></a><span class="co"># Find files modified in the last 7 days</span></span>
+<span id="cb30-5"><a href="#cb30-5"></a><span class="ex">$</span> find ~/projects <span class="at">-mtime</span> <span class="at">-7</span></span>
+<span id="cb30-6"><a href="#cb30-6"></a></span>
+<span id="cb30-7"><a href="#cb30-7"></a><span class="co"># Find files larger than 100MB</span></span>
+<span id="cb30-8"><a href="#cb30-8"></a><span class="ex">$</span> find . <span class="at">-size</span> +100M</span>
+<span id="cb30-9"><a href="#cb30-9"></a></span>
+<span id="cb30-10"><a href="#cb30-10"></a><span class="co"># Find and do something with results</span></span>
+<span id="cb30-11"><a href="#cb30-11"></a><span class="ex">$</span> find . <span class="at">-name</span> <span class="st">"*.tmp"</span> <span class="at">-delete</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>The <code>find</code> command is powerful for locating files across complex directory structures. Common options:</p>
 <div id="tbl-find-options" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-tbl figure"><figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-find-options-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
@@ -1423,27 +1497,27 @@ Table&nbsp;5.5: File naming examples
 <span class="header-section-number">5.8</span> Getting Help</h2>
 <section id="sec-manual-pages" class="level3"><h3 class="anchored" data-anchor-id="sec-manual-pages">Manual Pages</h3>
 <p>Every Unix command has a manual page accessible via <code>man</code>:</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb29"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb29-1"><a href="#cb29-1"></a><span class="ex">$</span> man ls</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb31"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb31-1"><a href="#cb31-1"></a><span class="ex">$</span> man ls</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>Manual pages can be dense. Look for: - <strong>NAME</strong>: What the command does - <strong>SYNOPSIS</strong>: How to use it - <strong>DESCRIPTION</strong>: Detailed explanation - <strong>OPTIONS</strong>: Available flags - <strong>EXAMPLES</strong>: If you’re lucky!</p>
 <p>Press <code>q</code> to exit the manual.</p>
 </section><section id="sec-quick-help" class="level3"><h3 class="anchored" data-anchor-id="sec-quick-help">Quick Help</h3>
 <p>Many commands support a <code>--help</code> option:</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb30"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb30-1"><a href="#cb30-1"></a><span class="ex">$</span> ls <span class="at">--help</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb32"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb32-1"><a href="#cb32-1"></a><span class="ex">$</span> ls <span class="at">--help</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </section><section id="sec-searching-for-commands" class="level3"><h3 class="anchored" data-anchor-id="sec-searching-for-commands">Searching for Commands</h3>
 <p>If you know what you want to do but not the command:</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb31"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb31-1"><a href="#cb31-1"></a><span class="co"># Search man page descriptions</span></span>
-<span id="cb31-2"><a href="#cb31-2"></a><span class="ex">$</span> man <span class="at">-k</span> <span class="st">"search term"</span></span>
-<span id="cb31-3"><a href="#cb31-3"></a><span class="ex">$</span> apropos <span class="st">"search term"</span></span>
-<span id="cb31-4"><a href="#cb31-4"></a></span>
-<span id="cb31-5"><a href="#cb31-5"></a><span class="co"># Find where a command is located</span></span>
-<span id="cb31-6"><a href="#cb31-6"></a><span class="ex">$</span> which python</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb33"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb33-1"><a href="#cb33-1"></a><span class="co"># Search man page descriptions</span></span>
+<span id="cb33-2"><a href="#cb33-2"></a><span class="ex">$</span> man <span class="at">-k</span> <span class="st">"search term"</span></span>
+<span id="cb33-3"><a href="#cb33-3"></a><span class="ex">$</span> apropos <span class="st">"search term"</span></span>
+<span id="cb33-4"><a href="#cb33-4"></a></span>
+<span id="cb33-5"><a href="#cb33-5"></a><span class="co"># Find where a command is located</span></span>
+<span id="cb33-6"><a href="#cb33-6"></a><span class="ex">$</span> which python</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </section></section><section id="sec-file-permissions" class="level2" data-number="5.9"><h2 data-number="5.9" class="anchored" data-anchor-id="sec-file-permissions">
 <span class="header-section-number">5.9</span> File Permissions and Ownership</h2>
 <p>Unix is a multi-user system, and every file has permissions controlling who can read, write, or execute it. Understanding permissions is essential for security and for running scripts (<a href="06-shell-scripting.html#sec-running-scripts" class="quarto-xref"><span>Section 8.2.2</span></a>).</p>
 <section id="sec-understanding-permission-strings" class="level3"><h3 class="anchored" data-anchor-id="sec-understanding-permission-strings">Understanding Permission Strings</h3>
 <p>When you run <code>ls -l</code>, you see permission strings like:</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb32"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb32-1"><a href="#cb32-1"></a><span class="ex">-rwxr-xr-x</span> 1 wcresko staff 2048 Jan 15 10:30 analysis.sh</span>
-<span id="cb32-2"><a href="#cb32-2"></a><span class="ex">drwxr-xr-x</span> 3 wcresko staff   96 Jan 15 09:00 data</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb34"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb34-1"><a href="#cb34-1"></a><span class="ex">-rwxr-xr-x</span> 1 wcresko staff 2048 Jan 15 10:30 analysis.sh</span>
+<span id="cb34-2"><a href="#cb34-2"></a><span class="ex">drwxr-xr-x</span> 3 wcresko staff   96 Jan 15 09:00 data</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>Let’s decode <code>-rwxr-xr-x</code> (<a href="#tbl-permission-string" class="quarto-xref">Table&nbsp;<span>5.6</span></a>):</p>
 <div id="tbl-permission-string" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-tbl figure"><figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-permission-string-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
@@ -1492,19 +1566,21 @@ Table&nbsp;5.6: Decoding a permission string such as <code>-rwxr-xr-x</code>
 <strong>x</strong> (execute): Run file as program or enter directory</li>
 <li>
 <strong>-</strong>: Permission denied for that operation</li>
-</ul></section><section id="sec-chmod" class="level3"><h3 class="anchored" data-anchor-id="sec-chmod">Changing Permissions: <code>chmod</code>
+</ul>
+<p>So <code>-rwxr-xr-x</code> means: this is a regular file; the owner can read, write, and execute it; members of the group can read and execute it; and everyone else can read and execute it.</p>
+</section><section id="sec-chmod" class="level3"><h3 class="anchored" data-anchor-id="sec-chmod">Changing Permissions: <code>chmod</code>
 </h3>
 <p>The <code>chmod</code> command changes file permissions. There are two notations:</p>
-<p><strong>Symbolic notation:</strong></p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb33"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb33-1"><a href="#cb33-1"></a><span class="co"># Add execute permission for owner</span></span>
-<span id="cb33-2"><a href="#cb33-2"></a><span class="ex">$</span> chmod u+x script.sh</span>
-<span id="cb33-3"><a href="#cb33-3"></a></span>
-<span id="cb33-4"><a href="#cb33-4"></a><span class="co"># Remove write permission for group and others</span></span>
-<span id="cb33-5"><a href="#cb33-5"></a><span class="ex">$</span> chmod go-w data.csv</span>
-<span id="cb33-6"><a href="#cb33-6"></a></span>
-<span id="cb33-7"><a href="#cb33-7"></a><span class="co"># Set exact permissions (owner: rwx, group: rx, others: rx)</span></span>
-<span id="cb33-8"><a href="#cb33-8"></a><span class="ex">$</span> chmod u=rwx,g=rx,o=rx script.sh</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<p><strong>Octal notation</strong> (uses numbers 0-7; <a href="#tbl-octal-permissions" class="quarto-xref">Table&nbsp;<span>5.7</span></a>):</p>
+<p><strong>Symbolic notation</strong> uses letters for <em>who</em> (<code>u</code> user/owner, <code>g</code> group, <code>o</code> others, <code>a</code> all) and operators for <em>what</em> (<code>+</code> add, <code>-</code> remove, <code>=</code> set exactly):</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb35"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb35-1"><a href="#cb35-1"></a><span class="co"># Add execute permission for owner</span></span>
+<span id="cb35-2"><a href="#cb35-2"></a><span class="ex">$</span> chmod u+x script.sh</span>
+<span id="cb35-3"><a href="#cb35-3"></a></span>
+<span id="cb35-4"><a href="#cb35-4"></a><span class="co"># Remove write permission for group and others</span></span>
+<span id="cb35-5"><a href="#cb35-5"></a><span class="ex">$</span> chmod go-w data.csv</span>
+<span id="cb35-6"><a href="#cb35-6"></a></span>
+<span id="cb35-7"><a href="#cb35-7"></a><span class="co"># Set exact permissions (owner: rwx, group: rx, others: rx)</span></span>
+<span id="cb35-8"><a href="#cb35-8"></a><span class="ex">$</span> chmod u=rwx,g=rx,o=rx script.sh</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p><strong>Octal notation</strong> assigns each permission a value—read = 4, write = 2, execute = 1—and adds them up for each of the three sets. For example, <code>rwx</code> = 4 + 2 + 1 = 7 and <code>r-x</code> = 4 + 0 + 1 = 5 (<a href="#tbl-octal-permissions" class="quarto-xref">Table&nbsp;<span>5.7</span></a>):</p>
 <div id="tbl-octal-permissions" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-tbl figure"><figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-octal-permissions-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 Table&nbsp;5.7: Octal permission values used by <code>chmod</code>
@@ -1540,29 +1616,46 @@ Table&nbsp;5.7: Octal permission values used by <code>chmod</code>
 </div>
 </figure>
 </div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb34"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb34-1"><a href="#cb34-1"></a><span class="co"># Common permission sets</span></span>
-<span id="cb34-2"><a href="#cb34-2"></a><span class="ex">$</span> chmod 755 script.sh    <span class="co"># rwxr-xr-x (executable script)</span></span>
-<span id="cb34-3"><a href="#cb34-3"></a><span class="ex">$</span> chmod 644 data.csv     <span class="co"># rw-r--r-- (readable file)</span></span>
-<span id="cb34-4"><a href="#cb34-4"></a><span class="ex">$</span> chmod 700 private/     <span class="co"># rwx------ (private directory)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb36"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb36-1"><a href="#cb36-1"></a><span class="co"># Common permission sets</span></span>
+<span id="cb36-2"><a href="#cb36-2"></a><span class="ex">$</span> chmod 755 script.sh    <span class="co"># rwxr-xr-x (executable script)</span></span>
+<span id="cb36-3"><a href="#cb36-3"></a><span class="ex">$</span> chmod 644 data.csv     <span class="co"># rw-r--r-- (readable file)</span></span>
+<span id="cb36-4"><a href="#cb36-4"></a><span class="ex">$</span> chmod 700 private/     <span class="co"># rwx------ (private directory)</span></span>
+<span id="cb36-5"><a href="#cb36-5"></a><span class="ex">$</span> chmod 600 secrets.txt  <span class="co"># rw------- (private file)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>A few patterns cover almost every situation: <code>755</code> for scripts (you can modify, everyone can run), <code>644</code> for data files (you can modify, everyone can read), and <code>700</code> or <code>600</code> for directories and files that only you should touch.</p>
+</section><section id="sec-making-scripts-executable" class="level3"><h3 class="anchored" data-anchor-id="sec-making-scripts-executable">Making Scripts Executable</h3>
+<p>The most common reason you will reach for <code>chmod</code> is to run a script you have written. A new text file is not executable, so trying to run it directly fails:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb37"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb37-1"><a href="#cb37-1"></a><span class="co"># Create a two-line script</span></span>
+<span id="cb37-2"><a href="#cb37-2"></a><span class="ex">$</span> echo <span class="st">'#!/bin/bash'</span> <span class="op">&gt;</span> myscript.sh</span>
+<span id="cb37-3"><a href="#cb37-3"></a><span class="ex">$</span> echo <span class="st">'echo "Hello, World!"'</span> <span class="op">&gt;&gt;</span> myscript.sh</span>
+<span id="cb37-4"><a href="#cb37-4"></a></span>
+<span id="cb37-5"><a href="#cb37-5"></a><span class="co"># Try to run it</span></span>
+<span id="cb37-6"><a href="#cb37-6"></a><span class="ex">$</span> ./myscript.sh</span>
+<span id="cb37-7"><a href="#cb37-7"></a><span class="ex">bash:</span> ./myscript.sh: Permission denied</span>
+<span id="cb37-8"><a href="#cb37-8"></a></span>
+<span id="cb37-9"><a href="#cb37-9"></a><span class="co"># Add execute permission, then try again</span></span>
+<span id="cb37-10"><a href="#cb37-10"></a><span class="ex">$</span> chmod +x myscript.sh</span>
+<span id="cb37-11"><a href="#cb37-11"></a><span class="ex">$</span> ./myscript.sh</span>
+<span id="cb37-12"><a href="#cb37-12"></a><span class="ex">Hello,</span> World!</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>The <code>#!/bin/bash</code> line at the top (the “shebang”) tells Unix which program should interpret the script, and the <code>./</code> prefix says “the file in the current directory” (<a href="#sec-dot-and-dotdot" class="quarto-xref"><span>Section 5.4.3</span></a>). Shell scripts are the subject of <a href="06-shell-scripting.html" class="quarto-xref"><span>Chapter 8</span></a>.</p>
 </section><section id="sec-chown" class="level3"><h3 class="anchored" data-anchor-id="sec-chown">Changing Ownership: <code>chown</code>
 </h3>
 <p>The <code>chown</code> command changes file ownership:</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb35"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb35-1"><a href="#cb35-1"></a><span class="co"># Change owner</span></span>
-<span id="cb35-2"><a href="#cb35-2"></a><span class="ex">$</span> chown alice myfile.txt</span>
-<span id="cb35-3"><a href="#cb35-3"></a></span>
-<span id="cb35-4"><a href="#cb35-4"></a><span class="co"># Change owner and group</span></span>
-<span id="cb35-5"><a href="#cb35-5"></a><span class="ex">$</span> chown alice:researchers myfile.txt</span>
-<span id="cb35-6"><a href="#cb35-6"></a></span>
-<span id="cb35-7"><a href="#cb35-7"></a><span class="co"># Recursively change directory ownership</span></span>
-<span id="cb35-8"><a href="#cb35-8"></a><span class="ex">$</span> chown <span class="at">-R</span> alice:researchers project/</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb38"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb38-1"><a href="#cb38-1"></a><span class="co"># Change owner</span></span>
+<span id="cb38-2"><a href="#cb38-2"></a><span class="ex">$</span> chown alice myfile.txt</span>
+<span id="cb38-3"><a href="#cb38-3"></a></span>
+<span id="cb38-4"><a href="#cb38-4"></a><span class="co"># Change owner and group</span></span>
+<span id="cb38-5"><a href="#cb38-5"></a><span class="ex">$</span> chown alice:researchers myfile.txt</span>
+<span id="cb38-6"><a href="#cb38-6"></a></span>
+<span id="cb38-7"><a href="#cb38-7"></a><span class="co"># Recursively change directory ownership</span></span>
+<span id="cb38-8"><a href="#cb38-8"></a><span class="ex">$</span> chown <span class="at">-R</span> alice:researchers project/</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </section><section id="sec-sudo" class="level3"><h3 class="anchored" data-anchor-id="sec-sudo">Superuser Access: <code>sudo</code>
 </h3>
 <p>Some operations require administrator (root) privileges. The <code>sudo</code> command temporarily elevates your permissions:</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb36"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb36-1"><a href="#cb36-1"></a><span class="co"># Install software (requires admin rights)</span></span>
-<span id="cb36-2"><a href="#cb36-2"></a><span class="ex">$</span> sudo apt install cowsay</span>
-<span id="cb36-3"><a href="#cb36-3"></a></span>
-<span id="cb36-4"><a href="#cb36-4"></a><span class="co"># Edit a system file</span></span>
-<span id="cb36-5"><a href="#cb36-5"></a><span class="ex">$</span> sudo nano /etc/hosts</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb39"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb39-1"><a href="#cb39-1"></a><span class="co"># Install software (requires admin rights)</span></span>
+<span id="cb39-2"><a href="#cb39-2"></a><span class="ex">$</span> sudo apt install cowsay</span>
+<span id="cb39-3"><a href="#cb39-3"></a></span>
+<span id="cb39-4"><a href="#cb39-4"></a><span class="co"># Edit a system file</span></span>
+<span id="cb39-5"><a href="#cb39-5"></a><span class="ex">$</span> sudo nano /etc/hosts</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="callout callout-style-default callout-warning callout-titled">
 <div class="callout-header d-flex align-content-center">
 <div class="callout-icon-container">
@@ -1580,17 +1673,17 @@ Warning
 <span class="header-section-number">5.10</span> Preparing for a Data Science Project</h2>
 <p>Now let’s put these commands into practice by setting up a proper directory structure for a data science project. A well-organized project directory makes your work reproducible and easier to navigate.</p>
 <p>We recommend creating a dedicated directory to hold all your projects. This keeps your work organized and separate from other files in your home directory:</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb37"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb37-1"><a href="#cb37-1"></a><span class="ex">$</span> cd ~</span>
-<span id="cb37-2"><a href="#cb37-2"></a><span class="ex">$</span> mkdir projects</span>
-<span id="cb37-3"><a href="#cb37-3"></a><span class="ex">$</span> cd projects</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb40"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb40-1"><a href="#cb40-1"></a><span class="ex">$</span> cd ~</span>
+<span id="cb40-2"><a href="#cb40-2"></a><span class="ex">$</span> mkdir projects</span>
+<span id="cb40-3"><a href="#cb40-3"></a><span class="ex">$</span> cd projects</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>For this example, let’s create a project analyzing gun violence data (based on a <a href="https://github.com/rairizarry/murders">real project on GitHub</a>). We’ll create subdirectories for raw data and processed data:</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb38"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb38-1"><a href="#cb38-1"></a><span class="ex">$</span> mkdir murders</span>
-<span id="cb38-2"><a href="#cb38-2"></a><span class="ex">$</span> cd murders</span>
-<span id="cb38-3"><a href="#cb38-3"></a><span class="ex">$</span> mkdir data rdas</span>
-<span id="cb38-4"><a href="#cb38-4"></a><span class="ex">$</span> ls</span>
-<span id="cb38-5"><a href="#cb38-5"></a><span class="ex">data</span>  rdas</span>
-<span id="cb38-6"><a href="#cb38-6"></a><span class="ex">$</span> pwd</span>
-<span id="cb38-7"><a href="#cb38-7"></a><span class="ex">/home/wcresko/projects/murders</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb41"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb41-1"><a href="#cb41-1"></a><span class="ex">$</span> mkdir murders</span>
+<span id="cb41-2"><a href="#cb41-2"></a><span class="ex">$</span> cd murders</span>
+<span id="cb41-3"><a href="#cb41-3"></a><span class="ex">$</span> mkdir data rdas</span>
+<span id="cb41-4"><a href="#cb41-4"></a><span class="ex">$</span> ls</span>
+<span id="cb41-5"><a href="#cb41-5"></a><span class="ex">data</span>  rdas</span>
+<span id="cb41-6"><a href="#cb41-6"></a><span class="ex">$</span> pwd</span>
+<span id="cb41-7"><a href="#cb41-7"></a><span class="ex">/home/wcresko/projects/murders</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>Our project structure now looks like this:</p>
 <pre><code>~/projects/
 └── murders/
@@ -1616,7 +1709,7 @@ Warning
 </div>
 </div>
 <p>From any terminal, you can navigate to this project by typing:</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb40"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb40-1"><a href="#cb40-1"></a><span class="ex">$</span> cd ~/projects/murders</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb43"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb43-1"><a href="#cb43-1"></a><span class="ex">$</span> cd ~/projects/murders</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>As your projects grow, you might expand this structure:</p>
 <pre><code>~/projects/
 └── murders/
@@ -1632,20 +1725,46 @@ Warning
 <p>Most Unix implementations include a large number of powerful tools and utilities beyond what we’ve covered here. As you become more comfortable with the basics, you’ll want to explore these advanced topics. The main purpose of this section is to make you aware of what’s available; you can dive deeper as needed.</p>
 <section id="sec-wild-cards" class="level3"><h3 class="anchored" data-anchor-id="sec-wild-cards">Wild Cards</h3>
 <p>One of the most powerful features of Unix is <strong>wild cards</strong>—special characters that match multiple files at once. Suppose you want to remove all temporary HTML files from a project. Removing them one by one would be tedious, but with wild cards you can match them all:</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb42"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb42-1"><a href="#cb42-1"></a><span class="co"># List all HTML files</span></span>
-<span id="cb42-2"><a href="#cb42-2"></a><span class="ex">$</span> ls <span class="pp">*</span>.html</span>
-<span id="cb42-3"><a href="#cb42-3"></a></span>
-<span id="cb42-4"><a href="#cb42-4"></a><span class="co"># Remove all HTML files</span></span>
-<span id="cb42-5"><a href="#cb42-5"></a><span class="ex">$</span> rm <span class="pp">*</span>.html</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<p>The <code>*</code> wild card matches any number of any characters. The <code>?</code> wild card matches exactly one character:</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb43"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb43-1"><a href="#cb43-1"></a><span class="co"># Match files like file-001.html, file-002.html, file-999.html</span></span>
-<span id="cb43-2"><a href="#cb43-2"></a><span class="ex">$</span> ls file-<span class="pp">???</span>.html</span>
-<span id="cb43-3"><a href="#cb43-3"></a></span>
-<span id="cb43-4"><a href="#cb43-4"></a><span class="co"># Remove all files starting with "temp"</span></span>
-<span id="cb43-5"><a href="#cb43-5"></a><span class="ex">$</span> rm temp<span class="pp">*</span></span>
-<span id="cb43-6"><a href="#cb43-6"></a></span>
-<span id="cb43-7"><a href="#cb43-7"></a><span class="co"># Match files with any extension</span></span>
-<span id="cb43-8"><a href="#cb43-8"></a><span class="ex">$</span> ls data.<span class="pp">*</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb45"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb45-1"><a href="#cb45-1"></a><span class="co"># List all HTML files</span></span>
+<span id="cb45-2"><a href="#cb45-2"></a><span class="ex">$</span> ls <span class="pp">*</span>.html</span>
+<span id="cb45-3"><a href="#cb45-3"></a></span>
+<span id="cb45-4"><a href="#cb45-4"></a><span class="co"># Remove all HTML files</span></span>
+<span id="cb45-5"><a href="#cb45-5"></a><span class="ex">$</span> rm <span class="pp">*</span>.html</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>The <code>*</code> wild card matches any number of any characters (including none). The <code>?</code> wild card matches exactly one character:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb46"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb46-1"><a href="#cb46-1"></a><span class="co"># All CSV files, all files starting with "data", all text and markdown files</span></span>
+<span id="cb46-2"><a href="#cb46-2"></a><span class="ex">$</span> ls <span class="pp">*</span>.csv</span>
+<span id="cb46-3"><a href="#cb46-3"></a><span class="ex">$</span> ls data<span class="pp">*</span></span>
+<span id="cb46-4"><a href="#cb46-4"></a><span class="ex">$</span> ls <span class="pp">*</span>.txt <span class="pp">*</span>.md</span>
+<span id="cb46-5"><a href="#cb46-5"></a></span>
+<span id="cb46-6"><a href="#cb46-6"></a><span class="co"># Match files like file-001.html, file-002.html, file-999.html</span></span>
+<span id="cb46-7"><a href="#cb46-7"></a><span class="ex">$</span> ls file-<span class="pp">???</span>.html</span>
+<span id="cb46-8"><a href="#cb46-8"></a></span>
+<span id="cb46-9"><a href="#cb46-9"></a><span class="co"># sample1.txt, sample2.txt, ... but not sample10.txt</span></span>
+<span id="cb46-10"><a href="#cb46-10"></a><span class="ex">$</span> ls sample<span class="pp">?</span>.txt</span>
+<span id="cb46-11"><a href="#cb46-11"></a></span>
+<span id="cb46-12"><a href="#cb46-12"></a><span class="co"># Remove all files starting with "temp"</span></span>
+<span id="cb46-13"><a href="#cb46-13"></a><span class="ex">$</span> rm temp<span class="pp">*</span></span>
+<span id="cb46-14"><a href="#cb46-14"></a></span>
+<span id="cb46-15"><a href="#cb46-15"></a><span class="co"># Match files with any extension</span></span>
+<span id="cb46-16"><a href="#cb46-16"></a><span class="ex">$</span> ls data.<span class="pp">*</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Square brackets <code>[ ]</code> match any <em>single</em> character from a set or range:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb47"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb47-1"><a href="#cb47-1"></a><span class="co"># sample1.txt, sample2.txt, or sample3.txt</span></span>
+<span id="cb47-2"><a href="#cb47-2"></a><span class="ex">$</span> ls sample<span class="pp">[</span><span class="ss">123</span><span class="pp">]</span>.txt</span>
+<span id="cb47-3"><a href="#cb47-3"></a></span>
+<span id="cb47-4"><a href="#cb47-4"></a><span class="co"># data_0.csv through data_9.csv</span></span>
+<span id="cb47-5"><a href="#cb47-5"></a><span class="ex">$</span> ls data_<span class="pp">[</span><span class="ss">0</span><span class="pp">-</span><span class="ss">9</span><span class="pp">]</span>.csv</span>
+<span id="cb47-6"><a href="#cb47-6"></a></span>
+<span id="cb47-7"><a href="#cb47-7"></a><span class="co"># fileA.txt through fileZ.txt</span></span>
+<span id="cb47-8"><a href="#cb47-8"></a><span class="ex">$</span> ls file<span class="pp">[</span><span class="ss">A</span><span class="pp">-</span><span class="ss">Z</span><span class="pp">]</span>.txt</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Wild cards are expanded by the <em>shell</em> before the command runs, so they work with any command, not just <code>ls</code>:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb48"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb48-1"><a href="#cb48-1"></a><span class="co"># Count lines in every CSV file</span></span>
+<span id="cb48-2"><a href="#cb48-2"></a><span class="ex">$</span> wc <span class="at">-l</span> <span class="pp">*</span>.csv</span>
+<span id="cb48-3"><a href="#cb48-3"></a></span>
+<span id="cb48-4"><a href="#cb48-4"></a><span class="co"># Copy all R scripts to a backup folder</span></span>
+<span id="cb48-5"><a href="#cb48-5"></a><span class="ex">$</span> cp <span class="pp">*</span>.R backup/</span>
+<span id="cb48-6"><a href="#cb48-6"></a></span>
+<span id="cb48-7"><a href="#cb48-7"></a><span class="co"># Search for "gene" in all text files</span></span>
+<span id="cb48-8"><a href="#cb48-8"></a><span class="ex">$</span> grep <span class="st">"gene"</span> <span class="pp">*</span>.txt</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="callout callout-style-default callout-warning callout-titled" title="Wild Card Danger">
 <div class="callout-header d-flex align-content-center">
 <div class="callout-icon-container">
@@ -1656,45 +1775,60 @@ Warning
 </div>
 </div>
 <div class="callout-body-container callout-body">
-<p>Combining <code>rm</code> with <code>*</code> can be dangerous! The command <code>rm *</code> deletes everything in the current directory without asking for confirmation. Always use <code>ls</code> first to see what a wild card pattern matches before using it with <code>rm</code>.</p>
+<p>Combining <code>rm</code> with <code>*</code> can be dangerous! The command <code>rm *</code> deletes everything in the current directory without asking for confirmation. Always use <code>ls</code> first to see what a wild card pattern matches before using it with <code>rm</code>, and consider <code>rm -i</code> for interactive confirmation when deleting with wild cards.</p>
 </div>
 </div>
 </section><section id="sec-environment-variables" class="level3"><h3 class="anchored" data-anchor-id="sec-environment-variables">Environment Variables</h3>
 <p>Unix has settings that affect your command-line environment called <strong>environment variables</strong>. These are distinguished by a <code>$</code> prefix. Some important ones:</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb44"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb44-1"><a href="#cb44-1"></a><span class="co"># Your home directory</span></span>
-<span id="cb44-2"><a href="#cb44-2"></a><span class="ex">$</span> echo <span class="va">$HOME</span></span>
-<span id="cb44-3"><a href="#cb44-3"></a><span class="ex">/home/wcresko</span></span>
-<span id="cb44-4"><a href="#cb44-4"></a></span>
-<span id="cb44-5"><a href="#cb44-5"></a><span class="co"># Your username</span></span>
-<span id="cb44-6"><a href="#cb44-6"></a><span class="ex">$</span> echo <span class="va">$USER</span></span>
-<span id="cb44-7"><a href="#cb44-7"></a><span class="ex">wcresko</span></span>
-<span id="cb44-8"><a href="#cb44-8"></a></span>
-<span id="cb44-9"><a href="#cb44-9"></a><span class="co"># Your current shell</span></span>
-<span id="cb44-10"><a href="#cb44-10"></a><span class="ex">$</span> echo <span class="va">$SHELL</span></span>
-<span id="cb44-11"><a href="#cb44-11"></a><span class="ex">/bin/bash</span></span>
-<span id="cb44-12"><a href="#cb44-12"></a></span>
-<span id="cb44-13"><a href="#cb44-13"></a><span class="co"># Where Unix looks for programs</span></span>
-<span id="cb44-14"><a href="#cb44-14"></a><span class="ex">$</span> echo <span class="va">$PATH</span></span>
-<span id="cb44-15"><a href="#cb44-15"></a><span class="ex">/usr/local/bin:/usr/bin:/bin</span></span>
-<span id="cb44-16"><a href="#cb44-16"></a></span>
-<span id="cb44-17"><a href="#cb44-17"></a><span class="co"># See all environment variables</span></span>
-<span id="cb44-18"><a href="#cb44-18"></a><span class="ex">$</span> env</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb49"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb49-1"><a href="#cb49-1"></a><span class="co"># Your home directory</span></span>
+<span id="cb49-2"><a href="#cb49-2"></a><span class="ex">$</span> echo <span class="va">$HOME</span></span>
+<span id="cb49-3"><a href="#cb49-3"></a><span class="ex">/home/wcresko</span></span>
+<span id="cb49-4"><a href="#cb49-4"></a></span>
+<span id="cb49-5"><a href="#cb49-5"></a><span class="co"># Your username</span></span>
+<span id="cb49-6"><a href="#cb49-6"></a><span class="ex">$</span> echo <span class="va">$USER</span></span>
+<span id="cb49-7"><a href="#cb49-7"></a><span class="ex">wcresko</span></span>
+<span id="cb49-8"><a href="#cb49-8"></a></span>
+<span id="cb49-9"><a href="#cb49-9"></a><span class="co"># Your current shell</span></span>
+<span id="cb49-10"><a href="#cb49-10"></a><span class="ex">$</span> echo <span class="va">$SHELL</span></span>
+<span id="cb49-11"><a href="#cb49-11"></a><span class="ex">/bin/bash</span></span>
+<span id="cb49-12"><a href="#cb49-12"></a></span>
+<span id="cb49-13"><a href="#cb49-13"></a><span class="co"># Where Unix looks for programs</span></span>
+<span id="cb49-14"><a href="#cb49-14"></a><span class="ex">$</span> echo <span class="va">$PATH</span></span>
+<span id="cb49-15"><a href="#cb49-15"></a><span class="ex">/usr/local/bin:/usr/bin:/bin</span></span>
+<span id="cb49-16"><a href="#cb49-16"></a></span>
+<span id="cb49-17"><a href="#cb49-17"></a><span class="co"># Your current working directory (the same thing pwd prints)</span></span>
+<span id="cb49-18"><a href="#cb49-18"></a><span class="ex">$</span> echo <span class="va">$PWD</span></span>
+<span id="cb49-19"><a href="#cb49-19"></a><span class="ex">/home/wcresko/projects</span></span>
+<span id="cb49-20"><a href="#cb49-20"></a></span>
+<span id="cb49-21"><a href="#cb49-21"></a><span class="co"># See all environment variables (there are many; page through them)</span></span>
+<span id="cb49-22"><a href="#cb49-22"></a><span class="ex">$</span> env <span class="kw">|</span> <span class="fu">less</span></span>
+<span id="cb49-23"><a href="#cb49-23"></a><span class="ex">$</span> printenv HOME</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>Environment variables control how your shell behaves and where it looks for programs. The <code>PATH</code> variable is particularly important—it’s a colon-separated list of directories where Unix searches for executable programs.</p>
+<p>You can also define your own variables. Assign with <code>NAME=value</code> (no spaces around the <code>=</code>) and refer to the value with a <code>$</code> prefix:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb50"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb50-1"><a href="#cb50-1"></a><span class="co"># Set a variable</span></span>
+<span id="cb50-2"><a href="#cb50-2"></a><span class="ex">$</span> PROJECT_DIR=~/projects/analysis</span>
+<span id="cb50-3"><a href="#cb50-3"></a></span>
+<span id="cb50-4"><a href="#cb50-4"></a><span class="co"># Use it (note the $)</span></span>
+<span id="cb50-5"><a href="#cb50-5"></a><span class="ex">$</span> cd <span class="va">$PROJECT_DIR</span></span>
+<span id="cb50-6"><a href="#cb50-6"></a><span class="ex">$</span> ls <span class="va">$PROJECT_DIR</span>/data</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>A variable set this way is visible only to the current shell. To make it available to the programs you launch from that shell (R, Python, a script), prefix the assignment with <code>export</code>:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb51"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb51-1"><a href="#cb51-1"></a><span class="ex">$</span> export PROJECT_DIR=~/projects/analysis</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Shell variables are the building blocks of shell scripts, which are covered in <a href="06-shell-scripting.html" class="quarto-xref"><span>Chapter 8</span></a>.</p>
 </section><section id="sec-executables-and-the-path" class="level3"><h3 class="anchored" data-anchor-id="sec-executables-and-the-path">Executables and the PATH</h3>
 <p>In Unix, all programs are files—they’re called <strong>executables</strong>. When you type <code>ls</code>, <code>grep</code>, or <code>git</code>, Unix runs an executable file. You can find where a program lives using <code>which</code>:</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb45"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb45-1"><a href="#cb45-1"></a><span class="ex">$</span> which git</span>
-<span id="cb45-2"><a href="#cb45-2"></a><span class="ex">/usr/bin/git</span></span>
-<span id="cb45-3"><a href="#cb45-3"></a></span>
-<span id="cb45-4"><a href="#cb45-4"></a><span class="ex">$</span> which python</span>
-<span id="cb45-5"><a href="#cb45-5"></a><span class="ex">/usr/bin/python</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb52"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb52-1"><a href="#cb52-1"></a><span class="ex">$</span> which git</span>
+<span id="cb52-2"><a href="#cb52-2"></a><span class="ex">/usr/bin/git</span></span>
+<span id="cb52-3"><a href="#cb52-3"></a></span>
+<span id="cb52-4"><a href="#cb52-4"></a><span class="ex">$</span> which python</span>
+<span id="cb52-5"><a href="#cb52-5"></a><span class="ex">/usr/bin/python</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>The <code>PATH</code> environment variable tells Unix where to look for executables. When you type a command, Unix searches through each directory in <code>PATH</code> until it finds a matching program:</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb46"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb46-1"><a href="#cb46-1"></a><span class="ex">$</span> echo <span class="va">$PATH</span></span>
-<span id="cb46-2"><a href="#cb46-2"></a><span class="ex">/usr/local/bin:/usr/bin:/bin:/home/wcresko/bin</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb53"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb53-1"><a href="#cb53-1"></a><span class="ex">$</span> echo <span class="va">$PATH</span></span>
+<span id="cb53-2"><a href="#cb53-2"></a><span class="ex">/usr/local/bin:/usr/bin:/bin:/home/wcresko/bin</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>Unix searches these directories in order. If you have your own scripts in <code>~/bin</code>, you can add that directory to your PATH to make them accessible from anywhere.</p>
 </section><section id="sec-shells-and-configuration-files" class="level3"><h3 class="anchored" data-anchor-id="sec-shells-and-configuration-files">Shells and Configuration Files</h3>
 <p>The <strong>shell</strong> is the program that interprets your commands. <strong>Bash</strong> (Bourne Again Shell) is the most common, but others exist like <strong>zsh</strong> (default on modern macOS) and <strong>fish</strong>. You can see which shell you’re using:</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb47"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb47-1"><a href="#cb47-1"></a><span class="ex">$</span> echo <span class="va">$SHELL</span></span>
-<span id="cb47-2"><a href="#cb47-2"></a><span class="ex">/bin/bash</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb54"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb54-1"><a href="#cb54-1"></a><span class="ex">$</span> echo <span class="va">$SHELL</span></span>
+<span id="cb54-2"><a href="#cb54-2"></a><span class="ex">/bin/bash</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>Your shell can be customized through configuration files that run when you open a terminal (<a href="#tbl-shell-config-files" class="quarto-xref">Table&nbsp;<span>5.8</span></a>):</p>
 <div id="tbl-shell-config-files" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-tbl figure"><figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-shell-config-files-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
@@ -1723,10 +1857,30 @@ Table&nbsp;5.8: Configuration files for common shells
 </div>
 </figure>
 </div>
-<p>These files can set environment variables, define aliases (shortcuts for commands), and customize your prompt. For example, adding this line to <code>~/.bashrc</code> creates a shortcut:</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb48"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb48-1"><a href="#cb48-1"></a><span class="bu">alias</span> ll=<span class="st">'ls -la'</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<p>After editing configuration files, apply the changes by running:</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb49"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb49-1"><a href="#cb49-1"></a><span class="ex">$</span> source ~/.bashrc</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>These files can set environment variables, define aliases (shortcuts for commands), and customize your prompt. For Bash, <code>~/.bashrc</code> is read by interactive shells and <code>~/.bash_profile</code> by login shells; on macOS with zsh, put the same lines in <code>~/.zshrc</code>. Common customizations include:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb55"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb55-1"><a href="#cb55-1"></a><span class="co"># Add a directory of your own scripts to the front of your PATH</span></span>
+<span id="cb55-2"><a href="#cb55-2"></a><span class="bu">export</span> <span class="va">PATH</span><span class="op">=</span><span class="st">"</span><span class="va">$HOME</span><span class="st">/bin:</span><span class="va">$PATH</span><span class="st">"</span></span>
+<span id="cb55-3"><a href="#cb55-3"></a></span>
+<span id="cb55-4"><a href="#cb55-4"></a><span class="co"># Create an alias (shortcut) for a common command</span></span>
+<span id="cb55-5"><a href="#cb55-5"></a><span class="bu">alias</span> ll=<span class="st">'ls -la'</span></span>
+<span id="cb55-6"><a href="#cb55-6"></a><span class="bu">alias</span> rm=<span class="st">'rm -i'</span>    <span class="co"># always ask before deleting</span></span>
+<span id="cb55-7"><a href="#cb55-7"></a></span>
+<span id="cb55-8"><a href="#cb55-8"></a><span class="co"># Set default options for programs</span></span>
+<span id="cb55-9"><a href="#cb55-9"></a><span class="bu">export</span> <span class="va">R_LIBS_USER</span><span class="op">=</span><span class="st">"</span><span class="va">$HOME</span><span class="st">/R/library"</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>After editing a configuration file, apply the changes either by opening a new terminal or by running:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb56"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb56-1"><a href="#cb56-1"></a><span class="ex">$</span> source ~/.bashrc      <span class="co"># or: source ~/.zshrc</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section><section id="sec-ssh-scp" class="level3"><h3 class="anchored" data-anchor-id="sec-ssh-scp">Connecting to Remote Computers: <code>ssh</code> and <code>scp</code>
+</h3>
+<p>One of the main reasons to learn the shell is that it works the same way on a computer across the room or across the country. The <code>ssh</code> command (<strong>s</strong>ecure <strong>sh</strong>ell) opens a shell on a remote machine:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb57"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb57-1"><a href="#cb57-1"></a><span class="ex">$</span> ssh username@server.university.edu</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Once connected, everything in this chapter—<code>pwd</code>, <code>ls</code>, <code>cd</code>, <code>mkdir</code>, and the rest—works exactly as it does locally, except that the files live on the remote system. This is how you will use UO’s Talapas cluster (<a href="11-hpc-talapas.html" class="quarto-xref"><span>Chapter 20</span></a>). Type <code>exit</code> to close the connection.</p>
+<p>The <code>scp</code> command (<strong>s</strong>ecure <strong>c</strong>o<strong>p</strong>y) copies files between your computer and a remote one. Its syntax mirrors <code>cp</code>, with <code>user@host:</code> prefixed to the remote path:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb58"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb58-1"><a href="#cb58-1"></a><span class="co"># Local file -&gt; remote directory</span></span>
+<span id="cb58-2"><a href="#cb58-2"></a><span class="ex">$</span> scp local_file.txt username@server.edu:~/destination/</span>
+<span id="cb58-3"><a href="#cb58-3"></a></span>
+<span id="cb58-4"><a href="#cb58-4"></a><span class="co"># Remote file -&gt; current local directory</span></span>
+<span id="cb58-5"><a href="#cb58-5"></a><span class="ex">$</span> scp username@server.edu:~/remote_file.txt .</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>For large or repeated transfers, <code>rsync</code> is more efficient because it copies only what has changed; see <a href="11-hpc-talapas.html#sec-file-transfer" class="quarto-xref"><span>Section 20.5.3</span></a>.</p>
 </section><section id="sec-commands-worth-learning" class="level3"><h3 class="anchored" data-anchor-id="sec-commands-worth-learning">Commands Worth Learning</h3>
 <p>Several other commands are worth knowing about as you advance (<a href="#tbl-commands-worth-learning" class="quarto-xref">Table&nbsp;<span>5.9</span></a>); <code>grep</code> gets its own treatment in <a href="05-grep-regex.html" class="quarto-xref"><span>Chapter 7</span></a>:</p>
 <div id="tbl-commands-worth-learning" class="quarto-float quarto-figure quarto-figure-center anchored">
@@ -1745,7 +1899,7 @@ Table&nbsp;5.9: Additional Unix commands worth learning
 </tr>
 <tr class="even">
 <td style="text-align: left;"><code>ssh</code></td>
-<td style="text-align: left;">Connect securely to another computer</td>
+<td style="text-align: left;">Connect securely to another computer (<a href="#sec-ssh-scp" class="quarto-xref"><span>Section 5.11.5</span></a>)</td>
 </tr>
 <tr class="odd">
 <td style="text-align: left;"><code>ln</code></td>
@@ -1773,7 +1927,7 @@ Table&nbsp;5.9: Additional Unix commands worth learning
 </section><section id="sec-file-manipulation-from-r" class="level3"><h3 class="anchored" data-anchor-id="sec-file-manipulation-from-r">File Manipulation from R</h3>
 <p>You can also perform file operations from within R using functions like <code><a href="https://rdrr.io/r/base/files.html">file.create()</a></code>, <code><a href="https://rdrr.io/r/base/files.html">file.copy()</a></code>, <code><a href="https://rdrr.io/r/base/files.html">file.rename()</a></code>, and <code><a href="https://rdrr.io/r/base/files.html">file.remove()</a></code>. See <code><a href="https://rdrr.io/r/base/files.html">?files</a></code> in R for the complete list. The <code><a href="https://rdrr.io/r/base/unlink.html">unlink()</a></code> function removes files and directories.</p>
 <p>While not generally recommended, you can run Unix commands from R using the <code><a href="https://rdrr.io/r/base/system.html">system()</a></code> function:</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb50"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb50-1"><a href="#cb50-1"></a><span class="fu">system</span>(<span class="st">"ls -la"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb59"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb59-1"><a href="#cb59-1"></a><span class="fu">system</span>(<span class="st">"ls -la"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>This can be useful for integrating Unix tools into R scripts, but native R functions are usually preferable for portability.</p>
 </section></section><section id="sec-unix-summary" class="level2" data-number="5.12"><h2 data-number="5.12" class="anchored" data-anchor-id="sec-unix-summary">
 <span class="header-section-number">5.12</span> Summary</h2>
@@ -1788,8 +1942,11 @@ Table&nbsp;5.9: Additional Unix commands worth learning
 </li>
 <li>File operations include <code>cp</code>, <code>mv</code>, <code>rm</code>, <code>mkdir</code>, and <code>touch</code>
 </li>
+<li>Every directory contains <code>.</code> (itself) and <code>..</code> (its parent); <code>cd ..</code> moves up one level</li>
 <li>Good naming conventions prevent problems</li>
 <li>Manual pages (<code>man</code>) provide detailed help</li>
+<li>Permissions (<code>rwx</code> for owner, group, and others) are changed with <code>chmod</code>; <code>chmod +x</code> makes a script runnable</li>
+<li>Wild cards (<code>*</code>, <code>?</code>, <code>[ ]</code>) are expanded by the shell before any command runs</li>
 </ul>
 <p>These commands form the foundation for everything else in Unix. Practice them until they become automatic!</p>
 <div class="callout callout-style-default callout-tip callout-titled">
@@ -1865,6 +2022,25 @@ Tip
 <li>What does the <code>ls -R</code> option do?</li>
 <li>How can you create a directory and all necessary parent directories in one command?</li>
 <li>What command shows disk usage, and what option makes the output human-readable?</li>
+</ol>
+<p><strong>Exercise 4: Wild Cards and Structure</strong></p>
+<ol type="1">
+<li>Make five directories called <code>dir_1</code> through <code>dir_5</code> with a single <code>mkdir</code> command</li>
+<li>Inside each, create <code>file_1.txt</code>, <code>file_2.txt</code>, and <code>file_3.txt</code> using <code>touch</code>
+</li>
+<li>Open <code>dir_1/file_1.txt</code> in <code>nano</code>, type a few words, save, and print it with <code>cat</code>
+</li>
+<li>Use a wild card to list every <code>file_2.txt</code> across all five directories in one command</li>
+<li>Delete all files in <code>dir_3</code> with a single <code>rm</code> command (check with <code>ls</code> first), then remove <code>dir_3</code> with <code>rmdir</code>
+</li>
+</ol>
+<p><strong>Exercise 5: File Permissions</strong></p>
+<ol type="1">
+<li>Create a short script that prints “Hello, World!” and the current date (<code>date</code>)</li>
+<li>Try to run it with <code>./</code>—what error do you get?</li>
+<li>Make it executable with <code>chmod +x</code> and run it again</li>
+<li>Examine the permissions of several files with <code>ls -l</code> and decode each permission string</li>
+<li>Practice changing permissions with both symbolic (<code>chmod u+x</code>) and octal (<code>chmod 755</code>) notation, checking the result with <code>ls -l</code> each time</li>
 </ol>
 </div>
 </div>

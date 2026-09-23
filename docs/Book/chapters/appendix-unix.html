@@ -511,6 +511,7 @@ ul.task-list li input[type="checkbox"] {
   <li><a href="#sec-unix-env" id="toc-sec-unix-env" class="nav-link" data-scroll-target="#sec-unix-env"><span class="header-section-number">A.11</span> Environment Variables</a>
   <ul class="collapse">
   <li><a href="#sec-common-env" id="toc-sec-common-env" class="nav-link" data-scroll-target="#sec-common-env">Common Environment Variables</a></li>
+  <li><a href="#sec-script-variables" id="toc-sec-script-variables" class="nav-link" data-scroll-target="#sec-script-variables">Special Variables in Scripts</a></li>
   </ul></li>
   </ul>
 <div class="toc-actions"><ul><li><a href="https://github.com/wcresko/BioE_Comp_Tools_Fa2026/edit/main/Book/chapters/appendix-unix.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li><li><a href="https://github.com/wcresko/BioE_Comp_Tools_Fa2026/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></nav>
@@ -927,33 +928,43 @@ Table&nbsp;A.4: Text processing commands
 </tr>
 <tr class="even">
 <td style="text-align: left;"><code>sort -k</code></td>
-<td style="text-align: left;">Sort by column</td>
-<td style="text-align: left;"><code>sort -k2 data.tsv</code></td>
+<td style="text-align: left;">Sort by column (use <code>-kN,N</code> to sort on that column only)</td>
+<td style="text-align: left;"><code>sort -k2,2 -n data.tsv</code></td>
 </tr>
 <tr class="odd">
+<td style="text-align: left;"><code>sort -t</code></td>
+<td style="text-align: left;">Specify field delimiter</td>
+<td style="text-align: left;"><code>sort -t',' -k3,3 data.csv</code></td>
+</tr>
+<tr class="even">
 <td style="text-align: left;"><code>sort -u</code></td>
 <td style="text-align: left;">Sort and remove duplicates</td>
 <td style="text-align: left;"><code>sort -u list.txt</code></td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td style="text-align: left;"><code>uniq</code></td>
 <td style="text-align: left;">Remove adjacent duplicates</td>
-<td style="text-align: left;"><code>sort file | uniq</code></td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;"><code>uniq -c</code></td>
-<td style="text-align: left;">Count occurrences</td>
-<td style="text-align: left;"><code>sort file | uniq -c</code></td>
+<td style="text-align: left;"><code>sort file \| uniq</code></td>
 </tr>
 <tr class="even">
+<td style="text-align: left;"><code>uniq -c</code></td>
+<td style="text-align: left;">Count occurrences</td>
+<td style="text-align: left;"><code>sort file \| uniq -c</code></td>
+</tr>
+<tr class="odd">
 <td style="text-align: left;"><code>uniq -d</code></td>
 <td style="text-align: left;">Show only duplicates</td>
-<td style="text-align: left;"><code>sort file | uniq -d</code></td>
+<td style="text-align: left;"><code>sort file \| uniq -d</code></td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><code>uniq -u</code></td>
+<td style="text-align: left;">Show only lines that occur once</td>
+<td style="text-align: left;"><code>sort file \| uniq -u</code></td>
 </tr>
 <tr class="odd">
 <td style="text-align: left;"><code>cut -f</code></td>
-<td style="text-align: left;">Extract fields (tab-delimited)</td>
-<td style="text-align: left;"><code>cut -f2 data.tsv</code></td>
+<td style="text-align: left;">Extract fields (tab-delimited); ranges allowed</td>
+<td style="text-align: left;"><code>cut -f2-5 data.tsv</code></td>
 </tr>
 <tr class="even">
 <td style="text-align: left;"><code>cut -d</code></td>
@@ -1037,8 +1048,18 @@ Table&nbsp;A.4: Text processing commands
 </tr>
 <tr class="even">
 <td style="text-align: left;"><code>join</code></td>
-<td style="text-align: left;">Join files on common field</td>
+<td style="text-align: left;">Join sorted files on common field</td>
 <td style="text-align: left;"><code>join file1.txt file2.txt</code></td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><code>join -1 -2</code></td>
+<td style="text-align: left;">Choose the key column in each file</td>
+<td style="text-align: left;"><code>join -1 2 -2 1 file1.txt file2.txt</code></td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><code>fold -w</code></td>
+<td style="text-align: left;">Wrap lines to a fixed width (<code>-w1</code> = one character per line)</td>
+<td style="text-align: left;"><code>tr -d '\n' &lt; seq.fa \| fold -w1 \| sort \| uniq -c</code></td>
 </tr>
 <tr class="odd">
 <td style="text-align: left;"><code>split</code></td>
@@ -1094,6 +1115,16 @@ Table&nbsp;A.5: Redirection operators
 <td style="text-align: left;"><code>wc -l &lt; data.txt</code></td>
 </tr>
 <tr class="even">
+<td style="text-align: left;"><code>&lt;&lt;</code></td>
+<td style="text-align: left;">Here-document (inline multi-line input up to a marker)</td>
+<td style="text-align: left;"><code>sort &lt;&lt; EOF</code> … <code>EOF</code></td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><code>1&gt;</code></td>
+<td style="text-align: left;">Redirect stdout (explicit form of <code>&gt;</code>)</td>
+<td style="text-align: left;"><code>cmd 1&gt; out.txt</code></td>
+</tr>
+<tr class="even">
 <td style="text-align: left;"><code>2&gt;</code></td>
 <td style="text-align: left;">Redirect stderr</td>
 <td style="text-align: left;"><code>cmd 2&gt; errors.txt</code></td>
@@ -1143,6 +1174,11 @@ Table&nbsp;A.6: Compression commands
 </figcaption>
 <div aria-describedby="tbl-compress-commands-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 <table class="caption-top table">
+<colgroup>
+<col style="width: 29%">
+<col style="width: 41%">
+<col style="width: 29%">
+</colgroup>
 <thead>
 <tr class="header">
 <th style="text-align: left;">Command</th>
@@ -1170,6 +1206,16 @@ Table&nbsp;A.6: Compression commands
 <td style="text-align: left;"><code>gunzip</code></td>
 <td style="text-align: left;">Decompress .gz file</td>
 <td style="text-align: left;"><code>gunzip file.txt.gz</code></td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><code>gunzip -k</code></td>
+<td style="text-align: left;">Decompress, keeping the .gz file</td>
+<td style="text-align: left;"><code>gunzip -k file.txt.gz</code></td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><code>gunzip -c</code></td>
+<td style="text-align: left;">Decompress to stdout (same as <code>zcat</code>)</td>
+<td style="text-align: left;"><code>gunzip -c data.gz \| head</code></td>
 </tr>
 <tr class="odd">
 <td style="text-align: left;"><code>zcat</code></td>
@@ -1918,6 +1964,56 @@ Table&nbsp;A.14: Common environment variables
 <tr class="odd">
 <td style="text-align: left;"><code>$$</code></td>
 <td style="text-align: left;">Current process ID</td>
+</tr>
+</tbody>
+</table>
+</div>
+</figure>
+</div>
+</section>
+<section id="sec-script-variables" class="level3">
+<h3 class="anchored" data-anchor-id="sec-script-variables">Special Variables in Scripts</h3>
+<div id="tbl-script-variables" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-script-variables-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;A.15: Special variables available inside shell scripts (<a href="06-shell-scripting.html#sec-cli-arguments" class="quarto-xref"><span>Section 8.7</span></a>)
+</figcaption>
+<div aria-describedby="tbl-script-variables-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<table class="caption-top table">
+<colgroup>
+<col style="width: 43%">
+<col style="width: 56%">
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: left;">Variable</th>
+<th style="text-align: left;">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;"><code>$0</code></td>
+<td style="text-align: left;">Name of the script</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><code>$1</code>, <code>$2</code>, … <code>$9</code></td>
+<td style="text-align: left;">First, second, … ninth command-line argument (<code>${10}</code> and up need braces)</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><code>$#</code></td>
+<td style="text-align: left;">Number of arguments</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><code>$@</code></td>
+<td style="text-align: left;">All arguments as separate words (quote it: <code>"$@"</code>)</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><code>$*</code></td>
+<td style="text-align: left;">All arguments as one word</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><code>$LINENO</code></td>
+<td style="text-align: left;">Current line number in the script (useful in error traps)</td>
 </tr>
 </tbody>
 </table>

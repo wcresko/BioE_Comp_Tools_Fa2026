@@ -169,7 +169,12 @@ $ grep "T\{2,4\}" sequence.txt
 
 # At least three G's
 $ grep "G\{3,\}" sequence.txt
+
+# G followed by zero or more C's: matches "G", "GC", "GCC", ...
+$ grep "GC*" sequence.txt
 ```
+
+Read the last example carefully: a quantifier applies only to the single character (or group) immediately before it. `GC*` does *not* mean "GC repeated"; it means "one G, then any number of C's," so it matches every line containing a G. To repeat the pair, group it: `\(GC\)*` in basic regex, or `(GC)*` with `-E`.
 
 ::: {.callout-warning}
 In basic `grep`, quantifiers like `?`, `+`, and `{}` must be escaped with `\`. Use `grep -E` or `egrep` to avoid escaping.
@@ -228,6 +233,9 @@ $ grep -E "A+T+" sequence.txt
 
 # One or more digits
 $ grep -E "[0-9]+" data.txt
+
+# Runs of at least 20 DNA bases (e.g. primer sequences)
+$ grep -E "[ACGT]{20,}" primers.txt
 ```
 
 ## Practical Bioinformatics Examples {#sec-regex-bioinformatics}
@@ -246,6 +254,13 @@ $ grep -i "kinase" sequences.fa
 
 # Find sequences by organism
 $ grep -E "^>.*Homo sapiens" proteins.fa
+
+# UniProt headers look like ">sp|P69905|HBA_HUMAN ..."; match the
+# accession field (the | is a literal pipe, so it must be escaped)
+$ grep -E "^>sp\|[A-Z0-9]+\|" uniprot.fasta
+
+# Sequences with no stop codon anywhere on the line
+$ grep -v -E "TAA|TAG|TGA" orfs.txt
 ```
 
 ### Searching for Biological Motifs {#sec-searching-for-biological-motifs}
@@ -482,6 +497,9 @@ $ sed 's/\t/,/g' data.tsv > data.csv
 
 # Convert a DNA sequence to RNA: every T becomes U
 $ grep -v "^>" gene.fa | sed 's/T/U/g'
+
+# Anchors work too: add a prefix to the start of every line
+$ sed 's/^/sample_/' ids.txt
 ```
 
 The `/` character is only a convention. If your pattern or replacement itself contains slashes (file paths, for example), pick a different delimiter such as `|` or `#`, and `sed` will use whatever character follows the `s`:
@@ -616,6 +634,19 @@ $ awk '$1 == "chr21" && ($3 - $2) > 1000' peaks.bed
 
 # Genes on the minus strand (regex match on column 7)
 $ awk '$3 == "gene" && $7 ~ /-/' annotations.gff
+
+# Rows where column 2 is exactly "control"
+$ awk '$2 == "control"' samples.tsv
+
+# Number every line (like cat -n), then the whole line
+$ awk '{ print NR, $0 }' data.txt
+```
+
+Actions can also transform values on the way out—`awk` does arithmetic on any field that looks like a number:
+
+```bash
+# Print column 1 and column 2 converted from kb to bp
+$ awk '{ print $1, $2 * 1000 }' lengths.tsv
 ```
 
 ### Computing Sums and Means with `END` {#sec-awk-end}
@@ -680,6 +711,32 @@ A useful rule of thumb: **grep finds lines, sed edits text, awk works with colum
 | `awk` | Filtering and computing on columns | `awk 'pattern { action }' file` | `awk '$3 == "gene"' genes.gff` |
 
 : Comparing `grep`, `sed`, and `awk` {#tbl-grep-sed-awk}
+
+### Putting It Together {#sec-text-tools-together}
+
+The real power of these tools comes from combining them with the pipeline tools of @sec-files-pipes. Each of the following answers a question you are likely to ask of a real data file in a single line:
+
+```bash
+# How many distinct gene names are in column 1 (skipping the header)?
+$ tail -n +2 data.tsv | cut -f1 | sort | uniq | wc -l
+
+# The 20 rows with p < 0.05 (column 5) with the largest effect size (column 3)
+$ awk '$5 < 0.05' results.tsv | sort -k3,3 -nr | head -20
+
+# Convert a CSV to tab-delimited and keep three columns
+$ sed 's/,/\t/g' data.csv | cut -f1,3,5 > subset.tsv
+
+# How many times does each value in column 2 occur, most common first?
+$ cut -f2 data.tsv | sort | uniq -c | sort -nr
+
+# How many sequences per chromosome in a FASTA whose headers look like ">chr1:1000-2000"?
+$ grep "^>" sequences.fasta | cut -d":" -f1 | sort | uniq -c
+
+# Which feature types does a GFF file contain, and how many of each?
+$ grep -v "^#" annotations.gff | cut -f3 | sort | uniq -c
+```
+
+Notice the recurring shape: *select* lines (`grep`, `awk`, `tail -n +2`), *extract* a column (`cut`), *sort* so that identical values are adjacent, then *count* (`uniq -c`, `wc -l`). Once this idiom is in your fingers, most "how many of each?" questions take seconds.
 
 ## Summary {#sec-regex-summary}
 

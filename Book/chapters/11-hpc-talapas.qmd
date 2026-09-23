@@ -53,38 +53,7 @@ Key resources:
 
 Understanding the cluster architecture (@fig-talapas-architecture; compare the generic layout in @fig-cluster-architecture) helps you use it effectively.
 
-```{mermaid}
-%%| label: fig-talapas-architecture
-%%| echo: false
-%%| fig-cap: "Talapas cluster architecture showing login nodes, scheduler, and compute nodes"
-flowchart TB
-    U[Your Computer] --> SSH([SSH])
-    SSH --> L1[Login Node 1]
-    SSH --> L2[Login Node 2]
-    SSH --> L3[Login Node 3]
-    SSH --> L4[Login Node 4]
-    L1 --> S[SLURM Scheduler]
-    L2 --> S
-    L3 --> S
-    L4 --> S
-    S --> C1[CPU Nodes]
-    S --> C2[GPU Nodes]
-    S --> C3[High-Memory Nodes]
-    C1 --> ST[(Shared Storage)]
-    C2 --> ST
-    C3 --> ST
-    
-    style U fill:#e3f2fd,stroke:#333,stroke-width:2px
-    style L1 fill:#87ceeb,stroke:#333,stroke-width:2px
-    style L2 fill:#87ceeb,stroke:#333,stroke-width:2px
-    style L3 fill:#87ceeb,stroke:#333,stroke-width:2px
-    style L4 fill:#87ceeb,stroke:#333,stroke-width:2px
-    style S fill:#f9d71c,stroke:#333,stroke-width:2px
-    style C1 fill:#98fb98,stroke:#333,stroke-width:2px
-    style C2 fill:#ffa07a,stroke:#333,stroke-width:2px
-    style C3 fill:#dda0dd,stroke:#333,stroke-width:2px
-    style ST fill:#c8e6c9,stroke:#333,stroke-width:2px
-```
+![Talapas cluster architecture: SSH into one of four login nodes, submit work to the SLURM scheduler with `sbatch` or `srun`, and it runs on CPU, GPU, or high-memory ("fat") compute nodes that all share the same storage](../images/appendix_F_S03_talapas_architecture.svg){#fig-talapas-architecture fig-align="center" width="85%"}
 
 ### Login Nodes vs. Compute Nodes {#sec-login-nodes-vs-compute-nodes}
 
@@ -310,23 +279,9 @@ $ du -h --max-depth=1 /projects/myPIRG/myusername
 
 @fig-slurm-workflow traces a job from submission to completion.
 
-```{mermaid}
-%%| label: fig-slurm-workflow
-%%| echo: false
-%%| fig-cap: "SLURM job lifecycle from submission to completion"
-flowchart LR
-    A[Submit Job] --> SB([sbatch])
-    SB --> B[Queue]
-    B --> W([Wait])
-    W --> C[Run on Compute Node]
-    C --> CO([Complete])
-    CO --> D[Output Files]
-    
-    style A fill:#f9d71c,stroke:#333,stroke-width:2px
-    style B fill:#87ceeb,stroke:#333,stroke-width:2px
-    style C fill:#98fb98,stroke:#333,stroke-width:2px
-    style D fill:#ffa07a,stroke:#333,stroke-width:2px
-```
+![SLURM job lifecycle: `sbatch` places the job in the queue, it waits for resources, runs on a compute node, and leaves its output in files](../images/appendix_F_S10_slurm_workflow.svg){#fig-slurm-workflow fig-align="center" width="100%"}
+
+Three words recur in everything that follows. A **job** is a unit of work you submit. A **partition** is a queue with its own hardware and time limits (@tbl-partitions). An **account** is the PIRG your usage is charged to.
 
 SLURM is the dominant scheduler on academic and national-lab clusters worldwide, so everything in this chapter transfers to almost any cluster you will encounter. Its job is to decide *when*, *where*, and *with what resources* every job runs. The mental model is a request-and-grant transaction:
 

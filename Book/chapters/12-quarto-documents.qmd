@@ -19,7 +19,8 @@ After completing this chapter, you will be able to:
 - Include mathematical equations and figures
 - Run Python (and mixed R/Python) code in a Quarto document
 - Use callouts, tabsets, divs, and cross-references to structure a document
-- Render documents to multiple output formats
+- Cite sources from a BibTeX file
+- Render documents to multiple output formats from RStudio and the command line
 :::
 
 ## What is Quarto? {#sec-what-is-quarto}
@@ -159,6 +160,16 @@ In Quarto books, each chapter typically starts with a single `#` header, with su
    1. Sub-step
    2. Another sub-step
 
+**Task lists** add a checkbox to each item (rendered in HTML output):
+
+```markdown
+- [ ] Incomplete task
+- [x] Completed task
+```
+
+- [ ] Incomplete task
+- [x] Completed task
+
 ### Links and Images {#sec-links-and-images}
 
 ```markdown
@@ -166,10 +177,14 @@ In Quarto books, each chapter typically starts with a single `#` header, with su
 
 [Link with title](https://example.com "Hover text")
 
+<https://example.com>
+
 ![Image caption](images/figure.png)
 
 ![Caption with size](images/figure.png){width="50%"}
 ```
+
+A bare URL in angle brackets becomes a clickable link with the URL as its text.
 
 ### Blockquotes {#sec-blockquotes}
 
@@ -220,6 +235,33 @@ Create tables with pipes and hyphens (the result is @tbl-pipe-table-example):
 : A rendered pipe table with left, center, and right alignment {#tbl-pipe-table-example}
 
 The colons indicate alignment: `:---` left, `:---:` center, `---:` right.
+
+**Tables produced by code.** Most tables in a report come from a code chunk rather than being typed by hand. Give the chunk a label starting with `tbl-` and a `tbl-cap`, and the table becomes numbered and cross-referenceable exactly like a hand-written one:
+
+::: {.panel-tabset}
+### R
+
+````markdown
+```{{r}}
+#| label: tbl-mtcars-head
+#| tbl-cap: "First rows of the mtcars dataset"
+knitr::kable(head(mtcars[, 1:4]))
+```
+````
+
+### Python
+
+````markdown
+```{{python}}
+#| label: tbl-df-head
+#| tbl-cap: "First rows of the data frame"
+from IPython.display import Markdown
+Markdown(df.head(6).to_markdown())   # df is a pandas DataFrame
+```
+````
+:::
+
+`knitr::kable()` is the simplest R option; the **gt** package (used throughout @sec-tidy-data) produces publication-quality tables from the same pipeline.
 
 ### Horizontal Rules {#sec-horizontal-rules}
 
@@ -320,10 +362,13 @@ format:
     theme: cosmo
     toc: true
     toc-depth: 3
+    number-sections: true
     code-fold: true
 execute:
   echo: true
   warning: false
+  message: false
+bibliography: references.bib
 ---
 ```
 
@@ -331,14 +376,20 @@ execute:
 |:-------|:------------|
 | `title` | Document title |
 | `author` | Author name(s) |
-| `date` | Publication date (`today` for current date) |
+| `date` | Publication date (`today` for current date, or `"2025-01-15"`) |
 | `format` | Output format(s) |
 | `toc` | Include table of contents |
 | `toc-depth` | How many header levels in TOC |
+| `number-sections` | Number the section headings |
 | `code-fold` | Collapse code by default |
-| `execute` | Global code execution options |
+| `execute` | Global code execution options (`echo`, `warning`, `message`, ...) |
+| `bibliography` | BibTeX file for citations (@sec-quarto-citations) |
 
 : Common YAML header options {#tbl-yaml-options}
+
+::: {.callout-warning}
+YAML is indentation-sensitive: nested options must be indented with spaces (never tabs), and a colon must be followed by a space. An error such as "YAML parse exception" almost always means a mis-indented line or a missing quote around a value that contains a colon.
+:::
 
 ## Code Chunks {#sec-code-chunks}
 
@@ -349,7 +400,7 @@ Code chunks are the heart of Quarto's power—they let you embed executable code
 In Quarto, code chunks use this syntax:
 
 ````markdown
-```{r}
+```{{r}}
 # Your R code here
 mean(c(1, 2, 3, 4, 5))
 ```
@@ -368,7 +419,7 @@ mean(c(1, 2, 3, 4, 5))
 Control chunk behavior with special comments starting with `#|`:
 
 ````markdown
-```{r}
+```{{r}}
 #| label: calculate-mean
 #| echo: true
 #| eval: true
@@ -459,9 +510,30 @@ ggplot(mtcars, aes(x = wt, y = mpg)) +
 | `fig-height` | Height in inches |
 | `fig-align` | Alignment: left, center, right |
 | `out-width` | Output width (e.g., "80%") |
+| `fig-dpi` | Resolution of raster output (e.g., 300 for print) |
 | `fig-format` | Format: png, svg, pdf |
+| `fig-subcap` | List of sub-captions for a chunk that draws several plots |
+| `layout-ncol` | Number of columns to arrange multiple plots in |
 
 : Figure chunk options {#tbl-figure-options}
+
+**Subfigures.** A chunk that produces more than one plot can label each with `fig-subcap` and arrange them with `layout-ncol`; the panels are referenced as `@fig-label-1`, `@fig-label-2`, and so on:
+
+````markdown
+```{{r}}
+#| label: fig-distributions
+#| fig-cap: "Two simulated distributions"
+#| fig-subcap:
+#|   - "Normal"
+#|   - "Exponential"
+#| layout-ncol: 2
+
+hist(rnorm(1000))
+hist(rexp(1000))
+```
+
+Compare @fig-distributions-1 with @fig-distributions-2.
+````
 
 ## Python in Quarto {#sec-quarto-python}
 
@@ -485,7 +557,7 @@ jupyter: python3
 ### R
 
 ````markdown
-```{r}
+```{{r}}
 #| label: gc-r
 seqs <- c("ATGCGCGATATCG", "GGCCTTAA")
 gc <- function(s) {
@@ -499,7 +571,7 @@ round(sapply(seqs, gc), 3)
 ### Python
 
 ````markdown
-```{python}
+```{{python}}
 #| label: gc-py
 seqs = ["ATGCGCGATATCG", "GGCCTTAA"]
 def gc(s):
@@ -633,6 +705,18 @@ This provides helpful tips.
 This one starts folded. Collapsed callouts are handy for optional detail or exercise answers.
 :::
 
+The five types differ only in icon and color; pick by meaning (@tbl-callout-types).
+
+| Type | Color | Use for |
+|:-----|:------|:--------|
+| `note` | Blue | Supplementary information |
+| `tip` | Green | Helpful suggestions and shortcuts |
+| `warning` | Orange | Potential problems or common mistakes |
+| `important` | Red | Information the reader must not miss |
+| `caution` | Red | Dangerous or irreversible operations |
+
+: Quarto callout types {#tbl-callout-types}
+
 A callout is a **fenced div**: a line of three or more colons with the class in braces, the content, and a closing line of colons. The opening and closing fences must each sit on their own line with a blank line around the block, or the div will not close and the rest of the page renders inside the box.
 
 ## Tabsets, Divs, and Spans {#sec-quarto-tabsets-divs}
@@ -645,13 +729,13 @@ The same `:::` fence syntax gives you several other structures.
 ::: {.panel-tabset}
 ### R
 
-```{r}
+```{{r}}
 mean(1:10)
 ```
 
 ### Python
 
-```{python}
+```{{python}}
 sum(range(1, 11)) / 10
 ```
 :::
@@ -711,7 +795,20 @@ As shown in @sec-results, the treatment effect...
 
 As discussed in @sec-quarto-documents, Quarto enables reproducible documents.
 
-The label *prefix* determines the reference type: `fig-` for figures, `tbl-` for tables, `sec-` for sections, `eq-` for equations, and `lst-` for code listings. A code chunk becomes a referenceable figure when its `label` starts with `fig-` *and* it has a `fig-cap`; Markdown tables take their id from the caption line `: Caption {#tbl-id}`. Quarto numbers everything automatically, so inserting a figure renumbers the rest.
+The label *prefix* determines the reference type (@tbl-crossref-prefixes). A code chunk becomes a referenceable figure when its `label` starts with `fig-` *and* it has a `fig-cap`; Markdown tables take their id from the caption line `: Caption {#tbl-id}`. Quarto numbers everything automatically, so inserting a figure renumbers the rest.
+
+| Type | Prefix | Where the id goes | Reference |
+|:-----|:-------|:------------------|:----------|
+| Figure | `fig-` | `#| label: fig-name` or `![...](f.png){#fig-name}` | `@fig-name` |
+| Subfigure | `fig-` | `fig-subcap` panels of `fig-name` | `@fig-name-1` |
+| Table | `tbl-` | `#| label: tbl-name` or `: Caption {#tbl-name}` | `@tbl-name` |
+| Section | `sec-` | `## Heading {#sec-name}` | `@sec-name` |
+| Equation | `eq-` | `$$ ... $$ {#eq-name}` | `@eq-name` |
+| Code listing | `lst-` | `#| label: lst-name` with `lst-cap` | `@lst-name` |
+
+: Cross-reference prefixes {#tbl-crossref-prefixes}
+
+Quarto also recognises `thm-`, `lem-`, `def-`, `exm-`, and `exr-` for theorem-style blocks (`::: {#thm-clt}`). Capitalize the prefix (`@Fig-name`) to begin a sentence with "Figure" rather than "fig."
 
 ### Equations {#sec-equations}
 
@@ -723,12 +820,52 @@ $$ {#eq-nb}
 As @eq-nb states, counts follow a negative binomial.
 ```
 
+The label must sit on the same line as the closing `$$`, separated by a space. Only labelled equations are numbered. @sec-latex-numbered-aligned shows how to align a multi-line derivation under one number.
+
+## Citations {#sec-quarto-citations}
+
+Quarto handles references the same way it handles cross-references: each source has a key, and you cite the key with `@`. The keys live in a **BibTeX** file (`.bib`), a plain-text database in which each entry looks like this:
+
+```bibtex
+@article{knuth1984literate,
+  author  = {Knuth, Donald E.},
+  title   = {Literate Programming},
+  journal = {The Computer Journal},
+  volume  = {27},
+  number  = {2},
+  pages   = {97--111},
+  year    = {1984}
+}
+```
+
+Name the file in the YAML header, then cite by key:
+
+```markdown
+---
+title: "Report"
+bibliography: references.bib
+---
+
+Knuth introduced literate programming [@knuth1984literate].
+@knuth1984literate argued that programs should be written for people.
+Several authors agree [@knuth1984literate; @xie2018r].
+A page reference [@knuth1984literate, p. 99] or a prefix [see @knuth1984literate].
+```
+
+Bracketed citations render in parentheses, "(Knuth 1984)"; a bare `@key` renders in the running text, "Knuth (1984)". Quarto compiles a reference list at the end of the document automatically, or wherever you place a `::: {#refs}` div. The default style is Chicago author-date; add `csl: apa.csl` (any style file from the [CSL repository](https://github.com/citation-style-language/styles)) to change it.
+
+::: {.callout-tip}
+Reference managers such as Zotero export BibTeX directly, and Google Scholar's "Cite" button offers a BibTeX entry for any paper. Keep one `references.bib` per project and let it grow.
+:::
+
 ## Rendering Documents {#sec-rendering}
 
 ### From RStudio {#sec-from-rstudio}
 
 - Click the **Render** button, or
 - Use the keyboard shortcut: `Ctrl+Shift+K` (Windows/Linux) or `Cmd+Shift+K` (Mac)
+
+While writing, `Ctrl+Alt+I` / `Cmd+Option+I` inserts a new code chunk and `Ctrl+Shift+Enter` / `Cmd+Shift+Enter` runs the current chunk without rendering the whole document (more in @sec-appendix-shortcuts).
 
 ### From Command Line {#sec-from-command-line}
 
@@ -751,7 +888,28 @@ For interactive editing:
 $ quarto preview document.qmd
 ```
 
-This opens a browser window that automatically updates as you edit.
+This opens a browser window that automatically updates as you edit. `--port 8080` fixes the port and `--no-browser` prints the URL instead of opening a window (useful on a remote machine).
+
+### The Quarto Command Line {#sec-quarto-cli}
+
+The `quarto` program has a handful of subcommands you will use regularly (@tbl-quarto-commands).
+
+| Command | What it does |
+|:--------|:-------------|
+| `quarto render file.qmd` | Render to the document's default format |
+| `quarto render file.qmd --to pdf` | Render to one format (`html`, `pdf`, `docx`, `revealjs`, ...) |
+| `quarto render file.qmd --to all` | Render every format listed in the YAML |
+| `quarto render file.qmd --output out.html` | Choose the output file name |
+| `quarto render file.qmd -P n:100` | Set a document parameter (`params:` in YAML) |
+| `quarto render` | Render the whole project (`_quarto.yml`) |
+| `quarto preview file.qmd` | Live preview that re-renders on save |
+| `quarto create project` | Scaffold a new project, website, or book |
+| `quarto check` | Verify the installation (R, Python/Jupyter, LaTeX) |
+| `quarto install tinytex` | Install a minimal LaTeX so PDF rendering works |
+| `quarto publish gh-pages` | Publish the rendered site (see @sec-github-pages) |
+| `quarto --version` | Print the installed version |
+
+: Common Quarto command-line commands {#tbl-quarto-commands}
 
 ## Multiple Output Formats {#sec-output-formats}
 
@@ -772,8 +930,79 @@ format:
 Then render all formats:
 
 ```bash
-$ quarto render document.qmd
+$ quarto render document.qmd --to all
 ```
+
+Without `--to all`, `quarto render` produces only the first format listed. Each format accepts its own options, nested under its name.
+
+### HTML Options {#sec-html-output}
+
+HTML is the richest target: it supports folding code, tabsets, interactive figures, and a floating table of contents.
+
+```yaml
+format:
+  html:
+    toc: true
+    toc-depth: 3
+    toc-location: left
+    number-sections: true
+    code-fold: true
+    code-tools: true
+    theme: cosmo
+    embed-resources: true
+```
+
+| Option | Description | Values |
+|:-------|:------------|:-------|
+| `toc-location` | Where the TOC sits | `left`, `right`, `body` |
+| `code-fold` | Collapse code behind a toggle | `true`, `false`, `show` |
+| `code-tools` | Menu to view/copy the full source | `true`, `false` |
+| `theme` | Bootswatch visual theme | `default`, `cosmo`, `flatly`, `darkly`, ... |
+| `embed-resources` | Bundle images, CSS, and JS into one `.html` file | `true`, `false` |
+
+: Common HTML format options {#tbl-html-options}
+
+`embed-resources: true` is the option to remember when you email a report: without it the HTML file depends on a folder of supporting files that must travel with it.
+
+### PDF Options {#sec-pdf-output}
+
+PDF output passes through LaTeX (@sec-latex-basics), so a LaTeX installation is required (`quarto install tinytex` provides a small one).
+
+```yaml
+format:
+  pdf:
+    documentclass: article
+    geometry:
+      - margin=1in
+    fontsize: 11pt
+    number-sections: true
+    colorlinks: true
+    keep-tex: false
+```
+
+| Option | Description | Values |
+|:-------|:------------|:-------|
+| `documentclass` | LaTeX document class | `article`, `report`, `book` |
+| `geometry` | Page size and margins | `margin=1in`, `letterpaper`, ... |
+| `fontsize` | Body text size | `10pt`, `11pt`, `12pt` |
+| `colorlinks` | Colored rather than boxed hyperlinks | `true`, `false` |
+| `keep-tex` | Keep the intermediate `.tex` file for debugging | `true`, `false` |
+
+: Common PDF format options {#tbl-pdf-options}
+
+### Word Options {#sec-word-output}
+
+Word output is the format collaborators without Quarto can edit. A **reference document** supplies the styles (fonts, heading sizes, margins) that the generated `.docx` inherits, so a journal's or lab's template can be applied without touching the source:
+
+```yaml
+format:
+  docx:
+    toc: true
+    number-sections: true
+    reference-doc: lab-template.docx
+```
+
+Run `quarto pandoc -o custom-reference.docx --print-default-data-file reference.docx` to obtain a starting template, edit its styles in Word, and point `reference-doc` at the result.
 
 ## Project Organization {#sec-quarto-projects}
 
@@ -840,7 +1069,7 @@ Quarto transforms how we communicate scientific work:
 - **Python chunks** run through Jupyter (or reticulate), and Quarto renders `.ipynb` notebooks directly
 - **Callouts, tabsets, and divs** structure a document with the same `:::` fence syntax
 - **Multiple formats** serve different audiences from one source
-- **Cross-references** create professional, navigable documents
+- **Cross-references and citations** create professional, navigable documents from `@`-keys and a `.bib` file
 
 The investment in learning Quarto pays dividends every time you write a report, prepare a presentation, or publish research. Your future self (and your collaborators) will thank you for the reproducibility.
 
@@ -880,7 +1109,15 @@ The investment in learning Quarto pays dividends every time you write a report, 
 **Exercise 4: Multi-Format Output**
 
 1. Configure your document to render to both HTML and PDF
-2. Render both versions
+2. Render both versions with `quarto render --to all`
 3. Note any differences in how content appears
 4. Adjust settings to optimize for each format
+
+**Exercise 5: Tables, Cross-References, and Citations**
+
+1. Type a small pipe table by hand and give it a caption with a `{#tbl-...}` id
+2. Produce a second table from code (`knitr::kable(head(iris, 5))` or `pandas`) with a `tbl-` label and `tbl-cap`
+3. Refer to both tables and to one figure from the text with `@`
+4. Create a `references.bib` with two entries, add `bibliography:` to the YAML, and cite both sources (one in brackets, one in running text)
+5. Render and check that the numbering and reference list are generated automatically
 :::

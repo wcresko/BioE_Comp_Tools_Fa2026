@@ -60,6 +60,21 @@ set.seed(2026)
 You do not have to choose. Most computational biologists use **both**: R for statistics and figures, Python for pipelines, images and machine learning. This lecture shows every idea in both languages - use the tabs.
 :::
 
+## Your IDE: the four panes
+
+![](images/RStudio_Screenshot.png){fig-align="center" width="70%"}
+
+| Pane                     | RStudio location | Positron equivalent            | Purpose                               |
+|:-------------------------|:-----------------|:-------------------------------|:--------------------------------------|
+| **Code editor**          | Top-left         | Editor tabs                    | Write/edit scripts and `.qmd` files   |
+| **Console**              | Bottom-left      | Console (R *or* Python)        | Interactive session; run one line     |
+| **Environment**          | Top-right        | Variables                      | Objects you have created, history     |
+| **Files / Plots / Help** | Bottom-right     | Explorer, Plots, Help, Data Explorer | Navigate files, view plots, read docs |
+
+::: callout-tip
+`R` and `Python` are the languages; **RStudio**, **Positron** and **VS Code** are the IDEs you write them in. Write code in the *editor* so it is saved, and send lines to the *console* with `Cmd/Ctrl-Enter`. Customize the RStudio layout in Tools → Global Options → Pane Layout.
+:::
+
 ## R vs Python: same ideas, different syntax
 
 | Idea | R | Python |
@@ -72,7 +87,7 @@ You do not have to choose. Most computational biologists use **both**: R for sta
 | Table of data | `data.frame` / tibble | `pandas` `DataFrame` |
 | Load a package | `library(dplyr)` | `import pandas as pd` |
 | Install a package | `install.packages("dplyr")` | `pip install pandas` (or `uv`, `conda`) |
-| Chain steps | pipe `x |> f() |> g()` | method chaining `x.f().g()` |
+| Chain steps | pipe `x \|> f() \|> g()` | method chaining `x.f().g()` |
 | Blocks | curly braces `{ }` | indentation (4 spaces) |
 | Missing value | `NA` | `None`, `float("nan")`, `pd.NA` |
 | Help | `?mean` | `help(statistics.mean)` or `mean?` in Jupyter |
@@ -646,6 +661,10 @@ print(seq_square_new)
 
 -   Integer and double vectors are known collectively as numeric vectors.
 -   In `R` numbers are doubles by default.
+
+## The hierarchy of R vector types
+
+![Atomic vectors (logical, numeric, character) and the augmented types built on them (factors, dates, date-times)](images/week_02_S12_r_vector_types_hierarchy.svg){fig-align="center" width="85%"}
 
 ## Types of vectors of data
 
@@ -1335,6 +1354,131 @@ When an object surprises you, run `str()` (R) or `.info()` / `type()` (Python) o
 :::
 :::
 
+## Logical operators and filtering a vector
+
+::::: columns
+::: {.column width="55%"}
+| Operator     | Meaning           | R example           | Python example        |
+|:-------------|:------------------|:--------------------|:----------------------|
+| `==`, `!=`   | equal / not equal | `x == 5`            | `x == 5`              |
+| `<`, `>`, `<=`, `>=` | comparisons | `x < 10`          | `x < 10`              |
+| and          | both true         | `x > 0 & x < 10`    | `(x > 0) & (x < 10)`  |
+| or           | either true       | `x < 0 \| x > 10`   | `(x < 0) \| (x > 10)` |
+| not          | negation          | `!(x > 5)`          | `~(x > 5)`            |
+| membership   | is element of     | `x %in% c(1, 2, 3)` | `np.isin(x, [1, 2, 3])` |
+:::
+
+::: {.column width="45%"}
+![](images/week_02_S14_boolean_set_operations_venn.svg){fig-align="center" width="100%"}
+:::
+:::::
+
+::: panel-tabset
+### R
+
+```{r}
+#| label: lec07-logical-filter-r
+#| echo: true
+#| eval: true
+
+x <- c(1, 5, 10, 15, 20)
+x > 10          # a logical vector, one TRUE/FALSE per element
+x[x > 10]       # keep only the elements where the condition is TRUE
+```
+
+### Python
+
+```{python}
+#| label: lec07-logical-filter-py
+#| echo: true
+#| eval: false
+
+import numpy as np
+x = np.array([1, 5, 10, 15, 20])
+x > 10          # array([False, False, False,  True,  True])
+x[x > 10]       # array([15, 20])  - boolean indexing, same idea as R
+```
+:::
+
+## Converting types and handling missing values
+
+::: panel-tabset
+### R
+
+| Task                       | Code                        | Result                  |
+|:---------------------------|:----------------------------|:------------------------|
+| Text to number             | `as.numeric("42")`          | `42`                    |
+| Text that isn't a number   | `as.numeric("hello")`       | `NA` (with a warning)   |
+| Number to text             | `as.character(42)`          | `"42"`                  |
+| Number to logical          | `as.logical(1)`             | `TRUE`                  |
+| Check for missing          | `is.na(x)`                  | logical vector          |
+| **Don't do this!**         | `x == NA`                   | always `NA`             |
+| Mean ignoring missing      | `mean(x, na.rm = TRUE)`     | the mean of the rest    |
+
+::: callout-warning
+`as.numeric()` on a **factor** returns the integer level codes, not the labels - use `as.numeric(as.character(x))`. And always test for missing values with `is.na()`, never `== NA`.
+:::
+
+### Python
+
+| Task                       | Code                              | Result                     |
+|:---------------------------|:----------------------------------|:---------------------------|
+| Text to number             | `float("42")`                     | `42.0`                     |
+| Text that isn't a number   | `float("hello")`                  | `ValueError` (an error, not `NaN`) |
+| Number to text             | `str(42)`                         | `"42"`                     |
+| Whole column to number     | `pd.to_numeric(col, errors="coerce")` | bad values become `NaN` |
+| Check for missing          | `pd.isna(x)` / `col.isna()`       | boolean array              |
+| **Don't do this!**         | `x == np.nan`                     | always `False`             |
+| Mean ignoring missing      | `col.mean()` (pandas skips `NaN`) / `np.nanmean(x)` | the mean of the rest |
+:::
+
+## Reading error messages
+
+::: panel-tabset
+### R
+
+| Error message             | Meaning                 | Fix                                        |
+|:--------------------------|:------------------------|:-------------------------------------------|
+| `object 'x' not found`    | Variable doesn't exist  | Check spelling; run the line that creates it |
+| `could not find function` | Package not loaded      | `library()` the package, or check spelling |
+| `unexpected ')'` / `unexpected symbol` | Mismatched brackets or quotes | Count opening/closing brackets |
+| `non-numeric argument to binary operator` | Wrong data type | Check with `class()` or `str()`      |
+| `cannot open file ... No such file` | Wrong working directory or path | `getwd()`, `list.files()`, fix the path |
+
+### Python
+
+| Error message             | Meaning                 | Fix                                        |
+|:--------------------------|:------------------------|:-------------------------------------------|
+| `NameError: name 'x' is not defined` | Variable doesn't exist | Check spelling; run the cell that creates it |
+| `ModuleNotFoundError`     | Package not installed *in this environment* | `pip install`, check `which python3` |
+| `SyntaxError` / `IndentationError` | Missing `:`, bracket, or bad indentation | Look at the line **above** the arrow too |
+| `TypeError: unsupported operand` | Wrong data type   | Check with `type()` or `.dtypes`           |
+| `FileNotFoundError`       | Wrong working directory or path | `Path.cwd()`, fix the path         |
+:::
+
+::: callout-tip
+Read error messages carefully - R reports the failing call, Python reports a **traceback** where the *last* line tells you what went wrong. Then paste the exact message into a search engine or an AI assistant.
+:::
+
+## The tidyverse family of packages
+
+![](images/week_02_S08_tidyverse_packages.jpeg){fig-align="center" width="70%"}
+
+::: {.aside}
+Source: [tidyverse.org](https://www.tidyverse.org/)
+:::
+
+| Package   | Purpose                                                   | pandas / Python equivalent      |
+|:----------|:----------------------------------------------------------|:--------------------------------|
+| `dplyr`   | Data manipulation (`filter`, `select`, `mutate`, `summarise`) | pandas methods              |
+| `ggplot2` | Data visualization                                        | `matplotlib`, `seaborn`, `plotnine` |
+| `tidyr`   | Reshaping data (`pivot_longer`, `pivot_wider`, `separate`) | `melt`, `pivot`                |
+| `readr`   | Fast reading of CSV, TSV files                            | `pd.read_csv`                   |
+| `stringr` | String manipulation                                       | `str` methods, `re`             |
+| `purrr`   | Functional programming tools (`map`)                      | list comprehensions             |
+
+Loading `tidyverse` loads all of these at once (plus `tibble` and `forcats`).
+
 ## A taste of the tidyverse: the pipe `|>`
 
 ::: panel-tabset
@@ -1443,6 +1587,33 @@ from plotnine import ggplot, aes, geom_boxplot, geom_jitter, labs, theme_minimal
 -   Same pattern for every plot type - learn it once; `plotnine` brings exactly this grammar to Python, `seaborn` is the more common Python choice
 -   More in the course book's [R Programming chapter](../book/chapters/07-r-programming.html) and [R Command Reference](../book/chapters/appendix-r.html)
 :::
+
+## The grammar of graphics: a plot is a stack of layers
+
+![](images/week_02_S23_grammar_of_graphics_layers.jpeg){fig-align="center" width="80%"}
+
+::: {.aside}
+Source: Leland Wilkinson, *The Grammar of Graphics*, 1999
+:::
+
+## Common `ggplot2` geoms
+
+| Geom               | Purpose      | Data type               | seaborn equivalent       |
+|:-------------------|:-------------|:------------------------|:-------------------------|
+| `geom_point()`     | Scatterplots | Two continuous          | `sns.scatterplot()`      |
+| `geom_line()`      | Line plots   | Continuous over ordered | `sns.lineplot()`         |
+| `geom_bar()`       | Bar charts   | Categorical counts      | `sns.countplot()`        |
+| `geom_histogram()` | Histograms   | Single continuous       | `sns.histplot()`         |
+| `geom_boxplot()`   | Boxplots     | Continuous by category  | `sns.boxplot()`          |
+| `geom_smooth()`    | Trend lines  | Two continuous          | `sns.regplot()`          |
+
+::: callout-tip
+`facet_wrap(~ group)` splits any plot into one panel per group, and `ggsave("figure.pdf")` writes the last plot to a file. Data-visualization mechanics get a full chapter in the [course book](../book/chapters/09-data-visualization.html).
+:::
+
+## Choosing the right kind of plot
+
+![Start from the question and the type of data you have](images/week_02_S32_flow_chart_for_choosing_data_v.svg){fig-align="center" width="90%"}
 
 ## Key Takeaways
 

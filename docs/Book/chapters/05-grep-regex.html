@@ -604,6 +604,7 @@ div.csl-indent {
   <li><a href="#sec-awk-ofs" id="toc-sec-awk-ofs" class="nav-link" data-scroll-target="#sec-awk-ofs">Controlling Output: <code>OFS</code></a></li>
   <li><a href="#sec-awk-mean-per-treatment" id="toc-sec-awk-mean-per-treatment" class="nav-link" data-scroll-target="#sec-awk-mean-per-treatment">A Bioengineering Example: Mean per Treatment</a></li>
   <li><a href="#sec-grep-choosing-the-right-tool" id="toc-sec-grep-choosing-the-right-tool" class="nav-link" data-scroll-target="#sec-grep-choosing-the-right-tool">Choosing the Right Tool</a></li>
+  <li><a href="#sec-text-tools-together" id="toc-sec-text-tools-together" class="nav-link" data-scroll-target="#sec-text-tools-together">Putting It Together</a></li>
   </ul>
 </li>
   <li><a href="#sec-regex-summary" id="toc-sec-regex-summary" class="nav-link" data-scroll-target="#sec-regex-summary"><span class="header-section-number">7.11</span> Summary</a></li>
@@ -870,7 +871,11 @@ Note
 <span id="cb5-8"><a href="#cb5-8"></a><span class="ex">$</span> grep <span class="st">"T\{2,4\}"</span> sequence.txt</span>
 <span id="cb5-9"><a href="#cb5-9"></a></span>
 <span id="cb5-10"><a href="#cb5-10"></a><span class="co"># At least three G's</span></span>
-<span id="cb5-11"><a href="#cb5-11"></a><span class="ex">$</span> grep <span class="st">"G\{3,\}"</span> sequence.txt</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb5-11"><a href="#cb5-11"></a><span class="ex">$</span> grep <span class="st">"G\{3,\}"</span> sequence.txt</span>
+<span id="cb5-12"><a href="#cb5-12"></a></span>
+<span id="cb5-13"><a href="#cb5-13"></a><span class="co"># G followed by zero or more C's: matches "G", "GC", "GCC", ...</span></span>
+<span id="cb5-14"><a href="#cb5-14"></a><span class="ex">$</span> grep <span class="st">"GC*"</span> sequence.txt</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Read the last example carefully: a quantifier applies only to the single character (or group) immediately before it. <code>GC*</code> does <em>not</em> mean “GC repeated”; it means “one G, then any number of C’s,” so it matches every line containing a G. To repeat the pair, group it: <code>\(GC\)*</code> in basic regex, or <code>(GC)*</code> with <code>-E</code>.</p>
 <div class="callout callout-style-default callout-warning callout-titled">
 <div class="callout-header d-flex align-content-center">
 <div class="callout-icon-container">
@@ -951,7 +956,10 @@ Table&nbsp;7.3: Extended regular expression metacharacters
 <span id="cb8-2"><a href="#cb8-2"></a><span class="ex">$</span> grep <span class="at">-E</span> <span class="st">"A+T+"</span> sequence.txt</span>
 <span id="cb8-3"><a href="#cb8-3"></a></span>
 <span id="cb8-4"><a href="#cb8-4"></a><span class="co"># One or more digits</span></span>
-<span id="cb8-5"><a href="#cb8-5"></a><span class="ex">$</span> grep <span class="at">-E</span> <span class="st">"[0-9]+"</span> data.txt</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb8-5"><a href="#cb8-5"></a><span class="ex">$</span> grep <span class="at">-E</span> <span class="st">"[0-9]+"</span> data.txt</span>
+<span id="cb8-6"><a href="#cb8-6"></a></span>
+<span id="cb8-7"><a href="#cb8-7"></a><span class="co"># Runs of at least 20 DNA bases (e.g. primer sequences)</span></span>
+<span id="cb8-8"><a href="#cb8-8"></a><span class="ex">$</span> grep <span class="at">-E</span> <span class="st">"[ACGT]{20,}"</span> primers.txt</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </section></section><section id="sec-regex-bioinformatics" class="level2" data-number="7.5"><h2 data-number="7.5" class="anchored" data-anchor-id="sec-regex-bioinformatics">
 <span class="header-section-number">7.5</span> Practical Bioinformatics Examples</h2>
 <section id="sec-working-with-fasta-files" class="level3"><h3 class="anchored" data-anchor-id="sec-working-with-fasta-files">Working with FASTA Files</h3>
@@ -965,7 +973,14 @@ Table&nbsp;7.3: Extended regular expression metacharacters
 <span id="cb9-8"><a href="#cb9-8"></a><span class="ex">$</span> grep <span class="at">-i</span> <span class="st">"kinase"</span> sequences.fa</span>
 <span id="cb9-9"><a href="#cb9-9"></a></span>
 <span id="cb9-10"><a href="#cb9-10"></a><span class="co"># Find sequences by organism</span></span>
-<span id="cb9-11"><a href="#cb9-11"></a><span class="ex">$</span> grep <span class="at">-E</span> <span class="st">"^&gt;.*Homo sapiens"</span> proteins.fa</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb9-11"><a href="#cb9-11"></a><span class="ex">$</span> grep <span class="at">-E</span> <span class="st">"^&gt;.*Homo sapiens"</span> proteins.fa</span>
+<span id="cb9-12"><a href="#cb9-12"></a></span>
+<span id="cb9-13"><a href="#cb9-13"></a><span class="co"># UniProt headers look like "&gt;sp|P69905|HBA_HUMAN ..."; match the</span></span>
+<span id="cb9-14"><a href="#cb9-14"></a><span class="co"># accession field (the | is a literal pipe, so it must be escaped)</span></span>
+<span id="cb9-15"><a href="#cb9-15"></a><span class="ex">$</span> grep <span class="at">-E</span> <span class="st">"^&gt;sp\|[A-Z0-9]+\|"</span> uniprot.fasta</span>
+<span id="cb9-16"><a href="#cb9-16"></a></span>
+<span id="cb9-17"><a href="#cb9-17"></a><span class="co"># Sequences with no stop codon anywhere on the line</span></span>
+<span id="cb9-18"><a href="#cb9-18"></a><span class="ex">$</span> grep <span class="at">-v</span> <span class="at">-E</span> <span class="st">"TAA|TAG|TGA"</span> orfs.txt</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </section><section id="sec-searching-for-biological-motifs" class="level3"><h3 class="anchored" data-anchor-id="sec-searching-for-biological-motifs">Searching for Biological Motifs</h3>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb10"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb10-1"><a href="#cb10-1"></a><span class="co"># Find restriction enzyme sites</span></span>
 <span id="cb10-2"><a href="#cb10-2"></a><span class="ex">$</span> grep <span class="at">-E</span> <span class="st">"GAATTC"</span> genome.fa         <span class="co"># EcoRI</span></span>
@@ -1207,7 +1222,10 @@ Table&nbsp;7.4: Common regular expression patterns for bioinformatics
 <span id="cb22-2"><a href="#cb22-2"></a><span class="ex">$</span> sed <span class="st">'s/\t/,/g'</span> data.tsv <span class="op">&gt;</span> data.csv</span>
 <span id="cb22-3"><a href="#cb22-3"></a></span>
 <span id="cb22-4"><a href="#cb22-4"></a><span class="co"># Convert a DNA sequence to RNA: every T becomes U</span></span>
-<span id="cb22-5"><a href="#cb22-5"></a><span class="ex">$</span> grep <span class="at">-v</span> <span class="st">"^&gt;"</span> gene.fa <span class="kw">|</span> <span class="fu">sed</span> <span class="st">'s/T/U/g'</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb22-5"><a href="#cb22-5"></a><span class="ex">$</span> grep <span class="at">-v</span> <span class="st">"^&gt;"</span> gene.fa <span class="kw">|</span> <span class="fu">sed</span> <span class="st">'s/T/U/g'</span></span>
+<span id="cb22-6"><a href="#cb22-6"></a></span>
+<span id="cb22-7"><a href="#cb22-7"></a><span class="co"># Anchors work too: add a prefix to the start of every line</span></span>
+<span id="cb22-8"><a href="#cb22-8"></a><span class="ex">$</span> sed <span class="st">'s/^/sample_/'</span> ids.txt</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>The <code>/</code> character is only a convention. If your pattern or replacement itself contains slashes (file paths, for example), pick a different delimiter such as <code>|</code> or <code>#</code>, and <code>sed</code> will use whatever character follows the <code>s</code>:</p>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb23"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb23-1"><a href="#cb23-1"></a><span class="co"># Rewrite a directory prefix without escaping every slash</span></span>
 <span id="cb23-2"><a href="#cb23-2"></a><span class="ex">$</span> sed <span class="st">'s|/home/old_user/|/home/new_user/|g'</span> paths.txt</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
@@ -1313,26 +1331,35 @@ Table&nbsp;7.4: Common regular expression patterns for bioinformatics
 <span id="cb31-8"><a href="#cb31-8"></a><span class="ex">$</span> awk <span class="st">'$1 == "chr21" &amp;&amp; ($3 - $2) &gt; 1000'</span> peaks.bed</span>
 <span id="cb31-9"><a href="#cb31-9"></a></span>
 <span id="cb31-10"><a href="#cb31-10"></a><span class="co"># Genes on the minus strand (regex match on column 7)</span></span>
-<span id="cb31-11"><a href="#cb31-11"></a><span class="ex">$</span> awk <span class="st">'$3 == "gene" &amp;&amp; $7 ~ /-/'</span> annotations.gff</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb31-11"><a href="#cb31-11"></a><span class="ex">$</span> awk <span class="st">'$3 == "gene" &amp;&amp; $7 ~ /-/'</span> annotations.gff</span>
+<span id="cb31-12"><a href="#cb31-12"></a></span>
+<span id="cb31-13"><a href="#cb31-13"></a><span class="co"># Rows where column 2 is exactly "control"</span></span>
+<span id="cb31-14"><a href="#cb31-14"></a><span class="ex">$</span> awk <span class="st">'$2 == "control"'</span> samples.tsv</span>
+<span id="cb31-15"><a href="#cb31-15"></a></span>
+<span id="cb31-16"><a href="#cb31-16"></a><span class="co"># Number every line (like cat -n), then the whole line</span></span>
+<span id="cb31-17"><a href="#cb31-17"></a><span class="ex">$</span> awk <span class="st">'{ print NR, $0 }'</span> data.txt</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Actions can also transform values on the way out—<code>awk</code> does arithmetic on any field that looks like a number:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb32"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb32-1"><a href="#cb32-1"></a><span class="co"># Print column 1 and column 2 converted from kb to bp</span></span>
+<span id="cb32-2"><a href="#cb32-2"></a><span class="ex">$</span> awk <span class="st">'{ print $1, $2 * 1000 }'</span> lengths.tsv</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </section><section id="sec-awk-end" class="level3"><h3 class="anchored" data-anchor-id="sec-awk-end">Computing Sums and Means with <code>END</code>
 </h3>
 <p>Two special patterns run outside the line-by-line loop: <code>BEGIN</code> before any input is read and <code>END</code> after the last line. <code>END</code> is where you report a total that you accumulated along the way. Variables spring into existence at first use and start at zero:</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb32"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb32-1"><a href="#cb32-1"></a><span class="co"># Total length of all BED intervals</span></span>
-<span id="cb32-2"><a href="#cb32-2"></a><span class="ex">$</span> awk <span class="st">'{ total += $3 - $2 } END { print total }'</span> peaks.bed</span>
-<span id="cb32-3"><a href="#cb32-3"></a></span>
-<span id="cb32-4"><a href="#cb32-4"></a><span class="co"># Mean of column 4, skipping the header</span></span>
-<span id="cb32-5"><a href="#cb32-5"></a><span class="ex">$</span> awk <span class="at">-F</span><span class="st">','</span> <span class="st">'NR &gt; 1 { sum += $4; n++ } END { print sum / n }'</span> od600_readings.csv</span>
-<span id="cb32-6"><a href="#cb32-6"></a></span>
-<span id="cb32-7"><a href="#cb32-7"></a><span class="co"># Count gene features (equivalent to grep -c but by column)</span></span>
-<span id="cb32-8"><a href="#cb32-8"></a><span class="ex">$</span> awk <span class="st">'$3 == "gene" { n++ } END { print n }'</span> annotations.gff</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb33"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb33-1"><a href="#cb33-1"></a><span class="co"># Total length of all BED intervals</span></span>
+<span id="cb33-2"><a href="#cb33-2"></a><span class="ex">$</span> awk <span class="st">'{ total += $3 - $2 } END { print total }'</span> peaks.bed</span>
+<span id="cb33-3"><a href="#cb33-3"></a></span>
+<span id="cb33-4"><a href="#cb33-4"></a><span class="co"># Mean of column 4, skipping the header</span></span>
+<span id="cb33-5"><a href="#cb33-5"></a><span class="ex">$</span> awk <span class="at">-F</span><span class="st">','</span> <span class="st">'NR &gt; 1 { sum += $4; n++ } END { print sum / n }'</span> od600_readings.csv</span>
+<span id="cb33-6"><a href="#cb33-6"></a></span>
+<span id="cb33-7"><a href="#cb33-7"></a><span class="co"># Count gene features (equivalent to grep -c but by column)</span></span>
+<span id="cb33-8"><a href="#cb33-8"></a><span class="ex">$</span> awk <span class="st">'$3 == "gene" { n++ } END { print n }'</span> annotations.gff</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </section><section id="sec-awk-ofs" class="level3"><h3 class="anchored" data-anchor-id="sec-awk-ofs">Controlling Output: <code>OFS</code>
 </h3>
 <p>When you <code>print</code> several fields separated by commas, <code>awk</code> joins them with the <em>output field separator</em>, <code>OFS</code>, which defaults to a single space. Set it in a <code>BEGIN</code> block (or with <code>-v OFS=...</code>) to produce tab- or comma-separated output:</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb33"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb33-1"><a href="#cb33-1"></a><span class="co"># Convert a GFF to a simple three-column TSV</span></span>
-<span id="cb33-2"><a href="#cb33-2"></a><span class="ex">$</span> awk <span class="st">'BEGIN { OFS = "\t" } $3 == "gene" { print $1, $4, $5 }'</span> annotations.gff</span>
-<span id="cb33-3"><a href="#cb33-3"></a></span>
-<span id="cb33-4"><a href="#cb33-4"></a><span class="co"># Convert TSV to CSV (rebuilding $0 forces awk to apply the new OFS)</span></span>
-<span id="cb33-5"><a href="#cb33-5"></a><span class="ex">$</span> awk <span class="at">-F</span><span class="st">'\t'</span> <span class="at">-v</span> OFS=<span class="st">','</span> <span class="st">'{ $1 = $1; print }'</span> measurements.tsv</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb34"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb34-1"><a href="#cb34-1"></a><span class="co"># Convert a GFF to a simple three-column TSV</span></span>
+<span id="cb34-2"><a href="#cb34-2"></a><span class="ex">$</span> awk <span class="st">'BEGIN { OFS = "\t" } $3 == "gene" { print $1, $4, $5 }'</span> annotations.gff</span>
+<span id="cb34-3"><a href="#cb34-3"></a></span>
+<span id="cb34-4"><a href="#cb34-4"></a><span class="co"># Convert TSV to CSV (rebuilding $0 forces awk to apply the new OFS)</span></span>
+<span id="cb34-5"><a href="#cb34-5"></a><span class="ex">$</span> awk <span class="at">-F</span><span class="st">'\t'</span> <span class="at">-v</span> OFS=<span class="st">','</span> <span class="st">'{ $1 = $1; print }'</span> measurements.tsv</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </section><section id="sec-awk-mean-per-treatment" class="level3"><h3 class="anchored" data-anchor-id="sec-awk-mean-per-treatment">A Bioengineering Example: Mean per Treatment</h3>
 <p>Suppose a plate reader exports a CSV with sample name, treatment, and OD600 columns:</p>
 <pre><code>sample,treatment,od600
@@ -1342,10 +1369,10 @@ S03,IPTG,0.81
 S04,IPTG,0.79
 S05,IPTG,0.85</code></pre>
 <p>To compute the mean OD600 for each treatment we need one running sum and one count <em>per treatment</em>. <code>awk</code>’s <strong>associative arrays</strong>—arrays indexed by a string instead of a number—make this a one-liner:</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb35"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb35-1"><a href="#cb35-1"></a><span class="ex">$</span> awk <span class="at">-F</span><span class="st">','</span> <span class="st">'NR &gt; 1 { sum[$2] += $3; n[$2]++ }</span></span>
-<span id="cb35-2"><a href="#cb35-2"></a><span class="st">             END { for (t in sum) print t, sum[t] / n[t] }'</span> od600_readings.csv</span>
-<span id="cb35-3"><a href="#cb35-3"></a><span class="ex">control</span> 0.435</span>
-<span id="cb35-4"><a href="#cb35-4"></a><span class="ex">IPTG</span> 0.816667</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb36"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb36-1"><a href="#cb36-1"></a><span class="ex">$</span> awk <span class="at">-F</span><span class="st">','</span> <span class="st">'NR &gt; 1 { sum[$2] += $3; n[$2]++ }</span></span>
+<span id="cb36-2"><a href="#cb36-2"></a><span class="st">             END { for (t in sum) print t, sum[t] / n[t] }'</span> od600_readings.csv</span>
+<span id="cb36-3"><a href="#cb36-3"></a><span class="ex">control</span> 0.435</span>
+<span id="cb36-4"><a href="#cb36-4"></a><span class="ex">IPTG</span> 0.816667</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>For each data line, <code>sum[$2]</code> accumulates the OD600 under the treatment name in column 2 and <code>n[$2]</code> counts the samples. In <code>END</code>, <code>for (t in sum)</code> loops over every treatment seen (in no particular order—pipe the output through <code>sort</code> if you want it alphabetical). This same pattern—group by one column, aggregate another—answers a large share of everyday questions about tabular data, and it runs at the speed of the disk on files far too big to open in a spreadsheet.</p>
 </section><section id="sec-grep-choosing-the-right-tool" class="level3"><h3 class="anchored" data-anchor-id="sec-grep-choosing-the-right-tool">Choosing the Right Tool</h3>
 <p>A useful rule of thumb: <strong>grep finds lines, sed edits text, awk works with columns.</strong> They overlap—each can delete comment lines, for instance—but each is clearest at its own job, and they chain together naturally in a pipeline (<a href="#tbl-grep-sed-awk" class="quarto-xref">Table&nbsp;<span>7.5</span></a>).</p>
@@ -1390,6 +1417,26 @@ Table&nbsp;7.5: Comparing <code>grep</code>, <code>sed</code>, and <code>awk</co
 </div>
 </figure>
 </div>
+</section><section id="sec-text-tools-together" class="level3"><h3 class="anchored" data-anchor-id="sec-text-tools-together">Putting It Together</h3>
+<p>The real power of these tools comes from combining them with the pipeline tools of <a href="04-files-pipes.html" class="quarto-xref"><span>Chapter 6</span></a>. Each of the following answers a question you are likely to ask of a real data file in a single line:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb37"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb37-1"><a href="#cb37-1"></a><span class="co"># How many distinct gene names are in column 1 (skipping the header)?</span></span>
+<span id="cb37-2"><a href="#cb37-2"></a><span class="ex">$</span> tail <span class="at">-n</span> +2 data.tsv <span class="kw">|</span> <span class="fu">cut</span> <span class="at">-f1</span> <span class="kw">|</span> <span class="fu">sort</span> <span class="kw">|</span> <span class="fu">uniq</span> <span class="kw">|</span> <span class="fu">wc</span> <span class="at">-l</span></span>
+<span id="cb37-3"><a href="#cb37-3"></a></span>
+<span id="cb37-4"><a href="#cb37-4"></a><span class="co"># The 20 rows with p &lt; 0.05 (column 5) with the largest effect size (column 3)</span></span>
+<span id="cb37-5"><a href="#cb37-5"></a><span class="ex">$</span> awk <span class="st">'$5 &lt; 0.05'</span> results.tsv <span class="kw">|</span> <span class="fu">sort</span> <span class="at">-k3,3</span> <span class="at">-nr</span> <span class="kw">|</span> <span class="fu">head</span> <span class="at">-20</span></span>
+<span id="cb37-6"><a href="#cb37-6"></a></span>
+<span id="cb37-7"><a href="#cb37-7"></a><span class="co"># Convert a CSV to tab-delimited and keep three columns</span></span>
+<span id="cb37-8"><a href="#cb37-8"></a><span class="ex">$</span> sed <span class="st">'s/,/\t/g'</span> data.csv <span class="kw">|</span> <span class="fu">cut</span> <span class="at">-f1,3,5</span> <span class="op">&gt;</span> subset.tsv</span>
+<span id="cb37-9"><a href="#cb37-9"></a></span>
+<span id="cb37-10"><a href="#cb37-10"></a><span class="co"># How many times does each value in column 2 occur, most common first?</span></span>
+<span id="cb37-11"><a href="#cb37-11"></a><span class="ex">$</span> cut <span class="at">-f2</span> data.tsv <span class="kw">|</span> <span class="fu">sort</span> <span class="kw">|</span> <span class="fu">uniq</span> <span class="at">-c</span> <span class="kw">|</span> <span class="fu">sort</span> <span class="at">-nr</span></span>
+<span id="cb37-12"><a href="#cb37-12"></a></span>
+<span id="cb37-13"><a href="#cb37-13"></a><span class="co"># How many sequences per chromosome in a FASTA whose headers look like "&gt;chr1:1000-2000"?</span></span>
+<span id="cb37-14"><a href="#cb37-14"></a><span class="ex">$</span> grep <span class="st">"^&gt;"</span> sequences.fasta <span class="kw">|</span> <span class="fu">cut</span> <span class="at">-d</span><span class="st">":"</span> <span class="at">-f1</span> <span class="kw">|</span> <span class="fu">sort</span> <span class="kw">|</span> <span class="fu">uniq</span> <span class="at">-c</span></span>
+<span id="cb37-15"><a href="#cb37-15"></a></span>
+<span id="cb37-16"><a href="#cb37-16"></a><span class="co"># Which feature types does a GFF file contain, and how many of each?</span></span>
+<span id="cb37-17"><a href="#cb37-17"></a><span class="ex">$</span> grep <span class="at">-v</span> <span class="st">"^#"</span> annotations.gff <span class="kw">|</span> <span class="fu">cut</span> <span class="at">-f3</span> <span class="kw">|</span> <span class="fu">sort</span> <span class="kw">|</span> <span class="fu">uniq</span> <span class="at">-c</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Notice the recurring shape: <em>select</em> lines (<code>grep</code>, <code>awk</code>, <code>tail -n +2</code>), <em>extract</em> a column (<code>cut</code>), <em>sort</em> so that identical values are adjacent, then <em>count</em> (<code>uniq -c</code>, <code>wc -l</code>). Once this idiom is in your fingers, most “how many of each?” questions take seconds.</p>
 </section></section><section id="sec-regex-summary" class="level2" data-number="7.11"><h2 data-number="7.11" class="anchored" data-anchor-id="sec-regex-summary">
 <span class="header-section-number">7.11</span> Summary</h2>
 <p>This chapter covered pattern matching with <code>grep</code> and regular expressions, and the two companion tools that edit and compute on the text <code>grep</code> finds:</p>

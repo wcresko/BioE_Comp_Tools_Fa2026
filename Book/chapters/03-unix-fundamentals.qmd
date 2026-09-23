@@ -135,13 +135,18 @@ For a complete list of keyboard shortcuts, see @sec-appendix-shortcuts.
 
 ## Anatomy of a Shell Command {#sec-shell-command-anatomy}
 
-Every shell command follows a consistent structure:
+Every shell command follows a consistent structure (@fig-shell-command-anatomy):
 
 ```bash
 command -options arguments
 ```
 
+![The parts of a shell command. The prompt is printed by the shell to show it is ready; you type the command, any options that modify its behavior, and the arguments it should operate on.](../images/appendix_B_S38_shell_command_anatomy.svg){#fig-shell-command-anatomy fig-align="center" width="80%"}
+
 Let's break this down:
+
+**Prompt**
+:   Printed by the shell, not typed by you. It signals that the computer is ready to accept a new command (`$` for a regular user, `#` for the administrator).
 
 **Command**
 :   The program or built-in function you want to run. This is required.
@@ -192,7 +197,9 @@ When you encounter an unfamiliar command, `man` should be your first stop. The m
 
 ## Understanding the File System {#sec-file-system}
 
-We refer to all the files, folders, and programs on your computer as the **filesystem**. In Unix, everything is organized as files within a hierarchical directory structure. Keep in mind that folders and programs are technically also files, but this is a detail we rarely think about. Understanding this structure is essential for navigation.
+We refer to all the files, folders, and programs on your computer as the **filesystem**. In Unix, everything is organized as files within a hierarchical directory structure (@fig-file-structure). Keep in mind that folders and programs are technically also files, but this is a detail we rarely think about. Understanding this structure is essential for navigation.
+
+![A computer's storage is a system of directories (folders) and files. The same folders you click through in Finder or File Explorer are what you will navigate from the shell.](../images/appendix_B_S42_file_structure.svg){#fig-file-structure fig-align="center" width="85%"}
 
 ### The Directory Tree {#sec-the-directory-tree}
 
@@ -211,6 +218,10 @@ In Unix, we refer to folders as **directories**. Directories that are inside oth
 ├── Library/
 └── tmp/
 ```
+
+@fig-unix-file-hierarchy shows the same idea as a tree: the root directory `/` at the top, system directories and user home directories branching below it, and your own files nested deeper still.
+
+![The Unix file hierarchy. Every file and directory on the system descends from the root directory `/`; user home directories sit under `/Users` (macOS) or `/home` (Linux).](../images/appendix_B_S43_unix_file_hierarchy.svg){#fig-unix-file-hierarchy fig-align="center" width="85%"}
 
 Key directories include:
 
@@ -253,7 +264,7 @@ A **path** specifies the location of a file or directory. The name comes from th
 Documents/analysis.R
 ```
 
-![Understanding file system paths: This diagram shows how an absolute path like `/home/catchen/working` is constructed by following the directory tree from root (`/`) through each level.](../images/unix_directory_paths.jpeg){#fig-paths width="70%"}
+![Understanding file system paths. An absolute path is built by following the directory tree from the root (`/`) down through each level to the file; the highlighted route spells out the path one directory at a time.](../images/unix_paths_highlighted.svg){#fig-paths fig-align="center" width="85%"}
 
 Unix provides shorthand symbols for common directory references:
 
@@ -267,6 +278,31 @@ Unix provides shorthand symbols for common directory references:
 : Special directory symbols {#tbl-dir-symbols}
 
 These symbols can be combined in paths. For example, `../..` means "go up two directories," and `~/projects` means "the projects folder in my home directory."
+
+### The Special Entries `.` and `..` {#sec-dot-and-dotdot}
+
+The first two symbols in @tbl-dir-symbols are not just shorthand: they are real entries that exist in *every* directory. You can see them with `ls -a`, which shows hidden files (anything whose name begins with a dot):
+
+```bash
+$ ls -a
+.  ..  .bashrc  analysis.R  data  README.md
+```
+
+The entry `.` (dot) refers to the directory itself, and `..` (dot dot) refers to its parent (@fig-unix-dot-files). This is why `cd ..` moves you up one level: you are literally entering the `..` entry of your current directory (@fig-unix-dotdot-navigation). It is also why you run a script in the current directory as `./script.sh`, meaning "the file `script.sh` inside the directory I am in right now."
+
+![Every directory contains two hidden entries: `.`, which points to the directory itself, and `..`, which points to its parent.](../images/unix_dot_files.svg){#fig-unix-dot-files fig-align="center" width="85%"}
+
+![Navigating with `..`: `cd ..` follows the parent link up one level in the tree, and a path such as `../other_dir` goes up one level and then down into a sibling directory.](../images/unix_dotdot_navigation.svg){#fig-unix-dotdot-navigation fig-align="center" width="85%"}
+
+```bash
+# These three commands are equivalent
+$ cd data
+$ cd ./data
+$ cd ././data
+
+# Up one level, then into a sibling directory
+$ cd ../scripts
+```
 
 ::: {.callout-tip}
 Use Tab completion! Start typing a file or directory name and press Tab to autocomplete. This saves typing and prevents errors.
@@ -494,6 +530,10 @@ $ mv data/raw.csv backup/raw_2024.csv
 $ mv *.R scripts/
 ```
 
+::: {.callout-caution title="The shell trusts you"}
+`mv` and `cp` will silently overwrite an existing file if you give two things the same name, and `rm` will delete whatever you tell it to. There is no "Are you sure?" dialog. Add `-i` (`mv -i`, `cp -i`, `rm -i`) to be asked before anything is overwritten or removed.
+:::
+
 ### Deleting Files: `rm` and `rmdir` {#sec-rm}
 
 ::: {.callout-warning title="Danger Zone"}
@@ -708,11 +748,13 @@ The three permission types are:
 - **x** (execute): Run file as program or enter directory
 - **-**: Permission denied for that operation
 
+So `-rwxr-xr-x` means: this is a regular file; the owner can read, write, and execute it; members of the group can read and execute it; and everyone else can read and execute it.
+
 ### Changing Permissions: `chmod` {#sec-chmod}
 
 The `chmod` command changes file permissions. There are two notations:
 
-**Symbolic notation:**
+**Symbolic notation** uses letters for *who* (`u` user/owner, `g` group, `o` others, `a` all) and operators for *what* (`+` add, `-` remove, `=` set exactly):
 
 ```bash
 # Add execute permission for owner
@@ -725,7 +767,7 @@ $ chmod go-w data.csv
 $ chmod u=rwx,g=rx,o=rx script.sh
 ```
 
-**Octal notation** (uses numbers 0-7; @tbl-octal-permissions):
+**Octal notation** assigns each permission a value—read = 4, write = 2, execute = 1—and adds them up for each of the three sets. For example, `rwx` = 4 + 2 + 1 = 7 and `r-x` = 4 + 0 + 1 = 5 (@tbl-octal-permissions):
 
 | Number | Permission |
 |:-------|:-----------|
@@ -742,7 +784,31 @@ $ chmod u=rwx,g=rx,o=rx script.sh
 $ chmod 755 script.sh    # rwxr-xr-x (executable script)
 $ chmod 644 data.csv     # rw-r--r-- (readable file)
 $ chmod 700 private/     # rwx------ (private directory)
+$ chmod 600 secrets.txt  # rw------- (private file)
 ```
+
+A few patterns cover almost every situation: `755` for scripts (you can modify, everyone can run), `644` for data files (you can modify, everyone can read), and `700` or `600` for directories and files that only you should touch.
+
+### Making Scripts Executable {#sec-making-scripts-executable}
+
+The most common reason you will reach for `chmod` is to run a script you have written. A new text file is not executable, so trying to run it directly fails:
+
+```bash
+# Create a two-line script
+$ echo '#!/bin/bash' > myscript.sh
+$ echo 'echo "Hello, World!"' >> myscript.sh
+
+# Try to run it
+$ ./myscript.sh
+bash: ./myscript.sh: Permission denied
+
+# Add execute permission, then try again
+$ chmod +x myscript.sh
+$ ./myscript.sh
+Hello, World!
+```
+
+The `#!/bin/bash` line at the top (the "shebang") tells Unix which program should interpret the script, and the `./` prefix says "the file in the current directory" (@sec-dot-and-dotdot). Shell scripts are the subject of @sec-shell-scripting.
 
 ### Changing Ownership: `chown` {#sec-chown}
 
@@ -853,11 +919,19 @@ $ ls *.html
 $ rm *.html
 ```
 
-The `*` wild card matches any number of any characters. The `?` wild card matches exactly one character:
+The `*` wild card matches any number of any characters (including none). The `?` wild card matches exactly one character:
 
 ```bash
+# All CSV files, all files starting with "data", all text and markdown files
+$ ls *.csv
+$ ls data*
+$ ls *.txt *.md
+
 # Match files like file-001.html, file-002.html, file-999.html
 $ ls file-???.html
+
+# sample1.txt, sample2.txt, ... but not sample10.txt
+$ ls sample?.txt
 
 # Remove all files starting with "temp"
 $ rm temp*
@@ -866,8 +940,34 @@ $ rm temp*
 $ ls data.*
 ```
 
+Square brackets `[ ]` match any *single* character from a set or range:
+
+```bash
+# sample1.txt, sample2.txt, or sample3.txt
+$ ls sample[123].txt
+
+# data_0.csv through data_9.csv
+$ ls data_[0-9].csv
+
+# fileA.txt through fileZ.txt
+$ ls file[A-Z].txt
+```
+
+Wild cards are expanded by the *shell* before the command runs, so they work with any command, not just `ls`:
+
+```bash
+# Count lines in every CSV file
+$ wc -l *.csv
+
+# Copy all R scripts to a backup folder
+$ cp *.R backup/
+
+# Search for "gene" in all text files
+$ grep "gene" *.txt
+```
+
 ::: {.callout-warning title="Wild Card Danger"}
-Combining `rm` with `*` can be dangerous! The command `rm *` deletes everything in the current directory without asking for confirmation. Always use `ls` first to see what a wild card pattern matches before using it with `rm`.
+Combining `rm` with `*` can be dangerous! The command `rm *` deletes everything in the current directory without asking for confirmation. Always use `ls` first to see what a wild card pattern matches before using it with `rm`, and consider `rm -i` for interactive confirmation when deleting with wild cards.
 :::
 
 ### Environment Variables {#sec-environment-variables}
@@ -891,11 +991,35 @@ $ echo $SHELL
 $ echo $PATH
 /usr/local/bin:/usr/bin:/bin
 
-# See all environment variables
-$ env
+# Your current working directory (the same thing pwd prints)
+$ echo $PWD
+/home/wcresko/projects
+
+# See all environment variables (there are many; page through them)
+$ env | less
+$ printenv HOME
 ```
 
 Environment variables control how your shell behaves and where it looks for programs. The `PATH` variable is particularly important—it's a colon-separated list of directories where Unix searches for executable programs.
+
+You can also define your own variables. Assign with `NAME=value` (no spaces around the `=`) and refer to the value with a `$` prefix:
+
+```bash
+# Set a variable
+$ PROJECT_DIR=~/projects/analysis
+
+# Use it (note the $)
+$ cd $PROJECT_DIR
+$ ls $PROJECT_DIR/data
+```
+
+A variable set this way is visible only to the current shell. To make it available to the programs you launch from that shell (R, Python, a script), prefix the assignment with `export`:
+
+```bash
+$ export PROJECT_DIR=~/projects/analysis
+```
+
+Shell variables are the building blocks of shell scripts, which are covered in @sec-shell-scripting.
 
 ### Executables and the PATH {#sec-executables-and-the-path}
 
@@ -936,17 +1060,47 @@ Your shell can be customized through configuration files that run when you open 
 
 : Configuration files for common shells {#tbl-shell-config-files}
 
-These files can set environment variables, define aliases (shortcuts for commands), and customize your prompt. For example, adding this line to `~/.bashrc` creates a shortcut:
+These files can set environment variables, define aliases (shortcuts for commands), and customize your prompt. For Bash, `~/.bashrc` is read by interactive shells and `~/.bash_profile` by login shells; on macOS with zsh, put the same lines in `~/.zshrc`. Common customizations include:
 
 ```bash
+# Add a directory of your own scripts to the front of your PATH
+export PATH="$HOME/bin:$PATH"
+
+# Create an alias (shortcut) for a common command
 alias ll='ls -la'
+alias rm='rm -i'    # always ask before deleting
+
+# Set default options for programs
+export R_LIBS_USER="$HOME/R/library"
 ```
 
-After editing configuration files, apply the changes by running:
+After editing a configuration file, apply the changes either by opening a new terminal or by running:
 
 ```bash
-$ source ~/.bashrc
+$ source ~/.bashrc      # or: source ~/.zshrc
 ```
+
+### Connecting to Remote Computers: `ssh` and `scp` {#sec-ssh-scp}
+
+One of the main reasons to learn the shell is that it works the same way on a computer across the room or across the country. The `ssh` command (**s**ecure **sh**ell) opens a shell on a remote machine:
+
+```bash
+$ ssh username@server.university.edu
+```
+
+Once connected, everything in this chapter—`pwd`, `ls`, `cd`, `mkdir`, and the rest—works exactly as it does locally, except that the files live on the remote system. This is how you will use UO's Talapas cluster (@sec-hpc-talapas). Type `exit` to close the connection.
+
+The `scp` command (**s**ecure **c**o**p**y) copies files between your computer and a remote one. Its syntax mirrors `cp`, with `user@host:` prefixed to the remote path:
+
+```bash
+# Local file -> remote directory
+$ scp local_file.txt username@server.edu:~/destination/
+
+# Remote file -> current local directory
+$ scp username@server.edu:~/remote_file.txt .
+```
+
+For large or repeated transfers, `rsync` is more efficient because it copies only what has changed; see @sec-file-transfer.
 
 ### Commands Worth Learning {#sec-commands-worth-learning}
 
@@ -955,7 +1109,7 @@ Several other commands are worth knowing about as you advance (@tbl-commands-wor
 | Command | Description |
 |:--------|:------------|
 | `tar` | Archive files and directories into one file |
-| `ssh` | Connect securely to another computer |
+| `ssh` | Connect securely to another computer (@sec-ssh-scp) |
 | `ln` | Create symbolic links (shortcuts to files) |
 | `nano` or `vim` | Edit files in the terminal |
 | `awk` | Column-oriented text processing (covered in @sec-awk) |
@@ -984,8 +1138,11 @@ This chapter covered the fundamentals of Unix navigation and file manipulation:
 - The file system is a hierarchical tree starting at `/`
 - Navigation uses `pwd`, `ls`, and `cd`
 - File operations include `cp`, `mv`, `rm`, `mkdir`, and `touch`
+- Every directory contains `.` (itself) and `..` (its parent); `cd ..` moves up one level
 - Good naming conventions prevent problems
 - Manual pages (`man`) provide detailed help
+- Permissions (`rwx` for owner, group, and others) are changed with `chmod`; `chmod +x` makes a script runnable
+- Wild cards (`*`, `?`, `[ ]`) are expanded by the shell before any command runs
 
 These commands form the foundation for everything else in Unix. Practice them until they become automatic!
 
@@ -1039,4 +1196,20 @@ Use manual pages to answer:
 1. What does the `ls -R` option do?
 2. How can you create a directory and all necessary parent directories in one command?
 3. What command shows disk usage, and what option makes the output human-readable?
+
+**Exercise 4: Wild Cards and Structure**
+
+1. Make five directories called `dir_1` through `dir_5` with a single `mkdir` command
+2. Inside each, create `file_1.txt`, `file_2.txt`, and `file_3.txt` using `touch`
+3. Open `dir_1/file_1.txt` in `nano`, type a few words, save, and print it with `cat`
+4. Use a wild card to list every `file_2.txt` across all five directories in one command
+5. Delete all files in `dir_3` with a single `rm` command (check with `ls` first), then remove `dir_3` with `rmdir`
+
+**Exercise 5: File Permissions**
+
+1. Create a short script that prints "Hello, World!" and the current date (`date`)
+2. Try to run it with `./`—what error do you get?
+3. Make it executable with `chmod +x` and run it again
+4. Examine the permissions of several files with `ls -l` and decode each permission string
+5. Practice changing permissions with both symbolic (`chmod u+x`) and octal (`chmod 755`) notation, checking the result with `ls -l` each time
 :::

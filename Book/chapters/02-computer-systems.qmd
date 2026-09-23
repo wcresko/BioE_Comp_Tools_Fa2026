@@ -35,18 +35,9 @@ A computer system consists of four major components working together:
 
 @fig-computer-components shows how data flows between these components.
 
-```{mermaid}
-%%| label: fig-computer-components
-%%| echo: false
-%%| fig-cap: "Basic computer system architecture showing the flow of data between components"
-graph TD
-    A[Input Devices] --> B[CPU]
-    B --> C[Memory]
-    C --> B
-    B --> D[Output Devices]
-    E[Storage] --> C
-    C --> E
-```
+![Basic computer system architecture showing the flow of data between input devices, the CPU, memory, storage, and output devices](../images/appendix_A_S02_computer_components.svg){#fig-computer-components fig-align="center" width="60%"}
+
+The hardware on the edges of that diagram is the **input/output (I/O) system**: keyboards, mice, touchscreens, cameras, microphones, and laboratory sensors bring data in; displays, printers, speakers, and actuators send results out. A network interface is both, which is why a cluster or cloud machine you never touch physically can still be a full computer system.
 
 At the heart of every computation is the **fetch-decode-execute cycle**, which the CPU performs billions of times per second.
 
@@ -54,16 +45,7 @@ At the heart of every computation is the **fetch-decode-execute cycle**, which t
 
 Every instruction your programs execute follows the same fundamental pattern (@fig-fetch-decode-execute):
 
-```{mermaid}
-%%| label: fig-fetch-decode-execute
-%%| echo: false
-%%| fig-cap: "The fundamental cycle underlying all computer operations"
-graph LR
-    A[Fetch Instruction] --> B[Decode Instruction]
-    B --> C[Execute Instruction]
-    C --> D[Store Results]
-    D --> A
-```
+![The fundamental cycle underlying all computer operations: fetch, decode, execute, store, and repeat](../images/appendix_A_S03_fetch_decode_execute.svg){#fig-fetch-decode-execute fig-align="center" width="85%"}
 
 1. **Fetch**: The CPU retrieves the next instruction from memory
 2. **Decode**: The CPU interprets what the instruction means
@@ -152,10 +134,12 @@ RAM provides temporary working space for programs and data currently in use. Key
 
 **Random Access.** Any memory location can be accessed with equal speed (unlike sequential access).
 
+**Bandwidth and Latency.** Two different numbers describe how fast memory is: *bandwidth* is how much data can move per second (tens of gigabytes per second for modern DDR4/DDR5 memory), and *latency* is the delay before the first byte arrives (on the order of 100 nanoseconds). Running two memory modules in *dual channel* doubles the available bandwidth, which is why laptops are usually sold with matched pairs.
+
 **Types.** There are two main kinds of RAM:
 
-- **DRAM (Dynamic RAM)**: Main system memory, requires constant refresh
-- **SRAM (Static RAM)**: Used in CPU caches, faster but more expensive
+- **DRAM (Dynamic RAM)**: Main system memory (the DDR4 and DDR5 modules in a laptop or server); cheap and dense, but must be refreshed constantly
+- **SRAM (Static RAM)**: Used in CPU caches; needs no refresh and is much faster, but far more expensive per byte
 
 Modern systems typically have 8-64 GB of RAM, though scientific workstations and servers may have much more. For a concrete sense of scale, @tbl-laptop-vs-talapas in @sec-computing-at-uo compares a typical laptop (8-16 GB) with a single Talapas node (512 GB) and the cluster's large-memory nodes (up to 4 TB).
 
@@ -216,6 +200,12 @@ ggplot(memory_data, aes(x = Level, y = Access_ns)) +
 
 An **operating system (OS)** is the software layer that manages hardware resources and provides services to applications. Think of it as a translator between your programs and the physical computer.
 
+### How an Operating System Is Organized {#sec-os-architecture}
+
+@fig-os-architecture shows the layers. Your applications (R, a web browser, a shell) never touch the hardware directly. They make **system calls**—requests such as "open this file" or "give me more memory"—to the **kernel**, the core of the OS that runs with full privileges. The kernel's subsystems handle process management, memory management, the file system, and I/O, and talk to the physical hardware through **device drivers**, small pieces of code that know the details of one particular disk, network card, or GPU. This layering is what lets the same R script run on a laptop and a cluster node with completely different hardware.
+
+![Operating system architecture: applications reach the hardware only through system calls, the kernel, and device drivers](../images/appendix_A_S13_os_architecture.svg){#fig-os-architecture fig-align="center" width="70%"}
+
 ### Core Functions {#sec-core-functions}
 
 Operating systems handle:
@@ -229,6 +219,21 @@ Operating systems handle:
 **Device Management.** Providing standardized interfaces to diverse hardware through device drivers.
 
 **Security.** User authentication, access control, protection against malicious software.
+
+### CPU Scheduling {#sec-cpu-scheduling}
+
+A computer runs far more processes than it has cores, so the OS must decide which process gets a core next. This is **CPU scheduling**, and the same ideas reappear at cluster scale when SLURM decides which *job* runs next (@sec-scheduler-fairshare). The classic strategies are:
+
+- **First-come, first-served (FCFS)**: simple, but one long process can make everything behind it wait
+- **Shortest job first (SJF)**: gives the best average waiting time, if job lengths are known in advance
+- **Round robin (RR)**: every runnable process gets a short time slice in turn, which keeps interactive programs responsive
+- **Priority scheduling**: important processes go first, usually with some aging so low-priority work eventually runs
+
+Schedulers are judged by *CPU utilization* (keep the cores busy), *throughput* (jobs finished per unit time), *turnaround time* (submission to completion), *waiting time* (time spent in the ready queue), and *response time* (delay before the first visible output). Desktop operating systems weight responsiveness heavily; a cluster scheduler weights throughput and fairness instead.
+
+### Security and Protection {#sec-os-security}
+
+The OS also keeps programs and users from interfering with one another. The CPU itself runs in two modes: ordinary programs execute in **user mode**, and only the kernel executes in **kernel mode**, where it can touch hardware directly; a user-mode program that tries to access memory that is not its own is stopped by **memory protection**. On top of that, file **permissions** and access control lists decide who may read or write what (@sec-file-permissions), user authentication verifies who you are, and **sandboxing** isolates untrusted processes (containers, discussed in @sec-software-layers, are a modern form of this).
 
 ### Common Operating Systems {#sec-common-operating-systems}
 
@@ -250,7 +255,9 @@ Research computing happens across a spectrum of environments, from your laptop t
 
 ### Local Computing {#sec-local-computing}
 
-**Local computing** refers to resources physically present and directly controlled by you—your laptop, desktop, or lab workstation.
+**Local computing** refers to resources physically present and directly controlled by you—your laptop, desktop, or lab workstation. @fig-local-architecture shows the software stack on such a machine: applications sit on the operating system, which reaches the CPU, memory, storage, GPU, and network card through a hardware abstraction layer.
+
+![Local computing architecture: one machine, one operating system, all hardware reached through the OS](../images/appendix_A_S21_local_computing_arch.svg){#fig-local-architecture fig-align="center" width="70%"}
 
 **Advantages:**
 
@@ -271,21 +278,7 @@ Research computing happens across a spectrum of environments, from your laptop t
 
 A **computing cluster** is a collection of interconnected computers (nodes) working together as a single system. The University of Oregon's Talapas is an example; @fig-cluster-architecture shows the basic layout, and @sec-hpc-talapas covers using it.
 
-```{mermaid}
-%%| label: fig-cluster-architecture
-%%| echo: false
-%%| fig-cap: "Simplified cluster architecture with head node, compute nodes, and shared storage"
-graph TB
-    M[Head/Login Node] --> N1[Compute Node 1]
-    M --> N2[Compute Node 2]
-    M --> N3[Compute Node 3]
-    M --> N4[Compute Node N]
-    N1 -.-> S[(Shared Storage)]
-    N2 -.-> S
-    N3 -.-> S
-    N4 -.-> S
-    U[Users] --> M
-```
+![Simplified cluster architecture with a head node, compute nodes, and shared storage](../images/appendix_A_S24_cluster_computing.svg){#fig-cluster-architecture fig-align="center" width="70%"}
 
 Key components include:
 
@@ -293,9 +286,20 @@ Key components include:
 
 **Compute Nodes.** Worker machines that actually run your analyses.
 
-**Resource Manager.** Software (like SLURM [@yoo2003slurm]) that schedules jobs and allocates resources fairly (see @sec-appendix-slurm for a command reference).
+**Interconnect.** A high-speed network (InfiniBand or 10+ gigabit Ethernet) linking the nodes to each other and to storage. It is much faster than an ordinary office network, and it is what makes a cluster behave like one machine rather than many.
 
-**Shared Storage.** Parallel file systems accessible from all nodes.
+**Shared Storage.** Parallel file systems such as Lustre or IBM's GPFS (the one Talapas uses; @sec-talapas-storage) that every node sees identically, so a file written on the login node is immediately available to a job on any compute node.
+
+**Resource Manager.** Software that schedules jobs and allocates resources fairly. Several exist (@tbl-resource-managers); Talapas uses SLURM [@yoo2003slurm], for which @sec-appendix-slurm is a command reference.
+
+| System | Typical use | Key features |
+|:-------|:------------|:-------------|
+| SLURM | Academic and national-lab HPC (Talapas) | Fair-share scheduling, backfill, job arrays, power management |
+| PBS / Torque | Traditional HPC | Mature, stable, widely supported |
+| SGE / UGE (Grid Engine) | Mixed workloads | Flexible queue policies |
+| Kubernetes | Containerized services and cloud | Microservices, auto-scaling |
+
+: Resource managers used to schedule jobs on clusters {#tbl-resource-managers}
 
 **Advantages:**
 
@@ -303,6 +307,7 @@ Key components include:
 - Specialized hardware (GPUs, high-memory nodes)
 - Shared among many users and projects
 - Professional management and maintenance
+- Fault tolerance: if one node fails, the others keep working
 
 **Disadvantages:**
 
@@ -310,24 +315,13 @@ Key components include:
 - Jobs may wait in queue
 - Shared resources mean competition for access
 - Less control over software environment
+- Expensive infrastructure (space, power, cooling) that someone has to fund and maintain
 
 ### Cloud Computing {#sec-cloud-computing}
 
-**Cloud computing** provides on-demand computing resources over the internet, with pay-as-you-go pricing. Major providers include Amazon Web Services (AWS), Google Cloud Platform (GCP), and Microsoft Azure. @fig-cloud-architecture sketches how a provider organizes its resources.
+**Cloud computing** provides on-demand computing resources over the internet, with pay-as-you-go pricing. Major providers include Amazon Web Services (AWS, the market leader with hundreds of services), Microsoft Azure (strong enterprise integration), and Google Cloud Platform (GCP, with an AI/ML focus). @fig-cloud-architecture sketches how a provider organizes its resources: each geographic **region** contains several independent **availability zones**, each with its own compute, storage, and networking, so that a failure in one zone does not take down the others.
 
-```{mermaid}
-%%| label: fig-cloud-architecture
-%%| echo: false
-%%| fig-cap: "Cloud computing architecture with multiple availability zones"
-graph TB
-    R[Region] --> AZ1[Availability Zone 1]
-    R --> AZ2[Availability Zone 2]
-    AZ1 --> C[Compute]
-    AZ1 --> S[Storage]
-    AZ2 --> C2[Compute]
-    AZ2 --> S2[Storage]
-    U[Users] -.Internet.-> R
-```
+![Cloud computing architecture: regions, availability zones, and the compute, storage, and networking inside each](../images/appendix_A_S27_cloud_computing.svg){#fig-cloud-architecture fig-align="center" width="75%"}
 
 **Advantages:**
 
@@ -343,7 +337,8 @@ graph TB
 - Vendor lock-in with proprietary services
 - Requires reliable internet connectivity
 - Data transfer costs (especially egress fees)
-- Less control compared to local systems
+- Less control compared to local systems, and compliance questions about where data may reside
+- Performance variability from "noisy neighbors" sharing the same physical hardware
 
 ### Choosing the Right Environment {#sec-choosing-the-right-environment}
 
@@ -365,19 +360,9 @@ A common workflow: develop and test locally, run production analyses on a cluste
 
 ## The Evolution of Scientific Computing {#sec-computing-evolution}
 
-Computing infrastructure has evolved dramatically over the past several decades (@fig-computing-evolution):
+Computing infrastructure has evolved dramatically over the past several decades (@fig-computing-evolution): from centralized mainframes in the 1960s and 70s, through personal computers in the 1980s and 90s and client-server systems in the 1990s and 2000s, to clusters and grids in the 2000s, cloud computing from about 2006 on, and today's edge and hybrid arrangements.
 
-```{mermaid}
-%%| label: fig-computing-evolution
-%%| echo: false
-%%| fig-cap: "Evolution of computing paradigms from mainframes to modern hybrid approaches"
-graph LR
-    A[1960s-70s<br/>Mainframes] --> B[1980s-90s<br/>Personal Computers]
-    B --> C[1990s-2000s<br/>Client-Server]
-    C --> D[2000s<br/>Clusters/Grids]
-    D --> E[2006+<br/>Cloud Computing]
-    E --> F[2020s<br/>Edge/Hybrid]
-```
+![Evolution of computing paradigms from mainframes to modern hybrid approaches](../images/appendix_A_S18_computing_timeline.svg){#fig-computing-evolution fig-align="center" width="100%"}
 
 Key drivers of this evolution include:
 

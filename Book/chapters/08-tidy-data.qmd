@@ -22,7 +22,8 @@ After completing this chapter, you will be able to:
 - Join multiple data frames using various join types
 - Reshape data between wide and long formats with pivot functions
 - Chain operations using the pipe operator
-- Work with tibbles as modern data frames
+- Work with tibbles as modern data frames and inspect them with `glimpse()`
+- Detect, drop, and replace missing values
 - Understand when to use data.table for high-performance data wrangling
 :::
 
@@ -52,7 +53,16 @@ Hadley Wickham formalized the concept of tidy data in an influential paper [@wic
 3. Each **value** has its own cell
 :::
 
-Let's unpack what these mean.
+![In tidy data, each variable forms a column and each observation forms a row.](../images/tidy_data_structure.jpeg){#fig-tidy-structure width="80%"}
+
+Wickham's original paper states the third rule slightly differently: each **type of observational unit** forms its own table (we return to this in @sec-messy-multiple-units). The rules are interrelated—it is impossible to satisfy only two of the three—which leads to an even simpler pair of practical instructions:
+
+1. Put each dataset in a tibble (or data frame)
+2. Put each variable in a column
+
+Real-world data rarely arrives in this form. Spreadsheets often encode information in column names, spread a single variable across several columns, or combine several variables in one column. **Data wrangling** is the process of transforming such messy data into tidy data, and the rest of this chapter is about the tools for doing so.
+
+Let's unpack what the three rules mean.
 
 ### Variables as Columns {#sec-variables-as-columns}
 
@@ -304,6 +314,29 @@ Always keep an unchanged copy of your original data. Create a separate processed
 - Retrace your steps if something goes wrong
 - Rerun analysis with different preprocessing
 - Share the original data with collaborators
+
+Keep raw files in their own directory, with write permission removed if possible (`chmod a-w`, @sec-chmod). All cleaning and transformation should be done programmatically, in scripts that can be re-run, with the outputs saved to new files.
+:::
+
+### Data File Do's and Don'ts {#sec-data-file-dos-donts}
+
+The naming rules above cover file and column names; these guidelines cover the *contents* of a data file, whether you edit it with Unix tools, R, or a spreadsheet program.
+
+::: {.callout-tip title="Do"}
+- **Add new observations as rows** and new variables as columns, so the file stays rectangular
+- **Include exactly one header row** with concise but descriptive variable names
+- **Use ISO 8601 dates** (`YYYY-MM-DD`): they sort correctly as text and contain no delimiter characters
+- **Represent missing values consistently**, as empty cells or `NA`
+- **Maintain metadata** (a data dictionary, @sec-documentation) alongside the file
+:::
+
+::: {.callout-warning title="Don't"}
+- **Don't mix data types within a column.** If a column holds numbers, every entry should be a number or an explicit `NA`, never a note like `"below detection"`
+- **Don't use delimiter characters inside values.** In a comma-delimited file, a value such as `March 8, 2024` will be split into two fields
+- **Don't paste data from formatted documents** such as Word; hidden formatting characters can corrupt a file
+- **Don't open data files in Excel to edit them** unless you know what it will silently convert: gene names such as `SEPT1` and `MARCH1` become dates, and long identifiers become scientific notation
+- **Don't encode information in colour or formatting.** Everything must live in the cell values, because formatting is lost on export
+- **Don't leave empty rows or columns as visual separators.** They break the rectangular structure that import functions expect
 :::
 
 ## Data Types {#sec-tidy-data-types}
@@ -338,9 +371,26 @@ data_types |>
   tab_header(title = "Data Type Classification")
 ```
 
+Quantitative data can be further split into **discrete** values (counts, integers, scores on a fixed scale) and **continuous** values that can in principle take any value in a range (mass, concentration, expression level). The interval/ratio distinction matters because ratio data support statements like "twice as much" while interval data do not: 20 g is twice as heavy as 10 g, but water at 20 °C is not "twice as hot" as water at 10 °C.
+
 ### R Data Types {#sec-r-data-types}
 
-R has specific data types for these categories:
+Each of these kinds of data maps onto a specific R type (@tbl-r-data-types and @fig-r-vector-types); the vector types themselves are introduced in @sec-vectors.
+
+| Data Type | Description | Examples | R Type |
+|:----------|:------------|:---------|:-------|
+| **Character** | Text strings | "control", gene names | `character` |
+| **Factor** | Categorical with levels, unordered | Species, treatment groups | `factor` |
+| **Ordered factor** | Categorical with a meaningful order | "low" < "medium" < "high" | `ordered` |
+| **Integer** | Whole numbers | Counts, discrete measurements | `integer` |
+| **Numeric** | Real numbers | Measurements, ratios, continuous data | `numeric` (`double`) |
+| **Logical** | True/false values | QC pass/fail, conditions | `logical` |
+| **Date** | Calendar dates | "2024-01-15", collection dates | `Date` |
+| **Date-time** | Timestamps with time | "2024-01-15 14:30:00" | `POSIXct` |
+
+: How kinds of data map to R types {#tbl-r-data-types}
+
+![R's vector types form a hierarchy: every atomic vector holds values of one type (logical, integer, double, or character), and factors, dates, and date-times are built on top of these.](../images/r_vector_types_hierarchy.svg){#fig-r-vector-types width="80%"}
 
 ```{r}
 #| label: r-types
@@ -348,8 +398,9 @@ R has specific data types for these categories:
 # Numeric (continuous)
 temperature <- c(37.2, 36.8, 38.1)
 class(temperature)
+typeof(temperature)   # stored as "double"
 
-# Integer
+# Integer (the L suffix)
 counts <- c(1L, 2L, 3L)
 class(counts)
 
@@ -358,7 +409,7 @@ sample_names <- c("control", "treatment", "treatment")
 class(sample_names)
 
 # Factor (categorical)
-treatment <- factor(c("low", "medium", "high"), 
+treatment <- factor(c("low", "medium", "high"),
                    levels = c("low", "medium", "high"),
                    ordered = TRUE)
 class(treatment)
@@ -367,7 +418,13 @@ treatment
 # Logical
 passed_qc <- c(TRUE, TRUE, FALSE)
 class(passed_qc)
+
+# Date
+collected <- as.Date("2024-01-15")
+class(collected)
 ```
+
+`class()` reports the type R uses when choosing how to print, plot, or model an object; `typeof()` reports how the values are stored underneath (a `numeric` vector is stored as `double`, a factor as `integer`). Getting types right matters because statistical and plotting functions treat factors differently from character strings, and arithmetic only works on numeric types.
 
 ### When to Use Factors {#sec-when-to-use-factors}
 
@@ -455,7 +512,7 @@ Load all core packages at once with a single `library()` call:
 library(tidyverse)
 ```
 
-This loads the eight core tidyverse packages and displays helpful information about function conflicts [@wickham2019tidyverse].
+This loads the eight core tidyverse packages and displays helpful information about function conflicts [@wickham2019tidyverse]. For example, the message notes that `dplyr::filter()` masks `stats::filter()`: once the tidyverse is loaded, typing `filter()` gives you the dplyr version, and you must write `stats::filter()` to reach the base R one (@sec-namespace-conflicts).
 
 ### Data Import with readr {#sec-data-import-with-readr}
 
@@ -535,7 +592,9 @@ This converts all names to lowercase snake_case, making them valid R identifiers
 
 ## The Pipe Operator {#sec-pipe}
 
-One of the most powerful features of the tidyverse is the **pipe operator**, which allows you to chain operations together in a readable way.
+One of the most powerful features of the tidyverse is the **pipe operator**, which allows you to chain operations together in a readable way. The pipe passes the result of one operation as the first argument of the next (@fig-pipe-operator). Read it as "then": take the data, *then* filter, *then* group, *then* summarize. This left-to-right, top-to-bottom flow mirrors how we think about data transformations, and it is the same idea as the Unix pipe `|` from @sec-pipes, applied to R objects instead of text streams.
+
+![The pipe operator passes the result of each step to the next, turning a nest of function calls into a readable sequence.](../images/pipe_operator.jpeg){#fig-pipe-operator width="80%"}
 
 ### The Native Pipe: `|>` {#sec-native-pipe}
 
@@ -556,7 +615,7 @@ c(-4, 9, -16) |>
 
 ### The magrittr Pipe: `%>%` {#sec-magrittr-pipe}
 
-The tidyverse also provides `%>%` from the magrittr package, which has additional features:
+The tidyverse also provides `%>%` from the magrittr package, which predates the native pipe and is what you will see in older code and tutorials:
 
 ```{r}
 #| label: magrittr-pipe
@@ -568,8 +627,10 @@ c(1, 2, 3, 4, 5) |> mean()
 c(1, 2, 3, 4, 5) %>% mean()
 ```
 
+The two differ in small ways: `%>%` uses `.` as a placeholder for the piped value and lets you call a function without parentheses (`x %>% mean`), while `|>` uses `_` as a placeholder (only for a named argument) and always requires parentheses. `|>` needs no package, so this book uses it throughout; either is fine as long as you are consistent within a project.
+
 ::: {.callout-tip}
-The pipe transforms `x |> f(y)` into `f(x, y)`. Think of it as "take this, then do that." This makes code read like a recipe: take data, then filter, then select, then summarize.
+The pipe transforms `x |> f(y)` into `f(x, y)`. Think of it as "take this, then do that." This makes code read like a recipe: take data, then filter, then select, then summarize. In RStudio and Positron, `Ctrl/Cmd + Shift + M` inserts a pipe (@sec-appendix-shortcuts).
 :::
 
 ## Data Manipulation with dplyr {#sec-dplyr}
@@ -635,6 +696,26 @@ experiments |>
   filter(treatment %in% c("drug_A", "drug_B"))
 ```
 
+Conditions are built from the comparison and logical operators in @tbl-filter-operators (introduced in @sec-logical-operators-and-comparisons). Separate conditions with commas for AND; `&` and `|` combine conditions the way set intersection and union do (@fig-boolean-venn).
+
+| Operator | Meaning |
+|:---------|:--------|
+| `==`, `!=` | Equal to, not equal to |
+| `<`, `<=`, `>`, `>=` | Less/greater than (or equal) |
+| `&` | AND (both conditions true) |
+| `\|` | OR (either condition true) |
+| `!` | NOT |
+| `%in%` | Value belongs to a set |
+| `is.na()` | Value is missing |
+
+: Operators used in `filter()` conditions {#tbl-filter-operators}
+
+![Boolean operators as set operations: `&` keeps rows in both sets, `|` keeps rows in either, and `!` keeps the complement.](../images/boolean_set_operations_venn.svg){#fig-boolean-venn width="60%"}
+
+::: {.callout-warning}
+`filter()` keeps only rows where the condition is `TRUE`. Rows where the condition evaluates to `NA` are silently dropped, so `filter(expression > 15)` also removes rows with a missing `expression`. Use `is.na()` explicitly if you want to keep or inspect them (@sec-missing-values).
+:::
+
 ### Selecting Columns with `select()` {#sec-dplyr-select}
 
 Choose which columns to keep:
@@ -660,7 +741,13 @@ experiments |>
 
 experiments |>
   select(where(is.numeric))
+
+# Move columns to the front, keeping everything else
+experiments |>
+  select(expression, cell_count, everything())
 ```
+
+The **selection helpers** are useful with wide datasets: `starts_with()`, `ends_with()`, and `contains()` match literal text, `matches()` takes a regular expression (@sec-grep-regex), `num_range("x", 1:3)` picks `x1`, `x2`, `x3`, `where()` selects by a predicate on the column, and `everything()` stands for all remaining columns (handy for reordering). The same helpers work inside `pivot_longer()` and `across()`.
 
 ### Arranging Rows with `arrange()` {#sec-dplyr-arrange}
 
@@ -681,6 +768,8 @@ experiments |>
   arrange(treatment, desc(expression))
 ```
 
+Missing values are always sorted to the end, regardless of whether you sort ascending or descending.
+
 ### Creating Columns with `mutate()` {#sec-dplyr-mutate}
 
 Add new columns or modify existing ones:
@@ -697,6 +786,15 @@ experiments |>
     treatment = toupper(treatment)
   )
 ```
+
+New columns can refer to columns created earlier in the same `mutate()` call. Any vectorized function works inside `mutate()`; the ones you will reach for most often are:
+
+- Arithmetic (`+`, `-`, `*`, `/`, `^`) and modular arithmetic (`%/%`, `%%`)
+- Logs and roots: `log()`, `log2()`, `log10()`, `sqrt()`
+- Offsets: `lead()`, `lag()` (@sec-lead-lag)
+- Cumulative aggregates: `cumsum()`, `cummax()`, `cummean()` (@sec-cumulative-and-running-aggregates)
+- Ranking: `min_rank()`, `dense_rank()`, `row_number()` (@sec-ranking-values)
+- Conditionals: `if_else()` (@sec-if-else-dplyr) and `case_when()` (@sec-case-when)
 
 ### Replacing Columns with `transmute()` {#sec-dplyr-transmute}
 
@@ -717,7 +815,7 @@ This is useful when you're creating a derived dataset and don't need the origina
 
 ### Summarizing Data with `summarize()` {#sec-dplyr-summarize}
 
-Collapse multiple rows into summary statistics:
+Collapse multiple rows into summary statistics (`summarise()`, with the British spelling, is an identical alias):
 
 ```{r}
 #| label: summarize-examples
@@ -729,6 +827,12 @@ experiments |>
     n_samples = n()
   )
 ```
+
+Common summary functions include `mean()`, `median()`, `sd()`, `var()`, `IQR()`, `min()`, `max()`, `quantile()`, `first()`, `last()`, `nth()`, `n()`, and `n_distinct()`.
+
+::: {.callout-warning title="Missing Values and Summaries"}
+Aggregation functions return `NA` if *any* input value is `NA`. Pass `na.rm = TRUE` (for example `mean(expression, na.rm = TRUE)`) to drop missing values before computing, or handle them explicitly first (@sec-missing-values).
+:::
 
 ### Grouping with `group_by()` {#sec-dplyr-group-by}
 
@@ -746,7 +850,7 @@ experiments |>
     n = n()
   )
 
-# Multiple grouping variables
+# Several summaries at once, sorted by the result
 experiments |>
   group_by(treatment) |>
   summarize(
@@ -755,6 +859,35 @@ experiments |>
     min_expr = min(expression)
   ) |>
   arrange(desc(mean_expr))
+```
+
+You can group by more than one variable, and grouping affects `mutate()` as well as `summarize()`: inside a grouped `mutate()`, functions like `mean()` or `min_rank()` are computed within each group, which is how you centre values on their group mean or rank samples within a treatment.
+
+```{r}
+#| label: grouped-mutate
+
+# Rank samples and centre expression within each treatment
+experiments |>
+  group_by(treatment) |>
+  mutate(
+    rank_in_group = min_rank(desc(expression)),
+    expr_vs_group_mean = expression - mean(expression)
+  ) |>
+  ungroup()
+```
+
+Three things to know about grouped data frames:
+
+- A grouped tibble prints its groups at the top (`# Groups: treatment [3]`), and every later verb respects the grouping until you remove it
+- `summarize()` peels off *one* level of grouping, so after grouping by two variables the result is still grouped by the first. Pass `.groups = "drop"` to return an ungrouped result, or call `ungroup()`
+- Forgetting to `ungroup()` is a common source of surprising results later in a pipeline; make it a habit to ungroup as soon as the grouped step is done
+
+```{r}
+#| label: groups-drop
+
+experiments |>
+  group_by(treatment, late_replicate = replicate > 2) |>
+  summarize(mean_expr = mean(expression), .groups = "drop")
 ```
 
 ### Chaining Operations Together {#sec-chaining-operations-together}
@@ -775,9 +908,83 @@ experiments |>
   arrange(desc(mean_log_expr))                 # Sort by mean
 ```
 
+## Handling Missing Values {#sec-missing-values}
+
+Missing values are ubiquitous in real data. R represents them as `NA` (@sec-special-values), and most operations involving `NA` return `NA`, which is deliberate: R refuses to guess. Wrangling therefore usually starts by finding out where the missing values are and deciding what to do with them.
+
+### Detecting Missing Values {#sec-detecting-missing-values}
+
+`is.na()` returns `TRUE` for each missing value; summing it counts them.
+
+```{r}
+#| label: na-detect
+
+# A dataset with some gaps
+assays <- tibble(
+  sample_id = paste0("S", 1:6),
+  treatment = c("control", "control", "drug_A", "drug_A", "drug_B", NA),
+  expression = c(10.2, NA, 15.3, 14.8, NA, 18.1)
+)
+
+# Any missing at all?
+any(is.na(assays))
+
+# Count missing values per column
+assays |>
+  summarize(across(everything(), \(x) sum(is.na(x))))
+
+# Base R equivalent
+colSums(is.na(assays))
+```
+
+`across()` applies the same function to several columns at once; it is the tidyverse's general tool for "do this to every column that ...", and it takes the same selection helpers as `select()`.
+
+### Dropping Rows with Missing Values {#sec-dropping-missing-values}
+
+```{r}
+#| label: na-drop
+
+# Rows with a value in a specific column
+assays |> filter(!is.na(expression))
+
+# The same, with tidyr
+assays |> drop_na(expression)
+
+# Only complete rows (no NA in any column)
+assays |> drop_na()
+```
+
+### Replacing Missing Values {#sec-replacing-missing-values}
+
+Sometimes a missing value has a known meaning (a count that was not recorded because nothing was found, for instance) and should be replaced rather than dropped:
+
+```{r}
+#| label: na-replace
+
+# Replace NA in one column
+assays |>
+  mutate(treatment = replace_na(treatment, "unknown"))
+
+# Replace NA in several columns with different values
+assays |>
+  replace_na(list(treatment = "unknown", expression = 0))
+
+# Replace with a computed value, e.g. the column mean
+assays |>
+  mutate(expression = if_else(is.na(expression),
+                              mean(expression, na.rm = TRUE),
+                              expression))
+```
+
+::: {.callout-warning title="Understand Before You Delete"}
+Never blindly drop or fill missing values. Ask *why* they are missing: an assay that failed at random is different from values that are missing because they fell below a detection limit. The pattern of missingness determines whether dropping, replacing, or flagging (`mutate(expr_missing = is.na(expression))`) is the right choice.
+:::
+
 ## Tibbles: Modern Data Frames {#sec-tibbles}
 
-**Tibbles** are the tidyverse's enhanced version of data frames. They have several advantages:
+**Tibbles** are the tidyverse's enhanced version of data frames (@fig-tibbles). They are designed to be more consistent and more informative than the base data frames of @sec-data-frames, while remaining compatible with almost everything that works on a data frame.
+
+![Tibbles are the tidyverse's enhanced data frames: they print compactly, show each column's type, and never change the type of what you give them.](../images/tibbles.jpeg){#fig-tibbles width="80%"}
 
 ### Creating Tibbles {#sec-creating-tibbles}
 
@@ -821,12 +1028,41 @@ This format is particularly useful for:
 - Quick test datasets
 - Small lookup tables
 
+### Inspecting Tibbles {#sec-inspecting-tibbles}
+
+Printing a tibble shows its dimensions, the first 10 rows, only as many columns as fit on screen, and the type of each column in angle brackets under its name (@tbl-tibble-type-abbreviations).
+
+| Abbreviation | Column type |
+|:-------------|:------------|
+| `<chr>` | character |
+| `<dbl>` | double (numeric with decimals) |
+| `<int>` | integer |
+| `<lgl>` | logical |
+| `<fct>` | factor |
+| `<date>` | Date |
+| `<dttm>` | date-time |
+
+: Column type abbreviations in tibble output {#tbl-tibble-type-abbreviations}
+
+For a dataset with many columns, `glimpse()` gives a transposed view with one line per column, showing its type and first few values; it is usually the first thing to run on newly imported data. The base R functions from @sec-examining-data-frames (`dim()`, `nrow()`, `names()`, `str()`, `summary()`) all work on tibbles too.
+
+```{r}
+#| label: glimpse-example
+
+glimpse(as_tibble(mtcars))
+
+# Extract a column as a vector
+my_tibble$z
+my_tibble[["z"]]
+```
+
 ### Tibble Advantages {#sec-tibble-advantages}
 
-1. **Better printing**: Shows first 10 rows and fits columns to screen
-2. **No partial matching**: `df$col` won't match `df$column`
+1. **Better printing**: Shows first 10 rows, fits columns to screen, and reports column types
+2. **No partial matching**: `df$col` won't match `df$column`, and accessing a column that does not exist gives a warning
 3. **No string-to-factor conversion**: Characters stay as characters
-4. **Preserves column types**: Subsetting always returns a tibble
+4. **Preserves column types**: Subsetting with `[` always returns a tibble
+5. **No row names**: Anything meaningful belongs in a proper column (use `rownames_to_column()` when converting a data frame such as `mtcars`)
 
 ```{r}
 #| label: tibble-advantages
@@ -838,6 +1074,12 @@ class(df[, 1])  # Returns vector!
 # Tibble subsetting is consistent
 tb <- tibble(x = 1:3, y = 4:6)
 class(tb[, 1])  # Returns tibble
+
+# Row names become a column
+mtcars |>
+  rownames_to_column("car") |>
+  as_tibble() |>
+  head(3)
 ```
 
 ## Additional dplyr Functions {#sec-dplyr-additional}
@@ -865,8 +1107,18 @@ experiments |>
 experiments |>
   count(treatment)
 
+# Equivalent to group_by(treatment) |> summarize(n = n())
+
 experiments |>
   count(treatment, sort = TRUE)
+
+# Count combinations of two variables
+experiments |>
+  count(treatment, late_replicate = replicate > 2)
+
+# Weighted count: sums cell_count instead of counting rows
+experiments |>
+  count(treatment, wt = cell_count)
 ```
 
 You can also use `n_distinct()` within `summarize()` to count unique values:
@@ -896,9 +1148,20 @@ experiments |>
 ```{r}
 #| label: distinct-example
 
+# Unique values of one column
 experiments |>
   distinct(treatment)
+
+# Unique combinations of several columns
+experiments |>
+  distinct(treatment, late_replicate = replicate > 2)
+
+# Keep the other columns (first row of each combination)
+experiments |>
+  distinct(treatment, .keep_all = TRUE)
 ```
+
+With no column names, `distinct()` removes exactly duplicated rows. Checking for duplicates is a standard data-quality step after import: `any(duplicated(df))` tells you whether any exist, `df[duplicated(df), ]` shows them, and `distinct(df)` removes them.
 
 ### Renaming with `rename()` {#sec-dplyr-rename}
 
@@ -932,6 +1195,16 @@ experiments |>
 # Top 3 by expression
 experiments |>
   slice_max(expression, n = 3)
+
+# A fraction of rows
+experiments |>
+  slice_sample(prop = 0.25)
+
+# Combined with group_by(): the top sample within each treatment
+experiments |>
+  group_by(treatment) |>
+  slice_max(expression, n = 1) |>
+  ungroup()
 ```
 
 ### Extracting Columns with `pull()` {#sec-dplyr-pull}
@@ -1063,6 +1336,9 @@ fct_lump_n(samples, n = 3)
 
 # Keep levels that appear at least 10 times
 fct_lump_min(samples, min = 10)
+
+# Lump levels that make up less than 5% of the data
+fct_lump_prop(samples, prop = 0.05)
 ```
 
 ::: {.callout-tip}
@@ -1087,6 +1363,8 @@ In real-world analysis, data often lives in multiple tables. **Joins** combine t
 | `anti_join()` | Keep rows from left table that have NO matches in right |
 
 : Types of joins in dplyr {#tbl-join-types}
+
+The first four are **mutating joins**: they add columns from the right table. `semi_join()` and `anti_join()` are **filtering joins**: they only keep or drop rows of the left table and never add columns, which makes them ideal for data-quality checks.
 
 ### Join Example {#sec-join-example}
 
@@ -1144,6 +1422,23 @@ Find rows in the left table with no match in the right:
 
 # Which samples are missing expression data?
 anti_join(samples, expression_data, by = "sample_id")
+
+# Which measurements have no sample record? (swap the tables)
+anti_join(expression_data, samples, by = "sample_id")
+```
+
+### Full and Semi Joins {#sec-full-semi-join}
+
+`full_join()` keeps every row from both tables, filling `NA` wherever there is no match, and `semi_join()` keeps the rows of the left table that *do* have a match without adding any columns:
+
+```{r}
+#| label: full-semi-join-example
+
+# Everything from both tables
+full_join(samples, expression_data, by = "sample_id")
+
+# Only samples that have expression data, columns unchanged
+semi_join(samples, expression_data, by = "sample_id")
 ```
 
 ### Joining on Multiple Columns {#sec-joining-on-multiple-columns}
@@ -1167,7 +1462,49 @@ When joining, watch for columns with the same name but different meanings (e.g.,
 
 ## Reshaping Data with tidyr {#sec-tidyr}
 
-We've already seen `pivot_longer()` and `separate()`. Let's complete the picture with their counterparts.
+We've already seen `pivot_longer()` and `separate()`. Let's complete the picture with their counterparts, and with the options that handle the messy column names you meet in practice.
+
+### Cleaning Names While Pivoting {#sec-pivot-longer-options}
+
+Column names in wide data usually carry a prefix or several pieces of information (`time_0`, `mass_g`). `pivot_longer()` can strip and split these as it goes, so you do not need a separate `mutate()` or `separate()` step:
+
+```{r}
+#| label: pivot-longer-options
+
+wide_data <- tibble(
+  sample = c("A", "B", "C"),
+  time_0 = c(10, 15, 12),
+  time_1 = c(14, 18, 15),
+  time_2 = c(18, 22, 19)
+)
+
+# Remove the "time_" prefix and convert what is left to an integer
+wide_data |>
+  pivot_longer(
+    cols = starts_with("time_"),
+    names_to = "timepoint",
+    names_prefix = "time_",
+    names_transform = as.integer,
+    values_to = "measurement"
+  )
+
+# Split names into two columns at a separator
+measurements <- tibble(
+  sample = c("S1", "S2", "S3"),
+  mass_g = c(2.5, 3.1, 2.8),
+  length_mm = c(45, 52, 48)
+)
+
+measurements |>
+  pivot_longer(
+    cols = -sample,
+    names_to = c("measurement", "unit"),
+    names_sep = "_",
+    values_to = "value"
+  )
+```
+
+`cols` accepts the same selection helpers as `select()`; `cols = -sample` ("everything except `sample`") is the most common form.
 
 ### Pivot Wider {#sec-pivot-wider}
 
@@ -1192,6 +1529,11 @@ gene_expression_long
 # Spread genes into columns
 gene_expression_long |>
   pivot_wider(names_from = gene, values_from = expression)
+
+# Add a prefix so the new column names are valid, descriptive identifiers
+gene_expression_long |>
+  pivot_wider(names_from = gene, values_from = expression,
+              names_prefix = "expr_")
 ```
 
 ### When to Use Wide vs. Long {#sec-when-to-use-wide-vs-long}
@@ -1237,6 +1579,19 @@ date_parts
 # Combine into a single date column
 date_parts |>
   unite(date, year, month, day, sep = "-")
+
+# Keep the original columns as well
+date_parts |>
+  unite(date, year, month, day, sep = "-", remove = FALSE)
+```
+
+`separate()` has the same `remove` argument, and it can also split at character *positions* rather than at a separator, which is what compact identifiers and undelimited dates need:
+
+```{r}
+#| label: separate-by-position
+
+tibble(date = c("20240115", "20240116")) |>
+  separate(date, into = c("year", "month", "day"), sep = c(4, 6))
 ```
 
 You can convert the united column to a proper date type:
@@ -1408,14 +1763,15 @@ The tidyverse provides powerful tools for working with tidy data:
   - `group_by()` enables grouped operations
   - `slice()` and `pull()` provide positional subsetting and column extraction
 - **Joins** (`left_join()`, `inner_join()`, `anti_join()`, etc.) combine data from multiple tables
-- **Tibbles** are enhanced data frames with consistent behavior
+- **Tibbles** are enhanced data frames with consistent behavior; `glimpse()` is the quickest way to inspect one
 - Functions like `case_when()`, `count()`, and `distinct()` handle common tasks
+- `is.na()`, `drop_na()`, and `replace_na()` detect, remove, and fill missing values; aggregation functions need `na.rm = TRUE`
 
 The **tidyr** package provides tools for reshaping data:
 
-- `pivot_longer()` converts wide data to long format
+- `pivot_longer()` converts wide data to long format (`names_prefix`, `names_sep`, and `names_transform` clean up names on the way)
 - `pivot_wider()` converts long data to wide format
-- `separate()` splits one column into multiple columns
+- `separate()` splits one column into multiple columns, at a separator or at character positions
 - `unite()` combines multiple columns into one
 - `separate_rows()` splits cells with multiple values into rows
 - `complete()` and `crossing()` handle missing combinations
@@ -1424,12 +1780,12 @@ For high-performance needs, **data.table** offers:
 
 - Concise `DT[i, j, by]` syntax
 - 10-100x speed improvements on large datasets
+- Memory efficiency through modification by reference
+- **dtplyr** as a bridge for those who prefer dplyr syntax
 
 ::: {.callout-tip}
 For quick reference on tidyverse functions and R data manipulation commands, see @sec-appendix-r.
 :::
-- Memory efficiency through modification by reference
-- **dtplyr** as a bridge for those who prefer dplyr syntax
 
 These practices and tools apply across data science workflows. Well-organized data combined with tidyverse tools makes analysis efficient, reproducible, and shareable.
 
@@ -1559,4 +1915,21 @@ measurements <- tibble(
 1. Given data with a combined column `"2024-01-15"`, use `separate()` to split it into year, month, and day columns
 2. Use `unite()` to combine them back, but with slashes as separators (`"2024/01/15"`)
 3. When might you prefer `separate_rows()` over `separate()`?
+
+**Exercise 12: Missing Data**
+
+Create this dataset:
+```r
+messy_data <- tibble(
+  sample_id = 1:10,
+  measurement_1 = c(5.2, NA, 6.8, 7.1, NA, 8.9, 9.2, NA, 7.5, 6.9),
+  measurement_2 = c(12.1, 13.5, NA, 14.2, 15.8, NA, 16.9, 17.2, NA, 14.8)
+)
+```
+
+1. Count the missing values in each column with `across()`
+2. Remove rows with any missing value, then rows missing only `measurement_1`
+3. Replace the missing values with the column means
+4. Add logical columns flagging which measurements were missing (hint: `across()` with `.names = "{.col}_missing"`)
+5. Load the built-in `airquality` dataset with `as_tibble()`, inspect it with `glimpse()`, and compute the mean `Ozone` per `Month`, first without and then with `na.rm = TRUE`
 :::

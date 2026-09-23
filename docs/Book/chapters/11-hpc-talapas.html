@@ -707,47 +707,14 @@ div.csl-indent {
 <li>3+ petabytes of storage</li>
 </ul></section></section><section id="sec-talapas-architecture" class="level2" data-number="20.2"><h2 data-number="20.2" class="anchored" data-anchor-id="sec-talapas-architecture">
 <span class="header-section-number">20.2</span> Talapas Architecture</h2>
-<p>Understanding the cluster architecture (<a href="#fig-talapas-architecture" class="quarto-xref">Figure&nbsp;<span>20.1</span></a>; compare the generic layout in <a href="02-computer-systems.html#fig-cluster-architecture" class="quarto-xref">Figure&nbsp;<span>4.4</span></a>) helps you use it effectively.</p>
-<div class="cell" data-layout-align="default">
-<div class="cell-output-display">
-<div id="fig-talapas-architecture" class="quarto-float quarto-figure quarto-figure-center anchored">
+<p>Understanding the cluster architecture (<a href="#fig-talapas-architecture" class="quarto-xref">Figure&nbsp;<span>20.1</span></a>; compare the generic layout in <a href="02-computer-systems.html#fig-cluster-architecture" class="quarto-xref">Figure&nbsp;<span>4.6</span></a>) helps you use it effectively.</p>
+<div id="fig-talapas-architecture" class="quarto-float quarto-figure quarto-figure-center anchored" data-fig-align="center">
 <figure class="quarto-float quarto-float-fig figure"><div aria-describedby="fig-talapas-architecture-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<div>
-<pre class="mermaid mermaid-js" data-label="fig-talapas-architecture">flowchart TB
-    U[Your Computer] --&gt; SSH([SSH])
-    SSH --&gt; L1[Login Node 1]
-    SSH --&gt; L2[Login Node 2]
-    SSH --&gt; L3[Login Node 3]
-    SSH --&gt; L4[Login Node 4]
-    L1 --&gt; S[SLURM Scheduler]
-    L2 --&gt; S
-    L3 --&gt; S
-    L4 --&gt; S
-    S --&gt; C1[CPU Nodes]
-    S --&gt; C2[GPU Nodes]
-    S --&gt; C3[High-Memory Nodes]
-    C1 --&gt; ST[(Shared Storage)]
-    C2 --&gt; ST
-    C3 --&gt; ST
-    
-    style U fill:#e3f2fd,stroke:#333,stroke-width:2px
-    style L1 fill:#87ceeb,stroke:#333,stroke-width:2px
-    style L2 fill:#87ceeb,stroke:#333,stroke-width:2px
-    style L3 fill:#87ceeb,stroke:#333,stroke-width:2px
-    style L4 fill:#87ceeb,stroke:#333,stroke-width:2px
-    style S fill:#f9d71c,stroke:#333,stroke-width:2px
-    style C1 fill:#98fb98,stroke:#333,stroke-width:2px
-    style C2 fill:#ffa07a,stroke:#333,stroke-width:2px
-    style C3 fill:#dda0dd,stroke:#333,stroke-width:2px
-    style ST fill:#c8e6c9,stroke:#333,stroke-width:2px
-</pre>
-</div>
+<img src="../images/appendix_F_S03_talapas_architecture.svg" class="img-fluid quarto-figure quarto-figure-center figure-img" style="width:85.0%">
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-talapas-architecture-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;20.1: Talapas cluster architecture showing login nodes, scheduler, and compute nodes
+Figure&nbsp;20.1: Talapas cluster architecture: SSH into one of four login nodes, submit work to the SLURM scheduler with <code>sbatch</code> or <code>srun</code>, and it runs on CPU, GPU, or high-memory (“fat”) compute nodes that all share the same storage
 </figcaption></figure>
-</div>
-</div>
 </div>
 <section id="sec-login-nodes-vs-compute-nodes" class="level3"><h3 class="anchored" data-anchor-id="sec-login-nodes-vs-compute-nodes">Login Nodes vs.&nbsp;Compute Nodes</h3>
 <div class="callout callout-style-default callout-warning callout-titled" title="Never Run Jobs on Login Nodes">
@@ -1116,32 +1083,15 @@ Important
 <li>Tracks resource usage</li>
 </ul>
 <p><a href="#fig-slurm-workflow" class="quarto-xref">Figure&nbsp;<span>20.3</span></a> traces a job from submission to completion.</p>
-<div class="cell" data-layout-align="default">
-<div class="cell-output-display">
-<div id="fig-slurm-workflow" class="quarto-float quarto-figure quarto-figure-center anchored">
+<div id="fig-slurm-workflow" class="quarto-float quarto-figure quarto-figure-center anchored" data-fig-align="center">
 <figure class="quarto-float quarto-float-fig figure"><div aria-describedby="fig-slurm-workflow-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<div>
-<pre class="mermaid mermaid-js" data-label="fig-slurm-workflow">flowchart LR
-    A[Submit Job] --&gt; SB([sbatch])
-    SB --&gt; B[Queue]
-    B --&gt; W([Wait])
-    W --&gt; C[Run on Compute Node]
-    C --&gt; CO([Complete])
-    CO --&gt; D[Output Files]
-    
-    style A fill:#f9d71c,stroke:#333,stroke-width:2px
-    style B fill:#87ceeb,stroke:#333,stroke-width:2px
-    style C fill:#98fb98,stroke:#333,stroke-width:2px
-    style D fill:#ffa07a,stroke:#333,stroke-width:2px
-</pre>
-</div>
+<img src="../images/appendix_F_S10_slurm_workflow.svg" class="img-fluid quarto-figure quarto-figure-center figure-img" style="width:100.0%">
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-slurm-workflow-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;20.3: SLURM job lifecycle from submission to completion
+Figure&nbsp;20.3: SLURM job lifecycle: <code>sbatch</code> places the job in the queue, it waits for resources, runs on a compute node, and leaves its output in files
 </figcaption></figure>
 </div>
-</div>
-</div>
+<p>Three words recur in everything that follows. A <strong>job</strong> is a unit of work you submit. A <strong>partition</strong> is a queue with its own hardware and time limits (<a href="#tbl-partitions" class="quarto-xref">Table&nbsp;<span>20.2</span></a>). An <strong>account</strong> is the PIRG your usage is charged to.</p>
 <p>SLURM is the dominant scheduler on academic and national-lab clusters worldwide, so everything in this chapter transfers to almost any cluster you will encounter. Its job is to decide <em>when</em>, <em>where</em>, and <em>with what resources</em> every job runs. The mental model is a request-and-grant transaction:</p>
 <ol type="1">
 <li>You <strong>declare</strong> what your job needs: how many CPU cores, how much memory, how long it will run, and whether it needs a GPU.</li>

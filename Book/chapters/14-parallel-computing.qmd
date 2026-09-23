@@ -133,6 +133,23 @@ The examples above use the **future** package ecosystem, which provides a unifie
 
 : The future ecosystem {#tbl-future-packages}
 
+::: {.callout-note title="Base R's `parallel` package"}
+Older code, and many package internals, use the **parallel** package that ships with R rather than **future**. The pattern is: start a set of worker processes, hand them work with a parallel `lapply()`, and shut them down:
+
+```{r}
+#| label: base-parallel
+#| eval: false
+
+library(parallel)
+n_cores <- detectCores() - 1          # leave one core for the OS
+cl <- makeCluster(n_cores)            # start the workers
+results <- parLapply(cl, data_list, analysis_function)
+stopCluster(cl)                       # always shut them down
+```
+
+`future`'s `plan(multisession)` does the same thing behind the scenes, but it also manages the workers for you, ships the variables and packages your function needs, and handles random seeds correctly. You should be able to read the `parallel` version when you meet it; write new code with `future` and `furrr`.
+:::
+
 ### Setting Up Parallel Execution {#sec-setting-up-parallel-execution}
 
 Before running parallel code, you must set a "plan" that determines how futures are resolved:

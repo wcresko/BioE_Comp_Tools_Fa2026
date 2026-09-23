@@ -68,25 +68,7 @@ While we focus on code, version control is equally valuable for manuscripts, the
 
 Understanding Git's mental model (@fig-git-workflow) helps everything else make sense:
 
-```{mermaid}
-%%| label: fig-git-workflow
-%%| echo: false
-%%| fig-cap: "The Git workflow: files move from working directory to staging area to repository"
-flowchart LR
-    A[Working Directory] --> GA([git add])
-    GA --> B[Staging Area]
-    B --> GC([git commit])
-    GC --> C[Local Repository]
-    C --> GP([git push])
-    GP --> D[Remote Repository]
-    D --> GPL([git pull])
-    GPL --> A
-    
-    style A fill:#f9d71c,stroke:#333,stroke-width:2px
-    style B fill:#87ceeb,stroke:#333,stroke-width:2px
-    style C fill:#98fb98,stroke:#333,stroke-width:2px
-    style D fill:#ffa07a,stroke:#333,stroke-width:2px
-```
+![The Git workflow: files move from the working directory to the staging area (`git add`), into the local repository (`git commit`), up to the remote (`git push`), and back down (`git pull`)](../images/appendix_E_S03_git_workflow.svg){#fig-git-workflow fig-align="center" width="100%"}
 
 **Working Directory.** The files you see and edit on your computer.
 
@@ -260,7 +242,12 @@ $ git log --oneline --graph --all
 
 # Last 5 commits
 $ git log -5
+
+# Show the actual changes (the "patch") made by each commit
+$ git log -p
 ```
+
+Each commit is identified by a unique hash (`7d4e8c2` below is the short form) and records the author, date, and message, which is why a good message matters.
 
 Example output:
 
@@ -280,6 +267,16 @@ $ git log --oneline
 - Project management tools
 - Free website hosting (GitHub Pages)
 - Integration with other services
+
+For a research project specifically, GitHub gives you:
+
+**Reproducibility.** The complete history of how an analysis developed, not just its final state.
+
+**Documentation.** A `README.md` on the repository's front page, a wiki, and GitHub Pages for a project website (@sec-github-pages).
+
+**Issues.** A built-in tracker for bugs, ideas, and to-dos that stays with the code. Referencing an issue number in a commit message ("Fix normalization bug (#12)") links the two.
+
+**Releases and DOIs.** When you submit a paper, tag the exact version of the code it used (`git tag -a v1.0 -m "Version used in manuscript"`; see @sec-git-tags) and create a *release* from that tag on GitHub. Connecting the repository to [Zenodo](https://zenodo.org/) turns each release into an archived copy with a citable DOI (@sec-general-repositories), which is what journals and funders increasingly ask for.
 
 ### Creating a GitHub Account {#sec-creating-a-github-account}
 
@@ -329,6 +326,18 @@ $ git pull origin main
 $ git pull
 ```
 
+**Fetching** downloads new commits from GitHub *without* merging them into your files:
+
+```bash
+$ git fetch origin
+
+# Now inspect what arrived before deciding to merge it
+$ git log --oneline main..origin/main
+$ git merge origin/main
+```
+
+`git pull` is exactly `git fetch` followed by `git merge`. Use `fetch` when you want to see what collaborators have changed before it touches your working directory—for example, when you are in the middle of something and are not sure whether the incoming changes will conflict with yours.
+
 ::: {.callout-warning}
 Always `pull` before starting work to get any changes from collaborators. Push frequently to back up your work.
 :::
@@ -337,22 +346,7 @@ Always `pull` before starting work to get any changes from collaborators. Push f
 
 **Branches** let you develop features in isolation without affecting the main codebase (@fig-git-branching).
 
-```{mermaid}
-%%| label: fig-git-branching
-%%| echo: false
-%%| fig-cap: "Branching allows parallel development that can later be merged"
-gitGraph
-    commit id: "Initial"
-    commit id: "Add README"
-    branch feature
-    checkout feature
-    commit id: "New feature"
-    commit id: "Fix bug"
-    checkout main
-    commit id: "Update docs"
-    merge feature
-    commit id: "Continue"
-```
+![Branching allows parallel development that can later be merged: a `feature` branch diverges from `main`, collects commits, and is merged back](../images/appendix_E_S12_git_branching.svg){#fig-git-branching fig-align="center" width="100%"}
 
 ### Creating and Switching Branches {#sec-creating-and-switching-branches}
 
@@ -560,19 +554,7 @@ Add `.gitignore` early! Once files are tracked, adding them to `.gitignore` won'
 
 GitHub Pages turns your repository into a website—perfect for project documentation, lab websites, or personal portfolios. @fig-github-pages shows the path from Quarto source to a live site.
 
-```{mermaid}
-%%| label: fig-github-pages
-%%| echo: false
-%%| fig-cap: "GitHub Pages workflow: from Quarto documents to live website"
-flowchart LR
-    A[Quarto Documents] --> R([Render])
-    R --> B[HTML Files]
-    B --> GP([git push])
-    GP --> C[GitHub Repository]
-    C --> AU([Automatic])
-    AU --> D[GitHub Pages Website]
-    D --> E[yourname.github.io/repo]
-```
+![GitHub Pages workflow: Quarto documents are rendered to HTML, pushed to a GitHub repository, and served automatically as a website](../images/appendix_E_S16_github_pages.svg){#fig-github-pages fig-align="center" width="100%"}
 
 ### Setting Up GitHub Pages {#sec-setting-up-github-pages}
 
@@ -831,15 +813,18 @@ For more Git emergencies, visit [ohshitgit.com](https://ohshitgit.com/) — a hu
 | `git add <file>` | Stage changes |
 | `git commit -m "msg"` | Record staged changes |
 | `git push` | Upload to remote |
-| `git pull` | Download from remote |
+| `git pull` | Download from remote and merge |
+| `git fetch` | Download from remote without merging |
 | `git branch` | List branches |
 | `git switch <name>` | Switch to a branch |
 | `git switch -c <name>` | Create and switch branch (older syntax: `git checkout -b <name>`) |
 | `git restore <file>` | Discard unstaged changes to a file (older syntax: `git checkout -- <file>`) |
 | `git merge <branch>` | Merge branch |
 | `git log --oneline` | View commit history |
+| `git log -p` | View history with the changes in each commit |
 | `git diff` | Show unstaged changes |
 | `git stash` | Temporarily store changes |
+| `git help <command>` | Open the manual page for any command (e.g. `git help log`) |
 
 : Essential Git commands {#tbl-git-commands}
 

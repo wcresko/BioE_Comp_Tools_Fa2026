@@ -36,7 +36,7 @@ set.seed(2026)
 -   a very light weight but flexible editing language
 -   allows the `rendering` of markdown text to a variety of different formats (pdf, html, web pages, powerpoint, etc....)
 -   very simple and common across science and engineering
--   involves a `yaml` header (which stands for `yet another markdown language`)
+-   involves a `yaml` header (YAML stands for `YAML Ain't Markup Language`, originally `Yet Another Markup Language`)
 -   similar to `html` but simpler
 :::
 
@@ -58,16 +58,18 @@ When you save your document, the output will be in the format indicated in your 
 
 ## This is Quarto Markdown
 
-```markdown
+``` yaml
 ---
-title: "title"
-output: html_document
+title: "My Analysis"
+author: "Your Name"
+format: html
 ---
 ```
 
 -   Note that `---` delineates the `yaml header`.
--   This controls document-level settings and rendering.
+-   This controls document-level settings and rendering - `format:` picks the output (`html`, `pdf`, `docx`, `revealjs`, ...)
 -   There are a lot of options that you can put in the `yaml header`
+-   (Older R Markdown files use `output: html_document` here - Quarto uses `format:`)
 
 ## This is Quarto Markdown
 
@@ -249,6 +251,26 @@ quarto render notebook.ipynb          # Jupyter notebooks render the same way
 -   Same source, many outputs: HTML, PDF, Word, slides, websites
 :::
 
+## One source, several output formats
+
+List more than one format in the YAML header and `quarto render` makes them all:
+
+``` yaml
+---
+title: "My Analysis"
+format:
+  html: default
+  pdf: default
+  docx: default
+---
+```
+
+| Output type       | Formats                                          |
+|-------------------|--------------------------------------------------|
+| **Documents**     | HTML, PDF (via LaTeX), Word (`.docx`), Markdown  |
+| **Presentations** | RevealJS (these slides!), PowerPoint, Beamer     |
+| **Websites and books** | HTML (all of our class material!)           |
+
 ## Callouts and cross-references
 
 ``` markdown
@@ -266,6 +288,23 @@ As shown in @fig-sem, the pores are uniform.
 -   **Cross-references**: label a figure `#fig-...`, a table `#tbl-...`, or an equation `#eq-...`, then refer to it with `@fig-...` - Quarto numbers them automatically
 -   Full syntax reference: the course book's [Quarto chapter](../book/chapters/12-quarto-documents.html)
 :::
+
+## Cross-referencing everything
+
+Every labelled element can be referenced from the text, and the numbers update automatically each time you render:
+
+| Type      | Where the label goes            | Reference syntax |
+|:----------|:--------------------------------|:-----------------|
+| Figures   | `#| label: fig-name` (code chunk) or `{#fig-name}` (image) | `@fig-name` |
+| Tables    | `#| label: tbl-name` or `{#tbl-name}` | `@tbl-name` |
+| Equations | `$$ ... $$ {#eq-name}`          | `@eq-name`       |
+| Sections  | `## Heading {#sec-name}`        | `@sec-name`      |
+
+``` markdown
+![Alt text](images/your_image.png){#fig-scaffold fig-align="center" width="70%"}
+
+See @fig-scaffold and @sec-methods for details.
+```
 
 ## Quarto Markdown formatting
 
@@ -560,21 +599,7 @@ Vendor menus and keybindings change every few months - the loop, the failure mod
 
 ## Git Workflow Concept
 
-```{mermaid}
-%%| label: lec08-mermaid-git-workflow
-%%| fig-width: 10
-%%| fig-height: 6
-flowchart LR
-    A[Working Directory] -->|git add| B[Staging Area]
-    B -->|git commit| C[Local Repository]
-    C -->|git push| D[Remote Repository]
-    D -->|git pull| A
-    
-    style A fill:#f9d71c
-    style B fill:#87ceeb
-    style C fill:#98fb98
-    style D fill:#ffa07a
-```
+![Git workflow: working directory, staging area, local and remote repositories](images/appendix_E_S03_git_workflow.svg){fig-align="center" width="100%"}
 
 -   **Track Changes**: Every modification is recorded
 -   **Collaboration**: Multiple people can work simultaneously
@@ -703,22 +728,7 @@ git fetch origin
 
 ## Branching and Merging
 
-```{mermaid}
-%%| label: lec08-mermaid-git-branching
-%%| fig-width: 10
-%%| fig-height: 6
-gitGraph
-    commit id: "Initial commit"
-    commit id: "Add README"
-    branch feature
-    checkout feature
-    commit id: "New feature"
-    commit id: "Fix bug"
-    checkout main
-    commit id: "Update docs"
-    merge feature
-    commit id: "Continue work"
-```
+![Branching and merging](images/appendix_E_S12_git_branching.svg){fig-align="center" width="100%"}
 
 ``` bash
 # Create and switch to new branch
@@ -777,26 +787,14 @@ git log -3
 
 ### Host Your Research Website for Free!
 
-```{mermaid}
-%%| label: lec08-mermaid-github-pages
-%%| fig-width: 10
-%%| fig-height: 5
-flowchart LR
-    A[Quarto Documents] -->|Render| B[HTML Files]
-    B -->|git push| C[GitHub Repository]
-    C -->|Automatic| D[GitHub Pages Website]
-    D --> E[yourname.github.io/project]
-    
-    style A fill:#e3f2fd
-    style E fill:#c8e6c9
-```
+![From Quarto source to a live website](images/appendix_E_S16_github_pages.svg){fig-align="center" width="100%"}
 
 ### Setup Steps:
 
 1.  Create repository
 2.  Push your HTML files
 3.  Enable Pages in repository settings
-4.  Your site is live at `https://username.github.io`
+4.  Your site is live at `https://username.github.io/repo_name`
 
 ## GitHub Pages Configuration
 

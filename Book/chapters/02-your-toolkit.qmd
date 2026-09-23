@@ -4,7 +4,7 @@
 After completing this chapter, you will be able to:
 
 - Explain what an editor and an integrated development environment (IDE) do for you, and why a small investment in learning one pays off every day
-- Install the core software for this course: a Unix shell, R, Python, Quarto, TinyTeX, VS Code, and Positron
+- Install the core software for this course: a Unix shell, R, Python, Quarto, TinyTeX, VS Code, and Positron (plus RStudio if you want it)
 - Navigate the layout of VS Code and Positron, use the Command Palette and the integrated terminal, and install the extensions we rely on
 - Choose sensibly among VS Code, Positron, and RStudio for a given task
 - Keep track of which "side" of a Windows computer you are working on when using WSL
@@ -63,7 +63,15 @@ On macOS and Linux you already have one: open **Terminal** (on macOS, press `Cmd
 
 ### R {#sec-toolkit-r}
 
-Download R from CRAN at <https://cran.r-project.org>. On **macOS** choose the `.pkg` installer that matches your chip: **arm64** for Apple silicon (M1 through M4) or **x86_64** for Intel Macs. If you are unsure, run `uname -m` in Terminal (@tbl-chip-check). On **Windows**, choose "base" and run the installer, accepting the defaults. R is the subject of @sec-r-programming and everything that follows it.
+Download R from CRAN at <https://cran.r-project.org>. Install R *before* RStudio or Positron, since both look for an existing R when they first start. On **macOS**, click "Download R for macOS" and choose the `.pkg` installer that matches your chip: **arm64** for Apple silicon (M1 through M4) or **x86_64** for Intel Macs. If you are unsure, run `uname -m` in Terminal (@tbl-chip-check). Open the downloaded file and follow the prompts; R ends up in your Applications folder. On **Windows**, click "Download R for Windows", then "base", then the link for the latest version; run the `.exe` installer, accepting the defaults, and R appears in the Start menu. On **Linux (Ubuntu/Debian)**, install from the package manager and confirm the version in one go:
+
+```bash
+sudo apt update
+sudo apt install -y r-base r-base-dev
+R --version
+```
+
+Other distributions have their own instructions on the CRAN site. Whichever platform you are on, a quick check that R itself works is to start it and type `R.version.string`; it should print something like `R version 4.5.1 (2025-06-13)`. R is the subject of @sec-r-programming and everything that follows it.
 
 ::: {.callout-note title="Windows: install R and Python on the Windows side"}
 If you use WSL, install R, Python, VS Code, and Positron as ordinary **Windows** applications, not inside Ubuntu. The IDEs run on Windows and will find the Windows copies of R and Python; Ubuntu is where you will type shell commands. @sec-which-side explains how to tell the two apart.
@@ -100,6 +108,22 @@ quarto install tinytex     # takes several minutes
 
 If you already have a full LaTeX distribution, Quarto will find and use it, and you can skip this step.
 
+TinyTeX can also be installed from inside R, which is convenient if you are working in RStudio and have not yet opened a terminal. In the R console:
+
+```r
+install.packages("tinytex")
+tinytex::install_tinytex()     # takes several minutes; restart the IDE afterwards
+```
+
+Either route produces the same TinyTeX; do not run both. TinyTeX installs additional LaTeX packages automatically the first time a document needs them, which is why it stays small. If you would rather have a complete distribution, the standard choices are **MacTeX** (<https://www.tug.org/mactex/>, about 4 GB) on macOS, **MiKTeX** (<https://miktex.org/download>; say yes to automatic package installation) on Windows, and `sudo apt install texlive texlive-latex-extra texlive-fonts-recommended` on Ubuntu/Debian (`texlive-full` if disk space is no object).
+
+To confirm that a LaTeX engine is available, run `quarto check` in a terminal and look for the "LaTeX" line, or in R:
+
+```r
+tinytex::is_tinytex()          # TRUE if TinyTeX is installed
+Sys.which("pdflatex")          # path to the engine (empty if none is found)
+```
+
 ### VS Code {#sec-vs-code}
 
 Download **Visual Studio Code** from <https://code.visualstudio.com/download>. It is free and requires no account. Run the installer, open VS Code, and allow any permissions it asks for. Installation details and the extensions we use are in @sec-vscode.
@@ -107,6 +131,10 @@ Download **Visual Studio Code** from <https://code.visualstudio.com/download>. I
 ### Positron {#sec-toolkit-positron}
 
 Download **Positron** from <https://positron.posit.co/download>. Install R and Python *before* Positron so that it can find them automatically. Details are in @sec-positron.
+
+### RStudio {#sec-toolkit-rstudio}
+
+**RStudio** is optional for this course but worth having if you already know it, and it is the IDE you will meet on Talapas through Open OnDemand (@sec-computing-at-uo). Download the free **RStudio Desktop** from <https://posit.co/download/rstudio-desktop/>; the page detects your operating system and offers the right installer. On **macOS**, open the `.dmg` and drag RStudio to your Applications folder; on **Windows**, run the `.exe` installer; on **Linux**, install the `.deb` or `.rpm` package with your package manager. RStudio does not include R, so install R first (@sec-toolkit-r). To verify, open RStudio (not R itself) and type `R.version.string` in the Console pane; if RStudio reports that it cannot find R, reinstall R and then RStudio. RStudio is introduced alongside R in @sec-rstudio.
 
 ### Compiler tools {#sec-compiler-tools}
 
@@ -283,7 +311,7 @@ quarto --version
 quarto check          # checks for R, Python, and LaTeX
 ```
 
-Each should print a version number (or, for `quarto check`, a list of passing checks), not "command not found." Then open Positron and confirm that you can start both an R console and a Python console from the interpreter picker. If a command is not found, the most likely explanation is that the terminal was opened before the program was installed: a terminal only sees programs that were on the `PATH` when it started, so close and reopen the terminal, or restart the IDE, before doing anything else. @tbl-install-troubleshooting lists other common problems.
+Each should print a version number (or, for `quarto check`, a list of passing checks), not "command not found." Then open Positron and confirm that you can start both an R console and a Python console from the interpreter picker; in the R console, `sessionInfo()` prints the R version, platform, and loaded packages in one place, which is exactly what you will be asked for when reporting a problem. The most complete end-to-end test is to create a new Quarto document (in VS Code or Positron, Command Palette → **Quarto: New Document**; in RStudio, *File → New File → Quarto Document*), set `format: pdf` in its header, and render it: that exercises Quarto, the language engine, and TinyTeX at once. If a command is not found, the most likely explanation is that the terminal was opened before the program was installed: a terminal only sees programs that were on the `PATH` when it started, so close and reopen the terminal, or restart the IDE, before doing anything else. @tbl-install-troubleshooting lists other common problems.
 
 | Symptom | Likely cause | Try this |
 |:--------|:-------------|:---------|
@@ -292,6 +320,10 @@ Each should print a version number (or, for `quarto check`, a list of passing ch
 | "Permission denied" | Need administrator rights, or the file is not executable | Run the installer as administrator; on Unix, use `sudo` only when instructions say to |
 | Installer fails or reports "disk full" | Not enough free space | Check with `df -h ~` and free up at least 20 GB |
 | macOS: "cannot be opened because the developer cannot be verified" | Gatekeeper security | Right-click the app and choose **Open**, or allow it under System Settings → Privacy & Security |
+| Windows: `wsl --install` fails or Ubuntu never appears | Virtualization disabled, or Windows out of date | Run Windows Update, enable virtualization (VT-x/AMD-V) in the BIOS/UEFI settings, then `wsl --update` and `wsl --install -d Ubuntu` |
+| RStudio or Positron cannot find R | R was installed after the IDE, or not at all | Install (or reinstall) R, then restart the IDE; in RStudio, check *Tools → Global Options → General → R version* |
+| R: "package 'x' is not available for this version of R" | Your R is older than the package requires | Install the current R from CRAN, then reinstall the package |
+| `install.packages()` fails partway | Network hiccup or missing dependency | Check your connection and retry with `install.packages("name", dependencies = TRUE)` |
 | Download is crawling | Many people on the same Wi-Fi | Pair up with a neighbor, or finish at home |
 
 : Troubleshooting common installation problems {#tbl-install-troubleshooting}
@@ -344,9 +376,47 @@ If the versions do not match, point the IDE at the correct R install (RStudio: *
 
 The project is on the Windows side (`/mnt/c/Users/...`) but the program is running inside WSL, or the reverse. File access across that boundary is dramatically slower, and case-sensitivity differs. Choose one arrangement and stick with it: either run R, Python, and the IDE as Windows programs with the project under `C:\Users\you`, which is what this course recommends (@sec-which-side), or run everything inside Ubuntu with the project under `~/`.
 
+### Rendering to PDF fails, or LaTeX complains about a missing `.sty` file {#sec-trouble-latex}
+
+Quarto rendered your document to HTML without complaint, but `format: pdf` stops with an error. Read the end of the log: the message usually names the problem. If it is `! LaTeX Error: File 'something.sty' not found`, TinyTeX normally installs the missing package on the fly; when it does not (typically because the package index is stale), update TinyTeX and install the package by hand, using either the terminal or the R console:
+
+```bash
+quarto update tinytex          # refresh TinyTeX and its package index
+tlmgr install <package-name>   # e.g. tlmgr install fontawesome5
+```
+
+```r
+tinytex::tlmgr_update()
+tinytex::tlmgr_install("package-name")
+```
+
+If `quarto check` reports that no LaTeX installation was found at all, TinyTeX is not installed or not on your `PATH`: run `quarto install tinytex` again (@sec-tinytex) and reopen the terminal. If the TinyTeX installer itself hangs, the usual culprit is a firewall or a campus network that blocks the CTAN mirror; try again from a different network.
+
 ### Old results keep coming back after a fix {#sec-trouble-stale-results}
 
 R keeps every object you create for the whole session, so a later chunk can silently use an old object after you edit an earlier one. Restart R and run the script from the top; `rm(list = ls())` clears variables but not loaded packages, so a restart is more reliable. In RStudio, also go to *Tools → Global Options → General* and uncheck **"Restore .RData into workspace at startup"** and set **"Save workspace to .RData on exit"** to **Never**, so that each session starts clean.
+
+## Keeping Software Updated {#sec-keeping-updated}
+
+Nothing in this chapter is install-once-and-forget. New versions bring bug fixes, security patches, and, in the case of R, access to packages that require a recent version. Once a term is a reasonable rhythm, and @tbl-keeping-updated lists how each piece is updated. Two cautions: do not update *the morning of* a deadline, and after a major R upgrade (for example 4.4 to 4.5) expect to reinstall your packages, because each major version keeps its own package library.
+
+| Tool | How to update |
+|:-----|:--------------|
+| R | Download and run the current installer from CRAN (Linux: `sudo apt upgrade`); then reinstall packages if the major version changed |
+| R packages | In R: `update.packages(ask = FALSE)` |
+| RStudio | **Help → Check for Updates**, or download the current installer |
+| VS Code, Positron | Both check for updates automatically; **Help → Check for Updates** (or **Code → Check for Updates** on macOS) forces it |
+| Python (python.org) | Run the newer installer; `uv self update` if you use uv; `conda update conda` for conda |
+| Python packages | Inside the environment: `pip install --upgrade <package>` (or `uv pip install --upgrade`) |
+| Quarto | Download and run the current installer from <https://quarto.org/docs/get-started/> |
+| TinyTeX | `quarto update tinytex` in a terminal, or `tinytex::tlmgr_update()` in R |
+| macOS command-line tools and Homebrew | System Settings → Software Update handles Xcode tools; `brew update && brew upgrade` for Homebrew packages |
+| Ubuntu (including WSL) | `sudo apt update && sudo apt upgrade` |
+| WSL itself | In PowerShell: `wsl --update` |
+
+: Updating the course toolkit {#tbl-keeping-updated}
+
+After any update, run the checkpoint commands in @sec-toolkit-checkpoint again; a surprising number of "it worked yesterday" problems are a tool that updated itself overnight and now needs the terminal reopened or a package reinstalled.
 
 ## Summary {#sec-toolkit-summary}
 
@@ -361,7 +431,8 @@ This chapter assembled the software you will use for the rest of the course and,
 - Editor-based AI assistants are useful for learning and debugging but must be read, tested, and never fed sensitive data
 - Compiling packages needs a toolchain: Xcode command-line tools plus gfortran on macOS, Rtools matching your R version on Windows, `build-essential gfortran` on Linux
 - `R --version`, `python3 --version`, `quarto --version`, and `quarto check` confirm a working installation; when a command is not found, reopen the terminal first
-- The most common later problems (compiler errors, slow Bioconductor mirrors, a stale R session, projects on the wrong side of WSL) are collected in @sec-setup-troubleshooting
+- The most common later problems (compiler errors, slow Bioconductor mirrors, a stale R session, missing LaTeX packages, projects on the wrong side of WSL) are collected in @sec-setup-troubleshooting
+- Update the toolkit once a term (@tbl-keeping-updated), never the morning of a deadline; a major R upgrade means reinstalling packages
 
 In @sec-computing-at-uo we turn from your laptop to the resources the University provides: your digital identity, cloud storage, data-security rules, site-licensed software, and the Talapas cluster.
 

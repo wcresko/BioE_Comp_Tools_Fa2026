@@ -91,7 +91,7 @@ div.csl-indent {
     "search-submit-button-title": "Submit",
     "search-label": "Search"
   }
-}</script><script src="../site_libs/quarto-diagram/mermaid.min.js"></script><script src="../site_libs/quarto-diagram/mermaid-init.js"></script><link href="../site_libs/quarto-diagram/mermaid.css" rel="stylesheet">
+}</script>
 </head>
 <body class="nav-sidebar docked quarto-light"><script id="quarto-html-before-body" type="application/javascript">
     const toggleBodyColorMode = (bsSheetEl) => {
@@ -525,7 +525,10 @@ div.csl-indent {
   <li>
 <a href="#sec-operating-systems" id="toc-sec-operating-systems" class="nav-link" data-scroll-target="#sec-operating-systems"><span class="header-section-number">4.6</span> Operating Systems</a>
   <ul class="collapse">
-<li><a href="#sec-core-functions" id="toc-sec-core-functions" class="nav-link" data-scroll-target="#sec-core-functions">Core Functions</a></li>
+<li><a href="#sec-os-architecture" id="toc-sec-os-architecture" class="nav-link" data-scroll-target="#sec-os-architecture">How an Operating System Is Organized</a></li>
+  <li><a href="#sec-core-functions" id="toc-sec-core-functions" class="nav-link" data-scroll-target="#sec-core-functions">Core Functions</a></li>
+  <li><a href="#sec-cpu-scheduling" id="toc-sec-cpu-scheduling" class="nav-link" data-scroll-target="#sec-cpu-scheduling">CPU Scheduling</a></li>
+  <li><a href="#sec-os-security" id="toc-sec-os-security" class="nav-link" data-scroll-target="#sec-os-security">Security and Protection</a></li>
   <li><a href="#sec-common-operating-systems" id="toc-sec-common-operating-systems" class="nav-link" data-scroll-target="#sec-common-operating-systems">Common Operating Systems</a></li>
   </ul>
 </li>
@@ -590,49 +593,26 @@ div.csl-indent {
 <p><strong>Firmware.</strong> Low-level software embedded directly in hardware components, providing basic control functions.</p>
 <p><strong>Data.</strong> The information being processed, stored, and transmitted by the system.</p>
 <p><a href="#fig-computer-components" class="quarto-xref">Figure&nbsp;<span>4.1</span></a> shows how data flows between these components.</p>
-<div class="cell" data-layout-align="default">
-<div class="cell-output-display">
-<div id="fig-computer-components" class="quarto-float quarto-figure quarto-figure-center anchored">
+<div id="fig-computer-components" class="quarto-float quarto-figure quarto-figure-center anchored" data-fig-align="center">
 <figure class="quarto-float quarto-float-fig figure"><div aria-describedby="fig-computer-components-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<div>
-<pre class="mermaid mermaid-js" data-label="fig-computer-components">graph TD
-    A[Input Devices] --&gt; B[CPU]
-    B --&gt; C[Memory]
-    C --&gt; B
-    B --&gt; D[Output Devices]
-    E[Storage] --&gt; C
-    C --&gt; E
-</pre>
-</div>
+<img src="../images/appendix_A_S02_computer_components.svg" class="img-fluid quarto-figure quarto-figure-center figure-img" style="width:60.0%">
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-computer-components-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;4.1: Basic computer system architecture showing the flow of data between components
+Figure&nbsp;4.1: Basic computer system architecture showing the flow of data between input devices, the CPU, memory, storage, and output devices
 </figcaption></figure>
 </div>
-</div>
-</div>
+<p>The hardware on the edges of that diagram is the <strong>input/output (I/O) system</strong>: keyboards, mice, touchscreens, cameras, microphones, and laboratory sensors bring data in; displays, printers, speakers, and actuators send results out. A network interface is both, which is why a cluster or cloud machine you never touch physically can still be a full computer system.</p>
 <p>At the heart of every computation is the <strong>fetch-decode-execute cycle</strong>, which the CPU performs billions of times per second.</p>
 </section><section id="sec-fetch-decode-execute" class="level2" data-number="4.2"><h2 data-number="4.2" class="anchored" data-anchor-id="sec-fetch-decode-execute">
 <span class="header-section-number">4.2</span> The Fetch-Decode-Execute Cycle</h2>
 <p>Every instruction your programs execute follows the same fundamental pattern (<a href="#fig-fetch-decode-execute" class="quarto-xref">Figure&nbsp;<span>4.2</span></a>):</p>
-<div class="cell" data-layout-align="default">
-<div class="cell-output-display">
-<div id="fig-fetch-decode-execute" class="quarto-float quarto-figure quarto-figure-center anchored">
+<div id="fig-fetch-decode-execute" class="quarto-float quarto-figure quarto-figure-center anchored" data-fig-align="center">
 <figure class="quarto-float quarto-float-fig figure"><div aria-describedby="fig-fetch-decode-execute-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<div>
-<pre class="mermaid mermaid-js" data-label="fig-fetch-decode-execute">graph LR
-    A[Fetch Instruction] --&gt; B[Decode Instruction]
-    B --&gt; C[Execute Instruction]
-    C --&gt; D[Store Results]
-    D --&gt; A
-</pre>
-</div>
+<img src="../images/appendix_A_S03_fetch_decode_execute.svg" class="img-fluid quarto-figure quarto-figure-center figure-img" style="width:85.0%">
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-fetch-decode-execute-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;4.2: The fundamental cycle underlying all computer operations
+Figure&nbsp;4.2: The fundamental cycle underlying all computer operations: fetch, decode, execute, store, and repeat
 </figcaption></figure>
-</div>
-</div>
 </div>
 <ol type="1">
 <li>
@@ -750,12 +730,13 @@ Tip
 <p>RAM provides temporary working space for programs and data currently in use. Key characteristics:</p>
 <p><strong>Volatile.</strong> Contents are lost when power is removed.</p>
 <p><strong>Random Access.</strong> Any memory location can be accessed with equal speed (unlike sequential access).</p>
+<p><strong>Bandwidth and Latency.</strong> Two different numbers describe how fast memory is: <em>bandwidth</em> is how much data can move per second (tens of gigabytes per second for modern DDR4/DDR5 memory), and <em>latency</em> is the delay before the first byte arrives (on the order of 100 nanoseconds). Running two memory modules in <em>dual channel</em> doubles the available bandwidth, which is why laptops are usually sold with matched pairs.</p>
 <p><strong>Types.</strong> There are two main kinds of RAM:</p>
 <ul>
 <li>
-<strong>DRAM (Dynamic RAM)</strong>: Main system memory, requires constant refresh</li>
+<strong>DRAM (Dynamic RAM)</strong>: Main system memory (the DDR4 and DDR5 modules in a laptop or server); cheap and dense, but must be refreshed constantly</li>
 <li>
-<strong>SRAM (Static RAM)</strong>: Used in CPU caches, faster but more expensive</li>
+<strong>SRAM (Static RAM)</strong>: Used in CPU caches; needs no refresh and is much faster, but far more expensive per byte</li>
 </ul>
 <p>Modern systems typically have 8-64 GB of RAM, though scientific workstations and servers may have much more. For a concrete sense of scale, <a href="03-computing-at-uo.html#tbl-laptop-vs-talapas" class="quarto-xref">Table&nbsp;<span>3.4</span></a> in <a href="03-computing-at-uo.html" class="quarto-xref"><span>Chapter 3</span></a> compares a typical laptop (8-16 GB) with a single Talapas node (512 GB) and the cluster’s large-memory nodes (up to 4 TB).</p>
 <div class="callout callout-style-default callout-tip callout-titled" title="The usual bottleneck is RAM">
@@ -817,13 +798,38 @@ Figure&nbsp;4.3: The memory hierarchy: faster storage is smaller and more expens
 </section></section><section id="sec-operating-systems" class="level2" data-number="4.6"><h2 data-number="4.6" class="anchored" data-anchor-id="sec-operating-systems">
 <span class="header-section-number">4.6</span> Operating Systems</h2>
 <p>An <strong>operating system (OS)</strong> is the software layer that manages hardware resources and provides services to applications. Think of it as a translator between your programs and the physical computer.</p>
-<section id="sec-core-functions" class="level3"><h3 class="anchored" data-anchor-id="sec-core-functions">Core Functions</h3>
+<section id="sec-os-architecture" class="level3"><h3 class="anchored" data-anchor-id="sec-os-architecture">How an Operating System Is Organized</h3>
+<p><a href="#fig-os-architecture" class="quarto-xref">Figure&nbsp;<span>4.4</span></a> shows the layers. Your applications (R, a web browser, a shell) never touch the hardware directly. They make <strong>system calls</strong>—requests such as “open this file” or “give me more memory”—to the <strong>kernel</strong>, the core of the OS that runs with full privileges. The kernel’s subsystems handle process management, memory management, the file system, and I/O, and talk to the physical hardware through <strong>device drivers</strong>, small pieces of code that know the details of one particular disk, network card, or GPU. This layering is what lets the same R script run on a laptop and a cluster node with completely different hardware.</p>
+<div id="fig-os-architecture" class="quarto-float quarto-figure quarto-figure-center anchored" data-fig-align="center">
+<figure class="quarto-float quarto-float-fig figure"><div aria-describedby="fig-os-architecture-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="../images/appendix_A_S13_os_architecture.svg" class="img-fluid quarto-figure quarto-figure-center figure-img" style="width:70.0%">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-os-architecture-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;4.4: Operating system architecture: applications reach the hardware only through system calls, the kernel, and device drivers
+</figcaption></figure>
+</div>
+</section><section id="sec-core-functions" class="level3"><h3 class="anchored" data-anchor-id="sec-core-functions">Core Functions</h3>
 <p>Operating systems handle:</p>
 <p><strong>Process Management.</strong> Creating, scheduling, and terminating programs. Managing how CPU time is shared among competing processes.</p>
 <p><strong>Memory Management.</strong> Allocating RAM to programs, implementing virtual memory, protecting programs from interfering with each other’s memory.</p>
 <p><strong>File System Management.</strong> Organizing data on storage devices, managing directories and permissions, handling read/write operations.</p>
 <p><strong>Device Management.</strong> Providing standardized interfaces to diverse hardware through device drivers.</p>
 <p><strong>Security.</strong> User authentication, access control, protection against malicious software.</p>
+</section><section id="sec-cpu-scheduling" class="level3"><h3 class="anchored" data-anchor-id="sec-cpu-scheduling">CPU Scheduling</h3>
+<p>A computer runs far more processes than it has cores, so the OS must decide which process gets a core next. This is <strong>CPU scheduling</strong>, and the same ideas reappear at cluster scale when SLURM decides which <em>job</em> runs next (<a href="11-hpc-talapas.html#sec-scheduler-fairshare" class="quarto-xref"><span>Section 20.6.1</span></a>). The classic strategies are:</p>
+<ul>
+<li>
+<strong>First-come, first-served (FCFS)</strong>: simple, but one long process can make everything behind it wait</li>
+<li>
+<strong>Shortest job first (SJF)</strong>: gives the best average waiting time, if job lengths are known in advance</li>
+<li>
+<strong>Round robin (RR)</strong>: every runnable process gets a short time slice in turn, which keeps interactive programs responsive</li>
+<li>
+<strong>Priority scheduling</strong>: important processes go first, usually with some aging so low-priority work eventually runs</li>
+</ul>
+<p>Schedulers are judged by <em>CPU utilization</em> (keep the cores busy), <em>throughput</em> (jobs finished per unit time), <em>turnaround time</em> (submission to completion), <em>waiting time</em> (time spent in the ready queue), and <em>response time</em> (delay before the first visible output). Desktop operating systems weight responsiveness heavily; a cluster scheduler weights throughput and fairness instead.</p>
+</section><section id="sec-os-security" class="level3"><h3 class="anchored" data-anchor-id="sec-os-security">Security and Protection</h3>
+<p>The OS also keeps programs and users from interfering with one another. The CPU itself runs in two modes: ordinary programs execute in <strong>user mode</strong>, and only the kernel executes in <strong>kernel mode</strong>, where it can touch hardware directly; a user-mode program that tries to access memory that is not its own is stopped by <strong>memory protection</strong>. On top of that, file <strong>permissions</strong> and access control lists decide who may read or write what (<a href="03-unix-fundamentals.html#sec-file-permissions" class="quarto-xref"><span>Section 5.9</span></a>), user authentication verifies who you are, and <strong>sandboxing</strong> isolates untrusted processes (containers, discussed in <a href="11-hpc-talapas.html#sec-software-layers" class="quarto-xref"><span>Section 20.11.3</span></a>, are a modern form of this).</p>
 </section><section id="sec-common-operating-systems" class="level3"><h3 class="anchored" data-anchor-id="sec-common-operating-systems">Common Operating Systems</h3>
 <p>For scientific computing, you’ll encounter:</p>
 <p><strong>Linux.</strong> Open-source Unix-like OS dominant in servers and clusters, and heir to the design philosophy of the original Unix <span class="citation" data-cites="kernighan1984unix">(<a href="../references.html#ref-kernighan1984unix" role="doc-biblioref">Kernighan &amp; Pike, 1984</a>)</span>. Most bioinformatics tools assume Linux.</p>
@@ -846,7 +852,15 @@ Figure&nbsp;4.3: The memory hierarchy: faster storage is smaller and more expens
 <span class="header-section-number">4.7</span> Computing Environments</h2>
 <p>Research computing happens across a spectrum of environments, from your laptop to massive cloud data centers.</p>
 <section id="sec-local-computing" class="level3"><h3 class="anchored" data-anchor-id="sec-local-computing">Local Computing</h3>
-<p><strong>Local computing</strong> refers to resources physically present and directly controlled by you—your laptop, desktop, or lab workstation.</p>
+<p><strong>Local computing</strong> refers to resources physically present and directly controlled by you—your laptop, desktop, or lab workstation. <a href="#fig-local-architecture" class="quarto-xref">Figure&nbsp;<span>4.5</span></a> shows the software stack on such a machine: applications sit on the operating system, which reaches the CPU, memory, storage, GPU, and network card through a hardware abstraction layer.</p>
+<div id="fig-local-architecture" class="quarto-float quarto-figure quarto-figure-center anchored" data-fig-align="center">
+<figure class="quarto-float quarto-float-fig figure"><div aria-describedby="fig-local-architecture-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="../images/appendix_A_S21_local_computing_arch.svg" class="img-fluid quarto-figure quarto-figure-center figure-img" style="width:70.0%">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-local-architecture-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;4.5: Local computing architecture: one machine, one operating system, all hardware reached through the OS
+</figcaption></figure>
+</div>
 <p><strong>Advantages:</strong></p>
 <ul>
 <li>Complete control over hardware and software</li>
@@ -862,42 +876,69 @@ Figure&nbsp;4.3: The memory hierarchy: faster storage is smaller and more expens
 <li>High upfront cost for powerful machines</li>
 <li>Resources sit idle during off-hours</li>
 </ul></section><section id="sec-cluster-computing" class="level3"><h3 class="anchored" data-anchor-id="sec-cluster-computing">Cluster Computing</h3>
-<p>A <strong>computing cluster</strong> is a collection of interconnected computers (nodes) working together as a single system. The University of Oregon’s Talapas is an example; <a href="#fig-cluster-architecture" class="quarto-xref">Figure&nbsp;<span>4.4</span></a> shows the basic layout, and <a href="11-hpc-talapas.html" class="quarto-xref"><span>Chapter 20</span></a> covers using it.</p>
-<div class="cell" data-layout-align="default">
-<div class="cell-output-display">
-<div id="fig-cluster-architecture" class="quarto-float quarto-figure quarto-figure-center anchored">
+<p>A <strong>computing cluster</strong> is a collection of interconnected computers (nodes) working together as a single system. The University of Oregon’s Talapas is an example; <a href="#fig-cluster-architecture" class="quarto-xref">Figure&nbsp;<span>4.6</span></a> shows the basic layout, and <a href="11-hpc-talapas.html" class="quarto-xref"><span>Chapter 20</span></a> covers using it.</p>
+<div id="fig-cluster-architecture" class="quarto-float quarto-figure quarto-figure-center anchored" data-fig-align="center">
 <figure class="quarto-float quarto-float-fig figure"><div aria-describedby="fig-cluster-architecture-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<div>
-<pre class="mermaid mermaid-js" data-label="fig-cluster-architecture">graph TB
-    M[Head/Login Node] --&gt; N1[Compute Node 1]
-    M --&gt; N2[Compute Node 2]
-    M --&gt; N3[Compute Node 3]
-    M --&gt; N4[Compute Node N]
-    N1 -.-&gt; S[(Shared Storage)]
-    N2 -.-&gt; S
-    N3 -.-&gt; S
-    N4 -.-&gt; S
-    U[Users] --&gt; M
-</pre>
-</div>
+<img src="../images/appendix_A_S24_cluster_computing.svg" class="img-fluid quarto-figure quarto-figure-center figure-img" style="width:70.0%">
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-cluster-architecture-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;4.4: Simplified cluster architecture with head node, compute nodes, and shared storage
+Figure&nbsp;4.6: Simplified cluster architecture with a head node, compute nodes, and shared storage
 </figcaption></figure>
-</div>
-</div>
 </div>
 <p>Key components include:</p>
 <p><strong>Head/Login Node.</strong> Where users log in and submit jobs. Not for running computations!</p>
 <p><strong>Compute Nodes.</strong> Worker machines that actually run your analyses.</p>
-<p><strong>Resource Manager.</strong> Software (like SLURM <span class="citation" data-cites="yoo2003slurm">(<a href="../references.html#ref-yoo2003slurm" role="doc-biblioref">Yoo et al., 2003</a>)</span>) that schedules jobs and allocates resources fairly (see <a href="appendix-slurm.html" class="quarto-xref"><span>Appendix F</span></a> for a command reference).</p>
-<p><strong>Shared Storage.</strong> Parallel file systems accessible from all nodes.</p>
+<p><strong>Interconnect.</strong> A high-speed network (InfiniBand or 10+ gigabit Ethernet) linking the nodes to each other and to storage. It is much faster than an ordinary office network, and it is what makes a cluster behave like one machine rather than many.</p>
+<p><strong>Shared Storage.</strong> Parallel file systems such as Lustre or IBM’s GPFS (the one Talapas uses; <a href="11-hpc-talapas.html#sec-talapas-storage" class="quarto-xref"><span>Section 20.5</span></a>) that every node sees identically, so a file written on the login node is immediately available to a job on any compute node.</p>
+<p><strong>Resource Manager.</strong> Software that schedules jobs and allocates resources fairly. Several exist (<a href="#tbl-resource-managers" class="quarto-xref">Table&nbsp;<span>4.2</span></a>); Talapas uses SLURM <span class="citation" data-cites="yoo2003slurm">(<a href="../references.html#ref-yoo2003slurm" role="doc-biblioref">Yoo et al., 2003</a>)</span>, for which <a href="appendix-slurm.html" class="quarto-xref"><span>Appendix F</span></a> is a command reference.</p>
+<div id="tbl-resource-managers" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure"><figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-resource-managers-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;4.2: Resource managers used to schedule jobs on clusters
+</figcaption><div aria-describedby="tbl-resource-managers-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<table class="caption-top table">
+<colgroup>
+<col style="width: 22%">
+<col style="width: 37%">
+<col style="width: 40%">
+</colgroup>
+<thead><tr class="header">
+<th style="text-align: left;">System</th>
+<th style="text-align: left;">Typical use</th>
+<th style="text-align: left;">Key features</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">SLURM</td>
+<td style="text-align: left;">Academic and national-lab HPC (Talapas)</td>
+<td style="text-align: left;">Fair-share scheduling, backfill, job arrays, power management</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">PBS / Torque</td>
+<td style="text-align: left;">Traditional HPC</td>
+<td style="text-align: left;">Mature, stable, widely supported</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">SGE / UGE (Grid Engine)</td>
+<td style="text-align: left;">Mixed workloads</td>
+<td style="text-align: left;">Flexible queue policies</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Kubernetes</td>
+<td style="text-align: left;">Containerized services and cloud</td>
+<td style="text-align: left;">Microservices, auto-scaling</td>
+</tr>
+</tbody>
+</table>
+</div>
+</figure>
+</div>
 <p><strong>Advantages:</strong></p>
 <ul>
 <li>Massive scalability (add nodes as needed)</li>
 <li>Specialized hardware (GPUs, high-memory nodes)</li>
 <li>Shared among many users and projects</li>
 <li>Professional management and maintenance</li>
+<li>Fault tolerance: if one node fails, the others keep working</li>
 </ul>
 <p><strong>Disadvantages:</strong></p>
 <ul>
@@ -905,29 +946,16 @@ Figure&nbsp;4.4: Simplified cluster architecture with head node, compute nodes, 
 <li>Jobs may wait in queue</li>
 <li>Shared resources mean competition for access</li>
 <li>Less control over software environment</li>
+<li>Expensive infrastructure (space, power, cooling) that someone has to fund and maintain</li>
 </ul></section><section id="sec-cloud-computing" class="level3"><h3 class="anchored" data-anchor-id="sec-cloud-computing">Cloud Computing</h3>
-<p><strong>Cloud computing</strong> provides on-demand computing resources over the internet, with pay-as-you-go pricing. Major providers include Amazon Web Services (AWS), Google Cloud Platform (GCP), and Microsoft Azure. <a href="#fig-cloud-architecture" class="quarto-xref">Figure&nbsp;<span>4.5</span></a> sketches how a provider organizes its resources.</p>
-<div class="cell" data-layout-align="default">
-<div class="cell-output-display">
-<div id="fig-cloud-architecture" class="quarto-float quarto-figure quarto-figure-center anchored">
+<p><strong>Cloud computing</strong> provides on-demand computing resources over the internet, with pay-as-you-go pricing. Major providers include Amazon Web Services (AWS, the market leader with hundreds of services), Microsoft Azure (strong enterprise integration), and Google Cloud Platform (GCP, with an AI/ML focus). <a href="#fig-cloud-architecture" class="quarto-xref">Figure&nbsp;<span>4.7</span></a> sketches how a provider organizes its resources: each geographic <strong>region</strong> contains several independent <strong>availability zones</strong>, each with its own compute, storage, and networking, so that a failure in one zone does not take down the others.</p>
+<div id="fig-cloud-architecture" class="quarto-float quarto-figure quarto-figure-center anchored" data-fig-align="center">
 <figure class="quarto-float quarto-float-fig figure"><div aria-describedby="fig-cloud-architecture-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<div>
-<pre class="mermaid mermaid-js" data-label="fig-cloud-architecture">graph TB
-    R[Region] --&gt; AZ1[Availability Zone 1]
-    R --&gt; AZ2[Availability Zone 2]
-    AZ1 --&gt; C[Compute]
-    AZ1 --&gt; S[Storage]
-    AZ2 --&gt; C2[Compute]
-    AZ2 --&gt; S2[Storage]
-    U[Users] -.Internet.-&gt; R
-</pre>
-</div>
+<img src="../images/appendix_A_S27_cloud_computing.svg" class="img-fluid quarto-figure quarto-figure-center figure-img" style="width:75.0%">
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-cloud-architecture-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;4.5: Cloud computing architecture with multiple availability zones
+Figure&nbsp;4.7: Cloud computing architecture: regions, availability zones, and the compute, storage, and networking inside each
 </figcaption></figure>
-</div>
-</div>
 </div>
 <p><strong>Advantages:</strong></p>
 <ul>
@@ -943,12 +971,13 @@ Figure&nbsp;4.5: Cloud computing architecture with multiple availability zones
 <li>Vendor lock-in with proprietary services</li>
 <li>Requires reliable internet connectivity</li>
 <li>Data transfer costs (especially egress fees)</li>
-<li>Less control compared to local systems</li>
+<li>Less control compared to local systems, and compliance questions about where data may reside</li>
+<li>Performance variability from “noisy neighbors” sharing the same physical hardware</li>
 </ul></section><section id="sec-choosing-the-right-environment" class="level3"><h3 class="anchored" data-anchor-id="sec-choosing-the-right-environment">Choosing the Right Environment</h3>
-<p><a href="#tbl-computing-environments" class="quarto-xref">Table&nbsp;<span>4.2</span></a> summarizes the tradeoffs between the three environments.</p>
+<p><a href="#tbl-computing-environments" class="quarto-xref">Table&nbsp;<span>4.3</span></a> summarizes the tradeoffs between the three environments.</p>
 <div id="tbl-computing-environments" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-tbl figure"><figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-computing-environments-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Table&nbsp;4.2: Comparison of computing environments
+Table&nbsp;4.3: Comparison of computing environments
 </figcaption><div aria-describedby="tbl-computing-environments-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 <table class="caption-top table">
 <colgroup>
@@ -1014,26 +1043,14 @@ Tip
 </div>
 </section></section><section id="sec-computing-evolution" class="level2" data-number="4.8"><h2 data-number="4.8" class="anchored" data-anchor-id="sec-computing-evolution">
 <span class="header-section-number">4.8</span> The Evolution of Scientific Computing</h2>
-<p>Computing infrastructure has evolved dramatically over the past several decades (<a href="#fig-computing-evolution" class="quarto-xref">Figure&nbsp;<span>4.6</span></a>):</p>
-<div class="cell" data-layout-align="default">
-<div class="cell-output-display">
-<div id="fig-computing-evolution" class="quarto-float quarto-figure quarto-figure-center anchored">
+<p>Computing infrastructure has evolved dramatically over the past several decades (<a href="#fig-computing-evolution" class="quarto-xref">Figure&nbsp;<span>4.8</span></a>): from centralized mainframes in the 1960s and 70s, through personal computers in the 1980s and 90s and client-server systems in the 1990s and 2000s, to clusters and grids in the 2000s, cloud computing from about 2006 on, and today’s edge and hybrid arrangements.</p>
+<div id="fig-computing-evolution" class="quarto-float quarto-figure quarto-figure-center anchored" data-fig-align="center">
 <figure class="quarto-float quarto-float-fig figure"><div aria-describedby="fig-computing-evolution-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<div>
-<pre class="mermaid mermaid-js" data-label="fig-computing-evolution">graph LR
-    A[1960s-70s&lt;br/&gt;Mainframes] --&gt; B[1980s-90s&lt;br/&gt;Personal Computers]
-    B --&gt; C[1990s-2000s&lt;br/&gt;Client-Server]
-    C --&gt; D[2000s&lt;br/&gt;Clusters/Grids]
-    D --&gt; E[2006+&lt;br/&gt;Cloud Computing]
-    E --&gt; F[2020s&lt;br/&gt;Edge/Hybrid]
-</pre>
-</div>
+<img src="../images/appendix_A_S18_computing_timeline.svg" class="img-fluid quarto-figure quarto-figure-center figure-img" style="width:100.0%">
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-computing-evolution-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;4.6: Evolution of computing paradigms from mainframes to modern hybrid approaches
+Figure&nbsp;4.8: Evolution of computing paradigms from mainframes to modern hybrid approaches
 </figcaption></figure>
-</div>
-</div>
 </div>
 <p>Key drivers of this evolution include:</p>
 <ul>
