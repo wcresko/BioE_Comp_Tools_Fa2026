@@ -466,6 +466,57 @@ ggplot(results, aes(x = time, y = population, color = strain)) +
   scale_y_continuous(labels = scales::comma)
 ```
 
+## A Worked Example: Normalizing Gene Counts {#sec-fn-worked-example}
+
+The examples so far have been small on purpose. Here is a function of the kind you will actually write, built up in the way functions get built in practice: first as a few lines that work once, then as something reusable. The raw read counts in the stickleback data (@sec-course-dataset) are not directly comparable between fish, because some libraries were sequenced more deeply than others. The usual first step is to scale each fish's counts to **counts per million** (CPM), dividing by that fish's total and multiplying by a million, and often to take a logarithm afterwards so that a handful of very highly expressed genes do not dominate every plot.
+
+Written once, for one column, that is a single line: `stickle$Gene1 / sum(stickle[, 5:604]) * 1e6`. Written for every gene it becomes a loop, and written for the next dataset it becomes a copy of the loop with the column numbers changed by hand, which is exactly the moment @sec-why-functions warned about. The function below does the job for any data frame whose gene columns can be named.
+
+```{r}
+#| label: ch15-cpm-function
+library(tidyverse)
+
+normalize_cpm <- function(counts, gene_cols, log = TRUE, pseudocount = 1) {
+  # counts:      a data frame with one row per sample
+  # gene_cols:   a tidyselect specification of the count columns, e.g. starts_with("Gene")
+  # log:         if TRUE, return log2(CPM + pseudocount); if FALSE, return CPM
+  # pseudocount: added before the log so that zero counts stay finite
+  gene_mat <- counts |> select({{ gene_cols }}) |> as.matrix()
+  if (!is.numeric(gene_mat)) stop("The selected gene columns must all be numeric.")
+  if (any(gene_mat < 0, na.rm = TRUE)) stop("Counts cannot be negative.")
+  library_size <- rowSums(gene_mat, na.rm = TRUE)
+  cpm <- gene_mat / library_size * 1e6
+  if (log) cpm <- log2(cpm + pseudocount)
+  counts |>
+    select(-{{ gene_cols }}) |>
+    bind_cols(as_tibble(cpm))
+}
+```
+
+Several of the chapter's ideas are at work in these fifteen lines. The arguments have **defaults** (@sec-default-argument-values), so the common call is short and the unusual one is still possible. The **input checks** at the top (@sec-fn-validate-inputs) fail immediately, with a message that says what went wrong, rather than producing a plausible-looking matrix of nonsense several steps later. The double-brace `{{ gene_cols }}` is the tidyverse's way of letting a function accept a column specification such as `starts_with("Gene")` and pass it on to `select()`; it is the one piece of syntax here that is specific to writing functions around dplyr, and it is worth recognizing because you will see it in other people's code. And the function returns a **data frame of the same shape it was given**, with the sample metadata untouched and the count columns replaced, so it drops straight into a pipeline.
+
+```{r}
+#| label: ch15-cpm-use
+stickle <- read_tsv("../data/Stickle_RNAseq.tsv", show_col_types = FALSE)
+stickle_cpm <- normalize_cpm(stickle, starts_with("Gene"))
+stickle_cpm[1:4, 1:7]
+
+# The raw counts and the normalized values tell different stories about library depth
+tibble(raw_total = rowSums(select(stickle, starts_with("Gene"))),
+       cpm_total = rowSums(2^select(stickle_cpm, starts_with("Gene")) - 1)) |>
+  summary()
+```
+
+After normalization every fish's counts sum to (almost exactly) one million, which is the point: differences between fish now reflect biology rather than how much sequencing each one received. Applying the same function to a second dataset, or with `log = FALSE`, or with a different pseudocount, is now a one-line change instead of a search-and-replace.
+
+::: {.callout-note title="When to promote code into a function"}
+A useful rule of thumb is the second copy. The first time you write a block of code, write it inline and get it working. The moment you find yourself copying it, stop and turn it into a function, giving the things that differ between the copies names as arguments. Two copies are a smell; three are a bug waiting to happen, because you will fix one and forget the others.
+:::
+
+::: {.callout-tip title="Testing a function you just wrote"}
+Check a new function on an input where you already know the answer before trusting it on real data. A two-row, three-gene data frame made with `tibble()` is enough to confirm by hand that the rows sum to a million and that `log = FALSE` returns raw CPM. Keep that check in your script as a comment or a tiny `stopifnot()`; it costs nothing and catches the day someone changes the function.
+:::
+
 ## Best Practices for Writing Functions {#sec-function-best-practices}
 
 ### 1. Use Descriptive Names {#sec-fn-descriptive-names}

@@ -55,11 +55,27 @@ While you are there, note your RAM and free disk space. In @sec-computing-at-uo 
 
 ## The Install Checklist {#sec-install-checklist}
 
-Here is everything you need to install for the course, in a sensible order. Several of the downloads are large, so it is worth starting them and letting them run while you read the rest of the chapter. The operating-system prerequisites (the Xcode command-line tools on macOS, and WSL with Ubuntu on Windows) are covered in @sec-introduction; make sure those are finished first.
+Here is everything you need for the course, in a sensible order. You do not need all of it on day one. The bootcamp installs a **minimum viable toolkit**, four things that are enough for the first several weeks, and the rest arrives in the week it is first used (@tbl-install-when). Several of the downloads are large, so it is worth starting them and letting them run while you read the rest of the chapter. The operating-system prerequisites (the Xcode command-line tools on macOS, and WSL with Ubuntu on Windows) are covered in @sec-introduction; make sure those are finished first.
+
+| Install | When | Why |
+|:--------|:-----|:----|
+| A **Unix shell** | Bootcamp | Built in on macOS and Linux; WSL with Ubuntu on Windows |
+| **R** (plus Rtools on Windows) | Bootcamp | One of the two languages we script in |
+| **Python 3** | Bootcamp | The other |
+| **Positron** | Bootcamp | The IDE demonstrated in class; its built-in terminal is where shell work happens, and it **bundles Quarto** |
+| **TinyTeX** | Week 9 | A small LaTeX, needed only for PDF output |
+| **Git** and a GitHub account | Weeks 9-10 | Version control (Macs already have Git from the Xcode tools) |
+| **VS Code**, **RStudio** | Optional | Alternatives to Positron; @sec-which-ide compares them |
+
+: What to install, and when {#tbl-install-when}
+
+::: {.callout-tip title="Which IDE will we use?"}
+Class demonstrations use **Positron**. Everything in the course also works in VS Code (the same editor underneath) and, for R, in RStudio, and you are welcome to use them; but if all of this is new to you, follow along in Positron so that what you see matches the screen at the front of the room.
+:::
 
 ### A Unix shell {#sec-toolkit-shell}
 
-On macOS and Linux you already have one: open **Terminal** (on macOS, press `Cmd-Space` and type "Terminal"; on Linux, often `Ctrl-Alt-T`). On Windows, the shell you will use for this course is the **Ubuntu** app installed by WSL. Confirm it works by typing `echo $SHELL` and `whoami` at the prompt. macOS uses `zsh` by default and Ubuntu uses `bash`; for everything in this course they behave the same.
+On macOS and Linux you already have one: open **Terminal** (on macOS, press `Cmd-Space` and type "Terminal"; on Linux, often `Ctrl-Alt-T`). On Windows, the shell you will use for this course is the **Ubuntu** installed by WSL. In practice you will usually reach the shell through the terminal panel inside Positron (``Ctrl-` ``, the backtick key), which runs the same shell in a window next to your code; on Windows, the terminal panel's drop-down menu offers an **Ubuntu (WSL)** profile. Confirm it works by typing `echo $SHELL` and `whoami` at the prompt. macOS uses `zsh` by default and Ubuntu uses `bash`; for everything in this course they behave the same.
 
 ### R {#sec-toolkit-r}
 
@@ -71,7 +87,7 @@ sudo apt install -y r-base r-base-dev
 R --version
 ```
 
-Other distributions have their own instructions on the CRAN site. Whichever platform you are on, a quick check that R itself works is to start it and type `R.version.string`; it should print something like `R version 4.5.1 (2025-06-13)`. R is the subject of @sec-r-programming and everything that follows it.
+Other distributions have their own instructions on the CRAN site. Whichever platform you are on, a quick check that R itself works is to start it and type `R.version.string`; it should print something like `R version 4.5.1 (2025-06-13)`. While you are there, install the one package collection the course leans on from Week 6 onward: `install.packages("tidyverse")`. It downloads a few hundred megabytes, so start it and let it run. On Windows, also install **Rtools** (@sec-compiler-tools) so that packages that need compiling can build. R is the subject of @sec-r-programming and everything that follows it.
 
 ::: {.callout-note title="Windows: install R and Python on the Windows side"}
 If you use WSL, install R, Python, VS Code, and Positron as ordinary **Windows** applications, not inside Ubuntu. The IDEs run on Windows and will find the Windows copies of R and Python; Ubuntu is where you will type shell commands. @sec-which-side explains how to tell the two apart.
@@ -95,11 +111,11 @@ The trade-offs among these options, and how to use environments with each, are c
 
 ### Quarto {#sec-toolkit-quarto}
 
-Quarto turns Markdown and code into HTML pages, PDFs, Word documents, and slides; it is how this book and the course slides are built. Download the installer for your operating system from <https://quarto.org/docs/get-started/> and run it. Quarto is covered in depth in @sec-quarto-documents.
+Quarto turns Markdown and code into HTML pages, PDFs, Word documents, and slides; it is how this book and the course slides are built. **Positron and RStudio bundle the Quarto command-line tool**, so if you use either of them there is nothing to install: open the IDE's terminal and run `quarto --version` to confirm. If you use VS Code, or want `quarto` available in a shell outside any IDE, download the installer for your operating system from <https://quarto.org/docs/get-started/> and run it. Quarto is covered in depth in @sec-quarto-documents.
 
 ### TinyTeX {#sec-tinytex}
 
-To produce PDFs, Quarto needs a **LaTeX** distribution, the standard system for typesetting mathematics (@sec-latex-basics). Full distributions such as MacTeX and MiKTeX are several gigabytes; TinyTeX installs only what Quarto needs. After Quarto is installed, open a terminal and run:
+To produce PDFs, Quarto needs a **LaTeX** distribution, the standard system for typesetting mathematics (@sec-latex-basics). You will not need this until Week 9, and rendering to HTML works without it, so it is fine to come back to this section later. Full distributions such as MacTeX and MiKTeX are several gigabytes; TinyTeX installs only what Quarto needs. Open a terminal and run:
 
 ```bash
 quarto --version
@@ -130,7 +146,7 @@ Download **Visual Studio Code** from <https://code.visualstudio.com/download>. I
 
 ### Positron {#sec-toolkit-positron}
 
-Download **Positron** from <https://positron.posit.co/download>. Install R and Python *before* Positron so that it can find them automatically. Details are in @sec-positron.
+Download **Positron** from <https://positron.posit.co/download> and run the installer. Positron discovers the R and Python installations on your computer when it starts, so if you install R or Python *after* Positron, quit and reopen it and they will appear in the interpreter picker at the top right. Two things make Positron the right first install: its **terminal panel** (``Ctrl-` ``) is where all the shell work in @sec-unix-fundamentals happens, and it **bundles Quarto**, so Markdown and rendering work with nothing extra. Details are in @sec-positron.
 
 ### RStudio {#sec-toolkit-rstudio}
 

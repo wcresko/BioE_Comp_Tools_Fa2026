@@ -916,6 +916,38 @@ ggsave("my_plot.svg", plot = p, width = 8, height = 6)
 
 `ggsave()` infers the format from the file extension and, if `plot` is omitted, saves the last plot displayed. Always give explicit `width` and `height` (in inches by default) so that text and points are sized consistently between runs, and use `dpi = 300` or higher for raster formats destined for print. Vector formats (PDF, SVG) scale without loss and are what journals usually ask for.
 
+## Running Example: The Stickleback Data {#sec-viz-stickle}
+
+::: {.callout-note title="Running example"}
+This section applies the chapter to the course dataset described in @sec-course-dataset (80 stickleback, 4 treatment groups, 600 genes). The same steps appear on the Week 7 slides, so the book and the lecture can be read side by side.
+:::
+
+The base R boxplot in @sec-r-programming showed one gene. With the long-format data from @sec-data-wrangling, ggplot2 shows several genes in one figure: a boxplot layer, colour for the microbiota treatment, and `facet_wrap()` to give each gene its own panel with its own y-axis.
+
+```{r}
+#| label: ch14-stickle-prep
+#| message: false
+library(tidyverse)
+stickle_long <- read_tsv("../data/Stickle_RNAseq.tsv", show_col_types = FALSE) |>
+  pivot_longer(starts_with("Gene"), names_to = "gene", values_to = "count")
+```
+
+```{r}
+#| label: fig-ch14-stickle-facets
+#| fig-cap: "Read counts for four genes by host genotype and microbiota treatment. Each panel is one gene; colour is the microbiota treatment."
+#| fig-width: 8
+#| fig-height: 5
+stickle_long |>
+  filter(gene %in% c("Gene1", "Gene2", "Gene3", "Gene4")) |>
+  ggplot(aes(x = Genotype, y = count, fill = Microbiota)) +
+  geom_boxplot() +
+  facet_wrap(~ gene, scales = "free_y") +
+  labs(y = "Read count", title = "Stickleback gut RNA-seq") +
+  theme_minimal(base_size = 14)
+```
+
+Nothing in the plotting code refers to a particular gene: change the `filter()` and the same figure describes any subset of the 600. That separation between the data and the description of the graphic is what the grammar of graphics buys you.
+
 ## Summary {#sec-viz-summary}
 
 ggplot2 provides a powerful and consistent framework for data visualization:

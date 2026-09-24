@@ -573,8 +573,9 @@ div.csl-indent {
   <li><a href="#sec-using-a-data-frame-of-inputs" id="toc-sec-using-a-data-frame-of-inputs" class="nav-link" data-scroll-target="#sec-using-a-data-frame-of-inputs">Using a Data Frame of Inputs</a></li>
   </ul>
 </li>
+  <li><a href="#sec-fn-worked-example" id="toc-sec-fn-worked-example" class="nav-link" data-scroll-target="#sec-fn-worked-example"><span class="header-section-number">15.8</span> A Worked Example: Normalizing Gene Counts</a></li>
   <li>
-<a href="#sec-function-best-practices" id="toc-sec-function-best-practices" class="nav-link" data-scroll-target="#sec-function-best-practices"><span class="header-section-number">15.8</span> Best Practices for Writing Functions</a>
+<a href="#sec-function-best-practices" id="toc-sec-function-best-practices" class="nav-link" data-scroll-target="#sec-function-best-practices"><span class="header-section-number">15.9</span> Best Practices for Writing Functions</a>
   <ul class="collapse">
 <li><a href="#sec-fn-descriptive-names" id="toc-sec-fn-descriptive-names" class="nav-link" data-scroll-target="#sec-fn-descriptive-names">1. Use Descriptive Names</a></li>
   <li><a href="#sec-fn-document" id="toc-sec-fn-document" class="nav-link" data-scroll-target="#sec-fn-document">2. Document Your Functions</a></li>
@@ -582,7 +583,7 @@ div.csl-indent {
   <li><a href="#sec-fn-focused" id="toc-sec-fn-focused" class="nav-link" data-scroll-target="#sec-fn-focused">4. Keep Functions Focused</a></li>
   </ul>
 </li>
-  <li><a href="#sec-functions-summary" id="toc-sec-functions-summary" class="nav-link" data-scroll-target="#sec-functions-summary"><span class="header-section-number">15.9</span> Summary</a></li>
+  <li><a href="#sec-functions-summary" id="toc-sec-functions-summary" class="nav-link" data-scroll-target="#sec-functions-summary"><span class="header-section-number">15.10</span> Summary</a></li>
   <li><a href="#sec-fn-additional-reading" id="toc-sec-fn-additional-reading" class="nav-link" data-scroll-target="#sec-fn-additional-reading">Additional Reading</a></li>
   <li><a href="#sec-fn-exercises" id="toc-sec-fn-exercises" class="nav-link" data-scroll-target="#sec-fn-exercises">Exercises</a></li>
   </ul><div class="toc-actions"><ul><li><a href="https://github.com/wcresko/BioE_Comp_Tools_Fa2026/edit/main/Book/chapters/15-writing-functions.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li><li><a href="https://github.com/wcresko/BioE_Comp_Tools_Fa2026/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></nav>
@@ -1258,127 +1259,257 @@ Figure&nbsp;15.1: Simulated bacterial growth curves for three strains, produced 
 </div>
 </div>
 </div>
-</section></section><section id="sec-function-best-practices" class="level2" data-number="15.8"><h2 data-number="15.8" class="anchored" data-anchor-id="sec-function-best-practices">
-<span class="header-section-number">15.8</span> Best Practices for Writing Functions</h2>
+</section></section><section id="sec-fn-worked-example" class="level2" data-number="15.8"><h2 data-number="15.8" class="anchored" data-anchor-id="sec-fn-worked-example">
+<span class="header-section-number">15.8</span> A Worked Example: Normalizing Gene Counts</h2>
+<p>The examples so far have been small on purpose. Here is a function of the kind you will actually write, built up in the way functions get built in practice: first as a few lines that work once, then as something reusable. The raw read counts in the stickleback data (<a href="01-introduction.html#sec-course-dataset" class="quarto-xref"><span>Section 1.5</span></a>) are not directly comparable between fish, because some libraries were sequenced more deeply than others. The usual first step is to scale each fish’s counts to <strong>counts per million</strong> (CPM), dividing by that fish’s total and multiplying by a million, and often to take a logarithm afterwards so that a handful of very highly expressed genes do not dominate every plot.</p>
+<p>Written once, for one column, that is a single line: <code>stickle$Gene1 / sum(stickle[, 5:604]) * 1e6</code>. Written for every gene it becomes a loop, and written for the next dataset it becomes a copy of the loop with the column numbers changed by hand, which is exactly the moment <a href="#sec-why-functions" class="quarto-xref"><span>Section 15.1</span></a> warned about. The function below does the job for any data frame whose gene columns can be named.</p>
+<div class="cell" data-layout-align="center">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb20"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1"></a><span class="fu">library</span>(tidyverse)</span>
+<span id="cb20-2"><a href="#cb20-2"></a></span>
+<span id="cb20-3"><a href="#cb20-3"></a>normalize_cpm <span class="ot">&lt;-</span> <span class="cf">function</span>(counts, gene_cols, <span class="at">log =</span> <span class="cn">TRUE</span>, <span class="at">pseudocount =</span> <span class="dv">1</span>) {</span>
+<span id="cb20-4"><a href="#cb20-4"></a>  <span class="co"># counts:      a data frame with one row per sample</span></span>
+<span id="cb20-5"><a href="#cb20-5"></a>  <span class="co"># gene_cols:   a tidyselect specification of the count columns, e.g. starts_with("Gene")</span></span>
+<span id="cb20-6"><a href="#cb20-6"></a>  <span class="co"># log:         if TRUE, return log2(CPM + pseudocount); if FALSE, return CPM</span></span>
+<span id="cb20-7"><a href="#cb20-7"></a>  <span class="co"># pseudocount: added before the log so that zero counts stay finite</span></span>
+<span id="cb20-8"><a href="#cb20-8"></a>  gene_mat <span class="ot">&lt;-</span> counts <span class="sc">|&gt;</span> <span class="fu">select</span>({{ gene_cols }}) <span class="sc">|&gt;</span> <span class="fu">as.matrix</span>()</span>
+<span id="cb20-9"><a href="#cb20-9"></a>  <span class="cf">if</span> (<span class="sc">!</span><span class="fu">is.numeric</span>(gene_mat)) <span class="fu">stop</span>(<span class="st">"The selected gene columns must all be numeric."</span>)</span>
+<span id="cb20-10"><a href="#cb20-10"></a>  <span class="cf">if</span> (<span class="fu">any</span>(gene_mat <span class="sc">&lt;</span> <span class="dv">0</span>, <span class="at">na.rm =</span> <span class="cn">TRUE</span>)) <span class="fu">stop</span>(<span class="st">"Counts cannot be negative."</span>)</span>
+<span id="cb20-11"><a href="#cb20-11"></a>  library_size <span class="ot">&lt;-</span> <span class="fu">rowSums</span>(gene_mat, <span class="at">na.rm =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb20-12"><a href="#cb20-12"></a>  cpm <span class="ot">&lt;-</span> gene_mat <span class="sc">/</span> library_size <span class="sc">*</span> <span class="fl">1e6</span></span>
+<span id="cb20-13"><a href="#cb20-13"></a>  <span class="cf">if</span> (log) cpm <span class="ot">&lt;-</span> <span class="fu">log2</span>(cpm <span class="sc">+</span> pseudocount)</span>
+<span id="cb20-14"><a href="#cb20-14"></a>  counts <span class="sc">|&gt;</span></span>
+<span id="cb20-15"><a href="#cb20-15"></a>    <span class="fu">select</span>(<span class="sc">-</span>{{ gene_cols }}) <span class="sc">|&gt;</span></span>
+<span id="cb20-16"><a href="#cb20-16"></a>    <span class="fu">bind_cols</span>(<span class="fu">as_tibble</span>(cpm))</span>
+<span id="cb20-17"><a href="#cb20-17"></a>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p>Several of the chapter’s ideas are at work in these fifteen lines. The arguments have <strong>defaults</strong> (<a href="#sec-default-argument-values" class="quarto-xref"><span>Section 15.3.3</span></a>), so the common call is short and the unusual one is still possible. The <strong>input checks</strong> at the top (<a href="#sec-fn-validate-inputs" class="quarto-xref"><span>Section 15.9.3</span></a>) fail immediately, with a message that says what went wrong, rather than producing a plausible-looking matrix of nonsense several steps later. The double-brace <code>{ gene_cols }</code> is the tidyverse’s way of letting a function accept a column specification such as <code>starts_with("Gene")</code> and pass it on to <code>select()</code>; it is the one piece of syntax here that is specific to writing functions around dplyr, and it is worth recognizing because you will see it in other people’s code. And the function returns a <strong>data frame of the same shape it was given</strong>, with the sample metadata untouched and the count columns replaced, so it drops straight into a pipeline.</p>
+<div class="cell" data-layout-align="center">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb21"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1"></a>stickle <span class="ot">&lt;-</span> <span class="fu">read_tsv</span>(<span class="st">"../data/Stickle_RNAseq.tsv"</span>, <span class="at">show_col_types =</span> <span class="cn">FALSE</span>)</span>
+<span id="cb21-2"><a href="#cb21-2"></a>stickle_cpm <span class="ot">&lt;-</span> <span class="fu">normalize_cpm</span>(stickle, <span class="fu">starts_with</span>(<span class="st">"Gene"</span>))</span>
+<span id="cb21-3"><a href="#cb21-3"></a>stickle_cpm[<span class="dv">1</span><span class="sc">:</span><span class="dv">4</span>, <span class="dv">1</span><span class="sc">:</span><span class="dv">7</span>]</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div class="kable-table">
+<table class="caption-top table table-sm table-striped small">
+<colgroup>
+<col style="width: 15%">
+<col style="width: 12%">
+<col style="width: 18%">
+<col style="width: 15%">
+<col style="width: 12%">
+<col style="width: 12%">
+<col style="width: 12%">
+</colgroup>
+<thead><tr class="header">
+<th style="text-align: left;">Individual</th>
+<th style="text-align: left;">Genotype</th>
+<th style="text-align: left;">Microbiota</th>
+<th style="text-align: left;">Geno&amp;Micro</th>
+<th style="text-align: right;">Gene1</th>
+<th style="text-align: right;">Gene2</th>
+<th style="text-align: right;">Gene3</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">AC1</td>
+<td style="text-align: left;">A</td>
+<td style="text-align: left;">conventional</td>
+<td style="text-align: left;">convA</td>
+<td style="text-align: right;">6.372507</td>
+<td style="text-align: right;">6.280558</td>
+<td style="text-align: right;">8.508702</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">AC2</td>
+<td style="text-align: left;">A</td>
+<td style="text-align: left;">conventional</td>
+<td style="text-align: left;">convA</td>
+<td style="text-align: right;">5.201244</td>
+<td style="text-align: right;">4.985373</td>
+<td style="text-align: right;">8.527971</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">AC3</td>
+<td style="text-align: left;">A</td>
+<td style="text-align: left;">conventional</td>
+<td style="text-align: left;">convA</td>
+<td style="text-align: right;">5.775734</td>
+<td style="text-align: right;">5.609096</td>
+<td style="text-align: right;">7.049595</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">AC4</td>
+<td style="text-align: left;">A</td>
+<td style="text-align: left;">conventional</td>
+<td style="text-align: left;">convA</td>
+<td style="text-align: right;">5.415360</td>
+<td style="text-align: right;">6.566381</td>
+<td style="text-align: right;">6.306388</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb22"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1"></a></span>
+<span id="cb22-2"><a href="#cb22-2"></a><span class="co"># The raw counts and the normalized values tell different stories about library depth</span></span>
+<span id="cb22-3"><a href="#cb22-3"></a><span class="fu">tibble</span>(<span class="at">raw_total =</span> <span class="fu">rowSums</span>(<span class="fu">select</span>(stickle, <span class="fu">starts_with</span>(<span class="st">"Gene"</span>))),</span>
+<span id="cb22-4"><a href="#cb22-4"></a>       <span class="at">cpm_total =</span> <span class="fu">rowSums</span>(<span class="dv">2</span><span class="sc">^</span><span class="fu">select</span>(stickle_cpm, <span class="fu">starts_with</span>(<span class="st">"Gene"</span>)) <span class="sc">-</span> <span class="dv">1</span>)) <span class="sc">|&gt;</span></span>
+<span id="cb22-5"><a href="#cb22-5"></a>  <span class="fu">summary</span>()</span>
+<span id="cb22-6"><a href="#cb22-6"></a><span class="co">#&gt;    raw_total        cpm_total    </span></span>
+<span id="cb22-7"><a href="#cb22-7"></a><span class="co">#&gt;  Min.   :125986   Min.   :1e+06  </span></span>
+<span id="cb22-8"><a href="#cb22-8"></a><span class="co">#&gt;  1st Qu.:190894   1st Qu.:1e+06  </span></span>
+<span id="cb22-9"><a href="#cb22-9"></a><span class="co">#&gt;  Median :204544   Median :1e+06  </span></span>
+<span id="cb22-10"><a href="#cb22-10"></a><span class="co">#&gt;  Mean   :284009   Mean   :1e+06  </span></span>
+<span id="cb22-11"><a href="#cb22-11"></a><span class="co">#&gt;  3rd Qu.:371757   3rd Qu.:1e+06  </span></span>
+<span id="cb22-12"><a href="#cb22-12"></a><span class="co">#&gt;  Max.   :582646   Max.   :1e+06</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p>After normalization every fish’s counts sum to (almost exactly) one million, which is the point: differences between fish now reflect biology rather than how much sequencing each one received. Applying the same function to a second dataset, or with <code>log = FALSE</code>, or with a different pseudocount, is now a one-line change instead of a search-and-replace.</p>
+<div class="callout callout-style-default callout-note callout-titled" title="When to promote code into a function">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>When to promote code into a function
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>A useful rule of thumb is the second copy. The first time you write a block of code, write it inline and get it working. The moment you find yourself copying it, stop and turn it into a function, giving the things that differ between the copies names as arguments. Two copies are a smell; three are a bug waiting to happen, because you will fix one and forget the others.</p>
+</div>
+</div>
+<div class="callout callout-style-default callout-tip callout-titled" title="Testing a function you just wrote">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Tip</span>Testing a function you just wrote
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Check a new function on an input where you already know the answer before trusting it on real data. A two-row, three-gene data frame made with <code>tibble()</code> is enough to confirm by hand that the rows sum to a million and that <code>log = FALSE</code> returns raw CPM. Keep that check in your script as a comment or a tiny <code><a href="https://rdrr.io/r/base/stopifnot.html">stopifnot()</a></code>; it costs nothing and catches the day someone changes the function.</p>
+</div>
+</div>
+</section><section id="sec-function-best-practices" class="level2" data-number="15.9"><h2 data-number="15.9" class="anchored" data-anchor-id="sec-function-best-practices">
+<span class="header-section-number">15.9</span> Best Practices for Writing Functions</h2>
 <section id="sec-fn-descriptive-names" class="level3"><h3 class="anchored" data-anchor-id="sec-fn-descriptive-names">1. Use Descriptive Names</h3>
 <div class="cell" data-layout-align="center">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb20"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1"></a><span class="co"># Good names</span></span>
-<span id="cb20-2"><a href="#cb20-2"></a><span class="fu">calculate_gc_content</span>()</span>
-<span id="cb20-3"><a href="#cb20-3"></a><span class="fu">normalize_expression</span>()</span>
-<span id="cb20-4"><a href="#cb20-4"></a><span class="fu">fit_growth_curve</span>()</span>
-<span id="cb20-5"><a href="#cb20-5"></a></span>
-<span id="cb20-6"><a href="#cb20-6"></a><span class="co"># Bad names</span></span>
-<span id="cb20-7"><a href="#cb20-7"></a><span class="fu">func1</span>()</span>
-<span id="cb20-8"><a href="#cb20-8"></a><span class="fu">do_stuff</span>()</span>
-<span id="cb20-9"><a href="#cb20-9"></a><span class="fu">f</span>()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb23"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1"></a><span class="co"># Good names</span></span>
+<span id="cb23-2"><a href="#cb23-2"></a><span class="fu">calculate_gc_content</span>()</span>
+<span id="cb23-3"><a href="#cb23-3"></a><span class="fu">normalize_expression</span>()</span>
+<span id="cb23-4"><a href="#cb23-4"></a><span class="fu">fit_growth_curve</span>()</span>
+<span id="cb23-5"><a href="#cb23-5"></a></span>
+<span id="cb23-6"><a href="#cb23-6"></a><span class="co"># Bad names</span></span>
+<span id="cb23-7"><a href="#cb23-7"></a><span class="fu">func1</span>()</span>
+<span id="cb23-8"><a href="#cb23-8"></a><span class="fu">do_stuff</span>()</span>
+<span id="cb23-9"><a href="#cb23-9"></a><span class="fu">f</span>()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 </section><section id="sec-fn-document" class="level3"><h3 class="anchored" data-anchor-id="sec-fn-document">2. Document Your Functions</h3>
 <p>Add comments explaining what the function does, its arguments, and return value:</p>
 <div class="cell" data-layout-align="center">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb21"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1"></a><span class="co"># Calculate the melting temperature of a DNA primer</span></span>
-<span id="cb21-2"><a href="#cb21-2"></a><span class="co">#</span></span>
-<span id="cb21-3"><a href="#cb21-3"></a><span class="co"># Uses the Wallace rule for short oligonucleotides (&lt;14 bp)</span></span>
-<span id="cb21-4"><a href="#cb21-4"></a><span class="co"># or the nearest-neighbor method for longer sequences</span></span>
-<span id="cb21-5"><a href="#cb21-5"></a><span class="co">#</span></span>
-<span id="cb21-6"><a href="#cb21-6"></a><span class="co"># Arguments:</span></span>
-<span id="cb21-7"><a href="#cb21-7"></a><span class="co">#   sequence: DNA sequence (string of A, T, G, C)</span></span>
-<span id="cb21-8"><a href="#cb21-8"></a><span class="co">#   method: "wallace" or "nearest_neighbor"</span></span>
-<span id="cb21-9"><a href="#cb21-9"></a><span class="co">#</span></span>
-<span id="cb21-10"><a href="#cb21-10"></a><span class="co"># Returns:</span></span>
-<span id="cb21-11"><a href="#cb21-11"></a><span class="co">#   Melting temperature in degrees Celsius</span></span>
-<span id="cb21-12"><a href="#cb21-12"></a></span>
-<span id="cb21-13"><a href="#cb21-13"></a>calculate_tm <span class="ot">=</span> <span class="cf">function</span>(sequence, <span class="at">method =</span> <span class="st">"wallace"</span>) {</span>
-<span id="cb21-14"><a href="#cb21-14"></a>  seq_upper <span class="ot">=</span> <span class="fu">toupper</span>(sequence)</span>
-<span id="cb21-15"><a href="#cb21-15"></a>  length <span class="ot">=</span> <span class="fu">nchar</span>(seq_upper)</span>
-<span id="cb21-16"><a href="#cb21-16"></a></span>
-<span id="cb21-17"><a href="#cb21-17"></a>  a_count <span class="ot">=</span> <span class="fu">str_count</span>(seq_upper, <span class="st">"A"</span>)</span>
-<span id="cb21-18"><a href="#cb21-18"></a>  t_count <span class="ot">=</span> <span class="fu">str_count</span>(seq_upper, <span class="st">"T"</span>)</span>
-<span id="cb21-19"><a href="#cb21-19"></a>  g_count <span class="ot">=</span> <span class="fu">str_count</span>(seq_upper, <span class="st">"G"</span>)</span>
-<span id="cb21-20"><a href="#cb21-20"></a>  c_count <span class="ot">=</span> <span class="fu">str_count</span>(seq_upper, <span class="st">"C"</span>)</span>
-<span id="cb21-21"><a href="#cb21-21"></a></span>
-<span id="cb21-22"><a href="#cb21-22"></a>  <span class="cf">if</span> (method <span class="sc">==</span> <span class="st">"wallace"</span> <span class="sc">||</span> length <span class="sc">&lt;</span> <span class="dv">14</span>) {</span>
-<span id="cb21-23"><a href="#cb21-23"></a>    <span class="co"># Wallace rule: Tm = 2(A+T) + 4(G+C)</span></span>
-<span id="cb21-24"><a href="#cb21-24"></a>    tm <span class="ot">=</span> <span class="dv">2</span> <span class="sc">*</span> (a_count <span class="sc">+</span> t_count) <span class="sc">+</span> <span class="dv">4</span> <span class="sc">*</span> (g_count <span class="sc">+</span> c_count)</span>
-<span id="cb21-25"><a href="#cb21-25"></a>  } <span class="cf">else</span> {</span>
-<span id="cb21-26"><a href="#cb21-26"></a>    <span class="co"># Simplified nearest-neighbor approximation</span></span>
-<span id="cb21-27"><a href="#cb21-27"></a>    tm <span class="ot">=</span> <span class="fl">64.9</span> <span class="sc">+</span> <span class="dv">41</span> <span class="sc">*</span> (g_count <span class="sc">+</span> c_count <span class="sc">-</span> <span class="fl">16.4</span>) <span class="sc">/</span> length</span>
-<span id="cb21-28"><a href="#cb21-28"></a>  }</span>
-<span id="cb21-29"><a href="#cb21-29"></a></span>
-<span id="cb21-30"><a href="#cb21-30"></a>  <span class="fu">return</span>(tm)</span>
-<span id="cb21-31"><a href="#cb21-31"></a>}</span>
-<span id="cb21-32"><a href="#cb21-32"></a></span>
-<span id="cb21-33"><a href="#cb21-33"></a><span class="fu">calculate_tm</span>(<span class="st">"ATGCGATCGATCG"</span>)</span>
-<span id="cb21-34"><a href="#cb21-34"></a><span class="co">#&gt; [1] 40</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb24"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1"></a><span class="co"># Calculate the melting temperature of a DNA primer</span></span>
+<span id="cb24-2"><a href="#cb24-2"></a><span class="co">#</span></span>
+<span id="cb24-3"><a href="#cb24-3"></a><span class="co"># Uses the Wallace rule for short oligonucleotides (&lt;14 bp)</span></span>
+<span id="cb24-4"><a href="#cb24-4"></a><span class="co"># or the nearest-neighbor method for longer sequences</span></span>
+<span id="cb24-5"><a href="#cb24-5"></a><span class="co">#</span></span>
+<span id="cb24-6"><a href="#cb24-6"></a><span class="co"># Arguments:</span></span>
+<span id="cb24-7"><a href="#cb24-7"></a><span class="co">#   sequence: DNA sequence (string of A, T, G, C)</span></span>
+<span id="cb24-8"><a href="#cb24-8"></a><span class="co">#   method: "wallace" or "nearest_neighbor"</span></span>
+<span id="cb24-9"><a href="#cb24-9"></a><span class="co">#</span></span>
+<span id="cb24-10"><a href="#cb24-10"></a><span class="co"># Returns:</span></span>
+<span id="cb24-11"><a href="#cb24-11"></a><span class="co">#   Melting temperature in degrees Celsius</span></span>
+<span id="cb24-12"><a href="#cb24-12"></a></span>
+<span id="cb24-13"><a href="#cb24-13"></a>calculate_tm <span class="ot">=</span> <span class="cf">function</span>(sequence, <span class="at">method =</span> <span class="st">"wallace"</span>) {</span>
+<span id="cb24-14"><a href="#cb24-14"></a>  seq_upper <span class="ot">=</span> <span class="fu">toupper</span>(sequence)</span>
+<span id="cb24-15"><a href="#cb24-15"></a>  length <span class="ot">=</span> <span class="fu">nchar</span>(seq_upper)</span>
+<span id="cb24-16"><a href="#cb24-16"></a></span>
+<span id="cb24-17"><a href="#cb24-17"></a>  a_count <span class="ot">=</span> <span class="fu">str_count</span>(seq_upper, <span class="st">"A"</span>)</span>
+<span id="cb24-18"><a href="#cb24-18"></a>  t_count <span class="ot">=</span> <span class="fu">str_count</span>(seq_upper, <span class="st">"T"</span>)</span>
+<span id="cb24-19"><a href="#cb24-19"></a>  g_count <span class="ot">=</span> <span class="fu">str_count</span>(seq_upper, <span class="st">"G"</span>)</span>
+<span id="cb24-20"><a href="#cb24-20"></a>  c_count <span class="ot">=</span> <span class="fu">str_count</span>(seq_upper, <span class="st">"C"</span>)</span>
+<span id="cb24-21"><a href="#cb24-21"></a></span>
+<span id="cb24-22"><a href="#cb24-22"></a>  <span class="cf">if</span> (method <span class="sc">==</span> <span class="st">"wallace"</span> <span class="sc">||</span> length <span class="sc">&lt;</span> <span class="dv">14</span>) {</span>
+<span id="cb24-23"><a href="#cb24-23"></a>    <span class="co"># Wallace rule: Tm = 2(A+T) + 4(G+C)</span></span>
+<span id="cb24-24"><a href="#cb24-24"></a>    tm <span class="ot">=</span> <span class="dv">2</span> <span class="sc">*</span> (a_count <span class="sc">+</span> t_count) <span class="sc">+</span> <span class="dv">4</span> <span class="sc">*</span> (g_count <span class="sc">+</span> c_count)</span>
+<span id="cb24-25"><a href="#cb24-25"></a>  } <span class="cf">else</span> {</span>
+<span id="cb24-26"><a href="#cb24-26"></a>    <span class="co"># Simplified nearest-neighbor approximation</span></span>
+<span id="cb24-27"><a href="#cb24-27"></a>    tm <span class="ot">=</span> <span class="fl">64.9</span> <span class="sc">+</span> <span class="dv">41</span> <span class="sc">*</span> (g_count <span class="sc">+</span> c_count <span class="sc">-</span> <span class="fl">16.4</span>) <span class="sc">/</span> length</span>
+<span id="cb24-28"><a href="#cb24-28"></a>  }</span>
+<span id="cb24-29"><a href="#cb24-29"></a></span>
+<span id="cb24-30"><a href="#cb24-30"></a>  <span class="fu">return</span>(tm)</span>
+<span id="cb24-31"><a href="#cb24-31"></a>}</span>
+<span id="cb24-32"><a href="#cb24-32"></a></span>
+<span id="cb24-33"><a href="#cb24-33"></a><span class="fu">calculate_tm</span>(<span class="st">"ATGCGATCGATCG"</span>)</span>
+<span id="cb24-34"><a href="#cb24-34"></a><span class="co">#&gt; [1] 40</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 </section><section id="sec-fn-validate-inputs" class="level3"><h3 class="anchored" data-anchor-id="sec-fn-validate-inputs">3. Validate Inputs</h3>
 <p>Check that inputs are valid before processing:</p>
 <div class="cell" data-layout-align="center">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb22"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1"></a>gc_content_safe <span class="ot">=</span> <span class="cf">function</span>(sequence) {</span>
-<span id="cb22-2"><a href="#cb22-2"></a>  <span class="co"># Check input type</span></span>
-<span id="cb22-3"><a href="#cb22-3"></a>  <span class="cf">if</span> (<span class="sc">!</span><span class="fu">is.character</span>(sequence)) {</span>
-<span id="cb22-4"><a href="#cb22-4"></a>    <span class="fu">stop</span>(<span class="st">"Sequence must be a character string"</span>)</span>
-<span id="cb22-5"><a href="#cb22-5"></a>  }</span>
-<span id="cb22-6"><a href="#cb22-6"></a></span>
-<span id="cb22-7"><a href="#cb22-7"></a>  <span class="co"># Check for valid DNA characters</span></span>
-<span id="cb22-8"><a href="#cb22-8"></a>  seq_upper <span class="ot">=</span> <span class="fu">toupper</span>(sequence)</span>
-<span id="cb22-9"><a href="#cb22-9"></a>  invalid_chars <span class="ot">=</span> <span class="fu">str_remove_all</span>(seq_upper, <span class="st">"[ATGCN]"</span>)</span>
-<span id="cb22-10"><a href="#cb22-10"></a>  <span class="cf">if</span> (<span class="fu">nchar</span>(invalid_chars) <span class="sc">&gt;</span> <span class="dv">0</span>) {</span>
-<span id="cb22-11"><a href="#cb22-11"></a>    <span class="fu">warning</span>(<span class="fu">paste</span>(<span class="st">"Invalid characters removed:"</span>, invalid_chars))</span>
-<span id="cb22-12"><a href="#cb22-12"></a>  }</span>
-<span id="cb22-13"><a href="#cb22-13"></a></span>
-<span id="cb22-14"><a href="#cb22-14"></a>  gc_count <span class="ot">=</span> <span class="fu">str_count</span>(seq_upper, <span class="st">"[GC]"</span>)</span>
-<span id="cb22-15"><a href="#cb22-15"></a>  total_bases <span class="ot">=</span> <span class="fu">str_count</span>(seq_upper, <span class="st">"[ATGC]"</span>)</span>
-<span id="cb22-16"><a href="#cb22-16"></a></span>
-<span id="cb22-17"><a href="#cb22-17"></a>  <span class="cf">if</span> (total_bases <span class="sc">==</span> <span class="dv">0</span>) {</span>
-<span id="cb22-18"><a href="#cb22-18"></a>    <span class="fu">stop</span>(<span class="st">"No valid DNA bases found in sequence"</span>)</span>
-<span id="cb22-19"><a href="#cb22-19"></a>  }</span>
-<span id="cb22-20"><a href="#cb22-20"></a></span>
-<span id="cb22-21"><a href="#cb22-21"></a>  <span class="fu">return</span>(gc_count <span class="sc">/</span> total_bases)</span>
-<span id="cb22-22"><a href="#cb22-22"></a>}</span>
-<span id="cb22-23"><a href="#cb22-23"></a></span>
-<span id="cb22-24"><a href="#cb22-24"></a><span class="fu">gc_content_safe</span>(<span class="st">"ATGCGATCG"</span>)     <span class="co"># Works fine</span></span>
-<span id="cb22-25"><a href="#cb22-25"></a><span class="co">#&gt; [1] 0.5555556</span></span>
-<span id="cb22-26"><a href="#cb22-26"></a><span class="fu">gc_content_safe</span>(<span class="st">"ATGCXYZGATCG"</span>)  <span class="co"># Warning about invalid characters</span></span>
-<span id="cb22-27"><a href="#cb22-27"></a><span class="co">#&gt; [1] 0.5555556</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb25"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1"></a>gc_content_safe <span class="ot">=</span> <span class="cf">function</span>(sequence) {</span>
+<span id="cb25-2"><a href="#cb25-2"></a>  <span class="co"># Check input type</span></span>
+<span id="cb25-3"><a href="#cb25-3"></a>  <span class="cf">if</span> (<span class="sc">!</span><span class="fu">is.character</span>(sequence)) {</span>
+<span id="cb25-4"><a href="#cb25-4"></a>    <span class="fu">stop</span>(<span class="st">"Sequence must be a character string"</span>)</span>
+<span id="cb25-5"><a href="#cb25-5"></a>  }</span>
+<span id="cb25-6"><a href="#cb25-6"></a></span>
+<span id="cb25-7"><a href="#cb25-7"></a>  <span class="co"># Check for valid DNA characters</span></span>
+<span id="cb25-8"><a href="#cb25-8"></a>  seq_upper <span class="ot">=</span> <span class="fu">toupper</span>(sequence)</span>
+<span id="cb25-9"><a href="#cb25-9"></a>  invalid_chars <span class="ot">=</span> <span class="fu">str_remove_all</span>(seq_upper, <span class="st">"[ATGCN]"</span>)</span>
+<span id="cb25-10"><a href="#cb25-10"></a>  <span class="cf">if</span> (<span class="fu">nchar</span>(invalid_chars) <span class="sc">&gt;</span> <span class="dv">0</span>) {</span>
+<span id="cb25-11"><a href="#cb25-11"></a>    <span class="fu">warning</span>(<span class="fu">paste</span>(<span class="st">"Invalid characters removed:"</span>, invalid_chars))</span>
+<span id="cb25-12"><a href="#cb25-12"></a>  }</span>
+<span id="cb25-13"><a href="#cb25-13"></a></span>
+<span id="cb25-14"><a href="#cb25-14"></a>  gc_count <span class="ot">=</span> <span class="fu">str_count</span>(seq_upper, <span class="st">"[GC]"</span>)</span>
+<span id="cb25-15"><a href="#cb25-15"></a>  total_bases <span class="ot">=</span> <span class="fu">str_count</span>(seq_upper, <span class="st">"[ATGC]"</span>)</span>
+<span id="cb25-16"><a href="#cb25-16"></a></span>
+<span id="cb25-17"><a href="#cb25-17"></a>  <span class="cf">if</span> (total_bases <span class="sc">==</span> <span class="dv">0</span>) {</span>
+<span id="cb25-18"><a href="#cb25-18"></a>    <span class="fu">stop</span>(<span class="st">"No valid DNA bases found in sequence"</span>)</span>
+<span id="cb25-19"><a href="#cb25-19"></a>  }</span>
+<span id="cb25-20"><a href="#cb25-20"></a></span>
+<span id="cb25-21"><a href="#cb25-21"></a>  <span class="fu">return</span>(gc_count <span class="sc">/</span> total_bases)</span>
+<span id="cb25-22"><a href="#cb25-22"></a>}</span>
+<span id="cb25-23"><a href="#cb25-23"></a></span>
+<span id="cb25-24"><a href="#cb25-24"></a><span class="fu">gc_content_safe</span>(<span class="st">"ATGCGATCG"</span>)     <span class="co"># Works fine</span></span>
+<span id="cb25-25"><a href="#cb25-25"></a><span class="co">#&gt; [1] 0.5555556</span></span>
+<span id="cb25-26"><a href="#cb25-26"></a><span class="fu">gc_content_safe</span>(<span class="st">"ATGCXYZGATCG"</span>)  <span class="co"># Warning about invalid characters</span></span>
+<span id="cb25-27"><a href="#cb25-27"></a><span class="co">#&gt; [1] 0.5555556</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 </section><section id="sec-fn-focused" class="level3"><h3 class="anchored" data-anchor-id="sec-fn-focused">4. Keep Functions Focused</h3>
 <p>Each function should do one thing well. Break complex operations into smaller functions:</p>
 <div class="cell" data-layout-align="center">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb23"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1"></a><span class="co"># Instead of one giant function, break it up:</span></span>
-<span id="cb23-2"><a href="#cb23-2"></a></span>
-<span id="cb23-3"><a href="#cb23-3"></a><span class="co"># Step 1: Clean the sequence</span></span>
-<span id="cb23-4"><a href="#cb23-4"></a>clean_sequence <span class="ot">=</span> <span class="cf">function</span>(seq) {</span>
-<span id="cb23-5"><a href="#cb23-5"></a>  seq <span class="sc">%&gt;%</span></span>
-<span id="cb23-6"><a href="#cb23-6"></a>    <span class="fu">toupper</span>() <span class="sc">%&gt;%</span></span>
-<span id="cb23-7"><a href="#cb23-7"></a>    <span class="fu">str_remove_all</span>(<span class="st">"[^ATGC]"</span>)</span>
-<span id="cb23-8"><a href="#cb23-8"></a>}</span>
-<span id="cb23-9"><a href="#cb23-9"></a></span>
-<span id="cb23-10"><a href="#cb23-10"></a><span class="co"># Step 2: Calculate base composition</span></span>
-<span id="cb23-11"><a href="#cb23-11"></a>base_composition <span class="ot">=</span> <span class="cf">function</span>(seq) {</span>
-<span id="cb23-12"><a href="#cb23-12"></a>  <span class="fu">tibble</span>(</span>
-<span id="cb23-13"><a href="#cb23-13"></a>    <span class="at">A =</span> <span class="fu">str_count</span>(seq, <span class="st">"A"</span>),</span>
-<span id="cb23-14"><a href="#cb23-14"></a>    <span class="at">T =</span> <span class="fu">str_count</span>(seq, <span class="st">"T"</span>),</span>
-<span id="cb23-15"><a href="#cb23-15"></a>    <span class="at">G =</span> <span class="fu">str_count</span>(seq, <span class="st">"G"</span>),</span>
-<span id="cb23-16"><a href="#cb23-16"></a>    <span class="at">C =</span> <span class="fu">str_count</span>(seq, <span class="st">"C"</span>)</span>
-<span id="cb23-17"><a href="#cb23-17"></a>  )</span>
-<span id="cb23-18"><a href="#cb23-18"></a>}</span>
-<span id="cb23-19"><a href="#cb23-19"></a></span>
-<span id="cb23-20"><a href="#cb23-20"></a><span class="co"># Step 3: Derive statistics</span></span>
-<span id="cb23-21"><a href="#cb23-21"></a>sequence_stats <span class="ot">=</span> <span class="cf">function</span>(composition) {</span>
-<span id="cb23-22"><a href="#cb23-22"></a>  total <span class="ot">=</span> <span class="fu">sum</span>(composition)</span>
-<span id="cb23-23"><a href="#cb23-23"></a>  composition <span class="sc">%&gt;%</span></span>
-<span id="cb23-24"><a href="#cb23-24"></a>    <span class="fu">mutate</span>(</span>
-<span id="cb23-25"><a href="#cb23-25"></a>      <span class="at">total =</span> total,</span>
-<span id="cb23-26"><a href="#cb23-26"></a>      <span class="at">gc_content =</span> (G <span class="sc">+</span> C) <span class="sc">/</span> total,</span>
-<span id="cb23-27"><a href="#cb23-27"></a>      <span class="at">at_content =</span> (A <span class="sc">+</span> T) <span class="sc">/</span> total</span>
-<span id="cb23-28"><a href="#cb23-28"></a>    )</span>
-<span id="cb23-29"><a href="#cb23-29"></a>}</span>
-<span id="cb23-30"><a href="#cb23-30"></a></span>
-<span id="cb23-31"><a href="#cb23-31"></a><span class="co"># Combine them in a pipeline</span></span>
-<span id="cb23-32"><a href="#cb23-32"></a><span class="st">"atgcGATCgatcgNNNN"</span> <span class="sc">%&gt;%</span></span>
-<span id="cb23-33"><a href="#cb23-33"></a>  <span class="fu">clean_sequence</span>() <span class="sc">%&gt;%</span></span>
-<span id="cb23-34"><a href="#cb23-34"></a>  <span class="fu">base_composition</span>() <span class="sc">%&gt;%</span></span>
-<span id="cb23-35"><a href="#cb23-35"></a>  <span class="fu">sequence_stats</span>()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb26"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1"></a><span class="co"># Instead of one giant function, break it up:</span></span>
+<span id="cb26-2"><a href="#cb26-2"></a></span>
+<span id="cb26-3"><a href="#cb26-3"></a><span class="co"># Step 1: Clean the sequence</span></span>
+<span id="cb26-4"><a href="#cb26-4"></a>clean_sequence <span class="ot">=</span> <span class="cf">function</span>(seq) {</span>
+<span id="cb26-5"><a href="#cb26-5"></a>  seq <span class="sc">%&gt;%</span></span>
+<span id="cb26-6"><a href="#cb26-6"></a>    <span class="fu">toupper</span>() <span class="sc">%&gt;%</span></span>
+<span id="cb26-7"><a href="#cb26-7"></a>    <span class="fu">str_remove_all</span>(<span class="st">"[^ATGC]"</span>)</span>
+<span id="cb26-8"><a href="#cb26-8"></a>}</span>
+<span id="cb26-9"><a href="#cb26-9"></a></span>
+<span id="cb26-10"><a href="#cb26-10"></a><span class="co"># Step 2: Calculate base composition</span></span>
+<span id="cb26-11"><a href="#cb26-11"></a>base_composition <span class="ot">=</span> <span class="cf">function</span>(seq) {</span>
+<span id="cb26-12"><a href="#cb26-12"></a>  <span class="fu">tibble</span>(</span>
+<span id="cb26-13"><a href="#cb26-13"></a>    <span class="at">A =</span> <span class="fu">str_count</span>(seq, <span class="st">"A"</span>),</span>
+<span id="cb26-14"><a href="#cb26-14"></a>    <span class="at">T =</span> <span class="fu">str_count</span>(seq, <span class="st">"T"</span>),</span>
+<span id="cb26-15"><a href="#cb26-15"></a>    <span class="at">G =</span> <span class="fu">str_count</span>(seq, <span class="st">"G"</span>),</span>
+<span id="cb26-16"><a href="#cb26-16"></a>    <span class="at">C =</span> <span class="fu">str_count</span>(seq, <span class="st">"C"</span>)</span>
+<span id="cb26-17"><a href="#cb26-17"></a>  )</span>
+<span id="cb26-18"><a href="#cb26-18"></a>}</span>
+<span id="cb26-19"><a href="#cb26-19"></a></span>
+<span id="cb26-20"><a href="#cb26-20"></a><span class="co"># Step 3: Derive statistics</span></span>
+<span id="cb26-21"><a href="#cb26-21"></a>sequence_stats <span class="ot">=</span> <span class="cf">function</span>(composition) {</span>
+<span id="cb26-22"><a href="#cb26-22"></a>  total <span class="ot">=</span> <span class="fu">sum</span>(composition)</span>
+<span id="cb26-23"><a href="#cb26-23"></a>  composition <span class="sc">%&gt;%</span></span>
+<span id="cb26-24"><a href="#cb26-24"></a>    <span class="fu">mutate</span>(</span>
+<span id="cb26-25"><a href="#cb26-25"></a>      <span class="at">total =</span> total,</span>
+<span id="cb26-26"><a href="#cb26-26"></a>      <span class="at">gc_content =</span> (G <span class="sc">+</span> C) <span class="sc">/</span> total,</span>
+<span id="cb26-27"><a href="#cb26-27"></a>      <span class="at">at_content =</span> (A <span class="sc">+</span> T) <span class="sc">/</span> total</span>
+<span id="cb26-28"><a href="#cb26-28"></a>    )</span>
+<span id="cb26-29"><a href="#cb26-29"></a>}</span>
+<span id="cb26-30"><a href="#cb26-30"></a></span>
+<span id="cb26-31"><a href="#cb26-31"></a><span class="co"># Combine them in a pipeline</span></span>
+<span id="cb26-32"><a href="#cb26-32"></a><span class="st">"atgcGATCgatcgNNNN"</span> <span class="sc">%&gt;%</span></span>
+<span id="cb26-33"><a href="#cb26-33"></a>  <span class="fu">clean_sequence</span>() <span class="sc">%&gt;%</span></span>
+<span id="cb26-34"><a href="#cb26-34"></a>  <span class="fu">base_composition</span>() <span class="sc">%&gt;%</span></span>
+<span id="cb26-35"><a href="#cb26-35"></a>  <span class="fu">sequence_stats</span>()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
 <div class="kable-table">
 <table class="caption-top table table-sm table-striped small">
@@ -1404,8 +1535,8 @@ Figure&nbsp;15.1: Simulated bacterial growth curves for three strains, produced 
 </div>
 </div>
 </div>
-</section></section><section id="sec-functions-summary" class="level2" data-number="15.9"><h2 data-number="15.9" class="anchored" data-anchor-id="sec-functions-summary">
-<span class="header-section-number">15.9</span> Summary</h2>
+</section></section><section id="sec-functions-summary" class="level2" data-number="15.10"><h2 data-number="15.10" class="anchored" data-anchor-id="sec-functions-summary">
+<span class="header-section-number">15.10</span> Summary</h2>
 <p>Writing functions is a fundamental programming skill that will dramatically improve your data analysis workflows:</p>
 <ul>
 <li>
@@ -1479,15 +1610,15 @@ Tip
 <p>Write a function <code>dilution_series()</code> that takes an initial concentration and dilution factor, then returns a data frame showing the concentration at each step for a specified number of dilutions. Use <code>pmap()</code> to apply this to multiple starting conditions.</p>
 <p><strong>Exercise 6: Refactoring</strong></p>
 <p>Take the following for loop and rewrite it using functional programming:</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb24"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1"></a>results <span class="ot">=</span> <span class="fu">c</span>()</span>
-<span id="cb24-2"><a href="#cb24-2"></a><span class="cf">for</span> (i <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span><span class="fu">length</span>(sequences)) {</span>
-<span id="cb24-3"><a href="#cb24-3"></a>  gc <span class="ot">=</span> <span class="fu">gc_content</span>(sequences[i])</span>
-<span id="cb24-4"><a href="#cb24-4"></a>  <span class="cf">if</span> (gc <span class="sc">&gt;</span> <span class="fl">0.5</span>) {</span>
-<span id="cb24-5"><a href="#cb24-5"></a>    results <span class="ot">=</span> <span class="fu">c</span>(results, <span class="st">"high"</span>)</span>
-<span id="cb24-6"><a href="#cb24-6"></a>  } <span class="cf">else</span> {</span>
-<span id="cb24-7"><a href="#cb24-7"></a>    results <span class="ot">=</span> <span class="fu">c</span>(results, <span class="st">"low"</span>)</span>
-<span id="cb24-8"><a href="#cb24-8"></a>  }</span>
-<span id="cb24-9"><a href="#cb24-9"></a>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb27"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb27-1"><a href="#cb27-1"></a>results <span class="ot">=</span> <span class="fu">c</span>()</span>
+<span id="cb27-2"><a href="#cb27-2"></a><span class="cf">for</span> (i <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span><span class="fu">length</span>(sequences)) {</span>
+<span id="cb27-3"><a href="#cb27-3"></a>  gc <span class="ot">=</span> <span class="fu">gc_content</span>(sequences[i])</span>
+<span id="cb27-4"><a href="#cb27-4"></a>  <span class="cf">if</span> (gc <span class="sc">&gt;</span> <span class="fl">0.5</span>) {</span>
+<span id="cb27-5"><a href="#cb27-5"></a>    results <span class="ot">=</span> <span class="fu">c</span>(results, <span class="st">"high"</span>)</span>
+<span id="cb27-6"><a href="#cb27-6"></a>  } <span class="cf">else</span> {</span>
+<span id="cb27-7"><a href="#cb27-7"></a>    results <span class="ot">=</span> <span class="fu">c</span>(results, <span class="st">"low"</span>)</span>
+<span id="cb27-8"><a href="#cb27-8"></a>  }</span>
+<span id="cb27-9"><a href="#cb27-9"></a>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 </div>
 

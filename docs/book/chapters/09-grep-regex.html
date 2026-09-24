@@ -613,7 +613,8 @@ div.csl-indent {
   <li><a href="#sec-text-tools-together" id="toc-sec-text-tools-together" class="nav-link" data-scroll-target="#sec-text-tools-together">Putting It Together</a></li>
   </ul>
 </li>
-  <li><a href="#sec-regex-summary" id="toc-sec-regex-summary" class="nav-link" data-scroll-target="#sec-regex-summary"><span class="header-section-number">9.11</span> Summary</a></li>
+  <li><a href="#sec-regex-stickle" id="toc-sec-regex-stickle" class="nav-link" data-scroll-target="#sec-regex-stickle"><span class="header-section-number">9.11</span> Running Example: The Stickleback Data</a></li>
+  <li><a href="#sec-regex-summary" id="toc-sec-regex-summary" class="nav-link" data-scroll-target="#sec-regex-summary"><span class="header-section-number">9.12</span> Summary</a></li>
   <li><a href="#sec-grep-additional-reading" id="toc-sec-grep-additional-reading" class="nav-link" data-scroll-target="#sec-grep-additional-reading">Additional Reading</a></li>
   <li><a href="#sec-grep-exercises" id="toc-sec-grep-exercises" class="nav-link" data-scroll-target="#sec-grep-exercises">Exercises</a></li>
   </ul><div class="toc-actions"><ul><li><a href="https://github.com/wcresko/BioE_Comp_Tools_Fa2026/edit/main/Book/chapters/09-grep-regex.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li><li><a href="https://github.com/wcresko/BioE_Comp_Tools_Fa2026/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></nav>
@@ -1443,8 +1444,34 @@ Table&nbsp;9.5: Comparing <code>grep</code>, <code>sed</code>, and <code>awk</co
 <span id="cb37-16"><a href="#cb37-16"></a><span class="co"># Which feature types does a GFF file contain, and how many of each?</span></span>
 <span id="cb37-17"><a href="#cb37-17"></a><span class="ex">$</span> grep <span class="at">-v</span> <span class="st">"^#"</span> annotations.gff <span class="kw">|</span> <span class="fu">cut</span> <span class="at">-f3</span> <span class="kw">|</span> <span class="fu">sort</span> <span class="kw">|</span> <span class="fu">uniq</span> <span class="at">-c</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>Notice the recurring shape: <em>select</em> lines (<code>grep</code>, <code>awk</code>, <code>tail -n +2</code>), <em>extract</em> a column (<code>cut</code>), <em>sort</em> so that identical values are adjacent, then <em>count</em> (<code>uniq -c</code>, <code>wc -l</code>). Once this idiom is in your fingers, most “how many of each?” questions take seconds.</p>
-</section></section><section id="sec-regex-summary" class="level2" data-number="9.11"><h2 data-number="9.11" class="anchored" data-anchor-id="sec-regex-summary">
-<span class="header-section-number">9.11</span> Summary</h2>
+</section></section><section id="sec-regex-stickle" class="level2" data-number="9.11"><h2 data-number="9.11" class="anchored" data-anchor-id="sec-regex-stickle">
+<span class="header-section-number">9.11</span> Running Example: The Stickleback Data</h2>
+<div class="callout callout-style-default callout-note callout-titled" title="Running example">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>Running example
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>This section applies the chapter to the course dataset described in <a href="01-introduction.html#sec-course-dataset" class="quarto-xref"><span>Section 1.5</span></a> (80 stickleback, 4 treatment groups, 600 genes). The same steps appear on the Week 3 and 4 slides, so the book and the lecture can be read side by side.</p>
+</div>
+</div>
+<p>The stickleback table is small enough to read, but the same commands scale to files with millions of lines. <code>grep -w</code> matches whole words, so the treatment label in the third column selects rows without also matching the combined label in the fourth; a regular expression anchored at the start of the line picks out individuals whose ID ends in <code>1</code>:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb38"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb38-1"><a href="#cb38-1"></a><span class="bu">cd</span> ~/projects/comptools</span>
+<span id="cb38-2"><a href="#cb38-2"></a><span class="fu">grep</span> <span class="at">-w</span> <span class="st">"convB"</span> data/Stickle_RNAseq.tsv <span class="kw">|</span> <span class="fu">cut</span> <span class="at">-f</span> 1      <span class="co"># individuals: genotype B, conventional</span></span>
+<span id="cb38-3"><a href="#cb38-3"></a><span class="fu">grep</span> <span class="at">-E</span> <span class="st">"^[A-Z]+1\b"</span> data/Stickle_RNAseq.tsv <span class="kw">|</span> <span class="fu">cut</span> <span class="at">-f</span> 1-3   <span class="co"># AC1, AM1, BC1, BM1</span></span>
+<span id="cb38-4"><a href="#cb38-4"></a><span class="fu">grep</span> <span class="at">-c</span> mono data/Stickle_RNAseq.tsv<span class="kw">;</span> <span class="fu">grep</span> <span class="at">-cw</span> mono data/Stickle_RNAseq.tsv   <span class="co"># both 40 - why?</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>The last line is worth pausing on. Without <code>-w</code>, <code>mono</code> also matches <code>monoA</code> and <code>monoB</code> in the fourth column, but every line that contains those also contains the bare word <code>mono</code> in the third, so the counts agree. Small experiments like this, comparing two flags on data you understand, are how you learn what a flag really does.</p>
+<p><code>sed</code> and <code>awk</code> complete the picture. The fourth column is named <code>Geno&amp;Micro</code>, and the ampersand will annoy every tool downstream, so the first <code>sed</code> command below renames it <em>in a new file</em>, leaving the raw data untouched (<a href="08-tidy-data.html#sec-preserving-raw-data" class="quarto-xref"><span>Section 8.5.4</span></a>). <code>awk</code> then computes the mean of the first gene column over all fish, and, using an associative array keyed on the genotype, per genotype:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb39"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb39-1"><a href="#cb39-1"></a><span class="fu">sed</span> <span class="st">'1s/Geno&amp;Micro/Geno_Micro/'</span> data/Stickle_RNAseq.tsv <span class="op">&gt;</span> results/stickle_clean.tsv</span>
+<span id="cb39-2"><a href="#cb39-2"></a><span class="fu">awk</span> <span class="at">-F</span><span class="st">'\t'</span> <span class="st">'NR &gt; 1 { sum += $5; n++ } END { print "Gene1 mean:", sum/n }'</span> results/stickle_clean.tsv</span>
+<span id="cb39-3"><a href="#cb39-3"></a><span class="fu">awk</span> <span class="at">-F</span><span class="st">'\t'</span> <span class="st">'NR &gt; 1 { sum[$2] += $5; n[$2]++ } END { for (g in sum) print g, sum[g]/n[g] }'</span> results/stickle_clean.tsv</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>The mean count of the first gene is about 14 in genotype A fish and about 1.4 in genotype B, a tenfold difference visible from three lines of <code>awk</code>. Turning this into a reusable script is the job of <a href="10-shell-scripting.html" class="quarto-xref"><span>Chapter 10</span></a>.</p>
+</section><section id="sec-regex-summary" class="level2" data-number="9.12"><h2 data-number="9.12" class="anchored" data-anchor-id="sec-regex-summary">
+<span class="header-section-number">9.12</span> Summary</h2>
 <p>This chapter covered pattern matching with <code>grep</code> and regular expressions, and the two companion tools that edit and compute on the text <code>grep</code> finds:</p>
 <ul>
 <li>

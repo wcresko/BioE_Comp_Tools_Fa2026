@@ -958,6 +958,38 @@ Common exceptions you will meet: `FileNotFoundError`, `KeyError` (missing dictio
 You do not have to pick one. Quarto documents can mix `{r}` and `{python}` chunks (@sec-quarto-documents), the `reticulate` R package calls Python from R, and Positron (@sec-toolkit) runs both consoles side by side. A common pattern is to preprocess with Python tools and then model and plot in R, or the reverse. Fluency in the translation table is what makes that painless.
 :::
 
+## Running Example: The Stickleback Data {#sec-py-stickle}
+
+::: {.callout-note title="Running example"}
+This section applies the chapter to the course dataset described in @sec-course-dataset (80 stickleback, 4 treatment groups, 600 genes). The same steps appear on the Week 6 slides, so the book and the lecture can be read side by side.
+:::
+
+In Python the same steps go through pandas. `read_csv()` with `sep="\t"` reads the tab-separated file, `.shape` and `.iloc` play the roles of `dim()` and bracket indexing, and `pd.crosstab()` is `table()`:
+
+```{python}
+#| label: ch12-stickle-read
+#| eval: false
+import pandas as pd
+stickle = pd.read_csv("../data/Stickle_RNAseq.tsv", sep="\t")
+stickle.shape                          # (80, 604)
+stickle.iloc[:4, :7]
+pd.crosstab(stickle["Genotype"], stickle["Microbiota"])
+stickle["Gene1"].describe()
+```
+
+A grouped boxplot is one method call on the data frame, with matplotlib doing the drawing:
+
+```{python}
+#| label: ch12-stickle-boxplot
+#| eval: false
+import matplotlib.pyplot as plt
+stickle.boxplot(column="Gene1", by=["Genotype", "Microbiota"])
+plt.ylabel("Gene1 read count")
+plt.show()
+```
+
+The reshaping and grouped summaries that @sec-data-wrangling does with `pivot_longer()` and `group_by()` have direct pandas equivalents in `melt()` and `groupby()`; @tbl-dplyr-pandas maps each verb to its counterpart.
+
 ## Summary {#sec-py-summary}
 
 This chapter introduced Python 3 as a second language alongside R:

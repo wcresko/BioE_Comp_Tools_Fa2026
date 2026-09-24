@@ -153,6 +153,8 @@ Connecting to a specific node is useful when you want to reconnect to a `tmux` o
 
 ### Connecting Your Editor with Remote-SSH {#sec-remote-ssh}
 
+![Remote-SSH: the editor runs on your laptop while the files, terminal, and R or Python processes live on Talapas, connected over an SSH tunnel.](../images/Chap16_remote_ssh.svg){#fig-remote-ssh fig-align="center" width="90%"}
+
 Editing scripts over a bare terminal gets old quickly. Both VS Code and Positron support **Remote - SSH**, which lets you run your familiar editor on your laptop while the files, terminal, and code execution live on Talapas.
 
 1. Install the **Remote - SSH** extension in VS Code or Positron
@@ -196,25 +198,7 @@ Three problems account for almost every failed first connection:
 
 @fig-storage-structure shows the layout of the file system, and @tbl-storage lists the quota and purpose of each location.
 
-```{mermaid}
-%%| label: fig-storage-structure
-%%| echo: false
-%%| fig-cap: "Talapas storage hierarchy"
-flowchart LR
-    R["/"] --> H["/home"]
-    R --> P["/projects"]
-    R --> SC["/scratch"]
-    H --> HD["/home/duckid<br/>250 GB"]
-    P --> PG["/projects/PIRG"]
-    PG --> PGU["/projects/PIRG/duckid<br/>Your workspace"]
-    PG --> PGS["/projects/PIRG/shared<br/>Shared with group"]
-    SC --> SCP["/scratch/PIRG<br/>Working data, purged after 90 days"]
-
-    style HD fill:#87ceeb,stroke:#333,stroke-width:2px
-    style PGU fill:#98fb98,stroke:#333,stroke-width:2px
-    style PGS fill:#f9d71c,stroke:#333,stroke-width:2px
-    style SCP fill:#ffa07a,stroke:#333,stroke-width:2px
-```
+![Talapas storage hierarchy: a backed-up home directory, project space with a personal workspace and a shared area, and purged scratch space.](../images/Chap16_storage_tree.svg){#fig-storage-structure fig-align="center" width="90%"}
 
 ### Directory Structure {#sec-directory-structure}
 
@@ -908,6 +892,42 @@ When publishing research using Talapas, include this acknowledgment:
 - **Service Desk**: [hpcrcf.atlassian.net/servicedesk](https://hpcrcf.atlassian.net/servicedesk/customer/portal/1)
 - **Email**: racs@uoregon.edu
 - **Office Hours**: Knight Library, Dream Lab 122E (Wednesdays 1-3pm)
+
+## Running Example: The Stickleback Data {#sec-hpc-stickle}
+
+::: {.callout-note title="Running example"}
+This section applies the chapter to the course dataset described in @sec-course-dataset (80 stickleback, 4 treatment groups, 600 genes). The same steps appear on the Week 8 slides, so the book and the lecture can be read side by side.
+:::
+
+Nothing about an analysis has to change to run on Talapas; what changes is *where* it runs and *who* starts it. Put the pipeline from @sec-data-wrangling in a script, `stickle_means.R`, that reads the data file and writes `results/gene_means.tsv`. Then wrap it in a SLURM batch script that asks for modest resources, loads R, and runs it:
+
+```bash
+#!/bin/bash
+#SBATCH --job-name=stickle_means
+#SBATCH --account=<your_pirg>
+#SBATCH --partition=compute
+#SBATCH --time=00:10:00
+#SBATCH --mem=4G
+#SBATCH --cpus-per-task=1
+#SBATCH --output=logs/stickle_%j.out
+#SBATCH --error=logs/stickle_%j.err
+
+module load R/4.4.0
+cd ~/projects/comptools
+Rscript stickle_means.R data/Stickle_RNAseq.tsv results/gene_means.tsv
+```
+
+Submit it, watch it in the queue, and read what it wrote:
+
+```bash
+mkdir -p logs results
+sbatch stickle_means.sbatch          # Submitted batch job 1234567
+squeue -u $USER                      # is it running?
+cat logs/stickle_1234567.out         # what did it print?
+head results/gene_means.tsv
+```
+
+A 160 KB file does not need a cluster, of course, and the job will finish in seconds. The point is the pattern: the same `Rscript` call you ran on your laptop, launched by `sbatch` instead of by you, with its output in a log file you read afterwards. For the term project, the identical pattern handles files a thousand times larger, and @sec-parallel-computing shows how to use more than one core when it does.
 
 ## Summary {#sec-hpc-summary}
 

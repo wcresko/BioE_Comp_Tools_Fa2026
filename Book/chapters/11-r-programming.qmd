@@ -1972,6 +1972,35 @@ exists("my_variable")
 object.size(x)  # Size of one object
 ```
 
+## Running Example: The Stickleback Data {#sec-r-stickle}
+
+::: {.callout-note title="Running example"}
+This section applies the chapter to the course dataset described in @sec-course-dataset (80 stickleback, 4 treatment groups, 600 genes). The same steps appear on the Week 6 slides, so the book and the lecture can be read side by side.
+:::
+
+The whole table fits comfortably in an R data frame. `read.delim()` reads tab-separated files with a header; `check.names = FALSE` keeps the column name `Geno&Micro` exactly as it is in the file (otherwise R would rename it `Geno.Micro`), and backticks let you refer to such a name later.
+
+```{r}
+#| label: ch11-stickle-read
+stickle <- read.delim("../data/Stickle_RNAseq.tsv", check.names = FALSE)
+dim(stickle)                          # 80 fish x 604 columns
+stickle[1:4, 1:7]                     # the first rows and columns
+table(stickle$Genotype, stickle$Microbiota)
+summary(stickle$Gene1)
+```
+
+A first figure takes one line of base R. The formula `Gene1 ~ Genotype + Microbiota` asks for one box per combination of the two factors:
+
+```{r}
+#| label: fig-ch11-stickle-boxplot
+#| fig-cap: "Gene1 read counts by host genotype and microbiota treatment, drawn with base R's boxplot()."
+boxplot(Gene1 ~ Genotype + Microbiota, data = stickle,
+        col = c("steelblue", "tomato", "steelblue", "tomato"),
+        ylab = "Gene1 read count", las = 2)
+```
+
+Genotype A fish have far higher Gene1 counts than genotype B, and within each genotype the mono-associated fish sit a little higher, the same pattern the `awk` script in @sec-shell-scripting found. @sec-data-wrangling redoes this with the tidyverse for all 600 genes at once, and @sec-data-viz turns the figure into publication-quality ggplot2.
+
 ## Summary {#sec-r-summary}
 
 This chapter introduced R programming fundamentals:

@@ -721,6 +721,44 @@ $ rm *.tmp                    # Then delete
 $ complex_pipeline | tee checkpoint.txt | further_processing
 ```
 
+## Running Example: The Stickleback Data {#sec-pipes-stickle}
+
+::: {.callout-note title="Running example"}
+This section applies the chapter to the course dataset described in @sec-course-dataset (80 stickleback, 4 treatment groups, 600 genes). The same steps appear on the Week 2 and 3 slides, so the book and the lecture can be read side by side.
+:::
+
+Start by downloading the file into a project folder, then answer some first questions about it with the tools from this chapter. How big is it, how many lines does it have, and what do the first rows look like? Because the file has 604 columns, `head` alone floods the screen, so `cut -f 1-6` is used to keep only the first six.
+
+```bash
+mkdir -p ~/projects/comptools/data && cd ~/projects/comptools
+curl -L -o data/Stickle_RNAseq.tsv \
+  https://wcresko.github.io/BioE_Comp_Tools_Fa2026/Data_Folder/Stickle_RNAseq.tsv
+
+ls -lh data/                                   # about 160 KB
+wc -l data/Stickle_RNAseq.tsv                  # 81 lines: a header plus 80 fish
+head -n 3 data/Stickle_RNAseq.tsv | cut -f 1-6  # first rows, first six columns
+```
+
+The second and third columns are the experimental factors. A pipeline of `cut`, `sort`, and `uniq -c` counts how many fish fall into each level, and turning the header line into one name per line with `tr` lets `wc -l` count the columns:
+
+```bash
+cut -f 2 data/Stickle_RNAseq.tsv | sort | uniq -c   # 40 A, 40 B (and one header)
+cut -f 3 data/Stickle_RNAseq.tsv | sort | uniq -c   # 40 conventional, 40 mono
+head -n 1 data/Stickle_RNAseq.tsv | tr '\t' '\n' | wc -l   # 604 columns
+```
+
+Redirection lets you save a subset as a new file. The header is written with `>`, and the matching rows are appended with `>>`; `2>` sends any error message to a log instead of the screen:
+
+```bash
+mkdir -p results
+head -n 1 data/Stickle_RNAseq.tsv > results/mono.tsv
+grep -w "mono" data/Stickle_RNAseq.tsv >> results/mono.tsv
+wc -l results/mono.tsv                                        # 41: header + 40 fish
+grep -w "mono" data/Stickle_RNAseq.tsvv 2> results/errors.log # a typo, logged not shown
+```
+
+Each of these is a one-line answer to a question about the data, and none of them needed a spreadsheet. The file is *tidy* for per-fish questions, with one row per fish and one column per variable, but its 600 gene columns are a wide layout; when the questions become per-gene, @sec-data-wrangling reshapes it to long form.
+
 ## Summary {#sec-pipes-summary}
 
 This chapter covered the tools for reading, writing, and connecting Unix commands:

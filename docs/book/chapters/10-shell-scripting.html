@@ -605,7 +605,8 @@ div.csl-indent {
   <li><a href="#sec-scripts-other-languages" id="toc-sec-scripts-other-languages" class="nav-link" data-scroll-target="#sec-scripts-other-languages"><span class="header-section-number">10.11</span> Scripts in Other Languages</a></li>
   <li><a href="#sec-complete-script" id="toc-sec-complete-script" class="nav-link" data-scroll-target="#sec-complete-script"><span class="header-section-number">10.12</span> A Complete Bioinformatics Script</a></li>
   <li><a href="#sec-scripting-best-practices" id="toc-sec-scripting-best-practices" class="nav-link" data-scroll-target="#sec-scripting-best-practices"><span class="header-section-number">10.13</span> Best Practices Summary</a></li>
-  <li><a href="#sec-scripting-summary" id="toc-sec-scripting-summary" class="nav-link" data-scroll-target="#sec-scripting-summary"><span class="header-section-number">10.14</span> Summary</a></li>
+  <li><a href="#sec-scripting-stickle" id="toc-sec-scripting-stickle" class="nav-link" data-scroll-target="#sec-scripting-stickle"><span class="header-section-number">10.14</span> Running Example: The Stickleback Data</a></li>
+  <li><a href="#sec-scripting-summary" id="toc-sec-scripting-summary" class="nav-link" data-scroll-target="#sec-scripting-summary"><span class="header-section-number">10.15</span> Summary</a></li>
   <li><a href="#sec-shell-additional-reading" id="toc-sec-shell-additional-reading" class="nav-link" data-scroll-target="#sec-shell-additional-reading">Additional Reading</a></li>
   <li><a href="#sec-shell-exercises" id="toc-sec-shell-exercises" class="nav-link" data-scroll-target="#sec-shell-exercises">Exercises</a></li>
   </ul><div class="toc-actions"><ul><li><a href="https://github.com/wcresko/BioE_Comp_Tools_Fa2026/edit/main/Book/chapters/10-shell-scripting.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li><li><a href="https://github.com/wcresko/BioE_Comp_Tools_Fa2026/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></nav>
@@ -1597,8 +1598,39 @@ Tip
 </ol>
 </div>
 </div>
-</section><section id="sec-scripting-summary" class="level2" data-number="10.14"><h2 data-number="10.14" class="anchored" data-anchor-id="sec-scripting-summary">
-<span class="header-section-number">10.14</span> Summary</h2>
+</section><section id="sec-scripting-stickle" class="level2" data-number="10.14"><h2 data-number="10.14" class="anchored" data-anchor-id="sec-scripting-stickle">
+<span class="header-section-number">10.14</span> Running Example: The Stickleback Data</h2>
+<div class="callout callout-style-default callout-note callout-titled" title="Running example">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>Running example
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>This section applies the chapter to the course dataset described in <a href="01-introduction.html#sec-course-dataset" class="quarto-xref"><span>Section 1.5</span></a> (80 stickleback, 4 treatment groups, 600 genes). The same steps appear on the Week 4 slides, so the book and the lecture can be read side by side.</p>
+</div>
+</div>
+<p>The <code>awk</code> one-liners of <a href="09-grep-regex.html" class="quarto-xref"><span>Chapter 9</span></a> answer one question about one gene. A script answers the same question for any gene, checks its input, and can be run in a loop. <code>gene_means.sh</code> takes a column number, looks up the gene’s name from the header, and prints the mean count in each of the four treatment groups:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb35"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb35-1"><a href="#cb35-1"></a><span class="co">#!/bin/bash</span></span>
+<span id="cb35-2"><a href="#cb35-2"></a><span class="co"># gene_means.sh - mean count of one gene per treatment group</span></span>
+<span id="cb35-3"><a href="#cb35-3"></a><span class="co"># Usage: ./gene_means.sh &lt;gene column number&gt;</span></span>
+<span id="cb35-4"><a href="#cb35-4"></a><span class="bu">set</span> <span class="at">-euo</span> pipefail</span>
+<span id="cb35-5"><a href="#cb35-5"></a><span class="va">col</span><span class="op">=</span><span class="va">${1</span><span class="op">:?</span>Give a gene column number, e.g. 5 for Gene1<span class="va">}</span></span>
+<span id="cb35-6"><a href="#cb35-6"></a><span class="va">infile</span><span class="op">=</span>results/stickle_clean.tsv</span>
+<span id="cb35-7"><a href="#cb35-7"></a></span>
+<span id="cb35-8"><a href="#cb35-8"></a><span class="va">gene</span><span class="op">=</span><span class="va">$(</span><span class="fu">head</span> <span class="at">-n</span> 1 <span class="st">"</span><span class="va">$infile</span><span class="st">"</span> <span class="kw">|</span> <span class="fu">cut</span> <span class="at">-f</span> <span class="st">"</span><span class="va">$col</span><span class="st">"</span><span class="va">)</span></span>
+<span id="cb35-9"><a href="#cb35-9"></a><span class="bu">echo</span> <span class="st">"Mean of </span><span class="va">$gene</span><span class="st"> by group:"</span></span>
+<span id="cb35-10"><a href="#cb35-10"></a><span class="fu">awk</span> <span class="at">-F</span><span class="st">'\t'</span> <span class="at">-v</span> c=<span class="st">"</span><span class="va">$col</span><span class="st">"</span> <span class="st">'NR &gt; 1 { sum[$4] += $c; n[$4]++ } END { for (g in sum) printf "  %-6s %8.1f\n", g, sum[g]/n[g] }'</span> <span class="st">"</span><span class="va">$infile</span><span class="st">"</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Three habits from this chapter are on display. <code>set -euo pipefail</code> makes the script stop at the first error rather than plough on with bad data. <code>${1:?...}</code> is a parameter expansion that aborts with a helpful message if no argument was given. And <code>-v c="$col"</code> is how a shell variable is handed to <code>awk</code>, which has its own variables and cannot see the shell’s. Make it executable and run it, then loop over several genes:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb36"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb36-1"><a href="#cb36-1"></a><span class="fu">chmod</span> +x gene_means.sh</span>
+<span id="cb36-2"><a href="#cb36-2"></a><span class="ex">./gene_means.sh</span> 5                              <span class="co"># Gene1</span></span>
+<span id="cb36-3"><a href="#cb36-3"></a><span class="cf">for</span> c <span class="kw">in</span> 5 6 7<span class="kw">;</span> <span class="cf">do</span> <span class="ex">./gene_means.sh</span> <span class="st">"</span><span class="va">$c</span><span class="st">"</span><span class="kw">;</span> <span class="cf">done</span>  <span class="co"># the first three genes</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>For genotype A fish, Gene1 averages about 16 counts in the mono-associated group and 12 in the conventional group; for genotype B, about 2 and 0.6. In <a href="16-hpc-talapas.html" class="quarto-xref"><span>Chapter 16</span></a> this same script runs unchanged as a batch job on Talapas.</p>
+</section><section id="sec-scripting-summary" class="level2" data-number="10.15"><h2 data-number="10.15" class="anchored" data-anchor-id="sec-scripting-summary">
+<span class="header-section-number">10.15</span> Summary</h2>
 <p>This chapter covered shell scripting essentials:</p>
 <ul>
 <li>Scripts are text files containing commands with a shebang line</li>

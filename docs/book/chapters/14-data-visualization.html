@@ -606,7 +606,8 @@ div.csl-indent {
   <li><a href="#sec-poor-graphics" id="toc-sec-poor-graphics" class="nav-link" data-scroll-target="#sec-poor-graphics"><span class="header-section-number">14.11</span> Examples of Poor Graphics</a></li>
   <li><a href="#sec-minard-map" id="toc-sec-minard-map" class="nav-link" data-scroll-target="#sec-minard-map"><span class="header-section-number">14.12</span> A Famous Good Example</a></li>
   <li><a href="#sec-saving-plots" id="toc-sec-saving-plots" class="nav-link" data-scroll-target="#sec-saving-plots"><span class="header-section-number">14.13</span> Saving Plots</a></li>
-  <li><a href="#sec-viz-summary" id="toc-sec-viz-summary" class="nav-link" data-scroll-target="#sec-viz-summary"><span class="header-section-number">14.14</span> Summary</a></li>
+  <li><a href="#sec-viz-stickle" id="toc-sec-viz-stickle" class="nav-link" data-scroll-target="#sec-viz-stickle"><span class="header-section-number">14.14</span> Running Example: The Stickleback Data</a></li>
+  <li><a href="#sec-viz-summary" id="toc-sec-viz-summary" class="nav-link" data-scroll-target="#sec-viz-summary"><span class="header-section-number">14.15</span> Summary</a></li>
   <li><a href="#sec-viz-additional-reading" id="toc-sec-viz-additional-reading" class="nav-link" data-scroll-target="#sec-viz-additional-reading">Additional Reading</a></li>
   <li><a href="#sec-viz-exercises" id="toc-sec-viz-exercises" class="nav-link" data-scroll-target="#sec-viz-exercises">Exercises</a></li>
   </ul><div class="toc-actions"><ul><li><a href="https://github.com/wcresko/BioE_Comp_Tools_Fa2026/edit/main/Book/chapters/14-data-visualization.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li><li><a href="https://github.com/wcresko/BioE_Comp_Tools_Fa2026/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></nav>
@@ -1906,8 +1907,49 @@ Figure&nbsp;14.44: A modern recreation of Minard’s design applied to a differe
 <span id="cb35-13"><a href="#cb35-13"></a><span class="fu">ggsave</span>(<span class="st">"my_plot.svg"</span>, <span class="at">plot =</span> p, <span class="at">width =</span> <span class="dv">8</span>, <span class="at">height =</span> <span class="dv">6</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <p><code>ggsave()</code> infers the format from the file extension and, if <code>plot</code> is omitted, saves the last plot displayed. Always give explicit <code>width</code> and <code>height</code> (in inches by default) so that text and points are sized consistently between runs, and use <code>dpi = 300</code> or higher for raster formats destined for print. Vector formats (PDF, SVG) scale without loss and are what journals usually ask for.</p>
-</section><section id="sec-viz-summary" class="level2" data-number="14.14"><h2 data-number="14.14" class="anchored" data-anchor-id="sec-viz-summary">
-<span class="header-section-number">14.14</span> Summary</h2>
+</section><section id="sec-viz-stickle" class="level2" data-number="14.14"><h2 data-number="14.14" class="anchored" data-anchor-id="sec-viz-stickle">
+<span class="header-section-number">14.14</span> Running Example: The Stickleback Data</h2>
+<div class="callout callout-style-default callout-note callout-titled" title="Running example">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>Running example
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>This section applies the chapter to the course dataset described in <a href="01-introduction.html#sec-course-dataset" class="quarto-xref"><span>Section 1.5</span></a> (80 stickleback, 4 treatment groups, 600 genes). The same steps appear on the Week 7 slides, so the book and the lecture can be read side by side.</p>
+</div>
+</div>
+<p>The base R boxplot in <a href="11-r-programming.html" class="quarto-xref"><span>Chapter 11</span></a> showed one gene. With the long-format data from <a href="13-data-wrangling.html" class="quarto-xref"><span>Chapter 13</span></a>, ggplot2 shows several genes in one figure: a boxplot layer, colour for the microbiota treatment, and <code>facet_wrap()</code> to give each gene its own panel with its own y-axis.</p>
+<div class="cell" data-layout-align="center">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb36"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb36-1"><a href="#cb36-1"></a><span class="fu">library</span>(tidyverse)</span>
+<span id="cb36-2"><a href="#cb36-2"></a>stickle_long <span class="ot">&lt;-</span> <span class="fu">read_tsv</span>(<span class="st">"../data/Stickle_RNAseq.tsv"</span>, <span class="at">show_col_types =</span> <span class="cn">FALSE</span>) <span class="sc">|&gt;</span></span>
+<span id="cb36-3"><a href="#cb36-3"></a>  <span class="fu">pivot_longer</span>(<span class="fu">starts_with</span>(<span class="st">"Gene"</span>), <span class="at">names_to =</span> <span class="st">"gene"</span>, <span class="at">values_to =</span> <span class="st">"count"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div class="cell" data-layout-align="center">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb37"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb37-1"><a href="#cb37-1"></a>stickle_long <span class="sc">|&gt;</span></span>
+<span id="cb37-2"><a href="#cb37-2"></a>  <span class="fu">filter</span>(gene <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"Gene1"</span>, <span class="st">"Gene2"</span>, <span class="st">"Gene3"</span>, <span class="st">"Gene4"</span>)) <span class="sc">|&gt;</span></span>
+<span id="cb37-3"><a href="#cb37-3"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> Genotype, <span class="at">y =</span> count, <span class="at">fill =</span> Microbiota)) <span class="sc">+</span></span>
+<span id="cb37-4"><a href="#cb37-4"></a>  <span class="fu">geom_boxplot</span>() <span class="sc">+</span></span>
+<span id="cb37-5"><a href="#cb37-5"></a>  <span class="fu">facet_wrap</span>(<span class="sc">~</span> gene, <span class="at">scales =</span> <span class="st">"free_y"</span>) <span class="sc">+</span></span>
+<span id="cb37-6"><a href="#cb37-6"></a>  <span class="fu">labs</span>(<span class="at">y =</span> <span class="st">"Read count"</span>, <span class="at">title =</span> <span class="st">"Stickleback gut RNA-seq"</span>) <span class="sc">+</span></span>
+<span id="cb37-7"><a href="#cb37-7"></a>  <span class="fu">theme_minimal</span>(<span class="at">base_size =</span> <span class="dv">14</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div id="fig-ch14-stickle-facets" class="quarto-float quarto-figure quarto-figure-center anchored" data-fig-align="center">
+<figure class="quarto-float quarto-float-fig figure"><div aria-describedby="fig-ch14-stickle-facets-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="14-data-visualization_files/figure-html/fig-ch14-stickle-facets-1.png" class="img-fluid quarto-figure quarto-figure-center figure-img" style="width:100.0%">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-ch14-stickle-facets-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;14.45: Read counts for four genes by host genotype and microbiota treatment. Each panel is one gene; colour is the microbiota treatment.
+</figcaption></figure>
+</div>
+</div>
+</div>
+<p>Nothing in the plotting code refers to a particular gene: change the <code><a href="https://rdrr.io/r/stats/filter.html">filter()</a></code> and the same figure describes any subset of the 600. That separation between the data and the description of the graphic is what the grammar of graphics buys you.</p>
+</section><section id="sec-viz-summary" class="level2" data-number="14.15"><h2 data-number="14.15" class="anchored" data-anchor-id="sec-viz-summary">
+<span class="header-section-number">14.15</span> Summary</h2>
 <p>ggplot2 provides a powerful and consistent framework for data visualization:</p>
 <ul>
 <li>Build plots layer by layer using the Grammar of Graphics</li>

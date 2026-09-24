@@ -860,6 +860,10 @@ Reference managers such as Zotero export BibTeX directly, and Google Scholar's "
 
 ## Rendering Documents {#sec-rendering}
 
+Rendering is the step that turns the plain-text source into a finished document. Quarto reads the `.qmd` file, runs every code chunk through R or Python (via knitr or Jupyter), weaves the results into the Markdown, and hands the whole thing to Pandoc, which produces the output format you asked for (@fig-render-pipeline). Because the code runs every time, the numbers, tables, and figures in the output can never drift away from the code that produced them.
+
+![From source to document: one `.qmd` file, run through Quarto, becomes an HTML page, a PDF (via LaTeX), a Word document, or a slide deck.](../images/Chap05_render_pipeline.svg){#fig-render-pipeline fig-align="center" width="85%"}
+
 ### From VS Code, Positron, or RStudio {#sec-from-rstudio}
 
 - Click the **Preview** button (VS Code and Positron, Quarto extension) or the **Render** button (RStudio), or
@@ -1058,6 +1062,41 @@ format:
 # Document your R environment
 sessionInfo()
 ```
+
+## Running Example: The Stickleback Data {#sec-quarto-stickle}
+
+::: {.callout-note title="Running example"}
+This section applies the chapter to the course dataset described in @sec-course-dataset (80 stickleback, 4 treatment groups, 600 genes). The same steps appear on the Week 9 slides, so the book and the lecture can be read side by side.
+:::
+
+Everything the course has done with the stickleback data can live in one Quarto document: the prose, the analysis, the figure, and the numbers quoted in the text, all regenerated on every render. A minimal report looks like this:
+
+````markdown
+---
+title: "Genotype and microbiota effects on gut gene expression"
+author: "Your Name"
+format: html
+---
+
+```{{r}}
+#| label: setup
+#| message: false
+library(tidyverse)
+stickle <- read_tsv("data/Stickle_RNAseq.tsv", show_col_types = FALSE)
+long <- stickle |> pivot_longer(starts_with("Gene"), names_to = "gene", values_to = "count")
+```
+
+We measured `r knitr::inline_expr("n_distinct(long$gene)")` genes in `r knitr::inline_expr("nrow(stickle)")` fish
+(@fig-gene1).
+
+```{{r}}
+#| label: fig-gene1
+#| fig-cap: "Gene1 counts by genotype and microbiota."
+ggplot(filter(long, gene == "Gene1"), aes(Genotype, count, fill = Microbiota)) + geom_boxplot()
+```
+````
+
+The inline code means the sentence "We measured 600 genes in 80 fish" is computed, not typed, so it can never disagree with the data. The chunk label beginning with `fig-` makes the figure numbered and cross-referenceable. Add `format: pdf` to the header, once TinyTeX is installed (@sec-tinytex), and the same file becomes a manuscript-ready PDF; add `format: revealjs` and it becomes slides.
 
 ## Summary {#sec-quarto-summary}
 

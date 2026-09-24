@@ -126,7 +126,7 @@ div.csl-indent {
     "search-submit-button-title": "Submit",
     "search-label": "Search"
   }
-}</script><script src="../site_libs/quarto-diagram/mermaid.min.js"></script><script src="../site_libs/quarto-diagram/mermaid-init.js"></script><link href="../site_libs/quarto-diagram/mermaid.css" rel="stylesheet">
+}</script>
 </head>
 <body class="nav-sidebar docked quarto-light"><script id="quarto-html-before-body" type="application/javascript">
     const toggleBodyColorMode = (bsSheetEl) => {
@@ -645,7 +645,8 @@ div.csl-indent {
 <li><a href="#sec-hpc-resources" id="toc-sec-hpc-resources" class="nav-link" data-scroll-target="#sec-hpc-resources">Resources</a></li>
   </ul>
 </li>
-  <li><a href="#sec-hpc-summary" id="toc-sec-hpc-summary" class="nav-link" data-scroll-target="#sec-hpc-summary"><span class="header-section-number">16.17</span> Summary</a></li>
+  <li><a href="#sec-hpc-stickle" id="toc-sec-hpc-stickle" class="nav-link" data-scroll-target="#sec-hpc-stickle"><span class="header-section-number">16.17</span> Running Example: The Stickleback Data</a></li>
+  <li><a href="#sec-hpc-summary" id="toc-sec-hpc-summary" class="nav-link" data-scroll-target="#sec-hpc-summary"><span class="header-section-number">16.18</span> Summary</a></li>
   <li><a href="#sec-hpc-additional-reading" id="toc-sec-hpc-additional-reading" class="nav-link" data-scroll-target="#sec-hpc-additional-reading">Additional Reading</a></li>
   <li><a href="#sec-hpc-exercises" id="toc-sec-hpc-exercises" class="nav-link" data-scroll-target="#sec-hpc-exercises">Exercises</a></li>
   </ul><div class="toc-actions"><ul><li><a href="https://github.com/wcresko/BioE_Comp_Tools_Fa2026/edit/main/Book/chapters/16-hpc-talapas.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li><li><a href="https://github.com/wcresko/BioE_Comp_Tools_Fa2026/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></nav>
@@ -911,6 +912,14 @@ Tip
 <p>Connecting to a specific node is useful when you want to reconnect to a <code>tmux</code> or <code>screen</code> session you left running there.</p>
 <p><strong>Windows users</strong>: Use the Ubuntu (WSL) terminal, or connect from VS Code or Positron with Remote-SSH (<a href="#sec-remote-ssh" class="quarto-xref"><span>Section 16.4.2</span></a>).</p>
 </section><section id="sec-remote-ssh" class="level3"><h3 class="anchored" data-anchor-id="sec-remote-ssh">Connecting Your Editor with Remote-SSH</h3>
+<div id="fig-remote-ssh" class="quarto-float quarto-figure quarto-figure-center anchored" data-fig-align="center">
+<figure class="quarto-float quarto-float-fig figure"><div aria-describedby="fig-remote-ssh-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="../images/Chap16_remote_ssh.svg" class="img-fluid quarto-figure quarto-figure-center figure-img" style="width:90.0%">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-remote-ssh-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;16.2: Remote-SSH: the editor runs on your laptop while the files, terminal, and R or Python processes live on Talapas, connected over an SSH tunnel.
+</figcaption></figure>
+</div>
 <p>Editing scripts over a bare terminal gets old quickly. Both VS Code and Positron support <strong>Remote - SSH</strong>, which lets you run your familiar editor on your laptop while the files, terminal, and code execution live on Talapas.</p>
 <ol type="1">
 <li>Install the <strong>Remote - SSH</strong> extension in VS Code or Positron</li>
@@ -962,34 +971,14 @@ Tip
 <strong><code>srun: error: Invalid account or account/partition combination</code>.</strong> You submitted a job without <code>--account=&lt;myPIRG&gt;</code> (or with a PIRG you do not belong to). Run <code>groups</code> to see which PIRGs you are in, then either add <code>--account=</code> to every <code>srun</code>/<code>sbatch</code> call or set it once in your shell profile (see <a href="#sec-slurm" class="quarto-xref"><span>Section 16.6</span></a>).</li>
 </ul></section></section><section id="sec-talapas-storage" class="level2" data-number="16.5"><h2 data-number="16.5" class="anchored" data-anchor-id="sec-talapas-storage">
 <span class="header-section-number">16.5</span> Storage on Talapas</h2>
-<p><a href="#fig-storage-structure" class="quarto-xref">Figure&nbsp;<span>16.2</span></a> shows the layout of the file system, and <a href="#tbl-storage" class="quarto-xref">Table&nbsp;<span>16.3</span></a> lists the quota and purpose of each location.</p>
-<div class="cell" data-layout-align="default">
-<div class="cell-output-display">
-<div id="fig-storage-structure" class="quarto-float quarto-figure quarto-figure-center anchored">
+<p><a href="#fig-storage-structure" class="quarto-xref">Figure&nbsp;<span>16.3</span></a> shows the layout of the file system, and <a href="#tbl-storage" class="quarto-xref">Table&nbsp;<span>16.3</span></a> lists the quota and purpose of each location.</p>
+<div id="fig-storage-structure" class="quarto-float quarto-figure quarto-figure-center anchored" data-fig-align="center">
 <figure class="quarto-float quarto-float-fig figure"><div aria-describedby="fig-storage-structure-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<div>
-<pre class="mermaid mermaid-js" data-label="fig-storage-structure">flowchart LR
-    R["/"] --&gt; H["/home"]
-    R --&gt; P["/projects"]
-    R --&gt; SC["/scratch"]
-    H --&gt; HD["/home/duckid&lt;br/&gt;250 GB"]
-    P --&gt; PG["/projects/PIRG"]
-    PG --&gt; PGU["/projects/PIRG/duckid&lt;br/&gt;Your workspace"]
-    PG --&gt; PGS["/projects/PIRG/shared&lt;br/&gt;Shared with group"]
-    SC --&gt; SCP["/scratch/PIRG&lt;br/&gt;Working data, purged after 90 days"]
-
-    style HD fill:#87ceeb,stroke:#333,stroke-width:2px
-    style PGU fill:#98fb98,stroke:#333,stroke-width:2px
-    style PGS fill:#f9d71c,stroke:#333,stroke-width:2px
-    style SCP fill:#ffa07a,stroke:#333,stroke-width:2px
-</pre>
-</div>
+<img src="../images/Chap16_storage_tree.svg" class="img-fluid quarto-figure quarto-figure-center figure-img" style="width:90.0%">
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-storage-structure-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;16.2: Talapas storage hierarchy
+Figure&nbsp;16.3: Talapas storage hierarchy: a backed-up home directory, project space with a personal workspace and a shared area, and purged scratch space.
 </figcaption></figure>
-</div>
-</div>
 </div>
 <section id="sec-directory-structure" class="level3"><h3 class="anchored" data-anchor-id="sec-directory-structure">Directory Structure</h3>
 <p>All of these live on a single ~3 PB parallel file system (IBM GPFS) that looks the same from every login and compute node, so a file you write on the login node is immediately visible to your jobs.</p>
@@ -1088,13 +1077,13 @@ Important
 <li>Queues jobs when resources are busy</li>
 <li>Tracks resource usage</li>
 </ul>
-<p><a href="#fig-slurm-workflow" class="quarto-xref">Figure&nbsp;<span>16.3</span></a> traces a job from submission to completion.</p>
+<p><a href="#fig-slurm-workflow" class="quarto-xref">Figure&nbsp;<span>16.4</span></a> traces a job from submission to completion.</p>
 <div id="fig-slurm-workflow" class="quarto-float quarto-figure quarto-figure-center anchored" data-fig-align="center">
 <figure class="quarto-float quarto-float-fig figure"><div aria-describedby="fig-slurm-workflow-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 <img src="../images/Chap20_img002.svg" class="img-fluid quarto-figure quarto-figure-center figure-img" style="width:100.0%">
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-slurm-workflow-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;16.3: SLURM job lifecycle: <code>sbatch</code> places the job in the queue, it waits for resources, runs on a compute node, and leaves its output in files
+Figure&nbsp;16.4: SLURM job lifecycle: <code>sbatch</code> places the job in the queue, it waits for resources, runs on a compute node, and leaves its output in files
 </figcaption></figure>
 </div>
 <p>Three words recur in everything that follows. A <strong>job</strong> is a unit of work you submit. A <strong>partition</strong> is a queue with its own hardware and time limits (<a href="#tbl-partitions" class="quarto-xref">Table&nbsp;<span>16.2</span></a>). An <strong>account</strong> is the PIRG your usage is charged to.</p>
@@ -1973,8 +1962,44 @@ Table&nbsp;16.9: Three ways to get software onto the cluster
 <strong>Email</strong>: racs@uoregon.edu</li>
 <li>
 <strong>Office Hours</strong>: Knight Library, Dream Lab 122E (Wednesdays 1-3pm)</li>
-</ul></section></section><section id="sec-hpc-summary" class="level2" data-number="16.17"><h2 data-number="16.17" class="anchored" data-anchor-id="sec-hpc-summary">
-<span class="header-section-number">16.17</span> Summary</h2>
+</ul></section></section><section id="sec-hpc-stickle" class="level2" data-number="16.17"><h2 data-number="16.17" class="anchored" data-anchor-id="sec-hpc-stickle">
+<span class="header-section-number">16.17</span> Running Example: The Stickleback Data</h2>
+<div class="callout callout-style-default callout-note callout-titled" title="Running example">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>Running example
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>This section applies the chapter to the course dataset described in <a href="01-introduction.html#sec-course-dataset" class="quarto-xref"><span>Section 1.5</span></a> (80 stickleback, 4 treatment groups, 600 genes). The same steps appear on the Week 8 slides, so the book and the lecture can be read side by side.</p>
+</div>
+</div>
+<p>Nothing about an analysis has to change to run on Talapas; what changes is <em>where</em> it runs and <em>who</em> starts it. Put the pipeline from <a href="13-data-wrangling.html" class="quarto-xref"><span>Chapter 13</span></a> in a script, <code>stickle_means.R</code>, that reads the data file and writes <code>results/gene_means.tsv</code>. Then wrap it in a SLURM batch script that asks for modest resources, loads R, and runs it:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb25"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb25-1"><a href="#cb25-1"></a><span class="co">#!/bin/bash</span></span>
+<span id="cb25-2"><a href="#cb25-2"></a><span class="co">#SBATCH --job-name=stickle_means</span></span>
+<span id="cb25-3"><a href="#cb25-3"></a><span class="co">#SBATCH --account=&lt;your_pirg&gt;</span></span>
+<span id="cb25-4"><a href="#cb25-4"></a><span class="co">#SBATCH --partition=compute</span></span>
+<span id="cb25-5"><a href="#cb25-5"></a><span class="co">#SBATCH --time=00:10:00</span></span>
+<span id="cb25-6"><a href="#cb25-6"></a><span class="co">#SBATCH --mem=4G</span></span>
+<span id="cb25-7"><a href="#cb25-7"></a><span class="co">#SBATCH --cpus-per-task=1</span></span>
+<span id="cb25-8"><a href="#cb25-8"></a><span class="co">#SBATCH --output=logs/stickle_%j.out</span></span>
+<span id="cb25-9"><a href="#cb25-9"></a><span class="co">#SBATCH --error=logs/stickle_%j.err</span></span>
+<span id="cb25-10"><a href="#cb25-10"></a></span>
+<span id="cb25-11"><a href="#cb25-11"></a><span class="ex">module</span> load R/4.4.0</span>
+<span id="cb25-12"><a href="#cb25-12"></a><span class="bu">cd</span> ~/projects/comptools</span>
+<span id="cb25-13"><a href="#cb25-13"></a><span class="ex">Rscript</span> stickle_means.R data/Stickle_RNAseq.tsv results/gene_means.tsv</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Submit it, watch it in the queue, and read what it wrote:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb26"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb26-1"><a href="#cb26-1"></a><span class="fu">mkdir</span> <span class="at">-p</span> logs results</span>
+<span id="cb26-2"><a href="#cb26-2"></a><span class="ex">sbatch</span> stickle_means.sbatch          <span class="co"># Submitted batch job 1234567</span></span>
+<span id="cb26-3"><a href="#cb26-3"></a><span class="ex">squeue</span> <span class="at">-u</span> <span class="va">$USER</span>                      <span class="co"># is it running?</span></span>
+<span id="cb26-4"><a href="#cb26-4"></a><span class="fu">cat</span> logs/stickle_1234567.out         <span class="co"># what did it print?</span></span>
+<span id="cb26-5"><a href="#cb26-5"></a><span class="fu">head</span> results/gene_means.tsv</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>A 160 KB file does not need a cluster, of course, and the job will finish in seconds. The point is the pattern: the same <code>Rscript</code> call you ran on your laptop, launched by <code>sbatch</code> instead of by you, with its output in a log file you read afterwards. For the term project, the identical pattern handles files a thousand times larger, and <a href="17-parallel-computing.html" class="quarto-xref"><span>Chapter 17</span></a> shows how to use more than one core when it does.</p>
+</section><section id="sec-hpc-summary" class="level2" data-number="16.18"><h2 data-number="16.18" class="anchored" data-anchor-id="sec-hpc-summary">
+<span class="header-section-number">16.18</span> Summary</h2>
 <p>High-performance computing extends your analytical capabilities beyond personal computers:</p>
 <ul>
 <li>Talapas provides 14,520+ CPU cores, 89 GPUs, 129 TB of memory, and about 3 PB of storage</li>

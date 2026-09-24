@@ -126,7 +126,7 @@ div.csl-indent {
     "search-submit-button-title": "Submit",
     "search-label": "Search"
   }
-}</script><script src="../site_libs/quarto-diagram/mermaid.min.js"></script><script src="../site_libs/quarto-diagram/mermaid-init.js"></script><link href="../site_libs/quarto-diagram/mermaid.css" rel="stylesheet">
+}</script>
 </head>
 <body class="nav-sidebar docked quarto-light"><script id="quarto-html-before-body" type="application/javascript">
     const toggleBodyColorMode = (bsSheetEl) => {
@@ -631,6 +631,15 @@ div.csl-indent {
 <p>Every tool in this book so far has been deterministic: <code>grep</code> finds exactly what your pattern says, <code><a href="https://dplyr.tidyverse.org/reference/filter.html">dplyr::filter()</a></code> keeps exactly the rows that satisfy your condition, and SLURM runs exactly the script you submit. The tools in this chapter are different. A <strong>large language model</strong> (LLM) is a statistical model trained on an enormous amount of text, including a great deal of publicly available source code. Given a prompt, it produces the continuation that its training makes most probable. When the prompt is “write me an R function that reads a FASTA file,” the most probable continuation is usually a plausible-looking R function.</p>
 <p>That single word, <em>plausible</em>, is the whole story of this chapter. An LLM does not run the code it writes, does not know whether the package it names exists, and has no way to check its answer against your data. It produces text that looks like a correct answer. Often it <em>is</em> a correct answer, because correct answers are common in the training data. Sometimes it is confidently, fluently wrong. Your job as a scientist is to tell the difference, and this chapter is about how to do that efficiently.</p>
 <p>Used well, an assistant can make you dramatically faster at the parts of programming that are tedious and make the parts that are hard more approachable. Used badly, it produces analyses that nobody, including you, actually understands. In this course we use the phrase <strong>“vibe coding” with the help of large language models</strong> deliberately and a little ironically: we want you to know what the phrase means, get the benefit, and avoid the trap.</p>
+<p>The assistants in this chapter are all built on <strong>generative</strong> models: rather than learning to label inputs, as a classifier that calls a cell “healthy” or “diseased” does, they learn the distribution of their training text well enough to produce new text that is likely to follow a prompt (<a href="#fig-discriminative-generative-ai" class="quarto-xref">Figure&nbsp;<span>19.1</span></a>). That is why they are fluent, and also why they are confidently wrong: the model is producing <em>plausible</em> code, and plausibility is not correctness.</p>
+<div id="fig-discriminative-generative-ai" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure"><div aria-describedby="fig-discriminative-generative-ai-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="../images/Chap01_img001.png" class="img-fluid figure-img" style="width:80.0%">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-discriminative-generative-ai-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;19.1: Discriminative models predict labels from features by learning decision boundaries; generative models learn the underlying distribution of the data and produce new content from it. Coding assistants are generative, which explains both their fluency and their failure modes.
+</figcaption></figure>
+</div>
 <section id="sec-ai-tool-spectrum" class="level3"><h3 class="anchored" data-anchor-id="sec-ai-tool-spectrum">A Spectrum of Tools</h3>
 <p>AI coding assistants come in three broad flavors, and it helps to keep them distinct because the risks differ.</p>
 <dl>
@@ -675,32 +684,14 @@ Assistants that do not just propose code but <em>act</em>: they create and edit 
 <p>So our version of vibe coding keeps the speed and drops the blindness. The assistant writes, you read, and a tiny test decides who is right.</p>
 </section><section id="sec-ai-loop" class="level2" data-number="19.3"><h2 data-number="19.3" class="anchored" data-anchor-id="sec-ai-loop">
 <span class="header-section-number">19.3</span> The Productive Loop</h2>
-<p>Here is the workflow we recommend (<a href="#fig-ai-loop" class="quarto-xref">Figure&nbsp;<span>19.1</span></a>). It is short enough to memorize.</p>
-<div class="cell" data-layout-align="default">
-<div class="cell-output-display">
-<div id="fig-ai-loop" class="quarto-float quarto-figure quarto-figure-center anchored">
+<p>Here is the workflow we recommend (<a href="#fig-ai-loop" class="quarto-xref">Figure&nbsp;<span>19.2</span></a>). It is short enough to memorize.</p>
+<div id="fig-ai-loop" class="quarto-float quarto-figure quarto-figure-center anchored" data-fig-align="center">
 <figure class="quarto-float quarto-float-fig figure"><div aria-describedby="fig-ai-loop-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<div>
-<pre class="mermaid mermaid-js" data-label="fig-ai-loop">flowchart LR
-    A[Describe the goal precisely] --&gt; B[Get code]
-    B --&gt; C[READ it]
-    C --&gt; D[Run it on a tiny test]
-    D --&gt; E[Check against something you know]
-    E --&gt;|wrong| A
-    E --&gt;|right| F[Use it, and keep the test]
-
-    style A fill:#e3f2fd,stroke:#333,stroke-width:2px
-    style C fill:#ffa07a,stroke:#333,stroke-width:2px
-    style E fill:#f9d71c,stroke:#333,stroke-width:2px
-    style F fill:#98fb98,stroke:#333,stroke-width:2px
-</pre>
-</div>
+<img src="../images/Chap19_ai_loop.svg" class="img-fluid quarto-figure quarto-figure-center figure-img" style="width:100.0%">
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-ai-loop-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;19.1: The productive loop for working with an AI coding assistant. The step people skip is the one that matters.
+Figure&nbsp;19.2: The productive loop for working with an AI coding assistant. The step people skip is the one that matters.
 </figcaption></figure>
-</div>
-</div>
 </div>
 <ol type="1">
 <li>

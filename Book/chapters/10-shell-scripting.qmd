@@ -949,6 +949,37 @@ log "Analysis complete. Results written to $OUTPUT"
 10. **Document usage**: Include help messages
 :::
 
+## Running Example: The Stickleback Data {#sec-scripting-stickle}
+
+::: {.callout-note title="Running example"}
+This section applies the chapter to the course dataset described in @sec-course-dataset (80 stickleback, 4 treatment groups, 600 genes). The same steps appear on the Week 4 slides, so the book and the lecture can be read side by side.
+:::
+
+The `awk` one-liners of @sec-grep-regex answer one question about one gene. A script answers the same question for any gene, checks its input, and can be run in a loop. `gene_means.sh` takes a column number, looks up the gene's name from the header, and prints the mean count in each of the four treatment groups:
+
+```bash
+#!/bin/bash
+# gene_means.sh - mean count of one gene per treatment group
+# Usage: ./gene_means.sh <gene column number>
+set -euo pipefail
+col=${1:?Give a gene column number, e.g. 5 for Gene1}
+infile=results/stickle_clean.tsv
+
+gene=$(head -n 1 "$infile" | cut -f "$col")
+echo "Mean of $gene by group:"
+awk -F'\t' -v c="$col" 'NR > 1 { sum[$4] += $c; n[$4]++ } END { for (g in sum) printf "  %-6s %8.1f\n", g, sum[g]/n[g] }' "$infile"
+```
+
+Three habits from this chapter are on display. `set -euo pipefail` makes the script stop at the first error rather than plough on with bad data. `${1:?...}` is a parameter expansion that aborts with a helpful message if no argument was given. And `-v c="$col"` is how a shell variable is handed to `awk`, which has its own variables and cannot see the shell's. Make it executable and run it, then loop over several genes:
+
+```bash
+chmod +x gene_means.sh
+./gene_means.sh 5                              # Gene1
+for c in 5 6 7; do ./gene_means.sh "$c"; done  # the first three genes
+```
+
+For genotype A fish, Gene1 averages about 16 counts in the mono-associated group and 12 in the conventional group; for genotype B, about 2 and 0.6. In @sec-hpc-talapas this same script runs unchanged as a batch job on Talapas.
+
 ## Summary {#sec-scripting-summary}
 
 This chapter covered shell scripting essentials:

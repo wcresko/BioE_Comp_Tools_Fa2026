@@ -31,6 +31,12 @@ But then reality sets in. Your spreadsheet has multiple header rows. Some column
 
 This scenario plays out in laboratories around the world, every day. The solution isn't just better software—it's better data organization from the start.
 
+### A cautionary tale: when Excel renamed the genes {#sec-excel-genes}
+
+The costs of careless data handling are not hypothetical. Spreadsheet programs helpfully guess what a cell contains, and for years Excel converted the gene symbol *SEPT2* into the date "2-Sep" and *MARCH1* into "1-Mar" the moment a gene list was pasted in. A 2016 survey of the supplementary files attached to genomics papers found such gene-name errors in roughly one in five of the spreadsheets that contained gene lists [@ziemann2016gene], and a follow-up five years later found that the problem had, if anything, grown [@abeysooriya2021gene]. The errors were so persistent that in 2020 the HUGO Gene Nomenclature Committee changed the official symbols of the affected genes, so that *SEPT2* is now *SEPTIN2* and *MARCH1* is *MARCHF1* [@bruford2020guidelines]. It is a remarkable thing for a spreadsheet's autocorrect feature to rename part of the human genome.
+
+The lessons generalize far beyond gene names. Keep raw data in plain-text files (CSV or TSV) that no program will silently reinterpret; never "fix" data by hand inside a spreadsheet, because there is no record of what was changed; and let scripts do the transformations, so that every step is written down and can be re-run. When you must use a spreadsheet for data entry, Broman and Woo's short paper on data organization in spreadsheets is the best available guide [@broman2018data], and its rules are the ones this chapter builds on.
+
 **Tidy data** provides a standard way to organize data that makes analysis easier. It's not the only valid way to structure data, but it's particularly well-suited for analysis in R and Python (pandas follows the same ideas; see @sec-py-pandas). When your data is tidy, you spend less time wrestling with data formats and more time answering scientific questions.
 
 ::: {.callout-note title="Data Wrangling in the Wild"}
@@ -256,21 +262,9 @@ Solution: Normalize into separate tables linked by keys.
 
 ### Naming Conventions {#sec-tidy-naming-conventions}
 
-::: {.callout-tip title="Data File Naming Rules"}
-**File names:**
+Good names are the cheapest documentation you will ever write, and the shell, R, and Python all reward the same habits. A file name should say what the file contains and, where it matters, when: `patient_outcomes_2024-03-15.csv` tells you more than `data_final_v2.csv` ever will, and a date written in ISO 8601 order (`YYYY-MM-DD`) sorts chronologically when the files are listed alphabetically. Avoid spaces, which every command-line tool treats as a separator between arguments, and avoid characters with special meanings in the shell or in URLs such as `& ? * / \ : ( ) ' "`; underscores and hyphens are the safe separators. Remember that Unix file systems are case-sensitive, so `Data.csv` and `data.csv` are different files; pick one convention (lower case is the usual choice) and keep to it.
 
-- Use descriptive names: `patient_outcomes_2024.csv`
-- Include dates in ISO format: `YYYY-MM-DD`
-- Avoid spaces (use underscores or hyphens)
-- Keep names concise but informative
-
-**Column names:**
-
-- Use lowercase with underscores: `sample_id`, `gene_expression`
-- Make names meaningful: `treatment_group` not `tg`
-- Avoid special characters and spaces
-- Start with a letter, not a number
-:::
+Column names follow the same logic with one extra constraint: they become variable names inside your code. Lower case with underscores (`sample_id`, `gene_expression`) can be typed without back-ticks or brackets in every language we use, a name should be meaningful (`treatment_group`, not `tg`), and it should start with a letter, because a name beginning with a digit is not a legal identifier in R or Python. The course dataset's fourth column, `Geno&Micro`, is a small illustration of what happens otherwise: it has to be quoted or renamed in every tool that touches it (@sec-data-wrangling).
 
 ### File Formats {#sec-file-formats}
 
@@ -291,14 +285,7 @@ For long-term storage and sharing, prefer plain text formats (CSV, TSV) over pro
 
 ### Documentation {#sec-documentation}
 
-Always create a **data dictionary** (also called a codebook) documenting:
-
-- Variable names and descriptions
-- Units of measurement
-- Allowable values or categories
-- Coding of missing values
-- Source of the data
-- Date created/modified
+A data file is only as useful as the description that travels with it. The standard form is a **data dictionary**, sometimes called a codebook: a second, small table with one row per variable that records the variable's name, what it measures, its units, the values or categories it may take, how missing values are coded, where the data came from, and when the file was created or last changed. It need not be elaborate; a `README.md` or a `variables.csv` next to the data is enough. The `Data_Folder/README.md` that accompanies the course dataset (@sec-course-dataset) is an example. Write it while you still remember what the columns mean, because six months later you will not, and neither will the collaborator who inherits the project.
 
 ### Preserving Raw Data {#sec-preserving-raw-data}
 
@@ -312,25 +299,14 @@ Always keep an unchanged copy of your original data. Create a separate processed
 Keep raw files in their own directory, with write permission removed if possible (`chmod a-w`, @sec-chmod). All cleaning and transformation should be done programmatically, in scripts that can be re-run, with the outputs saved to new files.
 :::
 
-### Data File Do's and Don'ts {#sec-data-file-dos-donts}
+### Keeping a Data File Clean {#sec-data-file-dos-donts}
 
-The naming rules above cover file and column names; these guidelines cover the *contents* of a data file, whether you edit it with Unix tools, R, or a spreadsheet program.
+The naming rules above cover file and column names; a few further habits keep the *contents* of a data file usable whether you edit it with Unix tools, R, Python, or a spreadsheet program. Keep the file rectangular: a new observation is a new row and a new variable is a new column, and there is exactly one header row, with concise but descriptive variable names. Write dates in ISO 8601 form, which sorts correctly as text and contains no delimiter characters. Represent missing values the same way everywhere, either as empty cells or as `NA`, never as a scattering of `-`, `N/A`, `missing`, and `?`. And keep the data dictionary from @sec-documentation alongside the file so that the two stay in step.
 
-::: {.callout-tip title="Do"}
-- **Add new observations as rows** and new variables as columns, so the file stays rectangular
-- **Include exactly one header row** with concise but descriptive variable names
-- **Use ISO 8601 dates** (`YYYY-MM-DD`): they sort correctly as text and contain no delimiter characters
-- **Represent missing values consistently**, as empty cells or `NA`
-- **Maintain metadata** (a data dictionary, @sec-documentation) alongside the file
-:::
+The mistakes to avoid are mostly ways of smuggling information into places where software cannot see it. Do not mix types within a column: if a column holds numbers, every entry is a number or an explicit `NA`, not a note such as "below detection", which turns the whole column into text. Do not use the file's delimiter inside a value, because in a comma-separated file `March 8, 2024` becomes two fields. Do not paste from formatted documents such as Word, whose invisible formatting characters can corrupt a file, and do not open a data file in Excel to edit it unless you know what it will silently convert, as the gene-name story in @sec-excel-genes shows. Do not encode information in colour, bold, or cell borders, because formatting is lost the moment the file is exported; put the information in a column instead. And do not leave empty rows or columns as visual separators, since they break the rectangular structure that every import function expects.
 
-::: {.callout-warning title="Don't"}
-- **Don't mix data types within a column.** If a column holds numbers, every entry should be a number or an explicit `NA`, never a note like `"below detection"`
-- **Don't use delimiter characters inside values.** In a comma-delimited file, a value such as `March 8, 2024` will be split into two fields
-- **Don't paste data from formatted documents** such as Word; hidden formatting characters can corrupt a file
-- **Don't open data files in Excel to edit them** unless you know what it will silently convert: gene names such as `SEPT1` and `MARCH1` become dates, and long identifiers become scientific notation
-- **Don't encode information in colour or formatting.** Everything must live in the cell values, because formatting is lost on export
-- **Don't leave empty rows or columns as visual separators.** They break the rectangular structure that import functions expect
+::: {.callout-tip title="The one-line version"}
+One header row, one type per column, one way of writing missing values, no formatting-as-data, and a data dictionary next to the file.
 :::
 
 ## Data Types {#sec-tidy-data-types}
@@ -443,36 +419,13 @@ sort(treatments_factor)
 
 ## Structuring Spreadsheets for Analysis {#sec-spreadsheets}
 
-If you must use spreadsheets for data entry, follow these guidelines:
+Spreadsheets are not going away, and for data *entry* they are often the most practical tool in the lab. The trouble begins when a spreadsheet is designed for a human eye rather than for a program. Merged cells that group rows visually, colour that marks a category, a second header row with units, a note typed into a spare cell, a running total at the bottom of a column: each is perfectly legible to a person and each breaks the rectangular structure that `read_csv()`, `pandas.read_csv()`, and `cut` all assume. The result is the scenario at the start of this chapter, in which the first hour of every analysis is spent undoing the layout.
 
-::: {.callout-important title="Spreadsheet Best Practices"}
-1. **One header row only** — Put variable names in row 1
-2. **No merged cells** — They break data structure
-3. **No color-coding as data** — Use a column instead
-4. **Consistent missing values** — Use `NA`, not blank, `-`, or `N/A`
-5. **One sheet per dataset** — Don't spread data across tabs
-6. **Export as CSV** — Preserve as plain text
-7. **No calculations in raw data** — Keep raw and calculated data separate
-:::
+The remedy is to treat the spreadsheet as a data file that happens to have a grid interface. Put the variable names in row 1 and nothing above them. Never merge cells. If a colour means something, add a column that says the same thing in words. Write missing values consistently as `NA` rather than leaving a mix of blanks, dashes, and `N/A`. Keep one dataset per sheet rather than spreading a study across tabs, and keep raw data and calculations apart: formulas belong in a separate sheet or, better, in a script, so that the raw sheet is nothing but values. Finally, export the sheet as CSV for analysis, which forces everything the program cannot see to disappear before it can cause trouble. Broman and Woo's paper on data organization in spreadsheets [@broman2018data] develops each of these rules with examples and is short enough to read in an afternoon.
 
 ### Before and After {#sec-before-and-after}
 
-**Bad spreadsheet practices:**
-
-- Merged cells for visual grouping
-- Color-coded cells indicating categories
-- Multiple header rows
-- Notes in random cells
-- Mixed data types in columns
-- Embedded calculations
-
-**Good spreadsheet practices:**
-
-- Clean rectangular data
-- Single header row
-- Consistent formatting throughout
-- Separate documentation sheet
-- Explicit coding of all information
+The difference between a spreadsheet built for looking at and one built for analysis is easy to see side by side. The "before" version has merged cells for visual grouping, colour-coded categories, several header rows, notes scattered in otherwise empty cells, a column that mixes numbers with words, and embedded calculations that will be silently read as data. The "after" version is a clean rectangle: one header row of well-named variables, one type per column, every piece of information stated explicitly in a cell value, and a second sheet or accompanying file carrying the documentation. Nothing has been lost in the translation; the colours and notes have simply become columns, where a program can read them.
 
 ## Summary {#sec-tidy-summary}
 

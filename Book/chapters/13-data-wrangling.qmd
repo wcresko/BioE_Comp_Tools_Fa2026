@@ -1278,6 +1278,39 @@ lazy_dt |>
 
 This gives you dplyr's readable syntax with much of data.table's performance.
 
+## Running Example: The Stickleback Data {#sec-wrangling-stickle}
+
+::: {.callout-note title="Running example"}
+This section applies the chapter to the course dataset described in @sec-course-dataset (80 stickleback, 4 treatment groups, 600 genes). The same steps appear on the Week 7 slides, so the book and the lecture can be read side by side.
+:::
+
+The stickleback table is wide: one row per fish, 600 gene columns. That is convenient for looking at one gene, and awkward for asking a question of every gene at once. `pivot_longer()` turns the gene columns into two: the gene's name and its count, giving one row per fish-gene pair, 48,000 rows in all. The awkward column name is fixed once, with `rename()`, on the way in. Because this book renders data frames as full tables, the chunk shows only the first six rows; printing all 48,000 would produce a table too large for the page (and, as it happens, for Pandoc).
+
+```{r}
+#| label: ch13-stickle-long
+#| message: false
+library(tidyverse)
+stickle <- read_tsv("../data/Stickle_RNAseq.tsv", show_col_types = FALSE) |>
+  rename(geno_micro = `Geno&Micro`)
+
+stickle_long <- stickle |>
+  pivot_longer(starts_with("Gene"), names_to = "gene", values_to = "count")
+dim(stickle_long)                 # 48,000 rows: one per fish x gene
+slice_head(stickle_long, n = 6)   # the first few (never print all 48,000!)
+```
+
+With the data in long form, a grouped summary computes the mean count of every gene in every treatment group in one pipeline, and `filter()` pulls out whichever gene you are curious about:
+
+```{r}
+#| label: ch13-stickle-means
+gene_means <- stickle_long |>
+  group_by(gene, Genotype, Microbiota) |>
+  summarize(mean_count = mean(count), .groups = "drop")
+gene_means |> filter(gene == "Gene1")
+```
+
+These are the same four numbers that the `awk` script in @sec-shell-scripting printed, now for all 600 genes in a single data frame that can be sorted, filtered, joined to annotation, or handed to ggplot2 (@sec-data-viz). That is the payoff of tidy, long-format data: one reshaping step, and every question about every gene becomes a `group_by()` away.
+
 ## Summary {#sec-wrangling-summary}
 
 The tidyverse provides powerful tools for working with tidy data:

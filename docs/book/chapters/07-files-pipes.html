@@ -600,7 +600,8 @@ div.csl-indent {
   <li><a href="#sec-defensive-practices" id="toc-sec-defensive-practices" class="nav-link" data-scroll-target="#sec-defensive-practices">Defensive Practices</a></li>
   </ul>
 </li>
-  <li><a href="#sec-pipes-summary" id="toc-sec-pipes-summary" class="nav-link" data-scroll-target="#sec-pipes-summary"><span class="header-section-number">7.10</span> Summary</a></li>
+  <li><a href="#sec-pipes-stickle" id="toc-sec-pipes-stickle" class="nav-link" data-scroll-target="#sec-pipes-stickle"><span class="header-section-number">7.10</span> Running Example: The Stickleback Data</a></li>
+  <li><a href="#sec-pipes-summary" id="toc-sec-pipes-summary" class="nav-link" data-scroll-target="#sec-pipes-summary"><span class="header-section-number">7.11</span> Summary</a></li>
   <li><a href="#sec-pipes-additional-reading" id="toc-sec-pipes-additional-reading" class="nav-link" data-scroll-target="#sec-pipes-additional-reading">Additional Reading</a></li>
   <li><a href="#sec-pipes-exercises" id="toc-sec-pipes-exercises" class="nav-link" data-scroll-target="#sec-pipes-exercises">Exercises</a></li>
   </ul><div class="toc-actions"><ul><li><a href="https://github.com/wcresko/BioE_Comp_Tools_Fa2026/edit/main/Book/chapters/07-files-pipes.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li><li><a href="https://github.com/wcresko/BioE_Comp_Tools_Fa2026/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></nav>
@@ -1322,8 +1323,42 @@ Note
 <span id="cb36-7"><a href="#cb36-7"></a></span>
 <span id="cb36-8"><a href="#cb36-8"></a><span class="co"># Use tee to save intermediate results</span></span>
 <span id="cb36-9"><a href="#cb36-9"></a><span class="ex">$</span> complex_pipeline <span class="kw">|</span> <span class="fu">tee</span> checkpoint.txt <span class="kw">|</span> <span class="ex">further_processing</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</section></section><section id="sec-pipes-summary" class="level2" data-number="7.10"><h2 data-number="7.10" class="anchored" data-anchor-id="sec-pipes-summary">
-<span class="header-section-number">7.10</span> Summary</h2>
+</section></section><section id="sec-pipes-stickle" class="level2" data-number="7.10"><h2 data-number="7.10" class="anchored" data-anchor-id="sec-pipes-stickle">
+<span class="header-section-number">7.10</span> Running Example: The Stickleback Data</h2>
+<div class="callout callout-style-default callout-note callout-titled" title="Running example">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>Running example
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>This section applies the chapter to the course dataset described in <a href="01-introduction.html#sec-course-dataset" class="quarto-xref"><span>Section 1.5</span></a> (80 stickleback, 4 treatment groups, 600 genes). The same steps appear on the Week 2 and 3 slides, so the book and the lecture can be read side by side.</p>
+</div>
+</div>
+<p>Start by downloading the file into a project folder, then answer some first questions about it with the tools from this chapter. How big is it, how many lines does it have, and what do the first rows look like? Because the file has 604 columns, <code>head</code> alone floods the screen, so <code>cut -f 1-6</code> is used to keep only the first six.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb37"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb37-1"><a href="#cb37-1"></a><span class="fu">mkdir</span> <span class="at">-p</span> ~/projects/comptools/data <span class="kw">&amp;&amp;</span> <span class="bu">cd</span> ~/projects/comptools</span>
+<span id="cb37-2"><a href="#cb37-2"></a><span class="ex">curl</span> <span class="at">-L</span> <span class="at">-o</span> data/Stickle_RNAseq.tsv <span class="dt">\</span></span>
+<span id="cb37-3"><a href="#cb37-3"></a>  https://wcresko.github.io/BioE_Comp_Tools_Fa2026/Data_Folder/Stickle_RNAseq.tsv</span>
+<span id="cb37-4"><a href="#cb37-4"></a></span>
+<span id="cb37-5"><a href="#cb37-5"></a><span class="fu">ls</span> <span class="at">-lh</span> data/                                   <span class="co"># about 160 KB</span></span>
+<span id="cb37-6"><a href="#cb37-6"></a><span class="fu">wc</span> <span class="at">-l</span> data/Stickle_RNAseq.tsv                  <span class="co"># 81 lines: a header plus 80 fish</span></span>
+<span id="cb37-7"><a href="#cb37-7"></a><span class="fu">head</span> <span class="at">-n</span> 3 data/Stickle_RNAseq.tsv <span class="kw">|</span> <span class="fu">cut</span> <span class="at">-f</span> 1-6  <span class="co"># first rows, first six columns</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>The second and third columns are the experimental factors. A pipeline of <code>cut</code>, <code>sort</code>, and <code>uniq -c</code> counts how many fish fall into each level, and turning the header line into one name per line with <code>tr</code> lets <code>wc -l</code> count the columns:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb38"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb38-1"><a href="#cb38-1"></a><span class="fu">cut</span> <span class="at">-f</span> 2 data/Stickle_RNAseq.tsv <span class="kw">|</span> <span class="fu">sort</span> <span class="kw">|</span> <span class="fu">uniq</span> <span class="at">-c</span>   <span class="co"># 40 A, 40 B (and one header)</span></span>
+<span id="cb38-2"><a href="#cb38-2"></a><span class="fu">cut</span> <span class="at">-f</span> 3 data/Stickle_RNAseq.tsv <span class="kw">|</span> <span class="fu">sort</span> <span class="kw">|</span> <span class="fu">uniq</span> <span class="at">-c</span>   <span class="co"># 40 conventional, 40 mono</span></span>
+<span id="cb38-3"><a href="#cb38-3"></a><span class="fu">head</span> <span class="at">-n</span> 1 data/Stickle_RNAseq.tsv <span class="kw">|</span> <span class="fu">tr</span> <span class="st">'\t'</span> <span class="st">'\n'</span> <span class="kw">|</span> <span class="fu">wc</span> <span class="at">-l</span>   <span class="co"># 604 columns</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Redirection lets you save a subset as a new file. The header is written with <code>&gt;</code>, and the matching rows are appended with <code>&gt;&gt;</code>; <code>2&gt;</code> sends any error message to a log instead of the screen:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb39"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb39-1"><a href="#cb39-1"></a><span class="fu">mkdir</span> <span class="at">-p</span> results</span>
+<span id="cb39-2"><a href="#cb39-2"></a><span class="fu">head</span> <span class="at">-n</span> 1 data/Stickle_RNAseq.tsv <span class="op">&gt;</span> results/mono.tsv</span>
+<span id="cb39-3"><a href="#cb39-3"></a><span class="fu">grep</span> <span class="at">-w</span> <span class="st">"mono"</span> data/Stickle_RNAseq.tsv <span class="op">&gt;&gt;</span> results/mono.tsv</span>
+<span id="cb39-4"><a href="#cb39-4"></a><span class="fu">wc</span> <span class="at">-l</span> results/mono.tsv                                        <span class="co"># 41: header + 40 fish</span></span>
+<span id="cb39-5"><a href="#cb39-5"></a><span class="fu">grep</span> <span class="at">-w</span> <span class="st">"mono"</span> data/Stickle_RNAseq.tsvv <span class="dv">2</span><span class="op">&gt;</span> results/errors.log <span class="co"># a typo, logged not shown</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Each of these is a one-line answer to a question about the data, and none of them needed a spreadsheet. The file is <em>tidy</em> for per-fish questions, with one row per fish and one column per variable, but its 600 gene columns are a wide layout; when the questions become per-gene, <a href="13-data-wrangling.html" class="quarto-xref"><span>Chapter 13</span></a> reshapes it to long form.</p>
+</section><section id="sec-pipes-summary" class="level2" data-number="7.11"><h2 data-number="7.11" class="anchored" data-anchor-id="sec-pipes-summary">
+<span class="header-section-number">7.11</span> Summary</h2>
 <p>This chapter covered the tools for reading, writing, and connecting Unix commands:</p>
 <ul>
 <li>Standard streams (stdin, stdout, stderr) enable program communication</li>
@@ -1388,7 +1423,7 @@ Tip
 </ol>
 <p><strong>Exercise 2: Pipeline Construction</strong></p>
 <p>Create a file <code>numbers.txt</code> with one number per line (include some duplicates):</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb37"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb37-1"><a href="#cb37-1"></a><span class="bu">echo</span> <span class="at">-e</span> <span class="st">"5\n3\n8\n3\n1\n5\n9\n3\n7"</span> <span class="op">&gt;</span> numbers.txt</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb40"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb40-1"><a href="#cb40-1"></a><span class="bu">echo</span> <span class="at">-e</span> <span class="st">"5\n3\n8\n3\n1\n5\n9\n3\n7"</span> <span class="op">&gt;</span> numbers.txt</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>Using pipes: 1. Sort the numbers numerically 2. Remove duplicates 3. Show only the top 3 numbers 4. Save the result to <code>top_three.txt</code> 5. Use <code>tee</code> to display the top 3 on screen <em>and</em> save them in one command 6. Count how many unique numbers there are and append that count to <code>top_three.txt</code></p>
 <p><strong>Exercise 3: Text Processing</strong></p>
 <p>Given a CSV file with format <code>name,score,grade</code>, write a pipeline to: 1. Extract just the scores (column 2) 2. Sort them numerically in descending order 3. Calculate how many scores there are 4. Find the top 5 scores</p>

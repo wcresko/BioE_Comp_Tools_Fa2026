@@ -530,6 +530,68 @@ For a biallelic locus with allele frequencies $p$ and $q = 1-p$:
 
 $$p^2 + 2pq + q^2 = 1$$
 
+## Equations From Bioengineering {#sec-latex-bioengineering}
+
+The equations above are the statistician's staples. Here are a few from the kinds of models bioengineers actually write down, each with the LaTeX that produces it, chosen because together they use most of the notation in this chapter.
+
+Enzyme kinetics is the natural starting point. The Michaelis-Menten rate law needs a fraction, a subscript that is a word rather than a single letter (so it is wrapped in `\text{}` or `\mathrm{}`), and square brackets for concentration:
+
+```latex
+$$v = \frac{V_{\max}[S]}{K_{\mathrm{M}} + [S]}$$
+```
+
+$$v = \frac{V_{\max}[S]}{K_{\mathrm{M}} + [S]}$$
+
+The Hill equation generalizes it to cooperative binding and adds a variable exponent, which shows why multi-character superscripts must be grouped in braces (`[S]^{n}` rather than `[S]^n` when $n$ is more than one character, and always when it is an expression):
+
+```latex
+$$\theta = \frac{[L]^{n}}{K_{d} + [L]^{n}}$$
+```
+
+$$\theta = \frac{[L]^{n}}{K_{d} + [L]^{n}}$$
+
+Population and cell growth are described by differential equations, and the logistic model shows the derivative notation `\frac{dN}{dt}` together with a parenthesized factor that grows to fit its contents with `\left(` and `\right)`:
+
+```latex
+$$\frac{dN}{dt} = rN\left(1 - \frac{N}{K}\right)$$
+```
+
+$$\frac{dN}{dt} = rN\left(1 - \frac{N}{K}\right)$$
+
+Transport problems bring in partial derivatives and the Laplacian. Fick's second law of diffusion uses `\partial` and `\nabla^2`; the second form, written out in one dimension, is the one you would actually discretize in code:
+
+```latex
+$$\frac{\partial C}{\partial t} = D\,\nabla^{2} C
+  \qquad\text{or, in one dimension,}\qquad
+  \frac{\partial C}{\partial t} = D\frac{\partial^{2} C}{\partial x^{2}}$$
+```
+
+$$\frac{\partial C}{\partial t} = D\,\nabla^{2} C
+  \qquad\text{or, in one dimension,}\qquad
+  \frac{\partial C}{\partial t} = D\frac{\partial^{2} C}{\partial x^{2}}$$
+
+Finally, the normalization used on the course dataset in @sec-writing-functions is itself an equation worth writing down, because doing so makes the pseudocount explicit in a way the code never quite does. For gene $g$ in sample $i$, with raw count $c_{gi}$ and library size $N_i = \sum_g c_{gi}$,
+
+```latex
+$$\text{CPM}_{gi} = \frac{c_{gi}}{N_i}\times 10^{6},
+  \qquad
+  y_{gi} = \log_{2}\!\left(\text{CPM}_{gi} + 1\right)$$
+```
+
+$$\text{CPM}_{gi} = \frac{c_{gi}}{N_i}\times 10^{6},
+  \qquad
+  y_{gi} = \log_{2}\!\left(\text{CPM}_{gi} + 1\right)$$
+
+A methods section that carries this equation, with the code that implements it in the same Quarto document, is the kind of reproducibility the last chapters of this book are about.
+
+## Reading Equations You Did Not Write {#sec-latex-reading}
+
+You will spend more time reading LaTeX than writing it: in the methods sections of papers whose source you download, in the templates of the journal you submit to, and in code comments where an author has written the formula their function implements. Three habits make that reading easy. First, find the structure before the symbols: every `\frac{...}{...}` is one fraction with a numerator and a denominator, every `\sum_{...}^{...}` is one sum with a lower and an upper limit, and matching braces tell you where each piece begins and ends, so an expression that looks like a wall of backslashes is usually three or four nested pieces. Second, learn to see a dozen commands on sight, since they account for most of what appears in scientific writing: the Greek letters, `\frac`, `\sqrt`, `\sum`, `\int`, `\partial`, `\hat`, `\bar`, `\left` and `\right`, `\text`, and the subscript and superscript operators `_` and `^`. Third, when a symbol is unfamiliar, render it. Paste the expression between dollar signs in a Quarto document and preview it, or use one of the online detexify tools that let you draw a symbol and tell you its command. Appendix @sec-appendix-latex is organized for exactly this kind of look-up.
+
+::: {.callout-note title="LaTeX beyond Quarto"}
+Quarto lets you use LaTeX's mathematics without writing a LaTeX document. You will meet the full system eventually: most journals in engineering and the quantitative sciences supply a LaTeX template, theses at many universities are written in it, and **Overleaf** (<https://www.overleaf.com/learn>) is a browser-based editor that many collaborations use so that nobody has to install anything. The mathematics you learn here transfers unchanged; what a full LaTeX document adds is the document-level structure of `\documentclass`, `\section`, and `\begin{figure}` that Quarto has been writing for you behind the scenes whenever you render to PDF (@sec-quarto-documents).
+:::
+
 ## Best Practices {#sec-latex-best-practices}
 
 ### When to Use LaTeX {#sec-latex-when-to-use-latex}
