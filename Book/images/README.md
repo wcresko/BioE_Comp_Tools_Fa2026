@@ -4,7 +4,7 @@ Every figure used by a book chapter lives here and is referenced from the chapte
 
 ## Naming convention
 
-`Chap##_img###.<ext>` for chapter figures and `App#_img###.<ext>` for appendix figures, numbered in order of first appearance within the chapter (e.g. `Chap05_img001.svg` is the first figure in Chapter 5, *Unix Fundamentals*). Chapter numbers follow the rendered book order, which matches the numeric prefix of the chapter file in `chapters/`.
+`Chap##_img###.<ext>` for chapter figures and `App#_img###.<ext>` for appendix figures, numbered in order of first appearance within the chapter (e.g. `Chap04_img001.svg` is the first figure in Chapter 4, *Unix Fundamentals*). Chapter numbers follow the rendered book order, which matches the numeric prefix of the chapter file in `chapters/`.
 
 The same convention is used for the lecture decks: `Lecture_Folder/images/Lec##_img###.<ext>`.
 

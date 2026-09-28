@@ -11,29 +11,41 @@ This book accompanies a graduate-level course taught at the University of Oregon
 ## Contents
 
 1. Introduction to Computational Tools
-2. Your Computational Toolkit
+2. Your Computational Toolkit: Installing and Using Editors and IDEs
 3. Computing Resources at the University of Oregon
-4. Computer Systems Architecture
-5. Unix Fundamentals
-6. Files, Pipes, and Redirection
-7. GREP and Regular Expressions
-8. Shell Scripting
-9. R Programming Fundamentals
-10. Python Programming Fundamentals
-11. Tidy Data Principles
-12. Data Visualization with ggplot2
-13. Writing Functions in R
-14. Parallel Computing in R
-15. Working with Databases
-16. Reproducible Documents with Quarto
-17. LaTeX for Scientific Documents
-18. Coding with AI Assistants
-19. Version Control with Git and GitHub
-20. High-Performance Computing with Talapas
+4. Unix Fundamentals
+5. Reproducible Documents with Quarto
+6. Computer Systems Architecture
+7. Files, Pipes, and Redirection
+8. Tidy Data Principles
+9. GREP and Regular Expressions
+10. Shell Scripting
+11. R Programming Fundamentals
+12. Python Programming Fundamentals
+13. Data Wrangling with the Tidyverse
+14. Data Visualization with ggplot2
+15. Writing Functions in R
+16. High-Performance Computing with Talapas
+17. Parallel Computing in R
+18. LaTeX for Scientific Documents
+19. Coding with AI Assistants
+20. Version Control with Git and GitHub
+21. Working with Databases
 
-Appendices A-J: Unix, Git, R, Python, LaTeX, SLURM and regex references; keyboard shortcuts; data formats & public repositories; glossary.
+Appendices:
 
-Chapter files in `chapters/` are numbered to match this order (`04-unix-fundamentals.qmd` is Chapter 5; `appendix-B-unix.qmd` is Appendix A), and their figures are named `images/Chap05_img001.svg`, `images/AppA_img001.png`, etc. (see `images/README.md`).
+- A. Keyboard Shortcuts Reference
+- B. Unix Command Reference
+- C. Common Data Formats & Public Repositories
+- D. Regular Expression Reference
+- E. R Command Reference
+- F. Python Quick Reference
+- G. SLURM Command Reference
+- H. LaTeX Command Reference
+- I. Git Command Reference
+- J. Glossary
+
+Chapter files in `chapters/` are numbered to match this order (`04-unix-fundamentals.qmd` is Chapter 4; `appendix-A-shortcuts.qmd` is Appendix A), and their figures are named `images/Chap04_img001.svg`, `images/AppA_img001.png`, etc. (see `images/README.md`).
 
 ## Building the Book
 
@@ -54,13 +66,12 @@ quarto preview Book           # live preview of the book with reload
 
 # Or from inside Book/:
 cd Book && quarto render
-quarto render --to pdf        # PDF version
 ```
 
 ### Output
 
 - HTML output is written to `../docs/book/` (the website's `docs/` folder) for GitHub Pages deployment
-- PDF output is generated alongside HTML
+- PDF output is currently switched off; to re-enable it, uncomment the `pdf:` block in `_quarto.yml` and install librsvg (`brew install librsvg`)
 
 ## Deploying to GitHub Pages
 
@@ -78,24 +89,10 @@ BioE_Comp_Tools_Fa2026/Book/
 ├── apa.csl              # Citation style
 ├── chapters/            # Chapter content
 │   ├── 01-introduction.qmd
-│   ├── 06-computer-systems.qmd
-│   ├── 04-unix-fundamentals.qmd
-│   ├── 07-files-pipes.qmd
-│   ├── 09-grep-regex.qmd
-│   ├── 10-shell-scripting.qmd
-│   ├── 11-r-programming.qmd
-│   ├── 08-tidy-data.qmd
-│   ├── 14-data-visualization.qmd
-│   ├── 20-git-github.qmd
-│   ├── 16-hpc-talapas.qmd
-│   ├── 05-quarto-documents.qmd
-│   ├── 15-writing-functions.qmd
-│   ├── 17-parallel-computing.qmd
+│   ├── 02-your-toolkit.qmd
+│   ├── ...              # numbered 01-21, in book order
 │   ├── 21-databases.qmd
-│   ├── 18-latex-basics.qmd
-│   ├── 19-ai-assisted-coding.qmd
-│   ├── 12-python-programming.qmd
-│   └── appendix-*.qmd   # unix, git, r, python, latex, slurm, regex, shortcuts, data-formats, glossary
+│   └── appendix-[A-J]-*.qmd  # shortcuts, unix, data-formats, regex, r, python, slurm, latex, git, glossary
 ├── images/              # Image assets
 └── (renders to ../docs/book/)
 ```

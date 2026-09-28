@@ -39,6 +39,29 @@ A computer system consists of four major components working together:
 
 The hardware on the edges of that diagram is the **input/output (I/O) system**: keyboards, mice, touchscreens, cameras, microphones, and laboratory sensors bring data in; displays, printers, speakers, and actuators send results out. A network interface is both, which is why a cluster or cloud machine you never touch physically can still be a full computer system.
 
+## Bits, Bytes, and the Units of Data {#sec-bits-bytes}
+
+Everything a computer stores—your thesis, a genome, a confocal stack—is ultimately a sequence of **bits**, each a single 0 or 1. Bits are grouped into **bytes** of eight, and one byte is enough to hold one character of ordinary text, so it is a useful mental unit: a plain-text file's size in bytes is roughly its length in characters. The prefixes then climb by factors of about a thousand (@tbl-data-units), and it pays to have a feel for what lives at each scale.
+
+| Unit | Size | Holds, roughly |
+|:-----|:-----|:---------------|
+| Byte (B) | 8 bits | One character of text |
+| Kilobyte (KB) | ~1,000 B | A paragraph; a short email |
+| Megabyte (MB) | ~1,000 KB | A photo; the entire *E. coli* genome as text (4.6 million bases) |
+| Gigabyte (GB) | ~1,000 MB | An RNA-seq FASTQ file; the human genome as text is about 3 GB |
+| Terabyte (TB) | ~1,000 GB | A laptop's disk; a high-content imaging screen |
+| Petabyte (PB) | ~1,000 TB | Talapas's shared storage, about 3 PB (@sec-computing-at-uo) |
+
+: Units of digital data, with a biological sense of scale {#tbl-data-units}
+
+Numbers in memory are stored in fixed-size slots: a typical integer takes 4 bytes and a double-precision decimal takes 8. That makes memory needs easy to estimate. The course's stickleback dataset—600 genes measured in 80 fish—is 48,000 numbers, well under a megabyte, and will open instantly on any laptop. A single-cell experiment with 20,000 genes and 100,000 cells is 2 billion numbers, roughly 16 GB as a dense matrix: more than most laptops' RAM, and precisely why sparse matrix formats and machines like Talapas exist.
+
+::: {.callout-note title="1,000 or 1,024?"}
+Two conventions coexist. Decimal units (KB, MB, GB) use powers of 1,000; binary units (KiB, MiB, GiB) use powers of 1,024. Disk manufacturers use decimal, operating systems historically used binary while labeling it "GB," and the mismatch compounds with size—which is why a "1 TB" drive shows up as about 931 "GB." Nothing is missing; the two sides are counting in different units.
+:::
+
+Files, in turn, come in two broad families. **Plain-text files**—scripts, CSV and TSV tables, FASTA and FASTQ sequence files, Quarto documents—contain nothing but characters: any editor can open them, the shell tools of @sec-unix-fundamentals and @sec-files-pipes operate on them line by line, and Git can show exactly what changed between versions. **Binary files**—images, `.docx` and `.xlsx` documents, compressed archives, and specialized scientific formats such as BAM and HDF5—encode data more compactly but are readable only by software that knows the format. Much of this course is about the leverage that comes from keeping data in plain text as long as possible; @sec-appendix-data-formats tours the formats you will meet in practice.
+
 At the heart of every computation is the **fetch-decode-execute cycle**, which the CPU performs billions of times per second.
 
 ## The Fetch-Decode-Execute Cycle {#sec-fetch-decode-execute}
@@ -144,7 +167,7 @@ RAM provides temporary working space for programs and data currently in use. Key
 Modern systems typically have 8-64 GB of RAM, though scientific workstations and servers may have much more. For a concrete sense of scale, @tbl-laptop-vs-talapas in @sec-computing-at-uo compares a typical laptop (8-16 GB) with a single Talapas node (512 GB) and the cluster's large-memory nodes (up to 4 TB).
 
 ::: {.callout-tip title="The usual bottleneck is RAM"}
-For data analysis, the most common limit is not processor speed but memory: your data must fit in RAM while you work on it. When a program dies with "out of memory," or your laptop grinds to a halt swapping to disk, the remedy is more RAM or a move to the cluster (@sec-hpc-talapas), not a faster CPU.
+For data analysis, the most common limit is not processor speed but memory: your data must fit in RAM while you work on it. When a program dies with "out of memory," or your laptop grinds to a halt swapping to disk, the remedy is more RAM or a move to the cluster (@sec-hpc-talapas), not a faster CPU. A workable rule of thumb: plan on RAM being three to five times the size of your data on disk, because a file expands when parsed into in-memory structures and analysis steps make copies. A 1 GB CSV is comfortable on a 16 GB laptop; a 10 GB one is not.
 :::
 
 ### Persistent Storage {#sec-persistent-storage}
