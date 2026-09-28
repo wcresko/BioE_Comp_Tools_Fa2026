@@ -22,8 +22,8 @@ This book accompanies a graduate-level course taught at the University of Oregon
 10. Shell Scripting
 11. R Programming Fundamentals
 12. Python Programming Fundamentals
-13. Data Wrangling with the Tidyverse
-14. Data Visualization with ggplot2
+13. Data Visualization with ggplot2
+14. Data Wrangling with the Tidyverse
 15. Writing Functions in R
 16. High-Performance Computing with Talapas
 17. Parallel Computing in R
