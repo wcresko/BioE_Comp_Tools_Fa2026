@@ -228,6 +228,7 @@ Bill Cresko
 <li>Making, reading and writing files</li>
 <li>Redirection and Unix pipes</li>
 <li>Basics of data structures and tidy data</li>
+<li>Meet the course dataset (stickleback gut RNA-seq)</li>
 </ul>
 </section>
 <section id="recap-from-last-time" class="slide level2">
@@ -238,6 +239,20 @@ Bill Cresko
 <li class="fragment">Use the shell because it is <strong>scriptable, repeatable, and works the same on your laptop and on Talapas</strong></li>
 <li class="fragment">Help: <code>man cmd</code>, <code>cmd --help</code>, <code>tldr cmd</code>, and the book’s <a href="../book/chapters/appendix-B-unix.html">Unix Command Reference</a></li>
 </ul>
+</section>
+<section id="our-course-dataset-stickleback-gut-rna-seq" class="slide level2 smaller">
+<h2>Our course dataset: stickleback gut RNA-seq</h2>
+<ul>
+<li><code>Stickle_RNAseq.tsv</code> - RNA-seq read counts for <strong>600 genes</strong> in the guts of <strong>80 threespine stickleback</strong> from the Cresko Lab</li>
+<li>Two host <strong>genotypes</strong> (A, B) x two <strong>microbiota</strong> treatments (conventional, mono) = four groups of 20 fish</li>
+<li>Plain text, tab-separated: one row per fish; columns <code>Individual</code>, <code>Genotype</code>, <code>Microbiota</code>, <code>Geno&amp;Micro</code>, and <code>Gene1</code>-<code>Gene600</code></li>
+<li>We will use it all term: count its rows at the shell today, search it with <code>grep</code> (L03), read it into R and Python (L05-06), plot it (L06-07), and run it on Talapas (L08)</li>
+</ul>
+<p>Download it once into your course folder:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb1-1"><a></a><span class="fu">mkdir</span> <span class="at">-p</span> ~/projects/comptools/data</span>
+<span id="cb1-2"><a></a><span class="ex">curl</span> <span class="at">-L</span> <span class="at">-o</span> ~/projects/comptools/data/Stickle_RNAseq.tsv <span class="dt">\</span></span>
+<span id="cb1-3"><a></a>  https://wcresko.github.io/BioE_Comp_Tools_Fa2026/Data_Folder/Stickle_RNAseq.tsv</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>More detail: <a href="../book/chapters/01-introduction.html#sec-course-dataset">Ch. 1, The Course Dataset</a></p>
 </section>
 <section>
 <section id="common-navigation-commands" class="title-slide slide level1 center">
@@ -310,15 +325,15 @@ Bill Cresko
 </ul>
 </div>
 <div id="tabset-1-2">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb1-1"><a></a><span class="co"># Absolute path</span></span>
-<span id="cb1-2"><a></a><span class="bu">cd</span> /Users/wcresko/Documents</span>
-<span id="cb1-3"><a></a></span>
-<span id="cb1-4"><a></a><span class="co"># Relative paths</span></span>
-<span id="cb1-5"><a></a><span class="bu">cd</span> ..           <span class="co"># Go up one directory</span></span>
-<span id="cb1-6"><a></a><span class="bu">cd</span> ./data       <span class="co"># Go into data directory (same as cd data)</span></span>
-<span id="cb1-7"><a></a><span class="bu">cd</span> ../scripts   <span class="co"># Go up one, then into scripts</span></span>
-<span id="cb1-8"><a></a><span class="bu">cd</span> ~            <span class="co"># Go to home directory</span></span>
-<span id="cb1-9"><a></a><span class="bu">cd</span> <span class="at">-</span>            <span class="co"># Go to previous directory</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb2-1"><a></a><span class="co"># Absolute path</span></span>
+<span id="cb2-2"><a></a><span class="bu">cd</span> /Users/wcresko/Documents</span>
+<span id="cb2-3"><a></a></span>
+<span id="cb2-4"><a></a><span class="co"># Relative paths</span></span>
+<span id="cb2-5"><a></a><span class="bu">cd</span> ..           <span class="co"># Go up one directory</span></span>
+<span id="cb2-6"><a></a><span class="bu">cd</span> ./data       <span class="co"># Go into data directory (same as cd data)</span></span>
+<span id="cb2-7"><a></a><span class="bu">cd</span> ../scripts   <span class="co"># Go up one, then into scripts</span></span>
+<span id="cb2-8"><a></a><span class="bu">cd</span> ~            <span class="co"># Go to home directory</span></span>
+<span id="cb2-9"><a></a><span class="bu">cd</span> <span class="at">-</span>            <span class="co"># Go to previous directory</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 </div>
 </div>
@@ -477,13 +492,13 @@ Bill Cresko
 </section>
 <section id="wildcards---one-command-many-files" class="slide level2">
 <h2>Wildcards - one command, many files</h2>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb2-1"><a></a><span class="fu">touch</span> sample_01.fastq sample_02.fastq sample_03.fastq control.fastq notes.md</span>
-<span id="cb2-2"><a></a></span>
-<span id="cb2-3"><a></a><span class="fu">ls</span> <span class="pp">*</span>.fastq              <span class="co"># everything ending in .fastq</span></span>
-<span id="cb2-4"><a></a><span class="fu">ls</span> sample_<span class="pp">*</span>.fastq       <span class="co"># the three sample_ files</span></span>
-<span id="cb2-5"><a></a><span class="fu">ls</span> sample_0<span class="pp">?</span>.fastq      <span class="co"># ? matches exactly one character</span></span>
-<span id="cb2-6"><a></a><span class="fu">ls</span> sample_0<span class="pp">[</span><span class="ss">12</span><span class="pp">]</span>.fastq   <span class="co"># only sample_01 and sample_02</span></span>
-<span id="cb2-7"><a></a><span class="fu">ls</span> <span class="pp">*</span>.<span class="dt">{fastq</span><span class="op">,</span><span class="dt">md}</span>         <span class="co"># brace expansion: .fastq OR .md</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb3"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb3-1"><a></a><span class="fu">touch</span> sample_01.fastq sample_02.fastq sample_03.fastq control.fastq notes.md</span>
+<span id="cb3-2"><a></a></span>
+<span id="cb3-3"><a></a><span class="fu">ls</span> <span class="pp">*</span>.fastq              <span class="co"># everything ending in .fastq</span></span>
+<span id="cb3-4"><a></a><span class="fu">ls</span> sample_<span class="pp">*</span>.fastq       <span class="co"># the three sample_ files</span></span>
+<span id="cb3-5"><a></a><span class="fu">ls</span> sample_0<span class="pp">?</span>.fastq      <span class="co"># ? matches exactly one character</span></span>
+<span id="cb3-6"><a></a><span class="fu">ls</span> sample_0<span class="pp">[</span><span class="ss">12</span><span class="pp">]</span>.fastq   <span class="co"># only sample_01 and sample_02</span></span>
+<span id="cb3-7"><a></a><span class="fu">ls</span> <span class="pp">*</span>.<span class="dt">{fastq</span><span class="op">,</span><span class="dt">md}</span>         <span class="co"># brace expansion: .fastq OR .md</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <table class="caption-top">
 <thead>
 <tr class="header">
@@ -706,13 +721,13 @@ Bill Cresko
 <section id="combining-it-all-together" class="slide level2">
 <h2>Combining It All Together</h2>
 <p>Example workflow:</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb3"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb3-1"><a></a><span class="co"># Read a file, process it, save results, and display</span></span>
-<span id="cb3-2"><a></a><span class="fu">cat</span> data.txt <span class="kw">|</span> <span class="dt">\</span></span>
-<span id="cb3-3"><a></a>  <span class="fu">grep</span> <span class="at">-v</span> <span class="st">"^#"</span> <span class="kw">|</span> <span class="ex">\ </span>      <span class="co"># Remove comment lines</span></span>
-<span id="cb3-4"><a></a>  <span class="fu">cut</span> <span class="at">-f1,3</span> <span class="kw">|</span> <span class="ex">\ </span>         <span class="co"># Extract columns 1 and 3</span></span>
-<span id="cb3-5"><a></a>  <span class="fu">sort</span> <span class="at">-k2</span> <span class="at">-n</span> <span class="kw">|</span> <span class="ex">\ </span>       <span class="co"># Sort by column 2 numerically</span></span>
-<span id="cb3-6"><a></a>  <span class="fu">tee</span> results.txt <span class="kw">|</span> <span class="ex">\ </span>   <span class="co"># Save to file</span></span>
-<span id="cb3-7"><a></a>  <span class="fu">head</span> <span class="at">-10</span>               <span class="co"># Show top 10</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb4"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb4-1"><a></a><span class="co"># Read a file, process it, save results, and display</span></span>
+<span id="cb4-2"><a></a><span class="fu">cat</span> data.txt <span class="kw">|</span> <span class="dt">\</span></span>
+<span id="cb4-3"><a></a>  <span class="fu">grep</span> <span class="at">-v</span> <span class="st">"^#"</span> <span class="kw">|</span> <span class="ex">\ </span>      <span class="co"># Remove comment lines</span></span>
+<span id="cb4-4"><a></a>  <span class="fu">cut</span> <span class="at">-f1,3</span> <span class="kw">|</span> <span class="ex">\ </span>         <span class="co"># Extract columns 1 and 3</span></span>
+<span id="cb4-5"><a></a>  <span class="fu">sort</span> <span class="at">-k2</span> <span class="at">-n</span> <span class="kw">|</span> <span class="ex">\ </span>       <span class="co"># Sort by column 2 numerically</span></span>
+<span id="cb4-6"><a></a>  <span class="fu">tee</span> results.txt <span class="kw">|</span> <span class="ex">\ </span>   <span class="co"># Save to file</span></span>
+<span id="cb4-7"><a></a>  <span class="fu">head</span> <span class="at">-10</span>               <span class="co"># Show top 10</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <aside class="notes">
 <p>The backslash allows you to continue commands on multiple lines for readability</p>
 <style type="text/css">
@@ -768,15 +783,15 @@ Bill Cresko
 <section id="first-look-at-a-real-data-file" class="slide level2">
 <h2>First look at a real data file</h2>
 <p>Download it into your project (once), then use what you learned today:</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb4"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb4-1"><a></a><span class="fu">mkdir</span> <span class="at">-p</span> ~/projects/comptools/data <span class="kw">&amp;&amp;</span> <span class="bu">cd</span> ~/projects/comptools</span>
-<span id="cb4-2"><a></a><span class="ex">curl</span> <span class="at">-L</span> <span class="at">-o</span> data/Stickle_RNAseq.tsv https://wcresko.github.io/BioE_Comp_Tools_Fa2026/Data_Folder/Stickle_RNAseq.tsv</span>
-<span id="cb4-3"><a></a></span>
-<span id="cb4-4"><a></a><span class="fu">ls</span> <span class="at">-lh</span> data/                       <span class="co"># how big is it?</span></span>
-<span id="cb4-5"><a></a><span class="fu">wc</span> <span class="at">-l</span> data/Stickle_RNAseq.tsv      <span class="co"># how many lines (fish + header)?</span></span>
-<span id="cb4-6"><a></a><span class="fu">head</span> <span class="at">-n</span> 3 data/Stickle_RNAseq.tsv <span class="kw">|</span> <span class="fu">cut</span> <span class="at">-f</span> 1-6     <span class="co"># first rows, first 6 columns only</span></span>
-<span id="cb4-7"><a></a><span class="fu">cut</span> <span class="at">-f</span> 2 data/Stickle_RNAseq.tsv <span class="kw">|</span> <span class="fu">sort</span> <span class="kw">|</span> <span class="fu">uniq</span> <span class="at">-c</span>  <span class="co"># how many fish per genotype?</span></span>
-<span id="cb4-8"><a></a><span class="fu">cut</span> <span class="at">-f</span> 3 data/Stickle_RNAseq.tsv <span class="kw">|</span> <span class="fu">sort</span> <span class="kw">|</span> <span class="fu">uniq</span> <span class="at">-c</span>  <span class="co"># ...and per microbiota treatment</span></span>
-<span id="cb4-9"><a></a><span class="fu">head</span> <span class="at">-n</span> 1 data/Stickle_RNAseq.tsv <span class="kw">|</span> <span class="fu">tr</span> <span class="st">'\t'</span> <span class="st">'\n'</span> <span class="kw">|</span> <span class="fu">wc</span> <span class="at">-l</span>   <span class="co"># how many columns?</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb5"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb5-1"><a></a><span class="fu">mkdir</span> <span class="at">-p</span> ~/projects/comptools/data <span class="kw">&amp;&amp;</span> <span class="bu">cd</span> ~/projects/comptools</span>
+<span id="cb5-2"><a></a><span class="ex">curl</span> <span class="at">-L</span> <span class="at">-o</span> data/Stickle_RNAseq.tsv https://wcresko.github.io/BioE_Comp_Tools_Fa2026/Data_Folder/Stickle_RNAseq.tsv</span>
+<span id="cb5-3"><a></a></span>
+<span id="cb5-4"><a></a><span class="fu">ls</span> <span class="at">-lh</span> data/                       <span class="co"># how big is it?</span></span>
+<span id="cb5-5"><a></a><span class="fu">wc</span> <span class="at">-l</span> data/Stickle_RNAseq.tsv      <span class="co"># how many lines (fish + header)?</span></span>
+<span id="cb5-6"><a></a><span class="fu">head</span> <span class="at">-n</span> 3 data/Stickle_RNAseq.tsv <span class="kw">|</span> <span class="fu">cut</span> <span class="at">-f</span> 1-6     <span class="co"># first rows, first 6 columns only</span></span>
+<span id="cb5-7"><a></a><span class="fu">cut</span> <span class="at">-f</span> 2 data/Stickle_RNAseq.tsv <span class="kw">|</span> <span class="fu">sort</span> <span class="kw">|</span> <span class="fu">uniq</span> <span class="at">-c</span>  <span class="co"># how many fish per genotype?</span></span>
+<span id="cb5-8"><a></a><span class="fu">cut</span> <span class="at">-f</span> 3 data/Stickle_RNAseq.tsv <span class="kw">|</span> <span class="fu">sort</span> <span class="kw">|</span> <span class="fu">uniq</span> <span class="at">-c</span>  <span class="co"># ...and per microbiota treatment</span></span>
+<span id="cb5-9"><a></a><span class="fu">head</span> <span class="at">-n</span> 1 data/Stickle_RNAseq.tsv <span class="kw">|</span> <span class="fu">tr</span> <span class="st">'\t'</span> <span class="st">'\n'</span> <span class="kw">|</span> <span class="fu">wc</span> <span class="at">-l</span>   <span class="co"># how many columns?</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="callout callout-tip callout-titled callout-style-default">
 <div class="callout-body">
 <div class="callout-title">
@@ -793,7 +808,7 @@ Bill Cresko
 </section>
 <section id="is-it-tidy" class="slide level2">
 <h2>Is it tidy?</h2>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb5"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb5-1"><a></a><span class="fu">head</span> <span class="at">-n</span> 2 data/Stickle_RNAseq.tsv <span class="kw">|</span> <span class="fu">cut</span> <span class="at">-f</span> 1-8</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb6"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb6-1"><a></a><span class="fu">head</span> <span class="at">-n</span> 2 data/Stickle_RNAseq.tsv <span class="kw">|</span> <span class="fu">cut</span> <span class="at">-f</span> 1-8</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <pre><code>Individual  Genotype  Microbiota    Geno&amp;Micro  Gene1  Gene2  Gene3  Gene4
 AC1         A         conventional  convA       16     15     71     153</code></pre>
 <ul>
