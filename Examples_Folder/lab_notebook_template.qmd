@@ -1,0 +1,223 @@
+---
+title: "Computational Lab Notebook"
+subtitle: "Project: [short project name]"
+author: "Your Name"
+date: today
+format:
+  html:
+    toc: true
+    embed-resources: true
+    code-tools: true
+    df-print: paged
+execute:
+  warning: false
+  message: false
+---
+
+<!--
+HOW TO USE THIS TEMPLATE
+========================
+A computational lab notebook plays the same role as a wet-lab
+notebook: a dated, honest record of what you did, why you did it,
+what happened, and what you concluded — including the dead ends.
+
+Suggested workflow:
+  1. Copy this file and rename it, e.g. 2026-10-06_rnaseq-qc.qmd
+     (one notebook file per experiment or analysis session).
+  2. Fill in each section as you work, not after the fact.
+  3. Render to HTML (Cmd/Ctrl + Shift + K in Positron) when done;
+     with embed-resources: true the HTML is a single, self-contained
+     file you can archive or share.
+  4. Commit both the .qmd and rendered .html to version control.
+
+Everything below the "worked example" line is a filled-in entry
+using the course stickleback dataset — replace it with your own.
+-->
+
+# Entry: `r format(Sys.Date())` — [one-line title of this analysis]
+
+## 1. Objective
+
+*What question is this entry trying to answer? One or two sentences.
+If you can't state the objective, you aren't ready to write code.*
+
+## 2. Background and rationale
+
+*Why are you doing this now? Link to prior entries, papers, or lab
+discussions. What did you already know before starting?*
+
+## 3. Data provenance
+
+*Exactly where the data came from — future-you will not remember.*
+
+| Item | Value |
+|------|-------|
+| File(s) | `path/to/data.tsv` |
+| Source | e.g. sequencing core, collaborator, NCBI accession |
+| Downloaded / received | YYYY-MM-DD |
+| Version / md5 checksum | `md5sum path/to/data.tsv` |
+
+## 4. Methods and parameters
+
+*Software, versions, and every non-default parameter. The code
+chunks below are part of the record, but summarize key choices in
+prose so a reader doesn't have to reverse-engineer them.*
+
+## 5. Analysis
+
+*Interleave narrative and code. Say what each chunk is about to do
+and, after it runs, what you see in the output.*
+
+```{r}
+#| label: setup
+library(readr)
+library(dplyr)
+library(ggplot2)
+```
+
+## 6. Results and interpretation
+
+*What did you find? Refer to specific numbers and figures. Separate
+observation ("the interaction term is significant, p = 3e-7") from
+interpretation ("the microbiota effect depends on host genotype").*
+
+## 7. Problems and dead ends
+
+*Things that failed, surprised you, or were abandoned — and why.
+This is the section that makes a notebook honest and useful.*
+
+## 8. Next steps
+
+*Concrete, actionable items for the next session.*
+
+## 9. Reproducibility record
+
+```{r}
+#| label: session-info
+sessionInfo()
+```
+
+---
+
+# Worked example entry: 2026-09-29 — Genotype and microbiota effects on Gene369
+
+## 1. Objective
+
+Test whether gut expression of Gene369 depends on host genotype,
+microbiota treatment, and their interaction, in the course RNA-seq
+dataset of 80 stickleback.
+
+## 2. Background and rationale
+
+Gene369 showed high between-group variance in an initial screen of
+the 600-gene count table. The experiment crossed 2 host genotypes
+(A, B) with 2 microbiota treatments (conventional, mono-associated),
+n = 20 fish per group, so a two-factor linear model is the natural
+first analysis.
+
+## 3. Data provenance
+
+| Item | Value |
+|------|-------|
+| File | `Data_Folder/Stickle_RNAseq.tsv` |
+| Source | Course website (Cresko Lab gut RNA-seq counts) |
+| Downloaded | 2026-09-29 |
+| Shape | 80 fish x 604 columns (3 factors + 600 genes) |
+
+## 4. Methods and parameters
+
+Counts were normalized to log2 counts-per-million (CPM) with a
+pseudocount of 1, using each fish's total count as its library
+size. Effects were tested with an ordinary least-squares linear
+model, `gene369 ~ Genotype * Microbiota`, in base R.
+
+## 5. Analysis
+
+Read the counts and normalize the focal gene:
+
+```{r}
+#| label: read-normalize
+local_paths <- c(
+  "Data_Folder/Stickle_RNAseq.tsv",
+  "../Data_Folder/Stickle_RNAseq.tsv"
+)
+found <- local_paths[file.exists(local_paths)]
+data_file <- if (length(found) > 0) {
+  found[1]
+} else {
+  "https://wcresko.github.io/BioE_Comp_Tools_Fa2026/Data_Folder/Stickle_RNAseq.tsv"
+}
+
+stickle <- read_tsv(data_file, show_col_types = FALSE) |>
+  mutate(lib_size = rowSums(across(starts_with("Gene"))))
+
+focal <- stickle |>
+  transmute(
+    Individual, Genotype, Microbiota,
+    gene369 = log2(Gene369 / lib_size * 1e6 + 1)
+  )
+
+count(focal, Genotype, Microbiota)
+```
+
+Visualize expression by group before modeling:
+
+```{r}
+#| label: fig-boxplot
+#| fig-cap: "Gene369 expression (log2 CPM) by genotype and microbiota treatment."
+ggplot(focal, aes(x = Microbiota, y = gene369, fill = Genotype)) +
+  geom_boxplot(outlier.shape = NA, alpha = 0.6) +
+  geom_point(
+    position = position_jitterdodge(jitter.width = 0.15),
+    size = 1.5, alpha = 0.6
+  ) +
+  labs(y = "Gene369 expression (log2 CPM)") +
+  theme_minimal()
+```
+
+Fit the two-factor model with interaction:
+
+```{r}
+#| label: linear-model
+fit <- lm(gene369 ~ Genotype * Microbiota, data = focal)
+summary(fit)
+anova(fit)
+```
+
+Check the residuals:
+
+```{r}
+#| label: fig-residuals
+#| fig-cap: "Residuals vs. fitted values for the two-factor model."
+plot(fit, which = 1)
+```
+
+## 6. Results and interpretation
+
+Both main effects and the interaction are significant. Genotype B
+fish express Gene369 about 4.5 log2 CPM units lower than genotype A
+(p < 1e-30), mono-association lowers expression by about 2.8 units
+in genotype A (p < 1e-20), and the positive interaction term
+(+1.5, p = 3e-7) means the microbiota effect is weaker in genotype
+B. The model explains ~93% of the variance. Interpretation: the
+transcriptional response of Gene369 to microbiota depends on host
+genotype — a candidate for genotype-by-environment interaction.
+
+## 7. Problems and dead ends
+
+Raw counts were initially modeled without normalization; library
+sizes vary ~4.6-fold across fish, which inflated the residual
+variance. Switched to log2 CPM.
+
+## 8. Next steps
+
+- Repeat the model across all 600 genes; adjust p-values (FDR).
+- Check whether Gene369's co-expression partners (e.g. Gene208)
+  show the same interaction pattern.
+
+## 9. Reproducibility record
+
+```{r}
+#| label: session-info-example
+sessionInfo()
+```
