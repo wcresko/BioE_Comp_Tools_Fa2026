@@ -199,7 +199,7 @@
 
 <section id="title-slide" class="quarto-title-block center">
   <h1 class="title">Lecture 02 - Computational Tools for Bioengineers</h1>
-  <p class="subtitle">Unix Navigation, Files, Pipes and Tidy Data</p>
+  <p class="subtitle">Unix Navigation, Files, Pipes and Shell Scripts</p>
 
 <div class="quarto-title-authors">
 <div class="quarto-title-author">
@@ -217,8 +217,8 @@ Bill Cresko
 <ul>
 <li><a href="../book/chapters/04-unix-fundamentals.html">Ch. 4: Unix Fundamentals</a></li>
 <li><a href="../book/chapters/07-files-pipes.html">Ch. 7: Files, Pipes, and Redirection</a></li>
-<li><a href="../book/chapters/08-tidy-data.html">Ch. 8: Tidy Data Principles</a></li>
 <li><em>Reference:</em> <a href="../book/chapters/appendix-B-unix.html">App. B: Unix Command Reference</a></li>
+<li>Looking ahead to next week: <a href="../book/chapters/08-tidy-data.html">Ch. 8: Tidy Data Principles</a></li>
 </ul>
 </section>
 <section id="goals-for-today" class="slide level2">
@@ -227,7 +227,7 @@ Bill Cresko
 <li>Navigating the file system: paths, <code>cd</code>, <code>ls</code>, wildcards</li>
 <li>Making, reading and writing files</li>
 <li>Redirection and Unix pipes</li>
-<li>Basics of data structures and tidy data</li>
+<li>Your first shell scripts - and the file permissions (<code>chmod</code>) that let them run</li>
 <li>Meet the course dataset (stickleback gut RNA-seq)</li>
 </ul>
 </section>
@@ -240,6 +240,22 @@ Bill Cresko
 <li class="fragment">Help: <code>man cmd</code>, <code>cmd --help</code>, <code>tldr cmd</code>, and the book’s <a href="../book/chapters/appendix-B-unix.html">Unix Command Reference</a></li>
 </ul>
 </section>
+<section id="try-it-now---your-first-ten-minutes-in-the-shell" class="slide level2">
+<h2>Try it now - your first ten minutes in the shell</h2>
+<p>Open the terminal (in Positron: <strong>Ctrl-`</strong>) and type each line yourself:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb1-1"><a></a><span class="fu">whoami</span>                  <span class="co"># who does the computer think you are?</span></span>
+<span id="cb1-2"><a></a><span class="bu">pwd</span>                     <span class="co"># where are you?</span></span>
+<span id="cb1-3"><a></a><span class="fu">ls</span>                      <span class="co"># what is here?</span></span>
+<span id="cb1-4"><a></a><span class="fu">ls</span> <span class="at">-lh</span>                  <span class="co"># ...with sizes and dates</span></span>
+<span id="cb1-5"><a></a><span class="bu">echo</span> <span class="st">"hello world"</span>      <span class="co"># your first command with an argument</span></span>
+<span id="cb1-6"><a></a><span class="fu">man</span> ls                  <span class="co"># read a manual page; press q to quit</span></span>
+<span id="cb1-7"><a></a><span class="fu">mkdir</span> <span class="at">-p</span> ~/projects     <span class="co"># make a home for your course work</span></span>
+<span id="cb1-8"><a></a><span class="bu">cd</span> ~/projects <span class="kw">&amp;&amp;</span> <span class="bu">pwd</span>    <span class="co"># go there and confirm</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<ul>
+<li>Use <strong>Tab</strong> for every path and <strong>↑</strong> to repeat commands - build the habit now</li>
+<li>Done early? Help a neighbor, then try Exercises 1-2 in <a href="../book/chapters/04-unix-fundamentals.html#sec-unix-exercises">Ch. 4</a></li>
+</ul>
+</section>
 <section id="our-course-dataset-stickleback-gut-rna-seq" class="slide level2 smaller">
 <h2>Our course dataset: stickleback gut RNA-seq</h2>
 <ul>
@@ -249,14 +265,14 @@ Bill Cresko
 <li>We will use it all term: count its rows at the shell today, search it with <code>grep</code> (L03), read it into R and Python (L05-06), plot it (L06-07), and run it on Talapas (L08)</li>
 </ul>
 <p>Download it once into your course folder:</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb1-1"><a></a><span class="fu">mkdir</span> <span class="at">-p</span> ~/projects/comptools/data</span>
-<span id="cb1-2"><a></a><span class="ex">curl</span> <span class="at">-L</span> <span class="at">-o</span> ~/projects/comptools/data/Stickle_RNAseq.tsv <span class="dt">\</span></span>
-<span id="cb1-3"><a></a>  https://wcresko.github.io/BioE_Comp_Tools_Fa2026/Data_Folder/Stickle_RNAseq.tsv</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb2-1"><a></a><span class="fu">mkdir</span> <span class="at">-p</span> ~/projects/comptools/data</span>
+<span id="cb2-2"><a></a><span class="ex">curl</span> <span class="at">-L</span> <span class="at">-o</span> ~/projects/comptools/data/Stickle_RNAseq.tsv <span class="dt">\</span></span>
+<span id="cb2-3"><a></a>  https://wcresko.github.io/BioE_Comp_Tools_Fa2026/Data_Folder/Stickle_RNAseq.tsv</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>More detail: <a href="../book/chapters/01-introduction.html#sec-course-dataset">Ch. 1, The Course Dataset</a></p>
 </section>
 <section>
-<section id="common-navigation-commands" class="title-slide slide level1 center">
-<h1>Common navigation commands</h1>
+<section id="the-file-system-and-paths" class="title-slide slide level1 center">
+<h1>The file system and paths</h1>
 
 <img data-src="images/Lec03_img001.jpeg" class="quarto-figure quarto-figure-center r-stretch" style="width:90.0%"></section>
 <section id="section" class="slide level2">
@@ -325,41 +341,34 @@ Bill Cresko
 </ul>
 </div>
 <div id="tabset-1-2">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb2-1"><a></a><span class="co"># Absolute path</span></span>
-<span id="cb2-2"><a></a><span class="bu">cd</span> /Users/wcresko/Documents</span>
-<span id="cb2-3"><a></a></span>
-<span id="cb2-4"><a></a><span class="co"># Relative paths</span></span>
-<span id="cb2-5"><a></a><span class="bu">cd</span> ..           <span class="co"># Go up one directory</span></span>
-<span id="cb2-6"><a></a><span class="bu">cd</span> ./data       <span class="co"># Go into data directory (same as cd data)</span></span>
-<span id="cb2-7"><a></a><span class="bu">cd</span> ../scripts   <span class="co"># Go up one, then into scripts</span></span>
-<span id="cb2-8"><a></a><span class="bu">cd</span> ~            <span class="co"># Go to home directory</span></span>
-<span id="cb2-9"><a></a><span class="bu">cd</span> <span class="at">-</span>            <span class="co"># Go to previous directory</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb3"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb3-1"><a></a><span class="co"># Absolute path</span></span>
+<span id="cb3-2"><a></a><span class="bu">cd</span> /Users/wcresko/Documents</span>
+<span id="cb3-3"><a></a></span>
+<span id="cb3-4"><a></a><span class="co"># Relative paths</span></span>
+<span id="cb3-5"><a></a><span class="bu">cd</span> ..           <span class="co"># Go up one directory</span></span>
+<span id="cb3-6"><a></a><span class="bu">cd</span> ./data       <span class="co"># Go into data directory (same as cd data)</span></span>
+<span id="cb3-7"><a></a><span class="bu">cd</span> ../scripts   <span class="co"># Go up one, then into scripts</span></span>
+<span id="cb3-8"><a></a><span class="bu">cd</span> ~            <span class="co"># Go to home directory</span></span>
+<span id="cb3-9"><a></a><span class="bu">cd</span> <span class="at">-</span>            <span class="co"># Go to previous directory</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 </div>
 </div>
 </section>
-<section id="common-navigation-commands-1" class="slide level2">
+<section id="common-navigation-commands" class="slide level2">
 <h2>Common navigation commands</h2>
 <ul>
-<li class="fragment"><strong><code>pwd</code></strong> = “print working directory”, which will print where you currently are in the system</li>
-<li class="fragment"><strong><code>ls</code></strong> = “list”, list all directories and files in your current position
+<li class="fragment"><strong><code>pwd</code></strong> = “print working directory”: where am I right now?</li>
+<li class="fragment"><strong><code>ls</code></strong> = “list” all directories and files in your current position
 <ul>
-<li class="fragment"><code>ls –F</code> = denote which results are directories, files, etc.</li>
-<li class="fragment"><code>ls –l</code> = ”long format”, lists total file sizes</li>
-<li class="fragment"><code>ls –r</code> = “reverse”, lists the results in reverse order</li>
-<li class="fragment"><code>ls –S</code> = “size”, sort results by size</li>
-<li class="fragment"><code>ls –t</code> = “time”, sort results by time created, from most recent to last</li>
+<li class="fragment"><code>ls -F</code> = mark which results are directories, files, etc.</li>
+<li class="fragment"><code>ls -l</code> = “long format”: permissions, owner, sizes, dates</li>
+<li class="fragment"><code>ls -S</code> = sort by <strong>s</strong>ize; <code>ls -t</code> = sort by <strong>t</strong>ime, newest first; add <code>-r</code> to <strong>r</strong>everse either order</li>
 </ul></li>
-</ul>
-</section>
-<section id="common-navigation-commands-2" class="slide level2">
-<h2>Common Navigation Commands</h2>
+<li class="fragment"><strong><code>cd</code></strong> = “change directory”: move to a new position based on your path argument
 <ul>
-<li><code>cd</code> = “change directory”, will place you in a new position based on your path argument
-<ul>
-<li><code>cd ..</code> “go up one directory”</li>
-<li><code>cd –</code> “go to the directory you were at last (like the back arrow on an internet browser)”</li>
-<li><code>cd ~</code> “go to my home directory”</li>
+<li class="fragment"><code>cd ..</code> = go up one directory</li>
+<li class="fragment"><code>cd ~</code> = go to my home directory</li>
+<li class="fragment"><code>cd -</code> = go back to the directory you were in last (like a browser’s back arrow)</li>
 </ul></li>
 </ul>
 </section>
@@ -386,8 +395,21 @@ Bill Cresko
 <li class="fragment">Delete files: <code>rm</code></li>
 <li class="fragment">Delete directories: <code>rmdir</code></li>
 <li class="fragment">Examining file length: <code>wc</code></li>
-<li class="fragment">Reading files: <code>cat</code></li>
-<li class="fragment">Looking at beginning or end: <code>head</code> or <code>tail</code></li>
+<li class="fragment">(Reading what’s <em>inside</em> a file - <code>cat</code>, <code>less</code>, <code>head</code>, <code>tail</code> - gets its own section shortly)</li>
+</ul>
+</section>
+<section id="editing-a-file-in-the-terminal-nano" class="slide level2">
+<h2>Editing a file in the terminal: <code>nano</code></h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb4"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb4-1"><a></a><span class="fu">nano</span> Practice.txt     <span class="co"># open the file (creating it if it doesn't exist)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<ul>
+<li>Type normally; arrow keys move the cursor - no mouse here</li>
+<li>The <code>^</code> shortcuts along the bottom mean <strong>Ctrl</strong>:
+<ul>
+<li><code>Ctrl-O</code>, then Enter = save (“write <strong>O</strong>ut”)</li>
+<li><code>Ctrl-X</code> = exit (it offers to save if you forgot)</li>
+<li><code>Ctrl-K</code> cuts a whole line; <code>Ctrl-U</code> pastes it back</li>
+</ul></li>
+<li>Prefer a familiar window? Positron edits the same files - but <code>nano</code> is what you’ll have on <strong>Talapas</strong> (L08), where there is no point-and-click</li>
 </ul>
 </section>
 <section id="things-to-keep-in-mind" class="slide level2">
@@ -401,7 +423,7 @@ Bill Cresko
 <li>Naming conventions
 <ul>
 <li>Avoid spaces</li>
-<li>Don’t start with a –</li>
+<li>Don’t start with a -</li>
 <li>Stick to letters, numbers, . , -, and _</li>
 </ul></li>
 <li>Use appropriate file extensions in file names
@@ -492,13 +514,13 @@ Bill Cresko
 </section>
 <section id="wildcards---one-command-many-files" class="slide level2">
 <h2>Wildcards - one command, many files</h2>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb3"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb3-1"><a></a><span class="fu">touch</span> sample_01.fastq sample_02.fastq sample_03.fastq control.fastq notes.md</span>
-<span id="cb3-2"><a></a></span>
-<span id="cb3-3"><a></a><span class="fu">ls</span> <span class="pp">*</span>.fastq              <span class="co"># everything ending in .fastq</span></span>
-<span id="cb3-4"><a></a><span class="fu">ls</span> sample_<span class="pp">*</span>.fastq       <span class="co"># the three sample_ files</span></span>
-<span id="cb3-5"><a></a><span class="fu">ls</span> sample_0<span class="pp">?</span>.fastq      <span class="co"># ? matches exactly one character</span></span>
-<span id="cb3-6"><a></a><span class="fu">ls</span> sample_0<span class="pp">[</span><span class="ss">12</span><span class="pp">]</span>.fastq   <span class="co"># only sample_01 and sample_02</span></span>
-<span id="cb3-7"><a></a><span class="fu">ls</span> <span class="pp">*</span>.<span class="dt">{fastq</span><span class="op">,</span><span class="dt">md}</span>         <span class="co"># brace expansion: .fastq OR .md</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb5"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb5-1"><a></a><span class="fu">touch</span> sample_01.fastq sample_02.fastq sample_03.fastq control.fastq notes.md</span>
+<span id="cb5-2"><a></a></span>
+<span id="cb5-3"><a></a><span class="fu">ls</span> <span class="pp">*</span>.fastq              <span class="co"># everything ending in .fastq</span></span>
+<span id="cb5-4"><a></a><span class="fu">ls</span> sample_<span class="pp">*</span>.fastq       <span class="co"># the three sample_ files</span></span>
+<span id="cb5-5"><a></a><span class="fu">ls</span> sample_0<span class="pp">?</span>.fastq      <span class="co"># ? matches exactly one character</span></span>
+<span id="cb5-6"><a></a><span class="fu">ls</span> sample_0<span class="pp">[</span><span class="ss">12</span><span class="pp">]</span>.fastq   <span class="co"># only sample_01 and sample_02</span></span>
+<span id="cb5-7"><a></a><span class="fu">ls</span> <span class="pp">*</span>.<span class="dt">{fastq</span><span class="op">,</span><span class="dt">md}</span>         <span class="co"># brace expansion: .fastq OR .md</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <table class="caption-top">
 <thead>
 <tr class="header">
@@ -693,10 +715,23 @@ Bill Cresko
 </ul></li>
 <li class="fragment"><strong>Filtering and processing:</strong>
 <ul>
-<li class="fragment"><code>ls -l | grep ".txt" | awk '{print $5, $9}'</code></li>
-<li class="fragment">List txt files with sizes</li>
+<li class="fragment"><code>ls -l | sort -k5,5n | tail -3</code></li>
+<li class="fragment">The three biggest files in a folder (column 5 of <code>ls -l</code> is the size)</li>
 </ul></li>
 </ul>
+<div class="callout callout-note callout-titled callout-style-default">
+<div class="callout-body">
+<div class="callout-title">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<p><strong>Note</strong></p>
+</div>
+<div class="callout-content">
+<p>A few of these examples <strong>preview commands we haven’t covered yet</strong>: <code>grep</code> searches for text patterns (all of L03), and <code>cut</code> picks columns (you’ll use it on the course data in a few slides). Focus on the <em>shape</em> of the pipelines today - the pieces get their own lectures.</p>
+</div>
+</div>
+</div>
 </section>
 <section id="advanced-pipe-examples" class="slide level2">
 <h2>Advanced Pipe Examples</h2>
@@ -713,21 +748,21 @@ Bill Cresko
 </ul></li>
 <li class="fragment"><strong>Complex transformations:</strong>
 <ul>
-<li class="fragment"><code>find . -name "*.txt" | xargs wc -l | sort -n</code></li>
-<li class="fragment">Find all txt files and sort by line count</li>
+<li class="fragment"><code>wc -l *.txt | sort -n</code></li>
+<li class="fragment">Line counts for every txt file, smallest first (<code>find</code> + <code>xargs</code> do this across whole directory trees - L04)</li>
 </ul></li>
 </ul>
 </section>
 <section id="combining-it-all-together" class="slide level2">
 <h2>Combining It All Together</h2>
 <p>Example workflow:</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb4"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb4-1"><a></a><span class="co"># Read a file, process it, save results, and display</span></span>
-<span id="cb4-2"><a></a><span class="fu">cat</span> data.txt <span class="kw">|</span> <span class="dt">\</span></span>
-<span id="cb4-3"><a></a>  <span class="fu">grep</span> <span class="at">-v</span> <span class="st">"^#"</span> <span class="kw">|</span> <span class="ex">\ </span>      <span class="co"># Remove comment lines</span></span>
-<span id="cb4-4"><a></a>  <span class="fu">cut</span> <span class="at">-f1,3</span> <span class="kw">|</span> <span class="ex">\ </span>         <span class="co"># Extract columns 1 and 3</span></span>
-<span id="cb4-5"><a></a>  <span class="fu">sort</span> <span class="at">-k2</span> <span class="at">-n</span> <span class="kw">|</span> <span class="ex">\ </span>       <span class="co"># Sort by column 2 numerically</span></span>
-<span id="cb4-6"><a></a>  <span class="fu">tee</span> results.txt <span class="kw">|</span> <span class="ex">\ </span>   <span class="co"># Save to file</span></span>
-<span id="cb4-7"><a></a>  <span class="fu">head</span> <span class="at">-10</span>               <span class="co"># Show top 10</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb6"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb6-1"><a></a><span class="co"># Read a file, process it, save results, and display</span></span>
+<span id="cb6-2"><a></a><span class="fu">cat</span> data.txt <span class="kw">|</span> <span class="dt">\</span></span>
+<span id="cb6-3"><a></a>  <span class="fu">grep</span> <span class="at">-v</span> <span class="st">"^#"</span> <span class="kw">|</span> <span class="ex">\ </span>      <span class="co"># Remove comment lines</span></span>
+<span id="cb6-4"><a></a>  <span class="fu">cut</span> <span class="at">-f1,3</span> <span class="kw">|</span> <span class="ex">\ </span>         <span class="co"># Extract columns 1 and 3</span></span>
+<span id="cb6-5"><a></a>  <span class="fu">sort</span> <span class="at">-k2</span> <span class="at">-n</span> <span class="kw">|</span> <span class="ex">\ </span>       <span class="co"># Sort by column 2 numerically</span></span>
+<span id="cb6-6"><a></a>  <span class="fu">tee</span> results.txt <span class="kw">|</span> <span class="ex">\ </span>   <span class="co"># Save to file</span></span>
+<span id="cb6-7"><a></a>  <span class="fu">head</span> <span class="at">-10</span>               <span class="co"># Show top 10</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <aside class="notes">
 <p>The backslash allows you to continue commands on multiple lines for readability</p>
 <style type="text/css">
@@ -776,22 +811,236 @@ Bill Cresko
 
 </section></section>
 <section>
+<section id="shell-scripts---saving-commands-to-reuse" class="title-slide slide level1 center">
+<h1>Shell scripts - saving commands to reuse</h1>
+
+</section>
+<section id="from-commands-to-scripts" class="slide level2">
+<h2>From commands to scripts</h2>
+<ul>
+<li class="fragment">A <strong>shell script</strong> is just a plain-text file of the commands you would have typed, run top to bottom</li>
+<li class="fragment">Anything you can type at the prompt - navigation, redirection, whole pipelines - can live in a script</li>
+<li class="fragment">Why bother?
+<ul>
+<li class="fragment"><strong>Reproducibility</strong> - an exact, re-runnable record of what you did (your lab notebook for data)</li>
+<li class="fragment"><strong>Automation</strong> - rerun the whole thing with one command when new data arrive</li>
+<li class="fragment"><strong>Sharing</strong> - hand a collaborator the script, not a list of instructions</li>
+</ul></li>
+<li class="fragment">Convention: name them with <code>.sh</code> and keep them in your project’s <code>scripts/</code> folder</li>
+</ul>
+</section>
+<section id="your-first-shell-script" class="slide level2">
+<h2>Your first shell script</h2>
+<p>Put these two lines in a file called <code>hello.sh</code> (using <code>nano</code>, Positron, or even <code>cat &gt;</code>):</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb7"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb7-1"><a></a><span class="co">#!/usr/bin/env bash</span></span>
+<span id="cb7-2"><a></a><span class="bu">echo</span> <span class="st">"Hello from </span><span class="va">$(</span><span class="fu">whoami</span><span class="va">)</span><span class="st"> on </span><span class="va">$(</span><span class="fu">date</span> <span class="st">'+%Y-%m-%d'</span><span class="va">)</span><span class="st">"</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<ul>
+<li class="fragment">Line 1 is the <strong>shebang</strong>: <code>#!</code> tells Unix <em>which program</em> should interpret the rest of the file - here, bash</li>
+<li class="fragment">Every other line starting with <code>#</code> is a <strong>comment</strong> - write lots of them</li>
+<li class="fragment">Now run it:</li>
+</ul>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb8"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb8-1"><a></a><span class="ex">./hello.sh</span></span>
+<span id="cb8-2"><a></a><span class="co"># bash: ./hello.sh: Permission denied</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<ul>
+<li class="fragment">Denied! To understand why, we need to look at <strong>file permissions</strong></li>
+</ul>
+</section>
+<section id="file-permissions---what-ls--l-is-telling-you" class="slide level2">
+<h2>File permissions - what <code>ls -l</code> is telling you</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb9"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb9-1"><a></a><span class="fu">ls</span> <span class="at">-l</span> hello.sh</span>
+<span id="cb9-2"><a></a><span class="co"># -rw-r--r--  1 bill  staff  63 Oct  5 16:10 hello.sh</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>That first column is ten characters: a file-type flag, then <strong>three triplets</strong> of <code>rwx</code>:</p>
+<table class="caption-top">
+<colgroup>
+<col style="width: 15%">
+<col style="width: 15%">
+<col style="width: 25%">
+<col style="width: 42%">
+</colgroup>
+<thead>
+<tr class="header">
+<th></th>
+<th style="text-align: center;">Characters</th>
+<th>Who</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>-</code></td>
+<td style="text-align: center;">1</td>
+<td>file type</td>
+<td><code>-</code> file, <code>d</code> directory, <code>l</code> link</td>
+</tr>
+<tr class="even">
+<td><code>rw-</code></td>
+<td style="text-align: center;">2-4</td>
+<td><strong>u</strong>ser (owner)</td>
+<td>owner can <strong>r</strong>ead and <strong>w</strong>rite</td>
+</tr>
+<tr class="odd">
+<td><code>r--</code></td>
+<td style="text-align: center;">5-7</td>
+<td><strong>g</strong>roup</td>
+<td>group members can read</td>
+</tr>
+<tr class="even">
+<td><code>r--</code></td>
+<td style="text-align: center;">8-10</td>
+<td><strong>o</strong>ther</td>
+<td>everyone else can read</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li class="fragment"><code>r</code> = read, <code>w</code> = write, <code>x</code> = <strong>execute</strong> - permission to <em>run</em> the file as a program</li>
+<li class="fragment">New files get <code>rw-</code> but never <code>x</code> - that is why <code>./hello.sh</code> was denied</li>
+<li class="fragment">On a <strong>directory</strong>, <code>x</code> means “may <code>cd</code> into it”</li>
+</ul>
+</section>
+<section id="changing-permissions-with-chmod" class="slide level2">
+<h2>Changing permissions with <code>chmod</code></h2>
+<p><code>chmod</code> (<em>change mode</em>) adds or removes permissions: <strong>who</strong> (<code>u</code>/<code>g</code>/<code>o</code>/<code>a</code>) <strong>+/-</strong> <strong>which</strong> (<code>r</code>/<code>w</code>/<code>x</code>)</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb10"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb10-1"><a></a><span class="fu">chmod</span> u+x hello.sh    <span class="co"># let the owner (you) execute it</span></span>
+<span id="cb10-2"><a></a><span class="fu">chmod</span> +x hello.sh     <span class="co"># the common shortcut: execute for everyone</span></span>
+<span id="cb10-3"><a></a><span class="ex">./hello.sh</span>            <span class="co"># now it runs!</span></span>
+<span id="cb10-4"><a></a><span class="co"># Hello from bill on 2026-10-05</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>More examples of the same pattern:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb11"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb11-1"><a></a><span class="fu">chmod</span> go-w notes.txt     <span class="co"># group and others may no longer write</span></span>
+<span id="cb11-2"><a></a><span class="fu">chmod</span> a-w data/raw/<span class="pp">*</span>     <span class="co"># nobody can write: protect your raw data!</span></span>
+<span id="cb11-3"><a></a><span class="fu">chmod</span> u+x scripts/<span class="pp">*</span>.sh   <span class="co"># make all your scripts runnable at once</span></span>
+<span id="cb11-4"><a></a><span class="fu">ls</span> <span class="at">-l</span>                    <span class="co"># always verify what changed</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="callout callout-tip callout-titled callout-style-default">
+<div class="callout-body">
+<div class="callout-title">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<p><strong>Tip</strong></p>
+</div>
+<div class="callout-content">
+<p><strong>The habit to build today</strong>: every time you write or download a script, it needs <code>chmod +x</code> once before <code>./script.sh</code> will work. (<code>bash script.sh</code> works without <code>x</code>, because there you are running <code>bash</code>, not the script.)</p>
+</div>
+</div>
+</div>
+</section>
+<section id="chmod-by-the-numbers" class="slide level2 smaller">
+<h2><code>chmod</code> by the numbers</h2>
+<p>You will often see permissions as three digits - each digit is one triplet, adding <code>r</code>=4, <code>w</code>=2, <code>x</code>=1:</p>
+<table class="caption-top">
+<colgroup>
+<col style="width: 12%">
+<col style="width: 19%">
+<col style="width: 45%">
+<col style="width: 22%">
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: center;">Number</th>
+<th style="text-align: center;">Triplets</th>
+<th>Meaning</th>
+<th>Typical use</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: center;"><code>755</code></td>
+<td style="text-align: center;"><code>rwxr-xr-x</code></td>
+<td>you do everything; others read + run</td>
+<td>scripts</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;"><code>644</code></td>
+<td style="text-align: center;"><code>rw-r--r--</code></td>
+<td>you read + write; others read</td>
+<td>data, documents</td>
+</tr>
+<tr class="odd">
+<td style="text-align: center;"><code>600</code></td>
+<td style="text-align: center;"><code>rw-------</code></td>
+<td>only you, at all</td>
+<td>sensitive files</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;"><code>444</code></td>
+<td style="text-align: center;"><code>r--r--r--</code></td>
+<td>read-only for everyone</td>
+<td>raw data</td>
+</tr>
+</tbody>
+</table>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb12"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb12-1"><a></a><span class="fu">chmod</span> 755 hello.sh       <span class="co"># identical to: chmod u+rwx,go+rx hello.sh</span></span>
+<span id="cb12-2"><a></a><span class="fu">chmod</span> 444 data/raw/<span class="pp">*</span>.tsv <span class="co"># raw data: look, don't touch</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<ul>
+<li>Both styles are everywhere; read <code>755</code> out loud as its triplets until it feels natural</li>
+<li>You will meet permissions again on Talapas (L08), where your <strong>group</strong> controls who in the lab sees shared files</li>
+</ul>
+</section>
+<section id="four-scripts-to-take-home" class="slide level2 smaller">
+<h2>Four scripts to take home</h2>
+<p>Written for this course - download from the <a href="../Schedule.html">Schedule</a> (week 2) or <a href="../Examples.html">Example Files</a> page, read the comments, make them yours:</p>
+<table class="caption-top">
+<thead>
+<tr class="header">
+<th>Script</th>
+<th>What it does</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><a href="../Examples_Folder/scripts_week02/file_inventory.sh"><code>file_inventory.sh</code></a></td>
+<td>Reports every file in a folder - grouped by file type, largest total first, with each file’s permissions and size - written out to a report file</td>
+</tr>
+<tr class="even">
+<td><a href="../Examples_Folder/scripts_week02/make_project.sh"><code>make_project.sh</code></a></td>
+<td>Builds the Lecture 01 project structure (<code>data/raw</code>, <code>scripts/</code>, <code>output/</code>, <code>docs/</code>) with template <code>README.md</code>, <code>.R</code>, <code>.py</code> and <code>.qmd</code> files</td>
+</tr>
+<tr class="odd">
+<td><a href="../Examples_Folder/scripts_week02/filter_rows.sh"><code>filter_rows.sh</code></a> + <a href="../Examples_Folder/scripts_week02/total_counts.sh"><code>total_counts.sh</code></a></td>
+<td>A two-script <strong>pipeline</strong> for the course dataset: the output of one is the input of the other</td>
+</tr>
+<tr class="even">
+<td><a href="../Examples_Folder/scripts_week02/backup_project.sh"><code>backup_project.sh</code></a></td>
+<td>Snapshots a project into a dated <code>.tar.gz</code> (skipping expendable <code>output/</code>)</td>
+</tr>
+</tbody>
+</table>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb13"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb13-1"><a></a><span class="fu">chmod</span> +x <span class="pp">*</span>.sh    <span class="co"># remember: once per download, or they won't run</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="scripts-that-feed-each-other" class="slide level2">
+<h2>Scripts that feed each other</h2>
+<p>Because both pipeline scripts read <strong>stdin</strong> and write <strong>stdout</strong>, they chain with <code>|</code> exactly like built-in commands:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb14"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb14-1"><a></a><span class="co"># Which genotype-A fish have the most RNA-seq reads?</span></span>
+<span id="cb14-2"><a></a><span class="ex">./filter_rows.sh</span> Genotype A <span class="op">&lt;</span> Stickle_RNAseq.tsv <span class="kw">|</span></span>
+<span id="cb14-3"><a></a>    <span class="ex">./total_counts.sh</span> <span class="kw">|</span></span>
+<span id="cb14-4"><a></a>    <span class="fu">sort</span> <span class="at">-t</span><span class="st">$'</span><span class="dt">\t</span><span class="st">'</span> <span class="at">-k2,2nr</span> <span class="kw">|</span></span>
+<span id="cb14-5"><a></a>    <span class="fu">head</span> <span class="at">-5</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<ul>
+<li class="fragment"><code>filter_rows.sh</code> keeps the header + the rows you ask for → <code>total_counts.sh</code> sums the 600 gene columns per fish</li>
+<li class="fragment">Then the <em>built-ins</em> take over: <code>sort</code> ranks, <code>head</code> trims - your scripts are now part of the Unix toolkit</li>
+<li class="fragment">This is the design to copy: small tools, plain text in and out, joined by pipes</li>
+<li class="fragment">Everything in today’s lecture - paths, redirection, pipes, permissions - in four short files</li>
+</ul>
+</section>
+<section class="slide level2">
+
+</section></section>
+<section>
 <section id="running-example-the-stickleback-rna-seq-table" class="title-slide slide level1 center">
 <h1>Running example: the stickleback RNA-seq table</h1>
 
 </section>
 <section id="first-look-at-a-real-data-file" class="slide level2">
 <h2>First look at a real data file</h2>
-<p>Download it into your project (once), then use what you learned today:</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb5"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb5-1"><a></a><span class="fu">mkdir</span> <span class="at">-p</span> ~/projects/comptools/data <span class="kw">&amp;&amp;</span> <span class="bu">cd</span> ~/projects/comptools</span>
-<span id="cb5-2"><a></a><span class="ex">curl</span> <span class="at">-L</span> <span class="at">-o</span> data/Stickle_RNAseq.tsv https://wcresko.github.io/BioE_Comp_Tools_Fa2026/Data_Folder/Stickle_RNAseq.tsv</span>
-<span id="cb5-3"><a></a></span>
-<span id="cb5-4"><a></a><span class="fu">ls</span> <span class="at">-lh</span> data/                       <span class="co"># how big is it?</span></span>
-<span id="cb5-5"><a></a><span class="fu">wc</span> <span class="at">-l</span> data/Stickle_RNAseq.tsv      <span class="co"># how many lines (fish + header)?</span></span>
-<span id="cb5-6"><a></a><span class="fu">head</span> <span class="at">-n</span> 3 data/Stickle_RNAseq.tsv <span class="kw">|</span> <span class="fu">cut</span> <span class="at">-f</span> 1-6     <span class="co"># first rows, first 6 columns only</span></span>
-<span id="cb5-7"><a></a><span class="fu">cut</span> <span class="at">-f</span> 2 data/Stickle_RNAseq.tsv <span class="kw">|</span> <span class="fu">sort</span> <span class="kw">|</span> <span class="fu">uniq</span> <span class="at">-c</span>  <span class="co"># how many fish per genotype?</span></span>
-<span id="cb5-8"><a></a><span class="fu">cut</span> <span class="at">-f</span> 3 data/Stickle_RNAseq.tsv <span class="kw">|</span> <span class="fu">sort</span> <span class="kw">|</span> <span class="fu">uniq</span> <span class="at">-c</span>  <span class="co"># ...and per microbiota treatment</span></span>
-<span id="cb5-9"><a></a><span class="fu">head</span> <span class="at">-n</span> 1 data/Stickle_RNAseq.tsv <span class="kw">|</span> <span class="fu">tr</span> <span class="st">'\t'</span> <span class="st">'\n'</span> <span class="kw">|</span> <span class="fu">wc</span> <span class="at">-l</span>   <span class="co"># how many columns?</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>You downloaded it at the start of class - now use what you learned today:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb15"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb15-1"><a></a><span class="bu">cd</span> ~/projects/comptools</span>
+<span id="cb15-2"><a></a></span>
+<span id="cb15-3"><a></a><span class="fu">ls</span> <span class="at">-lh</span> data/                      <span class="co"># how big is it?</span></span>
+<span id="cb15-4"><a></a><span class="fu">wc</span> <span class="at">-l</span> data/Stickle_RNAseq.tsv      <span class="co"># how many lines (fish + header)?</span></span>
+<span id="cb15-5"><a></a><span class="fu">head</span> <span class="at">-n</span> 3 data/Stickle_RNAseq.tsv <span class="kw">|</span> <span class="fu">cut</span> <span class="at">-f</span> 1-6     <span class="co"># first rows, first 6 columns only</span></span>
+<span id="cb15-6"><a></a><span class="fu">cut</span> <span class="at">-f</span> 2 data/Stickle_RNAseq.tsv <span class="kw">|</span> <span class="fu">sort</span> <span class="kw">|</span> <span class="fu">uniq</span> <span class="at">-c</span>  <span class="co"># how many fish per genotype?</span></span>
+<span id="cb15-7"><a></a><span class="fu">cut</span> <span class="at">-f</span> 3 data/Stickle_RNAseq.tsv <span class="kw">|</span> <span class="fu">sort</span> <span class="kw">|</span> <span class="fu">uniq</span> <span class="at">-c</span>  <span class="co"># ...and per microbiota treatment</span></span>
+<span id="cb15-8"><a></a><span class="fu">head</span> <span class="at">-n</span> 1 data/Stickle_RNAseq.tsv <span class="kw">|</span> <span class="fu">tr</span> <span class="st">'\t'</span> <span class="st">'\n'</span> <span class="kw">|</span> <span class="fu">wc</span> <span class="at">-l</span>   <span class="co"># how many columns?</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="callout callout-tip callout-titled callout-style-default">
 <div class="callout-body">
 <div class="callout-title">
@@ -806,90 +1055,14 @@ Bill Cresko
 </div>
 </div>
 </section>
-<section id="is-it-tidy" class="slide level2">
-<h2>Is it tidy?</h2>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb6"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb6-1"><a></a><span class="fu">head</span> <span class="at">-n</span> 2 data/Stickle_RNAseq.tsv <span class="kw">|</span> <span class="fu">cut</span> <span class="at">-f</span> 1-8</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<pre><code>Individual  Genotype  Microbiota    Geno&amp;Micro  Gene1  Gene2  Gene3  Gene4
-AC1         A         conventional  convA       16     15     71     153</code></pre>
+<section id="before-next-week" class="slide level2">
+<h2>Before next week</h2>
 <ul>
-<li class="fragment">One row per <strong>fish</strong>, one column per <strong>variable</strong> - tidy for per-fish questions</li>
-<li class="fragment">But <strong>600 gene columns</strong> is a “wide” layout: the <em>gene</em> is really a variable too. For per-gene questions we will reshape it to <strong>long</strong> format (one row per fish x gene) in Week 7</li>
-<li class="fragment">The <code>Geno&amp;Micro</code> column duplicates two other columns - and the <code>&amp;</code> is a name that will annoy every tool we use. Keep an eye on it.</li>
+<li class="fragment">Today: paths and navigation, making and editing files, redirection, pipes - and your first shell scripts with <code>chmod +x</code></li>
+<li class="fragment">Grab the four scripts from the <a href="../Schedule.html">Schedule</a> (week 2) and run them on your own folders</li>
+<li class="fragment"><strong>Next week (L03)</strong>: is our dataset <em>tidy</em>? Tidy data principles, then <code>grep</code> and regular expressions for searching files</li>
+<li class="fragment"><strong>Read</strong>: <a href="../book/chapters/07-files-pipes.html">Ch. 7</a>, <a href="../book/chapters/08-tidy-data.html">Ch. 8</a> and <a href="../book/chapters/09-grep-regex.html">Ch. 9</a>; keep <a href="../book/chapters/appendix-B-unix.html">App. B</a> open while you practice</li>
 </ul>
-</section></section>
-<section>
-<section id="tidy-data" class="title-slide slide level1 center">
-<h1>Tidy Data</h1>
-
-</section>
-<section id="an-example-to-get-us-started" class="slide level2">
-<h2>An example to get us started</h2>
-</section>
-<section id="section-2" class="slide level2">
-<h2></h2>
-
-<img data-src="images/Lec03_img009.jpeg" class="quarto-figure quarto-figure-center r-stretch" style="width:100.0%"></section>
-<section id="section-3" class="slide level2">
-<h2></h2>
-
-<img data-src="images/Lec03_img010.jpeg" class="quarto-figure quarto-figure-center r-stretch" style="width:90.0%"></section>
-<section id="data-set-rules-of-thumb-aka-tidy-data" class="slide level2">
-<h2>Data set rules of thumb (aka Tidy Data)</h2>
-<ul>
-<li>Store a copy of data in nonproprietary software and hardware formats, such as plain ASCII text (aka a flat file)</li>
-<li>Leave an uncorrected file when doing analyses</li>
-<li>Use descriptive names for your data files and variables</li>
-<li>Include a header line with descriptive variable names</li>
-<li>Maintain effective metadata about the data (data dictionary)</li>
-<li>When you add observations to a database, add rows</li>
-<li>When you add variables to a database, add columns, not rows</li>
-<li>A column of data should contain only one data type</li>
-</ul>
-</section>
-<section id="not-all-data-are-tidy-to-begin-with" class="slide level2">
-<h2>Not all data are tidy to begin with</h2>
-<ul>
-<li><p>Sometimes need to do some data wrangling</p></li>
-<li><p>But also contingency tables</p></li>
-</ul>
-</section>
-<section id="types-of-data" class="slide level2">
-<h2>Types of data</h2>
-<table class="caption-top">
-<colgroup>
-<col style="width: 25%">
-<col style="width: 25%">
-<col style="width: 25%">
-<col style="width: 25%">
-</colgroup>
-<tbody>
-<tr class="odd">
-<td style="text-align: center;">Categorical</td>
-<td style="text-align: center;"></td>
-<td style="text-align: center;">Quantitative</td>
-<td style="text-align: center;"></td>
-</tr>
-<tr class="even">
-<td style="text-align: center;">Ordinal</td>
-<td style="text-align: center;">Nominal</td>
-<td style="text-align: center;">Ratio</td>
-<td style="text-align: center;">Interval</td>
-</tr>
-<tr class="odd">
-<td style="text-align: center;">small, medium, large</td>
-<td style="text-align: center;">apples, oranges, bananas</td>
-<td style="text-align: center;">kilograms, dollars, years</td>
-<td style="text-align: center;">temperature, calendar year</td>
-</tr>
-<tr class="even">
-<td style="text-align: center;">ordered character</td>
-<td style="text-align: center;">character</td>
-<td style="text-align: center;">numeric</td>
-<td style="text-align: center;">integer</td>
-</tr>
-</tbody>
-</table>
-<p>‘Factor’ is a special type of character variable that we will explore more later</p>
 
 
 </section></section>
