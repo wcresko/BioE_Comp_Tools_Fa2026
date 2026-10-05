@@ -1,6 +1,6 @@
 ---
 title: "Lecture 03 - Computational Tools for Bioengineers"
-subtitle: "Data Streams, Large Genomic Files, GREP and Regular Expressions"
+subtitle: "Tidy Data, Data Streams, Large Genomic Files, GREP and Regular Expressions"
 date: "Monday, October 12, 2026"
 author: "Bill Cresko"
 ---
@@ -27,15 +27,74 @@ set.seed(2026)
 The course book goes deeper on everything in this lecture. Read before or after class:
 
 -   [Ch. 7: Files, Pipes, and Redirection](../book/chapters/07-files-pipes.html)
+-   [Ch. 8: Tidy Data Principles](../book/chapters/08-tidy-data.html)
 -   [Ch. 9: GREP and Regular Expressions](../book/chapters/09-grep-regex.html)
 -   *Reference:* [App. C: Common Data Formats & Public Repositories](../book/chapters/appendix-C-data-formats.html) · [App. D: Regular Expression Reference](../book/chapters/appendix-D-regex.html)
 
 ## Goals for today
 
+-   Tidy data principles - and is our stickleback table tidy?
 -   Unix standard streams and redirection
 -   Working with large genomic data files (FASTA and FASTQ)
 -   GREP and regular expressions
 -   Working with compressed files
+
+# Tidy Data
+
+## An example to get us started
+
+## 
+
+![](images/Lec03_img009.jpeg){fig-align="center" width="100%"}
+
+## 
+
+![](images/Lec03_img010.jpeg){fig-align="center" width="90%"}
+
+## Data set rules of thumb (aka Tidy Data)
+
+-   Store a copy of data in nonproprietary software and hardware formats, such as plain ASCII text (aka a flat file)
+-   Leave an uncorrected file when doing analyses
+-   Use descriptive names for your data files and variables
+-   Include a header line with descriptive variable names
+-   Maintain effective metadata about the data (data dictionary)
+-   When you add observations to a database, add rows
+-   When you add variables to a database, add columns, not rows
+-   A column of data should contain only one data type
+
+## Not all data are tidy to begin with
+
+-   Sometimes need to do some data wrangling
+
+-   But also contingency tables
+
+## Types of data
+
+|  |  |  |  |
+|:--:|:--:|:--:|:--:|
+| Categorical |  | Quantitative |  |
+| Ordinal | Nominal | Ratio | Interval |
+| small, medium, large | apples, oranges, bananas | kilograms, dollars, years | temperature, calendar year |
+| ordered character | character | numeric | integer |
+
+'Factor' is a special type of character variable that we will explore more later
+
+## Is our course dataset tidy?
+
+Back in your course folder (`cd ~/projects/comptools`):
+
+``` bash
+head -n 2 data/Stickle_RNAseq.tsv | cut -f 1-8
+```
+
+    Individual  Genotype  Microbiota    Geno&Micro  Gene1  Gene2  Gene3  Gene4
+    AC1         A         conventional  convA       16     15     71     153
+
+::: incremental
+-   One row per **fish**, one column per **variable** - tidy for per-fish questions
+-   But **600 gene columns** is a "wide" layout: the *gene* is really a variable too. For per-gene questions we will reshape it to **long** format (one row per fish x gene) in Week 7
+-   The `Geno&Micro` column duplicates two other columns - and the `&` is a name that will annoy every tool we use. Keep an eye on it.
+:::
 
 # The Command Line
 

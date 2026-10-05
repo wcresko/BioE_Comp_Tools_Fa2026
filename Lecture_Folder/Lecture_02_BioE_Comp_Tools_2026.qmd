@@ -1,6 +1,6 @@
 ---
 title: "Lecture 02 - Computational Tools for Bioengineers"
-subtitle: "Unix Navigation, Files, Pipes and Tidy Data"
+subtitle: "Unix Navigation, Files, Pipes and Shell Scripts"
 date: "Monday, October 5, 2026"
 author: "Bill Cresko"
 ---
@@ -28,15 +28,15 @@ The course book goes deeper on everything in this lecture. Read before or after 
 
 -   [Ch. 4: Unix Fundamentals](../book/chapters/04-unix-fundamentals.html)
 -   [Ch. 7: Files, Pipes, and Redirection](../book/chapters/07-files-pipes.html)
--   [Ch. 8: Tidy Data Principles](../book/chapters/08-tidy-data.html)
 -   *Reference:* [App. B: Unix Command Reference](../book/chapters/appendix-B-unix.html)
+-   Looking ahead to next week: [Ch. 8: Tidy Data Principles](../book/chapters/08-tidy-data.html)
 
 ## Goals for today
 
 -   Navigating the file system: paths, `cd`, `ls`, wildcards
 -   Making, reading and writing files
 -   Redirection and Unix pipes
--   Basics of data structures and tidy data
+-   Your first shell scripts - and the file permissions (`chmod`) that let them run
 -   Meet the course dataset (stickleback gut RNA-seq)
 
 ## Recap from last time
@@ -47,6 +47,24 @@ The course book goes deeper on everything in this lecture. Read before or after 
 -   Use the shell because it is **scriptable, repeatable, and works the same on your laptop and on Talapas**
 -   Help: `man cmd`, `cmd --help`, `tldr cmd`, and the book's [Unix Command Reference](../book/chapters/appendix-B-unix.html)
 :::
+
+## Try it now - your first ten minutes in the shell
+
+Open the terminal (in Positron: **Ctrl-\`**) and type each line yourself:
+
+``` bash
+whoami                  # who does the computer think you are?
+pwd                     # where are you?
+ls                      # what is here?
+ls -lh                  # ...with sizes and dates
+echo "hello world"      # your first command with an argument
+man ls                  # read a manual page; press q to quit
+mkdir -p ~/projects     # make a home for your course work
+cd ~/projects && pwd    # go there and confirm
+```
+
+-   Use **Tab** for every path and **↑** to repeat commands - build the habit now
+-   Done early? Help a neighbor, then try Exercises 1-2 in [Ch. 4](../book/chapters/04-unix-fundamentals.html#sec-unix-exercises)
 
 ## Our course dataset: stickleback gut RNA-seq {.smaller}
 
@@ -65,7 +83,7 @@ curl -L -o ~/projects/comptools/data/Stickle_RNAseq.tsv \
 
 More detail: [Ch. 1, The Course Dataset](../book/chapters/01-introduction.html#sec-course-dataset)
 
-# Common navigation commands
+# The file system and paths
 
 ![](images/Lec03_img001.jpeg){fig-align="center" width="90%"}
 
@@ -87,7 +105,7 @@ More detail: [Ch. 1, The Course Dataset](../book/chapters/01-introduction.html#s
 -   / = the root directory, which holds all other directories
 -   Most of your files will be located under /Users in a directory of your username
 -   the `~` is shorthand for your home folder
--   Navigation in the shell consists of jumping up and down between directories and seeing what’s in them
+-   Navigation in the shell consists of jumping up and down between directories and seeing what's in them
 -   The "path" refers to the location a file is in
     -   ex: "/Users/wcresko/Documents"
 
@@ -146,21 +164,16 @@ cd -            # Go to previous directory
 ## Common navigation commands
 
 ::: incremental
--   **`pwd`** = “print working directory”, which will print where you currently are in the system
--   **`ls`** = “list”, list all directories and files in your current position
-    -   `ls –F` = denote which results are directories, files, etc.
-    -   `ls –l` = ”long format”, lists total file sizes
-    -   `ls –r` = “reverse”, lists the results in reverse order
-    -   `ls –S` = “size”, sort results by size
-    -   `ls –t` = “time”, sort results by time created, from most recent to last
+-   **`pwd`** = "print working directory": where am I right now?
+-   **`ls`** = "list" all directories and files in your current position
+    -   `ls -F` = mark which results are directories, files, etc.
+    -   `ls -l` = "long format": permissions, owner, sizes, dates
+    -   `ls -S` = sort by **s**ize; `ls -t` = sort by **t**ime, newest first; add `-r` to **r**everse either order
+-   **`cd`** = "change directory": move to a new position based on your path argument
+    -   `cd ..` = go up one directory
+    -   `cd ~` = go to my home directory
+    -   `cd -` = go back to the directory you were in last (like a browser's back arrow)
 :::
-
-## Common Navigation Commands
-
--   `cd` = “change directory”, will place you in a new position based on your path argument
-    -   `cd ..` "go up one directory"
-    -   `cd –` "go to the directory you were at last (like the back arrow on an internet browser)"
-    -   `cd ~` "go to my home directory"
 
 ## Let's practice!
 
@@ -180,9 +193,21 @@ cd -            # Go to previous directory
 -   Delete files: `rm`
 -   Delete directories: `rmdir`
 -   Examining file length: `wc`
--   Reading files: `cat`
--   Looking at beginning or end: `head` or `tail`
+-   (Reading what's *inside* a file - `cat`, `less`, `head`, `tail` - gets its own section shortly)
 :::
+
+## Editing a file in the terminal: `nano`
+
+``` bash
+nano Practice.txt     # open the file (creating it if it doesn't exist)
+```
+
+-   Type normally; arrow keys move the cursor - no mouse here
+-   The `^` shortcuts along the bottom mean **Ctrl**:
+    -   `Ctrl-O`, then Enter = save ("write **O**ut")
+    -   `Ctrl-X` = exit (it offers to save if you forgot)
+    -   `Ctrl-K` cuts a whole line; `Ctrl-U` pastes it back
+-   Prefer a familiar window? Positron edits the same files - but `nano` is what you'll have on **Talapas** (L08), where there is no point-and-click
 
 ## Things to keep in mind
 
@@ -191,7 +216,7 @@ cd -            # Go to previous directory
     -   It will override files if you name 2 things the same
 -   Naming conventions
     -   Avoid spaces
-    -   Don’t start with a –
+    -   Don't start with a -
     -   Stick to letters, numbers, . , -, and \_
 -   Use appropriate file extensions in file names
     -   Some software expect files with certain extensions (.fasta, .txt, etc.)
@@ -199,13 +224,13 @@ cd -            # Go to previous directory
 ## Let's try it out
 
 -   Make a new directory called whatever you'd like.
--   Add a file named “Practice.txt” to the directory and add some text to it
+-   Add a file named "Practice.txt" to the directory and add some text to it
 -   Read the contents of the file and get its length
--   Rename the file to “Super_practice.txt”
--   Move the file to a new folder named “Testing”
--   Make a copy of the file named “Super_practice_copy.txt”
--   Read the contents of the file and get its length to make sure it’s the same as Super_practice.txt
--   Delete the original “Super_practice.txt”
+-   Rename the file to "Super_practice.txt"
+-   Move the file to a new folder named "Testing"
+-   Make a copy of the file named "Super_practice_copy.txt"
+-   Read the contents of the file and get its length to make sure it's the same as Super_practice.txt
+-   Delete the original "Super_practice.txt"
 
 ## Useful flags for file commands
 
@@ -347,8 +372,12 @@ The **shell** expands wildcards *before* the command runs - so `rm *.fastq` dele
     -   `sort data.txt | head -5`
     -   Get top 5 after sorting
 -   **Filtering and processing:**
-    -   `ls -l | grep ".txt" | awk '{print $5, $9}'`
-    -   List txt files with sizes
+    -   `ls -l | sort -k5,5n | tail -3`
+    -   The three biggest files in a folder (column 5 of `ls -l` is the size)
+:::
+
+::: callout-note
+A few of these examples **preview commands we haven't covered yet**: `grep` searches for text patterns (all of L03), and `cut` picks columns (you'll use it on the course data in a few slides). Focus on the *shape* of the pipelines today - the pieces get their own lectures.
 :::
 
 ## Advanced Pipe Examples
@@ -361,8 +390,8 @@ The **shell** expands wildcards *before* the command runs - so `rm *.fastq` dele
     -   `tail -f logfile.txt | grep ERROR`
     -   Watch log file for errors in real-time
 -   **Complex transformations:**
-    -   `find . -name "*.txt" | xargs wc -l | sort -n`
-    -   Find all txt files and sort by line count
+    -   `wc -l *.txt | sort -n`
+    -   Line counts for every txt file, smallest first (`find` + `xargs` do this across whole directory trees - L04)
 :::
 
 ## Combining It All Together
@@ -408,6 +437,142 @@ Try these exercises:
 -   Save intermediate results when debugging complex pipes
 :::
 
+------------------------------------------------------------------------
+
+# Shell scripts - saving commands to reuse
+
+## From commands to scripts
+
+::: incremental
+-   A **shell script** is just a plain-text file of the commands you would have typed, run top to bottom
+-   Anything you can type at the prompt - navigation, redirection, whole pipelines - can live in a script
+-   Why bother?
+    -   **Reproducibility** - an exact, re-runnable record of what you did (your lab notebook for data)
+    -   **Automation** - rerun the whole thing with one command when new data arrive
+    -   **Sharing** - hand a collaborator the script, not a list of instructions
+-   Convention: name them with `.sh` and keep them in your project's `scripts/` folder
+:::
+
+## Your first shell script
+
+Put these two lines in a file called `hello.sh` (using `nano`, Positron, or even `cat >`):
+
+``` bash
+#!/usr/bin/env bash
+echo "Hello from $(whoami) on $(date '+%Y-%m-%d')"
+```
+
+::: incremental
+-   Line 1 is the **shebang**: `#!` tells Unix *which program* should interpret the rest of the file - here, bash
+-   Every other line starting with `#` is a **comment** - write lots of them
+-   Now run it:
+
+``` bash
+./hello.sh
+# bash: ./hello.sh: Permission denied
+```
+
+-   Denied! To understand why, we need to look at **file permissions**
+:::
+
+## File permissions - what `ls -l` is telling you
+
+``` bash
+ls -l hello.sh
+# -rw-r--r--  1 bill  staff  63 Oct  5 16:10 hello.sh
+```
+
+That first column is ten characters: a file-type flag, then **three triplets** of `rwx`:
+
+|  | Characters | Who | Meaning |
+|-----------|:---------:|------------------|------------------------------|
+| `-` | 1 | file type | `-` file, `d` directory, `l` link |
+| `rw-` | 2-4 | **u**ser (owner) | owner can **r**ead and **w**rite |
+| `r--` | 5-7 | **g**roup | group members can read |
+| `r--` | 8-10 | **o**ther | everyone else can read |
+
+::: incremental
+-   `r` = read, `w` = write, `x` = **execute** - permission to *run* the file as a program
+-   New files get `rw-` but never `x` - that is why `./hello.sh` was denied
+-   On a **directory**, `x` means "may `cd` into it"
+:::
+
+## Changing permissions with `chmod`
+
+`chmod` (*change mode*) adds or removes permissions: **who** (`u`/`g`/`o`/`a`) **+/-** **which** (`r`/`w`/`x`)
+
+``` bash
+chmod u+x hello.sh    # let the owner (you) execute it
+chmod +x hello.sh     # the common shortcut: execute for everyone
+./hello.sh            # now it runs!
+# Hello from bill on 2026-10-05
+```
+
+More examples of the same pattern:
+
+``` bash
+chmod go-w notes.txt     # group and others may no longer write
+chmod a-w data/raw/*     # nobody can write: protect your raw data!
+chmod u+x scripts/*.sh   # make all your scripts runnable at once
+ls -l                    # always verify what changed
+```
+
+::: callout-tip
+**The habit to build today**: every time you write or download a script, it needs `chmod +x` once before `./script.sh` will work. (`bash script.sh` works without `x`, because there you are running `bash`, not the script.)
+:::
+
+## `chmod` by the numbers {.smaller}
+
+You will often see permissions as three digits - each digit is one triplet, adding `r`=4, `w`=2, `x`=1:
+
+| Number | Triplets | Meaning | Typical use |
+|:------:|:-----------:|------------------------------|---------------|
+| `755` | `rwxr-xr-x` | you do everything; others read + run | scripts |
+| `644` | `rw-r--r--` | you read + write; others read | data, documents |
+| `600` | `rw-------` | only you, at all | sensitive files |
+| `444` | `r--r--r--` | read-only for everyone | raw data |
+
+``` bash
+chmod 755 hello.sh       # identical to: chmod u+rwx,go+rx hello.sh
+chmod 444 data/raw/*.tsv # raw data: look, don't touch
+```
+
+-   Both styles are everywhere; read `755` out loud as its triplets until it feels natural
+-   You will meet permissions again on Talapas (L08), where your **group** controls who in the lab sees shared files
+
+## Four scripts to take home {.smaller}
+
+Written for this course - download from the [Schedule](../Schedule.html) (week 2) or [Example Files](../Examples.html) page, read the comments, make them yours:
+
+| Script | What it does |
+|-----------------------|-----------------------------------------------|
+| [`file_inventory.sh`](../Examples_Folder/scripts_week02/file_inventory.sh) | Reports every file in a folder - grouped by file type, largest total first, with each file's permissions and size - written out to a report file |
+| [`make_project.sh`](../Examples_Folder/scripts_week02/make_project.sh) | Builds the Lecture 01 project structure (`data/raw`, `scripts/`, `output/`, `docs/`) with template `README.md`, `.R`, `.py` and `.qmd` files |
+| [`filter_rows.sh`](../Examples_Folder/scripts_week02/filter_rows.sh) + [`total_counts.sh`](../Examples_Folder/scripts_week02/total_counts.sh) | A two-script **pipeline** for the course dataset: the output of one is the input of the other |
+| [`backup_project.sh`](../Examples_Folder/scripts_week02/backup_project.sh) | Snapshots a project into a dated `.tar.gz` (skipping expendable `output/`) |
+
+``` bash
+chmod +x *.sh    # remember: once per download, or they won't run
+```
+
+## Scripts that feed each other
+
+Because both pipeline scripts read **stdin** and write **stdout**, they chain with `|` exactly like built-in commands:
+
+``` bash
+# Which genotype-A fish have the most RNA-seq reads?
+./filter_rows.sh Genotype A < Stickle_RNAseq.tsv |
+    ./total_counts.sh |
+    sort -t$'\t' -k2,2nr |
+    head -5
+```
+
+::: incremental
+-   `filter_rows.sh` keeps the header + the rows you ask for → `total_counts.sh` sums the 600 gene columns per fish
+-   Then the *built-ins* take over: `sort` ranks, `head` trims - your scripts are now part of the Unix toolkit
+-   This is the design to copy: small tools, plain text in and out, joined by pipes
+-   Everything in today's lecture - paths, redirection, pipes, permissions - in four short files
+:::
 
 ------------------------------------------------------------------------
 
@@ -415,13 +580,12 @@ Try these exercises:
 
 ## First look at a real data file
 
-Download it into your project (once), then use what you learned today:
+You downloaded it at the start of class - now use what you learned today:
 
 ``` bash
-mkdir -p ~/projects/comptools/data && cd ~/projects/comptools
-curl -L -o data/Stickle_RNAseq.tsv https://wcresko.github.io/BioE_Comp_Tools_Fa2026/Data_Folder/Stickle_RNAseq.tsv
+cd ~/projects/comptools
 
-ls -lh data/                       # how big is it?
+ls -lh data/                      # how big is it?
 wc -l data/Stickle_RNAseq.tsv      # how many lines (fish + header)?
 head -n 3 data/Stickle_RNAseq.tsv | cut -f 1-6     # first rows, first 6 columns only
 cut -f 2 data/Stickle_RNAseq.tsv | sort | uniq -c  # how many fish per genotype?
@@ -433,57 +597,11 @@ head -n 1 data/Stickle_RNAseq.tsv | tr '\t' '\n' | wc -l   # how many columns?
 `cut -f` picks **columns** from a tab-separated file, `sort | uniq -c` **counts** categories, and `tr '\t' '\n'` turns one wide header line into one name per line so `wc -l` can count them. Every one of these is a one-word answer to a question about the data - no spreadsheet needed.
 :::
 
-## Is it tidy?
-
-``` bash
-head -n 2 data/Stickle_RNAseq.tsv | cut -f 1-8
-```
-
-    Individual  Genotype  Microbiota    Geno&Micro  Gene1  Gene2  Gene3  Gene4
-    AC1         A         conventional  convA       16     15     71     153
+## Before next week
 
 ::: incremental
--   One row per **fish**, one column per **variable** - tidy for per-fish questions
--   But **600 gene columns** is a "wide" layout: the *gene* is really a variable too. For per-gene questions we will reshape it to **long** format (one row per fish x gene) in Week 7
--   The `Geno&Micro` column duplicates two other columns - and the `&` is a name that will annoy every tool we use. Keep an eye on it.
+-   Today: paths and navigation, making and editing files, redirection, pipes - and your first shell scripts with `chmod +x`
+-   Grab the four scripts from the [Schedule](../Schedule.html) (week 2) and run them on your own folders
+-   **Next week (L03)**: is our dataset *tidy*? Tidy data principles, then `grep` and regular expressions for searching files
+-   **Read**: [Ch. 7](../book/chapters/07-files-pipes.html), [Ch. 8](../book/chapters/08-tidy-data.html) and [Ch. 9](../book/chapters/09-grep-regex.html); keep [App. B](../book/chapters/appendix-B-unix.html) open while you practice
 :::
-
-# Tidy Data
-
-## An example to get us started
-
-## 
-
-![](images/Lec03_img009.jpeg){fig-align="center" width="100%"}
-
-## 
-
-![](images/Lec03_img010.jpeg){fig-align="center" width="90%"}
-
-## Data set rules of thumb (aka Tidy Data)
-
--   Store a copy of data in nonproprietary software and hardware formats, such as plain ASCII text (aka a flat file)
--   Leave an uncorrected file when doing analyses
--   Use descriptive names for your data files and variables
--   Include a header line with descriptive variable names
--   Maintain effective metadata about the data (data dictionary)
--   When you add observations to a database, add rows
--   When you add variables to a database, add columns, not rows
--   A column of data should contain only one data type
-
-## Not all data are tidy to begin with
-
--   Sometimes need to do some data wrangling
-
--   But also contingency tables
-
-## Types of data
-
-|  |  |  |  |
-|:--:|:--:|:--:|:--:|
-| Categorical |  | Quantitative |  |
-| Ordinal | Nominal | Ratio | Interval |
-| small, medium, large | apples, oranges, bananas | kilograms, dollars, years | temperature, calendar year |
-| ordered character | character | numeric | integer |
-
-'Factor' is a special type of character variable that we will explore more later
