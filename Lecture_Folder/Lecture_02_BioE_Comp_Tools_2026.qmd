@@ -23,8 +23,6 @@ set.seed(2026)
 
 ## Book reading for this lecture
 
-The course book goes deeper on everything in this lecture. Read before or after class:
-
 - [Ch. 6: Permissions, Wild Cards, and the Shell Environment](../book/chapters/06-unix-environment.html)
 - [Ch. 7: Files, Pipes, and Redirection](../book/chapters/07-files-pipes.html)
 - *Review:* [Ch. 5: Unix Fundamentals](../book/chapters/05-unix-fundamentals.html)
@@ -33,7 +31,7 @@ The course book goes deeper on everything in this lecture. Read before or after 
 
 ## Goals for today
 
-- Navigating the file system: paths, `cd`, `ls`, wildcards
+- Navigating the file system
 - Making, reading and writing files
 - Redirection and Unix pipes
 - Your first shell scripts - and the file permissions (`chmod`) that let them run
@@ -48,9 +46,9 @@ The course book goes deeper on everything in this lecture. Read before or after 
 - Help: `man cmd`, `cmd --help`, `tldr cmd`, and the book's [Unix Command Reference](../book/chapters/appendix-B-unix.html)
 :::
 
-## Five minutes in the shell
+## Five minute warmup in the shell
 
-Open the terminal (in Positron: **Ctrl-\`**) and type each line yourself:
+Open the terminal (in Positron or standalone) and type each line yourself:
 
 ``` bash
 whoami                  # who does the computer think you are?
@@ -64,7 +62,6 @@ cd ~/projects && pwd    # go there and confirm
 ```
 
 - Use **Tab** for every path and **↑** to repeat commands - build the habit now
-- Done early? Help a neighbor, then try Exercises 1-2 in [Ch. 5](../book/chapters/05-unix-fundamentals.html#sec-unix-exercises)
 
 ## Our course dataset: stickleback gut RNA-seq {.smaller}
 
@@ -80,8 +77,6 @@ mkdir -p ~/projects/comptools/data
 curl -L -o ~/projects/comptools/data/Stickle_RNAseq.tsv \
   https://wcresko.github.io/BioE_Comp_Tools_Fa2026/Data_Folder/Stickle_RNAseq.tsv
 ```
-
-More detail: [Ch. 1, The Course Dataset](../book/chapters/01-introduction.html#sec-course-dataset)
 
 # The file system and paths
 
@@ -157,7 +152,6 @@ cd -            # Go to previous directory
 
 ## Common navigation commands
 
-::: incremental
 - **`pwd`** = "print working directory": where am I right now?
 - **`ls`** = "list" all directories and files in your current position
   - `ls -F` = mark which results are directories, files, etc.
@@ -167,12 +161,7 @@ cd -            # Go to previous directory
   - `cd ..` = go up one directory
   - `cd ~` = go to my home directory
   - `cd -` = go back to the directory you were in last (like a browser's back arrow)
-:::
 
-## Let's practice!
-
-- Try navigating around your computer using `cd` and `ls`
-- If you are on Ubuntu, you may need to create some empty directories in your Ubuntu folder before navigating in the terminal
 
 # Working with files
 
@@ -193,7 +182,8 @@ cd -            # Go to previous directory
 ## Editing a file in the terminal: `nano`
 
 ``` bash
-nano Practice.txt     # open the file (creating it if it doesn't exist)
+nano Practice.txt          # Create a new file
+nano Stickle_RNAseq.tsv    # Open the data file
 ```
 
 - Type normally; arrow keys move the cursor - no mouse here
@@ -201,7 +191,9 @@ nano Practice.txt     # open the file (creating it if it doesn't exist)
   - `Ctrl-O`, then Enter = save ("write **O**ut")
   - `Ctrl-X` = exit (it offers to save if you forgot)
   - `Ctrl-K` cuts a whole line; `Ctrl-U` pastes it back
-- Prefer a familiar window? Positron edits the same files - but `nano` is what you'll have on **Talapas** (L08), where there is no point-and-click
+- Prefer a familiar window?
+  - Positron edits the same files
+  - but `nano` is what you'll have on **Talapas** (L08), where there is no point-and-click
 
 ## Things to keep in mind
 
@@ -215,21 +207,10 @@ nano Practice.txt     # open the file (creating it if it doesn't exist)
 - Use appropriate file extensions in file names
   - Some software expect files with certain extensions (.fasta, .txt, etc.)
 
-## Let's try it out
-
-- Make a new directory called whatever you'd like.
-- Add a file named "Practice.txt" to the directory and add some text to it
-- Read the contents of the file and get its length
-- Rename the file to "Super_practice.txt"
-- Move the file to a new folder named "Testing"
-- Make a copy of the file named "Super_practice_copy.txt"
-- Read the contents of the file and get its length to make sure it's the same as Super_practice.txt
-- Delete the original "Super_practice.txt"
-
 ## Useful flags for file commands
 
 | Command           | Effect                                                 |
-|-------------------|-----------------------------------------------------|
+|--------------------|----------------------------------------------------|
 | `ls -l`           | Long listing: permissions, owner, size, date           |
 | `ls -a`           | Show hidden "dot" files (names starting with `.`)      |
 | `ls -lh`          | Human-readable sizes (K, M, G)                         |
@@ -240,7 +221,10 @@ nano Practice.txt     # open the file (creating it if it doesn't exist)
 | `mkdir -p a/b/c`  | Make nested directories in one step                    |
 
 ::: callout-warning
-The shell has **no Trash**. Double-check the path before `rm -r`, and never combine it with a wildcard (`rm -r *`) without thinking twice.
+
+- The shell has **no Trash**. 
+- Double-check the path before `rm -r`
+- Never combine it with a wildcard (`rm -r *`) without thinking twice.
 :::
 
 # Wildcards
@@ -266,7 +250,10 @@ ls *.{fastq,md}         # brace expansion: .fastq OR .md
 | `{foo,bar}` | Either `foo` or `bar` (brace expansion)   |
 
 ::: callout-tip
-The **shell** expands wildcards *before* the command runs - so `rm *.fastq` deletes every matching file at once. Run `ls *.fastq` first to see exactly what will be affected. More in the [Unix Fundamentals chapter](../book/chapters/05-unix-fundamentals.html) of the course book.
+
+- The **shell** expands wildcards *before* the command runs - so `rm *.fastq` deletes every matching file at once. 
+- Run `ls *.fastq` first to see exactly what will be affected. 
+- More in the [Unix Fundamentals chapter](../book/chapters/05-unix-fundamentals.html) of the course book.
 :::
 
 # Reading Files in Unix
@@ -321,17 +308,6 @@ The **shell** expands wildcards *before* the command runs - so `rm *.fastq` dele
   - `command &> all_output.txt`
 :::
 
-## Redirection, visually
-
-::::: columns
-::: {.column width="50%"}
-![Normally a command's output goes to the screen](../images/Lec02_img008.svg){width="100%"}
-:::
-
-::: {.column width="50%"}
-![`>` sends that output to a file instead](../images/Lec02_img009.svg){width="100%"}
-:::
-:::::
 
 # Unix Pipes
 
@@ -371,12 +347,15 @@ The **shell** expands wildcards *before* the command runs - so `rm *.fastq` dele
 :::
 
 ::: callout-note
-A few of these examples **preview commands we haven't covered yet**: `grep` searches for text patterns (all of L03), and `cut` picks columns (you'll use it on the course data in a few slides). Focus on the *shape* of the pipelines today - the pieces get their own lectures.
+
+- A few of these examples **preview commands we haven't covered yet**: 
+  `grep` searches for text patterns (all of L03)
+  `cut` picks columns (you'll use it on the course data in a few slides). 
+- Focus on the *shape* of the pipelines today - the pieces get their own lectures.
 :::
 
 ## Advanced Pipe Examples
 
-::: incremental
 - **Multi-step data processing:**
   - `cat data.csv | cut -d',' -f2 | sort | uniq -c | sort -rn`
   - Extract column 2, count unique values, sort by frequency
@@ -386,11 +365,9 @@ A few of these examples **preview commands we haven't covered yet**: `grep` sear
 - **Complex transformations:**
   - `wc -l *.txt | sort -n`
   - Line counts for every txt file, smallest first (`find` + `xargs` do this across whole directory trees - L04)
-:::
 
-## Combining It All Together
 
-Example workflow:
+## Example Workflow
 
 ``` bash
 # Read a file, process it, save results, and display
@@ -402,24 +379,12 @@ cat data.txt | \
   head -10               # Show top 10
 ```
 
-::: notes
+::: callout-note
 The backslash allows you to continue commands on multiple lines for readability
 :::
 
-## Practice Exercise: Files and Pipes
-
-Try these exercises:
-
-1.  Create a file with a list of numbers (one per line)
-2.  Use pipes to sort them numerically
-3.  Save the sorted list to a new file using redirection
-4.  Use `tee` to display and save the top 5 numbers
-5.  Count how many unique numbers you have using pipes
-6.  Append the count to your results file
-
 ## Tips for Working with Files and Pipes
 
-::: incremental
 - Test pipes step by step
   - Build complex pipes incrementally
   - Check output at each stage
@@ -429,22 +394,31 @@ Try these exercises:
   - Filter early in the pipeline
   - Reduces data passed between commands
 - Save intermediate results when debugging complex pipes
-:::
 
-------------------------------------------------------------------------
+
+## Practice Exercise: Files and Pipes
+
+
+1.  Create a file with a list of numbers (one per line)
+2.  Use pipes to sort them numerically
+3.  Save the sorted list to a new file using redirection
+4.  Use `tee` to display and save the top 5 numbers
+5.  Count how many unique numbers you have using pipes
+6.  Append the count to your results file
+
 
 # Shell scripts - saving commands to reuse
 
 ## From commands to scripts
 
 ::: incremental
-- A **shell script** is just a plain-text file of the commands you would have typed, run top to bottom
+- A **shell script** is just a plain-text file of the commands you would have typed into the prompt on a terminal, run top to bottom
 - Anything you can type at the prompt - navigation, redirection, whole pipelines - can live in a script
 - Why bother?
   - **Reproducibility** - an exact, re-runnable record of what you did (your lab notebook for data)
   - **Automation** - rerun the whole thing with one command when new data arrive
   - **Sharing** - hand a collaborator the script, not a list of instructions
-- Convention: name them with `.sh` and keep them in your project's `scripts/` folder
+- Convention for shell scripts: name them with `.sh` and keep them in your project's `scripts/` folder
 :::
 
 ## Your first shell script
@@ -456,7 +430,6 @@ Put these two lines in a file called `hello.sh` (using `nano`, Positron, or even
 echo "Hello from $(whoami) on $(date '+%Y-%m-%d')"
 ```
 
-::: incremental
 - Line 1 is the **shebang**: `#!` tells Unix *which program* should interpret the rest of the file - here, bash
 - Every other line starting with `#` is a **comment** - write lots of them
 - Now run it:
@@ -466,8 +439,9 @@ echo "Hello from $(whoami) on $(date '+%Y-%m-%d')"
 # bash: ./hello.sh: Permission denied
 ```
 
-- Denied! To understand why, we need to look at **file permissions**
-:::
+- Denied! 
+- To understand why, we need to look at **file permissions**
+
 
 ## File permissions - what `ls -l` is telling you
 
@@ -476,7 +450,8 @@ ls -l hello.sh
 # -rw-r--r--  1 bill  staff  63 Oct  5 16:10 hello.sh
 ```
 
-That first column is ten characters: a file-type flag, then **three triplets** of `rwx`:
+- That first column is ten characters
+- A file-type flag, then **three triplets** of `rwx`:
 
 |       | Characters | Who              | Meaning                           |
 |-------|:----------:|------------------|-----------------------------------|
@@ -486,14 +461,16 @@ That first column is ten characters: a file-type flag, then **three triplets** o
 | `r--` |    8-10    | **o**ther        | everyone else can read            |
 
 ::: incremental
-- `r` = read, `w` = write, `x` = **execute** - permission to *run* the file as a program
+- `r` = **read**, `w` = **write**, `x` = **execute** 
+- The `x` is permission to *run* the file as a program
 - New files get `rw-` but never `x` - that is why `./hello.sh` was denied
 - On a **directory**, `x` means "may `cd` into it"
 :::
 
 ## Changing permissions with `chmod`
 
-`chmod` (*change mode*) adds or removes permissions: **who** (`u`/`g`/`o`/`a`) **+/-** **which** (`r`/`w`/`x`)
+- `chmod` (*change mode*) adds or removes permissions
+- **who** (`u`/`g`/`o`/`a`) **+/-** **which** (`r`/`w`/`x`)
 
 ``` bash
 chmod u+x hello.sh    # let the owner (you) execute it
@@ -512,42 +489,44 @@ ls -l                    # always verify what changed
 ```
 
 ::: callout-tip
-**The habit to build today**: every time you write or download a script, it needs `chmod +x` once before `./script.sh` will work. (`bash script.sh` works without `x`, because there you are running `bash`, not the script.)
+- **The habit to build today**: every time you write or download a script, it needs `chmod +x` once before `./script.sh` will work. 
+- Noet that `bash script.sh` works without `x`, because there you are running `bash`, not the script.
 :::
 
-## `chmod` by the numbers {.smaller}
+## `chmod` by the numbers
 
-You will often see permissions as three digits - each digit is one triplet, adding `r`=4, `w`=2, `x`=1:
+- You will often see permissions as three digits
+- Each digit is one triplet, adding `r`=4, `w`=2, `x`=1:
 
 | Number |  Triplets   | Meaning                              | Typical use     |
-|:-------------:|:-------------:|----------------------------|---------------|
+|:--------------:|:--------------:|-------------------------|----------------|
 | `755`  | `rwxr-xr-x` | you do everything; others read + run | scripts         |
 | `644`  | `rw-r--r--` | you read + write; others read        | data, documents |
 | `600`  | `rw-------` | only you, at all                     | sensitive files |
 | `444`  | `r--r--r--` | read-only for everyone               | raw data        |
+
+- Both styles are everywhere; read `755` out loud as its triplets until it feels natural
+- You will meet permissions again on Talapas (L08), where your **group** controls who in the lab sees shared files
 
 ``` bash
 chmod 755 hello.sh       # identical to: chmod u+rwx,go+rx hello.sh
 chmod 444 data/raw/*.tsv # raw data: look, don't touch
 ```
 
-- Both styles are everywhere; read `755` out loud as its triplets until it feels natural
-- You will meet permissions again on Talapas (L08), where your **group** controls who in the lab sees shared files
+## Four scripts to take home
 
-## Four scripts to take home {.smaller}
-
-Written for this course - download from the [Schedule](../Schedule.html) (week 2) or [Example Files](../Examples.html) page, read the comments, make them yours:
+- Written for this course
+- Download from the [Schedule](../Schedule.html) (week 2) or [Example Files](../Examples.html) page
+- Read the comments, make them yours:
 
 | Script | What it does |
-|------------------------|------------------------------------------------|
+|------------------------|-----------------------------------------------|
 | [`file_inventory.sh`](../Examples_Folder/scripts_week02/file_inventory.sh) | Reports every file in a folder - grouped by file type, largest total first, with each file's permissions and size - written out to a report file |
 | [`make_project.sh`](../Examples_Folder/scripts_week02/make_project.sh) | Builds the Lecture 01 project structure (`data/raw`, `scripts/`, `output/`, `docs/`) with template `README.md`, `.R`, `.py` and `.qmd` files |
-| [`filter_rows.sh`](../Examples_Folder/scripts_week02/filter_rows.sh) + [`total_counts.sh`](../Examples_Folder/scripts_week02/total_counts.sh) | A two-script **pipeline** for the course dataset: the output of one is the input of the other |
 | [`backup_project.sh`](../Examples_Folder/scripts_week02/backup_project.sh) | Snapshots a project into a dated `.tar.gz` (skipping expendable `output/`) |
+| [`filter_rows.sh`](../Examples_Folder/scripts_week02/filter_rows.sh) + [`total_counts.sh`](../Examples_Folder/scripts_week02/total_counts.sh) | A two-script **pipeline** for the course dataset: the output of one is the input of the other |
 
-``` bash
-chmod +x *.sh    # remember: once per download, or they won't run
-```
+
 
 ## Scripts that feed each other
 
@@ -588,14 +567,18 @@ head -n 1 data/Stickle_RNAseq.tsv | tr '\t' '\n' | wc -l   # how many columns?
 ```
 
 ::: callout-tip
-`cut -f` picks **columns** from a tab-separated file, `sort | uniq -c` **counts** categories, and `tr '\t' '\n'` turns one wide header line into one name per line so `wc -l` can count them. Every one of these is a one-word answer to a question about the data - no spreadsheet needed.
+
+- `cut -f` picks **columns** from a tab-separated file
+- `sort | uniq -c` **counts** categories
+- `tr '\t' '\n'` turns one wide header line into one name per line so `wc -l` can count them
+- Every one of these is a one-word answer to a question about the data - no spreadsheet needed.
 :::
 
 ## Before next week
 
-::: incremental
+
 - Today: paths and navigation, making and editing files, redirection, pipes - and your first shell scripts with `chmod +x`
 - Grab the four scripts from the [Schedule](../Schedule.html) (week 2) and run them on your own folders
+- Work through the exercises
 - **Next week (L03)**: is our dataset *tidy*? Tidy data principles, then `grep` and regular expressions for searching files
 - **Read**: [Ch. 7](../book/chapters/07-files-pipes.html), [Ch. 8](../book/chapters/08-tidy-data.html) and [Ch. 9](../book/chapters/09-grep-regex.html); keep [App. B](../book/chapters/appendix-B-unix.html) open while you practice
-:::
