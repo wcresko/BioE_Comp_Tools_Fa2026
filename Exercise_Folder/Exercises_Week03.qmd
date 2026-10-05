@@ -1,8 +1,8 @@
 ---
-title: "Week 3 Exercises - Pipes, GREP, and Regular Expressions"
+title: "Week 3 Exercises - Tidy Data, GREP, and Regular Expressions"
 ---
 
-Short, **ungraded** practice tasks - about 20-30 minutes. Companion reading: [Ch. 7](../book/chapters/07-files-pipes.html) and [Ch. 9](../book/chapters/09-grep-regex.html); reference: [App. D](../book/chapters/appendix-D-regex.html). All tasks use `data/raw/Stickle_RNAseq.tsv` from last week.
+Short, **ungraded** practice tasks - about 20-30 minutes. Companion reading: [Ch. 8](../book/chapters/08-tidy-data.html) and [Ch. 9](../book/chapters/09-grep-regex.html), with [Ch. 7](../book/chapters/07-files-pipes.html) as review; reference: [App. D](../book/chapters/appendix-D-regex.html). All tasks use `data/raw/Stickle_RNAseq.tsv` from last week.
 
 1.  Count the fish raised with the "mono" microbiota: `grep -c "mono" data/raw/Stickle_RNAseq.tsv`. Does the answer match the experimental design (Ch. 1)?
 2.  Print only the Genotype column and tabulate it: `cut -f2 data/raw/Stickle_RNAseq.tsv | sort | uniq -c`. What do you get, and why is there one odd line?
@@ -14,3 +14,9 @@ Short, **ungraded** practice tasks - about 20-30 minutes. Companion reading: [Ch
 8.  Page through the file with `less`, search for `mono` with `/mono`, jump between matches with `n`, and quit with `q`.
 9.  In `man grep`, find what `-i` does, then demonstrate it by matching `MONO`.
 10. Write one pipeline of your own that answers a question about the file, and save it in a text file in `scripts/` so you have it for the homework.
+
+## Is it tidy?
+
+11. Look at the data the way a statistician would: `cut -f1-6 data/raw/Stickle_RNAseq.tsv | head -n 3`. One row per fish, one column per variable, a header line of descriptive names - which of the tidy-data rules of thumb from L03 (and [Ch. 8](../book/chapters/08-tidy-data.html)) does this file already satisfy?
+12. Now find the flaw: print columns 2-4 with `cut -f2-4 | head`. The `Geno&Micro` column just glues together the two columns before it - which tidy rule does that break? And try `echo Geno&Micro` in your shell to see why that `&` in a name will cause trouble far beyond R.
+13. Wide or long? Count how many values one fish's row holds: `head -n 1 data/raw/Stickle_RNAseq.tsv | tr '\t' '\n' | wc -l`. For per-gene questions each gene needs to be a *row*, not a column - how many rows would the long version of this table have (80 fish x 600 genes)? We will do that reshape, in one line of R, in Week 7.

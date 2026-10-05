@@ -59,7 +59,7 @@ stdin ───>│              │───> stdout
 
 By default, a command's stdout simply flows back to the terminal window you typed it in (@fig-stream-to-terminal). A program does not know—or care—whether its output is going to the screen, to a file, or to another program; that abstraction is the key to everything that follows.
 
-![The default: a command reads from the keyboard and writes its output to the terminal.](../images/Chap06_img001.svg){#fig-stream-to-terminal fig-align="center" width="85%"}
+![The default: a command reads from the keyboard and writes its output to the terminal.](../images/Lec02_img008.svg){#fig-stream-to-terminal fig-align="center" width="85%"}
 
 The magic of Unix is that these streams can be **redirected**—connected to files instead of the keyboard or screen, or piped directly into other programs. This is what makes it possible to build powerful pipelines where data flows through a series of transformations.
 
@@ -166,7 +166,7 @@ This is invaluable for watching job progress on computing clusters.
 
 Redirection connects a program's output to a file instead of the terminal (@fig-redirect-to-file).
 
-![Output redirection: `>` sends a command's stdout into a file instead of to the screen.](../images/Chap06_img002.svg){#fig-redirect-to-file fig-align="center" width="85%"}
+![Output redirection: `>` sends a command's stdout into a file instead of to the screen.](../images/Lec02_img009.svg){#fig-redirect-to-file fig-align="center" width="85%"}
 
 ### Overwrite: `>` {#sec-redirect-overwrite}
 
@@ -284,7 +284,7 @@ command1 | command2 | command3
 
 Data flows through the pipeline like water through physical pipes, transformed at each step (@fig-chained-pipeline). The output of `command1` becomes the input to `command2`, whose output becomes the input to `command3`. No intermediate files are created—the data exists only in memory as it flows between programs.
 
-![A chained pipeline: each `|` connects the stdout of one command to the stdin of the next, so data passes from tool to tool without ever being written to disk.](../images/Chap06_img003.svg){#fig-chained-pipeline fig-align="center" width="85%"}
+![A chained pipeline: each `|` connects the stdout of one command to the stdin of the next, so data passes from tool to tool without ever being written to disk.](../images/Lec02_img010.svg){#fig-chained-pipeline fig-align="center" width="85%"}
 
 This approach, combined with the Unix philosophy of small focused tools, means you can construct sophisticated data processing workflows by combining simple commands. Each command does one thing well, and the pipe connects them into something greater than the sum of its parts.
 
@@ -694,6 +694,40 @@ $ curl -s https://url/to/genome.fa.gz | \
 
 This streams data through memory, never writing to disk—essential when working with files larger than your available storage.
 
+## From Pipelines to Scripts {#sec-pipelines-to-scripts}
+
+A pipeline worth running twice is worth saving. Any pipeline from this chapter can be pasted into a plain-text file, given a shebang line, and made executable with `chmod +x` (@sec-making-scripts-executable)—and from then on it runs with one short command and documents exactly what you did. Shell scripting gets a full treatment in @sec-shell-scripting; what matters now is the connection to pipes.
+
+Here is the group-counting pipeline from the running example below, saved as a script that takes the column number as an argument:
+
+```bash
+#!/usr/bin/env bash
+# count_groups.sh - count how many rows fall into each level of a column
+# Usage: ./count_groups.sh <column_number> < table.tsv
+
+cut -f "$1" | sort | uniq -c
+```
+
+```bash
+$ chmod +x count_groups.sh                            # once, after creating it
+$ ./count_groups.sh 2 < data/Stickle_RNAseq.tsv       # 40 A, 40 B (and one header)
+$ ./count_groups.sh 3 < data/Stickle_RNAseq.tsv       # 40 conventional, 40 mono
+```
+
+Notice what makes this script composable: it reads from **stdin** and writes to **stdout**, just like `sort` or `uniq`. A script written this way—called a **filter**—slots into pipelines exactly like a built-in command:
+
+```bash
+$ zcat huge_table.tsv.gz | ./count_groups.sh 3 | sort -rn | head
+```
+
+This is the Unix philosophy (@sec-unix-philosophy) applied to your own tools: small programs, plain text in and out, joined by pipes. The course's [Example Files page](https://wcresko.github.io/BioE_Comp_Tools_Fa2026/Examples.html) has four heavily commented scripts built this way, introduced in Week 2—including the pair `filter_rows.sh` and `total_counts.sh`, designed so the output of one is the input of the other:
+
+```bash
+$ ./filter_rows.sh Genotype A < data/Stickle_RNAseq.tsv | ./total_counts.sh | sort -t$'\t' -k2,2nr | head -5
+```
+
+Download them, read the comments, and modify them—they are meant as starting points for your own tools.
+
 ## Best Practices {#sec-pipes-best-practices}
 
 ### Pipeline Efficiency {#sec-pipeline-efficiency}
@@ -832,4 +866,14 @@ Download a small bacterial genome and:
 2. Find the total sequence length
 3. Count each nucleotide (A, T, G, C)
 4. Search for a specific restriction enzyme site
+
+**Exercise 5: Scripts as Pipeline Tools**
+
+Download `filter_rows.sh` and `total_counts.sh` from the course's [Example Files page](https://wcresko.github.io/BioE_Comp_Tools_Fa2026/Examples.html), make them executable, and use them on the course dataset:
+
+1. Chain the pair to find the five genotype-B fish with the highest total read counts
+2. Add `wc -l` checks before and after `filter_rows.sh` to confirm how many rows each filter keeps
+3. Modify `filter_rows.sh` so that a missing *value* argument prints a short usage message instead of an awk error
+4. Write a new filter of your own, `keep_columns.sh`, that keeps only the columns named as arguments, and chain it after `filter_rows.sh`
+
 :::

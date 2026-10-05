@@ -59,7 +59,7 @@ The course book goes deeper on everything in this lecture. Read before or after 
 
 ## Talapas Architecture
 
-![](images/Lec10_img001.svg){fig-align="center" width="95%"}
+![](../images/Lec08_img001.svg){fig-align="center" width="95%"}
 
 ## Login Nodes vs Compute Nodes
 
@@ -183,7 +183,7 @@ The Knowledge Base says the UO VPN is **recommended, not required**. Off campus 
 
 ## Connecting VS Code to Talapas (Remote-SSH)
 
-![](images/Lec10_img002.svg){fig-align="center" width="100%"}
+![](../images/Lec08_img002.svg){fig-align="center" width="100%"}
 
 ::: callout-tip
 With **Remote - SSH**, VS Code (or Positron) runs its editor on your laptop while the files, terminal, and code live on Talapas - it feels just like working locally.
@@ -191,7 +191,7 @@ With **Remote - SSH**, VS Code (or Positron) runs its editor on your laptop whil
 
 ## Storage on Talapas
 
-![](images/Lec10_img003.svg){fig-align="center" width="85%"}
+![](../images/Lec08_img003.svg){fig-align="center" width="85%"}
 
 ### Directory Structure:
 
@@ -221,7 +221,7 @@ du -sh /projects/myPIRG/myusername
 -   Allocates resources fairly among users
 -   Ensures efficient cluster utilization
 
-![](images/Lec10_img004.svg){fig-align="center" width="95%"}
+![](../images/Lec08_img004.svg){fig-align="center" width="95%"}
 
 ### Key Concepts:
 
@@ -590,6 +590,31 @@ sacct -j JOBID --format=JobID,JobName,Elapsed,MaxRSS,State
 | CG   | Completing        |
 | CD   | Completed         |
 | F    | Failed            |
+
+# Using all those cores: parallel R
+
+## One node, many cores - but R uses one
+
+::: incremental
+-   A Talapas node has dozens of cores, but a plain R (or Python) script runs on **one** of them
+-   Many analyses are **embarrassingly parallel** - the same independent computation repeated many times: bootstraps, per-gene models, simulations, one-file-per-sample processing
+-   The `future`/`furrr` packages make parallel R nearly drop-in - that is this week's second reading, [Ch. 17](../book/chapters/17-parallel-computing.html)
+:::
+
+## A taste: parallel R in three lines
+
+``` r
+library(furrr)
+plan(multisession, workers = 8)              # start 8 R workers
+
+results <- future_map(gene_list, fit_model)  # parallel drop-in for map()
+```
+
+::: incremental
+-   Match workers to your SLURM request: `#SBATCH --cpus-per-task=8` → `workers = 8`
+-   Only worth it when each task takes real time - starting workers has overhead
+-   Everything else you saw today - batch scripts, modules, storage - stays exactly the same
+:::
 
 ## Best Practices for Talapas
 
