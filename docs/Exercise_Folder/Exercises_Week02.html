@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>Week 2 Exercises - Files, Directories, and First Pipes – Comp Tools Bioengineers F26</title>
+<title>Week 2 Exercises - Files, Pipes, and First Shell Scripts – Comp Tools Bioengineers F26</title>
 <style>
 /* Default styles provided by pandoc.
 ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
@@ -143,15 +143,22 @@ ul.task-list li input[type="checkbox"] {
 <div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
 <!-- sidebar -->
 <!-- margin-sidebar -->
-    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar zindex-bottom">
-        
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#files-directories-and-pipes" id="toc-files-directories-and-pipes" class="nav-link active" data-scroll-target="#files-directories-and-pipes">Files, directories, and pipes</a></li>
+  <li><a href="#shell-scripts-and-permissions" id="toc-shell-scripts-and-permissions" class="nav-link" data-scroll-target="#shell-scripts-and-permissions">Shell scripts and permissions</a></li>
+  </ul>
+</nav>
     </div>
 <!-- main -->
 <main class="content" id="quarto-document-content">
 
 <header id="title-block-header" class="quarto-title-block default">
 <div class="quarto-title">
-<h1 class="title">Week 2 Exercises - Files, Directories, and First Pipes</h1>
+<h1 class="title">Week 2 Exercises - Files, Pipes, and First Shell Scripts</h1>
 </div>
 
 
@@ -168,21 +175,37 @@ ul.task-list li input[type="checkbox"] {
 </header>
 
 
-<p>Short, <strong>ungraded</strong> practice tasks - about 20-30 minutes. Companion reading: <a href="../book/chapters/04-unix-fundamentals.html">Ch. 4</a>, <a href="../book/chapters/07-files-pipes.html">Ch. 7</a>, and <a href="../book/chapters/08-tidy-data.html">Ch. 8</a>.</p>
+<p>Short, <strong>ungraded</strong> practice tasks - about 30-40 minutes. Companion reading: <a href="../book/chapters/06-unix-environment.html">Ch. 6</a> and <a href="../book/chapters/07-files-pipes.html">Ch. 7</a>, with <a href="../book/chapters/05-unix-fundamentals.html">Ch. 5</a> as review.</p>
+<section id="files-directories-and-pipes" class="level2">
+<h2 class="anchored" data-anchor-id="files-directories-and-pipes">Files, directories, and pipes</h2>
 <ol type="1">
-<li>Inside <code>~/projects/comptools</code>, build a project skeleton in one command: <code>mkdir -p data/raw data/processed scripts results figures</code>.</li>
-<li>Run <code>ls -F</code> and confirm the five directories are there (the <code>/</code> suffix marks directories).</li>
+<li>Inside <code>~/projects/comptools</code>, build a project skeleton in one command: <code>mkdir -p data/raw data/processed scripts output/figures output/tables docs</code> - the structure from Lecture 01.</li>
+<li>Run <code>ls -F</code> and confirm the directories are there (the <code>/</code> suffix marks directories).</li>
 <li>Create a <code>README.md</code> with <code>nano</code>: type one sentence describing the project, save (<code>Ctrl+O</code>, Enter), and exit (<code>Ctrl+X</code>). Print it with <code>cat</code>.</li>
 <li>Download the course dataset into <code>data/raw</code> (the command is on the L02 slides and in <a href="../book/chapters/01-introduction.html#sec-course-dataset">Ch. 1</a>). If you already downloaded it, <code>cp</code> or <code>mv</code> it into <code>data/raw</code>.</li>
 <li>How many lines does <code>Stickle_RNAseq.tsv</code> have (<code>wc -l</code>)? Given 80 fish, why that number?</li>
 <li>Look at just the first three lines with <code>head -n 3</code>. Too wide to read? Try <code>cut -f1-4 data/raw/Stickle_RNAseq.tsv | head -n 3</code> to see only the first four columns.</li>
-<li>How big is the file (<code>ls -lh data/raw</code>)?</li>
-<li>Make a copy called <code>stickle_backup.tsv</code>, rename it to <code>stickle_backup_2026.tsv</code> with <code>mv</code>, then delete it with <code>rm -i</code> (answer <code>y</code> when asked).</li>
 <li>In a scratch directory, create <code>file_1.txt</code>, <code>file_2.txt</code>, and <code>file_3.txt</code> with one <code>touch</code> command, then list them with the wildcard <code>file_?.txt</code>.</li>
-<li>Save a directory listing to a file with redirection: <code>ls -lh data/raw &gt; results/data_inventory.txt</code>, then <code>cat</code> it.</li>
+<li>Save a directory listing to a file with redirection: <code>ls -lh data/raw &gt; output/data_inventory.txt</code>, then <code>cat</code> it.</li>
 </ol>
+</section>
+<section id="shell-scripts-and-permissions" class="level2">
+<h2 class="anchored" data-anchor-id="shell-scripts-and-permissions">Shell scripts and permissions</h2>
+<ol start="9" type="1">
+<li>In <code>scripts/</code>, use <code>nano</code> to create <code>hello.sh</code> containing the two lines from the L02 slides (the <code>#!/usr/bin/env bash</code> shebang and an <code>echo</code>). Try <code>./hello.sh</code> - read the error out loud.</li>
+<li>Run <code>ls -l hello.sh</code> and decode the ten-character permission string: who can read it? Write it? Run it?</li>
+<li>Fix it with <code>chmod u+x hello.sh</code>, check <code>ls -l</code> again to see what changed, and run it. Then try <code>bash hello.sh</code> - why does that work even without <code>x</code>?</li>
+<li>Download the four example scripts from the <a href="../Examples.html">Example Files page</a> into <code>scripts/</code> and make them all executable with one command: <code>chmod +x *.sh</code>.</li>
+<li>Run <code>./file_inventory.sh ~/projects/comptools inventory.txt</code> and open the report. Which file type takes the most space in your project?</li>
+<li>Try the two-script pipeline on the dataset: <code>./filter_rows.sh Genotype A &lt; ../data/raw/Stickle_RNAseq.tsv | ./total_counts.sh | sort -t$'\t' -k2,2nr | head -5</code>. Which fish has the most reads? Rerun for genotype B.</li>
+<li>Scripts are just text, so modify one and run it again: open <code>total_counts.sh</code> in <code>nano</code>, change the header it prints from <code>Total_counts</code> to <code>Total_reads</code>, save, and rerun the pipeline from the previous task. Two things to notice: your change shows up immediately, and no new <code>chmod</code> was needed - the execute permission belongs to the file, not to its contents.</li>
+<li>Make a dated snapshot of your whole project: <code>cd ~/projects &amp;&amp; comptools/scripts/backup_project.sh comptools</code>. List the archive’s contents with <code>tar -tzf &lt;archive-name&gt;</code> - your <code>output/</code> folder should be missing while everything else is there. Read the script’s comments to see why <code>output/</code> is treated as expendable.</li>
+<li>Protect your raw data the Unix way: <code>chmod a-w data/raw/*</code>, then try <code>echo "oops" &gt;&gt; data/raw/Stickle_RNAseq.tsv</code> and watch the shell refuse. (Undo later with <code>chmod u+w</code> if you ever need to - but should you?)</li>
+</ol>
+<p>Done early? Run <code>./make_project.sh practice_project</code> and compare its layout to the skeleton you built by hand in task 1, then read the script’s comments to see how it works.</p>
 
 
+</section>
 
 </main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">

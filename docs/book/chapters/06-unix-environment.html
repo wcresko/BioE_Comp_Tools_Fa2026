@@ -1,0 +1,1556 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.9.38">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="description" content="A comprehensive guide to essential computational tools for graduate students in bioengineering and life sciences, covering Unix/Linux, R and Python, editors and IDEs, computing resources at the University of Oregon, AI-assisted coding, reproducible documents, version control with Git/GitHub, and high-performance computing.">
+
+<title>6&nbsp; Permissions, Wild Cards, and the Shell Environment – Foundational Computational Tools for Bioengineers</title>
+<style>
+/* Default styles provided by pandoc.
+** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+*/
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../">
+<link href="../chapters/07-files-pipes.html" rel="next">
+<link href="../chapters/05-unix-fundamentals.html" rel="prev">
+<script src="../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../site_libs/quarto-html/popper.min.js"></script>
+<script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-de63f62b328812d8e578a4d74e282472.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-text-highlighting-styles">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-dark-6b6957c917596b414ec0b78690761e87.css" rel="stylesheet" class="quarto-color-scheme quarto-color-alternate" id="quarto-text-highlighting-styles">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-de63f62b328812d8e578a4d74e282472.css" rel="stylesheet" class="quarto-color-scheme-extra" id="quarto-text-highlighting-styles">
+<script src="../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../site_libs/bootstrap/bootstrap-78b24b1404a9d4f83d4c66d2c21f352a.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
+<link href="../site_libs/bootstrap/bootstrap-dark-43701f55fc27b180096ce89b6cbee875.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
+<link href="../site_libs/bootstrap/bootstrap-78b24b1404a9d4f83d4c66d2c21f352a.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "sidebar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "start",
+  "type": "textbox",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+
+
+</head>
+
+<body class="nav-sidebar docked quarto-light"><script id="quarto-html-before-body" type="application/javascript">
+    const toggleBodyColorMode = (bsSheetEl) => {
+      const mode = bsSheetEl.getAttribute("data-mode");
+      const bodyEl = window.document.querySelector("body");
+      if (mode === "dark") {
+        bodyEl.classList.add("quarto-dark");
+        bodyEl.classList.remove("quarto-light");
+      } else {
+        bodyEl.classList.add("quarto-light");
+        bodyEl.classList.remove("quarto-dark");
+      }
+    }
+    const toggleBodyColorPrimary = () => {
+      const bsSheetEl = window.document.querySelector("link#quarto-bootstrap:not([rel=disabled-stylesheet])");
+      if (bsSheetEl) {
+        toggleBodyColorMode(bsSheetEl);
+      }
+    }
+    const setColorSchemeToggle = (alternate) => {
+      const toggles = window.document.querySelectorAll('.quarto-color-scheme-toggle');
+      for (let i=0; i < toggles.length; i++) {
+        const toggle = toggles[i];
+        if (toggle) {
+          if (alternate) {
+            toggle.classList.add("alternate");
+          } else {
+            toggle.classList.remove("alternate");
+          }
+        }
+      }
+    };
+    const toggleColorMode = (alternate) => {
+      // Switch the stylesheets
+      const primaryStylesheets = window.document.querySelectorAll('link.quarto-color-scheme:not(.quarto-color-alternate)');
+      const alternateStylesheets = window.document.querySelectorAll('link.quarto-color-scheme.quarto-color-alternate');
+      manageTransitions('#quarto-margin-sidebar .nav-link', false);
+      if (alternate) {
+        // note: dark is layered on light, we don't disable primary!
+        enableStylesheet(alternateStylesheets);
+        for (const sheetNode of alternateStylesheets) {
+          if (sheetNode.id === "quarto-bootstrap") {
+            toggleBodyColorMode(sheetNode);
+          }
+        }
+      } else {
+        disableStylesheet(alternateStylesheets);
+        enableStylesheet(primaryStylesheets)
+        toggleBodyColorPrimary();
+      }
+      manageTransitions('#quarto-margin-sidebar .nav-link', true);
+      // Switch the toggles
+      setColorSchemeToggle(alternate)
+      // Hack to workaround the fact that safari doesn't
+      // properly recolor the scrollbar when toggling (#1455)
+      if (navigator.userAgent.indexOf('Safari') > 0 && navigator.userAgent.indexOf('Chrome') == -1) {
+        manageTransitions("body", false);
+        window.scrollTo(0, 1);
+        setTimeout(() => {
+          window.scrollTo(0, 0);
+          manageTransitions("body", true);
+        }, 40);
+      }
+    }
+    const disableStylesheet = (stylesheets) => {
+      for (let i=0; i < stylesheets.length; i++) {
+        const stylesheet = stylesheets[i];
+        stylesheet.rel = 'disabled-stylesheet';
+      }
+    }
+    const enableStylesheet = (stylesheets) => {
+      for (let i=0; i < stylesheets.length; i++) {
+        const stylesheet = stylesheets[i];
+        if(stylesheet.rel !== 'stylesheet') { // for Chrome, which will still FOUC without this check
+          stylesheet.rel = 'stylesheet';
+        }
+      }
+    }
+    const manageTransitions = (selector, allowTransitions) => {
+      const els = window.document.querySelectorAll(selector);
+      for (let i=0; i < els.length; i++) {
+        const el = els[i];
+        if (allowTransitions) {
+          el.classList.remove('notransition');
+        } else {
+          el.classList.add('notransition');
+        }
+      }
+    }
+    const isFileUrl = () => {
+      return window.location.protocol === 'file:';
+    }
+    const hasAlternateSentinel = () => {
+      let styleSentinel = getColorSchemeSentinel();
+      if (styleSentinel !== null) {
+        return styleSentinel === "alternate";
+      } else {
+        return false;
+      }
+    }
+    const setStyleSentinel = (alternate) => {
+      const value = alternate ? "alternate" : "default";
+      if (!isFileUrl()) {
+        window.localStorage.setItem("quarto-color-scheme", value);
+      } else {
+        localAlternateSentinel = value;
+      }
+    }
+    const getColorSchemeSentinel = () => {
+      if (!isFileUrl()) {
+        const storageValue = window.localStorage.getItem("quarto-color-scheme");
+        return storageValue != null ? storageValue : localAlternateSentinel;
+      } else {
+        return localAlternateSentinel;
+      }
+    }
+    const toggleGiscusIfUsed = (isAlternate, darkModeDefault) => {
+      const baseTheme = document.querySelector('#giscus-base-theme')?.value ?? 'light';
+      const alternateTheme = document.querySelector('#giscus-alt-theme')?.value ?? 'dark';
+      let newTheme = '';
+      if(authorPrefersDark) {
+        newTheme = isAlternate ? baseTheme : alternateTheme;
+      } else {
+        newTheme = isAlternate ? alternateTheme : baseTheme;
+      }
+      const changeGiscusTheme = () => {
+        // From: https://github.com/giscus/giscus/issues/336
+        const sendMessage = (message) => {
+          const iframe = document.querySelector('iframe.giscus-frame');
+          if (!iframe) return;
+          iframe.contentWindow.postMessage({ giscus: message }, 'https://giscus.app');
+        }
+        sendMessage({
+          setConfig: {
+            theme: newTheme
+          }
+        });
+      }
+      const isGiscussLoaded = window.document.querySelector('iframe.giscus-frame') !== null;
+      if (isGiscussLoaded) {
+        changeGiscusTheme();
+      }
+    };
+    const authorPrefersDark = false;
+    const darkModeDefault = authorPrefersDark;
+      document.querySelector('link#quarto-text-highlighting-styles.quarto-color-scheme-extra').rel = 'disabled-stylesheet';
+      document.querySelector('link#quarto-bootstrap.quarto-color-scheme-extra').rel = 'disabled-stylesheet';
+    let localAlternateSentinel = darkModeDefault ? 'alternate' : 'default';
+    // Dark / light mode switch
+    window.quartoToggleColorScheme = () => {
+      // Read the current dark / light value
+      let toAlternate = !hasAlternateSentinel();
+      toggleColorMode(toAlternate);
+      setStyleSentinel(toAlternate);
+      toggleGiscusIfUsed(toAlternate, darkModeDefault);
+      window.dispatchEvent(new Event('resize'));
+    };
+    // Switch to dark mode if need be
+    if (hasAlternateSentinel()) {
+      toggleColorMode(true);
+    } else {
+      toggleColorMode(false);
+    }
+  </script>
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../chapters/06-unix-environment.html"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Permissions, Wild Cards, and the Shell Environment</span></a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+      <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
+        <i class="bi bi-search"></i>
+      </button>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation docked overflow-auto">
+    <div class="pt-lg-2 mt-2 text-left sidebar-header">
+    <div class="sidebar-title mb-0 py-0">
+      <a href="../">Foundational Computational Tools for Bioengineers</a> 
+        <div class="sidebar-tools-main">
+    <a href="https://github.com/wcresko/BioE_Comp_Tools_Fa2026/tree/main/Book/" title="Source Code" class="quarto-navigation-tool px-1" aria-label="Source Code"><i class="bi bi-github"></i></a>
+  <a href="" class="quarto-color-scheme-toggle quarto-navigation-tool  px-1" onclick="window.quartoToggleColorScheme(); return false;" title="Toggle dark mode"><i class="bi"></i></a>
+</div>
+    </div>
+      </div>
+        <div class="mt-2 flex-shrink-0 align-items-center">
+        <div class="sidebar-search">
+        <div id="quarto-search" class="" title="Search"></div>
+        </div>
+        </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Preface</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/01-introduction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">Introduction to Computational Tools</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/02-your-toolkit.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">Your Computational Toolkit: Installing and Using Editors and IDEs</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/03-computing-at-uo.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Computing Resources at the University of Oregon</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/04-computer-systems.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Computer Systems Architecture</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/05-unix-fundamentals.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Unix Fundamentals</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/06-unix-environment.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Permissions, Wild Cards, and the Shell Environment</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/07-files-pipes.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">Files, Pipes, and Redirection</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/08-tidy-data.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">8</span>&nbsp; <span class="chapter-title">Tidy Data Principles</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/09-grep-regex.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">9</span>&nbsp; <span class="chapter-title">GREP and Regular Expressions</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/10-shell-scripting.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">10</span>&nbsp; <span class="chapter-title">Shell Scripting</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/11-r-programming.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">11</span>&nbsp; <span class="chapter-title">R Programming Fundamentals</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/12-python-programming.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">12</span>&nbsp; <span class="chapter-title">Python Programming Fundamentals</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/13-data-visualization.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">13</span>&nbsp; <span class="chapter-title">Data Visualization with ggplot2</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/14-data-wrangling.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">14</span>&nbsp; <span class="chapter-title">Data Wrangling with the Tidyverse</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/15-writing-functions.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">15</span>&nbsp; <span class="chapter-title">Writing Functions in R</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/16-hpc-talapas.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">16</span>&nbsp; <span class="chapter-title">High-Performance Computing with Talapas</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/17-parallel-computing.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">17</span>&nbsp; <span class="chapter-title">Parallel Computing in R</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/18-quarto-documents.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">18</span>&nbsp; <span class="chapter-title">Reproducible Documents with Quarto</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/19-latex-basics.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">19</span>&nbsp; <span class="chapter-title">LaTeX for Scientific Documents</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/20-ai-assisted-coding.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">20</span>&nbsp; <span class="chapter-title">Coding with AI Assistants</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/21-git-github.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">21</span>&nbsp; <span class="chapter-title">Version Control with Git and GitHub</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/22-databases.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">22</span>&nbsp; <span class="chapter-title">Working with Databases</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../references.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">References</span></a>
+  </div>
+</li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="false">
+ <span class="menu-text">Appendices</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="false" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/appendix-A-shortcuts.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">A</span>&nbsp; <span class="chapter-title">Keyboard Shortcuts Reference</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/appendix-B-unix.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">B</span>&nbsp; <span class="chapter-title">Unix Command Reference</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/appendix-C-data-formats.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">C</span>&nbsp; <span class="chapter-title">Common Data Formats &amp; Public Repositories</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/appendix-D-regex.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">D</span>&nbsp; <span class="chapter-title">Regular Expression Reference</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/appendix-E-r.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">E</span>&nbsp; <span class="chapter-title">R Command Reference</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/appendix-F-python.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">F</span>&nbsp; <span class="chapter-title">Python Quick Reference</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/appendix-G-slurm.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">G</span>&nbsp; <span class="chapter-title">SLURM Command Reference</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/appendix-H-latex.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">H</span>&nbsp; <span class="chapter-title">LaTeX Command Reference</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/appendix-I-git.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">I</span>&nbsp; <span class="chapter-title">Git Command Reference</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/appendix-J-glossary.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">J</span>&nbsp; <span class="chapter-title">Glossary</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">Table of contents</h2>
+   
+  <ul>
+  <li><a href="#sec-wild-cards" id="toc-sec-wild-cards" class="nav-link active" data-scroll-target="#sec-wild-cards"><span class="header-section-number">6.1</span> Wild Cards</a></li>
+  <li><a href="#sec-file-permissions" id="toc-sec-file-permissions" class="nav-link" data-scroll-target="#sec-file-permissions"><span class="header-section-number">6.2</span> File Permissions and Ownership</a>
+  <ul class="collapse">
+  <li><a href="#sec-understanding-permission-strings" id="toc-sec-understanding-permission-strings" class="nav-link" data-scroll-target="#sec-understanding-permission-strings">Understanding Permission Strings</a></li>
+  <li><a href="#sec-chmod" id="toc-sec-chmod" class="nav-link" data-scroll-target="#sec-chmod">Changing Permissions: <code>chmod</code></a></li>
+  <li><a href="#sec-making-scripts-executable" id="toc-sec-making-scripts-executable" class="nav-link" data-scroll-target="#sec-making-scripts-executable">Making Scripts Executable</a></li>
+  <li><a href="#sec-chown" id="toc-sec-chown" class="nav-link" data-scroll-target="#sec-chown">Changing Ownership: <code>chown</code></a></li>
+  <li><a href="#sec-sudo" id="toc-sec-sudo" class="nav-link" data-scroll-target="#sec-sudo">Superuser Access: <code>sudo</code></a></li>
+  </ul></li>
+  <li><a href="#sec-environment-variables" id="toc-sec-environment-variables" class="nav-link" data-scroll-target="#sec-environment-variables"><span class="header-section-number">6.3</span> Environment Variables</a></li>
+  <li><a href="#sec-executables-and-the-path" id="toc-sec-executables-and-the-path" class="nav-link" data-scroll-target="#sec-executables-and-the-path"><span class="header-section-number">6.4</span> Executables and the PATH</a></li>
+  <li><a href="#sec-shells-and-configuration-files" id="toc-sec-shells-and-configuration-files" class="nav-link" data-scroll-target="#sec-shells-and-configuration-files"><span class="header-section-number">6.5</span> Shells and Configuration Files</a></li>
+  <li><a href="#sec-ssh-scp" id="toc-sec-ssh-scp" class="nav-link" data-scroll-target="#sec-ssh-scp"><span class="header-section-number">6.6</span> Connecting to Remote Computers: <code>ssh</code> and <code>scp</code></a></li>
+  <li><a href="#sec-commands-worth-learning" id="toc-sec-commands-worth-learning" class="nav-link" data-scroll-target="#sec-commands-worth-learning"><span class="header-section-number">6.7</span> Commands Worth Learning</a></li>
+  <li><a href="#sec-file-manipulation-from-r" id="toc-sec-file-manipulation-from-r" class="nav-link" data-scroll-target="#sec-file-manipulation-from-r"><span class="header-section-number">6.8</span> File Manipulation from R</a></li>
+  <li><a href="#sec-unix-env-summary" id="toc-sec-unix-env-summary" class="nav-link" data-scroll-target="#sec-unix-env-summary"><span class="header-section-number">6.9</span> Summary</a></li>
+  <li><a href="#sec-unix-env-exercises" id="toc-sec-unix-env-exercises" class="nav-link" data-scroll-target="#sec-unix-env-exercises">Exercises</a></li>
+  </ul>
+<div class="toc-actions"><ul><li><a href="https://github.com/wcresko/BioE_Comp_Tools_Fa2026/edit/main/Book/chapters/06-unix-environment.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li><li><a href="https://github.com/wcresko/BioE_Comp_Tools_Fa2026/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title"><span id="sec-unix-environment" class="quarto-section-identifier"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Permissions, Wild Cards, and the Shell Environment</span></span></h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<div class="callout callout-style-default callout-note callout-titled" title="Learning Objectives">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>Learning Objectives
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>After completing this chapter, you will be able to:</p>
+<ul>
+<li>Match many files at once with wild cards (<code>*</code>, <code>?</code>, <code>[ ]</code>) safely</li>
+<li>Read a permission string from <code>ls -l</code> and change permissions with <code>chmod</code></li>
+<li>Make a script executable and run it with <code>./</code></li>
+<li>Use environment variables and understand how the <code>PATH</code> finds programs</li>
+<li>Customize your shell with configuration files, and connect to remote computers with <code>ssh</code></li>
+</ul>
+</div>
+</div>
+<p><a href="05-unix-fundamentals.html" class="quarto-xref"><span>Chapter 5</span></a> introduced the file system and the core commands for moving around it and managing files. This chapter is the second half of that story: the shell features that turn those commands into real workflows. Wild cards let one command act on many files; permissions control who can read, change, and—crucially for the scripts you are about to start writing—<em>run</em> a file; and environment variables, the <code>PATH</code>, and configuration files determine how your shell behaves every time it starts. These are exactly the pieces you need in hand before <a href="07-files-pipes.html" class="quarto-xref"><span>Chapter 7</span></a> chains commands into pipelines and <a href="10-shell-scripting.html" class="quarto-xref"><span>Chapter 10</span></a> turns pipelines into programs.</p>
+<section id="sec-wild-cards" class="level2" data-number="6.1">
+<h2 data-number="6.1" class="anchored" data-anchor-id="sec-wild-cards"><span class="header-section-number">6.1</span> Wild Cards</h2>
+<p>One of the most powerful features of Unix is <strong>wild cards</strong>—special characters that match multiple files at once. Suppose you want to remove all temporary HTML files from a project. Removing them one by one would be tedious, but with wild cards you can match them all:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1"></a><span class="co"># List all HTML files</span></span>
+<span id="cb1-2"><a href="#cb1-2"></a><span class="ex">$</span> ls <span class="pp">*</span>.html</span>
+<span id="cb1-3"><a href="#cb1-3"></a></span>
+<span id="cb1-4"><a href="#cb1-4"></a><span class="co"># Remove all HTML files</span></span>
+<span id="cb1-5"><a href="#cb1-5"></a><span class="ex">$</span> rm <span class="pp">*</span>.html</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>The <code>*</code> wild card matches any number of any characters (including none). The <code>?</code> wild card matches exactly one character:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1"></a><span class="co"># All CSV files, all files starting with "data", all text and markdown files</span></span>
+<span id="cb2-2"><a href="#cb2-2"></a><span class="ex">$</span> ls <span class="pp">*</span>.csv</span>
+<span id="cb2-3"><a href="#cb2-3"></a><span class="ex">$</span> ls data<span class="pp">*</span></span>
+<span id="cb2-4"><a href="#cb2-4"></a><span class="ex">$</span> ls <span class="pp">*</span>.txt <span class="pp">*</span>.md</span>
+<span id="cb2-5"><a href="#cb2-5"></a></span>
+<span id="cb2-6"><a href="#cb2-6"></a><span class="co"># Match files like file-001.html, file-002.html, file-999.html</span></span>
+<span id="cb2-7"><a href="#cb2-7"></a><span class="ex">$</span> ls file-<span class="pp">???</span>.html</span>
+<span id="cb2-8"><a href="#cb2-8"></a></span>
+<span id="cb2-9"><a href="#cb2-9"></a><span class="co"># sample1.txt, sample2.txt, ... but not sample10.txt</span></span>
+<span id="cb2-10"><a href="#cb2-10"></a><span class="ex">$</span> ls sample<span class="pp">?</span>.txt</span>
+<span id="cb2-11"><a href="#cb2-11"></a></span>
+<span id="cb2-12"><a href="#cb2-12"></a><span class="co"># Remove all files starting with "temp"</span></span>
+<span id="cb2-13"><a href="#cb2-13"></a><span class="ex">$</span> rm temp<span class="pp">*</span></span>
+<span id="cb2-14"><a href="#cb2-14"></a></span>
+<span id="cb2-15"><a href="#cb2-15"></a><span class="co"># Match files with any extension</span></span>
+<span id="cb2-16"><a href="#cb2-16"></a><span class="ex">$</span> ls data.<span class="pp">*</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Square brackets <code>[ ]</code> match any <em>single</em> character from a set or range:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb3"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1"></a><span class="co"># sample1.txt, sample2.txt, or sample3.txt</span></span>
+<span id="cb3-2"><a href="#cb3-2"></a><span class="ex">$</span> ls sample<span class="pp">[</span><span class="ss">123</span><span class="pp">]</span>.txt</span>
+<span id="cb3-3"><a href="#cb3-3"></a></span>
+<span id="cb3-4"><a href="#cb3-4"></a><span class="co"># data_0.csv through data_9.csv</span></span>
+<span id="cb3-5"><a href="#cb3-5"></a><span class="ex">$</span> ls data_<span class="pp">[</span><span class="ss">0</span><span class="pp">-</span><span class="ss">9</span><span class="pp">]</span>.csv</span>
+<span id="cb3-6"><a href="#cb3-6"></a></span>
+<span id="cb3-7"><a href="#cb3-7"></a><span class="co"># fileA.txt through fileZ.txt</span></span>
+<span id="cb3-8"><a href="#cb3-8"></a><span class="ex">$</span> ls file<span class="pp">[</span><span class="ss">A</span><span class="pp">-</span><span class="ss">Z</span><span class="pp">]</span>.txt</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Wild cards are expanded by the <em>shell</em> before the command runs, so they work with any command, not just <code>ls</code>:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb4"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1"></a><span class="co"># Count lines in every CSV file</span></span>
+<span id="cb4-2"><a href="#cb4-2"></a><span class="ex">$</span> wc <span class="at">-l</span> <span class="pp">*</span>.csv</span>
+<span id="cb4-3"><a href="#cb4-3"></a></span>
+<span id="cb4-4"><a href="#cb4-4"></a><span class="co"># Copy all R scripts to a backup folder</span></span>
+<span id="cb4-5"><a href="#cb4-5"></a><span class="ex">$</span> cp <span class="pp">*</span>.R backup/</span>
+<span id="cb4-6"><a href="#cb4-6"></a></span>
+<span id="cb4-7"><a href="#cb4-7"></a><span class="co"># Search for "gene" in all text files</span></span>
+<span id="cb4-8"><a href="#cb4-8"></a><span class="ex">$</span> grep <span class="st">"gene"</span> <span class="pp">*</span>.txt</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="callout callout-style-default callout-warning callout-titled" title="Wild Card Danger">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Warning</span>Wild Card Danger
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Combining <code>rm</code> with <code>*</code> can be dangerous! The command <code>rm *</code> deletes everything in the current directory without asking for confirmation. Always use <code>ls</code> first to see what a wild card pattern matches before using it with <code>rm</code>, and consider <code>rm -i</code> for interactive confirmation when deleting with wild cards.</p>
+</div>
+</div>
+</section>
+<section id="sec-file-permissions" class="level2" data-number="6.2">
+<h2 data-number="6.2" class="anchored" data-anchor-id="sec-file-permissions"><span class="header-section-number">6.2</span> File Permissions and Ownership</h2>
+<p>Unix is a multi-user system, and every file has permissions controlling who can read, write, or execute it. Understanding permissions is essential for security and for running scripts (<a href="10-shell-scripting.html#sec-running-scripts" class="quarto-xref"><span>Section 10.2.2</span></a>).</p>
+<section id="sec-understanding-permission-strings" class="level3">
+<h3 class="anchored" data-anchor-id="sec-understanding-permission-strings">Understanding Permission Strings</h3>
+<p>When you run <code>ls -l</code>, you see permission strings like:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb5"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1"></a><span class="ex">-rwxr-xr-x</span> 1 wcresko staff 2048 Jan 15 10:30 analysis.sh</span>
+<span id="cb5-2"><a href="#cb5-2"></a><span class="ex">drwxr-xr-x</span> 3 wcresko staff   96 Jan 15 09:00 data</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Let’s decode <code>-rwxr-xr-x</code> (<a href="#tbl-permission-string" class="quarto-xref">Table&nbsp;<span>6.1</span></a>):</p>
+<div id="tbl-permission-string" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-permission-string-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;6.1: Decoding a permission string such as <code>-rwxr-xr-x</code>
+</figcaption>
+<div aria-describedby="tbl-permission-string-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th style="text-align: left;">Position</th>
+<th style="text-align: left;">Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">1st character</td>
+<td style="text-align: left;">Type: <code>-</code> (file), <code>d</code> (directory), <code>l</code> (link)</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Characters 2-4</td>
+<td style="text-align: left;"><strong>Owner</strong> permissions: <code>rwx</code></td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Characters 5-7</td>
+<td style="text-align: left;"><strong>Group</strong> permissions: <code>r-x</code></td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Characters 8-10</td>
+<td style="text-align: left;"><strong>Others</strong> permissions: <code>r-x</code></td>
+</tr>
+</tbody>
+</table>
+</div>
+</figure>
+</div>
+<p>The three permission types are:</p>
+<ul>
+<li><strong>r</strong> (read): View file contents or list directory</li>
+<li><strong>w</strong> (write): Modify file or add/remove files in directory</li>
+<li><strong>x</strong> (execute): Run file as program or enter directory</li>
+<li><strong>-</strong>: Permission denied for that operation</li>
+</ul>
+<p>So <code>-rwxr-xr-x</code> means: this is a regular file; the owner can read, write, and execute it; members of the group can read and execute it; and everyone else can read and execute it.</p>
+</section>
+<section id="sec-chmod" class="level3">
+<h3 class="anchored" data-anchor-id="sec-chmod">Changing Permissions: <code>chmod</code></h3>
+<p>The <code>chmod</code> command changes file permissions. There are two notations:</p>
+<p><strong>Symbolic notation</strong> uses letters for <em>who</em> (<code>u</code> user/owner, <code>g</code> group, <code>o</code> others, <code>a</code> all) and operators for <em>what</em> (<code>+</code> add, <code>-</code> remove, <code>=</code> set exactly):</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb6"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb6-1"><a href="#cb6-1"></a><span class="co"># Add execute permission for owner</span></span>
+<span id="cb6-2"><a href="#cb6-2"></a><span class="ex">$</span> chmod u+x script.sh</span>
+<span id="cb6-3"><a href="#cb6-3"></a></span>
+<span id="cb6-4"><a href="#cb6-4"></a><span class="co"># Remove write permission for group and others</span></span>
+<span id="cb6-5"><a href="#cb6-5"></a><span class="ex">$</span> chmod go-w data.csv</span>
+<span id="cb6-6"><a href="#cb6-6"></a></span>
+<span id="cb6-7"><a href="#cb6-7"></a><span class="co"># Set exact permissions (owner: rwx, group: rx, others: rx)</span></span>
+<span id="cb6-8"><a href="#cb6-8"></a><span class="ex">$</span> chmod u=rwx,g=rx,o=rx script.sh</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p><strong>Octal notation</strong> assigns each permission a value—read = 4, write = 2, execute = 1—and adds them up for each of the three sets. For example, <code>rwx</code> = 4 + 2 + 1 = 7 and <code>r-x</code> = 4 + 0 + 1 = 5 (<a href="#tbl-octal-permissions" class="quarto-xref">Table&nbsp;<span>6.2</span></a>):</p>
+<div id="tbl-octal-permissions" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-octal-permissions-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;6.2: Octal permission values used by <code>chmod</code>
+</figcaption>
+<div aria-describedby="tbl-octal-permissions-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th style="text-align: left;">Number</th>
+<th style="text-align: left;">Permission</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">7</td>
+<td style="text-align: left;">rwx (read + write + execute)</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">6</td>
+<td style="text-align: left;">rw- (read + write)</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">5</td>
+<td style="text-align: left;">r-x (read + execute)</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">4</td>
+<td style="text-align: left;">r– (read only)</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">0</td>
+<td style="text-align: left;">— (no permissions)</td>
+</tr>
+</tbody>
+</table>
+</div>
+</figure>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb7"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb7-1"><a href="#cb7-1"></a><span class="co"># Common permission sets</span></span>
+<span id="cb7-2"><a href="#cb7-2"></a><span class="ex">$</span> chmod 755 script.sh    <span class="co"># rwxr-xr-x (executable script)</span></span>
+<span id="cb7-3"><a href="#cb7-3"></a><span class="ex">$</span> chmod 644 data.csv     <span class="co"># rw-r--r-- (readable file)</span></span>
+<span id="cb7-4"><a href="#cb7-4"></a><span class="ex">$</span> chmod 700 private/     <span class="co"># rwx------ (private directory)</span></span>
+<span id="cb7-5"><a href="#cb7-5"></a><span class="ex">$</span> chmod 600 secrets.txt  <span class="co"># rw------- (private file)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>A few patterns cover almost every situation: <code>755</code> for scripts (you can modify, everyone can run), <code>644</code> for data files (you can modify, everyone can read), and <code>700</code> or <code>600</code> for directories and files that only you should touch.</p>
+</section>
+<section id="sec-making-scripts-executable" class="level3">
+<h3 class="anchored" data-anchor-id="sec-making-scripts-executable">Making Scripts Executable</h3>
+<p>The most common reason you will reach for <code>chmod</code> is to run a script you have written. A new text file is not executable, so trying to run it directly fails:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb8"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb8-1"><a href="#cb8-1"></a><span class="co"># Create a two-line script</span></span>
+<span id="cb8-2"><a href="#cb8-2"></a><span class="ex">$</span> echo <span class="st">'#!/bin/bash'</span> <span class="op">&gt;</span> myscript.sh</span>
+<span id="cb8-3"><a href="#cb8-3"></a><span class="ex">$</span> echo <span class="st">'echo "Hello, World!"'</span> <span class="op">&gt;&gt;</span> myscript.sh</span>
+<span id="cb8-4"><a href="#cb8-4"></a></span>
+<span id="cb8-5"><a href="#cb8-5"></a><span class="co"># Try to run it</span></span>
+<span id="cb8-6"><a href="#cb8-6"></a><span class="ex">$</span> ./myscript.sh</span>
+<span id="cb8-7"><a href="#cb8-7"></a><span class="ex">bash:</span> ./myscript.sh: Permission denied</span>
+<span id="cb8-8"><a href="#cb8-8"></a></span>
+<span id="cb8-9"><a href="#cb8-9"></a><span class="co"># Add execute permission, then try again</span></span>
+<span id="cb8-10"><a href="#cb8-10"></a><span class="ex">$</span> chmod +x myscript.sh</span>
+<span id="cb8-11"><a href="#cb8-11"></a><span class="ex">$</span> ./myscript.sh</span>
+<span id="cb8-12"><a href="#cb8-12"></a><span class="ex">Hello,</span> World!</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>The <code>#!/bin/bash</code> line at the top (the “shebang”) tells Unix which program should interpret the script, and the <code>./</code> prefix says “the file in the current directory” (<a href="05-unix-fundamentals.html#sec-dot-and-dotdot" class="quarto-xref"><span>Section 5.4.3</span></a>). You will also see the shebang written as <code>#!/usr/bin/env bash</code>—the form used in the lecture slides and the course’s example scripts. The two are interchangeable for this course: the <code>env</code> form asks Unix to find <code>bash</code> wherever it is installed, which makes a script more portable to systems where bash is not at <code>/bin/bash</code> (some macOS and cluster setups).</p>
+<p>Two more things worth knowing from day one:</p>
+<ul>
+<li><strong><code>bash myscript.sh</code> works without execute permission.</strong> In that command you are running <code>bash</code> (which is already executable) and handing it the file to read, so no <code>x</code> bit is needed. The <code>chmod +x</code> requirement applies only to running the script directly as <code>./myscript.sh</code>.</li>
+<li><strong>Downloaded scripts always need <code>chmod +x</code> once.</strong> The execute bit is not part of the file’s contents, so it does not survive a download. The four worked example scripts on the course’s <a href="https://wcresko.github.io/BioE_Comp_Tools_Fa2026/Examples.html">Example Files page</a> are a good place to practice: download them, run <code>chmod +x *.sh</code>, then read their comments to see how real scripts are put together.</li>
+</ul>
+<p>Shell scripts are the subject of <a href="10-shell-scripting.html" class="quarto-xref"><span>Chapter 10</span></a>.</p>
+</section>
+<section id="sec-chown" class="level3">
+<h3 class="anchored" data-anchor-id="sec-chown">Changing Ownership: <code>chown</code></h3>
+<p>The <code>chown</code> command changes file ownership:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb9"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb9-1"><a href="#cb9-1"></a><span class="co"># Change owner</span></span>
+<span id="cb9-2"><a href="#cb9-2"></a><span class="ex">$</span> chown alice myfile.txt</span>
+<span id="cb9-3"><a href="#cb9-3"></a></span>
+<span id="cb9-4"><a href="#cb9-4"></a><span class="co"># Change owner and group</span></span>
+<span id="cb9-5"><a href="#cb9-5"></a><span class="ex">$</span> chown alice:researchers myfile.txt</span>
+<span id="cb9-6"><a href="#cb9-6"></a></span>
+<span id="cb9-7"><a href="#cb9-7"></a><span class="co"># Recursively change directory ownership</span></span>
+<span id="cb9-8"><a href="#cb9-8"></a><span class="ex">$</span> chown <span class="at">-R</span> alice:researchers project/</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="sec-sudo" class="level3">
+<h3 class="anchored" data-anchor-id="sec-sudo">Superuser Access: <code>sudo</code></h3>
+<p>Some operations require administrator (root) privileges. The <code>sudo</code> command temporarily elevates your permissions:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb10"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb10-1"><a href="#cb10-1"></a><span class="co"># Install software (requires admin rights)</span></span>
+<span id="cb10-2"><a href="#cb10-2"></a><span class="ex">$</span> sudo apt install cowsay</span>
+<span id="cb10-3"><a href="#cb10-3"></a></span>
+<span id="cb10-4"><a href="#cb10-4"></a><span class="co"># Edit a system file</span></span>
+<span id="cb10-5"><a href="#cb10-5"></a><span class="ex">$</span> sudo nano /etc/hosts</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="callout callout-style-default callout-warning callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Warning
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Use <code>sudo</code> carefully! With great power comes great responsibility. Commands run with <code>sudo</code> can modify or delete system files, potentially breaking your computer. Always double-check commands before running them with <code>sudo</code>.</p>
+</div>
+</div>
+</section>
+</section>
+<section id="sec-environment-variables" class="level2" data-number="6.3">
+<h2 data-number="6.3" class="anchored" data-anchor-id="sec-environment-variables"><span class="header-section-number">6.3</span> Environment Variables</h2>
+<p>Unix has settings that affect your command-line environment called <strong>environment variables</strong>. These are distinguished by a <code>$</code> prefix. Some important ones:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb11"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb11-1"><a href="#cb11-1"></a><span class="co"># Your home directory</span></span>
+<span id="cb11-2"><a href="#cb11-2"></a><span class="ex">$</span> echo <span class="va">$HOME</span></span>
+<span id="cb11-3"><a href="#cb11-3"></a><span class="ex">/home/wcresko</span></span>
+<span id="cb11-4"><a href="#cb11-4"></a></span>
+<span id="cb11-5"><a href="#cb11-5"></a><span class="co"># Your username</span></span>
+<span id="cb11-6"><a href="#cb11-6"></a><span class="ex">$</span> echo <span class="va">$USER</span></span>
+<span id="cb11-7"><a href="#cb11-7"></a><span class="ex">wcresko</span></span>
+<span id="cb11-8"><a href="#cb11-8"></a></span>
+<span id="cb11-9"><a href="#cb11-9"></a><span class="co"># Your current shell</span></span>
+<span id="cb11-10"><a href="#cb11-10"></a><span class="ex">$</span> echo <span class="va">$SHELL</span></span>
+<span id="cb11-11"><a href="#cb11-11"></a><span class="ex">/bin/bash</span></span>
+<span id="cb11-12"><a href="#cb11-12"></a></span>
+<span id="cb11-13"><a href="#cb11-13"></a><span class="co"># Where Unix looks for programs</span></span>
+<span id="cb11-14"><a href="#cb11-14"></a><span class="ex">$</span> echo <span class="va">$PATH</span></span>
+<span id="cb11-15"><a href="#cb11-15"></a><span class="ex">/usr/local/bin:/usr/bin:/bin</span></span>
+<span id="cb11-16"><a href="#cb11-16"></a></span>
+<span id="cb11-17"><a href="#cb11-17"></a><span class="co"># Your current working directory (the same thing pwd prints)</span></span>
+<span id="cb11-18"><a href="#cb11-18"></a><span class="ex">$</span> echo <span class="va">$PWD</span></span>
+<span id="cb11-19"><a href="#cb11-19"></a><span class="ex">/home/wcresko/projects</span></span>
+<span id="cb11-20"><a href="#cb11-20"></a></span>
+<span id="cb11-21"><a href="#cb11-21"></a><span class="co"># See all environment variables (there are many; page through them)</span></span>
+<span id="cb11-22"><a href="#cb11-22"></a><span class="ex">$</span> env <span class="kw">|</span> <span class="fu">less</span></span>
+<span id="cb11-23"><a href="#cb11-23"></a><span class="ex">$</span> printenv HOME</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Environment variables control how your shell behaves and where it looks for programs. The <code>PATH</code> variable is particularly important—it’s a colon-separated list of directories where Unix searches for executable programs.</p>
+<p>You can also define your own variables. Assign with <code>NAME=value</code> (no spaces around the <code>=</code>) and refer to the value with a <code>$</code> prefix:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb12"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb12-1"><a href="#cb12-1"></a><span class="co"># Set a variable</span></span>
+<span id="cb12-2"><a href="#cb12-2"></a><span class="ex">$</span> PROJECT_DIR=~/projects/analysis</span>
+<span id="cb12-3"><a href="#cb12-3"></a></span>
+<span id="cb12-4"><a href="#cb12-4"></a><span class="co"># Use it (note the $)</span></span>
+<span id="cb12-5"><a href="#cb12-5"></a><span class="ex">$</span> cd <span class="va">$PROJECT_DIR</span></span>
+<span id="cb12-6"><a href="#cb12-6"></a><span class="ex">$</span> ls <span class="va">$PROJECT_DIR</span>/data</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>A variable set this way is visible only to the current shell. To make it available to the programs you launch from that shell (R, Python, a script), prefix the assignment with <code>export</code>:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb13"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb13-1"><a href="#cb13-1"></a><span class="ex">$</span> export PROJECT_DIR=~/projects/analysis</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Shell variables are the building blocks of shell scripts, which are covered in <a href="10-shell-scripting.html" class="quarto-xref"><span>Chapter 10</span></a>.</p>
+</section>
+<section id="sec-executables-and-the-path" class="level2" data-number="6.4">
+<h2 data-number="6.4" class="anchored" data-anchor-id="sec-executables-and-the-path"><span class="header-section-number">6.4</span> Executables and the PATH</h2>
+<p>In Unix, all programs are files—they’re called <strong>executables</strong>. When you type <code>ls</code>, <code>grep</code>, or <code>git</code>, Unix runs an executable file. You can find where a program lives using <code>which</code>:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb14"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb14-1"><a href="#cb14-1"></a><span class="ex">$</span> which git</span>
+<span id="cb14-2"><a href="#cb14-2"></a><span class="ex">/usr/bin/git</span></span>
+<span id="cb14-3"><a href="#cb14-3"></a></span>
+<span id="cb14-4"><a href="#cb14-4"></a><span class="ex">$</span> which python</span>
+<span id="cb14-5"><a href="#cb14-5"></a><span class="ex">/usr/bin/python</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>The <code>PATH</code> environment variable tells Unix where to look for executables. When you type a command, Unix searches through each directory in <code>PATH</code> until it finds a matching program:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb15"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb15-1"><a href="#cb15-1"></a><span class="ex">$</span> echo <span class="va">$PATH</span></span>
+<span id="cb15-2"><a href="#cb15-2"></a><span class="ex">/usr/local/bin:/usr/bin:/bin:/home/wcresko/bin</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Unix searches these directories in order. If you have your own scripts in <code>~/bin</code>, you can add that directory to your PATH to make them accessible from anywhere.</p>
+</section>
+<section id="sec-shells-and-configuration-files" class="level2" data-number="6.5">
+<h2 data-number="6.5" class="anchored" data-anchor-id="sec-shells-and-configuration-files"><span class="header-section-number">6.5</span> Shells and Configuration Files</h2>
+<p>The <strong>shell</strong> is the program that interprets your commands. <strong>Bash</strong> (Bourne Again Shell) is the most common, but others exist like <strong>zsh</strong> (default on modern macOS) and <strong>fish</strong>. You can see which shell you’re using:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb16"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb16-1"><a href="#cb16-1"></a><span class="ex">$</span> echo <span class="va">$SHELL</span></span>
+<span id="cb16-2"><a href="#cb16-2"></a><span class="ex">/bin/bash</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Your shell can be customized through configuration files that run when you open a terminal (<a href="#tbl-shell-config-files" class="quarto-xref">Table&nbsp;<span>6.3</span></a>):</p>
+<div id="tbl-shell-config-files" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-shell-config-files-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;6.3: Configuration files for common shells
+</figcaption>
+<div aria-describedby="tbl-shell-config-files-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th style="text-align: left;">Shell</th>
+<th style="text-align: left;">Configuration Files</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">Bash</td>
+<td style="text-align: left;"><code>~/.bashrc</code>, <code>~/.bash_profile</code></td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Zsh</td>
+<td style="text-align: left;"><code>~/.zshrc</code>, <code>~/.zprofile</code></td>
+</tr>
+</tbody>
+</table>
+</div>
+</figure>
+</div>
+<p>These files can set environment variables, define aliases (shortcuts for commands), and customize your prompt. For Bash, <code>~/.bashrc</code> is read by interactive shells and <code>~/.bash_profile</code> by login shells; on macOS with zsh, put the same lines in <code>~/.zshrc</code>. Common customizations include:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb17"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb17-1"><a href="#cb17-1"></a><span class="co"># Add a directory of your own scripts to the front of your PATH</span></span>
+<span id="cb17-2"><a href="#cb17-2"></a><span class="bu">export</span> <span class="va">PATH</span><span class="op">=</span><span class="st">"</span><span class="va">$HOME</span><span class="st">/bin:</span><span class="va">$PATH</span><span class="st">"</span></span>
+<span id="cb17-3"><a href="#cb17-3"></a></span>
+<span id="cb17-4"><a href="#cb17-4"></a><span class="co"># Create an alias (shortcut) for a common command</span></span>
+<span id="cb17-5"><a href="#cb17-5"></a><span class="bu">alias</span> ll=<span class="st">'ls -la'</span></span>
+<span id="cb17-6"><a href="#cb17-6"></a><span class="bu">alias</span> rm=<span class="st">'rm -i'</span>    <span class="co"># always ask before deleting</span></span>
+<span id="cb17-7"><a href="#cb17-7"></a></span>
+<span id="cb17-8"><a href="#cb17-8"></a><span class="co"># Set default options for programs</span></span>
+<span id="cb17-9"><a href="#cb17-9"></a><span class="bu">export</span> <span class="va">R_LIBS_USER</span><span class="op">=</span><span class="st">"</span><span class="va">$HOME</span><span class="st">/R/library"</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>After editing a configuration file, apply the changes either by opening a new terminal or by running:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb18"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb18-1"><a href="#cb18-1"></a><span class="ex">$</span> source ~/.bashrc      <span class="co"># or: source ~/.zshrc</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="sec-ssh-scp" class="level2" data-number="6.6">
+<h2 data-number="6.6" class="anchored" data-anchor-id="sec-ssh-scp"><span class="header-section-number">6.6</span> Connecting to Remote Computers: <code>ssh</code> and <code>scp</code></h2>
+<p>One of the main reasons to learn the shell is that it works the same way on a computer across the room or across the country. The <code>ssh</code> command (<strong>s</strong>ecure <strong>sh</strong>ell) opens a shell on a remote machine:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb19"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb19-1"><a href="#cb19-1"></a><span class="ex">$</span> ssh username@server.university.edu</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Once connected, everything in this chapter—<code>pwd</code>, <code>ls</code>, <code>cd</code>, <code>mkdir</code>, and the rest—works exactly as it does locally, except that the files live on the remote system. This is how you will use UO’s Talapas cluster (<a href="16-hpc-talapas.html" class="quarto-xref"><span>Chapter 16</span></a>). Type <code>exit</code> to close the connection.</p>
+<p>The <code>scp</code> command (<strong>s</strong>ecure <strong>c</strong>o<strong>p</strong>y) copies files between your computer and a remote one. Its syntax mirrors <code>cp</code>, with <code>user@host:</code> prefixed to the remote path:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb20"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb20-1"><a href="#cb20-1"></a><span class="co"># Local file -&gt; remote directory</span></span>
+<span id="cb20-2"><a href="#cb20-2"></a><span class="ex">$</span> scp local_file.txt username@server.edu:~/destination/</span>
+<span id="cb20-3"><a href="#cb20-3"></a></span>
+<span id="cb20-4"><a href="#cb20-4"></a><span class="co"># Remote file -&gt; current local directory</span></span>
+<span id="cb20-5"><a href="#cb20-5"></a><span class="ex">$</span> scp username@server.edu:~/remote_file.txt .</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>For large or repeated transfers, <code>rsync</code> is more efficient because it copies only what has changed; see <a href="16-hpc-talapas.html#sec-file-transfer" class="quarto-xref"><span>Section 16.5.3</span></a>.</p>
+</section>
+<section id="sec-commands-worth-learning" class="level2" data-number="6.7">
+<h2 data-number="6.7" class="anchored" data-anchor-id="sec-commands-worth-learning"><span class="header-section-number">6.7</span> Commands Worth Learning</h2>
+<p>Several other commands are worth knowing about as you advance (<a href="#tbl-commands-worth-learning" class="quarto-xref">Table&nbsp;<span>6.4</span></a>); <code>grep</code> gets its own treatment in <a href="09-grep-regex.html" class="quarto-xref"><span>Chapter 9</span></a>:</p>
+<div id="tbl-commands-worth-learning" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-commands-worth-learning-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;6.4: Additional Unix commands worth learning
+</figcaption>
+<div aria-describedby="tbl-commands-worth-learning-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th style="text-align: left;">Command</th>
+<th style="text-align: left;">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;"><code>tar</code></td>
+<td style="text-align: left;">Archive files and directories into one file</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><code>ssh</code></td>
+<td style="text-align: left;">Connect securely to another computer (<a href="#sec-ssh-scp" class="quarto-xref"><span>Section 6.6</span></a>)</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><code>ln</code></td>
+<td style="text-align: left;">Create symbolic links (shortcuts to files)</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><code>nano</code> or <code>vim</code></td>
+<td style="text-align: left;">Edit files in the terminal</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><code>awk</code></td>
+<td style="text-align: left;">Column-oriented text processing (covered in <a href="09-grep-regex.html#sec-awk" class="quarto-xref"><span>Section 9.10</span></a>)</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><code>sed</code></td>
+<td style="text-align: left;">Stream editor for text transformation (covered in <a href="09-grep-regex.html#sec-sed" class="quarto-xref"><span>Section 9.9</span></a>)</td>
+</tr>
+</tbody>
+</table>
+</div>
+</figure>
+</div>
+</section>
+<section id="sec-file-manipulation-from-r" class="level2" data-number="6.8">
+<h2 data-number="6.8" class="anchored" data-anchor-id="sec-file-manipulation-from-r"><span class="header-section-number">6.8</span> File Manipulation from R</h2>
+<p>You can also perform file operations from within R using functions like <code>file.create()</code>, <code>file.copy()</code>, <code>file.rename()</code>, and <code>file.remove()</code>. See <code>?files</code> in R for the complete list. The <code>unlink()</code> function removes files and directories.</p>
+<p>While not generally recommended, you can run Unix commands from R using the <code>system()</code> function:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb21"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1"></a><span class="fu">system</span>(<span class="st">"ls -la"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>This can be useful for integrating Unix tools into R scripts, but native R functions are usually preferable for portability.</p>
+</section>
+<section id="sec-unix-env-summary" class="level2" data-number="6.9">
+<h2 data-number="6.9" class="anchored" data-anchor-id="sec-unix-env-summary"><span class="header-section-number">6.9</span> Summary</h2>
+<p>This chapter completed your shell foundations:</p>
+<ul>
+<li>Wild cards (<code>*</code>, <code>?</code>, <code>[ ]</code>, <code>{ }</code>) are expanded by the <em>shell</em> before the command runs—preview with <code>ls</code> before using them with <code>rm</code></li>
+<li><code>ls -l</code> permission strings decode as owner/group/others triplets of <code>rwx</code></li>
+<li><code>chmod</code> changes permissions symbolically (<code>u+x</code>, <code>go-w</code>) or in octal (<code>755</code>, <code>644</code>)</li>
+<li>A new script needs <code>chmod +x</code> once before <code>./script.sh</code> will run; the shebang line says which interpreter runs it</li>
+<li>Environment variables (<code>$HOME</code>, <code>$PATH</code>) configure your session; the <code>PATH</code> is where the shell looks for programs</li>
+<li>Shell configuration files (<code>.bashrc</code>, <code>.zshrc</code>) make your customizations permanent</li>
+<li><code>ssh</code> and <code>scp</code> extend everything in this book to remote machines like Talapas (<a href="16-hpc-talapas.html" class="quarto-xref"><span>Chapter 16</span></a>)</li>
+</ul>
+<div class="callout callout-style-default callout-tip callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Tip
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>For a comprehensive reference of Unix commands with syntax and examples, see <a href="appendix-B-unix.html" class="quarto-xref"><span>Appendix B</span></a>.</p>
+</div>
+</div>
+</section>
+<section id="sec-unix-env-exercises" class="level2 unnumbered">
+<h2 class="unnumbered anchored" data-anchor-id="sec-unix-env-exercises">Exercises</h2>
+<div class="callout callout-style-default callout-tip callout-titled" title="Practice Exercises">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Tip</span>Practice Exercises
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p><strong>Exercise 1: Wild Cards and Structure</strong></p>
+<ol type="1">
+<li>Make five directories called <code>dir_1</code> through <code>dir_5</code> with a single <code>mkdir</code> command</li>
+<li>Inside each, create <code>file_1.txt</code>, <code>file_2.txt</code>, and <code>file_3.txt</code> using <code>touch</code></li>
+<li>Open <code>dir_1/file_1.txt</code> in <code>nano</code>, type a few words, save, and print it with <code>cat</code></li>
+<li>Use a wild card to list every <code>file_2.txt</code> across all five directories in one command</li>
+<li>Delete all files in <code>dir_3</code> with a single <code>rm</code> command (check with <code>ls</code> first), then remove <code>dir_3</code> with <code>rmdir</code></li>
+</ol>
+<p><strong>Exercise 2: File Permissions</strong></p>
+<ol type="1">
+<li>Create a short script that prints “Hello, World!” and the current date (<code>date</code>)</li>
+<li>Try to run it with <code>./</code>—what error do you get?</li>
+<li>Make it executable with <code>chmod +x</code> and run it again</li>
+<li>Examine the permissions of several files with <code>ls -l</code> and decode each permission string</li>
+<li>Practice changing permissions with both symbolic (<code>chmod u+x</code>) and octal (<code>chmod 755</code>) notation, checking the result with <code>ls -l</code> each time</li>
+</ol>
+<p><strong>Exercise 3: Your Environment</strong></p>
+<ol type="1">
+<li>Print your <code>$HOME</code>, <code>$USER</code>, and <code>$SHELL</code> variables</li>
+<li>Print your <code>$PATH</code> and count how many directories it contains (hint: <code>tr ':' '\n' | wc -l</code>)</li>
+<li>Use <code>which</code> to find where <code>ls</code>, <code>bash</code>, and <code>python3</code> live</li>
+<li>Create an alias for <code>ls -lh</code> in your shell configuration file, reload it with <code>source</code>, and test it</li>
+</ol>
+</div>
+</div>
+
+
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    // Ensure there is a toggle, if there isn't float one in the top right
+    if (window.document.querySelector('.quarto-color-scheme-toggle') === null) {
+      const a = window.document.createElement('a');
+      a.classList.add('top-right');
+      a.classList.add('quarto-color-scheme-toggle');
+      a.href = "";
+      a.onclick = function() { try { window.quartoToggleColorScheme(); } catch {} return false; };
+      const i = window.document.createElement("i");
+      i.classList.add('bi');
+      a.appendChild(i);
+      window.document.body.appendChild(a);
+    }
+    setColorSchemeToggle(hasAlternateSentinel())
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+            // target, if specified
+            link.setAttribute("target", "_blank");
+            if (link.getAttribute("rel") === null) {
+              link.setAttribute("rel", "noopener");
+            }
+            // default icon
+            link.classList.add("external");
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        const annoteTargets = window.document.querySelectorAll('.code-annotation-anchor');
+        for (let i=0; i<annoteTargets.length; i++) {
+          const annoteTarget = annoteTargets[i];
+          const targetCell = annoteTarget.getAttribute("data-target-cell");
+          const targetAnnotation = annoteTarget.getAttribute("data-target-annotation");
+          const contentFn = () => {
+            const content = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+            if (content) {
+              const tipContent = content.cloneNode(true);
+              tipContent.classList.add("code-annotation-tip-content");
+              return tipContent.outerHTML;
+            }
+          }
+          const config = {
+            allowHTML: true,
+            content: contentFn,
+            onShow: (instance) => {
+              selectCodeLines(instance.reference);
+              instance.reference.classList.add('code-annotation-active');
+              window.tippy.hideAll();
+            },
+            onHide: (instance) => {
+              unselectCodeLines();
+              instance.reference.classList.remove('code-annotation-active');
+            },
+            maxWidth: 300,
+            delay: [50, 0],
+            duration: [200, 0],
+            offset: [5, 10],
+            arrow: true,
+            appendTo: function(el) {
+              return el.parentElement.parentElement.parentElement;
+            },
+            interactive: true,
+            interactiveBorder: 10,
+            theme: 'quarto',
+            placement: 'right',
+            popperOptions: {
+              modifiers: [
+              {
+                name: 'flip',
+                options: {
+                  flipVariations: false, // true by default
+                  allowedAutoPlacements: ['right'],
+                  fallbackPlacements: ['right', 'top', 'top-start', 'top-end', 'bottom', 'bottom-start', 'bottom-end', 'left'],
+                },
+              },
+              {
+                name: 'preventOverflow',
+                options: {
+                  mainAxis: false,
+                  altAxis: false
+                }
+              }
+              ]        
+            }      
+          };
+          window.tippy(annoteTarget, config); 
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+<nav class="page-navigation">
+  <div class="nav-page nav-page-previous">
+      <a href="../chapters/05-unix-fundamentals.html" class="pagination-link" aria-label="Unix Fundamentals">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Unix Fundamentals</span></span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+      <a href="../chapters/07-files-pipes.html" class="pagination-link" aria-label="Files, Pipes, and Redirection">
+        <span class="nav-page-text"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">Files, Pipes, and Redirection</span></span> <i class="bi bi-arrow-right-short"></i>
+      </a>
+  </div>
+</nav>
+</div> <!-- /content -->
+<footer class="footer">
+  <div class="nav-footer">
+    <div class="nav-footer-left">
+<p>© 2026 William A. Cresko | Knight Campus for Accelerating Scientific Impact</p>
+</div>   
+    <div class="nav-footer-center">
+      &nbsp;
+    <div class="toc-actions d-sm-block d-md-none"><ul><li><a href="https://github.com/wcresko/BioE_Comp_Tools_Fa2026/edit/main/Book/chapters/06-unix-environment.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li><li><a href="https://github.com/wcresko/BioE_Comp_Tools_Fa2026/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></div>
+    <div class="nav-footer-right">
+<p><a href="https://wcresko.github.io/BioE_Comp_Tools_Fa2026/">Course website</a> | Built with <a href="https://quarto.org/">Quarto</a></p>
+</div>
+  </div>
+</footer>
+
+
+
+
+</body></html>

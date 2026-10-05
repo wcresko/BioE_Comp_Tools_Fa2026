@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>Week 3 Exercises - Pipes, GREP, and Regular Expressions – Comp Tools Bioengineers F26</title>
+<title>Week 3 Exercises - Tidy Data, GREP, and Regular Expressions – Comp Tools Bioengineers F26</title>
 <style>
 /* Default styles provided by pandoc.
 ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
@@ -143,15 +143,21 @@ ul.task-list li input[type="checkbox"] {
 <div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
 <!-- sidebar -->
 <!-- margin-sidebar -->
-    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar zindex-bottom">
-        
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#is-it-tidy" id="toc-is-it-tidy" class="nav-link active" data-scroll-target="#is-it-tidy">Is it tidy?</a></li>
+  </ul>
+</nav>
     </div>
 <!-- main -->
 <main class="content" id="quarto-document-content">
 
 <header id="title-block-header" class="quarto-title-block default">
 <div class="quarto-title">
-<h1 class="title">Week 3 Exercises - Pipes, GREP, and Regular Expressions</h1>
+<h1 class="title">Week 3 Exercises - Tidy Data, GREP, and Regular Expressions</h1>
 </div>
 
 
@@ -168,7 +174,7 @@ ul.task-list li input[type="checkbox"] {
 </header>
 
 
-<p>Short, <strong>ungraded</strong> practice tasks - about 20-30 minutes. Companion reading: <a href="../book/chapters/07-files-pipes.html">Ch. 7</a> and <a href="../book/chapters/09-grep-regex.html">Ch. 9</a>; reference: <a href="../book/chapters/appendix-D-regex.html">App. D</a>. All tasks use <code>data/raw/Stickle_RNAseq.tsv</code> from last week.</p>
+<p>Short, <strong>ungraded</strong> practice tasks - about 20-30 minutes. Companion reading: <a href="../book/chapters/08-tidy-data.html">Ch. 8</a> and <a href="../book/chapters/09-grep-regex.html">Ch. 9</a>, with <a href="../book/chapters/07-files-pipes.html">Ch. 7</a> as review; reference: <a href="../book/chapters/appendix-D-regex.html">App. D</a>. All tasks use <code>data/raw/Stickle_RNAseq.tsv</code> from last week.</p>
 <ol type="1">
 <li>Count the fish raised with the “mono” microbiota: <code>grep -c "mono" data/raw/Stickle_RNAseq.tsv</code>. Does the answer match the experimental design (Ch. 1)?</li>
 <li>Print only the Genotype column and tabulate it: <code>cut -f2 data/raw/Stickle_RNAseq.tsv | sort | uniq -c</code>. What do you get, and why is there one odd line?</li>
@@ -181,8 +187,16 @@ ul.task-list li input[type="checkbox"] {
 <li>In <code>man grep</code>, find what <code>-i</code> does, then demonstrate it by matching <code>MONO</code>.</li>
 <li>Write one pipeline of your own that answers a question about the file, and save it in a text file in <code>scripts/</code> so you have it for the homework.</li>
 </ol>
+<section id="is-it-tidy" class="level2">
+<h2 class="anchored" data-anchor-id="is-it-tidy">Is it tidy?</h2>
+<ol start="11" type="1">
+<li>Look at the data the way a statistician would: <code>cut -f1-6 data/raw/Stickle_RNAseq.tsv | head -n 3</code>. One row per fish, one column per variable, a header line of descriptive names - which of the tidy-data rules of thumb from L03 (and <a href="../book/chapters/08-tidy-data.html">Ch. 8</a>) does this file already satisfy?</li>
+<li>Now find the flaw: print columns 2-4 with <code>cut -f2-4 | head</code>. The <code>Geno&amp;Micro</code> column just glues together the two columns before it - which tidy rule does that break? And try <code>echo Geno&amp;Micro</code> in your shell to see why that <code>&amp;</code> in a name will cause trouble far beyond R.</li>
+<li>Wide or long? Count how many values one fish’s row holds: <code>head -n 1 data/raw/Stickle_RNAseq.tsv | tr '\t' '\n' | wc -l</code>. For per-gene questions each gene needs to be a <em>row</em>, not a column - how many rows would the long version of this table have (80 fish x 600 genes)? We will do that reshape, in one line of R, in Week 7.</li>
+</ol>
 
 
+</section>
 
 </main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">

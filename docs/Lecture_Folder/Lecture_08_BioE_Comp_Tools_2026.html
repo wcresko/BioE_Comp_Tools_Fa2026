@@ -255,7 +255,7 @@ Bill Cresko
 <section id="talapas-architecture" class="slide level2">
 <h2>Talapas Architecture</h2>
 
-<img data-src="images/Lec10_img001.svg" class="quarto-figure quarto-figure-center r-stretch" style="width:95.0%"></section>
+<img data-src="../images/Lec08_img001.svg" class="quarto-figure quarto-figure-center r-stretch" style="width:95.0%"></section>
 <section id="login-nodes-vs-compute-nodes" class="slide level2">
 <h2>Login Nodes vs Compute Nodes</h2>
 <h3 id="login-nodes-head-nodes">Login Nodes (Head Nodes)</h3>
@@ -507,7 +507,7 @@ Bill Cresko
 <section id="connecting-vs-code-to-talapas-remote-ssh" class="slide level2">
 <h2>Connecting VS Code to Talapas (Remote-SSH)</h2>
 
-<img data-src="images/Lec10_img002.svg" class="quarto-figure quarto-figure-center r-stretch" style="width:100.0%"><div class="callout callout-tip callout-titled callout-style-default">
+<img data-src="../images/Lec08_img002.svg" class="quarto-figure quarto-figure-center r-stretch" style="width:100.0%"><div class="callout callout-tip callout-titled callout-style-default">
 <div class="callout-body">
 <div class="callout-title">
 <div class="callout-icon-container">
@@ -524,7 +524,7 @@ Bill Cresko
 <section id="storage-on-talapas" class="slide level2">
 <h2>Storage on Talapas</h2>
 
-<img data-src="images/Lec10_img003.svg" class="quarto-figure quarto-figure-center r-stretch" style="width:85.0%"><h3 id="directory-structure">Directory Structure:</h3>
+<img data-src="../images/Lec08_img003.svg" class="quarto-figure quarto-figure-center r-stretch" style="width:85.0%"><h3 id="directory-structure">Directory Structure:</h3>
 <table class="caption-top">
 <colgroup>
 <col style="width: 32%">
@@ -582,7 +582,7 @@ Bill Cresko
 <li>Ensures efficient cluster utilization</li>
 </ul>
 
-<img data-src="images/Lec10_img004.svg" class="quarto-figure quarto-figure-center r-stretch" style="width:95.0%"><h3 id="key-concepts">Key Concepts:</h3>
+<img data-src="../images/Lec08_img004.svg" class="quarto-figure quarto-figure-center r-stretch" style="width:95.0%"><h3 id="key-concepts">Key Concepts:</h3>
 <ul>
 <li><strong>Jobs</strong>: Units of work you submit</li>
 <li><strong>Partitions</strong>: Queues with different properties</li>
@@ -1005,6 +1005,31 @@ Bill Cresko
 </tr>
 </tbody>
 </table>
+</section></section>
+<section>
+<section id="using-all-those-cores-parallel-r" class="title-slide slide level1 center">
+<h1>Using all those cores: parallel R</h1>
+
+</section>
+<section id="one-node-many-cores---but-r-uses-one" class="slide level2">
+<h2>One node, many cores - but R uses one</h2>
+<ul>
+<li class="fragment">A Talapas node has dozens of cores, but a plain R (or Python) script runs on <strong>one</strong> of them</li>
+<li class="fragment">Many analyses are <strong>embarrassingly parallel</strong> - the same independent computation repeated many times: bootstraps, per-gene models, simulations, one-file-per-sample processing</li>
+<li class="fragment">The <code>future</code>/<code>furrr</code> packages make parallel R nearly drop-in - that is this week’s second reading, <a href="../book/chapters/17-parallel-computing.html">Ch. 17</a></li>
+</ul>
+</section>
+<section id="a-taste-parallel-r-in-three-lines" class="slide level2">
+<h2>A taste: parallel R in three lines</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb19"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a></a><span class="fu">library</span>(furrr)</span>
+<span id="cb19-2"><a></a><span class="fu">plan</span>(multisession, <span class="at">workers =</span> <span class="dv">8</span>)              <span class="co"># start 8 R workers</span></span>
+<span id="cb19-3"><a></a></span>
+<span id="cb19-4"><a></a>results <span class="ot">&lt;-</span> <span class="fu">future_map</span>(gene_list, fit_model)  <span class="co"># parallel drop-in for map()</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<ul>
+<li class="fragment">Match workers to your SLURM request: <code>#SBATCH --cpus-per-task=8</code> → <code>workers = 8</code></li>
+<li class="fragment">Only worth it when each task takes real time - starting workers has overhead</li>
+<li class="fragment">Everything else you saw today - batch scripts, modules, storage - stays exactly the same</li>
+</ul>
 </section>
 <section id="best-practices-for-talapas" class="slide level2">
 <h2>Best Practices for Talapas</h2>
