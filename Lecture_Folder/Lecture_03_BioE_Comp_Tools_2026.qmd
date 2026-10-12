@@ -1,6 +1,6 @@
 ---
 title: "Lecture 03"
-subtitle: "Tidy Data, Pipes, GREP and Large Genomic Files"
+subtitle: "Tidy Data, Pipes, GREP and Large Files"
 date: "Monday, October 12, 2026"
 author: "Bill Cresko"
 ---
@@ -60,7 +60,7 @@ set.seed(2026)
 
 Change line 1 and the *same* mechanics run any language:
 
-``` {.bash code-line-numbers="|1|2|3"}
+``` {.bash}
 #!/usr/bin/env bash      # a bash script
 #!/usr/bin/env python3   # a Python script
 #!/usr/bin/env Rscript   # an R script
@@ -80,7 +80,7 @@ Change line 1 and the *same* mechanics run any language:
 
 - We will create a directory structure that we will use for the Python script on the next page
 
-## A first Python script
+## A first Python script - more later
 
 ``` {.python code-line-numbers="|1|4-5|9|12-14|17-20"}
 #!/usr/bin/env python3
@@ -122,6 +122,7 @@ print("Wrote results/total_counts_by_group.png")
 - When you add variables to a database, add columns, not rows
 - A column of data should contain only one data type
 
+
 ## Not all data are tidy to begin with
 
 Straight out of a lab notebook spreadsheet:
@@ -152,12 +153,14 @@ Straight out of a lab notebook spreadsheet:
 ::: incremental
 - One variable per column, one fish per row, one value - **and one data type** - per cell
 - Units live in the **column name**, not the cells
-- Also common in the wild: **contingency tables** (counts cross-tabulated by two factors) - compact to read, but reshape to tidy before analysis
+- Also common: 
+  - **contingency tables** (counts cross-tabulated by two factors) 
+  - compact to read, but reshape to tidy before analysis
 :::
 
 ## Is our course dataset tidy?
 
-Back in your course folder (`cd ~/projects/comptools`):
+
 
 ``` bash
 head -n 2 data/Stickle_RNAseq.tsv | cut -f 1-8
@@ -169,14 +172,15 @@ AC1         A         conventional  convA       16     15     71     153
 ```
 
 ::: incremental
-- One row per **fish**, one column per **variable** - tidy for per-fish questions
-- But **600 gene columns** is a "wide" layout: the *gene* is really a variable too. For per-gene questions we will reshape it to **long** format (one row per fish x gene) in Week 7
-- The `Geno&Micro` column duplicates two other columns - and the `&` is a name that will annoy every tool we use. Keep an eye on it.
+- One row per **fish**, one column per **variable**
+- But **600 gene columns** is a "wide" layout:
+  - the *gene* is really a variable too
+  - For per-gene questions we will reshape it to **long** format (one row per fish x gene) in Week 7
+- The `Geno&Micro` column duplicates two other columns
+  - and the `&` is a name that will annoy every tool we use. Keep an eye on it.
 :::
 
-# Reading Files and Unix Pipes
-
-## Commands for Reading Files
+## Reminder - Commands for Reading Files
 
 - **`cat`** = concatenate and display files
   - Shows entire file at once
@@ -192,6 +196,10 @@ AC1         A         conventional  convA       16     15     71     153
   - `tail -n 20 file.txt` shows last 20 lines
   - `tail -f file.txt` follows file as it grows (useful for logs)
 
+
+
+# Chaining commands together with the pipe
+
 ## What are Pipes?
 
 - **`|`** = the pipe operator
@@ -206,21 +214,24 @@ AC1         A         conventional  convA       16     15     71     153
 
 ## Common Pipe Patterns
 
-- **Counting patterns:**
-  - `grep "pattern" file.txt | wc -l`
-  - Count lines matching a pattern
 - **Sorting and uniqueness:**
   - `cat file.txt | sort | uniq`
   - Sort lines and remove duplicates
 - **Finding top/bottom items:**
   - `sort data.txt | head -5`
   - Get top 5 after sorting
+- **Counting patterns:**
+  - `grep "pattern" file.txt | wc -l`
+  - Count lines matching a pattern
 - **Filtering and processing:**
   - `ls -l | grep ".txt" | awk '{print $5, $9}'`
   - List txt files with sizes
 
 ::: callout-note
-A few of these preview commands we haven't covered yet: `grep` gets its full treatment later today, and `awk`, `find` and `xargs` are stars of L04. Focus on the *shape* of the pipelines for now.
+- A few of these preview commands we haven't covered yet 
+- `grep` gets its full treatment later today
+- `awk`, `find` and `xargs` are in L04
+- Focus on the *shape* of the pipelines for now.
 :::
 
 ## Advanced Pipe Examples
@@ -332,7 +343,7 @@ ACG
 
 Predict the output of each command *before* you run it:
 
-``` {.bash code-line-numbers="|1|2|3"}
+``` {.bash}
 grep "^ATG" test.txt
 grep "ATG$" test.txt
 grep "^A.G$" test.txt
@@ -389,30 +400,14 @@ zcat reads.fastq.gz | awk 'NR % 4 == 2' | grep -c "N"
 grep "gene" data.txt | sed 's/gene/GENE/g'
 ```
 
-## Reminder from L02: the three standard streams
+## `streams` and `grep` on the stickleback table
 
-Every Unix program reads and writes through three numbered streams:
-
-```         
-          ┌──────────────┐
-stdin ───>│              │───> stdout
-    (0)   │   program    │      (1)
-          │              │───> stderr
-          └──────────────┘      (2)
-```
-
-- `>` sends **stdout** to a file (overwrites) · `>>` appends · `2>` captures **stderr** · `|` connects one program's stdout to the next one's stdin
-- Full treatment in L02 and [Ch. 7](../book/chapters/07-files-pipes.html) - next slide puts them to work on our data
-
-## Running example: streams and `grep` on the stickleback table
-
-``` {.bash code-line-numbers="|1|3-6|8-9|11-12|14-15"}
-cd ~/projects/comptools && mkdir -p results
+``` {.bash code-line-numbers="|3-6|8-9|11-12|14-15"}
 
 # Keep only the header plus the mono-associated fish, save to a new file
 head -n 1 data/Stickle_RNAseq.tsv > results/mono.tsv
 grep -w "mono" data/Stickle_RNAseq.tsv >> results/mono.tsv
-wc -l results/mono.tsv                        # 41 lines = header + 20 + 20 fish
+wc -l results/mono.tsv                        
 
 # Which individuals are genotype B raised conventionally?
 grep -w "convB" data/Stickle_RNAseq.tsv | cut -f 1
@@ -421,11 +416,14 @@ grep -w "convB" data/Stickle_RNAseq.tsv | cut -f 1
 grep -E "^[A-Z]+1\b" data/Stickle_RNAseq.tsv | cut -f 1-3
 
 # Send errors somewhere useful: a typo in the path goes to the log, not the screen
-grep -w "mono" data/Stickle_RNAseq.tsvv 2> results/errors.log; cat results/errors.log
+grep -w "mono" data/Stickle_RNAseq.tsv 2> results/errors.log; cat results/errors.log
 ```
 
 ::: callout-tip
-`>` creates the file, `>>` appends to it, `2>` captures **stderr**. `grep -w "mono"` matches `mono` only as a whole word, so it finds the 40 mono-associated fish through the third column but would *not* match `monoA` on its own. Try `grep -c mono` versus `grep -cw mono`: both give 40 here. Work out why (which column does each one match on?) - experiments like this are how you learn what a flag really does.
+- `>` creates the file, `>>` appends to it, `2>` captures **stderr**. 
+- `grep -w "mono"` matches `mono` only as a whole word, so it finds the 40 mono-associated fish through the third column but would *not* match `monoA` on its own. 
+- Try `grep -c mono` versus `grep -cw mono`: both give 40 here. 
+- Work out why (which column does each one match on?) - experiments like this are how you learn what a flag really does.
 :::
 
 # Sequence Files and Compression
@@ -464,7 +462,9 @@ NCATGCAGCGTACGGTAATTGGCAG
 :::::
 
 ::: callout-tip
-Both are usually gzip-compressed (`.fa.gz`, `.fastq.gz`) - use `zcat` / `zless` / `zgrep` to read them without unpacking. More formats (CSV/TSV, GFF, BED, VCF, HDF5) in the [Data Formats appendix](../book/chapters/appendix-C-data-formats.html) of the course book.
+- Both are usually gzip-compressed (`.fa.gz`, `.fastq.gz`)
+- use `zcat` / `zless` / `zgrep` to read them without unpacking. 
+- More formats (CSV/TSV, GFF, BED, VCF, HDF5) in the [Data Formats appendix](../book/chapters/appendix-C-data-formats.html) of the course book.
 :::
 
 ## Working with Compressed Files
@@ -554,7 +554,9 @@ zgrep "^>" chr21.fa.gz | less
 ```
 
 ::: callout-note
-The UCSC file is *soft-masked*: repeats are written in lowercase (`acgt`). Patterns like `GAATTC` will miss sites inside masked regions - add `-i` to `grep`, or uppercase everything first with `tr 'acgt' 'ACGT'`.
+- The UCSC file is *soft-masked*: repeats are written in lowercase (`acgt`). 
+- Patterns like `GAATTC` will miss sites inside masked regions - add `-i` to `grep`
+- Or uppercase everything first with `tr 'acgt' 'ACGT'`.
 :::
 
 ## Creating a Subset for Analysis

@@ -847,11 +847,11 @@
     "text": "Shell Scripts and Permissions - hands on\n\nLet’s work through our shell scripts\nWe will create a directory structure that we will use for the Python script on the next page"
   },
   {
-    "objectID": "Lecture_Folder/Lecture_03_BioE_Comp_Tools_2026.html#a-first-python-script",
-    "href": "Lecture_Folder/Lecture_03_BioE_Comp_Tools_2026.html#a-first-python-script",
+    "objectID": "Lecture_Folder/Lecture_03_BioE_Comp_Tools_2026.html#a-first-python-script---more-later",
+    "href": "Lecture_Folder/Lecture_03_BioE_Comp_Tools_2026.html#a-first-python-script---more-later",
     "title": "Lecture 03",
-    "section": "A first Python script",
-    "text": "A first Python script\n#!/usr/bin/env python3\n# plot_stickleback.py - total RNA-seq counts per fish, by group\n\nimport pandas as pd                  # data tables     (L05-L06)\nimport matplotlib.pyplot as plt     # plotting        (L06)\n\n# One line to read the whole table - because it is tidy:\n# a header of variable names, one row per fish, one value per cell\nstickle = pd.read_csv(\"data/Stickle_RNAseq.tsv\", sep=\"\\t\")\n\n# One number per fish: total reads across the 600 gene columns\ngenes = [c for c in stickle.columns if c.startswith(\"Gene\")]\ntotals = pd.DataFrame({\"Group\": stickle[\"Geno&Micro\"],\n                       \"Total\": stickle[genes].sum(axis=1)})\n\n# A quick plot: one box per genotype-x-microbiota group\ntotals.boxplot(column=\"Total\", by=\"Group\")\nplt.ylabel(\"Total reads per fish\")\nplt.savefig(\"results/total_counts_by_group.png\", dpi=200)\nprint(\"Wrote results/total_counts_by_group.png\")"
+    "section": "A first Python script - more later",
+    "text": "A first Python script - more later\n#!/usr/bin/env python3\n# plot_stickleback.py - total RNA-seq counts per fish, by group\n\nimport pandas as pd                  # data tables     (L05-L06)\nimport matplotlib.pyplot as plt     # plotting        (L06)\n\n# One line to read the whole table - because it is tidy:\n# a header of variable names, one row per fish, one value per cell\nstickle = pd.read_csv(\"data/Stickle_RNAseq.tsv\", sep=\"\\t\")\n\n# One number per fish: total reads across the 600 gene columns\ngenes = [c for c in stickle.columns if c.startswith(\"Gene\")]\ntotals = pd.DataFrame({\"Group\": stickle[\"Geno&Micro\"],\n                       \"Total\": stickle[genes].sum(axis=1)})\n\n# A quick plot: one box per genotype-x-microbiota group\ntotals.boxplot(column=\"Total\", by=\"Group\")\nplt.ylabel(\"Total reads per fish\")\nplt.savefig(\"results/total_counts_by_group.png\", dpi=200)\nprint(\"Wrote results/total_counts_by_group.png\")"
   },
   {
     "objectID": "Lecture_Folder/Lecture_03_BioE_Comp_Tools_2026.html#an-example-to-get-us-started",
@@ -879,21 +879,21 @@
     "href": "Lecture_Folder/Lecture_03_BioE_Comp_Tools_2026.html#the-same-data-tidied",
     "title": "Lecture 03",
     "section": "The same data, tidied",
-    "text": "The same data, tidied\n\n\n\nIndividual\nGenotype\nMicrobiota\nLength_mm\n\n\n\n\nAC1\nA\nconventional\n42\n\n\nAC2\nA\nconventional\n41\n\n\nAM1\nA\nmono\nNA\n\n\nBC1\nB\nconventional\n44\n\n\n\n\nOne variable per column, one fish per row, one value - and one data type - per cell\nUnits live in the column name, not the cells\nAlso common in the wild: contingency tables (counts cross-tabulated by two factors) - compact to read, but reshape to tidy before analysis"
+    "text": "The same data, tidied\n\n\n\nIndividual\nGenotype\nMicrobiota\nLength_mm\n\n\n\n\nAC1\nA\nconventional\n42\n\n\nAC2\nA\nconventional\n41\n\n\nAM1\nA\nmono\nNA\n\n\nBC1\nB\nconventional\n44\n\n\n\n\nOne variable per column, one fish per row, one value - and one data type - per cell\nUnits live in the column name, not the cells\nAlso common:\n\ncontingency tables (counts cross-tabulated by two factors)\ncompact to read, but reshape to tidy before analysis"
   },
   {
     "objectID": "Lecture_Folder/Lecture_03_BioE_Comp_Tools_2026.html#is-our-course-dataset-tidy",
     "href": "Lecture_Folder/Lecture_03_BioE_Comp_Tools_2026.html#is-our-course-dataset-tidy",
     "title": "Lecture 03",
     "section": "Is our course dataset tidy?",
-    "text": "Is our course dataset tidy?\nBack in your course folder (cd ~/projects/comptools):\nhead -n 2 data/Stickle_RNAseq.tsv | cut -f 1-8\nIndividual  Genotype  Microbiota    Geno&Micro  Gene1  Gene2  Gene3  Gene4\nAC1         A         conventional  convA       16     15     71     153\n\nOne row per fish, one column per variable - tidy for per-fish questions\nBut 600 gene columns is a “wide” layout: the gene is really a variable too. For per-gene questions we will reshape it to long format (one row per fish x gene) in Week 7\nThe Geno&Micro column duplicates two other columns - and the & is a name that will annoy every tool we use. Keep an eye on it."
+    "text": "Is our course dataset tidy?\nhead -n 2 data/Stickle_RNAseq.tsv | cut -f 1-8\nIndividual  Genotype  Microbiota    Geno&Micro  Gene1  Gene2  Gene3  Gene4\nAC1         A         conventional  convA       16     15     71     153\n\nOne row per fish, one column per variable\nBut 600 gene columns is a “wide” layout:\n\nthe gene is really a variable too\nFor per-gene questions we will reshape it to long format (one row per fish x gene) in Week 7\n\nThe Geno&Micro column duplicates two other columns\n\nand the & is a name that will annoy every tool we use. Keep an eye on it."
   },
   {
-    "objectID": "Lecture_Folder/Lecture_03_BioE_Comp_Tools_2026.html#commands-for-reading-files",
-    "href": "Lecture_Folder/Lecture_03_BioE_Comp_Tools_2026.html#commands-for-reading-files",
+    "objectID": "Lecture_Folder/Lecture_03_BioE_Comp_Tools_2026.html#reminder---commands-for-reading-files",
+    "href": "Lecture_Folder/Lecture_03_BioE_Comp_Tools_2026.html#reminder---commands-for-reading-files",
     "title": "Lecture 03",
-    "section": "Commands for Reading Files",
-    "text": "Commands for Reading Files\n\ncat = concatenate and display files\n\nShows entire file at once\nGood for small files\n\nless = view file page by page\n\nNavigate with space (forward), b (back), q (quit)\nSearch with /pattern\n\nmore = similar to less but simpler\n\nSpace to go forward, q to quit\n\nhead = display first 10 lines (default)\n\nhead -n 20 file.txt shows first 20 lines\n\ntail = display last 10 lines (default)\n\ntail -n 20 file.txt shows last 20 lines\ntail -f file.txt follows file as it grows (useful for logs)"
+    "section": "Reminder - Commands for Reading Files",
+    "text": "Reminder - Commands for Reading Files\n\ncat = concatenate and display files\n\nShows entire file at once\nGood for small files\n\nless = view file page by page\n\nNavigate with space (forward), b (back), q (quit)\nSearch with /pattern\n\nmore = similar to less but simpler\n\nSpace to go forward, q to quit\n\nhead = display first 10 lines (default)\n\nhead -n 20 file.txt shows first 20 lines\n\ntail = display last 10 lines (default)\n\ntail -n 20 file.txt shows last 20 lines\ntail -f file.txt follows file as it grows (useful for logs)"
   },
   {
     "objectID": "Lecture_Folder/Lecture_03_BioE_Comp_Tools_2026.html#what-are-pipes",
@@ -907,7 +907,7 @@
     "href": "Lecture_Folder/Lecture_03_BioE_Comp_Tools_2026.html#common-pipe-patterns",
     "title": "Lecture 03",
     "section": "Common Pipe Patterns",
-    "text": "Common Pipe Patterns\n\nCounting patterns:\n\ngrep \"pattern\" file.txt | wc -l\nCount lines matching a pattern\n\nSorting and uniqueness:\n\ncat file.txt | sort | uniq\nSort lines and remove duplicates\n\nFinding top/bottom items:\n\nsort data.txt | head -5\nGet top 5 after sorting\n\nFiltering and processing:\n\nls -l | grep \".txt\" | awk '{print $5, $9}'\nList txt files with sizes\n\n\n\n\n\n\n\n\nNote\n\n\nA few of these preview commands we haven’t covered yet: grep gets its full treatment later today, and awk, find and xargs are stars of L04. Focus on the shape of the pipelines for now."
+    "text": "Common Pipe Patterns\n\nSorting and uniqueness:\n\ncat file.txt | sort | uniq\nSort lines and remove duplicates\n\nFinding top/bottom items:\n\nsort data.txt | head -5\nGet top 5 after sorting\n\nCounting patterns:\n\ngrep \"pattern\" file.txt | wc -l\nCount lines matching a pattern\n\nFiltering and processing:\n\nls -l | grep \".txt\" | awk '{print $5, $9}'\nList txt files with sizes\n\n\n\n\n\n\n\n\nNote\n\n\n\nA few of these preview commands we haven’t covered yet\ngrep gets its full treatment later today\nawk, find and xargs are in L04\nFocus on the shape of the pipelines for now."
   },
   {
     "objectID": "Lecture_Folder/Lecture_03_BioE_Comp_Tools_2026.html#advanced-pipe-examples",
@@ -973,25 +973,18 @@
     "text": "Combining GREP with Pipes\n# Count unique sequence headers\ngrep \"^&gt;\" sequences.fasta | sort | uniq | wc -l\n\n# Extract gene names from GFF file\ngrep -v \"^#\" annotation.gff | cut -f9 | grep -oE \"gene=[^;]+\"\n\n# Find sequences without stop codons\ngrep -v -E \"(TAA|TAG|TGA)\" orfs.txt\n\n# Quality control pipeline: count reads containing an N\n# FASTQ records are 4 lines; the sequence is always line 2 of each,\n# so awk 'NR % 4 == 2' pulls out sequence lines. (grep \"^@\" is NOT\n# safe here - quality lines can start with @ too, since @ is a valid\n# quality character.)\nzcat reads.fastq.gz | awk 'NR % 4 == 2' | grep -c \"N\"\n\n# Search and replace with sed (uses regex - sed is L04)\ngrep \"gene\" data.txt | sed 's/gene/GENE/g'"
   },
   {
-    "objectID": "Lecture_Folder/Lecture_03_BioE_Comp_Tools_2026.html#reminder-from-l02-the-three-standard-streams",
-    "href": "Lecture_Folder/Lecture_03_BioE_Comp_Tools_2026.html#reminder-from-l02-the-three-standard-streams",
+    "objectID": "Lecture_Folder/Lecture_03_BioE_Comp_Tools_2026.html#streams-and-grep-on-the-stickleback-table",
+    "href": "Lecture_Folder/Lecture_03_BioE_Comp_Tools_2026.html#streams-and-grep-on-the-stickleback-table",
     "title": "Lecture 03",
-    "section": "Reminder from L02: the three standard streams",
-    "text": "Reminder from L02: the three standard streams\nEvery Unix program reads and writes through three numbered streams:\n          ┌──────────────┐\nstdin ───&gt;│              │───&gt; stdout\n    (0)   │   program    │      (1)\n          │              │───&gt; stderr\n          └──────────────┘      (2)\n\n&gt; sends stdout to a file (overwrites) · &gt;&gt; appends · 2&gt; captures stderr · | connects one program’s stdout to the next one’s stdin\nFull treatment in L02 and Ch. 7 - next slide puts them to work on our data"
-  },
-  {
-    "objectID": "Lecture_Folder/Lecture_03_BioE_Comp_Tools_2026.html#running-example-streams-and-grep-on-the-stickleback-table",
-    "href": "Lecture_Folder/Lecture_03_BioE_Comp_Tools_2026.html#running-example-streams-and-grep-on-the-stickleback-table",
-    "title": "Lecture 03",
-    "section": "Running example: streams and grep on the stickleback table",
-    "text": "Running example: streams and grep on the stickleback table\ncd ~/projects/comptools && mkdir -p results\n\n# Keep only the header plus the mono-associated fish, save to a new file\nhead -n 1 data/Stickle_RNAseq.tsv &gt; results/mono.tsv\ngrep -w \"mono\" data/Stickle_RNAseq.tsv &gt;&gt; results/mono.tsv\nwc -l results/mono.tsv                        # 41 lines = header + 20 + 20 fish\n\n# Which individuals are genotype B raised conventionally?\ngrep -w \"convB\" data/Stickle_RNAseq.tsv | cut -f 1\n\n# A regular expression: individuals whose ID ends in a 1\ngrep -E \"^[A-Z]+1\\b\" data/Stickle_RNAseq.tsv | cut -f 1-3\n\n# Send errors somewhere useful: a typo in the path goes to the log, not the screen\ngrep -w \"mono\" data/Stickle_RNAseq.tsvv 2&gt; results/errors.log; cat results/errors.log\n\n\n\n\n\n\nTip\n\n\n&gt; creates the file, &gt;&gt; appends to it, 2&gt; captures stderr. grep -w \"mono\" matches mono only as a whole word, so it finds the 40 mono-associated fish through the third column but would not match monoA on its own. Try grep -c mono versus grep -cw mono: both give 40 here. Work out why (which column does each one match on?) - experiments like this are how you learn what a flag really does."
+    "section": "streams and grep on the stickleback table",
+    "text": "streams and grep on the stickleback table\n\n# Keep only the header plus the mono-associated fish, save to a new file\nhead -n 1 data/Stickle_RNAseq.tsv &gt; results/mono.tsv\ngrep -w \"mono\" data/Stickle_RNAseq.tsv &gt;&gt; results/mono.tsv\nwc -l results/mono.tsv                        \n\n# Which individuals are genotype B raised conventionally?\ngrep -w \"convB\" data/Stickle_RNAseq.tsv | cut -f 1\n\n# A regular expression: individuals whose ID ends in a 1\ngrep -E \"^[A-Z]+1\\b\" data/Stickle_RNAseq.tsv | cut -f 1-3\n\n# Send errors somewhere useful: a typo in the path goes to the log, not the screen\ngrep -w \"mono\" data/Stickle_RNAseq.tsv 2&gt; results/errors.log; cat results/errors.log\n\n\n\n\n\n\nTip\n\n\n\n&gt; creates the file, &gt;&gt; appends to it, 2&gt; captures stderr.\ngrep -w \"mono\" matches mono only as a whole word, so it finds the 40 mono-associated fish through the third column but would not match monoA on its own.\nTry grep -c mono versus grep -cw mono: both give 40 here.\nWork out why (which column does each one match on?) - experiments like this are how you learn what a flag really does."
   },
   {
     "objectID": "Lecture_Folder/Lecture_03_BioE_Comp_Tools_2026.html#sequence-file-formats-fasta-and-fastq",
     "href": "Lecture_Folder/Lecture_03_BioE_Comp_Tools_2026.html#sequence-file-formats-fasta-and-fastq",
     "title": "Lecture 03",
     "section": "Sequence file formats: FASTA and FASTQ",
-    "text": "Sequence file formats: FASTA and FASTQ\n\n\nFASTA - sequences (genomes, genes, proteins)\n&gt;chr21 Homo sapiens chromosome 21\nNNNNNNNNNNGATCCTTGAAGCGCCCCCAAGG\nGCATCTTCTCTACTTTCACCTAACAGATCCCA\n\nHeader line starts with &gt;\nSequence on one or more lines\nCount sequences: grep -c \"^&gt;\" file.fa\n\n\nFASTQ - raw sequencing reads\n@SRR12345.1 read_1\nNCATGCAGCGTACGGTAATTGGCAG\n+\n#AAAAFFFFFFFFFFFFFFFFFFFF\n\n4 lines per read: @ header, sequence, +, per-base quality\nQuality letters encode Phred scores (! = lowest, I = Q40)\nCount reads: echo $(( $(wc -l &lt; reads.fastq) / 4 ))\n\n\n\n\n\n\n\n\nTip\n\n\nBoth are usually gzip-compressed (.fa.gz, .fastq.gz) - use zcat / zless / zgrep to read them without unpacking. More formats (CSV/TSV, GFF, BED, VCF, HDF5) in the Data Formats appendix of the course book."
+    "text": "Sequence file formats: FASTA and FASTQ\n\n\nFASTA - sequences (genomes, genes, proteins)\n&gt;chr21 Homo sapiens chromosome 21\nNNNNNNNNNNGATCCTTGAAGCGCCCCCAAGG\nGCATCTTCTCTACTTTCACCTAACAGATCCCA\n\nHeader line starts with &gt;\nSequence on one or more lines\nCount sequences: grep -c \"^&gt;\" file.fa\n\n\nFASTQ - raw sequencing reads\n@SRR12345.1 read_1\nNCATGCAGCGTACGGTAATTGGCAG\n+\n#AAAAFFFFFFFFFFFFFFFFFFFF\n\n4 lines per read: @ header, sequence, +, per-base quality\nQuality letters encode Phred scores (! = lowest, I = Q40)\nCount reads: echo $(( $(wc -l &lt; reads.fastq) / 4 ))\n\n\n\n\n\n\n\n\nTip\n\n\n\nBoth are usually gzip-compressed (.fa.gz, .fastq.gz)\nuse zcat / zless / zgrep to read them without unpacking.\nMore formats (CSV/TSV, GFF, BED, VCF, HDF5) in the Data Formats appendix of the course book."
   },
   {
     "objectID": "Lecture_Folder/Lecture_03_BioE_Comp_Tools_2026.html#working-with-compressed-files",
@@ -1019,7 +1012,7 @@
     "href": "Lecture_Folder/Lecture_03_BioE_Comp_Tools_2026.html#examining-large-files-efficiently",
     "title": "Lecture 03",
     "section": "Examining Large Files Efficiently",
-    "text": "Examining Large Files Efficiently\nDon’t use cat on huge files! Use these approaches:\n# Decompress and look at first 10 lines\n\ngunzip -c chr21.fa.gz | head -10\n\n# Check file size before and after decompression (-k keeps the .gz)\n\nls -lh chr21.fa.gz\ngunzip -k chr21.fa.gz\nls -lh chr21.fa\n\n# Count sequences in FASTA file (lines starting with &gt;)\n# grep can't read gzip data directly - use zgrep (or zcat | grep)\n\nzgrep \"^&gt;\" chr21.fa.gz | wc -l\n\n# View sequence headers only\n\nzgrep \"^&gt;\" chr21.fa.gz | less\n\n\n\n\n\n\nNote\n\n\nThe UCSC file is soft-masked: repeats are written in lowercase (acgt). Patterns like GAATTC will miss sites inside masked regions - add -i to grep, or uppercase everything first with tr 'acgt' 'ACGT'."
+    "text": "Examining Large Files Efficiently\nDon’t use cat on huge files! Use these approaches:\n# Decompress and look at first 10 lines\n\ngunzip -c chr21.fa.gz | head -10\n\n# Check file size before and after decompression (-k keeps the .gz)\n\nls -lh chr21.fa.gz\ngunzip -k chr21.fa.gz\nls -lh chr21.fa\n\n# Count sequences in FASTA file (lines starting with &gt;)\n# grep can't read gzip data directly - use zgrep (or zcat | grep)\n\nzgrep \"^&gt;\" chr21.fa.gz | wc -l\n\n# View sequence headers only\n\nzgrep \"^&gt;\" chr21.fa.gz | less\n\n\n\n\n\n\nNote\n\n\n\nThe UCSC file is soft-masked: repeats are written in lowercase (acgt).\nPatterns like GAATTC will miss sites inside masked regions - add -i to grep\nOr uppercase everything first with tr 'acgt' 'ACGT'."
   },
   {
     "objectID": "Lecture_Folder/Lecture_03_BioE_Comp_Tools_2026.html#creating-a-subset-for-analysis",
