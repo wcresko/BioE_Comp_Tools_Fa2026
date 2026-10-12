@@ -21,54 +21,37 @@ theme_set(theme_minimal(base_size = 14))
 set.seed(2026)
 ```
 
-
 ## Book reading for this lecture
 
 The course book goes deeper on everything in this lecture. Read before or after class:
 
--   *Review:* [Ch. 7: Files, Pipes, and Redirection](../book/chapters/07-files-pipes.html)
--   [Ch. 8: Tidy Data Principles](../book/chapters/08-tidy-data.html)
--   [Ch. 9: GREP, Regular Expressions, sed and awk](../book/chapters/09-grep-regex.html) - the grep and regex sections; sed and awk wait for L04
--   *Reference:* [App. C: Common Data Formats & Public Repositories](../book/chapters/appendix-C-data-formats.html) · [App. D: Regular Expression Reference](../book/chapters/appendix-D-regex.html)
+- *Review:* [Ch. 7: Files, Pipes, and Redirection](../book/chapters/07-files-pipes.html)
+- [Ch. 8: Tidy Data Principles](../book/chapters/08-tidy-data.html)
+- [Ch. 9: GREP, Regular Expressions, sed and awk](../book/chapters/09-grep-regex.html) - the grep and regex sections; sed and awk wait for L04
+- *Reference:* [App. C: Common Data Formats & Public Repositories](../book/chapters/appendix-C-data-formats.html) · [App. D: Regular Expression Reference](../book/chapters/appendix-D-regex.html)
 
 ## Goals for today
 
--   Warm-up: shell scripts and permissions from L02 - ending in your first *Python* script
--   Tidy data principles - and is our stickleback table tidy?
--   Unix standard streams and redirection
--   Working with large genomic data files (FASTA and FASTQ)
--   GREP and regular expressions
--   Working with compressed files
+- Warm-up: shell scripts and permissions from L02 - ending in your first *Python* script
+- Tidy data principles - and is our stickleback table tidy?
+- Unix standard streams and redirection
+- Working with large genomic data files (FASTA and FASTQ)
+- GREP and regular expressions
+- Working with compressed files
 
-# Warm-up - shell scripts, take two
+# Warm-up - shell scripts
 
 ## Recap: a script is a text file you make runnable
 
 We rushed the end of L02, so here are the ideas to keep. The full story stays in [Lecture 02](Lecture_02_BioE_Comp_Tools_2026.html) and [Ch. 6](../book/chapters/06-unix-environment.html).
 
 ::: incremental
--   A **shell script** is a plain-text file of the commands you would have typed, run top to bottom
--   Line 1 is the **shebang**: `#!` names the program that interprets the rest of the file (`#!/usr/bin/env bash`)
--   New files are born `rw-r--r--` - **no `x`** - so `./hello.sh` answers `Permission denied`
--   The one-time fix is `chmod +x hello.sh`; after that, `./hello.sh` just runs
--   `bash hello.sh` works *without* `x`, because there you are running `bash`, not the script
--   Read `ls -l` as a file-type flag + three `rwx` triplets (user, group, other): `755` = `rwxr-xr-x`, the classic script permission
-:::
-
-## Two minutes of muscle memory
-
-The four week-2 scripts are on the [Example Files](../Examples.html) page - open them in Positron, *read the comments*, then rebuild the habit:
-
-``` bash
-cd ~/projects/comptools
-ls -l scripts/                  # first column: who may read, write, execute?
-chmod +x scripts/*.sh           # the once-per-script step
-./scripts/filter_rows.sh Genotype A < data/Stickle_RNAseq.tsv |
-    ./scripts/total_counts.sh | sort -t$'\t' -k2,2nr | head -3
-```
-
-::: callout-tip
-`Permission denied` is almost never about *you* - look for a missing `x` with `ls -l`. And `command not found` for a script that is right there usually means you forgot the `./`.
+- A **shell script** is a plain-text file of the commands you would have typed, run top to bottom
+- Line 1 is the **shebang**: `#!` names the program that interprets the rest of the file (`#!/usr/bin/env bash`)
+- New files are born `rw-r--r--` - **no `x`** - so `./hello.sh` answers `Permission denied`
+- The one-time fix is `chmod +x hello.sh`; after that, `./hello.sh` just runs
+- `bash hello.sh` works *without* `x`, because there you are running `bash`, not the script
+- Read `ls -l` as a file-type flag + three `rwx` triplets (user, group, other): `755` = `rwxr-xr-x`, the classic script permission
 :::
 
 ## The shebang is not married to bash
@@ -82,17 +65,17 @@ Change line 1 and the *same* mechanics run any language:
 ```
 
 ::: incremental
--   Commands in a text file → shebang on line 1 → `chmod +x` once → `./script` forever
--   The shell does not care what language is inside - it reads the shebang and hands the file over
--   So let's write our first **Python** script right now, as a preview of L05-L07
--   It will read the stickleback table in *one line* - possible only because the file follows rules we will name today: **tidy data**
+- Commands in a text file → shebang on line 1 → `chmod +x` once → `./script` forever
+- The shell does not care what language is inside - it reads the shebang and hands the file over
+- So let's write our first **Python** script right now, as a preview of L05-L07
+- It will read the stickleback table in *one line* - possible only because the file follows rules we will name today: **tidy data**
 :::
 
 ## A first Python script: read tidy data, make a plot
 
 Put this in `scripts/plot_stickleback.py` - or grab the commented script and its step-by-step notebook from the [Schedule](../Schedule.html) (week 3):
 
-``` python
+``` {.python code-line-numbers="|1|4-5|9|12-14|17-20"}
 #!/usr/bin/env python3
 # plot_stickleback.py - total RNA-seq counts per fish, by group
 
@@ -126,12 +109,11 @@ open results/total_counts_by_group.png   # macOS (Linux: xdg-open)
 ```
 
 ::: incremental
--   `Permission denied`? You know exactly what to do now
--   Read a file, compute, save a figure - rerunnable with **one command** when new data arrive: that is reproducibility
--   Don't sweat the pandas/matplotlib details yet (that's L05-L07) - today's point is that *scripts are scripts*, whatever the language
--   The one-line read worked because the data follow rules. Which rules? On to **tidy data**
+- `Permission denied`? You know exactly what to do now
+- Read a file, compute, save a figure - rerunnable with **one command** when new data arrive: that is reproducibility
+- Don't sweat the pandas/matplotlib details yet (that's L05-L07) - today's point is that *scripts are scripts*, whatever the language
+- The one-line read worked because the data follow rules. Which rules? On to **tidy data**
 :::
-
 
 # Tidy Data
 
@@ -147,25 +129,25 @@ open results/total_counts_by_group.png   # macOS (Linux: xdg-open)
 
 ## Data set rules of thumb (aka Tidy Data)
 
--   Store a copy of data in nonproprietary software and hardware formats, such as plain ASCII text (aka a flat file)
--   Leave an uncorrected file when doing analyses
--   Use descriptive names for your data files and variables
--   Include a header line with descriptive variable names
--   Maintain effective metadata about the data (data dictionary)
--   When you add observations to a database, add rows
--   When you add variables to a database, add columns, not rows
--   A column of data should contain only one data type
+- Store a copy of data in nonproprietary software and hardware formats, such as plain ASCII text (aka a flat file)
+- Leave an uncorrected file when doing analyses
+- Use descriptive names for your data files and variables
+- Include a header line with descriptive variable names
+- Maintain effective metadata about the data (data dictionary)
+- When you add observations to a database, add rows
+- When you add variables to a database, add columns, not rows
+- A column of data should contain only one data type
 
 ## Not all data are tidy to begin with
 
--   Sometimes need to do some data wrangling
+- Sometimes need to do some data wrangling
 
--   But also contingency tables
+- But also contingency tables
 
 ## Types of data
 
 |  |  |  |  |
-|:--:|:--:|:--:|:--:|
+|:----------------:|:----------------:|:----------------:|:----------------:|
 | Categorical |  | Quantitative |  |
 | Ordinal | Nominal | Ratio | Interval |
 | small, medium, large | apples, oranges, bananas | kilograms, dollars, years | temperature, calendar year |
@@ -181,13 +163,15 @@ Back in your course folder (`cd ~/projects/comptools`):
 head -n 2 data/Stickle_RNAseq.tsv | cut -f 1-8
 ```
 
-    Individual  Genotype  Microbiota    Geno&Micro  Gene1  Gene2  Gene3  Gene4
-    AC1         A         conventional  convA       16     15     71     153
+```         
+Individual  Genotype  Microbiota    Geno&Micro  Gene1  Gene2  Gene3  Gene4
+AC1         A         conventional  convA       16     15     71     153
+```
 
 ::: incremental
--   One row per **fish**, one column per **variable** - tidy for per-fish questions
--   But **600 gene columns** is a "wide" layout: the *gene* is really a variable too. For per-gene questions we will reshape it to **long** format (one row per fish x gene) in Week 7
--   The `Geno&Micro` column duplicates two other columns - and the `&` is a name that will annoy every tool we use. Keep an eye on it.
+- One row per **fish**, one column per **variable** - tidy for per-fish questions
+- But **600 gene columns** is a "wide" layout: the *gene* is really a variable too. For per-gene questions we will reshape it to **long** format (one row per fish x gene) in Week 7
+- The `Geno&Micro` column duplicates two other columns - and the `&` is a name that will annoy every tool we use. Keep an eye on it.
 :::
 
 # The Command Line
@@ -196,94 +180,94 @@ head -n 2 data/Stickle_RNAseq.tsv | cut -f 1-8
 
 ## Making new files
 
--   Make new folders: `mkdir`
--   Make new files: `nano`, `touch`
--   Rename files: `mv`
--   Move files: `mv`
--   Copy files: `cp`
--   Delete files: `rm`
--   Delete directories: `rmdir`
--   Examining file length: `wc`
--   Reading files: `cat`
--   Looking at beginning or end: `head` or `tail`
+- Make new folders: `mkdir`
+- Make new files: `nano`, `touch`
+- Rename files: `mv`
+- Move files: `mv`
+- Copy files: `cp`
+- Delete files: `rm`
+- Delete directories: `rmdir`
+- Examining file length: `wc`
+- Reading files: `cat`
+- Looking at beginning or end: `head` or `tail`
 
 ## Things to keep in mind
 
--   The shell trusts you
-    -   It will delete files you say to delete
-    -   It will override files if you name 2 things the same
--   Naming conventions
-    -   Avoid spaces
-    -   Don’t start with a –
-    -   Stick to letters, numbers, . , -, and \_
--   Use appropriate file extensions in file names
-    -   Some software expect files with certain extensions (.fasta, .txt, etc.)
+- The shell trusts you
+  - It will delete files you say to delete
+  - It will override files if you name 2 things the same
+- Naming conventions
+  - Avoid spaces
+  - Don’t start with a –
+  - Stick to letters, numbers, . , -, and \_
+- Use appropriate file extensions in file names
+  - Some software expect files with certain extensions (.fasta, .txt, etc.)
 
 ## Practice making files and directories
 
--   Make a new directory called whatever you'd like.
--   Add a file named `Practice.txt` to the directory and add some text to it
--   Read the contents of the file and get its length
--   Rename the file to `Super_practice.txt`
--   Move the file to a new folder named `Testing`
--   Make a copy of the file named `Super_practice_copy.txt`
--   Read the contents of the file and get its length to make sure it’s the same as `Super_practice.txt`
--   Delete the original `Super_practice.txt`
+- Make a new directory called whatever you'd like.
+- Add a file named `Practice.txt` to the directory and add some text to it
+- Read the contents of the file and get its length
+- Rename the file to `Super_practice.txt`
+- Move the file to a new folder named `Testing`
+- Make a copy of the file named `Super_practice_copy.txt`
+- Read the contents of the file and get its length to make sure it’s the same as `Super_practice.txt`
+- Delete the original `Super_practice.txt`
 
 # Reading and Writing Files in Unix
 
 ## Commands for Reading Files
 
--   **`cat`** = concatenate and display files
-    -   Shows entire file at once
-    -   Good for small files
--   **`less`** = view file page by page
-    -   Navigate with `space` (forward), `b` (back), `q` (quit)
-    -   Search with `/pattern`
--   **`more`** = similar to less but simpler
-    -   Space to go forward, `q` to quit
--   **`head`** = display first 10 lines (default)
-    -   `head -n 20 file.txt` shows first 20 lines
--   **`tail`** = display last 10 lines (default)
-    -   `tail -n 20 file.txt` shows last 20 lines
-    -   `tail -f file.txt` follows file as it grows (useful for logs)
+- **`cat`** = concatenate and display files
+  - Shows entire file at once
+  - Good for small files
+- **`less`** = view file page by page
+  - Navigate with `space` (forward), `b` (back), `q` (quit)
+  - Search with `/pattern`
+- **`more`** = similar to less but simpler
+  - Space to go forward, `q` to quit
+- **`head`** = display first 10 lines (default)
+  - `head -n 20 file.txt` shows first 20 lines
+- **`tail`** = display last 10 lines (default)
+  - `tail -n 20 file.txt` shows last 20 lines
+  - `tail -f file.txt` follows file as it grows (useful for logs)
 
 ## Input Redirection
 
--   **`<`** = redirect input from a file
-    -   `command < input.txt`
-    -   Sends contents of file as input to command
--   **`<<`** = here document (multi-line input)
-    -   Allows you to provide multi-line input directly in the terminal
--   Example uses:
-    -   `wc -l < data.txt` counts lines in data.txt
-    -   `sort < names.txt` sorts contents of names.txt
+- **`<`** = redirect input from a file
+  - `command < input.txt`
+  - Sends contents of file as input to command
+- **`<<`** = here document (multi-line input)
+  - Allows you to provide multi-line input directly in the terminal
+- Example uses:
+  - `wc -l < data.txt` counts lines in data.txt
+  - `sort < names.txt` sorts contents of names.txt
 
 ## Output Redirection
 
--   **`>`** = redirect output to a file (overwrites)
-    -   `ls -l > filelist.txt`
-    -   Creates new file or overwrites existing
--   **`>>`** = append output to a file
-    -   `echo "new line" >> existing.txt`
-    -   Adds to the end of existing file
--   **`2>`** = redirect error messages
-    -   `command 2> errors.txt`
-    -   Captures error messages separately
--   **`&>`** = redirect both output and errors
-    -   `command &> all_output.txt`
+- **`>`** = redirect output to a file (overwrites)
+  - `ls -l > filelist.txt`
+  - Creates new file or overwrites existing
+- **`>>`** = append output to a file
+  - `echo "new line" >> existing.txt`
+  - Adds to the end of existing file
+- **`2>`** = redirect error messages
+  - `command 2> errors.txt`
+  - Captures error messages separately
+- **`&>`** = redirect both output and errors
+  - `command &> all_output.txt`
 
 ## Unix Three Standard Streams
 
--   **stdin (0)** = Standard Input
-    -   Where programs read input from
-    -   Default: keyboard
--   **stdout (1)** = Standard Output
-    -   Where programs write normal output
-    -   Default: terminal screen
--   **stderr (2)** = Standard Error
-    -   Where programs write error messages
-    -   Default: terminal screen (same as stdout)
+- **stdin (0)** = Standard Input
+  - Where programs read input from
+  - Default: keyboard
+- **stdout (1)** = Standard Output
+  - Where programs write normal output
+  - Default: terminal screen
+- **stderr (2)** = Standard Error
+  - Where programs write error messages
+  - Default: terminal screen (same as stdout)
 
 ## Visualizing Data Streams
 
@@ -296,10 +280,10 @@ stdin ───>│              │───> stdout
          └──────────────┘      (2)
 ```
 
--   File descriptor numbers: 0, 1, 2
--   Can redirect each stream independently
--   Programs don't know if streams are redirected
--   This abstraction is key to Unix philosophy
+- File descriptor numbers: 0, 1, 2
+- Can redirect each stream independently
+- Programs don't know if streams are redirected
+- This abstraction is key to Unix philosophy
 
 ## Basic Stream Redirection
 
@@ -341,55 +325,54 @@ cat *_errors.log | grep -E "ERROR|WARNING"
 
 ## What are Pipes?
 
--   **`|`** = the pipe operator
-    -   Takes output from one command as input to another
-    -   Chains commands together
-    -   No intermediate files needed!
--   Basic syntax:
-    -   `command1 | command2 | command3`
--   Power of Unix philosophy:
-    -   Small tools that do one thing well
-    -   Combine them to do complex tasks
+- **`|`** = the pipe operator
+  - Takes output from one command as input to another
+  - Chains commands together
+  - No intermediate files needed!
+- Basic syntax:
+  - `command1 | command2 | command3`
+- Power of Unix philosophy:
+  - Small tools that do one thing well
+  - Combine them to do complex tasks
 
 ## Common Pipe Patterns
 
--   **Counting patterns:**
-    -   `grep "pattern" file.txt | wc -l`
-    -   Count lines matching a pattern
--   **Sorting and uniqueness:**
-    -   `cat file.txt | sort | uniq`
-    -   Sort lines and remove duplicates
--   **Finding top/bottom items:**
-    -   `sort data.txt | head -5`
-    -   Get top 5 after sorting
--   **Filtering and processing:**
-    -   `ls -l | grep ".txt" | awk '{print $5, $9}'`
-    -   List txt files with sizes
+- **Counting patterns:**
+  - `grep "pattern" file.txt | wc -l`
+  - Count lines matching a pattern
+- **Sorting and uniqueness:**
+  - `cat file.txt | sort | uniq`
+  - Sort lines and remove duplicates
+- **Finding top/bottom items:**
+  - `sort data.txt | head -5`
+  - Get top 5 after sorting
+- **Filtering and processing:**
+  - `ls -l | grep ".txt" | awk '{print $5, $9}'`
+  - List txt files with sizes
 
 ## Advanced Pipe Examples
 
--   **Multi-step data processing:**
-    -   `cat data.csv | cut -d',' -f2 | sort | uniq -c | sort -rn`
-    -   Extract column 2, count unique values, sort by frequency
--   **Complex transformations:**
-    -   `find . -name "*.txt" | xargs wc -l | sort -n`
-    -   Find all txt files and sort by line count
--   **Real-time monitoring:**
-    -   `tail -f logfile.txt | grep ERROR`
-    -   Watch log file for errors in real-time
+- **Multi-step data processing:**
+  - `cat data.csv | cut -d',' -f2 | sort | uniq -c | sort -rn`
+  - Extract column 2, count unique values, sort by frequency
+- **Complex transformations:**
+  - `find . -name "*.txt" | xargs wc -l | sort -n`
+  - Find all txt files and sort by line count
+- **Real-time monitoring:**
+  - `tail -f logfile.txt | grep ERROR`
+  - Watch log file for errors in real-time
 
 ## Tips for Working with Files and Pipes
 
--   Test pipes step by step
-    -   Build complex pipes incrementally
-    -   Check output at each stage
--   Use `less` for large files instead of `cat`
--   Remember: `>` overwrites, `>>` appends
--   Pipe efficiency:
-    -   Filter early in the pipeline
-    -   Reduces data passed between commands
--   Save intermediate results when debugging complex pipes \# Unix Data Streams
-
+- Test pipes step by step
+  - Build complex pipes incrementally
+  - Check output at each stage
+- Use `less` for large files instead of `cat`
+- Remember: `>` overwrites, `>>` appends
+- Pipe efficiency:
+  - Filter early in the pipeline
+  - Reduces data passed between commands
+- Save intermediate results when debugging complex pipes \# Unix Data Streams
 
 ## Sequence file formats: FASTA and FASTQ
 
@@ -403,9 +386,9 @@ NNNNNNNNNNGATCCTTGAAGCGCCCCCAAGG
 GCATCTTCTCTACTTTCACCTAACAGATCCCA
 ```
 
--   Header line starts with `>`
--   Sequence on one or more lines
--   Count sequences: `grep -c "^>" file.fa`
+- Header line starts with `>`
+- Sequence on one or more lines
+- Count sequences: `grep -c "^>" file.fa`
 :::
 
 ::: {.column width="50%"}
@@ -418,9 +401,9 @@ NCATGCAGCGTACGGTAATTGGCAG
 #AAAAFFFFFFFFFFFFFFFFFFFF
 ```
 
--   **4 lines per read**: `@` header, sequence, `+`, per-base quality
--   Quality letters encode Phred scores (`!` = lowest, `I` = Q40)
--   Count reads: `echo $(( $(wc -l < reads.fastq) / 4 ))`
+- **4 lines per read**: `@` header, sequence, `+`, per-base quality
+- Quality letters encode Phred scores (`!` = lowest, `I` = Q40)
+- Count reads: `echo $(( $(wc -l < reads.fastq) / 4 ))`
 :::
 :::::
 
@@ -432,12 +415,12 @@ Both are usually gzip-compressed (`.fa.gz`, `.fastq.gz`) - use `zcat` / `zless` 
 
 ## Human Chromosome Data
 
--   Genomic data files can be massive (the full human genome is \~3.1 GB compressed)
--   FASTA format is standard for sequence data
--   Perfect use case for Unix pipes and redirection
--   We will practice on **human chromosome 21** - the smallest autosome (\~13 MB compressed, \~46 Mb of sequence), so every command finishes in seconds
--   The same commands work unchanged on the whole genome - only the wait time changes
--   The course book works through the same file in [Chapter 9](../book/chapters/09-grep-regex.html#sec-genomic-processing)
+- Genomic data files can be massive (the full human genome is \~3.1 GB compressed)
+- FASTA format is standard for sequence data
+- Perfect use case for Unix pipes and redirection
+- We will practice on **human chromosome 21** - the smallest autosome (\~13 MB compressed, \~46 Mb of sequence), so every command finishes in seconds
+- The same commands work unchanged on the whole genome - only the wait time changes
+- The course book works through the same file in [Chapter 9](../book/chapters/09-grep-regex.html#sec-genomic-processing)
 
 ## Downloading Genomic Data
 
@@ -454,10 +437,10 @@ curl -L -o chr21.fa.gz \
   https://hgdownload.soe.ucsc.edu/goldenPath/hg38/chromosomes/chr21.fa.gz
 ```
 
--   `wget` and `curl` are both tools for downloading files (macOS ships `curl`; install `wget` with Homebrew if you want it)
--   The backslash lets a long command span multiple lines
--   `.gz` extension means the file is compressed
--   The whole genome lives in the same directory as `hg38.fa.gz` (\~1 GB) - same commands, much longer runs
+- `wget` and `curl` are both tools for downloading files (macOS ships `curl`; install `wget` with Homebrew if you want it)
+- The backslash lets a long command span multiple lines
+- `.gz` extension means the file is compressed
+- The whole genome lives in the same directory as `hg38.fa.gz` (\~1 GB) - same commands, much longer runs
 
 ## Examining Large Files Efficiently
 
@@ -526,10 +509,10 @@ grep -v "^>" chr21.fa | \
   uniq -c
 ```
 
--   `grep -v` inverts the match (excludes lines)
--   `tr -d '\n'` removes newlines
--   `fold -w1` puts each character on its own line
--   Expect a lot of `N` - the first \~5 Mb of chr21 is unassembled
+- `grep -v` inverts the match (excludes lines)
+- `tr -d '\n'` removes newlines
+- `fold -w1` puts each character on its own line
+- Expect a lot of `N` - the first \~5 Mb of chr21 is unassembled
 
 ## Finding Patterns in Genomic Data
 
@@ -583,8 +566,8 @@ wget -qO - https://hgdownload.soe.ucsc.edu/goldenPath/hg38/chromosomes/chr21.fa.
 ```
 
 ::: notes
--   The `-O -` flag tells wget to output to stdout
--   This approach saves disk space and time
+- The `-O -` flag tells wget to output to stdout
+- This approach saves disk space and time
 :::
 
 ## Running example: streams and `grep` on the stickleback table
@@ -613,13 +596,13 @@ grep -w "mono" data/Stickle_RNAseq.tsvv 2> results/errors.log; cat results/error
 
 ## Key Takeaways
 
--   **Real bioinformatics often involves gigabytes of data - these Unix tools scale beautifully!**
--   **Never load entire genome files into memory** - use streaming
--   **Combine tools** - each does one thing well
--   **Test on subsets first** - extract small portions for development
--   **Document your pipelines** - save commands in scripts
--   **Use compression** - work with .gz files directly when possible
--   **Think in streams** - data flows through pipes without intermediate files
+- **Real bioinformatics often involves gigabytes of data - these Unix tools scale beautifully!**
+- **Never load entire genome files into memory** - use streaming
+- **Combine tools** - each does one thing well
+- **Test on subsets first** - extract small portions for development
+- **Document your pipelines** - save commands in scripts
+- **Use compression** - work with .gz files directly when possible
+- **Think in streams** - data flows through pipes without intermediate files
 
 ## Practice Exercise: Genomic Data Pipeline
 
@@ -632,16 +615,15 @@ Build a complete analysis pipeline:
 5.  Extract all genes with "ribosomal" in the header
 6.  Save your pipeline as a shell script for reproducibility
 
-
 # GREP and Regular Expressions
 
 ## What is GREP?
 
--   **GREP** = Global Regular Expression Print
--   Powerful text search tool in Unix
--   Searches for patterns in files or input streams
--   Returns lines that match the pattern
--   Essential for large data processing
+- **GREP** = Global Regular Expression Print
+- Powerful text search tool in Unix
+- Searches for patterns in files or input streams
+- Returns lines that match the pattern
+- Essential for large data processing
 
 Basic syntax:
 
@@ -675,15 +657,15 @@ grep "mutation" *.txt
 
 Regular expressions (regex) are patterns for matching text:
 
--   **`.`** = any single character
--   **`*`** = zero or more of preceding character
--   **`+`** = one or more of preceding character
--   **`?`** = zero or one of preceding character
--   **`^`** = start of line
--   **`$`** = end of line
--   **`[abc]`** = any character in set
--   **`[^abc]`** = any character NOT in set
--   **`\`** = escape special characters
+- **`.`** = any single character
+- **`*`** = zero or more of preceding character
+- **`+`** = one or more of preceding character
+- **`?`** = zero or one of preceding character
+- **`^`** = start of line
+- **`$`** = end of line
+- **`[abc]`** = any character in set
+- **`[^abc]`** = any character NOT in set
+- **`\`** = escape special characters
 
 ## Basic Regex Examples
 

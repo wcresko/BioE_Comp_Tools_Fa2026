@@ -233,8 +233,8 @@ Bill Cresko
 </ul>
 </section>
 <section>
-<section id="warm-up---shell-scripts-take-two" class="title-slide slide level1 center">
-<h1>Warm-up - shell scripts, take two</h1>
+<section id="warm-up---shell-scripts" class="title-slide slide level1 center">
+<h1>Warm-up - shell scripts</h1>
 
 </section>
 <section id="recap-a-script-is-a-text-file-you-make-runnable" class="slide level2">
@@ -249,34 +249,12 @@ Bill Cresko
 <li class="fragment">Read <code>ls -l</code> as a file-type flag + three <code>rwx</code> triplets (user, group, other): <code>755</code> = <code>rwxr-xr-x</code>, the classic script permission</li>
 </ul>
 </section>
-<section id="two-minutes-of-muscle-memory" class="slide level2">
-<h2>Two minutes of muscle memory</h2>
-<p>The four week-2 scripts are on the <a href="../Examples.html">Example Files</a> page - open them in Positron, <em>read the comments</em>, then rebuild the habit:</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb1-1"><a></a><span class="bu">cd</span> ~/projects/comptools</span>
-<span id="cb1-2"><a></a><span class="fu">ls</span> <span class="at">-l</span> scripts/                  <span class="co"># first column: who may read, write, execute?</span></span>
-<span id="cb1-3"><a></a><span class="fu">chmod</span> +x scripts/<span class="pp">*</span>.sh           <span class="co"># the once-per-script step</span></span>
-<span id="cb1-4"><a></a><span class="ex">./scripts/filter_rows.sh</span> Genotype A <span class="op">&lt;</span> data/Stickle_RNAseq.tsv <span class="kw">|</span></span>
-<span id="cb1-5"><a></a>    <span class="ex">./scripts/total_counts.sh</span> <span class="kw">|</span> <span class="fu">sort</span> <span class="at">-t</span><span class="st">$'</span><span class="dt">\t</span><span class="st">'</span> <span class="at">-k2,2nr</span> <span class="kw">|</span> <span class="fu">head</span> <span class="at">-3</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="callout callout-tip callout-titled callout-style-default">
-<div class="callout-body">
-<div class="callout-title">
-<div class="callout-icon-container">
-<i class="callout-icon"></i>
-</div>
-<p><strong>Tip</strong></p>
-</div>
-<div class="callout-content">
-<p><code>Permission denied</code> is almost never about <em>you</em> - look for a missing <code>x</code> with <code>ls -l</code>. And <code>command not found</code> for a script that is right there usually means you forgot the <code>./</code>.</p>
-</div>
-</div>
-</div>
-</section>
 <section id="the-shebang-is-not-married-to-bash" class="slide level2">
 <h2>The shebang is not married to bash</h2>
 <p>Change line 1 and the <em>same</em> mechanics run any language:</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb2-1"><a></a><span class="co">#!/usr/bin/env bash      # a bash script</span></span>
-<span id="cb2-2"><a></a><span class="co">#!/usr/bin/env python3   # a Python script</span></span>
-<span id="cb2-3"><a></a><span class="co">#!/usr/bin/env Rscript   # an R script</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb1-1"><a></a><span class="co">#!/usr/bin/env bash      # a bash script</span></span>
+<span id="cb1-2"><a></a><span class="co">#!/usr/bin/env python3   # a Python script</span></span>
+<span id="cb1-3"><a></a><span class="co">#!/usr/bin/env Rscript   # an R script</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <ul>
 <li class="fragment">Commands in a text file → shebang on line 1 → <code>chmod +x</code> once → <code>./script</code> forever</li>
 <li class="fragment">The shell does not care what language is inside - it reads the shebang and hands the file over</li>
@@ -286,35 +264,35 @@ Bill Cresko
 </section>
 <section id="a-first-python-script-read-tidy-data-make-a-plot" class="slide level2">
 <h2>A first Python script: read tidy data, make a plot</h2>
-<p>Put this in <code>scripts/plot_stickleback.py</code> - or download the commented version from the <a href="../Schedule.html">Schedule</a> (week 3):</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb3"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a></a><span class="co">#!/usr/bin/env python3</span></span>
-<span id="cb3-2"><a></a><span class="co"># plot_stickleback.py - total RNA-seq counts per fish, by group</span></span>
-<span id="cb3-3"><a></a></span>
-<span id="cb3-4"><a></a><span class="im">import</span> pandas <span class="im">as</span> pd                  <span class="co"># data tables     (L05-L06)</span></span>
-<span id="cb3-5"><a></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt      <span class="co"># plotting        (L06)</span></span>
-<span id="cb3-6"><a></a></span>
-<span id="cb3-7"><a></a><span class="co"># One line to read the whole table - because it is tidy:</span></span>
-<span id="cb3-8"><a></a><span class="co"># a header of variable names, one row per fish, one value per cell</span></span>
-<span id="cb3-9"><a></a>stickle <span class="op">=</span> pd.read_csv(<span class="st">"data/Stickle_RNAseq.tsv"</span>, sep<span class="op">=</span><span class="st">"</span><span class="ch">\t</span><span class="st">"</span>)</span>
-<span id="cb3-10"><a></a></span>
-<span id="cb3-11"><a></a><span class="co"># One number per fish: total reads across the 600 gene columns</span></span>
-<span id="cb3-12"><a></a>genes <span class="op">=</span> [c <span class="cf">for</span> c <span class="kw">in</span> stickle.columns <span class="cf">if</span> c.startswith(<span class="st">"Gene"</span>)]</span>
-<span id="cb3-13"><a></a>totals <span class="op">=</span> pd.DataFrame({<span class="st">"Group"</span>: stickle[<span class="st">"Geno&amp;Micro"</span>],</span>
-<span id="cb3-14"><a></a>                       <span class="st">"Total"</span>: stickle[genes].<span class="bu">sum</span>(axis<span class="op">=</span><span class="dv">1</span>)})</span>
-<span id="cb3-15"><a></a></span>
-<span id="cb3-16"><a></a><span class="co"># A quick plot: one box per genotype-x-microbiota group</span></span>
-<span id="cb3-17"><a></a>totals.boxplot(column<span class="op">=</span><span class="st">"Total"</span>, by<span class="op">=</span><span class="st">"Group"</span>)</span>
-<span id="cb3-18"><a></a>plt.ylabel(<span class="st">"Total reads per fish"</span>)</span>
-<span id="cb3-19"><a></a>plt.savefig(<span class="st">"results/total_counts_by_group.png"</span>, dpi<span class="op">=</span><span class="dv">200</span>)</span>
-<span id="cb3-20"><a></a><span class="bu">print</span>(<span class="st">"Wrote results/total_counts_by_group.png"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Put this in <code>scripts/plot_stickleback.py</code> - or grab the commented script and its step-by-step notebook from the <a href="../Schedule.html">Schedule</a> (week 3):</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2" data-code-line-numbers="|1|4-5|9|12-14|17-20"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a></a><span class="co">#!/usr/bin/env python3</span></span>
+<span id="cb2-2"><a></a><span class="co"># plot_stickleback.py - total RNA-seq counts per fish, by group</span></span>
+<span id="cb2-3"><a></a></span>
+<span id="cb2-4"><a></a><span class="im">import</span> pandas <span class="im">as</span> pd                  <span class="co"># data tables     (L05-L06)</span></span>
+<span id="cb2-5"><a></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt      <span class="co"># plotting        (L06)</span></span>
+<span id="cb2-6"><a></a></span>
+<span id="cb2-7"><a></a><span class="co"># One line to read the whole table - because it is tidy:</span></span>
+<span id="cb2-8"><a></a><span class="co"># a header of variable names, one row per fish, one value per cell</span></span>
+<span id="cb2-9"><a></a>stickle <span class="op">=</span> pd.read_csv(<span class="st">"data/Stickle_RNAseq.tsv"</span>, sep<span class="op">=</span><span class="st">"</span><span class="ch">\t</span><span class="st">"</span>)</span>
+<span id="cb2-10"><a></a></span>
+<span id="cb2-11"><a></a><span class="co"># One number per fish: total reads across the 600 gene columns</span></span>
+<span id="cb2-12"><a></a>genes <span class="op">=</span> [c <span class="cf">for</span> c <span class="kw">in</span> stickle.columns <span class="cf">if</span> c.startswith(<span class="st">"Gene"</span>)]</span>
+<span id="cb2-13"><a></a>totals <span class="op">=</span> pd.DataFrame({<span class="st">"Group"</span>: stickle[<span class="st">"Geno&amp;Micro"</span>],</span>
+<span id="cb2-14"><a></a>                       <span class="st">"Total"</span>: stickle[genes].<span class="bu">sum</span>(axis<span class="op">=</span><span class="dv">1</span>)})</span>
+<span id="cb2-15"><a></a></span>
+<span id="cb2-16"><a></a><span class="co"># A quick plot: one box per genotype-x-microbiota group</span></span>
+<span id="cb2-17"><a></a>totals.boxplot(column<span class="op">=</span><span class="st">"Total"</span>, by<span class="op">=</span><span class="st">"Group"</span>)</span>
+<span id="cb2-18"><a></a>plt.ylabel(<span class="st">"Total reads per fish"</span>)</span>
+<span id="cb2-19"><a></a>plt.savefig(<span class="st">"results/total_counts_by_group.png"</span>, dpi<span class="op">=</span><span class="dv">200</span>)</span>
+<span id="cb2-20"><a></a><span class="bu">print</span>(<span class="st">"Wrote results/total_counts_by_group.png"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </section>
 <section id="run-it-exactly-like-the-shell-scripts" class="slide level2">
 <h2>Run it exactly like the shell scripts</h2>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb4"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb4-1"><a></a><span class="bu">cd</span> ~/projects/comptools <span class="kw">&amp;&amp;</span> <span class="fu">mkdir</span> <span class="at">-p</span> results</span>
-<span id="cb4-2"><a></a><span class="fu">chmod</span> +x scripts/plot_stickleback.py     <span class="co"># the same one-time step</span></span>
-<span id="cb4-3"><a></a><span class="ex">./scripts/plot_stickleback.py</span>            <span class="co"># the same ./ to run it</span></span>
-<span id="cb4-4"><a></a><span class="co"># Wrote results/total_counts_by_group.png</span></span>
-<span id="cb4-5"><a></a><span class="ex">open</span> results/total_counts_by_group.png   <span class="co"># macOS (Linux: xdg-open)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb3"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb3-1"><a></a><span class="bu">cd</span> ~/projects/comptools <span class="kw">&amp;&amp;</span> <span class="fu">mkdir</span> <span class="at">-p</span> results</span>
+<span id="cb3-2"><a></a><span class="fu">chmod</span> +x scripts/plot_stickleback.py     <span class="co"># the same one-time step</span></span>
+<span id="cb3-3"><a></a><span class="ex">./scripts/plot_stickleback.py</span>            <span class="co"># the same ./ to run it</span></span>
+<span id="cb3-4"><a></a><span class="co"># Wrote results/total_counts_by_group.png</span></span>
+<span id="cb3-5"><a></a><span class="ex">open</span> results/total_counts_by_group.png   <span class="co"># macOS (Linux: xdg-open)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <ul>
 <li class="fragment"><code>Permission denied</code>? You know exactly what to do now</li>
 <li class="fragment">Read a file, compute, save a figure - rerunnable with <strong>one command</strong> when new data arrive: that is reproducibility</li>
@@ -399,7 +377,7 @@ Bill Cresko
 <section id="is-our-course-dataset-tidy" class="slide level2">
 <h2>Is our course dataset tidy?</h2>
 <p>Back in your course folder (<code>cd ~/projects/comptools</code>):</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb5"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb5-1"><a></a><span class="fu">head</span> <span class="at">-n</span> 2 data/Stickle_RNAseq.tsv <span class="kw">|</span> <span class="fu">cut</span> <span class="at">-f</span> 1-8</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb4"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb4-1"><a></a><span class="fu">head</span> <span class="at">-n</span> 2 data/Stickle_RNAseq.tsv <span class="kw">|</span> <span class="fu">cut</span> <span class="at">-f</span> 1-8</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <pre><code>Individual  Genotype  Microbiota    Geno&amp;Micro  Gene1  Gene2  Gene3  Gene4
 AC1         A         conventional  convA       16     15     71     153</code></pre>
 <ul>
@@ -559,12 +537,12 @@ AC1         A         conventional  convA       16     15     71     153</code><
 </section>
 <section id="visualizing-data-streams" class="slide level2">
 <h2>Visualizing Data Streams</h2>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb7"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb7-1"><a></a><span class="co"># Every Unix program has these three streams</span></span>
-<span id="cb7-2"><a></a>         <span class="ex">┌──────────────┐</span></span>
-<span id="cb7-3"><a></a><span class="ex">stdin</span> ───<span class="op">&gt;</span>│              │───<span class="op">&gt;</span> stdout</span>
-<span id="cb7-4"><a></a>    <span class="kw">(</span><span class="ex">0</span><span class="kw">)</span>  <span class="ex">│</span>   Program    │      <span class="er">(</span><span class="ex">1</span><span class="kw">)</span></span>
-<span id="cb7-5"><a></a>         <span class="ex">│</span>              │───<span class="op">&gt;</span> stderr</span>
-<span id="cb7-6"><a></a>         <span class="ex">└──────────────┘</span>      <span class="er">(</span><span class="ex">2</span><span class="kw">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb6"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb6-1"><a></a><span class="co"># Every Unix program has these three streams</span></span>
+<span id="cb6-2"><a></a>         <span class="ex">┌──────────────┐</span></span>
+<span id="cb6-3"><a></a><span class="ex">stdin</span> ───<span class="op">&gt;</span>│              │───<span class="op">&gt;</span> stdout</span>
+<span id="cb6-4"><a></a>    <span class="kw">(</span><span class="ex">0</span><span class="kw">)</span>  <span class="ex">│</span>   Program    │      <span class="er">(</span><span class="ex">1</span><span class="kw">)</span></span>
+<span id="cb6-5"><a></a>         <span class="ex">│</span>              │───<span class="op">&gt;</span> stderr</span>
+<span id="cb6-6"><a></a>         <span class="ex">└──────────────┘</span>      <span class="er">(</span><span class="ex">2</span><span class="kw">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <ul>
 <li>File descriptor numbers: 0, 1, 2</li>
 <li>Can redirect each stream independently</li>
@@ -574,34 +552,34 @@ AC1         A         conventional  convA       16     15     71     153</code><
 </section>
 <section id="basic-stream-redirection" class="slide level2">
 <h2>Basic Stream Redirection</h2>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb8"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb8-1"><a></a><span class="co"># Redirect stdout to file (equivalent ways)</span></span>
-<span id="cb8-2"><a></a></span>
-<span id="cb8-3"><a></a><span class="fu">ls</span> <span class="at">-l</span> <span class="op">&gt;</span> files.txt</span>
-<span id="cb8-4"><a></a><span class="fu">ls</span> <span class="at">-l</span> <span class="dv">1</span><span class="op">&gt;</span> files.txt      <span class="co"># Explicitly using fd 1</span></span>
-<span id="cb8-5"><a></a></span>
-<span id="cb8-6"><a></a><span class="co"># Redirect stderr to file</span></span>
-<span id="cb8-7"><a></a></span>
-<span id="cb8-8"><a></a><span class="fu">ls</span> /nonexistent <span class="dv">2</span><span class="op">&gt;</span> errors.txt</span>
-<span id="cb8-9"><a></a></span>
-<span id="cb8-10"><a></a><span class="co"># Redirect both stdout and stderr to same file</span></span>
-<span id="cb8-11"><a></a></span>
-<span id="cb8-12"><a></a><span class="fu">ls</span> <span class="at">-l</span> /nonexistent <span class="op">&amp;&gt;</span> all_output.txt</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb7"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb7-1"><a></a><span class="co"># Redirect stdout to file (equivalent ways)</span></span>
+<span id="cb7-2"><a></a></span>
+<span id="cb7-3"><a></a><span class="fu">ls</span> <span class="at">-l</span> <span class="op">&gt;</span> files.txt</span>
+<span id="cb7-4"><a></a><span class="fu">ls</span> <span class="at">-l</span> <span class="dv">1</span><span class="op">&gt;</span> files.txt      <span class="co"># Explicitly using fd 1</span></span>
+<span id="cb7-5"><a></a></span>
+<span id="cb7-6"><a></a><span class="co"># Redirect stderr to file</span></span>
+<span id="cb7-7"><a></a></span>
+<span id="cb7-8"><a></a><span class="fu">ls</span> /nonexistent <span class="dv">2</span><span class="op">&gt;</span> errors.txt</span>
+<span id="cb7-9"><a></a></span>
+<span id="cb7-10"><a></a><span class="co"># Redirect both stdout and stderr to same file</span></span>
+<span id="cb7-11"><a></a></span>
+<span id="cb7-12"><a></a><span class="fu">ls</span> <span class="at">-l</span> /nonexistent <span class="op">&amp;&gt;</span> all_output.txt</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </section>
 <section id="bioinformatics-example" class="slide level2">
 <h2>Bioinformatics Example</h2>
 <p>Processing sequence data with stream control:</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb9"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb9-1"><a></a><span class="co"># FASTQ processing pipeline with error handling</span></span>
-<span id="cb9-2"><a></a></span>
-<span id="cb9-3"><a></a><span class="fu">zcat</span> reads.fastq.gz <span class="dv">2</span><span class="op">&gt;</span> unzip_errors.log <span class="kw">|</span> </span>
-<span id="cb9-4"><a></a><span class="ex">fastqc</span> stdin <span class="dv">2</span><span class="op">&gt;</span> qc_errors.log <span class="kw">|</span> </span>
-<span id="cb9-5"><a></a><span class="ex">trimmomatic</span> <span class="dv">2</span><span class="op">&gt;</span> trim_errors.log <span class="kw">|</span> </span>
-<span id="cb9-6"><a></a><span class="ex">bowtie2</span> <span class="at">-x</span> genome <span class="at">-</span> <span class="dv">2</span><span class="op">&gt;</span> alignment_stats.txt <span class="kw">|</span> </span>
-<span id="cb9-7"><a></a><span class="ex">samtools</span> sort <span class="dv">2</span><span class="op">&gt;</span> sort_errors.log <span class="kw">|</span> </span>
-<span id="cb9-8"><a></a><span class="ex">samtools</span> index <span class="at">-</span> <span class="dv">2</span><span class="op">&gt;</span> index_errors.log</span>
-<span id="cb9-9"><a></a></span>
-<span id="cb9-10"><a></a><span class="co"># Check all error logs at once</span></span>
-<span id="cb9-11"><a></a></span>
-<span id="cb9-12"><a></a><span class="fu">cat</span> <span class="pp">*</span>_errors.log <span class="kw">|</span> <span class="fu">grep</span> <span class="at">-E</span> <span class="st">"ERROR|WARNING"</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb8"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb8-1"><a></a><span class="co"># FASTQ processing pipeline with error handling</span></span>
+<span id="cb8-2"><a></a></span>
+<span id="cb8-3"><a></a><span class="fu">zcat</span> reads.fastq.gz <span class="dv">2</span><span class="op">&gt;</span> unzip_errors.log <span class="kw">|</span> </span>
+<span id="cb8-4"><a></a><span class="ex">fastqc</span> stdin <span class="dv">2</span><span class="op">&gt;</span> qc_errors.log <span class="kw">|</span> </span>
+<span id="cb8-5"><a></a><span class="ex">trimmomatic</span> <span class="dv">2</span><span class="op">&gt;</span> trim_errors.log <span class="kw">|</span> </span>
+<span id="cb8-6"><a></a><span class="ex">bowtie2</span> <span class="at">-x</span> genome <span class="at">-</span> <span class="dv">2</span><span class="op">&gt;</span> alignment_stats.txt <span class="kw">|</span> </span>
+<span id="cb8-7"><a></a><span class="ex">samtools</span> sort <span class="dv">2</span><span class="op">&gt;</span> sort_errors.log <span class="kw">|</span> </span>
+<span id="cb8-8"><a></a><span class="ex">samtools</span> index <span class="at">-</span> <span class="dv">2</span><span class="op">&gt;</span> index_errors.log</span>
+<span id="cb8-9"><a></a></span>
+<span id="cb8-10"><a></a><span class="co"># Check all error logs at once</span></span>
+<span id="cb8-11"><a></a></span>
+<span id="cb8-12"><a></a><span class="fu">cat</span> <span class="pp">*</span>_errors.log <span class="kw">|</span> <span class="fu">grep</span> <span class="at">-E</span> <span class="st">"ERROR|WARNING"</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </section></section>
 <section>
 <section id="unix-pipes" class="title-slide slide level1 center">
@@ -696,9 +674,9 @@ AC1         A         conventional  convA       16     15     71     153</code><
 <div class="columns">
 <div class="column" style="width:50%;">
 <p><strong>FASTA</strong> - sequences (genomes, genes, proteins)</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb10"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb10-1"><a></a><span class="op">&gt;</span>chr21 <span class="ex">Homo</span> sapiens chromosome 21</span>
-<span id="cb10-2"><a></a><span class="ex">NNNNNNNNNNGATCCTTGAAGCGCCCCCAAGG</span></span>
-<span id="cb10-3"><a></a><span class="ex">GCATCTTCTCTACTTTCACCTAACAGATCCCA</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb9"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb9-1"><a></a><span class="op">&gt;</span>chr21 <span class="ex">Homo</span> sapiens chromosome 21</span>
+<span id="cb9-2"><a></a><span class="ex">NNNNNNNNNNGATCCTTGAAGCGCCCCCAAGG</span></span>
+<span id="cb9-3"><a></a><span class="ex">GCATCTTCTCTACTTTCACCTAACAGATCCCA</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <ul>
 <li>Header line starts with <code>&gt;</code></li>
 <li>Sequence on one or more lines</li>
@@ -706,10 +684,10 @@ AC1         A         conventional  convA       16     15     71     153</code><
 </ul>
 </div><div class="column" style="width:50%;">
 <p><strong>FASTQ</strong> - raw sequencing reads</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb11"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb11-1"><a></a><span class="ex">@SRR12345.1</span> read_1</span>
-<span id="cb11-2"><a></a><span class="ex">NCATGCAGCGTACGGTAATTGGCAG</span></span>
-<span id="cb11-3"><a></a><span class="ex">+</span></span>
-<span id="cb11-4"><a></a><span class="co">#AAAAFFFFFFFFFFFFFFFFFFFF</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb10"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb10-1"><a></a><span class="ex">@SRR12345.1</span> read_1</span>
+<span id="cb10-2"><a></a><span class="ex">NCATGCAGCGTACGGTAATTGGCAG</span></span>
+<span id="cb10-3"><a></a><span class="ex">+</span></span>
+<span id="cb10-4"><a></a><span class="co">#AAAAFFFFFFFFFFFFFFFFFFFF</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <ul>
 <li><strong>4 lines per read</strong>: <code>@</code> header, sequence, <code>+</code>, per-base quality</li>
 <li>Quality letters encode Phred scores (<code>!</code> = lowest, <code>I</code> = Q40)</li>
@@ -749,14 +727,14 @@ AC1         A         conventional  convA       16     15     71     153</code><
 <section id="downloading-genomic-data" class="slide level2">
 <h2>Downloading Genomic Data</h2>
 <p>Download chromosome 21 of the human genome (hg38 / GRCh38) from UCSC:</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb12"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb12-1"><a></a><span class="co"># Using `wget` to download chr21 (~13 MB)</span></span>
-<span id="cb12-2"><a></a></span>
-<span id="cb12-3"><a></a><span class="fu">wget</span> https://hgdownload.soe.ucsc.edu/goldenPath/hg38/chromosomes/chr21.fa.gz</span>
-<span id="cb12-4"><a></a></span>
-<span id="cb12-5"><a></a><span class="co"># Or using `curl` and save with a specific name (-L follows redirects)</span></span>
-<span id="cb12-6"><a></a></span>
-<span id="cb12-7"><a></a><span class="ex">curl</span> <span class="at">-L</span> <span class="at">-o</span> chr21.fa.gz <span class="dt">\</span></span>
-<span id="cb12-8"><a></a>  https://hgdownload.soe.ucsc.edu/goldenPath/hg38/chromosomes/chr21.fa.gz</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb11"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb11-1"><a></a><span class="co"># Using `wget` to download chr21 (~13 MB)</span></span>
+<span id="cb11-2"><a></a></span>
+<span id="cb11-3"><a></a><span class="fu">wget</span> https://hgdownload.soe.ucsc.edu/goldenPath/hg38/chromosomes/chr21.fa.gz</span>
+<span id="cb11-4"><a></a></span>
+<span id="cb11-5"><a></a><span class="co"># Or using `curl` and save with a specific name (-L follows redirects)</span></span>
+<span id="cb11-6"><a></a></span>
+<span id="cb11-7"><a></a><span class="ex">curl</span> <span class="at">-L</span> <span class="at">-o</span> chr21.fa.gz <span class="dt">\</span></span>
+<span id="cb11-8"><a></a>  https://hgdownload.soe.ucsc.edu/goldenPath/hg38/chromosomes/chr21.fa.gz</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <ul>
 <li><code>wget</code> and <code>curl</code> are both tools for downloading files (macOS ships <code>curl</code>; install <code>wget</code> with Homebrew if you want it)</li>
 <li>The backslash lets a long command span multiple lines</li>
@@ -767,24 +745,24 @@ AC1         A         conventional  convA       16     15     71     153</code><
 <section id="examining-large-files-efficiently" class="slide level2">
 <h2>Examining Large Files Efficiently</h2>
 <p>Don’t use <code>cat</code> on huge files! Use these approaches:</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb13"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb13-1"><a></a><span class="co"># Decompress and look at first 10 lines</span></span>
-<span id="cb13-2"><a></a></span>
-<span id="cb13-3"><a></a><span class="fu">gunzip</span> <span class="at">-c</span> chr21.fa.gz <span class="kw">|</span> <span class="fu">head</span> <span class="at">-10</span></span>
-<span id="cb13-4"><a></a></span>
-<span id="cb13-5"><a></a><span class="co"># Check file size before and after decompression (-k keeps the .gz)</span></span>
-<span id="cb13-6"><a></a></span>
-<span id="cb13-7"><a></a><span class="fu">ls</span> <span class="at">-lh</span> chr21.fa.gz</span>
-<span id="cb13-8"><a></a><span class="fu">gunzip</span> <span class="at">-k</span> chr21.fa.gz</span>
-<span id="cb13-9"><a></a><span class="fu">ls</span> <span class="at">-lh</span> chr21.fa</span>
-<span id="cb13-10"><a></a></span>
-<span id="cb13-11"><a></a><span class="co"># Count sequences in FASTA file (lines starting with &gt;)</span></span>
-<span id="cb13-12"><a></a><span class="co"># grep can't read gzip data directly - use zgrep (or zcat | grep)</span></span>
-<span id="cb13-13"><a></a></span>
-<span id="cb13-14"><a></a><span class="fu">zgrep</span> <span class="st">"^&gt;"</span> chr21.fa.gz <span class="kw">|</span> <span class="fu">wc</span> <span class="at">-l</span></span>
-<span id="cb13-15"><a></a></span>
-<span id="cb13-16"><a></a><span class="co"># View sequence headers only</span></span>
-<span id="cb13-17"><a></a></span>
-<span id="cb13-18"><a></a><span class="fu">zgrep</span> <span class="st">"^&gt;"</span> chr21.fa.gz <span class="kw">|</span> <span class="fu">less</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb12"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb12-1"><a></a><span class="co"># Decompress and look at first 10 lines</span></span>
+<span id="cb12-2"><a></a></span>
+<span id="cb12-3"><a></a><span class="fu">gunzip</span> <span class="at">-c</span> chr21.fa.gz <span class="kw">|</span> <span class="fu">head</span> <span class="at">-10</span></span>
+<span id="cb12-4"><a></a></span>
+<span id="cb12-5"><a></a><span class="co"># Check file size before and after decompression (-k keeps the .gz)</span></span>
+<span id="cb12-6"><a></a></span>
+<span id="cb12-7"><a></a><span class="fu">ls</span> <span class="at">-lh</span> chr21.fa.gz</span>
+<span id="cb12-8"><a></a><span class="fu">gunzip</span> <span class="at">-k</span> chr21.fa.gz</span>
+<span id="cb12-9"><a></a><span class="fu">ls</span> <span class="at">-lh</span> chr21.fa</span>
+<span id="cb12-10"><a></a></span>
+<span id="cb12-11"><a></a><span class="co"># Count sequences in FASTA file (lines starting with &gt;)</span></span>
+<span id="cb12-12"><a></a><span class="co"># grep can't read gzip data directly - use zgrep (or zcat | grep)</span></span>
+<span id="cb12-13"><a></a></span>
+<span id="cb12-14"><a></a><span class="fu">zgrep</span> <span class="st">"^&gt;"</span> chr21.fa.gz <span class="kw">|</span> <span class="fu">wc</span> <span class="at">-l</span></span>
+<span id="cb12-15"><a></a></span>
+<span id="cb12-16"><a></a><span class="co"># View sequence headers only</span></span>
+<span id="cb12-17"><a></a></span>
+<span id="cb12-18"><a></a><span class="fu">zgrep</span> <span class="st">"^&gt;"</span> chr21.fa.gz <span class="kw">|</span> <span class="fu">less</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="callout callout-note callout-titled callout-style-default">
 <div class="callout-body">
 <div class="callout-title">
@@ -802,34 +780,34 @@ AC1         A         conventional  convA       16     15     71     153</code><
 <section id="creating-a-subset-for-analysis" class="slide level2">
 <h2>Creating a Subset for Analysis</h2>
 <p>Make a smaller working file for testing:</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb14"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb14-1"><a></a><span class="co"># Extract the first ~1 Mb of sequence for testing (50 bases per line)</span></span>
-<span id="cb14-2"><a></a></span>
-<span id="cb14-3"><a></a><span class="fu">zcat</span> chr21.fa.gz <span class="kw">|</span> <span class="fu">head</span> <span class="at">-n</span> 20000 <span class="op">&gt;</span> chr21_subset.fa</span>
-<span id="cb14-4"><a></a></span>
-<span id="cb14-5"><a></a><span class="co"># Extract a specific record by name from a multi-sequence FASTA</span></span>
-<span id="cb14-6"><a></a><span class="co"># (e.g. from hg38.fa - chr21.fa has only one record)</span></span>
-<span id="cb14-7"><a></a></span>
-<span id="cb14-8"><a></a><span class="fu">awk</span> <span class="st">'/^&gt;chr21$/,/^&gt;chr22$/'</span> hg38.fa <span class="kw">|</span> <span class="fu">head</span> <span class="at">-n</span> <span class="at">-1</span> <span class="op">&gt;</span> chr21_from_genome.fa</span>
-<span id="cb14-9"><a></a></span>
-<span id="cb14-10"><a></a><span class="co"># Pull out a window of lines from the middle of the chromosome</span></span>
-<span id="cb14-11"><a></a></span>
-<span id="cb14-12"><a></a><span class="fu">sed</span> <span class="at">-n</span> <span class="st">'400000,420000p'</span> chr21.fa <span class="op">&gt;</span> region_of_interest.fa</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb13"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb13-1"><a></a><span class="co"># Extract the first ~1 Mb of sequence for testing (50 bases per line)</span></span>
+<span id="cb13-2"><a></a></span>
+<span id="cb13-3"><a></a><span class="fu">zcat</span> chr21.fa.gz <span class="kw">|</span> <span class="fu">head</span> <span class="at">-n</span> 20000 <span class="op">&gt;</span> chr21_subset.fa</span>
+<span id="cb13-4"><a></a></span>
+<span id="cb13-5"><a></a><span class="co"># Extract a specific record by name from a multi-sequence FASTA</span></span>
+<span id="cb13-6"><a></a><span class="co"># (e.g. from hg38.fa - chr21.fa has only one record)</span></span>
+<span id="cb13-7"><a></a></span>
+<span id="cb13-8"><a></a><span class="fu">awk</span> <span class="st">'/^&gt;chr21$/,/^&gt;chr22$/'</span> hg38.fa <span class="kw">|</span> <span class="fu">head</span> <span class="at">-n</span> <span class="at">-1</span> <span class="op">&gt;</span> chr21_from_genome.fa</span>
+<span id="cb13-9"><a></a></span>
+<span id="cb13-10"><a></a><span class="co"># Pull out a window of lines from the middle of the chromosome</span></span>
+<span id="cb13-11"><a></a></span>
+<span id="cb13-12"><a></a><span class="fu">sed</span> <span class="at">-n</span> <span class="st">'400000,420000p'</span> chr21.fa <span class="op">&gt;</span> region_of_interest.fa</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </section>
 <section id="processing-fasta-files-with-pipes" class="slide level2">
 <h2>Processing FASTA Files with Pipes</h2>
 <p>Extract specific regions or sequences:</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb15"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb15-1"><a></a><span class="co"># Extract just the sequence (no headers) and count bases</span></span>
-<span id="cb15-2"><a></a></span>
-<span id="cb15-3"><a></a><span class="fu">grep</span> <span class="at">-v</span> <span class="st">"^&gt;"</span> chr21.fa <span class="kw">|</span> <span class="fu">tr</span> <span class="at">-d</span> <span class="st">'\n'</span> <span class="kw">|</span> <span class="fu">wc</span> <span class="at">-c</span></span>
-<span id="cb15-4"><a></a></span>
-<span id="cb15-5"><a></a><span class="co"># Count each type of nucleotide (uppercase first so a == A)</span></span>
-<span id="cb15-6"><a></a></span>
-<span id="cb15-7"><a></a><span class="fu">grep</span> <span class="at">-v</span> <span class="st">"^&gt;"</span> chr21.fa <span class="kw">|</span> <span class="dt">\</span></span>
-<span id="cb15-8"><a></a>  <span class="fu">tr</span> <span class="st">'acgtn'</span> <span class="st">'ACGTN'</span> <span class="kw">|</span> <span class="dt">\</span></span>
-<span id="cb15-9"><a></a>  <span class="fu">tr</span> <span class="at">-d</span> <span class="st">'\n'</span> <span class="kw">|</span> <span class="dt">\</span></span>
-<span id="cb15-10"><a></a>  <span class="fu">fold</span> <span class="at">-w1</span> <span class="kw">|</span> <span class="dt">\</span></span>
-<span id="cb15-11"><a></a>  <span class="fu">sort</span> <span class="kw">|</span> <span class="dt">\</span></span>
-<span id="cb15-12"><a></a>  <span class="fu">uniq</span> <span class="at">-c</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb14"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb14-1"><a></a><span class="co"># Extract just the sequence (no headers) and count bases</span></span>
+<span id="cb14-2"><a></a></span>
+<span id="cb14-3"><a></a><span class="fu">grep</span> <span class="at">-v</span> <span class="st">"^&gt;"</span> chr21.fa <span class="kw">|</span> <span class="fu">tr</span> <span class="at">-d</span> <span class="st">'\n'</span> <span class="kw">|</span> <span class="fu">wc</span> <span class="at">-c</span></span>
+<span id="cb14-4"><a></a></span>
+<span id="cb14-5"><a></a><span class="co"># Count each type of nucleotide (uppercase first so a == A)</span></span>
+<span id="cb14-6"><a></a></span>
+<span id="cb14-7"><a></a><span class="fu">grep</span> <span class="at">-v</span> <span class="st">"^&gt;"</span> chr21.fa <span class="kw">|</span> <span class="dt">\</span></span>
+<span id="cb14-8"><a></a>  <span class="fu">tr</span> <span class="st">'acgtn'</span> <span class="st">'ACGTN'</span> <span class="kw">|</span> <span class="dt">\</span></span>
+<span id="cb14-9"><a></a>  <span class="fu">tr</span> <span class="at">-d</span> <span class="st">'\n'</span> <span class="kw">|</span> <span class="dt">\</span></span>
+<span id="cb14-10"><a></a>  <span class="fu">fold</span> <span class="at">-w1</span> <span class="kw">|</span> <span class="dt">\</span></span>
+<span id="cb14-11"><a></a>  <span class="fu">sort</span> <span class="kw">|</span> <span class="dt">\</span></span>
+<span id="cb14-12"><a></a>  <span class="fu">uniq</span> <span class="at">-c</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <ul>
 <li><code>grep -v</code> inverts the match (excludes lines)</li>
 <li><code>tr -d '\n'</code> removes newlines</li>
@@ -840,47 +818,47 @@ AC1         A         conventional  convA       16     15     71     153</code><
 <section id="finding-patterns-in-genomic-data" class="slide level2">
 <h2>Finding Patterns in Genomic Data</h2>
 <p>Search for specific sequences and motifs:</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb16"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb16-1"><a></a><span class="co"># Find all instances of a restriction enzyme site (EcoRI: GAATTC)</span></span>
-<span id="cb16-2"><a></a></span>
-<span id="cb16-3"><a></a><span class="fu">grep</span> <span class="at">-v</span> <span class="st">"^&gt;"</span> chr21.fa <span class="kw">|</span> <span class="dt">\</span></span>
-<span id="cb16-4"><a></a>  <span class="fu">tr</span> <span class="st">'acgt'</span> <span class="st">'ACGT'</span> <span class="kw">|</span> <span class="dt">\</span></span>
-<span id="cb16-5"><a></a>  <span class="fu">tr</span> <span class="at">-d</span> <span class="st">'\n'</span> <span class="kw">|</span> <span class="dt">\</span></span>
-<span id="cb16-6"><a></a>  <span class="fu">grep</span> <span class="at">-o</span> <span class="st">"GAATTC"</span> <span class="kw">|</span> <span class="dt">\</span></span>
-<span id="cb16-7"><a></a>  <span class="fu">wc</span> <span class="at">-l</span></span>
-<span id="cb16-8"><a></a></span>
-<span id="cb16-9"><a></a><span class="co"># Extract 100 bases around each EcoRI site</span></span>
-<span id="cb16-10"><a></a></span>
-<span id="cb16-11"><a></a><span class="fu">grep</span> <span class="at">-v</span> <span class="st">"^&gt;"</span> chr21.fa <span class="kw">|</span> <span class="dt">\</span></span>
-<span id="cb16-12"><a></a>  <span class="fu">tr</span> <span class="st">'acgt'</span> <span class="st">'ACGT'</span> <span class="kw">|</span> <span class="dt">\</span></span>
-<span id="cb16-13"><a></a>  <span class="fu">tr</span> <span class="at">-d</span> <span class="st">'\n'</span> <span class="kw">|</span> <span class="dt">\</span></span>
-<span id="cb16-14"><a></a>  <span class="fu">grep</span> <span class="at">-oE</span> <span class="st">".{100}GAATTC.{100}"</span> <span class="op">&gt;</span> ecori_contexts.txt</span>
-<span id="cb16-15"><a></a></span>
-<span id="cb16-16"><a></a><span class="co"># Find all start codons (ATG) and their byte offsets</span></span>
-<span id="cb16-17"><a></a></span>
-<span id="cb16-18"><a></a><span class="fu">grep</span> <span class="at">-v</span> <span class="st">"^&gt;"</span> chr21.fa <span class="kw">|</span> <span class="dt">\</span></span>
-<span id="cb16-19"><a></a>  <span class="fu">tr</span> <span class="st">'acgt'</span> <span class="st">'ACGT'</span> <span class="kw">|</span> <span class="dt">\</span></span>
-<span id="cb16-20"><a></a>  <span class="fu">tr</span> <span class="at">-d</span> <span class="st">'\n'</span> <span class="kw">|</span> <span class="dt">\</span></span>
-<span id="cb16-21"><a></a>  <span class="fu">grep</span> <span class="at">-b</span> <span class="at">-o</span> <span class="st">"ATG"</span> <span class="kw">|</span> <span class="dt">\</span></span>
-<span id="cb16-22"><a></a>  <span class="fu">head</span> <span class="at">-20</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb15"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb15-1"><a></a><span class="co"># Find all instances of a restriction enzyme site (EcoRI: GAATTC)</span></span>
+<span id="cb15-2"><a></a></span>
+<span id="cb15-3"><a></a><span class="fu">grep</span> <span class="at">-v</span> <span class="st">"^&gt;"</span> chr21.fa <span class="kw">|</span> <span class="dt">\</span></span>
+<span id="cb15-4"><a></a>  <span class="fu">tr</span> <span class="st">'acgt'</span> <span class="st">'ACGT'</span> <span class="kw">|</span> <span class="dt">\</span></span>
+<span id="cb15-5"><a></a>  <span class="fu">tr</span> <span class="at">-d</span> <span class="st">'\n'</span> <span class="kw">|</span> <span class="dt">\</span></span>
+<span id="cb15-6"><a></a>  <span class="fu">grep</span> <span class="at">-o</span> <span class="st">"GAATTC"</span> <span class="kw">|</span> <span class="dt">\</span></span>
+<span id="cb15-7"><a></a>  <span class="fu">wc</span> <span class="at">-l</span></span>
+<span id="cb15-8"><a></a></span>
+<span id="cb15-9"><a></a><span class="co"># Extract 100 bases around each EcoRI site</span></span>
+<span id="cb15-10"><a></a></span>
+<span id="cb15-11"><a></a><span class="fu">grep</span> <span class="at">-v</span> <span class="st">"^&gt;"</span> chr21.fa <span class="kw">|</span> <span class="dt">\</span></span>
+<span id="cb15-12"><a></a>  <span class="fu">tr</span> <span class="st">'acgt'</span> <span class="st">'ACGT'</span> <span class="kw">|</span> <span class="dt">\</span></span>
+<span id="cb15-13"><a></a>  <span class="fu">tr</span> <span class="at">-d</span> <span class="st">'\n'</span> <span class="kw">|</span> <span class="dt">\</span></span>
+<span id="cb15-14"><a></a>  <span class="fu">grep</span> <span class="at">-oE</span> <span class="st">".{100}GAATTC.{100}"</span> <span class="op">&gt;</span> ecori_contexts.txt</span>
+<span id="cb15-15"><a></a></span>
+<span id="cb15-16"><a></a><span class="co"># Find all start codons (ATG) and their byte offsets</span></span>
+<span id="cb15-17"><a></a></span>
+<span id="cb15-18"><a></a><span class="fu">grep</span> <span class="at">-v</span> <span class="st">"^&gt;"</span> chr21.fa <span class="kw">|</span> <span class="dt">\</span></span>
+<span id="cb15-19"><a></a>  <span class="fu">tr</span> <span class="st">'acgt'</span> <span class="st">'ACGT'</span> <span class="kw">|</span> <span class="dt">\</span></span>
+<span id="cb15-20"><a></a>  <span class="fu">tr</span> <span class="at">-d</span> <span class="st">'\n'</span> <span class="kw">|</span> <span class="dt">\</span></span>
+<span id="cb15-21"><a></a>  <span class="fu">grep</span> <span class="at">-b</span> <span class="at">-o</span> <span class="st">"ATG"</span> <span class="kw">|</span> <span class="dt">\</span></span>
+<span id="cb15-22"><a></a>  <span class="fu">head</span> <span class="at">-20</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </section>
 <section id="combining-downloads-with-processing" class="slide level2">
 <h2>Combining Downloads with Processing</h2>
 <p>Stream processing without saving intermediate files:</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb17"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb17-1"><a></a><span class="co"># Download, decompress, and process in one pipeline</span></span>
-<span id="cb17-2"><a></a><span class="ex">curl</span> <span class="at">-sL</span> https://hgdownload.soe.ucsc.edu/goldenPath/hg38/chromosomes/chr21.fa.gz <span class="kw">|</span> <span class="dt">\</span></span>
-<span id="cb17-3"><a></a>  <span class="fu">gunzip</span> <span class="at">-c</span> <span class="kw">|</span> <span class="dt">\</span></span>
-<span id="cb17-4"><a></a>  <span class="fu">grep</span> <span class="at">-v</span> <span class="st">"^&gt;"</span> <span class="kw">|</span> <span class="dt">\</span></span>
-<span id="cb17-5"><a></a>  <span class="fu">tr</span> <span class="at">-d</span> <span class="st">'\n'</span> <span class="kw">|</span> <span class="dt">\</span></span>
-<span id="cb17-6"><a></a>  <span class="fu">cut</span> <span class="at">-c1-1000000</span> <span class="op">&gt;</span> first_megabase.txt</span>
-<span id="cb17-7"><a></a></span>
-<span id="cb17-8"><a></a><span class="co"># Download and immediately analyze GC content</span></span>
-<span id="cb17-9"><a></a><span class="fu">wget</span> <span class="at">-qO</span> <span class="at">-</span> https://hgdownload.soe.ucsc.edu/goldenPath/hg38/chromosomes/chr21.fa.gz <span class="kw">|</span> <span class="dt">\</span></span>
-<span id="cb17-10"><a></a>  <span class="fu">gunzip</span> <span class="at">-c</span> <span class="kw">|</span> <span class="dt">\</span></span>
-<span id="cb17-11"><a></a>  <span class="fu">grep</span> <span class="at">-v</span> <span class="st">"^&gt;"</span> <span class="kw">|</span> <span class="dt">\</span></span>
-<span id="cb17-12"><a></a>  <span class="fu">tr</span> <span class="st">'acgtn'</span> <span class="st">'ACGTN'</span> <span class="kw">|</span> <span class="dt">\</span></span>
-<span id="cb17-13"><a></a>  <span class="fu">tr</span> <span class="at">-d</span> <span class="st">'N\n'</span> <span class="kw">|</span> <span class="dt">\</span></span>
-<span id="cb17-14"><a></a>  <span class="fu">tr</span> <span class="st">'ATGC'</span> <span class="st">'0011'</span> <span class="kw">|</span> <span class="dt">\</span></span>
-<span id="cb17-15"><a></a>  <span class="fu">awk</span> <span class="st">'{n = length($0); gc = gsub(/1/, ""); print "GC%:", 100 * gc / n}'</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb16"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb16-1"><a></a><span class="co"># Download, decompress, and process in one pipeline</span></span>
+<span id="cb16-2"><a></a><span class="ex">curl</span> <span class="at">-sL</span> https://hgdownload.soe.ucsc.edu/goldenPath/hg38/chromosomes/chr21.fa.gz <span class="kw">|</span> <span class="dt">\</span></span>
+<span id="cb16-3"><a></a>  <span class="fu">gunzip</span> <span class="at">-c</span> <span class="kw">|</span> <span class="dt">\</span></span>
+<span id="cb16-4"><a></a>  <span class="fu">grep</span> <span class="at">-v</span> <span class="st">"^&gt;"</span> <span class="kw">|</span> <span class="dt">\</span></span>
+<span id="cb16-5"><a></a>  <span class="fu">tr</span> <span class="at">-d</span> <span class="st">'\n'</span> <span class="kw">|</span> <span class="dt">\</span></span>
+<span id="cb16-6"><a></a>  <span class="fu">cut</span> <span class="at">-c1-1000000</span> <span class="op">&gt;</span> first_megabase.txt</span>
+<span id="cb16-7"><a></a></span>
+<span id="cb16-8"><a></a><span class="co"># Download and immediately analyze GC content</span></span>
+<span id="cb16-9"><a></a><span class="fu">wget</span> <span class="at">-qO</span> <span class="at">-</span> https://hgdownload.soe.ucsc.edu/goldenPath/hg38/chromosomes/chr21.fa.gz <span class="kw">|</span> <span class="dt">\</span></span>
+<span id="cb16-10"><a></a>  <span class="fu">gunzip</span> <span class="at">-c</span> <span class="kw">|</span> <span class="dt">\</span></span>
+<span id="cb16-11"><a></a>  <span class="fu">grep</span> <span class="at">-v</span> <span class="st">"^&gt;"</span> <span class="kw">|</span> <span class="dt">\</span></span>
+<span id="cb16-12"><a></a>  <span class="fu">tr</span> <span class="st">'acgtn'</span> <span class="st">'ACGTN'</span> <span class="kw">|</span> <span class="dt">\</span></span>
+<span id="cb16-13"><a></a>  <span class="fu">tr</span> <span class="at">-d</span> <span class="st">'N\n'</span> <span class="kw">|</span> <span class="dt">\</span></span>
+<span id="cb16-14"><a></a>  <span class="fu">tr</span> <span class="st">'ATGC'</span> <span class="st">'0011'</span> <span class="kw">|</span> <span class="dt">\</span></span>
+<span id="cb16-15"><a></a>  <span class="fu">awk</span> <span class="st">'{n = length($0); gc = gsub(/1/, ""); print "GC%:", 100 * gc / n}'</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <aside class="notes">
 <ul>
 <li>The <code>-O -</code> flag tells wget to output to stdout</li>
@@ -900,21 +878,21 @@ AC1         A         conventional  convA       16     15     71     153</code><
 </section>
 <section id="running-example-streams-and-grep-on-the-stickleback-table" class="slide level2">
 <h2>Running example: streams and <code>grep</code> on the stickleback table</h2>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb18"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb18-1"><a></a><span class="bu">cd</span> ~/projects/comptools <span class="kw">&amp;&amp;</span> <span class="fu">mkdir</span> <span class="at">-p</span> results</span>
-<span id="cb18-2"><a></a></span>
-<span id="cb18-3"><a></a><span class="co"># Keep only the header plus the mono-associated fish, save to a new file</span></span>
-<span id="cb18-4"><a></a><span class="fu">head</span> <span class="at">-n</span> 1 data/Stickle_RNAseq.tsv <span class="op">&gt;</span> results/mono.tsv</span>
-<span id="cb18-5"><a></a><span class="fu">grep</span> <span class="at">-w</span> <span class="st">"mono"</span> data/Stickle_RNAseq.tsv <span class="op">&gt;&gt;</span> results/mono.tsv</span>
-<span id="cb18-6"><a></a><span class="fu">wc</span> <span class="at">-l</span> results/mono.tsv                        <span class="co"># 41 lines = header + 20 + 20 fish</span></span>
-<span id="cb18-7"><a></a></span>
-<span id="cb18-8"><a></a><span class="co"># Which individuals are genotype B raised conventionally?</span></span>
-<span id="cb18-9"><a></a><span class="fu">grep</span> <span class="at">-w</span> <span class="st">"convB"</span> data/Stickle_RNAseq.tsv <span class="kw">|</span> <span class="fu">cut</span> <span class="at">-f</span> 1</span>
-<span id="cb18-10"><a></a></span>
-<span id="cb18-11"><a></a><span class="co"># A regular expression: individuals whose ID ends in a 1</span></span>
-<span id="cb18-12"><a></a><span class="fu">grep</span> <span class="at">-E</span> <span class="st">"^[A-Z]+1\b"</span> data/Stickle_RNAseq.tsv <span class="kw">|</span> <span class="fu">cut</span> <span class="at">-f</span> 1-3</span>
-<span id="cb18-13"><a></a></span>
-<span id="cb18-14"><a></a><span class="co"># Send errors somewhere useful: a typo in the path goes to the log, not the screen</span></span>
-<span id="cb18-15"><a></a><span class="fu">grep</span> <span class="at">-w</span> <span class="st">"mono"</span> data/Stickle_RNAseq.tsvv <span class="dv">2</span><span class="op">&gt;</span> results/errors.log<span class="kw">;</span> <span class="fu">cat</span> results/errors.log</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb17"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb17-1"><a></a><span class="bu">cd</span> ~/projects/comptools <span class="kw">&amp;&amp;</span> <span class="fu">mkdir</span> <span class="at">-p</span> results</span>
+<span id="cb17-2"><a></a></span>
+<span id="cb17-3"><a></a><span class="co"># Keep only the header plus the mono-associated fish, save to a new file</span></span>
+<span id="cb17-4"><a></a><span class="fu">head</span> <span class="at">-n</span> 1 data/Stickle_RNAseq.tsv <span class="op">&gt;</span> results/mono.tsv</span>
+<span id="cb17-5"><a></a><span class="fu">grep</span> <span class="at">-w</span> <span class="st">"mono"</span> data/Stickle_RNAseq.tsv <span class="op">&gt;&gt;</span> results/mono.tsv</span>
+<span id="cb17-6"><a></a><span class="fu">wc</span> <span class="at">-l</span> results/mono.tsv                        <span class="co"># 41 lines = header + 20 + 20 fish</span></span>
+<span id="cb17-7"><a></a></span>
+<span id="cb17-8"><a></a><span class="co"># Which individuals are genotype B raised conventionally?</span></span>
+<span id="cb17-9"><a></a><span class="fu">grep</span> <span class="at">-w</span> <span class="st">"convB"</span> data/Stickle_RNAseq.tsv <span class="kw">|</span> <span class="fu">cut</span> <span class="at">-f</span> 1</span>
+<span id="cb17-10"><a></a></span>
+<span id="cb17-11"><a></a><span class="co"># A regular expression: individuals whose ID ends in a 1</span></span>
+<span id="cb17-12"><a></a><span class="fu">grep</span> <span class="at">-E</span> <span class="st">"^[A-Z]+1\b"</span> data/Stickle_RNAseq.tsv <span class="kw">|</span> <span class="fu">cut</span> <span class="at">-f</span> 1-3</span>
+<span id="cb17-13"><a></a></span>
+<span id="cb17-14"><a></a><span class="co"># Send errors somewhere useful: a typo in the path goes to the log, not the screen</span></span>
+<span id="cb17-15"><a></a><span class="fu">grep</span> <span class="at">-w</span> <span class="st">"mono"</span> data/Stickle_RNAseq.tsvv <span class="dv">2</span><span class="op">&gt;</span> results/errors.log<span class="kw">;</span> <span class="fu">cat</span> results/errors.log</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="callout callout-tip callout-titled callout-style-default">
 <div class="callout-body">
 <div class="callout-title">
@@ -968,27 +946,27 @@ AC1         A         conventional  convA       16     15     71     153</code><
 <li>Essential for large data processing</li>
 </ul>
 <p>Basic syntax:</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb19"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb19-1"><a></a><span class="fu">grep</span> <span class="pp">[</span><span class="ss">options</span><span class="pp">]</span> pattern <span class="pp">[</span><span class="ss">file...</span><span class="pp">]</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb18"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb18-1"><a></a><span class="fu">grep</span> <span class="pp">[</span><span class="ss">options</span><span class="pp">]</span> pattern <span class="pp">[</span><span class="ss">file...</span><span class="pp">]</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </section>
 <section id="basic-grep-usage" class="slide level2">
 <h2>Basic GREP Usage</h2>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb20"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb20-1"><a></a><span class="co"># Search for a simple pattern</span></span>
-<span id="cb20-2"><a></a><span class="fu">grep</span> <span class="st">"ACGT"</span> sequences.txt</span>
-<span id="cb20-3"><a></a></span>
-<span id="cb20-4"><a></a><span class="co"># Case-insensitive search</span></span>
-<span id="cb20-5"><a></a><span class="fu">grep</span> <span class="at">-i</span> <span class="st">"gene"</span> annotations.txt</span>
-<span id="cb20-6"><a></a></span>
-<span id="cb20-7"><a></a><span class="co"># Count matching lines</span></span>
-<span id="cb20-8"><a></a><span class="fu">grep</span> <span class="at">-c</span> <span class="st">"&gt;"</span> proteins.fasta</span>
-<span id="cb20-9"><a></a></span>
-<span id="cb20-10"><a></a><span class="co"># Show line numbers</span></span>
-<span id="cb20-11"><a></a><span class="fu">grep</span> <span class="at">-n</span> <span class="st">"ERROR"</span> logfile.txt</span>
-<span id="cb20-12"><a></a></span>
-<span id="cb20-13"><a></a><span class="co"># Invert match (show non-matching lines)</span></span>
-<span id="cb20-14"><a></a><span class="fu">grep</span> <span class="at">-v</span> <span class="st">"^#"</span> data.txt    <span class="co"># Skip comment lines</span></span>
-<span id="cb20-15"><a></a></span>
-<span id="cb20-16"><a></a><span class="co"># Search multiple files</span></span>
-<span id="cb20-17"><a></a><span class="fu">grep</span> <span class="st">"mutation"</span> <span class="pp">*</span>.txt</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb19"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb19-1"><a></a><span class="co"># Search for a simple pattern</span></span>
+<span id="cb19-2"><a></a><span class="fu">grep</span> <span class="st">"ACGT"</span> sequences.txt</span>
+<span id="cb19-3"><a></a></span>
+<span id="cb19-4"><a></a><span class="co"># Case-insensitive search</span></span>
+<span id="cb19-5"><a></a><span class="fu">grep</span> <span class="at">-i</span> <span class="st">"gene"</span> annotations.txt</span>
+<span id="cb19-6"><a></a></span>
+<span id="cb19-7"><a></a><span class="co"># Count matching lines</span></span>
+<span id="cb19-8"><a></a><span class="fu">grep</span> <span class="at">-c</span> <span class="st">"&gt;"</span> proteins.fasta</span>
+<span id="cb19-9"><a></a></span>
+<span id="cb19-10"><a></a><span class="co"># Show line numbers</span></span>
+<span id="cb19-11"><a></a><span class="fu">grep</span> <span class="at">-n</span> <span class="st">"ERROR"</span> logfile.txt</span>
+<span id="cb19-12"><a></a></span>
+<span id="cb19-13"><a></a><span class="co"># Invert match (show non-matching lines)</span></span>
+<span id="cb19-14"><a></a><span class="fu">grep</span> <span class="at">-v</span> <span class="st">"^#"</span> data.txt    <span class="co"># Skip comment lines</span></span>
+<span id="cb19-15"><a></a></span>
+<span id="cb19-16"><a></a><span class="co"># Search multiple files</span></span>
+<span id="cb19-17"><a></a><span class="fu">grep</span> <span class="st">"mutation"</span> <span class="pp">*</span>.txt</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </section>
 <section id="introduction-to-regular-expressions" class="slide level2">
 <h2>Introduction to Regular Expressions</h2>
@@ -1007,106 +985,106 @@ AC1         A         conventional  convA       16     15     71     153</code><
 </section>
 <section id="basic-regex-examples" class="slide level2">
 <h2>Basic Regex Examples</h2>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb21"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb21-1"><a></a><span class="co"># Match DNA sequences</span></span>
-<span id="cb21-2"><a></a><span class="fu">grep</span> <span class="st">"^ATG"</span> genes.txt         <span class="co"># Lines starting with ATG</span></span>
-<span id="cb21-3"><a></a><span class="fu">grep</span> <span class="st">"TAG$"</span> genes.txt         <span class="co"># Lines ending with TAG</span></span>
-<span id="cb21-4"><a></a><span class="fu">grep</span> <span class="st">"A.G"</span> sequences.txt      <span class="co"># A, any char, then G</span></span>
-<span id="cb21-5"><a></a></span>
-<span id="cb21-6"><a></a><span class="co"># Character classes</span></span>
-<span id="cb21-7"><a></a><span class="fu">grep</span> <span class="st">"[ACGT]"</span> dna.txt         <span class="co"># Any DNA base</span></span>
-<span id="cb21-8"><a></a><span class="fu">grep</span> <span class="st">"[^ACGT]"</span> dna.txt        <span class="co"># Non-DNA characters</span></span>
-<span id="cb21-9"><a></a><span class="fu">grep</span> <span class="st">"[0-9]"</span> data.txt         <span class="co"># Any digit</span></span>
-<span id="cb21-10"><a></a><span class="fu">grep</span> <span class="st">"[A-Za-z]"</span> text.txt      <span class="co"># Any letter</span></span>
-<span id="cb21-11"><a></a></span>
-<span id="cb21-12"><a></a><span class="co"># Quantifiers</span></span>
-<span id="cb21-13"><a></a><span class="fu">grep</span> <span class="st">"A\{3\}"</span> sequence.txt    <span class="co"># Exactly 3 A's</span></span>
-<span id="cb21-14"><a></a><span class="fu">grep</span> <span class="st">"T\{2,4\}"</span> sequence.txt  <span class="co"># 2 to 4 T's</span></span>
-<span id="cb21-15"><a></a><span class="fu">grep</span> <span class="st">"GC*"</span> sequence.txt       <span class="co"># G followed by 0+ C's</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb20"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb20-1"><a></a><span class="co"># Match DNA sequences</span></span>
+<span id="cb20-2"><a></a><span class="fu">grep</span> <span class="st">"^ATG"</span> genes.txt         <span class="co"># Lines starting with ATG</span></span>
+<span id="cb20-3"><a></a><span class="fu">grep</span> <span class="st">"TAG$"</span> genes.txt         <span class="co"># Lines ending with TAG</span></span>
+<span id="cb20-4"><a></a><span class="fu">grep</span> <span class="st">"A.G"</span> sequences.txt      <span class="co"># A, any char, then G</span></span>
+<span id="cb20-5"><a></a></span>
+<span id="cb20-6"><a></a><span class="co"># Character classes</span></span>
+<span id="cb20-7"><a></a><span class="fu">grep</span> <span class="st">"[ACGT]"</span> dna.txt         <span class="co"># Any DNA base</span></span>
+<span id="cb20-8"><a></a><span class="fu">grep</span> <span class="st">"[^ACGT]"</span> dna.txt        <span class="co"># Non-DNA characters</span></span>
+<span id="cb20-9"><a></a><span class="fu">grep</span> <span class="st">"[0-9]"</span> data.txt         <span class="co"># Any digit</span></span>
+<span id="cb20-10"><a></a><span class="fu">grep</span> <span class="st">"[A-Za-z]"</span> text.txt      <span class="co"># Any letter</span></span>
+<span id="cb20-11"><a></a></span>
+<span id="cb20-12"><a></a><span class="co"># Quantifiers</span></span>
+<span id="cb20-13"><a></a><span class="fu">grep</span> <span class="st">"A\{3\}"</span> sequence.txt    <span class="co"># Exactly 3 A's</span></span>
+<span id="cb20-14"><a></a><span class="fu">grep</span> <span class="st">"T\{2,4\}"</span> sequence.txt  <span class="co"># 2 to 4 T's</span></span>
+<span id="cb20-15"><a></a><span class="fu">grep</span> <span class="st">"GC*"</span> sequence.txt       <span class="co"># G followed by 0+ C's</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </section>
 <section id="extended-regular-expressions" class="slide level2">
 <h2>Extended Regular Expressions</h2>
 <p>Use <code>grep -E</code> or <code>egrep</code> for extended regex:</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb22"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb22-1"><a></a><span class="co"># Alternation (OR)</span></span>
-<span id="cb22-2"><a></a><span class="fu">grep</span> <span class="at">-E</span> <span class="st">"start|stop|pause"</span> commands.txt</span>
-<span id="cb22-3"><a></a></span>
-<span id="cb22-4"><a></a><span class="co"># Grouping</span></span>
-<span id="cb22-5"><a></a><span class="fu">grep</span> <span class="at">-E</span> <span class="st">"(ATG|GTG|TTG)"</span> codons.txt</span>
-<span id="cb22-6"><a></a></span>
-<span id="cb22-7"><a></a><span class="co"># Plus quantifier (one or more)</span></span>
-<span id="cb22-8"><a></a><span class="fu">grep</span> <span class="at">-E</span> <span class="st">"A+T+G+"</span> sequences.txt</span>
-<span id="cb22-9"><a></a></span>
-<span id="cb22-10"><a></a><span class="co"># Question mark (optional)</span></span>
-<span id="cb22-11"><a></a><span class="fu">grep</span> <span class="at">-E</span> <span class="st">"colou?r"</span> british_american.txt</span>
-<span id="cb22-12"><a></a></span>
-<span id="cb22-13"><a></a><span class="co"># Complex patterns for bioinformatics</span></span>
-<span id="cb22-14"><a></a><span class="fu">grep</span> <span class="at">-E</span> <span class="st">"^&gt;sp\|[A-Z0-9]+\|"</span> uniprot.fasta  <span class="co"># UniProt headers</span></span>
-<span id="cb22-15"><a></a><span class="fu">grep</span> <span class="at">-E</span> <span class="st">"[ACGT]{20,}"</span> primers.txt          <span class="co"># Sequences 20bp+</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb21"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb21-1"><a></a><span class="co"># Alternation (OR)</span></span>
+<span id="cb21-2"><a></a><span class="fu">grep</span> <span class="at">-E</span> <span class="st">"start|stop|pause"</span> commands.txt</span>
+<span id="cb21-3"><a></a></span>
+<span id="cb21-4"><a></a><span class="co"># Grouping</span></span>
+<span id="cb21-5"><a></a><span class="fu">grep</span> <span class="at">-E</span> <span class="st">"(ATG|GTG|TTG)"</span> codons.txt</span>
+<span id="cb21-6"><a></a></span>
+<span id="cb21-7"><a></a><span class="co"># Plus quantifier (one or more)</span></span>
+<span id="cb21-8"><a></a><span class="fu">grep</span> <span class="at">-E</span> <span class="st">"A+T+G+"</span> sequences.txt</span>
+<span id="cb21-9"><a></a></span>
+<span id="cb21-10"><a></a><span class="co"># Question mark (optional)</span></span>
+<span id="cb21-11"><a></a><span class="fu">grep</span> <span class="at">-E</span> <span class="st">"colou?r"</span> british_american.txt</span>
+<span id="cb21-12"><a></a></span>
+<span id="cb21-13"><a></a><span class="co"># Complex patterns for bioinformatics</span></span>
+<span id="cb21-14"><a></a><span class="fu">grep</span> <span class="at">-E</span> <span class="st">"^&gt;sp\|[A-Z0-9]+\|"</span> uniprot.fasta  <span class="co"># UniProt headers</span></span>
+<span id="cb21-15"><a></a><span class="fu">grep</span> <span class="at">-E</span> <span class="st">"[ACGT]{20,}"</span> primers.txt          <span class="co"># Sequences 20bp+</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </section>
 <section id="combining-grep-with-pipes" class="slide level2">
 <h2>Combining GREP with Pipes</h2>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb23"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb23-1"><a></a><span class="co"># Count unique sequence headers</span></span>
-<span id="cb23-2"><a></a><span class="fu">grep</span> <span class="st">"^&gt;"</span> sequences.fasta <span class="kw">|</span> <span class="fu">sort</span> <span class="kw">|</span> <span class="fu">uniq</span> <span class="kw">|</span> <span class="fu">wc</span> <span class="at">-l</span></span>
-<span id="cb23-3"><a></a></span>
-<span id="cb23-4"><a></a><span class="co"># Extract gene names from GFF file</span></span>
-<span id="cb23-5"><a></a><span class="fu">grep</span> <span class="at">-v</span> <span class="st">"^#"</span> annotation.gff <span class="kw">|</span> <span class="fu">cut</span> <span class="at">-f9</span> <span class="kw">|</span> <span class="fu">grep</span> <span class="at">-oE</span> <span class="st">"gene=[^;]+"</span></span>
-<span id="cb23-6"><a></a></span>
-<span id="cb23-7"><a></a><span class="co"># Find sequences without stop codons</span></span>
-<span id="cb23-8"><a></a><span class="fu">grep</span> <span class="at">-v</span> <span class="at">-E</span> <span class="st">"(TAA|TAG|TGA)"</span> orfs.txt</span>
-<span id="cb23-9"><a></a></span>
-<span id="cb23-10"><a></a><span class="co"># Quality control pipeline: count reads containing an N</span></span>
-<span id="cb23-11"><a></a><span class="co"># FASTQ records are 4 lines; the sequence is always line 2 of each,</span></span>
-<span id="cb23-12"><a></a><span class="co"># so awk 'NR % 4 == 2' pulls out sequence lines. (grep "^@" is NOT</span></span>
-<span id="cb23-13"><a></a><span class="co"># safe here - quality lines can start with @ too, since @ is a valid</span></span>
-<span id="cb23-14"><a></a><span class="co"># quality character.)</span></span>
-<span id="cb23-15"><a></a><span class="fu">zcat</span> reads.fastq.gz <span class="kw">|</span> <span class="fu">awk</span> <span class="st">'NR % 4 == 2'</span> <span class="kw">|</span> <span class="fu">grep</span> <span class="at">-c</span> <span class="st">"N"</span></span>
-<span id="cb23-16"><a></a></span>
-<span id="cb23-17"><a></a><span class="co"># Search and replace with sed (uses regex)</span></span>
-<span id="cb23-18"><a></a><span class="fu">grep</span> <span class="st">"gene"</span> data.txt <span class="kw">|</span> <span class="fu">sed</span> <span class="st">'s/gene/GENE/g'</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb22"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb22-1"><a></a><span class="co"># Count unique sequence headers</span></span>
+<span id="cb22-2"><a></a><span class="fu">grep</span> <span class="st">"^&gt;"</span> sequences.fasta <span class="kw">|</span> <span class="fu">sort</span> <span class="kw">|</span> <span class="fu">uniq</span> <span class="kw">|</span> <span class="fu">wc</span> <span class="at">-l</span></span>
+<span id="cb22-3"><a></a></span>
+<span id="cb22-4"><a></a><span class="co"># Extract gene names from GFF file</span></span>
+<span id="cb22-5"><a></a><span class="fu">grep</span> <span class="at">-v</span> <span class="st">"^#"</span> annotation.gff <span class="kw">|</span> <span class="fu">cut</span> <span class="at">-f9</span> <span class="kw">|</span> <span class="fu">grep</span> <span class="at">-oE</span> <span class="st">"gene=[^;]+"</span></span>
+<span id="cb22-6"><a></a></span>
+<span id="cb22-7"><a></a><span class="co"># Find sequences without stop codons</span></span>
+<span id="cb22-8"><a></a><span class="fu">grep</span> <span class="at">-v</span> <span class="at">-E</span> <span class="st">"(TAA|TAG|TGA)"</span> orfs.txt</span>
+<span id="cb22-9"><a></a></span>
+<span id="cb22-10"><a></a><span class="co"># Quality control pipeline: count reads containing an N</span></span>
+<span id="cb22-11"><a></a><span class="co"># FASTQ records are 4 lines; the sequence is always line 2 of each,</span></span>
+<span id="cb22-12"><a></a><span class="co"># so awk 'NR % 4 == 2' pulls out sequence lines. (grep "^@" is NOT</span></span>
+<span id="cb22-13"><a></a><span class="co"># safe here - quality lines can start with @ too, since @ is a valid</span></span>
+<span id="cb22-14"><a></a><span class="co"># quality character.)</span></span>
+<span id="cb22-15"><a></a><span class="fu">zcat</span> reads.fastq.gz <span class="kw">|</span> <span class="fu">awk</span> <span class="st">'NR % 4 == 2'</span> <span class="kw">|</span> <span class="fu">grep</span> <span class="at">-c</span> <span class="st">"N"</span></span>
+<span id="cb22-16"><a></a></span>
+<span id="cb22-17"><a></a><span class="co"># Search and replace with sed (uses regex)</span></span>
+<span id="cb22-18"><a></a><span class="fu">grep</span> <span class="st">"gene"</span> data.txt <span class="kw">|</span> <span class="fu">sed</span> <span class="st">'s/gene/GENE/g'</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </section>
 <section id="analyzing-sequence-content" class="slide level2">
 <h2>Analyzing Sequence Content</h2>
 <p>Combine Unix tools to analyze genomic data:</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb24"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb24-1"><a></a><span class="co"># Count total bases in chromosome 21</span></span>
-<span id="cb24-2"><a></a></span>
-<span id="cb24-3"><a></a><span class="fu">grep</span> <span class="at">-v</span> <span class="st">"^&gt;"</span> human_genome.fa <span class="kw">|</span> <span class="fu">tr</span> <span class="at">-d</span> <span class="st">'\n'</span> <span class="kw">|</span> <span class="fu">wc</span> <span class="at">-c</span></span>
-<span id="cb24-4"><a></a></span>
-<span id="cb24-5"><a></a><span class="co"># Count each type of base</span></span>
-<span id="cb24-6"><a></a></span>
-<span id="cb24-7"><a></a><span class="fu">grep</span> <span class="at">-v</span> <span class="st">"^&gt;"</span> human_genome.fa <span class="kw">|</span> <span class="fu">tr</span> <span class="at">-d</span> <span class="st">'\n'</span> <span class="kw">|</span> </span>
-<span id="cb24-8"><a></a>  <span class="fu">fold</span> <span class="at">-w1</span> <span class="kw">|</span> <span class="fu">sort</span> <span class="kw">|</span> <span class="fu">uniq</span> <span class="at">-c</span></span>
-<span id="cb24-9"><a></a></span>
-<span id="cb24-10"><a></a><span class="co"># Calculate GC content</span></span>
-<span id="cb24-11"><a></a></span>
-<span id="cb24-12"><a></a><span class="fu">grep</span> <span class="at">-v</span> <span class="st">"^&gt;"</span> human_genome.fa <span class="kw">|</span> <span class="fu">tr</span> <span class="at">-d</span> <span class="st">'\n'</span> <span class="kw">|</span> </span>
-<span id="cb24-13"><a></a>  <span class="fu">tr</span> <span class="at">-cd</span> <span class="st">'GCgc'</span> <span class="kw">|</span> <span class="fu">wc</span> <span class="at">-c</span></span>
-<span id="cb24-14"><a></a></span>
-<span id="cb24-15"><a></a><span class="co"># Find simple sequence repeats (e.g., "ATATAT...")</span></span>
-<span id="cb24-16"><a></a></span>
-<span id="cb24-17"><a></a><span class="fu">grep</span> <span class="at">-v</span> <span class="st">"^&gt;"</span> human_genome.fa <span class="kw">|</span> <span class="fu">grep</span> <span class="at">-oE</span> <span class="st">"(AT){5,}"</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb23"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb23-1"><a></a><span class="co"># Count total bases in chromosome 21</span></span>
+<span id="cb23-2"><a></a></span>
+<span id="cb23-3"><a></a><span class="fu">grep</span> <span class="at">-v</span> <span class="st">"^&gt;"</span> human_genome.fa <span class="kw">|</span> <span class="fu">tr</span> <span class="at">-d</span> <span class="st">'\n'</span> <span class="kw">|</span> <span class="fu">wc</span> <span class="at">-c</span></span>
+<span id="cb23-4"><a></a></span>
+<span id="cb23-5"><a></a><span class="co"># Count each type of base</span></span>
+<span id="cb23-6"><a></a></span>
+<span id="cb23-7"><a></a><span class="fu">grep</span> <span class="at">-v</span> <span class="st">"^&gt;"</span> human_genome.fa <span class="kw">|</span> <span class="fu">tr</span> <span class="at">-d</span> <span class="st">'\n'</span> <span class="kw">|</span> </span>
+<span id="cb23-8"><a></a>  <span class="fu">fold</span> <span class="at">-w1</span> <span class="kw">|</span> <span class="fu">sort</span> <span class="kw">|</span> <span class="fu">uniq</span> <span class="at">-c</span></span>
+<span id="cb23-9"><a></a></span>
+<span id="cb23-10"><a></a><span class="co"># Calculate GC content</span></span>
+<span id="cb23-11"><a></a></span>
+<span id="cb23-12"><a></a><span class="fu">grep</span> <span class="at">-v</span> <span class="st">"^&gt;"</span> human_genome.fa <span class="kw">|</span> <span class="fu">tr</span> <span class="at">-d</span> <span class="st">'\n'</span> <span class="kw">|</span> </span>
+<span id="cb23-13"><a></a>  <span class="fu">tr</span> <span class="at">-cd</span> <span class="st">'GCgc'</span> <span class="kw">|</span> <span class="fu">wc</span> <span class="at">-c</span></span>
+<span id="cb23-14"><a></a></span>
+<span id="cb23-15"><a></a><span class="co"># Find simple sequence repeats (e.g., "ATATAT...")</span></span>
+<span id="cb23-16"><a></a></span>
+<span id="cb23-17"><a></a><span class="fu">grep</span> <span class="at">-v</span> <span class="st">"^&gt;"</span> human_genome.fa <span class="kw">|</span> <span class="fu">grep</span> <span class="at">-oE</span> <span class="st">"(AT){5,}"</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </section>
 <section id="working-with-compressed-files" class="slide level2">
 <h2>Working with Compressed Files</h2>
 <p>Most genomic data is compressed to save space:</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb25"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb25-1"><a></a><span class="co"># View compressed files without extracting</span></span>
-<span id="cb25-2"><a></a></span>
-<span id="cb25-3"><a></a><span class="fu">zcat</span> file.gz <span class="kw">|</span> <span class="fu">head</span></span>
-<span id="cb25-4"><a></a><span class="fu">zless</span> file.gz</span>
-<span id="cb25-5"><a></a><span class="fu">zgrep</span> <span class="st">"pattern"</span> file.gz</span>
-<span id="cb25-6"><a></a></span>
-<span id="cb25-7"><a></a><span class="co"># Compress and decompress</span></span>
-<span id="cb25-8"><a></a></span>
-<span id="cb25-9"><a></a><span class="fu">gzip</span> file.txt          <span class="co"># Creates file.txt.gz</span></span>
-<span id="cb25-10"><a></a><span class="fu">gunzip</span> file.txt.gz     <span class="co"># Restores file.txt</span></span>
-<span id="cb25-11"><a></a><span class="fu">gzip</span> <span class="at">-k</span> file.txt       <span class="co"># Keep original file</span></span>
-<span id="cb25-12"><a></a></span>
-<span id="cb25-13"><a></a><span class="co"># Work directly with compressed files</span></span>
-<span id="cb25-14"><a></a><span class="co"># (count reads: every 4th line is a header; don't grep "^@" - quality lines can start with @)</span></span>
-<span id="cb25-15"><a></a></span>
-<span id="cb25-16"><a></a><span class="fu">zcat</span> reads.fastq.gz <span class="kw">|</span> <span class="fu">awk</span> <span class="st">'NR % 4 == 1'</span> <span class="kw">|</span> <span class="fu">wc</span> <span class="at">-l</span></span>
-<span id="cb25-17"><a></a></span>
-<span id="cb25-18"><a></a><span class="co"># Concatenate compressed files</span></span>
-<span id="cb25-19"><a></a></span>
-<span id="cb25-20"><a></a><span class="fu">zcat</span> file1.gz file2.gz <span class="kw">|</span> <span class="fu">gzip</span> <span class="op">&gt;</span> combined.gz</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb24"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb24-1"><a></a><span class="co"># View compressed files without extracting</span></span>
+<span id="cb24-2"><a></a></span>
+<span id="cb24-3"><a></a><span class="fu">zcat</span> file.gz <span class="kw">|</span> <span class="fu">head</span></span>
+<span id="cb24-4"><a></a><span class="fu">zless</span> file.gz</span>
+<span id="cb24-5"><a></a><span class="fu">zgrep</span> <span class="st">"pattern"</span> file.gz</span>
+<span id="cb24-6"><a></a></span>
+<span id="cb24-7"><a></a><span class="co"># Compress and decompress</span></span>
+<span id="cb24-8"><a></a></span>
+<span id="cb24-9"><a></a><span class="fu">gzip</span> file.txt          <span class="co"># Creates file.txt.gz</span></span>
+<span id="cb24-10"><a></a><span class="fu">gunzip</span> file.txt.gz     <span class="co"># Restores file.txt</span></span>
+<span id="cb24-11"><a></a><span class="fu">gzip</span> <span class="at">-k</span> file.txt       <span class="co"># Keep original file</span></span>
+<span id="cb24-12"><a></a></span>
+<span id="cb24-13"><a></a><span class="co"># Work directly with compressed files</span></span>
+<span id="cb24-14"><a></a><span class="co"># (count reads: every 4th line is a header; don't grep "^@" - quality lines can start with @)</span></span>
+<span id="cb24-15"><a></a></span>
+<span id="cb24-16"><a></a><span class="fu">zcat</span> reads.fastq.gz <span class="kw">|</span> <span class="fu">awk</span> <span class="st">'NR % 4 == 1'</span> <span class="kw">|</span> <span class="fu">wc</span> <span class="at">-l</span></span>
+<span id="cb24-17"><a></a></span>
+<span id="cb24-18"><a></a><span class="co"># Concatenate compressed files</span></span>
+<span id="cb24-19"><a></a></span>
+<span id="cb24-20"><a></a><span class="fu">zcat</span> file1.gz file2.gz <span class="kw">|</span> <span class="fu">gzip</span> <span class="op">&gt;</span> combined.gz</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </section>
 <section id="homework---microbial-genome-analysis" class="slide level2">
 <h2>Homework - microbial genome analysis</h2>
