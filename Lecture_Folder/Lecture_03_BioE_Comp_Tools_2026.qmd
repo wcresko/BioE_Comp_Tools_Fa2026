@@ -28,16 +28,110 @@ The course book goes deeper on everything in this lecture. Read before or after 
 
 -   *Review:* [Ch. 7: Files, Pipes, and Redirection](../book/chapters/07-files-pipes.html)
 -   [Ch. 8: Tidy Data Principles](../book/chapters/08-tidy-data.html)
--   [Ch. 9: GREP and Regular Expressions](../book/chapters/09-grep-regex.html) - the grep and regex sections; sed and awk wait for L04
+-   [Ch. 9: GREP, Regular Expressions, sed and awk](../book/chapters/09-grep-regex.html) - the grep and regex sections; sed and awk wait for L04
 -   *Reference:* [App. C: Common Data Formats & Public Repositories](../book/chapters/appendix-C-data-formats.html) · [App. D: Regular Expression Reference](../book/chapters/appendix-D-regex.html)
 
 ## Goals for today
 
+-   Warm-up: shell scripts and permissions from L02 - ending in your first *Python* script
 -   Tidy data principles - and is our stickleback table tidy?
 -   Unix standard streams and redirection
 -   Working with large genomic data files (FASTA and FASTQ)
 -   GREP and regular expressions
 -   Working with compressed files
+
+# Warm-up - shell scripts, take two
+
+## Recap: a script is a text file you make runnable
+
+We rushed the end of L02, so here are the ideas to keep. The full story stays in [Lecture 02](Lecture_02_BioE_Comp_Tools_2026.html) and [Ch. 6](../book/chapters/06-unix-environment.html).
+
+::: incremental
+-   A **shell script** is a plain-text file of the commands you would have typed, run top to bottom
+-   Line 1 is the **shebang**: `#!` names the program that interprets the rest of the file (`#!/usr/bin/env bash`)
+-   New files are born `rw-r--r--` - **no `x`** - so `./hello.sh` answers `Permission denied`
+-   The one-time fix is `chmod +x hello.sh`; after that, `./hello.sh` just runs
+-   `bash hello.sh` works *without* `x`, because there you are running `bash`, not the script
+-   Read `ls -l` as a file-type flag + three `rwx` triplets (user, group, other): `755` = `rwxr-xr-x`, the classic script permission
+:::
+
+## Two minutes of muscle memory
+
+The four week-2 scripts are on the [Example Files](../Examples.html) page - open them in Positron, *read the comments*, then rebuild the habit:
+
+``` bash
+cd ~/projects/comptools
+ls -l scripts/                  # first column: who may read, write, execute?
+chmod +x scripts/*.sh           # the once-per-script step
+./scripts/filter_rows.sh Genotype A < data/Stickle_RNAseq.tsv |
+    ./scripts/total_counts.sh | sort -t$'\t' -k2,2nr | head -3
+```
+
+::: callout-tip
+`Permission denied` is almost never about *you* - look for a missing `x` with `ls -l`. And `command not found` for a script that is right there usually means you forgot the `./`.
+:::
+
+## The shebang is not married to bash
+
+Change line 1 and the *same* mechanics run any language:
+
+``` bash
+#!/usr/bin/env bash      # a bash script
+#!/usr/bin/env python3   # a Python script
+#!/usr/bin/env Rscript   # an R script
+```
+
+::: incremental
+-   Commands in a text file → shebang on line 1 → `chmod +x` once → `./script` forever
+-   The shell does not care what language is inside - it reads the shebang and hands the file over
+-   So let's write our first **Python** script right now, as a preview of L05-L07
+-   It will read the stickleback table in *one line* - possible only because the file follows rules we will name today: **tidy data**
+:::
+
+## A first Python script: read tidy data, make a plot
+
+Put this in `scripts/plot_stickleback.py` - or download the commented version from the [Schedule](../Schedule.html) (week 3):
+
+``` python
+#!/usr/bin/env python3
+# plot_stickleback.py - total RNA-seq counts per fish, by group
+
+import pandas as pd                  # data tables     (L05-L06)
+import matplotlib.pyplot as plt      # plotting        (L06)
+
+# One line to read the whole table - because it is tidy:
+# a header of variable names, one row per fish, one value per cell
+stickle = pd.read_csv("data/Stickle_RNAseq.tsv", sep="\t")
+
+# One number per fish: total reads across the 600 gene columns
+genes = [c for c in stickle.columns if c.startswith("Gene")]
+totals = pd.DataFrame({"Group": stickle["Geno&Micro"],
+                       "Total": stickle[genes].sum(axis=1)})
+
+# A quick plot: one box per genotype-x-microbiota group
+totals.boxplot(column="Total", by="Group")
+plt.ylabel("Total reads per fish")
+plt.savefig("results/total_counts_by_group.png", dpi=200)
+print("Wrote results/total_counts_by_group.png")
+```
+
+## Run it exactly like the shell scripts
+
+``` bash
+cd ~/projects/comptools && mkdir -p results
+chmod +x scripts/plot_stickleback.py     # the same one-time step
+./scripts/plot_stickleback.py            # the same ./ to run it
+# Wrote results/total_counts_by_group.png
+open results/total_counts_by_group.png   # macOS (Linux: xdg-open)
+```
+
+::: incremental
+-   `Permission denied`? You know exactly what to do now
+-   Read a file, compute, save a figure - rerunnable with **one command** when new data arrive: that is reproducibility
+-   Don't sweat the pandas/matplotlib details yet (that's L05-L07) - today's point is that *scripts are scripts*, whatever the language
+-   The one-line read worked because the data follow rules. Which rules? On to **tidy data**
+:::
+
 
 # Tidy Data
 
