@@ -807,315 +807,315 @@
   {
     "objectID": "Lecture_Folder/Lecture_03_BioE_Comp_Tools_2026.html#book-reading-for-this-lecture",
     "href": "Lecture_Folder/Lecture_03_BioE_Comp_Tools_2026.html#book-reading-for-this-lecture",
-    "title": "Lecture 03 - Computational Tools for Bioengineers",
+    "title": "Lecture 03",
     "section": "Book reading for this lecture",
-    "text": "Book reading for this lecture\nThe course book goes deeper on everything in this lecture. Read before or after class:\n\nReview: Ch. 7: Files, Pipes, and Redirection\nCh. 8: Tidy Data Principles\nCh. 9: GREP, Regular Expressions, sed and awk - the grep and regex sections; sed and awk wait for L04\nReference: App. C: Common Data Formats & Public Repositories · App. D: Regular Expression Reference"
+    "text": "Book reading for this lecture\n\nCh. 7: Files, Pipes, and Redirection\nCh. 8: Tidy Data Principles\nCh. 9: GREP, Regular Expressions, sed and awk - the grep and regex sections; sed and awk wait for L04\nReference: App. C: Common Data Formats & Public Repositories · App. D: Regular Expression Reference"
   },
   {
     "objectID": "Lecture_Folder/Lecture_03_BioE_Comp_Tools_2026.html#goals-for-today",
     "href": "Lecture_Folder/Lecture_03_BioE_Comp_Tools_2026.html#goals-for-today",
-    "title": "Lecture 03 - Computational Tools for Bioengineers",
+    "title": "Lecture 03",
     "section": "Goals for today",
     "text": "Goals for today\n\nWarm-up: shell scripts and permissions from L02 - ending in your first Python script\nTidy data principles - and is our stickleback table tidy?\nUnix standard streams and redirection\nWorking with large genomic data files (FASTA and FASTQ)\nGREP and regular expressions\nWorking with compressed files"
   },
   {
     "objectID": "Lecture_Folder/Lecture_03_BioE_Comp_Tools_2026.html#recap-a-script-is-a-text-file-you-make-runnable",
     "href": "Lecture_Folder/Lecture_03_BioE_Comp_Tools_2026.html#recap-a-script-is-a-text-file-you-make-runnable",
-    "title": "Lecture 03 - Computational Tools for Bioengineers",
+    "title": "Lecture 03",
     "section": "Recap: a script is a text file you make runnable",
-    "text": "Recap: a script is a text file you make runnable\nWe rushed the end of L02, so here are the ideas to keep. The full story stays in Lecture 02 and Ch. 6.\n\nA shell script is a plain-text file of the commands you would have typed, run top to bottom\nLine 1 is the shebang: #! names the program that interprets the rest of the file (#!/usr/bin/env bash)\nNew files are born rw-r--r-- - no x - so ./hello.sh answers Permission denied\nThe one-time fix is chmod +x hello.sh; after that, ./hello.sh just runs\nbash hello.sh works without x, because there you are running bash, not the script\nRead ls -l as a file-type flag + three rwx triplets (user, group, other): 755 = rwxr-xr-x, the classic script permission"
+    "text": "Recap: a script is a text file you make runnable\n\nWe rushed the end of L02, so here are the ideas to keep.\n\n\nA shell script is a plain-text file of the commands you would have typed, run top to bottom\nLine 1 is the shebang: #! names the program that interprets the rest of the file (#!/usr/bin/env bash)\nNew files are born rw-r--r--\n\nno x\nso ./hello.sh answers Permission denied\n\nThe one-time fix is\n\nchmod +x hello.sh\nafter that, ./hello.sh just runs\n\nbash hello.sh works without x, because there you are running bash, not the script\nRead ls -l as a file-type flag + three rwx triplets (user, group, other): 755 = rwxr-xr-x, the classic script permission"
   },
   {
     "objectID": "Lecture_Folder/Lecture_03_BioE_Comp_Tools_2026.html#the-shebang-is-not-married-to-bash",
     "href": "Lecture_Folder/Lecture_03_BioE_Comp_Tools_2026.html#the-shebang-is-not-married-to-bash",
-    "title": "Lecture 03 - Computational Tools for Bioengineers",
+    "title": "Lecture 03",
     "section": "The shebang is not married to bash",
-    "text": "The shebang is not married to bash\nChange line 1 and the same mechanics run any language:\n#!/usr/bin/env bash      # a bash script\n#!/usr/bin/env python3   # a Python script\n#!/usr/bin/env Rscript   # an R script\n\nCommands in a text file → shebang on line 1 → chmod +x once → ./script forever\nThe shell does not care what language is inside - it reads the shebang and hands the file over\nSo let’s write our first Python script right now, as a preview of L05-L07\nIt will read the stickleback table in one line - possible only because the file follows rules we will name today: tidy data"
+    "text": "The shebang is not married to bash\nChange line 1 and the same mechanics run any language:\n#!/usr/bin/env bash      # a bash script\n#!/usr/bin/env python3   # a Python script\n#!/usr/bin/env Rscript   # an R script\n\nCommands in a text file → shebang on line 1 → chmod +x once → ./script forever\nThe shell does not care what language is inside - it reads the shebang and hands the file over\nSo let’s go in and remind ourselves of the shell scripts\nThen, let’s write our first Python script as a preview of L05-L07\nIt will read the stickleback table in one line which possible only because the file follows tidy data rules"
   },
   {
     "objectID": "Lecture_Folder/Lecture_03_BioE_Comp_Tools_2026.html#a-first-python-script-read-tidy-data-make-a-plot",
     "href": "Lecture_Folder/Lecture_03_BioE_Comp_Tools_2026.html#a-first-python-script-read-tidy-data-make-a-plot",
-    "title": "Lecture 03 - Computational Tools for Bioengineers",
+    "title": "Lecture 03",
     "section": "A first Python script: read tidy data, make a plot",
-    "text": "A first Python script: read tidy data, make a plot\nPut this in scripts/plot_stickleback.py - or grab the commented script and its step-by-step notebook from the Schedule (week 3):\n#!/usr/bin/env python3\n# plot_stickleback.py - total RNA-seq counts per fish, by group\n\nimport pandas as pd                  # data tables     (L05-L06)\nimport matplotlib.pyplot as plt      # plotting        (L06)\n\n# One line to read the whole table - because it is tidy:\n# a header of variable names, one row per fish, one value per cell\nstickle = pd.read_csv(\"data/Stickle_RNAseq.tsv\", sep=\"\\t\")\n\n# One number per fish: total reads across the 600 gene columns\ngenes = [c for c in stickle.columns if c.startswith(\"Gene\")]\ntotals = pd.DataFrame({\"Group\": stickle[\"Geno&Micro\"],\n                       \"Total\": stickle[genes].sum(axis=1)})\n\n# A quick plot: one box per genotype-x-microbiota group\ntotals.boxplot(column=\"Total\", by=\"Group\")\nplt.ylabel(\"Total reads per fish\")\nplt.savefig(\"results/total_counts_by_group.png\", dpi=200)\nprint(\"Wrote results/total_counts_by_group.png\")"
+    "text": "A first Python script: read tidy data, make a plot\nPut this in scripts/plot_stickleback.py - or grab the commented script and its step-by-step notebook from the Schedule (week 3):\n#!/usr/bin/env python3\n# plot_stickleback.py - total RNA-seq counts per fish, by group\n\nimport pandas as pd                  # data tables     (L05-L06)\nimport matplotlib.pyplot as plt     # plotting        (L06)\n\n# One line to read the whole table - because it is tidy:\n# a header of variable names, one row per fish, one value per cell\nstickle = pd.read_csv(\"data/Stickle_RNAseq.tsv\", sep=\"\\t\")\n\n# One number per fish: total reads across the 600 gene columns\ngenes = [c for c in stickle.columns if c.startswith(\"Gene\")]\ntotals = pd.DataFrame({\"Group\": stickle[\"Geno&Micro\"],\n                       \"Total\": stickle[genes].sum(axis=1)})\n\n# A quick plot: one box per genotype-x-microbiota group\ntotals.boxplot(column=\"Total\", by=\"Group\")\nplt.ylabel(\"Total reads per fish\")\nplt.savefig(\"results/total_counts_by_group.png\", dpi=200)\nprint(\"Wrote results/total_counts_by_group.png\")"
   },
   {
     "objectID": "Lecture_Folder/Lecture_03_BioE_Comp_Tools_2026.html#run-it-exactly-like-the-shell-scripts",
     "href": "Lecture_Folder/Lecture_03_BioE_Comp_Tools_2026.html#run-it-exactly-like-the-shell-scripts",
-    "title": "Lecture 03 - Computational Tools for Bioengineers",
+    "title": "Lecture 03",
     "section": "Run it exactly like the shell scripts",
     "text": "Run it exactly like the shell scripts\ncd ~/projects/comptools && mkdir -p results\nchmod +x scripts/plot_stickleback.py     # the same one-time step\n./scripts/plot_stickleback.py            # the same ./ to run it\n# Wrote results/total_counts_by_group.png\nopen results/total_counts_by_group.png   # macOS (Linux: xdg-open)\n\nPermission denied? You know exactly what to do now\nRead a file, compute, save a figure - rerunnable with one command when new data arrive: that is reproducibility\nDon’t sweat the pandas/matplotlib details yet (that’s L05-L07) - today’s point is that scripts are scripts, whatever the language\nThe one-line read worked because the data follow rules. Which rules? On to tidy data"
   },
   {
     "objectID": "Lecture_Folder/Lecture_03_BioE_Comp_Tools_2026.html#an-example-to-get-us-started",
     "href": "Lecture_Folder/Lecture_03_BioE_Comp_Tools_2026.html#an-example-to-get-us-started",
-    "title": "Lecture 03 - Computational Tools for Bioengineers",
+    "title": "Lecture 03",
     "section": "An example to get us started",
     "text": "An example to get us started"
   },
   {
     "objectID": "Lecture_Folder/Lecture_03_BioE_Comp_Tools_2026.html#data-set-rules-of-thumb-aka-tidy-data",
     "href": "Lecture_Folder/Lecture_03_BioE_Comp_Tools_2026.html#data-set-rules-of-thumb-aka-tidy-data",
-    "title": "Lecture 03 - Computational Tools for Bioengineers",
+    "title": "Lecture 03",
     "section": "Data set rules of thumb (aka Tidy Data)",
     "text": "Data set rules of thumb (aka Tidy Data)\n\nStore a copy of data in nonproprietary software and hardware formats, such as plain ASCII text (aka a flat file)\nLeave an uncorrected file when doing analyses\nUse descriptive names for your data files and variables\nInclude a header line with descriptive variable names\nMaintain effective metadata about the data (data dictionary)\nWhen you add observations to a database, add rows\nWhen you add variables to a database, add columns, not rows\nA column of data should contain only one data type"
   },
   {
     "objectID": "Lecture_Folder/Lecture_03_BioE_Comp_Tools_2026.html#not-all-data-are-tidy-to-begin-with",
     "href": "Lecture_Folder/Lecture_03_BioE_Comp_Tools_2026.html#not-all-data-are-tidy-to-begin-with",
-    "title": "Lecture 03 - Computational Tools for Bioengineers",
+    "title": "Lecture 03",
     "section": "Not all data are tidy to begin with",
     "text": "Not all data are tidy to begin with\n\nSometimes need to do some data wrangling\nBut also contingency tables"
   },
   {
     "objectID": "Lecture_Folder/Lecture_03_BioE_Comp_Tools_2026.html#types-of-data",
     "href": "Lecture_Folder/Lecture_03_BioE_Comp_Tools_2026.html#types-of-data",
-    "title": "Lecture 03 - Computational Tools for Bioengineers",
+    "title": "Lecture 03",
     "section": "Types of data",
     "text": "Types of data\n\n\n\n\n\n\n\n\n\nCategorical\n\nQuantitative\n\n\n\nOrdinal\nNominal\nRatio\nInterval\n\n\nsmall, medium, large\napples, oranges, bananas\nkilograms, dollars, years\ntemperature, calendar year\n\n\nordered character\ncharacter\nnumeric\ninteger\n\n\n\n‘Factor’ is a special type of character variable that we will explore more later"
   },
   {
     "objectID": "Lecture_Folder/Lecture_03_BioE_Comp_Tools_2026.html#is-our-course-dataset-tidy",
     "href": "Lecture_Folder/Lecture_03_BioE_Comp_Tools_2026.html#is-our-course-dataset-tidy",
-    "title": "Lecture 03 - Computational Tools for Bioengineers",
+    "title": "Lecture 03",
     "section": "Is our course dataset tidy?",
     "text": "Is our course dataset tidy?\nBack in your course folder (cd ~/projects/comptools):\nhead -n 2 data/Stickle_RNAseq.tsv | cut -f 1-8\nIndividual  Genotype  Microbiota    Geno&Micro  Gene1  Gene2  Gene3  Gene4\nAC1         A         conventional  convA       16     15     71     153\n\nOne row per fish, one column per variable - tidy for per-fish questions\nBut 600 gene columns is a “wide” layout: the gene is really a variable too. For per-gene questions we will reshape it to long format (one row per fish x gene) in Week 7\nThe Geno&Micro column duplicates two other columns - and the & is a name that will annoy every tool we use. Keep an eye on it."
   },
   {
     "objectID": "Lecture_Folder/Lecture_03_BioE_Comp_Tools_2026.html#making-new-files",
     "href": "Lecture_Folder/Lecture_03_BioE_Comp_Tools_2026.html#making-new-files",
-    "title": "Lecture 03 - Computational Tools for Bioengineers",
+    "title": "Lecture 03",
     "section": "Making new files",
     "text": "Making new files\n\nMake new folders: mkdir\nMake new files: nano, touch\nRename files: mv\nMove files: mv\nCopy files: cp\nDelete files: rm\nDelete directories: rmdir\nExamining file length: wc\nReading files: cat\nLooking at beginning or end: head or tail"
   },
   {
     "objectID": "Lecture_Folder/Lecture_03_BioE_Comp_Tools_2026.html#things-to-keep-in-mind",
     "href": "Lecture_Folder/Lecture_03_BioE_Comp_Tools_2026.html#things-to-keep-in-mind",
-    "title": "Lecture 03 - Computational Tools for Bioengineers",
+    "title": "Lecture 03",
     "section": "Things to keep in mind",
     "text": "Things to keep in mind\n\nThe shell trusts you\n\nIt will delete files you say to delete\nIt will override files if you name 2 things the same\n\nNaming conventions\n\nAvoid spaces\nDon’t start with a –\nStick to letters, numbers, . , -, and _\n\nUse appropriate file extensions in file names\n\nSome software expect files with certain extensions (.fasta, .txt, etc.)"
   },
   {
     "objectID": "Lecture_Folder/Lecture_03_BioE_Comp_Tools_2026.html#practice-making-files-and-directories",
     "href": "Lecture_Folder/Lecture_03_BioE_Comp_Tools_2026.html#practice-making-files-and-directories",
-    "title": "Lecture 03 - Computational Tools for Bioengineers",
+    "title": "Lecture 03",
     "section": "Practice making files and directories",
     "text": "Practice making files and directories\n\nMake a new directory called whatever you’d like.\nAdd a file named Practice.txt to the directory and add some text to it\nRead the contents of the file and get its length\nRename the file to Super_practice.txt\nMove the file to a new folder named Testing\nMake a copy of the file named Super_practice_copy.txt\nRead the contents of the file and get its length to make sure it’s the same as Super_practice.txt\nDelete the original Super_practice.txt"
   },
   {
     "objectID": "Lecture_Folder/Lecture_03_BioE_Comp_Tools_2026.html#commands-for-reading-files",
     "href": "Lecture_Folder/Lecture_03_BioE_Comp_Tools_2026.html#commands-for-reading-files",
-    "title": "Lecture 03 - Computational Tools for Bioengineers",
+    "title": "Lecture 03",
     "section": "Commands for Reading Files",
     "text": "Commands for Reading Files\n\ncat = concatenate and display files\n\nShows entire file at once\nGood for small files\n\nless = view file page by page\n\nNavigate with space (forward), b (back), q (quit)\nSearch with /pattern\n\nmore = similar to less but simpler\n\nSpace to go forward, q to quit\n\nhead = display first 10 lines (default)\n\nhead -n 20 file.txt shows first 20 lines\n\ntail = display last 10 lines (default)\n\ntail -n 20 file.txt shows last 20 lines\ntail -f file.txt follows file as it grows (useful for logs)"
   },
   {
     "objectID": "Lecture_Folder/Lecture_03_BioE_Comp_Tools_2026.html#input-redirection",
     "href": "Lecture_Folder/Lecture_03_BioE_Comp_Tools_2026.html#input-redirection",
-    "title": "Lecture 03 - Computational Tools for Bioengineers",
+    "title": "Lecture 03",
     "section": "Input Redirection",
     "text": "Input Redirection\n\n&lt; = redirect input from a file\n\ncommand &lt; input.txt\nSends contents of file as input to command\n\n&lt;&lt; = here document (multi-line input)\n\nAllows you to provide multi-line input directly in the terminal\n\nExample uses:\n\nwc -l &lt; data.txt counts lines in data.txt\nsort &lt; names.txt sorts contents of names.txt"
   },
   {
     "objectID": "Lecture_Folder/Lecture_03_BioE_Comp_Tools_2026.html#output-redirection",
     "href": "Lecture_Folder/Lecture_03_BioE_Comp_Tools_2026.html#output-redirection",
-    "title": "Lecture 03 - Computational Tools for Bioengineers",
+    "title": "Lecture 03",
     "section": "Output Redirection",
     "text": "Output Redirection\n\n&gt; = redirect output to a file (overwrites)\n\nls -l &gt; filelist.txt\nCreates new file or overwrites existing\n\n&gt;&gt; = append output to a file\n\necho \"new line\" &gt;&gt; existing.txt\nAdds to the end of existing file\n\n2&gt; = redirect error messages\n\ncommand 2&gt; errors.txt\nCaptures error messages separately\n\n&&gt; = redirect both output and errors\n\ncommand &&gt; all_output.txt"
   },
   {
     "objectID": "Lecture_Folder/Lecture_03_BioE_Comp_Tools_2026.html#unix-three-standard-streams",
     "href": "Lecture_Folder/Lecture_03_BioE_Comp_Tools_2026.html#unix-three-standard-streams",
-    "title": "Lecture 03 - Computational Tools for Bioengineers",
+    "title": "Lecture 03",
     "section": "Unix Three Standard Streams",
     "text": "Unix Three Standard Streams\n\nstdin (0) = Standard Input\n\nWhere programs read input from\nDefault: keyboard\n\nstdout (1) = Standard Output\n\nWhere programs write normal output\nDefault: terminal screen\n\nstderr (2) = Standard Error\n\nWhere programs write error messages\nDefault: terminal screen (same as stdout)"
   },
   {
     "objectID": "Lecture_Folder/Lecture_03_BioE_Comp_Tools_2026.html#visualizing-data-streams",
     "href": "Lecture_Folder/Lecture_03_BioE_Comp_Tools_2026.html#visualizing-data-streams",
-    "title": "Lecture 03 - Computational Tools for Bioengineers",
+    "title": "Lecture 03",
     "section": "Visualizing Data Streams",
     "text": "Visualizing Data Streams\n# Every Unix program has these three streams\n         ┌──────────────┐\nstdin ───&gt;│              │───&gt; stdout\n    (0)  │   Program    │      (1)\n         │              │───&gt; stderr\n         └──────────────┘      (2)\n\nFile descriptor numbers: 0, 1, 2\nCan redirect each stream independently\nPrograms don’t know if streams are redirected\nThis abstraction is key to Unix philosophy"
   },
   {
     "objectID": "Lecture_Folder/Lecture_03_BioE_Comp_Tools_2026.html#basic-stream-redirection",
     "href": "Lecture_Folder/Lecture_03_BioE_Comp_Tools_2026.html#basic-stream-redirection",
-    "title": "Lecture 03 - Computational Tools for Bioengineers",
+    "title": "Lecture 03",
     "section": "Basic Stream Redirection",
     "text": "Basic Stream Redirection\n# Redirect stdout to file (equivalent ways)\n\nls -l &gt; files.txt\nls -l 1&gt; files.txt      # Explicitly using fd 1\n\n# Redirect stderr to file\n\nls /nonexistent 2&gt; errors.txt\n\n# Redirect both stdout and stderr to same file\n\nls -l /nonexistent &&gt; all_output.txt"
   },
   {
     "objectID": "Lecture_Folder/Lecture_03_BioE_Comp_Tools_2026.html#bioinformatics-example",
     "href": "Lecture_Folder/Lecture_03_BioE_Comp_Tools_2026.html#bioinformatics-example",
-    "title": "Lecture 03 - Computational Tools for Bioengineers",
+    "title": "Lecture 03",
     "section": "Bioinformatics Example",
     "text": "Bioinformatics Example\nProcessing sequence data with stream control:\n# FASTQ processing pipeline with error handling\n\nzcat reads.fastq.gz 2&gt; unzip_errors.log | \nfastqc stdin 2&gt; qc_errors.log | \ntrimmomatic 2&gt; trim_errors.log | \nbowtie2 -x genome - 2&gt; alignment_stats.txt | \nsamtools sort 2&gt; sort_errors.log | \nsamtools index - 2&gt; index_errors.log\n\n# Check all error logs at once\n\ncat *_errors.log | grep -E \"ERROR|WARNING\""
   },
   {
     "objectID": "Lecture_Folder/Lecture_03_BioE_Comp_Tools_2026.html#what-are-pipes",
     "href": "Lecture_Folder/Lecture_03_BioE_Comp_Tools_2026.html#what-are-pipes",
-    "title": "Lecture 03 - Computational Tools for Bioengineers",
+    "title": "Lecture 03",
     "section": "What are Pipes?",
     "text": "What are Pipes?\n\n| = the pipe operator\n\nTakes output from one command as input to another\nChains commands together\nNo intermediate files needed!\n\nBasic syntax:\n\ncommand1 | command2 | command3\n\nPower of Unix philosophy:\n\nSmall tools that do one thing well\nCombine them to do complex tasks"
   },
   {
     "objectID": "Lecture_Folder/Lecture_03_BioE_Comp_Tools_2026.html#common-pipe-patterns",
     "href": "Lecture_Folder/Lecture_03_BioE_Comp_Tools_2026.html#common-pipe-patterns",
-    "title": "Lecture 03 - Computational Tools for Bioengineers",
+    "title": "Lecture 03",
     "section": "Common Pipe Patterns",
     "text": "Common Pipe Patterns\n\nCounting patterns:\n\ngrep \"pattern\" file.txt | wc -l\nCount lines matching a pattern\n\nSorting and uniqueness:\n\ncat file.txt | sort | uniq\nSort lines and remove duplicates\n\nFinding top/bottom items:\n\nsort data.txt | head -5\nGet top 5 after sorting\n\nFiltering and processing:\n\nls -l | grep \".txt\" | awk '{print $5, $9}'\nList txt files with sizes"
   },
   {
     "objectID": "Lecture_Folder/Lecture_03_BioE_Comp_Tools_2026.html#advanced-pipe-examples",
     "href": "Lecture_Folder/Lecture_03_BioE_Comp_Tools_2026.html#advanced-pipe-examples",
-    "title": "Lecture 03 - Computational Tools for Bioengineers",
+    "title": "Lecture 03",
     "section": "Advanced Pipe Examples",
     "text": "Advanced Pipe Examples\n\nMulti-step data processing:\n\ncat data.csv | cut -d',' -f2 | sort | uniq -c | sort -rn\nExtract column 2, count unique values, sort by frequency\n\nComplex transformations:\n\nfind . -name \"*.txt\" | xargs wc -l | sort -n\nFind all txt files and sort by line count\n\nReal-time monitoring:\n\ntail -f logfile.txt | grep ERROR\nWatch log file for errors in real-time"
   },
   {
     "objectID": "Lecture_Folder/Lecture_03_BioE_Comp_Tools_2026.html#tips-for-working-with-files-and-pipes",
     "href": "Lecture_Folder/Lecture_03_BioE_Comp_Tools_2026.html#tips-for-working-with-files-and-pipes",
-    "title": "Lecture 03 - Computational Tools for Bioengineers",
+    "title": "Lecture 03",
     "section": "Tips for Working with Files and Pipes",
     "text": "Tips for Working with Files and Pipes\n\nTest pipes step by step\n\nBuild complex pipes incrementally\nCheck output at each stage\n\nUse less for large files instead of cat\nRemember: &gt; overwrites, &gt;&gt; appends\nPipe efficiency:\n\nFilter early in the pipeline\nReduces data passed between commands\n\nSave intermediate results when debugging complex pipes # Unix Data Streams"
   },
   {
     "objectID": "Lecture_Folder/Lecture_03_BioE_Comp_Tools_2026.html#sequence-file-formats-fasta-and-fastq",
     "href": "Lecture_Folder/Lecture_03_BioE_Comp_Tools_2026.html#sequence-file-formats-fasta-and-fastq",
-    "title": "Lecture 03 - Computational Tools for Bioengineers",
+    "title": "Lecture 03",
     "section": "Sequence file formats: FASTA and FASTQ",
     "text": "Sequence file formats: FASTA and FASTQ\n\n\nFASTA - sequences (genomes, genes, proteins)\n&gt;chr21 Homo sapiens chromosome 21\nNNNNNNNNNNGATCCTTGAAGCGCCCCCAAGG\nGCATCTTCTCTACTTTCACCTAACAGATCCCA\n\nHeader line starts with &gt;\nSequence on one or more lines\nCount sequences: grep -c \"^&gt;\" file.fa\n\n\nFASTQ - raw sequencing reads\n@SRR12345.1 read_1\nNCATGCAGCGTACGGTAATTGGCAG\n+\n#AAAAFFFFFFFFFFFFFFFFFFFF\n\n4 lines per read: @ header, sequence, +, per-base quality\nQuality letters encode Phred scores (! = lowest, I = Q40)\nCount reads: echo $(( $(wc -l &lt; reads.fastq) / 4 ))\n\n\n\n\n\n\n\n\nTip\n\n\nBoth are usually gzip-compressed (.fa.gz, .fastq.gz) - use zcat / zless / zgrep to read them without unpacking. More formats (CSV/TSV, GFF, BED, VCF, HDF5) in the Data Formats appendix of the course book."
   },
   {
     "objectID": "Lecture_Folder/Lecture_03_BioE_Comp_Tools_2026.html#human-chromosome-data",
     "href": "Lecture_Folder/Lecture_03_BioE_Comp_Tools_2026.html#human-chromosome-data",
-    "title": "Lecture 03 - Computational Tools for Bioengineers",
+    "title": "Lecture 03",
     "section": "Human Chromosome Data",
     "text": "Human Chromosome Data\n\nGenomic data files can be massive (the full human genome is ~3.1 GB compressed)\nFASTA format is standard for sequence data\nPerfect use case for Unix pipes and redirection\nWe will practice on human chromosome 21 - the smallest autosome (~13 MB compressed, ~46 Mb of sequence), so every command finishes in seconds\nThe same commands work unchanged on the whole genome - only the wait time changes\nThe course book works through the same file in Chapter 9"
   },
   {
     "objectID": "Lecture_Folder/Lecture_03_BioE_Comp_Tools_2026.html#downloading-genomic-data",
     "href": "Lecture_Folder/Lecture_03_BioE_Comp_Tools_2026.html#downloading-genomic-data",
-    "title": "Lecture 03 - Computational Tools for Bioengineers",
+    "title": "Lecture 03",
     "section": "Downloading Genomic Data",
     "text": "Downloading Genomic Data\nDownload chromosome 21 of the human genome (hg38 / GRCh38) from UCSC:\n# Using `wget` to download chr21 (~13 MB)\n\nwget https://hgdownload.soe.ucsc.edu/goldenPath/hg38/chromosomes/chr21.fa.gz\n\n# Or using `curl` and save with a specific name (-L follows redirects)\n\ncurl -L -o chr21.fa.gz \\\n  https://hgdownload.soe.ucsc.edu/goldenPath/hg38/chromosomes/chr21.fa.gz\n\nwget and curl are both tools for downloading files (macOS ships curl; install wget with Homebrew if you want it)\nThe backslash lets a long command span multiple lines\n.gz extension means the file is compressed\nThe whole genome lives in the same directory as hg38.fa.gz (~1 GB) - same commands, much longer runs"
   },
   {
     "objectID": "Lecture_Folder/Lecture_03_BioE_Comp_Tools_2026.html#examining-large-files-efficiently",
     "href": "Lecture_Folder/Lecture_03_BioE_Comp_Tools_2026.html#examining-large-files-efficiently",
-    "title": "Lecture 03 - Computational Tools for Bioengineers",
+    "title": "Lecture 03",
     "section": "Examining Large Files Efficiently",
     "text": "Examining Large Files Efficiently\nDon’t use cat on huge files! Use these approaches:\n# Decompress and look at first 10 lines\n\ngunzip -c chr21.fa.gz | head -10\n\n# Check file size before and after decompression (-k keeps the .gz)\n\nls -lh chr21.fa.gz\ngunzip -k chr21.fa.gz\nls -lh chr21.fa\n\n# Count sequences in FASTA file (lines starting with &gt;)\n# grep can't read gzip data directly - use zgrep (or zcat | grep)\n\nzgrep \"^&gt;\" chr21.fa.gz | wc -l\n\n# View sequence headers only\n\nzgrep \"^&gt;\" chr21.fa.gz | less\n\n\n\n\n\n\nNote\n\n\nThe UCSC file is soft-masked: repeats are written in lowercase (acgt). Patterns like GAATTC will miss sites inside masked regions - add -i to grep, or uppercase everything first with tr 'acgt' 'ACGT'."
   },
   {
     "objectID": "Lecture_Folder/Lecture_03_BioE_Comp_Tools_2026.html#creating-a-subset-for-analysis",
     "href": "Lecture_Folder/Lecture_03_BioE_Comp_Tools_2026.html#creating-a-subset-for-analysis",
-    "title": "Lecture 03 - Computational Tools for Bioengineers",
+    "title": "Lecture 03",
     "section": "Creating a Subset for Analysis",
     "text": "Creating a Subset for Analysis\nMake a smaller working file for testing:\n# Extract the first ~1 Mb of sequence for testing (50 bases per line)\n\nzcat chr21.fa.gz | head -n 20000 &gt; chr21_subset.fa\n\n# Extract a specific record by name from a multi-sequence FASTA\n# (e.g. from hg38.fa - chr21.fa has only one record)\n\nawk '/^&gt;chr21$/,/^&gt;chr22$/' hg38.fa | head -n -1 &gt; chr21_from_genome.fa\n\n# Pull out a window of lines from the middle of the chromosome\n\nsed -n '400000,420000p' chr21.fa &gt; region_of_interest.fa"
   },
   {
     "objectID": "Lecture_Folder/Lecture_03_BioE_Comp_Tools_2026.html#processing-fasta-files-with-pipes",
     "href": "Lecture_Folder/Lecture_03_BioE_Comp_Tools_2026.html#processing-fasta-files-with-pipes",
-    "title": "Lecture 03 - Computational Tools for Bioengineers",
+    "title": "Lecture 03",
     "section": "Processing FASTA Files with Pipes",
     "text": "Processing FASTA Files with Pipes\nExtract specific regions or sequences:\n# Extract just the sequence (no headers) and count bases\n\ngrep -v \"^&gt;\" chr21.fa | tr -d '\\n' | wc -c\n\n# Count each type of nucleotide (uppercase first so a == A)\n\ngrep -v \"^&gt;\" chr21.fa | \\\n  tr 'acgtn' 'ACGTN' | \\\n  tr -d '\\n' | \\\n  fold -w1 | \\\n  sort | \\\n  uniq -c\n\ngrep -v inverts the match (excludes lines)\ntr -d '\\n' removes newlines\nfold -w1 puts each character on its own line\nExpect a lot of N - the first ~5 Mb of chr21 is unassembled"
   },
   {
     "objectID": "Lecture_Folder/Lecture_03_BioE_Comp_Tools_2026.html#finding-patterns-in-genomic-data",
     "href": "Lecture_Folder/Lecture_03_BioE_Comp_Tools_2026.html#finding-patterns-in-genomic-data",
-    "title": "Lecture 03 - Computational Tools for Bioengineers",
+    "title": "Lecture 03",
     "section": "Finding Patterns in Genomic Data",
     "text": "Finding Patterns in Genomic Data\nSearch for specific sequences and motifs:\n# Find all instances of a restriction enzyme site (EcoRI: GAATTC)\n\ngrep -v \"^&gt;\" chr21.fa | \\\n  tr 'acgt' 'ACGT' | \\\n  tr -d '\\n' | \\\n  grep -o \"GAATTC\" | \\\n  wc -l\n\n# Extract 100 bases around each EcoRI site\n\ngrep -v \"^&gt;\" chr21.fa | \\\n  tr 'acgt' 'ACGT' | \\\n  tr -d '\\n' | \\\n  grep -oE \".{100}GAATTC.{100}\" &gt; ecori_contexts.txt\n\n# Find all start codons (ATG) and their byte offsets\n\ngrep -v \"^&gt;\" chr21.fa | \\\n  tr 'acgt' 'ACGT' | \\\n  tr -d '\\n' | \\\n  grep -b -o \"ATG\" | \\\n  head -20"
   },
   {
     "objectID": "Lecture_Folder/Lecture_03_BioE_Comp_Tools_2026.html#combining-downloads-with-processing",
     "href": "Lecture_Folder/Lecture_03_BioE_Comp_Tools_2026.html#combining-downloads-with-processing",
-    "title": "Lecture 03 - Computational Tools for Bioengineers",
+    "title": "Lecture 03",
     "section": "Combining Downloads with Processing",
     "text": "Combining Downloads with Processing\nStream processing without saving intermediate files:\n# Download, decompress, and process in one pipeline\ncurl -sL https://hgdownload.soe.ucsc.edu/goldenPath/hg38/chromosomes/chr21.fa.gz | \\\n  gunzip -c | \\\n  grep -v \"^&gt;\" | \\\n  tr -d '\\n' | \\\n  cut -c1-1000000 &gt; first_megabase.txt\n\n# Download and immediately analyze GC content\nwget -qO - https://hgdownload.soe.ucsc.edu/goldenPath/hg38/chromosomes/chr21.fa.gz | \\\n  gunzip -c | \\\n  grep -v \"^&gt;\" | \\\n  tr 'acgtn' 'ACGTN' | \\\n  tr -d 'N\\n' | \\\n  tr 'ATGC' '0011' | \\\n  awk '{n = length($0); gc = gsub(/1/, \"\"); print \"GC%:\", 100 * gc / n}'\n\n\nThe -O - flag tells wget to output to stdout\nThis approach saves disk space and time"
   },
   {
     "objectID": "Lecture_Folder/Lecture_03_BioE_Comp_Tools_2026.html#running-example-streams-and-grep-on-the-stickleback-table",
     "href": "Lecture_Folder/Lecture_03_BioE_Comp_Tools_2026.html#running-example-streams-and-grep-on-the-stickleback-table",
-    "title": "Lecture 03 - Computational Tools for Bioengineers",
+    "title": "Lecture 03",
     "section": "Running example: streams and grep on the stickleback table",
     "text": "Running example: streams and grep on the stickleback table\ncd ~/projects/comptools && mkdir -p results\n\n# Keep only the header plus the mono-associated fish, save to a new file\nhead -n 1 data/Stickle_RNAseq.tsv &gt; results/mono.tsv\ngrep -w \"mono\" data/Stickle_RNAseq.tsv &gt;&gt; results/mono.tsv\nwc -l results/mono.tsv                        # 41 lines = header + 20 + 20 fish\n\n# Which individuals are genotype B raised conventionally?\ngrep -w \"convB\" data/Stickle_RNAseq.tsv | cut -f 1\n\n# A regular expression: individuals whose ID ends in a 1\ngrep -E \"^[A-Z]+1\\b\" data/Stickle_RNAseq.tsv | cut -f 1-3\n\n# Send errors somewhere useful: a typo in the path goes to the log, not the screen\ngrep -w \"mono\" data/Stickle_RNAseq.tsvv 2&gt; results/errors.log; cat results/errors.log\n\n\n\n\n\n\nTip\n\n\n&gt; creates the file, &gt;&gt; appends to it, 2&gt; captures stderr. grep -w \"mono\" matches mono only as a whole word, so it finds the 40 mono-associated fish through the third column but would not match monoA on its own. Try grep -c mono versus grep -cw mono: both give 40 here. Work out why (which column does each one match on?) - experiments like this are how you learn what a flag really does."
   },
   {
     "objectID": "Lecture_Folder/Lecture_03_BioE_Comp_Tools_2026.html#key-takeaways",
     "href": "Lecture_Folder/Lecture_03_BioE_Comp_Tools_2026.html#key-takeaways",
-    "title": "Lecture 03 - Computational Tools for Bioengineers",
+    "title": "Lecture 03",
     "section": "Key Takeaways",
     "text": "Key Takeaways\n\nReal bioinformatics often involves gigabytes of data - these Unix tools scale beautifully!\nNever load entire genome files into memory - use streaming\nCombine tools - each does one thing well\nTest on subsets first - extract small portions for development\nDocument your pipelines - save commands in scripts\nUse compression - work with .gz files directly when possible\nThink in streams - data flows through pipes without intermediate files"
   },
   {
     "objectID": "Lecture_Folder/Lecture_03_BioE_Comp_Tools_2026.html#practice-exercise-genomic-data-pipeline",
     "href": "Lecture_Folder/Lecture_03_BioE_Comp_Tools_2026.html#practice-exercise-genomic-data-pipeline",
-    "title": "Lecture 03 - Computational Tools for Bioengineers",
+    "title": "Lecture 03",
     "section": "Practice Exercise: Genomic Data Pipeline",
     "text": "Practice Exercise: Genomic Data Pipeline\nBuild a complete analysis pipeline:\n\nDownload a bacterial genome (smaller, ~5 MB)\nCount the total number of genes (hint: count headers)\nCalculate the genome size in base pairs\nFind the 10 most common 6-base sequences\nExtract all genes with “ribosomal” in the header\nSave your pipeline as a shell script for reproducibility"
   },
   {
     "objectID": "Lecture_Folder/Lecture_03_BioE_Comp_Tools_2026.html#what-is-grep",
     "href": "Lecture_Folder/Lecture_03_BioE_Comp_Tools_2026.html#what-is-grep",
-    "title": "Lecture 03 - Computational Tools for Bioengineers",
+    "title": "Lecture 03",
     "section": "What is GREP?",
     "text": "What is GREP?\n\nGREP = Global Regular Expression Print\nPowerful text search tool in Unix\nSearches for patterns in files or input streams\nReturns lines that match the pattern\nEssential for large data processing\n\nBasic syntax:\ngrep [options] pattern [file...]"
   },
   {
     "objectID": "Lecture_Folder/Lecture_03_BioE_Comp_Tools_2026.html#basic-grep-usage",
     "href": "Lecture_Folder/Lecture_03_BioE_Comp_Tools_2026.html#basic-grep-usage",
-    "title": "Lecture 03 - Computational Tools for Bioengineers",
+    "title": "Lecture 03",
     "section": "Basic GREP Usage",
     "text": "Basic GREP Usage\n# Search for a simple pattern\ngrep \"ACGT\" sequences.txt\n\n# Case-insensitive search\ngrep -i \"gene\" annotations.txt\n\n# Count matching lines\ngrep -c \"&gt;\" proteins.fasta\n\n# Show line numbers\ngrep -n \"ERROR\" logfile.txt\n\n# Invert match (show non-matching lines)\ngrep -v \"^#\" data.txt    # Skip comment lines\n\n# Search multiple files\ngrep \"mutation\" *.txt"
   },
   {
     "objectID": "Lecture_Folder/Lecture_03_BioE_Comp_Tools_2026.html#introduction-to-regular-expressions",
     "href": "Lecture_Folder/Lecture_03_BioE_Comp_Tools_2026.html#introduction-to-regular-expressions",
-    "title": "Lecture 03 - Computational Tools for Bioengineers",
+    "title": "Lecture 03",
     "section": "Introduction to Regular Expressions",
     "text": "Introduction to Regular Expressions\nRegular expressions (regex) are patterns for matching text:\n\n. = any single character\n* = zero or more of preceding character\n+ = one or more of preceding character\n? = zero or one of preceding character\n^ = start of line\n$ = end of line\n[abc] = any character in set\n[^abc] = any character NOT in set\n\\ = escape special characters"
   },
   {
     "objectID": "Lecture_Folder/Lecture_03_BioE_Comp_Tools_2026.html#basic-regex-examples",
     "href": "Lecture_Folder/Lecture_03_BioE_Comp_Tools_2026.html#basic-regex-examples",
-    "title": "Lecture 03 - Computational Tools for Bioengineers",
+    "title": "Lecture 03",
     "section": "Basic Regex Examples",
     "text": "Basic Regex Examples\n# Match DNA sequences\ngrep \"^ATG\" genes.txt         # Lines starting with ATG\ngrep \"TAG$\" genes.txt         # Lines ending with TAG\ngrep \"A.G\" sequences.txt      # A, any char, then G\n\n# Character classes\ngrep \"[ACGT]\" dna.txt         # Any DNA base\ngrep \"[^ACGT]\" dna.txt        # Non-DNA characters\ngrep \"[0-9]\" data.txt         # Any digit\ngrep \"[A-Za-z]\" text.txt      # Any letter\n\n# Quantifiers\ngrep \"A\\{3\\}\" sequence.txt    # Exactly 3 A's\ngrep \"T\\{2,4\\}\" sequence.txt  # 2 to 4 T's\ngrep \"GC*\" sequence.txt       # G followed by 0+ C's"
   },
   {
     "objectID": "Lecture_Folder/Lecture_03_BioE_Comp_Tools_2026.html#extended-regular-expressions",
     "href": "Lecture_Folder/Lecture_03_BioE_Comp_Tools_2026.html#extended-regular-expressions",
-    "title": "Lecture 03 - Computational Tools for Bioengineers",
+    "title": "Lecture 03",
     "section": "Extended Regular Expressions",
     "text": "Extended Regular Expressions\nUse grep -E or egrep for extended regex:\n# Alternation (OR)\ngrep -E \"start|stop|pause\" commands.txt\n\n# Grouping\ngrep -E \"(ATG|GTG|TTG)\" codons.txt\n\n# Plus quantifier (one or more)\ngrep -E \"A+T+G+\" sequences.txt\n\n# Question mark (optional)\ngrep -E \"colou?r\" british_american.txt\n\n# Complex patterns for bioinformatics\ngrep -E \"^&gt;sp\\|[A-Z0-9]+\\|\" uniprot.fasta  # UniProt headers\ngrep -E \"[ACGT]{20,}\" primers.txt          # Sequences 20bp+"
   },
   {
     "objectID": "Lecture_Folder/Lecture_03_BioE_Comp_Tools_2026.html#combining-grep-with-pipes",
     "href": "Lecture_Folder/Lecture_03_BioE_Comp_Tools_2026.html#combining-grep-with-pipes",
-    "title": "Lecture 03 - Computational Tools for Bioengineers",
+    "title": "Lecture 03",
     "section": "Combining GREP with Pipes",
     "text": "Combining GREP with Pipes\n# Count unique sequence headers\ngrep \"^&gt;\" sequences.fasta | sort | uniq | wc -l\n\n# Extract gene names from GFF file\ngrep -v \"^#\" annotation.gff | cut -f9 | grep -oE \"gene=[^;]+\"\n\n# Find sequences without stop codons\ngrep -v -E \"(TAA|TAG|TGA)\" orfs.txt\n\n# Quality control pipeline: count reads containing an N\n# FASTQ records are 4 lines; the sequence is always line 2 of each,\n# so awk 'NR % 4 == 2' pulls out sequence lines. (grep \"^@\" is NOT\n# safe here - quality lines can start with @ too, since @ is a valid\n# quality character.)\nzcat reads.fastq.gz | awk 'NR % 4 == 2' | grep -c \"N\"\n\n# Search and replace with sed (uses regex)\ngrep \"gene\" data.txt | sed 's/gene/GENE/g'"
   },
   {
     "objectID": "Lecture_Folder/Lecture_03_BioE_Comp_Tools_2026.html#analyzing-sequence-content",
     "href": "Lecture_Folder/Lecture_03_BioE_Comp_Tools_2026.html#analyzing-sequence-content",
-    "title": "Lecture 03 - Computational Tools for Bioengineers",
+    "title": "Lecture 03",
     "section": "Analyzing Sequence Content",
     "text": "Analyzing Sequence Content\nCombine Unix tools to analyze genomic data:\n# Count total bases in chromosome 21\n\ngrep -v \"^&gt;\" human_genome.fa | tr -d '\\n' | wc -c\n\n# Count each type of base\n\ngrep -v \"^&gt;\" human_genome.fa | tr -d '\\n' | \n  fold -w1 | sort | uniq -c\n\n# Calculate GC content\n\ngrep -v \"^&gt;\" human_genome.fa | tr -d '\\n' | \n  tr -cd 'GCgc' | wc -c\n\n# Find simple sequence repeats (e.g., \"ATATAT...\")\n\ngrep -v \"^&gt;\" human_genome.fa | grep -oE \"(AT){5,}\""
   },
   {
     "objectID": "Lecture_Folder/Lecture_03_BioE_Comp_Tools_2026.html#working-with-compressed-files",
     "href": "Lecture_Folder/Lecture_03_BioE_Comp_Tools_2026.html#working-with-compressed-files",
-    "title": "Lecture 03 - Computational Tools for Bioengineers",
+    "title": "Lecture 03",
     "section": "Working with Compressed Files",
     "text": "Working with Compressed Files\nMost genomic data is compressed to save space:\n# View compressed files without extracting\n\nzcat file.gz | head\nzless file.gz\nzgrep \"pattern\" file.gz\n\n# Compress and decompress\n\ngzip file.txt          # Creates file.txt.gz\ngunzip file.txt.gz     # Restores file.txt\ngzip -k file.txt       # Keep original file\n\n# Work directly with compressed files\n# (count reads: every 4th line is a header; don't grep \"^@\" - quality lines can start with @)\n\nzcat reads.fastq.gz | awk 'NR % 4 == 1' | wc -l\n\n# Concatenate compressed files\n\nzcat file1.gz file2.gz | gzip &gt; combined.gz"
   },
   {
     "objectID": "Lecture_Folder/Lecture_03_BioE_Comp_Tools_2026.html#homework---microbial-genome-analysis",
     "href": "Lecture_Folder/Lecture_03_BioE_Comp_Tools_2026.html#homework---microbial-genome-analysis",
-    "title": "Lecture 03 - Computational Tools for Bioengineers",
+    "title": "Lecture 03",
     "section": "Homework - microbial genome analysis",
     "text": "Homework - microbial genome analysis\nWith a sample FASTA file:\n\nDownload a bacterial genome from NCBI\nCount the number of genes (sequences)\nCalculate the total genome size\nFind the longest and shortest genes\nCalculate overall GC content\nSearch for specific motifs or restriction sites\nExtract protein-coding sequences based on headers"
   },
@@ -3456,5 +3456,19 @@
     "title": "About",
     "section": "Technical Requirements",
     "text": "Technical Requirements\n\nYou will be working on your own laptop computer.\nIf you would like to borrow a laptop let me know.\nIf you are working on Windows you need to install WSL2 via PowerShell (see Software page)\nFor the bootcamp (Week 0): latest version of R (install here), Python 3 (install here; on Windows check “Add python.exe to PATH”), and Positron (install here), the IDE used in class, which bundles Quarto.\nOptional alternative IDEs: VS Code (install here) and RStudio (install here).\nLater in the course (Week 9): a LaTeX distribution for PDF output - TinyTeX via quarto install tinytex (details here), or a full distribution such as MacTeX or MiKTeX.\nLater in the course (Weeks 9-10): Git (install here) and a GitHub account (sign up here) using your UO email.\nA terminal that allows ssh connection to the UO computing cluster (Talapas)."
+  },
+  {
+    "objectID": "Lecture_Folder/Lecture_03_BioE_Comp_Tools_2026.html#a-first-python-script",
+    "href": "Lecture_Folder/Lecture_03_BioE_Comp_Tools_2026.html#a-first-python-script",
+    "title": "Lecture 03",
+    "section": "A first Python script",
+    "text": "A first Python script\n#!/usr/bin/env python3\n# plot_stickleback.py - total RNA-seq counts per fish, by group\n\nimport pandas as pd                  # data tables     (L05-L06)\nimport matplotlib.pyplot as plt     # plotting        (L06)\n\n# One line to read the whole table - because it is tidy:\n# a header of variable names, one row per fish, one value per cell\nstickle = pd.read_csv(\"data/Stickle_RNAseq.tsv\", sep=\"\\t\")\n\n# One number per fish: total reads across the 600 gene columns\ngenes = [c for c in stickle.columns if c.startswith(\"Gene\")]\ntotals = pd.DataFrame({\"Group\": stickle[\"Geno&Micro\"],\n                       \"Total\": stickle[genes].sum(axis=1)})\n\n# A quick plot: one box per genotype-x-microbiota group\ntotals.boxplot(column=\"Total\", by=\"Group\")\nplt.ylabel(\"Total reads per fish\")\nplt.savefig(\"results/total_counts_by_group.png\", dpi=200)\nprint(\"Wrote results/total_counts_by_group.png\")"
+  },
+  {
+    "objectID": "Lecture_Folder/Lecture_03_BioE_Comp_Tools_2026.html#shell-scripts-and-permissions---hands-on",
+    "href": "Lecture_Folder/Lecture_03_BioE_Comp_Tools_2026.html#shell-scripts-and-permissions---hands-on",
+    "title": "Lecture 03",
+    "section": "Shell Scripts and Permissions - hands on",
+    "text": "Shell Scripts and Permissions - hands on\n\nLet’s work through our shell scripts\nWe will create a directory structure that we will use for the Python script on the next page"
   }
 ]

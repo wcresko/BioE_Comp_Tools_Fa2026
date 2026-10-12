@@ -1,6 +1,6 @@
 ---
-title: "Lecture 03 - Computational Tools for Bioengineers"
-subtitle: "Tidy Data, Data Streams, Large Genomic Files, GREP and Regular Expressions"
+title: "Lecture 03"
+subtitle: "Tidy Data, Pipes, GREP and Large Genomic Files"
 date: "Monday, October 12, 2026"
 author: "Bill Cresko"
 ---
@@ -23,9 +23,7 @@ set.seed(2026)
 
 ## Book reading for this lecture
 
-The course book goes deeper on everything in this lecture. Read before or after class:
-
-- *Review:* [Ch. 7: Files, Pipes, and Redirection](../book/chapters/07-files-pipes.html)
+- [Ch. 7: Files, Pipes, and Redirection](../book/chapters/07-files-pipes.html)
 - [Ch. 8: Tidy Data Principles](../book/chapters/08-tidy-data.html)
 - [Ch. 9: GREP, Regular Expressions, sed and awk](../book/chapters/09-grep-regex.html) - the grep and regex sections; sed and awk wait for L04
 - *Reference:* [App. C: Common Data Formats & Public Repositories](../book/chapters/appendix-C-data-formats.html) · [App. D: Regular Expression Reference](../book/chapters/appendix-D-regex.html)
@@ -34,31 +32,35 @@ The course book goes deeper on everything in this lecture. Read before or after 
 
 - Warm-up: shell scripts and permissions from L02 - ending in your first *Python* script
 - Tidy data principles - and is our stickleback table tidy?
-- Unix standard streams and redirection
-- Working with large genomic data files (FASTA and FASTQ)
-- GREP and regular expressions
-- Working with compressed files
+- Reading files and chaining commands with Unix pipes
+- GREP and regular expressions - applied to our course dataset
+- Sequence file formats (FASTA and FASTQ) and compressed files
+- Worked example: download a whole human chromosome and explore it with pipes and `grep`
 
 # Warm-up - shell scripts
 
 ## Recap: a script is a text file you make runnable
 
-We rushed the end of L02, so here are the ideas to keep. The full story stays in [Lecture 02](Lecture_02_BioE_Comp_Tools_2026.html) and [Ch. 6](../book/chapters/06-unix-environment.html).
+- We rushed the end of L02, so here are the ideas to keep.
 
 ::: incremental
 - A **shell script** is a plain-text file of the commands you would have typed, run top to bottom
 - Line 1 is the **shebang**: `#!` names the program that interprets the rest of the file (`#!/usr/bin/env bash`)
-- New files are born `rw-r--r--` - **no `x`** - so `./hello.sh` answers `Permission denied`
-- The one-time fix is `chmod +x hello.sh`; after that, `./hello.sh` just runs
+- New files are born `rw-r--r--`
+  - **no `x`**
+  - so `./hello.sh` answers `Permission denied`
+- The one-time fix is
+  - `chmod +x hello.sh`
+  - after that, `./hello.sh` just runs
 - `bash hello.sh` works *without* `x`, because there you are running `bash`, not the script
 - Read `ls -l` as a file-type flag + three `rwx` triplets (user, group, other): `755` = `rwxr-xr-x`, the classic script permission
 :::
 
-## The shebang is not married to bash
+## The `shebang` is not married to bash
 
 Change line 1 and the *same* mechanics run any language:
 
-``` bash
+``` {.bash code-line-numbers="|1|2|3"}
 #!/usr/bin/env bash      # a bash script
 #!/usr/bin/env python3   # a Python script
 #!/usr/bin/env Rscript   # an R script
@@ -67,20 +69,25 @@ Change line 1 and the *same* mechanics run any language:
 ::: incremental
 - Commands in a text file → shebang on line 1 → `chmod +x` once → `./script` forever
 - The shell does not care what language is inside - it reads the shebang and hands the file over
-- So let's write our first **Python** script right now, as a preview of L05-L07
-- It will read the stickleback table in *one line* - possible only because the file follows rules we will name today: **tidy data**
+- So let's go in and remind ourselves of the shell scripts
+- Then, let's write our first **Python** script as a preview of L05-L07
+- It will read the stickleback table in *one line* which possible only because the file follows **tidy data rules**
 :::
 
-## A first Python script: read tidy data, make a plot
+## Shell Scripts and Permissions - hands on
 
-Put this in `scripts/plot_stickleback.py` - or grab the commented script and its step-by-step notebook from the [Schedule](../Schedule.html) (week 3):
+- Let's work through our shell scripts
+
+- We will create a directory structure that we will use for the Python script on the next page
+
+## A first Python script
 
 ``` {.python code-line-numbers="|1|4-5|9|12-14|17-20"}
 #!/usr/bin/env python3
 # plot_stickleback.py - total RNA-seq counts per fish, by group
 
 import pandas as pd                  # data tables     (L05-L06)
-import matplotlib.pyplot as plt      # plotting        (L06)
+import matplotlib.pyplot as plt     # plotting        (L06)
 
 # One line to read the whole table - because it is tidy:
 # a header of variable names, one row per fish, one value per cell
@@ -98,34 +105,11 @@ plt.savefig("results/total_counts_by_group.png", dpi=200)
 print("Wrote results/total_counts_by_group.png")
 ```
 
-## Run it exactly like the shell scripts
-
-``` bash
-cd ~/projects/comptools && mkdir -p results
-chmod +x scripts/plot_stickleback.py     # the same one-time step
-./scripts/plot_stickleback.py            # the same ./ to run it
-# Wrote results/total_counts_by_group.png
-open results/total_counts_by_group.png   # macOS (Linux: xdg-open)
-```
-
-::: incremental
-- `Permission denied`? You know exactly what to do now
-- Read a file, compute, save a figure - rerunnable with **one command** when new data arrive: that is reproducibility
-- Don't sweat the pandas/matplotlib details yet (that's L05-L07) - today's point is that *scripts are scripts*, whatever the language
-- The one-line read worked because the data follow rules. Which rules? On to **tidy data**
-:::
-
 # Tidy Data
 
 ## An example to get us started
 
-## 
-
 ![](../images/Lec03_img001.jpeg){fig-align="center" width="100%"}
-
-## 
-
-![](../images/Lec03_img002.jpeg){fig-align="center" width="90%"}
 
 ## Data set rules of thumb (aka Tidy Data)
 
@@ -140,20 +124,36 @@ open results/total_counts_by_group.png   # macOS (Linux: xdg-open)
 
 ## Not all data are tidy to begin with
 
-- Sometimes need to do some data wrangling
+Straight out of a lab notebook spreadsheet:
 
-- But also contingency tables
+| Fish | Treatment | Length | Notes |
+|------|-----------|--------|----------------|
+| AC1 | conv/A | 42 mm | healthy |
+| AC2 | conv/A | 4.1cm | ? |
+| AM1 | mono A | missing | died, replaced |
+| BC1 | B - conventional | 44 | |
 
-## Types of data
+::: incremental
+- `Treatment` packs **two variables** (genotype, microbiota) into one column - and codes them three different ways
+- `Length` mixes **numbers, units and text** in one column - no tool can average `42 mm`, `4.1cm` and `missing`
+- Missing values appear as `?`, `missing` and blank - pick **one** convention (`NA`)
+- None of this is wrong *in the lab* - it is just not ready for analysis: fixing it is **data wrangling** (Week 7)
+:::
 
-|  |  |  |  |
-|:----------------:|:----------------:|:----------------:|:----------------:|
-| Categorical |  | Quantitative |  |
-| Ordinal | Nominal | Ratio | Interval |
-| small, medium, large | apples, oranges, bananas | kilograms, dollars, years | temperature, calendar year |
-| ordered character | character | numeric | integer |
+## The same data, tidied
 
-'Factor' is a special type of character variable that we will explore more later
+| Individual | Genotype | Microbiota | Length_mm |
+|------------|----------|------------|-----------|
+| AC1 | A | conventional | 42 |
+| AC2 | A | conventional | 41 |
+| AM1 | A | mono | NA |
+| BC1 | B | conventional | 44 |
+
+::: incremental
+- One variable per column, one fish per row, one value - **and one data type** - per cell
+- Units live in the **column name**, not the cells
+- Also common in the wild: **contingency tables** (counts cross-tabulated by two factors) - compact to read, but reshape to tidy before analysis
+:::
 
 ## Is our course dataset tidy?
 
@@ -163,7 +163,7 @@ Back in your course folder (`cd ~/projects/comptools`):
 head -n 2 data/Stickle_RNAseq.tsv | cut -f 1-8
 ```
 
-```         
+```
 Individual  Genotype  Microbiota    Geno&Micro  Gene1  Gene2  Gene3  Gene4
 AC1         A         conventional  convA       16     15     71     153
 ```
@@ -174,47 +174,7 @@ AC1         A         conventional  convA       16     15     71     153
 - The `Geno&Micro` column duplicates two other columns - and the `&` is a name that will annoy every tool we use. Keep an eye on it.
 :::
 
-# The Command Line
-
-![](../images/Lec01_img007.jpeg){fig-align="center" width="90%"}
-
-## Making new files
-
-- Make new folders: `mkdir`
-- Make new files: `nano`, `touch`
-- Rename files: `mv`
-- Move files: `mv`
-- Copy files: `cp`
-- Delete files: `rm`
-- Delete directories: `rmdir`
-- Examining file length: `wc`
-- Reading files: `cat`
-- Looking at beginning or end: `head` or `tail`
-
-## Things to keep in mind
-
-- The shell trusts you
-  - It will delete files you say to delete
-  - It will override files if you name 2 things the same
-- Naming conventions
-  - Avoid spaces
-  - Don’t start with a –
-  - Stick to letters, numbers, . , -, and \_
-- Use appropriate file extensions in file names
-  - Some software expect files with certain extensions (.fasta, .txt, etc.)
-
-## Practice making files and directories
-
-- Make a new directory called whatever you'd like.
-- Add a file named `Practice.txt` to the directory and add some text to it
-- Read the contents of the file and get its length
-- Rename the file to `Super_practice.txt`
-- Move the file to a new folder named `Testing`
-- Make a copy of the file named `Super_practice_copy.txt`
-- Read the contents of the file and get its length to make sure it’s the same as `Super_practice.txt`
-- Delete the original `Super_practice.txt`
-
-# Reading and Writing Files in Unix
+# Reading Files and Unix Pipes
 
 ## Commands for Reading Files
 
@@ -231,97 +191,6 @@ AC1         A         conventional  convA       16     15     71     153
 - **`tail`** = display last 10 lines (default)
   - `tail -n 20 file.txt` shows last 20 lines
   - `tail -f file.txt` follows file as it grows (useful for logs)
-
-## Input Redirection
-
-- **`<`** = redirect input from a file
-  - `command < input.txt`
-  - Sends contents of file as input to command
-- **`<<`** = here document (multi-line input)
-  - Allows you to provide multi-line input directly in the terminal
-- Example uses:
-  - `wc -l < data.txt` counts lines in data.txt
-  - `sort < names.txt` sorts contents of names.txt
-
-## Output Redirection
-
-- **`>`** = redirect output to a file (overwrites)
-  - `ls -l > filelist.txt`
-  - Creates new file or overwrites existing
-- **`>>`** = append output to a file
-  - `echo "new line" >> existing.txt`
-  - Adds to the end of existing file
-- **`2>`** = redirect error messages
-  - `command 2> errors.txt`
-  - Captures error messages separately
-- **`&>`** = redirect both output and errors
-  - `command &> all_output.txt`
-
-## Unix Three Standard Streams
-
-- **stdin (0)** = Standard Input
-  - Where programs read input from
-  - Default: keyboard
-- **stdout (1)** = Standard Output
-  - Where programs write normal output
-  - Default: terminal screen
-- **stderr (2)** = Standard Error
-  - Where programs write error messages
-  - Default: terminal screen (same as stdout)
-
-## Visualizing Data Streams
-
-``` bash
-# Every Unix program has these three streams
-         ┌──────────────┐
-stdin ───>│              │───> stdout
-    (0)  │   Program    │      (1)
-         │              │───> stderr
-         └──────────────┘      (2)
-```
-
-- File descriptor numbers: 0, 1, 2
-- Can redirect each stream independently
-- Programs don't know if streams are redirected
-- This abstraction is key to Unix philosophy
-
-## Basic Stream Redirection
-
-``` bash
-# Redirect stdout to file (equivalent ways)
-
-ls -l > files.txt
-ls -l 1> files.txt      # Explicitly using fd 1
-
-# Redirect stderr to file
-
-ls /nonexistent 2> errors.txt
-
-# Redirect both stdout and stderr to same file
-
-ls -l /nonexistent &> all_output.txt
-```
-
-## Bioinformatics Example
-
-Processing sequence data with stream control:
-
-``` bash
-# FASTQ processing pipeline with error handling
-
-zcat reads.fastq.gz 2> unzip_errors.log | 
-fastqc stdin 2> qc_errors.log | 
-trimmomatic 2> trim_errors.log | 
-bowtie2 -x genome - 2> alignment_stats.txt | 
-samtools sort 2> sort_errors.log | 
-samtools index - 2> index_errors.log
-
-# Check all error logs at once
-
-cat *_errors.log | grep -E "ERROR|WARNING"
-```
-
-# Unix Pipes
 
 ## What are Pipes?
 
@@ -350,6 +219,10 @@ cat *_errors.log | grep -E "ERROR|WARNING"
   - `ls -l | grep ".txt" | awk '{print $5, $9}'`
   - List txt files with sizes
 
+::: callout-note
+A few of these preview commands we haven't covered yet: `grep` gets its full treatment later today, and `awk`, `find` and `xargs` are stars of L04. Focus on the *shape* of the pipelines for now.
+:::
+
 ## Advanced Pipe Examples
 
 - **Multi-step data processing:**
@@ -372,7 +245,190 @@ cat *_errors.log | grep -E "ERROR|WARNING"
 - Pipe efficiency:
   - Filter early in the pipeline
   - Reduces data passed between commands
-- Save intermediate results when debugging complex pipes \# Unix Data Streams
+- Save intermediate results when debugging complex pipes
+
+# GREP and Regular Expressions
+
+## What is GREP?
+
+- **GREP** = Global Regular Expression Print
+- Powerful text search tool in Unix
+- Searches for patterns in files or input streams
+- Returns lines that match the pattern
+- Essential for large data processing
+
+Basic syntax:
+
+``` bash
+grep [options] pattern [file...]
+```
+
+## Basic GREP Usage
+
+``` {.bash code-line-numbers="|1-2|4-5|7-8|10-11|13-14|16-17"}
+# Search for a simple pattern
+grep "ACGT" sequences.txt
+
+# Case-insensitive search
+grep -i "gene" annotations.txt
+
+# Count matching lines
+grep -c ">" proteins.fasta
+
+# Show line numbers
+grep -n "ERROR" logfile.txt
+
+# Invert match (show non-matching lines)
+grep -v "^#" data.txt    # Skip comment lines
+
+# Search multiple files
+grep "mutation" *.txt
+```
+
+## Introduction to Regular Expressions
+
+Regular expressions (regex) are patterns for matching text:
+
+- **`.`** = any single character
+- **`*`** = zero or more of preceding character
+- **`+`** = one or more of preceding character
+- **`?`** = zero or one of preceding character
+- **`^`** = start of line
+- **`$`** = end of line
+- **`[abc]`** = any character in set
+- **`[^abc]`** = any character NOT in set
+- **`\`** = escape special characters
+
+## Basic Regex Examples
+
+``` {.bash code-line-numbers="|1-4|6-10|12-15"}
+# Match DNA sequences
+grep "^ATG" genes.txt         # Lines starting with ATG
+grep "TAG$" genes.txt         # Lines ending with TAG
+grep "A.G" sequences.txt      # A, any char, then G
+
+# Character classes
+grep "[ACGT]" dna.txt         # Any DNA base
+grep "[^ACGT]" dna.txt        # Non-DNA characters
+grep "[0-9]" data.txt         # Any digit
+grep "[A-Za-z]" text.txt      # Any letter
+
+# Quantifiers
+grep "A\{3\}" sequence.txt    # Exactly 3 A's
+grep "T\{2,4\}" sequence.txt  # 2 to 4 T's
+grep "GC*" sequence.txt       # G followed by 0+ C's
+```
+
+## Two-minute quiz: which lines match?
+
+The file `test.txt` has four lines:
+
+```         
+ATGCCCTAG
+CCATG
+ATG
+ACG
+```
+
+Predict the output of each command *before* you run it:
+
+``` {.bash code-line-numbers="|1|2|3"}
+grep "^ATG" test.txt
+grep "ATG$" test.txt
+grep "^A.G$" test.txt
+```
+
+::: incremental
+- `^ATG` → lines 1 and 3 (must *start* with ATG)
+- `ATG$` → lines 2 and 3 (must *end* with ATG)
+- `^A.G$` → lines 3 and 4 (exactly three characters: A, anything, G)
+:::
+
+## Extended Regular Expressions
+
+Use `grep -E` or `egrep` for extended regex:
+
+``` {.bash code-line-numbers="|1-2|4-5|7-8|10-11|13-15"}
+# Alternation (OR)
+grep -E "start|stop|pause" commands.txt
+
+# Grouping
+grep -E "(ATG|GTG|TTG)" codons.txt
+
+# Plus quantifier (one or more)
+grep -E "A+T+G+" sequences.txt
+
+# Question mark (optional)
+grep -E "colou?r" british_american.txt
+
+# Complex patterns for bioinformatics
+grep -E "^>sp\|[A-Z0-9]+\|" uniprot.fasta  # UniProt headers
+grep -E "[ACGT]{20,}" primers.txt          # Sequences 20bp+
+```
+
+## Combining GREP with Pipes
+
+``` {.bash code-line-numbers="|1-2|4-5|7-8|10-15|17-18"}
+# Count unique sequence headers
+grep "^>" sequences.fasta | sort | uniq | wc -l
+
+# Extract gene names from GFF file
+grep -v "^#" annotation.gff | cut -f9 | grep -oE "gene=[^;]+"
+
+# Find sequences without stop codons
+grep -v -E "(TAA|TAG|TGA)" orfs.txt
+
+# Quality control pipeline: count reads containing an N
+# FASTQ records are 4 lines; the sequence is always line 2 of each,
+# so awk 'NR % 4 == 2' pulls out sequence lines. (grep "^@" is NOT
+# safe here - quality lines can start with @ too, since @ is a valid
+# quality character.)
+zcat reads.fastq.gz | awk 'NR % 4 == 2' | grep -c "N"
+
+# Search and replace with sed (uses regex - sed is L04)
+grep "gene" data.txt | sed 's/gene/GENE/g'
+```
+
+## Reminder from L02: the three standard streams
+
+Every Unix program reads and writes through three numbered streams:
+
+```         
+          ┌──────────────┐
+stdin ───>│              │───> stdout
+    (0)   │   program    │      (1)
+          │              │───> stderr
+          └──────────────┘      (2)
+```
+
+- `>` sends **stdout** to a file (overwrites) · `>>` appends · `2>` captures **stderr** · `|` connects one program's stdout to the next one's stdin
+- Full treatment in L02 and [Ch. 7](../book/chapters/07-files-pipes.html) - next slide puts them to work on our data
+
+## Running example: streams and `grep` on the stickleback table
+
+``` {.bash code-line-numbers="|1|3-6|8-9|11-12|14-15"}
+cd ~/projects/comptools && mkdir -p results
+
+# Keep only the header plus the mono-associated fish, save to a new file
+head -n 1 data/Stickle_RNAseq.tsv > results/mono.tsv
+grep -w "mono" data/Stickle_RNAseq.tsv >> results/mono.tsv
+wc -l results/mono.tsv                        # 41 lines = header + 20 + 20 fish
+
+# Which individuals are genotype B raised conventionally?
+grep -w "convB" data/Stickle_RNAseq.tsv | cut -f 1
+
+# A regular expression: individuals whose ID ends in a 1
+grep -E "^[A-Z]+1\b" data/Stickle_RNAseq.tsv | cut -f 1-3
+
+# Send errors somewhere useful: a typo in the path goes to the log, not the screen
+grep -w "mono" data/Stickle_RNAseq.tsvv 2> results/errors.log; cat results/errors.log
+```
+
+::: callout-tip
+`>` creates the file, `>>` appends to it, `2>` captures **stderr**. `grep -w "mono"` matches `mono` only as a whole word, so it finds the 40 mono-associated fish through the third column but would *not* match `monoA` on its own. Try `grep -c mono` versus `grep -cw mono`: both give 40 here. Work out why (which column does each one match on?) - experiments like this are how you learn what a flag really does.
+:::
+
+# Sequence Files and Compression
 
 ## Sequence file formats: FASTA and FASTQ
 
@@ -411,9 +467,39 @@ NCATGCAGCGTACGGTAATTGGCAG
 Both are usually gzip-compressed (`.fa.gz`, `.fastq.gz`) - use `zcat` / `zless` / `zgrep` to read them without unpacking. More formats (CSV/TSV, GFF, BED, VCF, HDF5) in the [Data Formats appendix](../book/chapters/appendix-C-data-formats.html) of the course book.
 :::
 
-# Working with Large Genomic Data Files
+## Working with Compressed Files
+
+Most genomic data is compressed to save space:
+
+``` {.bash code-line-numbers="|1-5|7-11|13-16|18-20"}
+# View compressed files without extracting
+
+zcat file.gz | head
+zless file.gz
+zgrep "pattern" file.gz
+
+# Compress and decompress
+
+gzip file.txt          # Creates file.txt.gz
+gunzip file.txt.gz     # Restores file.txt
+gzip -k file.txt       # Keep original file
+
+# Work directly with compressed files
+# (count reads: every 4th line is a header; don't grep "^@" - quality lines can start with @)
+
+zcat reads.fastq.gz | awk 'NR % 4 == 1' | wc -l
+
+# Concatenate compressed files
+
+zcat file1.gz file2.gz | gzip > combined.gz
+```
+
+# Worked Example - Downloading and Exploring a Large Genomic File
 
 ## Human Chromosome Data
+
+- Everything so far - reading files, pipes, redirection, `grep` - in one realistic job: grab a big public dataset and ask it questions, straight from the shell
+
 
 - Genomic data files can be massive (the full human genome is \~3.1 GB compressed)
 - FASTA format is standard for sequence data
@@ -426,7 +512,7 @@ Both are usually gzip-compressed (`.fa.gz`, `.fastq.gz`) - use `zcat` / `zless` 
 
 Download chromosome 21 of the human genome (hg38 / GRCh38) from UCSC:
 
-``` bash
+``` {.bash code-line-numbers="|1-3|5-8"}
 # Using `wget` to download chr21 (~13 MB)
 
 wget https://hgdownload.soe.ucsc.edu/goldenPath/hg38/chromosomes/chr21.fa.gz
@@ -446,7 +532,7 @@ curl -L -o chr21.fa.gz \
 
 Don't use `cat` on huge files! Use these approaches:
 
-``` bash
+``` {.bash code-line-numbers="|1-3|5-9|11-14|16-18"}
 # Decompress and look at first 10 lines
 
 gunzip -c chr21.fa.gz | head -10
@@ -475,7 +561,7 @@ The UCSC file is *soft-masked*: repeats are written in lowercase (`acgt`). Patte
 
 Make a smaller working file for testing:
 
-``` bash
+``` {.bash code-line-numbers="|1-3|5-8|10-12"}
 # Extract the first ~1 Mb of sequence for testing (50 bases per line)
 
 zcat chr21.fa.gz | head -n 20000 > chr21_subset.fa
@@ -490,11 +576,15 @@ awk '/^>chr21$/,/^>chr22$/' hg38.fa | head -n -1 > chr21_from_genome.fa
 sed -n '400000,420000p' chr21.fa > region_of_interest.fa
 ```
 
+::: callout-note
+`awk` and `sed` are the stars of L04 - read those two lines as recipes for now.
+:::
+
 ## Processing FASTA Files with Pipes
 
 Extract specific regions or sequences:
 
-``` bash
+``` {.bash code-line-numbers="|1-3|5-12"}
 # Extract just the sequence (no headers) and count bases
 
 grep -v "^>" chr21.fa | tr -d '\n' | wc -c
@@ -518,7 +608,7 @@ grep -v "^>" chr21.fa | \
 
 Search for specific sequences and motifs:
 
-``` bash
+``` {.bash code-line-numbers="|1-7|9-14|16-22"}
 # Find all instances of a restriction enzyme site (EcoRI: GAATTC)
 
 grep -v "^>" chr21.fa | \
@@ -547,7 +637,7 @@ grep -v "^>" chr21.fa | \
 
 Stream processing without saving intermediate files:
 
-``` bash
+``` {.bash code-line-numbers="|1-6|8-15"}
 # Download, decompress, and process in one pipeline
 curl -sL https://hgdownload.soe.ucsc.edu/goldenPath/hg38/chromosomes/chr21.fa.gz | \
   gunzip -c | \
@@ -570,28 +660,26 @@ wget -qO - https://hgdownload.soe.ucsc.edu/goldenPath/hg38/chromosomes/chr21.fa.
 - This approach saves disk space and time
 :::
 
-## Running example: streams and `grep` on the stickleback table
+## Your turn: sequence content of chr21
 
-``` bash
-cd ~/projects/comptools && mkdir -p results
+Using only today's commands (`grep -v`, `tr`, `fold`, `sort`, `uniq`, `wc`):
 
-# Keep only the header plus the mono-associated fish, save to a new file
-head -n 1 data/Stickle_RNAseq.tsv > results/mono.tsv
-grep -w "mono" data/Stickle_RNAseq.tsv >> results/mono.tsv
-wc -l results/mono.tsv                        # 41 lines = header + 20 + 20 fish
-
-# Which individuals are genotype B raised conventionally?
-grep -w "convB" data/Stickle_RNAseq.tsv | cut -f 1
-
-# A regular expression: individuals whose ID ends in a 1
-grep -E "^[A-Z]+1\b" data/Stickle_RNAseq.tsv | cut -f 1-3
-
-# Send errors somewhere useful: a typo in the path goes to the log, not the screen
-grep -w "mono" data/Stickle_RNAseq.tsvv 2> results/errors.log; cat results/errors.log
-```
+1.  Count the total number of bases in `chr21.fa`
+2.  Calculate the **GC content** (percent of bases that are G or C)
+3.  Find runs of the dinucleotide repeat `AT` five or more units long
+4.  *Bonus:* what fraction of the chromosome is `N`?
 
 ::: callout-tip
-`>` creates the file, `>>` appends to it, `2>` captures **stderr**. `grep -w "mono"` matches `mono` only as a whole word, so it finds the 40 mono-associated fish through the third column but would *not* match `monoA` on its own. Try `grep -c mono` versus `grep -cw mono`: both give 40 here. Work out why (which column does each one match on?) - experiments like this are how you learn what a flag really does.
+Build each pipeline one command at a time and check the output at every stage. Remember the soft-masking: uppercase first with `tr 'acgt' 'ACGT'`.
+:::
+
+::: notes
+Solutions:
+
+- Total bases: grep -v "^>" chr21.fa | tr -d '\n' | wc -c
+- GC content: grep -v "^>" chr21.fa | tr -d '\n' | tr -cd 'GCgc' | wc -c, divided by the total
+- Repeats: grep -v "^>" chr21.fa | tr 'acgt' 'ACGT' | tr -d '\n' | grep -oE "(AT){5,}"
+- N fraction: same pipeline with tr -cd 'Nn' | wc -c, divided by the total
 :::
 
 ## Key Takeaways
@@ -603,196 +691,3 @@ grep -w "mono" data/Stickle_RNAseq.tsvv 2> results/errors.log; cat results/error
 - **Document your pipelines** - save commands in scripts
 - **Use compression** - work with .gz files directly when possible
 - **Think in streams** - data flows through pipes without intermediate files
-
-## Practice Exercise: Genomic Data Pipeline
-
-Build a complete analysis pipeline:
-
-1.  Download a bacterial genome (smaller, \~5 MB)
-2.  Count the total number of genes (hint: count headers)
-3.  Calculate the genome size in base pairs
-4.  Find the 10 most common 6-base sequences
-5.  Extract all genes with "ribosomal" in the header
-6.  Save your pipeline as a shell script for reproducibility
-
-# GREP and Regular Expressions
-
-## What is GREP?
-
-- **GREP** = Global Regular Expression Print
-- Powerful text search tool in Unix
-- Searches for patterns in files or input streams
-- Returns lines that match the pattern
-- Essential for large data processing
-
-Basic syntax:
-
-``` bash
-grep [options] pattern [file...]
-```
-
-## Basic GREP Usage
-
-``` bash
-# Search for a simple pattern
-grep "ACGT" sequences.txt
-
-# Case-insensitive search
-grep -i "gene" annotations.txt
-
-# Count matching lines
-grep -c ">" proteins.fasta
-
-# Show line numbers
-grep -n "ERROR" logfile.txt
-
-# Invert match (show non-matching lines)
-grep -v "^#" data.txt    # Skip comment lines
-
-# Search multiple files
-grep "mutation" *.txt
-```
-
-## Introduction to Regular Expressions
-
-Regular expressions (regex) are patterns for matching text:
-
-- **`.`** = any single character
-- **`*`** = zero or more of preceding character
-- **`+`** = one or more of preceding character
-- **`?`** = zero or one of preceding character
-- **`^`** = start of line
-- **`$`** = end of line
-- **`[abc]`** = any character in set
-- **`[^abc]`** = any character NOT in set
-- **`\`** = escape special characters
-
-## Basic Regex Examples
-
-``` bash
-# Match DNA sequences
-grep "^ATG" genes.txt         # Lines starting with ATG
-grep "TAG$" genes.txt         # Lines ending with TAG
-grep "A.G" sequences.txt      # A, any char, then G
-
-# Character classes
-grep "[ACGT]" dna.txt         # Any DNA base
-grep "[^ACGT]" dna.txt        # Non-DNA characters
-grep "[0-9]" data.txt         # Any digit
-grep "[A-Za-z]" text.txt      # Any letter
-
-# Quantifiers
-grep "A\{3\}" sequence.txt    # Exactly 3 A's
-grep "T\{2,4\}" sequence.txt  # 2 to 4 T's
-grep "GC*" sequence.txt       # G followed by 0+ C's
-```
-
-## Extended Regular Expressions
-
-Use `grep -E` or `egrep` for extended regex:
-
-``` bash
-# Alternation (OR)
-grep -E "start|stop|pause" commands.txt
-
-# Grouping
-grep -E "(ATG|GTG|TTG)" codons.txt
-
-# Plus quantifier (one or more)
-grep -E "A+T+G+" sequences.txt
-
-# Question mark (optional)
-grep -E "colou?r" british_american.txt
-
-# Complex patterns for bioinformatics
-grep -E "^>sp\|[A-Z0-9]+\|" uniprot.fasta  # UniProt headers
-grep -E "[ACGT]{20,}" primers.txt          # Sequences 20bp+
-```
-
-## Combining GREP with Pipes
-
-``` bash
-# Count unique sequence headers
-grep "^>" sequences.fasta | sort | uniq | wc -l
-
-# Extract gene names from GFF file
-grep -v "^#" annotation.gff | cut -f9 | grep -oE "gene=[^;]+"
-
-# Find sequences without stop codons
-grep -v -E "(TAA|TAG|TGA)" orfs.txt
-
-# Quality control pipeline: count reads containing an N
-# FASTQ records are 4 lines; the sequence is always line 2 of each,
-# so awk 'NR % 4 == 2' pulls out sequence lines. (grep "^@" is NOT
-# safe here - quality lines can start with @ too, since @ is a valid
-# quality character.)
-zcat reads.fastq.gz | awk 'NR % 4 == 2' | grep -c "N"
-
-# Search and replace with sed (uses regex)
-grep "gene" data.txt | sed 's/gene/GENE/g'
-```
-
-## Analyzing Sequence Content
-
-Combine Unix tools to analyze genomic data:
-
-``` bash
-# Count total bases in chromosome 21
-
-grep -v "^>" human_genome.fa | tr -d '\n' | wc -c
-
-# Count each type of base
-
-grep -v "^>" human_genome.fa | tr -d '\n' | 
-  fold -w1 | sort | uniq -c
-
-# Calculate GC content
-
-grep -v "^>" human_genome.fa | tr -d '\n' | 
-  tr -cd 'GCgc' | wc -c
-
-# Find simple sequence repeats (e.g., "ATATAT...")
-
-grep -v "^>" human_genome.fa | grep -oE "(AT){5,}"
-```
-
-## Working with Compressed Files
-
-Most genomic data is compressed to save space:
-
-``` bash
-# View compressed files without extracting
-
-zcat file.gz | head
-zless file.gz
-zgrep "pattern" file.gz
-
-# Compress and decompress
-
-gzip file.txt          # Creates file.txt.gz
-gunzip file.txt.gz     # Restores file.txt
-gzip -k file.txt       # Keep original file
-
-# Work directly with compressed files
-# (count reads: every 4th line is a header; don't grep "^@" - quality lines can start with @)
-
-zcat reads.fastq.gz | awk 'NR % 4 == 1' | wc -l
-
-# Concatenate compressed files
-
-zcat file1.gz file2.gz | gzip > combined.gz
-```
-
-## Homework - microbial genome analysis
-
-With a sample FASTA file:
-
-1.  Download a bacterial genome from NCBI
-2.  Count the number of genes (sequences)
-3.  Calculate the total genome size
-4.  Find the longest and shortest genes
-5.  Calculate overall GC content
-6.  Search for specific motifs or restriction sites
-7.  Extract protein-coding sequences based on headers
-
-------------------------------------------------------------------------
