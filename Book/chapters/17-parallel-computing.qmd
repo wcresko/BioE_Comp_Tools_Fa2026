@@ -43,6 +43,9 @@ In biosciences, parallel computing is especially valuable for:
 - **Cross-validation** in machine learning
 - **Parameter sweeps** for computational models
 
+Tasks like these share a structure: the *same* computation is repeated many times, and no repetition depends on the result of any other. Such problems are called **embarrassingly parallel**, and they are the best kind of parallel problem to have---each bootstrap replicate, gene, simulation, or sample can be handed to a different core with no coordination among the workers and the results simply collected at the end. Nearly everything in this chapter targets exactly this situation. When iterations *do* depend on one another (each step of a Markov chain needs the previous step), parallelizing is far harder, and the techniques here do not directly apply.
+
+
 ## How Many Cores Do You Have? {#sec-cores}
 
 Before parallelizing, find out how many cores are available:
@@ -111,6 +114,33 @@ toc()
 ```
 
 The parallel version is dramatically faster! With 8 cores, we can process all 8 samples simultaneously, reducing the time from ~16 seconds to ~2 seconds.
+
+@fig-serial-parallel-gantt shows where that speedup comes from.
+
+```{r}
+#| label: fig-serial-parallel-gantt
+#| fig-cap: "Timeline of the motivating example: eight 2-second samples processed one after another on a single core take about 16 seconds, while the same eight samples spread across eight workers all finish after about 2 seconds."
+#| echo: false
+
+gantt = rbind(
+  data.frame(mode = "Serial: 1 core (total ~16 s)",
+             task = 1:8, worker = 1, start = (0:7) * 2),
+  data.frame(mode = "Parallel: 8 workers (total ~2 s)",
+             task = 1:8, worker = 1:8, start = 0)
+)
+gantt$mode = factor(gantt$mode, levels = unique(gantt$mode))
+
+ggplot(gantt) +
+  geom_rect(aes(xmin = start, xmax = start + 2,
+                ymin = worker - 0.42, ymax = worker + 0.42),
+            fill = "#2e6da4", color = "white") +
+  geom_text(aes(x = start + 1, y = worker, label = task),
+            color = "white", size = 3.2) +
+  facet_wrap(vars(mode), ncol = 1, scales = "free_y") +
+  scale_y_reverse(breaks = 1:8) +
+  labs(x = "Elapsed time (seconds)", y = "Worker") +
+  theme_minimal()
+```
 
 Let's verify the results are identical:
 

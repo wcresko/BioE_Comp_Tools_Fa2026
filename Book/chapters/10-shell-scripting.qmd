@@ -192,6 +192,21 @@ echo "Name without extension: $NAME"
 echo "Length: $LENGTH characters"
 ```
 
+The `#`, `##`, `%`, and `%%` operators above belong to a larger family of **parameter expansions**; @tbl-param-expansion collects the forms this course uses most, each applied to the familiar `FILE="sample_001.fastq.gz"`.
+
+| Expansion | Meaning | Example | Result |
+|:----------|:--------|:--------|:-------|
+| `${VAR#pat}` | Remove shortest matching prefix | `${FILE#sample_}` | `001.fastq.gz` |
+| `${VAR##pat}` | Remove longest matching prefix | `${FILE##*.}` | `gz` |
+| `${VAR%pat}` | Remove shortest matching suffix | `${FILE%.gz}` | `sample_001.fastq` |
+| `${VAR%%pat}` | Remove longest matching suffix | `${FILE%%.*}` | `sample_001` |
+| `${#VAR}` | Length in characters | `${#FILE}` | `19` |
+| `${VAR:-default}` | Default if unset or empty | `${THREADS:-4}` | `4` when `THREADS` is unset |
+| `${VAR:?msg}` | Error and exit if unset or empty | `${INPUT:?no input file given}` | script stops with the message |
+| `${VAR/old/new}` | Replace first match | `${FILE/fastq/fq}` | `sample_001.fq.gz` |
+
+: Bash parameter expansions at a glance {#tbl-param-expansion}
+
 ## Arrays {#sec-shell-arrays}
 
 Arrays store multiple values:
@@ -581,6 +596,10 @@ set -o pipefail # Catch errors in pipes
 
 # Or combine: set -euo pipefail
 ```
+
+Each flag closes a different silent-failure loophole. Without `-e`, a script whose third command fails cheerfully runs the fourth on garbage input; with it, the script stops at the first non-zero exit status. Without `-u`, a misspelled variable (`$INPUTT` for `$INPUT`) silently expands to the empty string---so a command like `rm -r "$OUTDIRR/tmp"` operates on a path you never intended; with it, the misspelling is an immediate, named error. And without `pipefail`, a pipeline's exit status is that of its *last* command, so `zcat missing.gz | head` reports success because `head` succeeded even though `zcat` found nothing; `pipefail` makes the pipeline fail if any stage fails.
+
+Make the shebang line and `set -euo pipefail` the first two lines of every script you write---the course scripts, including `gene_means.sh` in @sec-scripting-stickle, all do. One caveat to know about: `-e` is suspended for commands whose exit status is being tested, such as the condition of an `if` or the left side of `&&`/`||`, which is exactly what makes the try/catch pattern of @sec-exit-status work inside a strict-mode script.
 
 ### Custom Error Handling {#sec-custom-error-handling}
 

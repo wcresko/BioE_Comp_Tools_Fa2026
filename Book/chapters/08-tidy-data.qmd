@@ -156,6 +156,29 @@ With messy data, you must first reshape it—or write complex code to work aroun
 
 ## Common Data Problems {#sec-data-problems}
 
+### Straight from the Lab Notebook {#sec-messy-lab-notebook}
+
+Before cataloguing the problems one by one, here is what several of them look like together, in a table typed straight out of a lab notebook spreadsheet:
+
+| Fish | Treatment | Length | Notes |
+|------|-----------|--------|----------------|
+| AC1 | conv/A | 42 mm | healthy |
+| AC2 | conv/A | 4.1cm | ? |
+| AM1 | mono A | missing | died, replaced |
+| BC1 | B - conventional | 44 | |
+
+Every row records real information, and nothing here is wrong *in the lab*. But almost nothing is ready for analysis. The `Treatment` column packs two variables---genotype and microbiota---into one cell, and codes the combination three different ways (`conv/A`, `mono A`, `B - conventional`). The `Length` column mixes numbers, units, and text, so no tool can average `42 mm`, `4.1cm`, and `missing`. And missing values appear as `?`, as the word `missing`, and as a blank, when one convention (`NA`) should serve throughout. The tidied version puts each variable in its own column, moves the units into the column name, and settles on one missing-value code:
+
+| Individual | Genotype | Microbiota | Length_mm |
+|------------|----------|------------|-----------|
+| AC1 | A | conventional | 42 |
+| AC2 | A | conventional | 41 |
+| AM1 | A | mono | NA |
+| BC1 | B | conventional | 44 |
+
+Turning the first table into the second is **data wrangling**, and the sections that follow take the problems one at a time. A related layout you will often meet is the **contingency table**---counts cross-tabulated by two factors, with one factor's levels as rows and the other's as columns. It is compact and pleasant to read, but like the wide layouts below it needs reshaping to tidy form before analysis.
+
+
 ### Problem 1: Column Headers Are Values {#sec-messy-headers-are-values}
 
 Often, column names contain data values rather than variable names:
@@ -426,6 +449,42 @@ The remedy is to treat the spreadsheet as a data file that happens to have a gri
 ### Before and After {#sec-before-and-after}
 
 The difference between a spreadsheet built for looking at and one built for analysis is easy to see side by side. The "before" version has merged cells for visual grouping, colour-coded categories, several header rows, notes scattered in otherwise empty cells, a column that mixes numbers with words, and embedded calculations that will be silently read as data. The "after" version is a clean rectangle: one header row of well-named variables, one type per column, every piece of information stated explicitly in a cell value, and a second sheet or accompanying file carrying the documentation. Nothing has been lost in the translation; the colours and notes have simply become columns, where a program can read them.
+
+![A spreadsheet built for the eye versus one built for analysis: the merged cells, extra header row, colour, stray notes, and embedded formula on the left all become ordinary rows, columns, and `NA` values in the clean rectangle on the right.](../images/bk_before_after_tidy.svg){#fig-before-after-tidy fig-align="center" width="100%"}
+
+## Running Example: The Stickleback Data {#sec-tidy-stickle}
+
+::: {.callout-note title="Running example"}
+This section applies the chapter to the course dataset described in @sec-course-dataset (80 stickleback, 4 treatment groups, 600 genes). The same steps appear on the Week 3 slides, so the book and the lecture can be read side by side.
+:::
+
+So: is the course dataset tidy? One command from @sec-pipes-stickle shows the structure at a glance (the file has 604 columns, so `cut -f 1-8` keeps the output readable):
+
+```bash
+head -n 2 data/Stickle_RNAseq.tsv | cut -f 1-8
+```
+
+```
+Individual  Genotype  Microbiota    Geno&Micro  Gene1  Gene2  Gene3  Gene4
+AC1         A         conventional  convA       16     15     71     153
+```
+
+Measured against the three rules, the table does well. There is exactly one header row of variable names, one row per fish, one value per cell, and one type per column. Two features nonetheless deserve a closer look, because each illustrates a point from this chapter.
+
+First, the 600 gene columns are a **wide** layout. For per-fish questions---total reads per fish, which group a fish belongs to---this is exactly the tidy shape: the fish is the observational unit, and each row is one fish. But for per-gene questions the *gene* is really a variable too, hiding in the column names just as the years hid in the column names of @sec-messy-headers-are-values. The tidy shape for those questions is **long**: one row per fish-by-gene combination (48,000 rows of `Individual`, `Gene`, `Count`). Neither layout is wrong; they answer different questions, and @sec-data-wrangling shows how `pivot_longer()` converts one into the other in a single call.
+
+![The same stickleback data in wide and long layouts: in the wide table each of the 80 fish is a row and the 600 genes are columns; pivoting longer turns the gene column names into values of a `Gene` column, giving 48,000 rows of one fish-by-gene pair each.](../images/bk_wide_vs_long.svg){#fig-wide-vs-long fig-align="center" width="100%"}
+
+Second, the fourth column, `Geno&Micro`, breaks two rules at once. It duplicates information already present in the `Genotype` and `Microbiota` columns, and its name contains an `&`, a character with a special meaning in the shell that forces quoting or renaming in every tool downstream (@sec-tidy-naming-conventions). The column earns its keep as a convenient grouping label, but the name does not: @sec-regex-stickle renames it with one line of `sed`, writing the result to a new file so the raw data stay untouched (@sec-preserving-raw-data).
+
+The payoff of a tidy, plain-text file is that *reading it is a one-liner in every language we use*. The Week 3 example script `plot_stickleback.py` on the course [Example Files page](https://wcresko.github.io/BioE_Comp_Tools_Fa2026/Examples.html) loads the entire table like this:
+
+```python
+stickle = pd.read_csv("data/Stickle_RNAseq.tsv", sep="\t")
+```
+
+and the R equivalent is `read_tsv("data/Stickle_RNAseq.tsv")`. No skipping of merged cells, no parsing of units out of values, no guessing at missing-value codes---because the file follows the rules of this chapter, every import function simply works.
+
 
 ## Summary {#sec-tidy-summary}
 

@@ -72,6 +72,8 @@ NCATGCAGCGTACGGTAATTGGCAGGCATTAGCAGCATCC
 #AAAAFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
 ```
 
+![Anatomy of a FASTQ record: four lines per read, with each quality character encoding the Phred score of the base at the same position (Phred+33: Q = ASCII code - 33).](../images/bk_fastq_anatomy.svg){#fig-fastq-anatomy fig-align="center" width="90%"}
+
 | Line | Content |
 |---|---|
 | 1 | Header: read ID plus instrument, run, lane, tile, and x/y position. Starts with `@` |
@@ -99,6 +101,11 @@ Modern Illumina data use **Phred+33** encoding: the character's ASCII code minus
 - Paired-end runs produce two files per sample, typically `..._R1_001.fastq.gz` and `..._R2_001.fastq.gz`; the reads in each file are in the same order.
 - Because each read is exactly 4 lines, **number of reads = lines / 4**: `echo $(( $(zcat reads.fastq.gz | wc -l) / 4 ))`.
 - Quality-control tools such as FastQC summarize quality scores across a whole file.
+
+::: {.callout-warning title="Don't count reads with `grep -c '^@'`"}
+It is tempting to count reads by counting header lines, since every header starts with `@`. But `@` is also a valid quality character---ASCII 64, which in Phred+33 encodes Q31---so line 4 of a record can begin with `@` too, and the count comes out too high. The structure of the file, not its characters, is what is reliable: count reads as lines divided by 4 (as above, or `zcat reads.fastq.gz | awk 'NR % 4 == 1' | wc -l`), and pull out sequences by line position (`awk 'NR % 4 == 2'`) rather than by pattern matching.
+:::
+
 
 ## Compressed files (.gz) and streaming {#sec-gzip-streaming}
 

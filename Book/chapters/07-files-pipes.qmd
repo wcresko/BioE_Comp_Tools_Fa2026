@@ -40,13 +40,7 @@ Understanding this philosophy transforms how you approach computational problems
 
 Every Unix program has three standard communication channels, called **streams**. Understanding these streams is essential to understanding how Unix tools communicate with each other and with you.
 
-```
-         ┌──────────────┐
-stdin ───>│              │───> stdout
-    (0)   │   Program    │      (1)
-          │              │───> stderr
-          └──────────────┘      (2)
-```
+![The three standard streams. A program reads input from stdin (file descriptor 0) and writes to two separate output channels: stdout (1) for normal output and stderr (2) for error messages, both of which appear on the terminal by default.](../images/bk_standard_streams.svg){#fig-standard-streams fig-align="center" width="85%"}
 
 **Standard Input (stdin)**
 :   Where programs read input. By default, this is your keyboard—when a program waits for input, it's reading from stdin. File descriptor 0.
@@ -728,6 +722,19 @@ $ ./filter_rows.sh Genotype A < data/Stickle_RNAseq.tsv | ./total_counts.sh | so
 
 Download them, read the comments, and modify them—they are meant as starting points for your own tools.
 
+@tbl-week2-scripts summarizes what each one does.
+
+| Script | What it does |
+|:-------|:-------------|
+| `file_inventory.sh` | Reports every file in a folder---grouped by file type, largest total first, with each file's permissions and size---written out to a report file |
+| `make_project.sh` | Builds the standard project skeleton of @sec-prep-project (`data/raw`, `data/processed`, `scripts/`, `output/`, `docs/`) with template `README.md`, `.R`, `.py`, and `.qmd` files |
+| `backup_project.sh` | Snapshots a project into a dated `.tar.gz` archive, skipping the expendable `output/` directory |
+| `filter_rows.sh` | A filter: keeps the header plus the rows whose named column matches a value, reading stdin and writing stdout |
+| `total_counts.sh` | A filter: sums the 600 gene-count columns for each fish, reading stdin and writing stdout |
+
+: The Week 2 example scripts {#tbl-week2-scripts}
+
+
 ## Best Practices {#sec-pipes-best-practices}
 
 ### Pipeline Efficiency {#sec-pipeline-efficiency}
@@ -754,6 +761,10 @@ $ rm *.tmp                    # Then delete
 # Use tee to save intermediate results
 $ complex_pipeline | tee checkpoint.txt | further_processing
 ```
+
+::: {.callout-note title="What `&&` does"}
+Two commands joined by `&&` run left to right, and the second runs **only if the first succeeded**---in the first example above, `grep` searches `data.txt` only once `test -f` has confirmed the file exists. You have been using this already: `mkdir -p data && cd data` enters the directory only if it could be created. Under the hood, every command finishes by reporting an **exit status** (0 for success, anything else for failure); that status is what `&&` checks, and it is also what makes `if` statements in shell scripts work. @sec-shell-scripting covers it properly.
+:::
 
 ## Running Example: The Stickleback Data {#sec-pipes-stickle}
 

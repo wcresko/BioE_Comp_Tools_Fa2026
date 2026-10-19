@@ -32,14 +32,66 @@ The course book goes deeper on everything in this lecture. Read before or after 
 -   [Ch. 14: Data Wrangling with the Tidyverse](../book/chapters/14-data-wrangling.html)
 -   [Ch. 15: Writing Functions in R](../book/chapters/15-writing-functions.html)
 -   *Reference:* [App. E: R Command Reference](../book/chapters/appendix-E-r.html) · [App. F: Python Quick Reference](../book/chapters/appendix-F-python.html)
+-   *Environments:* [Ch. 12, Virtual Environments](../book/chapters/12-python-programming.html#sec-py-venv) · [Ch. 16, The Three Software Layers](../book/chapters/16-hpc-talapas.html#sec-software-layers) - the second previews Week 8
 -   *Optional:* [Ch. 22: Working with Databases](../book/chapters/22-databases.html) - for when project data outgrow flat files
 
 ## Goals for today
 
+-   Environments: what they are, why you need them, and the three tools (`venv`, `conda`, `renv`)
 -   Installing vs. loading packages; inspecting objects and reading error messages
 -   Logical operators, filtering, type conversion and missing values
 -   The tidyverse and the pipe `|>` for data wrangling
 -   ggplot2 and the grammar of graphics; choosing the right plot
+
+# Environments: giving every project its own toolbox
+
+## Why environments?
+
+::: incremental
+- By default your computer has **one** R and **one** Python - and every project installs packages into it
+- Project A needs pandas 2.2; reproducing last year's analysis needs pandas 1.5. Upgrade for one and you silently break the other - "**dependency hell**"
+- From the bootcamp: "which Python did that install go into?" is the #1 Python headache
+- An **environment** is an isolated set of packages (and an interpreter) for **one project**
+- Three payoffs:
+  - projects cannot break each other
+  - you can **record** exactly which versions produced a result
+  - a collaborator - or Talapas - can **rebuild** the same setup from that record
+:::
+
+## The three environment tools you will meet
+
+| Tool | For | Environments live... | The record you share |
+|---|---|---|---|
+| **`venv`** (+ `pip`) | Python | in the project folder (`.venv/`) | `requirements.txt` |
+| **`conda`** / `mamba` | Python *plus* compiled tools (`samtools`, even R) | centrally, by name (`conda env list`) | `environment.yml` |
+| **`renv`** | R | in the project folder | `renv.lock` |
+
+::: incremental
+- **`venv`** is our default on your laptop - you have used it since the bootcamp
+- **`conda`** is the standard in bioinformatics and on **Talapas** (next week) - one tool for *any* software
+- **`renv`** for R projects: `renv::init()` once, `renv::snapshot()` to record, `renv::restore()` to rebuild
+- Whichever you use: **commit the record file to Git - never the environment itself**
+:::
+
+## `conda` in practice - on your own computer
+
+``` bash
+# Install once: Miniforge, from https://conda-forge.org/download/
+
+conda create -n rnaseq python=3.12 pandas matplotlib   # make a named environment - once
+conda activate rnaseq                                  # turn it on - every session
+conda install -c bioconda samtools                     # compiled genomics tools too!
+conda env export > environment.yml                     # record it, to rebuild anywhere
+conda deactivate                                       # turn it off
+```
+
+::: incremental
+- Environments are **named and central**, not per-folder: `conda env list` shows them all
+- Packages come from **channels**: `conda-forge` (general) and `bioconda` (genomics)
+- Install **Miniforge**, not Anaconda - Anaconda's default channel requires a paid license at organizations like UO; Miniforge defaults to the free `conda-forge`
+- `mamba` (included in Miniforge) is a faster drop-in replacement for `conda`
+- Next week the *same* `environment.yml` rebuilds this environment on Talapas: `conda env create -f environment.yml`
+:::
 
 # Going further with R and Python
 
@@ -257,7 +309,7 @@ x[x > 10]       # array([15, 20])  - boolean indexing, same idea as R
 :::
 
 ::: callout-tip
-Read error messages carefully - R reports the failing call, Python reports a **traceback** where the *last* line tells you what went wrong. Then paste the exact message into a search engine or an AI assistant.
+Read error messages carefully - R reports the failing call, Python reports a **traceback** where the *last* line tells you what went wrong. Then paste the exact message into a search engine or an AI assistant. And a preview: on Talapas next week, a `ModuleNotFoundError` inside a batch job usually means you forgot `conda activate` in the job script.
 :::
 
 ## The tidyverse family of packages
@@ -464,6 +516,6 @@ Same data, three tools: `awk` gave us one gene's mean per group in Week 4, base 
 -   **Same ideas, two syntaxes**: variables, vectors, functions, data frames and plots work the same way in R and Python - once you know one, the other is mostly vocabulary
 -   **R**: `<-`, counts from 1, `c()` vectors, `data.frame`, `library()`, `|>` pipes, `ggplot2`
 -   **Python**: `=`, counts from 0, lists and `numpy` arrays, `pandas` `DataFrame`, `import`, method chaining, `matplotlib` / `seaborn`
--   **Install once, load every session**: `install.packages()` + `library()` vs `pip install` (in a virtual environment) + `import`
+-   **Install once, load every session**: `install.packages()` + `library()` vs `pip install` (in a virtual environment) + `import` - and record the environment (`requirements.txt`, `environment.yml`, `renv.lock`) so anyone can rebuild it
 -   Run code as **scripts** (`Rscript`, `python3`) for pipelines and in **Quarto** when you want prose, code and output together
 -   When in doubt: `str()` / `.info()`, `?fun` / `help(fun)`, and read the error message

@@ -140,6 +140,21 @@ $ ssh yourduckid@login.talapas.uoregon.edu
 
 `login.talapas.uoregon.edu` is a **load balancer** that hands you to one of the four login nodes. Expect a Duo two-step prompt after you enter your password: no characters appear while you type the password (this is normal), and Duo then asks you to type `1` for a push notification to the Duo Mobile app, `2` for a text message, or `3` for a phone call. Mac and Linux users can set up an SSH key (`ssh-keygen -t ed25519`, then `ssh-copy-id`) to skip the password, but Duo will still prompt whenever policy requires it.
 
+::: {.callout-note title="Set Up an SSH Key Once"}
+An **SSH key** is a matched pair of files: a *public* key (the lock---safe to share, and the thing you hand to servers) and a *private* key (the key---it never leaves your computer). Give a server your public key once and it recognizes your machine from then on, so you stop typing your password:
+
+```bash
+# On your laptop, one time (accept the defaults; a passphrase is optional but wise)
+$ ssh-keygen -t ed25519
+
+# Copy the public key to Talapas (enter your UO password one last time)
+$ ssh-copy-id yourduckid@login.talapas.uoregon.edu
+```
+
+`ssh-keygen` writes the pair to `~/.ssh/`: the public half is `id_ed25519.pub`, the private half `id_ed25519` (never share or commit that one). Duo still applies when policy requires it. The same key pair authenticates you to GitHub later---@sec-github-ssh-keys shows where to paste the public key there.
+:::
+
+
 **Do you need the VPN?** The Talapas Knowledge Base says a UO VPN connection is *recommended*, not required. Without the VPN, connect to the load balancer as above and answer the Duo prompts. With the [UO VPN](https://service.uoregon.edu/TDClient/2030/Portal/KB/ArticleDet?ID=101392) connected, you can also SSH directly to a specific login node:
 
 ```bash
@@ -221,6 +236,10 @@ Three policies shape where your files should live:
 - **`/scratch` is purged.** Anything in `/scratch/<PIRG>/` that has not been accessed in 90 days is deleted automatically, without warning. It is the right place for large intermediate files while a pipeline runs (it is fast and has a generous quota), and the wrong place for anything you would miss. When a run finishes, copy the results you want to keep to `/projects/<PIRG>/` and delete the rest. If `/scratch` "looks empty after a few months," this is why.
 - **Nothing is backed up.** RACS does not back up any Talapas file system. Some snapshotting exists for home and project directories, but it is not a substitute for your own copies. Keep code in Git (@sec-git-github) and irreplaceable data somewhere off the cluster.
 - **Home is small and shared.** Your home directory is for dotfiles, scripts, and small software installs, not for sequencing data or reference genomes. Put those under `/projects` (shared with your lab) or `/scratch`.
+
+@fig-storage-decision condenses these policies into a single decision.
+
+![Where a file belongs on Talapas: code lives in home and a Git repository, large active data goes to purged scratch space, results worth keeping move to project space, and small configurations stay in the 250 GB home directory.](../images/bk_storage_decision.svg){#fig-storage-decision fig-align="center" width="95%"}
 
 ### Moving Files On and Off Talapas {#sec-file-transfer}
 
@@ -494,6 +513,8 @@ The resolution is empirical. The first time you run a new step, err *slightly* o
 
 In practice this is a two-submission loop. **First run:** generous but not absurd limits, for example `--mem=32G --time=04:00:00 --cpus-per-task=4` for an unknown step, then `seff <jobid>` as soon as it finishes. **Second and later runs:** `--mem` at `MaxRSS × 1.2`, `--time` at `Elapsed × 1.2`, and `--cpus-per-task` at whatever the tool actually used. A step that requested 64 GB and used 12 GB has a new request of about 15 GB, a fourfold reduction that noticeably improves its queue position. After one pass through a multi-step pipeline you have an accurate resource profile for every step, and subsequent runs start promptly because each asks only for what it needs.
 
+![The right-sizing loop: submit the first run with a generous request, read `seff` when the job finishes, set the next request from `MaxRSS` × 1.2 and `Elapsed` × 1.2, and resubmit.](../images/bk_rightsizing_loop.svg){#fig-rightsizing-loop fig-align="center" width="85%"}
+
 ::: {.callout-warning title="A finished job is not necessarily a successful job"}
 Before treating a run as done, check two things together: `seff` reports `State: COMPLETED` with exit code `0:0`, *and* the output file you expected exists and is complete (for example, the script's final "Wrote ..." message appears in the `.out` log). A job killed by `OUT_OF_MEMORY` or `TIMEOUT` mid-write leaves a truncated file on disk that looks valid but is not, and the next step in your pipeline then fails with a confusing downstream error instead of the real cause.
 :::
@@ -583,6 +604,10 @@ Lmod modules are the first of three ways to get software onto Talapas, and most 
 
 : Three ways to get software onto the cluster {#tbl-software-layers}
 
+@fig-software-layers shows how the layers combine.
+
+![The three software layers on Talapas: centrally installed Lmod modules form the base, your per-user environments sit on top of them, and an Apptainer container seals an entire stack into one portable image as the alternative.](../images/bk_software_layers.svg){#fig-software-layers fig-align="center" width="90%"}
+
 **Layer 2: per-user environments.** The system R and Python modules are read-only, so packages you install go into your own directory. For R, create a per-user library once and point R at it; `install.packages()` and `BiocManager::install()` will then write there:
 
 ```bash
@@ -591,6 +616,21 @@ $ echo 'R_LIBS_USER=~/Rlibs' >> ~/.Renviron
 ```
 
 To make a project reproducible, record the exact package versions with **renv**: `renv::init()` in the project, `renv::snapshot()` to write `renv.lock`, and `renv::restore()` on a fresh clone to reinstall the same versions. Commit `renv.lock` (not the library itself) to Git. For Python the equivalent is a conda environment (`module load miniconda3/20240410`, `conda create -n myenv python=3.12 numpy pandas`, `conda activate myenv`) or a `venv`; many bioinformatics tools are one `conda install` away thanks to the Bioconda channel [@gruning2018bioconda]. Either way, export the environment (`conda env export > environment.yml`) and version-control the file. Activate the environment inside the job script, exactly as you load modules.
+
+The `environment.yml` file is also how an environment *moves to the cluster*. If you recorded your project's environment on your laptop with `conda env export > environment.yml`, you do not recreate it on Talapas from memory---you rebuild it from the file:
+
+```bash
+$ module load miniconda3/20240410
+$ conda env create -f environment.yml      # once: rebuilds the environment by name
+$ conda activate rnaseq                    # every session, and inside every sbatch script
+```
+
+The same two lines---`module load miniconda3/20240410` and `conda activate`---must appear **inside** your batch scripts, because every batch job starts with a clean shell (@sec-slurm-scripts).
+
+::: {.callout-warning title="Conda environments live in your home directory"}
+By default conda installs every environment, and caches every package it has ever downloaded, under your **home directory**---whose quota (@tbl-storage) a few heavyweight environments plus the package cache can erode surprisingly quickly. Keep an eye on it: `conda env list` shows the environments you have accumulated, `conda remove -n old_env --all` deletes one you no longer need, `conda clean -a` clears the download cache, and `df -h ~` (@sec-check-your-storage) tells you where you stand.
+:::
+
 
 **Layer 3: containers.** A container packages the *entire* software stack, from operating-system libraries up, into one portable, versioned file. **Docker** [@merkel2014docker] is the standard on laptops and in the cloud, but it requires root privileges, so clusters do not run it. **Apptainer** (formerly Singularity) [@kurtzer2017singularity] is its HPC-safe counterpart: it runs as an ordinary user, mounts your home and project directories automatically, and can pull Docker images directly, so an image built on a laptop runs unchanged on Talapas:
 
@@ -710,6 +750,36 @@ $ squeue -u $USER
 # Check output in real-time
 $ tail -f logs/genome_12345678.out
 ```
+
+### Mixing Languages in One Job {#sec-hpc-mixed-language}
+
+A batch script is just a shell script, so nothing stops one job from running steps in different languages: load both modules, then call each interpreter in turn. This is the natural shape for a small pipeline where, say, Python summarizes raw files into a table and R turns the table into a figure:
+
+```bash
+#!/bin/bash
+#SBATCH --job-name=fasta_pipeline
+#SBATCH --partition=compute
+#SBATCH --account=myPIRG
+#SBATCH --output=logs/%x_%j.out
+#SBATCH --error=logs/%x_%j.err
+#SBATCH --time=01:00:00
+#SBATCH --cpus-per-task=2
+#SBATCH --mem=8G
+
+set -euo pipefail
+
+module purge
+module load python3/3.11.4
+module load R/4.3.3
+
+# Step 1 (Python): summarise every FASTA file into one table
+python3 fasta_stats.py data/*.fasta > results/fasta_stats.tsv
+
+# Step 2 (R): read that table, make the figure
+Rscript plot_stats.R results/fasta_stats.tsv results/fasta_stats.png
+```
+
+Two details carry the weight here. First, `set -euo pipefail` is what makes the chain safe: if the Python step fails, the job stops rather than handing R a truncated or empty table that would produce a plausible-looking but wrong figure. Second, both scripts take their file names from the command line (`commandArgs(trailingOnly = TRUE)` in R, `sys.argv` in Python) rather than hard-coding paths, so the same scripts run unchanged on your laptop and on the cluster. When the two steps grow expensive enough to need different resource requests, split them into two jobs chained with `--dependency=afterok:` (@tbl-slurm-directives) instead.
 
 ## Designing a Pipeline on the Cluster {#sec-cluster-pipeline}
 

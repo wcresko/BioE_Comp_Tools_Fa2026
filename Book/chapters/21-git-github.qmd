@@ -503,6 +503,10 @@ $ git clone git@github.com:yourname/your-new-repo.git
 
 : Fork vs. template repositories {#tbl-fork-vs-template}
 
+@fig-fork-clone-template shows the three ways to make a repository your own.
+
+![Three ways to copy a repository: a clone is a local copy linked to the original, a fork is a server-side copy that shares history and can send pull requests back upstream, and a template creates a fresh repository with no connection to the original.](../images/bk_fork_clone_template.svg){#fig-fork-clone-template fig-align="center" width="90%"}
+
 ## The .gitignore File {#sec-gitignore}
 
 Not everything should be tracked. The `.gitignore` file specifies intentionally untracked files:
@@ -530,6 +534,8 @@ data/raw/*
 # Python artifacts
 __pycache__/
 *.pyc
+.venv/
+venv/
 .ipynb_checkpoints/
 
 # Output files
@@ -545,6 +551,8 @@ Thumbs.db
 .env
 secrets.txt
 ```
+
+The `.venv/` entry matters as soon as you follow @sec-quarto-python, which creates a project virtual environment---hundreds of megabytes of installed packages that belong on each machine, not in the repository (rebuild them from the project's recorded dependencies instead).
 
 ::: {.callout-warning}
 Add `.gitignore` early! Once files are tracked, adding them to `.gitignore` won't untrack them.
@@ -589,6 +597,26 @@ $ git commit -m "Update website"
 # Push to GitHub
 $ git push
 ```
+
+**The alternative: let Quarto publish for you.** Quarto has a built-in publishing command that renders the site and pushes the *rendered output* to a separate `gh-pages` branch, so the generated HTML never clutters the history of `main`:
+
+```bash
+$ quarto publish gh-pages
+```
+
+The first run offers to create the `gh-pages` branch and configure Pages to serve from it; you can also record the target in `_quarto.yml` so collaborators publish the same way:
+
+```yaml
+publish:
+  gh-pages:
+    branch: gh-pages
+```
+
+With this route, Pages' source branch is **gh-pages** (root folder) rather than **main** with `/docs`. Pick one approach per repository and stay with it: committing `docs/` keeps everything on one branch and makes the published files part of your ordinary history, while `quarto publish gh-pages` keeps source and output cleanly separated. Both are one command away from an updated site.
+
+@fig-pages-two-paths compares the two routes side by side.
+
+![Two routes to the same GitHub Pages site: committing the rendered `docs/` folder on `main`, or letting `quarto publish gh-pages` push the rendered output to a separate `gh-pages` branch.](../images/bk_pages_two_paths.svg){#fig-pages-two-paths fig-align="center" width="80%"}
 
 ## Best Practices {#sec-git-best-practices}
 
@@ -829,6 +857,38 @@ For more Git emergencies, visit [ohshitgit.com](https://ohshitgit.com/) — a hu
 : Essential Git commands {#tbl-git-commands}
 
 For a comprehensive reference of Git commands and workflows, see @sec-appendix-git.
+
+## Running Example: Your Course Website {#sec-git-website-example}
+
+::: {.callout-note title="Running example"}
+This section ties the chapter together with the Week 10 class activity: turning the course's template repository into a website of your own, published with GitHub Pages. It uses nothing beyond what this chapter has already covered---templates (@sec-starting-from-a-template-repository), the basic workflow (@sec-git-workflow), and Pages (@sec-github-pages).
+:::
+
+The course provides a template website repository at <https://github.com/wcresko/academic_website_template>: a small Quarto website project whose pages are ordinary `.qmd` files. The workflow from template to live site exercises every Git skill in this chapter once, in order.
+
+1. **Create your copy.** Log in to GitHub (this matters---the button does not appear otherwise), open the template repository, and click the green **Use this template** button, then **Create a new repository**. Pick your account as the owner and give it a name. Because this is a template rather than a fork, your new repository starts with the template's files but a fresh history (@tbl-fork-vs-template).
+2. **Clone it.** On your new repository's page, use the green **Code** button to copy the repository's URL, then, in a terminal, `cd` to wherever you keep projects and clone it:
+
+   ```bash
+   $ git clone git@github.com:yourname/your-website-repo.git
+   $ cd your-website-repo
+   ```
+
+   (Use the `https://...` URL instead if you set up a personal access token rather than an SSH key; see @sec-git-auth.)
+3. **Edit and render.** Open the folder in VS Code, Positron, or RStudio and edit the `.qmd` files---they accept everything from @sec-quarto-documents, including R and Python chunks. The project's `_quarto.yml` sets `output-dir: docs`, so `quarto render` writes the finished site into `docs/`.
+4. **Commit and push.** The daily rhythm from @sec-git-workflow:
+
+   ```bash
+   $ git status
+   $ git add .
+   $ git commit -m "Personalize site content"
+   $ git push
+   ```
+
+5. **Turn on Pages.** On GitHub: **Settings → Pages**, source **Deploy from a branch**, branch **main**, folder **/docs**, and **Save**. After a minute or two your site is live at `https://yourname.github.io/your-website-repo/`.
+
+From here on, updating the site is steps 3 and 4 plus a push: edit, `quarto render`, commit, push. Every published version of the site corresponds to a commit, which is the whole point---when something breaks, `git log` tells you exactly which change broke it.
+
 
 ## Summary {#sec-git-summary}
 

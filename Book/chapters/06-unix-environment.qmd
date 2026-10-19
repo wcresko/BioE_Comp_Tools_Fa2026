@@ -75,6 +75,31 @@ $ grep "gene" *.txt
 Combining `rm` with `*` can be dangerous! The command `rm *` deletes everything in the current directory without asking for confirmation. Always use `ls` first to see what a wild card pattern matches before using it with `rm`, and consider `rm -i` for interactive confirmation when deleting with wild cards.
 :::
 
+### Brace Expansion {#sec-brace-expansion}
+
+A close cousin of the wild cards is **brace expansion**. A comma-separated list inside `{ }` expands into one copy of the surrounding text per alternative, and `{start..end}` expands a numeric or alphabetic sequence:
+
+```bash
+# Both the .fastq and the .md files, in one command
+$ ls *.{fastq,md}
+
+# A quick backup copy: expands to  cp notes.txt notes.txt.bak
+$ cp notes.txt{,.bak}
+
+# sample_1 through sample_5
+$ echo sample_{1..5}
+sample_1 sample_2 sample_3 sample_4 sample_5
+```
+
+Unlike the wild cards above, brace expansion never looks at which files exist---the shell simply generates the strings and hands them to the command. That makes it the tool of choice for *creating* things rather than matching them. Braces nest, so a single `mkdir -p` can build an entire project directory tree (@sec-prep-project) in one line:
+
+```bash
+$ mkdir -p my_project/{data/{raw,processed},scripts,output/{figures,tables},docs}
+$ ls -R my_project
+```
+
+Keep the distinction straight and the two features cover complementary jobs: a wild card such as `sample_*.txt` *selects* from names already present (and matches nothing if no file fits), while `sample_{1..5}.txt` *generates* all five names whether or not the files exist. Wild cards select; braces generate.
+
 ## File Permissions and Ownership {#sec-file-permissions}
 
 Unix is a multi-user system, and every file has permissions controlling who can read, write, or execute it. Understanding permissions is essential for security and for running scripts (@sec-running-scripts).
@@ -107,6 +132,8 @@ The three permission types are:
 - **-**: Permission denied for that operation
 
 So `-rwxr-xr-x` means: this is a regular file; the owner can read, write, and execute it; members of the group can read and execute it; and everyone else can read and execute it.
+
+![Decomposing the permission string `-rwxr-xr-x`. The first character gives the file type; the next nine form three triplets---owner, group, and others---each flagging read, write, and execute. Summing read = 4, write = 2, and execute = 1 within each triplet gives the octal value 755.](../images/bk_permission_string.svg){#fig-permission-string fig-align="center" width="90%"}
 
 ### Changing Permissions: `chmod` {#sec-chmod}
 
@@ -146,6 +173,31 @@ $ chmod 600 secrets.txt  # rw------- (private file)
 ```
 
 A few patterns cover almost every situation: `755` for scripts (you can modify, everyone can run), `644` for data files (you can modify, everyone can read), and `700` or `600` for directories and files that only you should touch.
+
+![The octal permission calculator: read = 4, write = 2, and execute = 1 are summed within each triplet to give one digit. A handful of values---755 for scripts, 644 for data files, 600 for private files---cover most situations, and 444 locks raw data read-only for everyone.](../images/bk_chmod_numbers.svg){#fig-chmod-numbers fig-align="center" width="90%"}
+
+One pattern deserves to become a habit: making your raw data **read-only**. Raw data files should never change after they arrive (@sec-prep-project), and removing write permission enforces that---no script, yours or anyone else's, can silently overwrite them:
+
+```bash
+# Nobody can write: protect your raw data
+$ chmod a-w data/raw/*
+
+# The same idea in octal: r--r--r--, read-only for everyone
+$ chmod 444 data/raw/*.tsv
+
+# While you are at it: make every script in a project runnable at once
+$ chmod u+x scripts/*.sh
+
+# Always verify what changed
+$ ls -l data/raw
+```
+
+With the raw files locked down, a mistake costs you a prompt instead of your data: `rm` asks before deleting a write-protected file, and output redirection (`>`) aimed at one refuses outright. You can always restore write permission with `chmod u+w` when a file genuinely must change---the point is that changing raw data should require a deliberate step.
+
+::: {.callout-tip title="Permissions matter more on shared systems"}
+On your laptop you are usually the only user, so the group and others triplets rarely come into play. On a shared system such as Talapas they are how a lab manages its files: your group there is your PIRG, and the group permissions decide whether labmates can read your results or write into a shared project directory. You will meet this again in @sec-hpc-talapas.
+:::
+
 
 ### Making Scripts Executable {#sec-making-scripts-executable}
 

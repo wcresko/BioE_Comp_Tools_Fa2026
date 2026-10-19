@@ -2,7 +2,7 @@
 title: "Week 8 Exercises - First Steps on Talapas"
 ---
 
-Short, **ungraded** practice tasks - about 30 minutes, all on Talapas. Companion reading: [Ch. 16](../book/chapters/16-hpc-talapas.html) and [Ch. 17](../book/chapters/17-parallel-computing.html); reference: [App. G](../book/chapters/appendix-G-slurm.html). You need your Talapas account working - if it is not, that is task 0: contact me.
+Short, **ungraded** practice tasks - about 40 minutes, all on Talapas. Companion reading: [Ch. 16](../book/chapters/16-hpc-talapas.html) and [Ch. 17](../book/chapters/17-parallel-computing.html); reference: [App. G](../book/chapters/appendix-G-slurm.html). You need your Talapas account working - if it is not, that is task 0: contact me.
 
 1.  Log in to Open OnDemand at <https://ondemand.talapas.uoregon.edu> with your Duck ID and open the **file explorer**. What is the path of your home directory?
 2.  Open a **shell** from OnDemand (or `ssh yourduckid@login.talapas.uoregon.edu`) and run `hostname` and `pwd`.
@@ -10,7 +10,9 @@ Short, **ungraded** practice tasks - about 30 minutes, all on Talapas. Companion
 4.  Recreate your course skeleton on the cluster: `mkdir -p ~/comptools/{data,scripts,results}`.
 5.  Transfer `Stickle_RNAseq.tsv` to `~/comptools/data` (OnDemand's file explorer upload button, or `scp` from your laptop). Confirm with `wc -l`.
 6.  Run `module avail R` (press `q` to exit the list), then `module load` an R version and start R on the login node just long enough to run `R.version.string` and quit.
-7.  Copy the minimal Slurm script from the book ([Ch. 16](../book/chapters/16-hpc-talapas.html)) into `scripts/hello.sbatch`: it should print `hostname` and `date`.
-8.  Submit it with `sbatch scripts/hello.sbatch`, watch the queue with `squeue -u $USER`, and when it finishes, `cat` the `slurm-*.out` file. Which node did it run on?
-9.  Run `sinfo` and identify one regular partition and the GPU partition.
-10. From the shell, run your Week 3 grep pipeline on the dataset - identical commands, bigger computer. That is the point of the shell.
+7.  Rebuild your laptop environment from Week 7: transfer your `environment.yml` (same route as task 5), then `module spider miniconda`, `module load` it, and run `conda env create -f environment.yml`. Activate it with `conda activate rnaseq` and check `which python3` - you now have the *same* environment in both places.
+8.  Copy the minimal Slurm script from the book ([Ch. 16](../book/chapters/16-hpc-talapas.html)) into `scripts/hello.sbatch`: it should print `hostname` and `date`.
+9.  Submit it with `sbatch scripts/hello.sbatch`, watch the queue with `squeue -u $USER`, and when it finishes, `cat` the `slurm-*.out` file. Which node did it run on?
+10. Now prove your environment travels into batch jobs: add `module load` miniconda, `conda activate rnaseq`, and `python3 -c "import pandas as pd; print(pd.__version__)"` to `hello.sbatch` and resubmit. The pandas version in the log is your environment, running on a compute node.
+11. Run `sinfo` and identify one regular partition and the GPU partition.
+12. From the shell, run your Week 3 grep pipeline on the dataset - identical commands, bigger computer. That is the point of the shell.

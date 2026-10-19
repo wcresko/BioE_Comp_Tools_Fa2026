@@ -137,6 +137,81 @@ python3 summarize.py experiment.csv
 ```
 :::
 
+### A Fuller Example: FASTA Statistics in R and Python {#sec-fasta-stats-rpy}
+
+The bash script `fasta_stats.sh` in @sec-complete-script counts the sequences in a FASTA file, totals their length, and reports the GC content. Counting and arithmetic are exactly where bash gets awkward, and the same program is shorter and clearer in either R or Python. Both versions below take the file name as a command-line argument, check that the file exists, and exit with a non-zero status on failure, so a shell pipeline or a Slurm job (@sec-hpc-talapas) can tell whether they succeeded---just like `exit 1` in bash.
+
+::: {.panel-tabset}
+### R
+
+```r
+#!/usr/bin/env Rscript
+# fasta_stats.R - basic statistics for a FASTA file
+args <- commandArgs(trailingOnly = TRUE)
+if (length(args) != 1) {
+  cat("Usage: Rscript fasta_stats.R sequences.fasta\n")
+  quit(status = 1)
+}
+input <- args[1]
+if (!file.exists(input)) {
+  cat("Error: File", input, "not found!\n")
+  quit(status = 1)
+}
+
+lines   <- readLines(input)
+headers <- grepl("^>", lines)                # TRUE for header lines
+seq     <- paste(lines[!headers], collapse = "")
+
+cat("=== FASTA Statistics for", input, "===\n")
+cat("Number of sequences:", sum(headers), "\n")
+cat("Total length:", nchar(seq), "bp\n")
+cat("Average length:", nchar(seq) / sum(headers), "bp\n")
+gc <- sum(strsplit(seq, "")[[1]] %in% c("G", "C"))
+cat("GC content:", round(100 * gc / nchar(seq), 1), "%\n")
+```
+
+```bash
+Rscript fasta_stats.R sequences.fasta
+```
+
+### Python
+
+```python
+#!/usr/bin/env python3
+# fasta_stats.py - basic statistics for a FASTA file
+import sys
+from pathlib import Path
+
+if len(sys.argv) != 2:                       # sys.argv[0] is the script name
+    print("Usage: python3 fasta_stats.py sequences.fasta")
+    sys.exit(1)
+input_file = Path(sys.argv[1])
+if not input_file.is_file():
+    print(f"Error: File {input_file} not found!")
+    sys.exit(1)
+
+lines   = input_file.read_text().splitlines()
+headers = [line for line in lines if line.startswith(">")]
+seq     = "".join(line for line in lines if not line.startswith(">"))
+
+print(f"=== FASTA Statistics for {input_file} ===")
+print(f"Number of sequences: {len(headers)}")
+print(f"Total length: {len(seq)} bp")
+print(f"Average length: {len(seq) / len(headers):.1f} bp")
+gc = seq.count("G") + seq.count("C")
+print(f"GC content: {100 * gc / len(seq):.1f}%")
+```
+
+```bash
+python3 fasta_stats.py sequences.fasta
+```
+:::
+
+Read the R version as a preview of the rest of this chapter: `readLines()` returns a character vector with one element per line, `grepl("^>", lines)` applies a regular expression (@sec-grep-regex) to every element at once and returns a logical vector, `lines[!headers]` is logical indexing (@sec-vector-indexing), and `sum(headers)` counts the `TRUE` values. The Python version does the same work with list comprehensions and string methods (@sec-python-programming); `sys.argv` and the more capable `argparse` are covered in @sec-py-cli. Where the bash version chained `grep`, `tr`, and `wc` through pipes, each language here does the counting itself.
+
+![One program, three vocabularies: every version of the FASTA statistics script passes through the same four stages---read arguments, validate input, count and compute, report---and only the names change between bash, R, and Python.](../images/bk_three_languages.svg){#fig-three-languages fig-align="center" width="90%"}
+
+
 ## Positron and RStudio: Your R Environment {#sec-rstudio}
 
 While R can run from the command line, most users work in an integrated development environment (IDE). In this course that is mainly **Positron** (@sec-positron), which is built on the same core as VS Code and adds the panes a data scientist needs; **RStudio** (@sec-rstudio-overview) offers the same panes in a fixed four-pane layout, and everything below applies to it with the pane names noted.
@@ -152,6 +227,11 @@ Positron organizes your workspace into a few key regions (RStudio's equivalents 
 **Variables (right; RStudio: Environment/History, top-right).** Shows the objects you've created in the current session, with their type and size; click a data frame to open it in the **Data Explorer**.
 
 **Plots, Help, and Explorer (right and left; RStudio: Files/Plots/Packages/Help, bottom-right).** The plot viewer, help documentation, and the file browser for the folder you have open.
+
+@fig-ide-four-panes shows the classic four-pane arrangement.
+
+![The four-pane IDE layout: a source editor for scripts (top left in RStudio), the interactive console where code runs (bottom left), the environment pane listing the variables in the current session (top right), and the pane for files, plots, packages, and help (bottom right).](../images/Lec04_img001.png){#fig-ide-four-panes fig-align="center" width="80%"}
+
 
 ::: {.callout-note title="R is not the IDE"}
 `R` is the programming language; Positron, RStudio, or VS Code is the integrated development environment that lets you write and run R (and Python) comfortably. R must be installed first, and the IDE then finds it. If you ever need to, you can run R directly from the shell by typing `R`.
@@ -521,6 +601,10 @@ measurements[-(1:3)]      # All but first three
 measurements[measurements > 5]
 ```
 
+@fig-logical-indexing traces that last expression step by step.
+
+![Logical indexing step by step: the comparison `measurements > 5` produces a logical vector the same length as `measurements`, and placing it inside `[ ]` keeps only the elements where it is `TRUE`. NumPy arrays use the identical idiom.](../images/bk_logical_indexing.svg){#fig-logical-indexing fig-align="center" width="90%"}
+
 ::: {.callout-important}
 R uses 1-based indexing! The first element is `[1]`, not `[0]` as in Python and most other languages (see @sec-r-python-translation).
 :::
@@ -541,6 +625,9 @@ R has several fundamental data types:
 : R data types. The abbreviations are what tibbles (@sec-tibbles) and `glimpse()` print under each column name. {#tbl-data-types}
 
 Numbers are doubles by default: `42` is numeric, and you must write `42L` to get an integer. Integer and double vectors together are called **numeric** vectors.
+
+![The three core atomic vector types---logical, numeric (integer and double), and character---and the augmented types built on top of them: factors are built on integer vectors, while dates and date-times are built on doubles.](../images/Lec05_img001.svg){#fig-r-type-hierarchy fig-align="center" width="85%"}
+
 
 ```{r}
 #| label: types

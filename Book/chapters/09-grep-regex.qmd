@@ -423,6 +423,33 @@ $ for site in GAATTC GGATCC AAGCTT CTCGAG; do
 $ grep -v "^>" genome.fa | tr -d '\n' | grep -oE ".{50}GAATTC.{50}" | head
 ```
 
+### Accounting for Soft-Masking {#sec-genomic-softmask}
+
+The counts above are undercounts. As the callout in @sec-downloading-the-data warned, the UCSC file is soft-masked---repeats are written in lowercase---and `grep` is case-sensitive, so a `GAATTC` that falls inside a masked repeat is invisible to the pattern. The fix, used throughout the Week 3 and 4 slides' version of this walkthrough, is to uppercase the sequence with `tr` before matching:
+
+![Soft-masking hides restriction sites from a case-sensitive search: `grep "GAATTC"` finds the uppercase site but misses the lowercase copy inside a masked repeat, until `tr 'acgt' 'ACGT'` uppercases the sequence first.](../images/bk_soft_masking.svg){#fig-soft-masking fig-align="center" width="85%"}
+
+```bash
+# Count EcoRI sites in masked and unmasked sequence alike
+$ grep -v "^>" genome.fa | tr 'acgt' 'ACGT' | tr -d '\n' | grep -o "GAATTC" | wc -l
+
+# Nucleotide frequencies with masking folded in (expect a lot of N:
+# the first ~5 Mb of chr21 is unassembled)
+$ grep -v "^>" genome.fa | tr 'acgtn' 'ACGTN' | tr -d '\n' | fold -w1 | sort | uniq -c
+```
+
+![Anatomy of the nucleotide-tally pipeline: each stage transforms the stream, from raw FASTA sequence lines to a count of every base.](../images/bk_pipeline_anatomy.svg){#fig-pipeline-anatomy fig-align="center" width="100%"}
+
+The same tool answers the classic first question about any genome, its **GC content**. `tr -cd` (complement, delete) keeps only the listed characters, so two counts and a division are all it takes; `bc` does the floating-point arithmetic the shell cannot (@sec-arithmetic-operations):
+
+```bash
+$ total=$(grep -v "^>" genome.fa | tr -d '\n' | tr -cd 'ACGTacgt' | wc -c)
+$ gc=$(grep -v "^>" genome.fa | tr -d '\n' | tr -cd 'GCgc' | wc -c)
+$ echo "scale=2; 100 * $gc / $total" | bc
+```
+
+Note that counting only `ACGT` characters in the denominator deliberately excludes the `N`s; whether that is what you want depends on the question. A single-pipeline variant of the same calculation appears in @sec-example-pipeline-gc-content.
+
 ### Finding Simple Sequence Repeats {#sec-finding-simple-sequence-repeats}
 
 ```bash
@@ -649,6 +676,20 @@ Actions can also transform values on the way out—`awk` does arithmetic on any 
 $ awk '{ print $1, $2 * 1000 }' lengths.tsv
 ```
 
+### Range Patterns {#sec-awk-ranges}
+
+A pattern can also be a *pair* of patterns separated by a comma. `awk '/start/,/stop/'` switches on at the first line matching the first pattern and off at the next line matching the second, printing everything in between---the same idea as `sed`'s two-address ranges in @sec-printing-and-deleting-lines, but with the full power of awk's patterns. The classic use is pulling one record out of a multi-sequence FASTA file by name:
+
+```bash
+# All lines from the chr21 header up to and including the chr22 header
+$ awk '/^>chr21$/,/^>chr22$/' hg38.fa > chr21_plus_one_line.fa
+
+# Trim the chr22 header that closes the range
+$ awk '/^>chr21$/,/^>chr22$/' hg38.fa | head -n -1 > chr21_from_genome.fa
+```
+
+The range is inclusive at both ends, which is why the second command trims the final line (`head -n -1` prints all but the last line; it is a GNU extension, so on macOS use `sed '$d'` instead). One caution: a range pattern re-opens if the start pattern matches again later in the file, so this idiom is reliable for extracting a single uniquely named record, not for every selection task.
+
 ### Computing Sums and Means with `END` {#sec-awk-end}
 
 Two special patterns run outside the line-by-line loop: `BEGIN` before any input is read and `END` after the last line. `END` is where you report a total that you accumulated along the way. Variables spring into existence at first use and start at zero:
@@ -674,6 +715,16 @@ $ awk 'BEGIN { OFS = "\t" } $3 == "gene" { print $1, $4, $5 }' annotations.gff
 
 # Convert TSV to CSV (rebuilding $0 forces awk to apply the new OFS)
 $ awk -F'\t' -v OFS=',' '{ $1 = $1; print }' measurements.tsv
+```
+
+For fully formatted output, awk also has `printf`, with the C-style format strings you may know from other languages: `%s` for a string, `%d` for an integer, `%f` for a fixed number of decimals. A number between the `%` and the letter sets the field width, a `-` left-justifies, and `.1` limits the decimals, so `%-6s %8.1f` means "the string in a left-justified 6-character field, then the number right-justified in 8 characters with one decimal"---which is how the `gene_means.sh` script of @sec-shell-scripting lines its group means up in neat columns. Unlike `print`, `printf` adds no newline of its own; end the format string with `\n`.
+
+```bash
+# Group means in aligned columns, one decimal place
+$ awk -F',' 'NR > 1 { sum[$2] += $3; n[$2]++ }
+             END { for (t in sum) printf "%-8s %6.2f\n", t, sum[t] / n[t] }' od600_readings.csv
+control    0.44
+IPTG       0.82
 ```
 
 ### A Bioengineering Example: Mean per Treatment {#sec-awk-mean-per-treatment}
@@ -711,6 +762,8 @@ A useful rule of thumb: **grep finds lines, sed edits text, awk works with colum
 | `awk` | Filtering and computing on columns | `awk 'pattern { action }' file` | `awk '$3 == "gene"' genes.gff` |
 
 : Comparing `grep`, `sed`, and `awk` {#tbl-grep-sed-awk}
+
+![Choosing the right tool: `grep` finds lines, `sed` edits text within lines, `awk` filters and computes on columns, and `sort | uniq -c` counts groups --- and the tools chain together naturally in a pipeline.](../images/bk_grep_sed_awk_flow.svg){#fig-grep-sed-awk-flow fig-align="center" width="75%"}
 
 ### Putting It Together {#sec-text-tools-together}
 
@@ -837,4 +890,16 @@ Download a bacterial genome and:
 3. Find the longest homopolymer run
 4. Calculate GC content using only Unix tools
 5. Document your pipeline in a shell script
+
+**Exercise 5: chr21 Self-Check (from the Week 4 slides)**
+
+Using the chr21.fa file from @sec-genomic-processing and only `grep -v`, `tr`, `fold`, `sort`, `uniq`, and `wc`:
+
+1. Count the total number of bases in `chr21.fa`
+2. Calculate the GC content (percent of bases that are G or C)
+3. Find runs of the dinucleotide repeat `AT` five or more units long
+4. What fraction of the chromosome is `N`?
+
+Build each pipeline one command at a time and check the output at every stage. Remember the soft-masking (@sec-genomic-softmask): uppercase first with `tr 'acgt' 'ACGT'`. Hints: for (1) start from the total-bases pipeline in @sec-analyzing-sequence-content; for (2) and (4), `tr -cd 'GCgc'` and `tr -cd 'Nn'` keep only the listed characters, and dividing by the answer to (1) gives the fraction; for (3), `grep -oE "(AT){5,}"` prints each run on its own line.
+
 :::
