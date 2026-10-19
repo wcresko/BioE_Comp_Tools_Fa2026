@@ -139,7 +139,7 @@ python3 summarize.py experiment.csv
 
 ### A Fuller Example: FASTA Statistics in R and Python {#sec-fasta-stats-rpy}
 
-The bash script `fasta_stats.sh` in @sec-complete-script counts the sequences in a FASTA file, totals their length, and reports the GC content. Counting and arithmetic are exactly where bash gets awkward, and the same program is shorter and clearer in either R or Python. Both versions below take the file name as a command-line argument, check that the file exists, and exit with a non-zero status on failure, so a shell pipeline or a Slurm job (@sec-hpc-talapas) can tell whether they succeeded---just like `exit 1` in bash.
+The bash script `fasta_stats.sh` in @sec-complete-script counts the sequences in a FASTA file, totals their length, and reports the N count, GC content, and number of ORF-like stretches. Counting and arithmetic are exactly where bash gets awkward, and the same program is shorter and clearer in either R or Python. Both versions below take the file name as a command-line argument, check that the file exists, and exit with a non-zero status on failure, so a shell pipeline or a Slurm job (@sec-hpc-talapas) can tell whether they succeeded---just like `exit 1` in bash.
 
 ::: {.panel-tabset}
 ### R
@@ -166,8 +166,12 @@ cat("=== FASTA Statistics for", input, "===\n")
 cat("Number of sequences:", sum(headers), "\n")
 cat("Total length:", nchar(seq), "bp\n")
 cat("Average length:", nchar(seq) / sum(headers), "bp\n")
+n_count <- sum(strsplit(seq, "")[[1]] %in% c("N", "n"))
+cat("N bases:", n_count, "\n")
 gc <- sum(strsplit(toupper(seq), "")[[1]] %in% c("G", "C"))
 cat("GC content:", round(100 * gc / nchar(seq), 1), "%\n")
+orfs <- regmatches(seq, gregexpr("ATG([ACGT]{3}){20,}(TAA|TAG|TGA)", seq))[[1]]
+cat("ORF-like stretches:", length(orfs), "\n")
 ```
 
 ```bash
@@ -179,6 +183,7 @@ Rscript fasta_stats.R sequences.fasta
 ```python
 #!/usr/bin/env python3
 # fasta_stats.py - basic statistics for a FASTA file
+import re
 import sys
 from pathlib import Path
 
@@ -198,8 +203,12 @@ print(f"=== FASTA Statistics for {input_file} ===")
 print(f"Number of sequences: {len(headers)}")
 print(f"Total length: {len(seq)} bp")
 print(f"Average length: {len(seq) / len(headers):.1f} bp")
+n_count = seq.count("N") + seq.count("n")
+print(f"N bases: {n_count}")
 gc = seq.upper().count("G") + seq.upper().count("C")
 print(f"GC content: {100 * gc / len(seq):.1f}%")
+orfs = re.findall(r"ATG(?:[ACGT]{3}){20,}(?:TAA|TAG|TGA)", seq)
+print(f"ORF-like stretches: {len(orfs)}")
 ```
 
 ```bash

@@ -859,13 +859,23 @@ total_length() {
 }
 
 gc_content() {
-    local gc=$(grep -v "^>" "$1" | tr -d '\n' | grep -o "[GC]" | wc -l | tr -d ' ')
+    local gc=$(grep -v "^>" "$1" | tr 'acgt' 'ACGT' | tr -d '\n' | grep -o "[GC]" | wc -l | tr -d ' ')
     local total=$(total_length "$1")
     if [ "$total" -gt 0 ]; then
         echo "$((gc * 100 / total))"
     else
         echo "0"
     fi
+}
+
+n_count() {
+    grep -v "^>" "$1" | tr -cd 'Nn' | wc -c | tr -d ' '
+}
+
+orf_like_count() {
+    # uppercase-only pattern: soft-masked (lowercase) repeats cannot match
+    grep -v "^>" "$1" | tr -d '\n' | \
+        grep -oE "ATG([ACGT]{3}){20,}(TAA|TAG|TGA)" | wc -l | tr -d ' '
 }
 
 #-------------------------------------------------------------------------------
@@ -933,6 +943,12 @@ TOTAL_LEN=$(total_length "$INPUT")
 log "Computing GC content..."
 GC_PCT=$(gc_content "$INPUT")
 
+log "Counting N bases..."
+N_BASES=$(n_count "$INPUT")
+
+log "Scanning for ORF-like stretches..."
+ORF_COUNT=$(orf_like_count "$INPUT")
+
 # Calculate average length
 if [ "$SEQ_COUNT" -gt 0 ]; then
     AVG_LEN=$((TOTAL_LEN / SEQ_COUNT))
@@ -953,6 +969,8 @@ fi
     echo "Total length: $TOTAL_LEN bp"
     echo "Average length: $AVG_LEN bp"
     echo "GC content: $GC_PCT%"
+    echo "N bases: $N_BASES"
+    echo "ORF-like stretches: $ORF_COUNT"
 } > "$OUTPUT"
 
 log "Analysis complete. Results written to $OUTPUT"

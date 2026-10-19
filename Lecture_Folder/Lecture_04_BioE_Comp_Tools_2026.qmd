@@ -64,7 +64,7 @@ grep [options] pattern [file...]
 - Full treatment: the L03 slides, [Ch. 9](../book/chapters/09-grep-regex.html) and [App. D](../book/chapters/appendix-D-regex.html)
 :::
 
-## Reminder: `grep` lives in pipelines
+## Reminder: `grep` can live in pipelines
 
 ``` {.bash code-line-numbers="|1-2|4-5|7-8|10-11|13-14"}
 # -c counts matching lines, -w matches whole words only: the mono fish
@@ -74,7 +74,7 @@ grep -cw "mono" data/Stickle_RNAseq.tsv
 grep -w "A" data/Stickle_RNAseq.tsv | cut -f 3 | sort | uniq -c
 
 # -n shows line numbers: where in the file is fish BM7?
-grep -nw "BM7" data/Stickle_RNAseq.tsv | cut -f 1-2
+grep -nw "BM7" data/Stickle_RNAseq.tsv | cut -f 1-4
 
 # -v inverts the match: everything NOT mono (40 conventional fish + 1 header = 41)
 grep -vw "mono" data/Stickle_RNAseq.tsv | wc -l
@@ -194,9 +194,7 @@ awk -F'\t' 'NR > 1 {n++} END {print n, "fish"}' data/Stickle_RNAseq.tsv
 
 ## Streams with `sed`: cleaning the stickleback table
 
-``` {.bash code-line-numbers="|1|3-4|6-8|10-12"}
-cd ~/projects/comptools && mkdir -p results
-
+``` {.bash code-line-numbers="|1-2|4-6|8-10"}
 # Fix the awkward column name once, writing a new file (never edit raw data in place)
 sed '1s/Geno&Micro/Geno_Micro/' data/Stickle_RNAseq.tsv > results/stickle_clean.tsv
 
@@ -273,17 +271,26 @@ wget https://hgdownload.soe.ucsc.edu/goldenPath/hg38/chromosomes/chr21.fa.gz
 - The whole genome lives in the same directory as `hg38.fa.gz` (\~1 GB) - same commands, much longer runs
 
 ::: callout-note
-macOS ships `curl` but not `wget`. Install it once with Homebrew (`brew install wget`); on Ubuntu/WSL it is `sudo apt install wget`.
+- macOS ships `curl` but not `wget`
+
+- Install it once with Homebrew (`brew install wget`)
+
+- Ubuntu/WSL it is `sudo apt install wget`.
 :::
 
 ## Examining Large Files Efficiently
 
 Don't use `cat` on huge files! Use these approaches:
 
-``` {.bash code-line-numbers="|1-3|5-9|11-14|16-18"}
-# Decompress and look at first 10 lines
+``` {.bash code-line-numbers="|1|3-4|6-8|10|12-14|16-17|19|21|23"}
+# Peek at the top and the bottom - and see why not to cat the whole thing
 
 gunzip -c chr21.fa.gz | head -10
+gunzip -c chr21.fa.gz | tail -10
+
+# Combine them: two 50-base lines (~100 characters) from the middle of the file
+gunzip -c chr21.fa.gz | cat          # dumps all ~930,000 lines
+gunzip -c chr21.fa.gz | head -n 460000 | tail -n 2
 
 # Check file size before and after decompression (-k keeps the .gz)
 
@@ -311,15 +318,11 @@ zgrep "^>" chr21.fa.gz | less
 
 Make a smaller working file for testing:
 
-``` {.bash code-line-numbers="|1-3|5-8|10-12"}
+``` {.bash code-line-numbers="|1-4|6-8"}
 # Extract the first ~1 Mb of sequence for testing (50 bases per line)
 
-zcat chr21.fa.gz | head -n 20000 > chr21_subset.fa
-
-# Extract a specific record by name from a multi-sequence FASTA
-# (e.g. from hg38.fa - chr21.fa has only one record)
-
-awk '/^>chr21$/,/^>chr22$/' hg38.fa | head -n -1 > chr21_from_genome.fa
+zcat chr21.fa.gz | head -n 20000 > chr21_subset.fa # if you hadn't unzipped the file
+cat chr21.fa | head -n 20000 > chr21_subset.fa
 
 # Pull out a window of lines from the middle of the chromosome
 
@@ -327,19 +330,27 @@ sed -n '400000,420000p' chr21.fa > region_of_interest.fa
 ```
 
 ::: callout-note
-- Both of today's new tools reappear here: the `sed -n '400000,420000p'` line is the print-a-line-range pattern from the `sed` slide
+- the `sed -n '400000,420000p'` line is the print-a-line-range pattern from the `sed` slide
 
-- the `awk` line uses a *range pattern* (`/start/,/stop/`) that goes beyond today's basics - treat it as a recipe, with the full story in [Ch. 9](../book/chapters/09-grep-regex.html#sec-awk-ranges).
+- `chr21.fa` holds a single record, but when a FASTA holds *many* (the full `hg38.fa`, say), an `awk` range pattern pulls one out by name - `awk '/^>chr21$/,/^>chr22$/' hg38.fa` - a recipe for later, with the full story in [Ch. 9](../book/chapters/09-grep-regex.html#sec-awk-ranges).
 :::
 
 ## Processing FASTA Files with Pipes
 
-Extract specific regions or sequences:
+Every pipeline here starts the same way: drop the header, keep the sequence.
 
-``` {.bash code-line-numbers="|1-3|5-12"}
-# Extract just the sequence (no headers) and count bases
+``` {.bash code-line-numbers="|1-3|5-7|9-11|13-20"}
+# Extract the sequence (no header) - the start of every pipeline on this slide
 
-grep -v "^>" chr21.fa | tr -d '\n' | wc -c
+grep -v "^>" chr21.fa | head -2
+
+# How many N's? tr -cd keeps ONLY the listed characters
+
+grep -v "^>" chr21.fa | tr -cd 'Nn' | wc -c
+
+# Strip the N's (and the newlines), and count the real bases that remain
+
+grep -v "^>" chr21.fa | tr -d 'Nn\n' | wc -c
 
 # Count each type of nucleotide (uppercase first so a == A)
 
@@ -351,16 +362,44 @@ grep -v "^>" chr21.fa | \
   uniq -c
 ```
 
-- `grep -v` inverts the match (excludes lines)
-- `tr -d '\n'` removes newlines
+- `grep -v` inverts the match (drops the `>` header line)
+- `tr -d` **deletes** the listed characters; `tr -cd` deletes the **c**omplement - keeping only them
 - `fold -w1` puts each character on its own line
 - Expect a lot of `N` - the first \~5 Mb of chr21 is unassembled
+
+## Tying it together: finding ORF-like stretches
+
+This time the lowercase masking is *information*, not a nuisance: an **uppercase-only** pattern automatically skips the repeats.
+
+``` {.bash code-line-numbers="|1-4|6-7|9-10|12-13"}
+# ATG, then in-frame codons, then a stop - uppercase only, so masked repeats cannot match
+grep -v "^>" chr21.fa | \
+  tr -d '\n' | \
+  grep -oE "ATG([ACGT]{3}){20,}(TAA|TAG|TGA)" > orf_like.txt
+
+# grep -o wrote one match per line - how many ORF-like stretches?
+wc -l orf_like.txt
+
+# Peek at the start of the first one
+head -1 orf_like.txt | cut -c 1-60
+
+# awk again: how long are the three longest?
+awk '{ print length($0) }' orf_like.txt | sort -n | tail -3
+```
+
+::: callout-note
+- recall the soft-masking: **lowercase** (`acgt`) marks repeat-derived sequence, **UPPERCASE** (`ACGT`) is the non-repeat fraction - which is where genes mostly live
+
+- "ORF-like", not ORFs: the greedy `*` runs to the *last* in-frame stop, we only searched one strand, and real gene-finding needs much more - but 20+ codons of unmasked open frame is a respectable first filter
+
+- compare: earlier we uppercased to *defeat* the masking; here we keep it and let case do the filtering
+:::
 
 ## Finding Patterns in Genomic Data
 
 Search for specific sequences and motifs:
 
-``` {.bash code-line-numbers="|1-7|9-14|16-22"}
+``` {.bash code-line-numbers="|1-7|9-14"}
 # Find all instances of a restriction enzyme site (EcoRI: GAATTC)
 
 grep -v "^>" chr21.fa | \
@@ -375,14 +414,6 @@ grep -v "^>" chr21.fa | \
   tr 'acgt' 'ACGT' | \
   tr -d '\n' | \
   grep -oE ".{100}GAATTC.{100}" > ecori_contexts.txt
-
-# Find all start codons (ATG) and their byte offsets
-
-grep -v "^>" chr21.fa | \
-  tr 'acgt' 'ACGT' | \
-  tr -d '\n' | \
-  grep -b -o "ATG" | \
-  head -20
 ```
 
 ## Combining Downloads with Processing *(if time allows)*
@@ -522,9 +553,9 @@ WINDOW=1000
 # Use them with $ (quote to protect spaces)
 echo "Analyzing $GENOME in windows of $WINDOW bp"
 
-# Capture command output - how many bases are in the subset?
-N_BASES=$(grep -v "^>" "$GENOME" | tr -d '\n' | wc -c)
-echo "$GENOME has $N_BASES bases"
+# Capture command output - the REAL bases (N's stripped, as on the pipes slide)
+N_REAL=$(grep -v "^>" "$GENOME" | tr -d 'Nn\n' | wc -c)
+echo "$GENOME has $N_REAL real bases"
 
 # String operations on file names
 NAME="${GENOME%.fa}"         # strip the suffix -> chr21_subset
@@ -540,12 +571,12 @@ Bash also has arrays (`BASES=(A C G T)`) - you will rarely need them in this cou
 ``` {.bash code-line-numbers="|1|3-9|11-15|17-26"}
 #!/bin/bash
 
-# Numeric comparisons: how big is the chr21 subset?
-N_BASES=$(grep -v "^>" chr21_subset.fa | tr -d '\n' | wc -c)
-if [ "$N_BASES" -gt 500000 ]; then
-    echo "Big subset: $N_BASES bases"
+# Numeric comparisons: how many REAL bases (N's stripped) in the subset?
+N_REAL=$(grep -v "^>" chr21_subset.fa | tr -d 'Nn\n' | wc -c)
+if [ "$N_REAL" -gt 500000 ]; then
+    echo "Mostly real sequence: $N_REAL bases"
 else
-    echo "Small subset: $N_BASES bases"
+    echo "Mostly N's! Only $N_REAL real bases"
 fi
 
 # String comparisons: which kind of data is this?
@@ -684,9 +715,9 @@ for c in 5 6 7; do ./gene_means.sh $c; done    # loop over the first three genes
 
 ## Script the worked example: `fasta_stats.sh`
 
-The same move for the genomic data: the sequence-counting and GC pipelines from the chr21 worked example, wrapped with argument checks into one tool that runs on *any* FASTA file:
+The same move for the genomic data: the counting, N, GC and ORF-finding pipelines from the chr21 worked example, wrapped with argument checks into one tool that runs on *any* FASTA file:
 
-``` {.bash code-line-numbers="|1-3|5-9|11|13-17|19|21-23|25-27|29-31|33-36"}
+``` {.bash code-line-numbers="|1-3|5-9|11|13-17|19|21-23|25-27|29-31|33-35|37-40|42-44"}
 #!/bin/bash
 # Script: fasta_stats.sh
 # Purpose: Calculate basic statistics for FASTA files
@@ -719,10 +750,18 @@ echo "Total length: $TOTAL_LENGTH bp"
 AVG_LENGTH=$((TOTAL_LENGTH / SEQ_COUNT))
 echo "Average length: $AVG_LENGTH bp"
 
+# Count the N's (unassembled gaps)
+N_COUNT=$(grep -v "^>" "$INPUT" | tr -cd 'Nn' | wc -c)
+echo "N bases: $N_COUNT"
+
 # GC content
 GC_COUNT=$(grep -v "^>" "$INPUT" | tr 'acgt' 'ACGT' | tr -d '\n' | grep -o "[GC]" | wc -l)
 GC_PERCENT=$((GC_COUNT * 100 / TOTAL_LENGTH))
 echo "GC content: $GC_PERCENT%"
+
+# ORF-like stretches: uppercase-only pattern - the soft-masking does the filtering
+ORF_COUNT=$(grep -v "^>" "$INPUT" | tr -d '\n' | grep -oE "ATG([ACGT]{3}){20,}(TAA|TAG|TGA)" | wc -l)
+echo "ORF-like stretches: $ORF_COUNT"
 ```
 
 ``` bash

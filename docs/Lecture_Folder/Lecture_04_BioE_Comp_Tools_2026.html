@@ -265,8 +265,8 @@ Bill Cresko
 <li class="fragment">Full treatment: the L03 slides, <a href="../book/chapters/09-grep-regex.html">Ch. 9</a> and <a href="../book/chapters/appendix-D-regex.html">App. D</a></li>
 </ul>
 </section>
-<section id="reminder-grep-lives-in-pipelines" class="slide level2">
-<h2>Reminder: <code>grep</code> lives in pipelines</h2>
+<section id="reminder-grep-can-live-in-pipelines" class="slide level2">
+<h2>Reminder: <code>grep</code> can live in pipelines</h2>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2" data-code-line-numbers="|1-2|4-5|7-8|10-11|13-14"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb2-1"><a></a><span class="co"># -c counts matching lines, -w matches whole words only: the mono fish</span></span>
 <span id="cb2-2"><a></a><span class="fu">grep</span> <span class="at">-cw</span> <span class="st">"mono"</span> data/Stickle_RNAseq.tsv</span>
 <span id="cb2-3"><a></a></span>
@@ -274,7 +274,7 @@ Bill Cresko
 <span id="cb2-5"><a></a><span class="fu">grep</span> <span class="at">-w</span> <span class="st">"A"</span> data/Stickle_RNAseq.tsv <span class="kw">|</span> <span class="fu">cut</span> <span class="at">-f</span> 3 <span class="kw">|</span> <span class="fu">sort</span> <span class="kw">|</span> <span class="fu">uniq</span> <span class="at">-c</span></span>
 <span id="cb2-6"><a></a></span>
 <span id="cb2-7"><a></a><span class="co"># -n shows line numbers: where in the file is fish BM7?</span></span>
-<span id="cb2-8"><a></a><span class="fu">grep</span> <span class="at">-nw</span> <span class="st">"BM7"</span> data/Stickle_RNAseq.tsv <span class="kw">|</span> <span class="fu">cut</span> <span class="at">-f</span> 1-2</span>
+<span id="cb2-8"><a></a><span class="fu">grep</span> <span class="at">-nw</span> <span class="st">"BM7"</span> data/Stickle_RNAseq.tsv <span class="kw">|</span> <span class="fu">cut</span> <span class="at">-f</span> 1-4</span>
 <span id="cb2-9"><a></a></span>
 <span id="cb2-10"><a></a><span class="co"># -v inverts the match: everything NOT mono (40 conventional fish + 1 header = 41)</span></span>
 <span id="cb2-11"><a></a><span class="fu">grep</span> <span class="at">-vw</span> <span class="st">"mono"</span> data/Stickle_RNAseq.tsv <span class="kw">|</span> <span class="fu">wc</span> <span class="at">-l</span></span>
@@ -417,18 +417,16 @@ ACG</code></pre>
 </section>
 <section id="streams-with-sed-cleaning-the-stickleback-table" class="slide level2">
 <h2>Streams with <code>sed</code>: cleaning the stickleback table</h2>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb9" data-code-line-numbers="|1|3-4|6-8|10-12"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb9-1"><a></a><span class="bu">cd</span> ~/projects/comptools <span class="kw">&amp;&amp;</span> <span class="fu">mkdir</span> <span class="at">-p</span> results</span>
-<span id="cb9-2"><a></a></span>
-<span id="cb9-3"><a></a><span class="co"># Fix the awkward column name once, writing a new file (never edit raw data in place)</span></span>
-<span id="cb9-4"><a></a><span class="fu">sed</span> <span class="st">'1s/Geno&amp;Micro/Geno_Micro/'</span> data/Stickle_RNAseq.tsv <span class="op">&gt;</span> results/stickle_clean.tsv</span>
-<span id="cb9-5"><a></a></span>
-<span id="cb9-6"><a></a><span class="co"># Check the new header - and that the raw file is untouched</span></span>
-<span id="cb9-7"><a></a><span class="fu">head</span> <span class="at">-n</span> 1 results/stickle_clean.tsv <span class="kw">|</span> <span class="fu">cut</span> <span class="at">-f</span> 1-4</span>
-<span id="cb9-8"><a></a><span class="fu">head</span> <span class="at">-n</span> 1 data/Stickle_RNAseq.tsv <span class="kw">|</span> <span class="fu">cut</span> <span class="at">-f</span> 1-4</span>
-<span id="cb9-9"><a></a></span>
-<span id="cb9-10"><a></a><span class="co"># A conventional-only copy: delete every mono line (the header survives)</span></span>
-<span id="cb9-11"><a></a><span class="fu">sed</span> <span class="st">'/mono/d'</span> data/Stickle_RNAseq.tsv <span class="op">&gt;</span> results/conventional_only.tsv</span>
-<span id="cb9-12"><a></a><span class="fu">wc</span> <span class="at">-l</span> results/conventional_only.tsv        <span class="co"># 41 = header + 40 fish</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb9" data-code-line-numbers="|1|3-4|6-8|10-12"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb9-1"><a></a><span class="co"># Fix the awkward column name once, writing a new file (never edit raw data in place)</span></span>
+<span id="cb9-2"><a></a><span class="fu">sed</span> <span class="st">'1s/Geno&amp;Micro/Geno_Micro/'</span> data/Stickle_RNAseq.tsv <span class="op">&gt;</span> results/stickle_clean.tsv</span>
+<span id="cb9-3"><a></a></span>
+<span id="cb9-4"><a></a><span class="co"># Check the new header - and that the raw file is untouched</span></span>
+<span id="cb9-5"><a></a><span class="fu">head</span> <span class="at">-n</span> 1 results/stickle_clean.tsv <span class="kw">|</span> <span class="fu">cut</span> <span class="at">-f</span> 1-4</span>
+<span id="cb9-6"><a></a><span class="fu">head</span> <span class="at">-n</span> 1 data/Stickle_RNAseq.tsv <span class="kw">|</span> <span class="fu">cut</span> <span class="at">-f</span> 1-4</span>
+<span id="cb9-7"><a></a></span>
+<span id="cb9-8"><a></a><span class="co"># A conventional-only copy: delete every mono line (the header survives)</span></span>
+<span id="cb9-9"><a></a><span class="fu">sed</span> <span class="st">'/mono/d'</span> data/Stickle_RNAseq.tsv <span class="op">&gt;</span> results/conventional_only.tsv</span>
+<span id="cb9-10"><a></a><span class="fu">wc</span> <span class="at">-l</span> results/conventional_only.tsv        <span class="co"># 41 = header + 40 fish</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="callout callout-tip callout-titled callout-style-default">
 <div class="callout-body">
 <div class="callout-title">
@@ -516,7 +514,11 @@ ACG</code></pre>
 <p><strong>Note</strong></p>
 </div>
 <div class="callout-content">
-<p>macOS ships <code>curl</code> but not <code>wget</code>. Install it once with Homebrew (<code>brew install wget</code>); on Ubuntu/WSL it is <code>sudo apt install wget</code>.</p>
+<ul>
+<li><p>macOS ships <code>curl</code> but not <code>wget</code></p></li>
+<li><p>Install it once with Homebrew (<code>brew install wget</code>)</p></li>
+<li><p>Ubuntu/WSL it is <code>sudo apt install wget</code>.</p></li>
+</ul>
 </div>
 </div>
 </div>
@@ -524,24 +526,30 @@ ACG</code></pre>
 <section id="examining-large-files-efficiently" class="slide level2">
 <h2>Examining Large Files Efficiently</h2>
 <p>Don’t use <code>cat</code> on huge files! Use these approaches:</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb12" data-code-line-numbers="|1-3|5-9|11-14|16-18"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb12-1"><a></a><span class="co"># Decompress and look at first 10 lines</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb12" data-code-line-numbers="|1-3|4|5|7-9|11-15|17-20|22-24"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb12-1"><a></a><span class="co"># Peek at the top and the bottom - and see why not to cat the whole thing</span></span>
 <span id="cb12-2"><a></a></span>
 <span id="cb12-3"><a></a><span class="fu">gunzip</span> <span class="at">-c</span> chr21.fa.gz <span class="kw">|</span> <span class="fu">head</span> <span class="at">-10</span></span>
-<span id="cb12-4"><a></a></span>
-<span id="cb12-5"><a></a><span class="co"># Check file size before and after decompression (-k keeps the .gz)</span></span>
+<span id="cb12-4"><a></a><span class="fu">gunzip</span> <span class="at">-c</span> chr21.fa.gz <span class="kw">|</span> <span class="fu">tail</span> <span class="at">-10</span></span>
+<span id="cb12-5"><a></a><span class="fu">gunzip</span> <span class="at">-c</span> chr21.fa.gz <span class="kw">|</span> <span class="fu">cat</span>          <span class="co"># dumps all ~930,000 lines - the one to avoid</span></span>
 <span id="cb12-6"><a></a></span>
-<span id="cb12-7"><a></a><span class="fu">ls</span> <span class="at">-lh</span> chr21.fa.gz</span>
-<span id="cb12-8"><a></a><span class="fu">gunzip</span> <span class="at">-k</span> chr21.fa.gz</span>
-<span id="cb12-9"><a></a><span class="fu">ls</span> <span class="at">-lh</span> chr21.fa</span>
+<span id="cb12-7"><a></a><span class="co"># Combine them: two 50-base lines (~100 characters) from the middle of the file</span></span>
+<span id="cb12-8"><a></a></span>
+<span id="cb12-9"><a></a><span class="fu">gunzip</span> <span class="at">-c</span> chr21.fa.gz <span class="kw">|</span> <span class="fu">head</span> <span class="at">-n</span> 460000 <span class="kw">|</span> <span class="fu">tail</span> <span class="at">-n</span> 2</span>
 <span id="cb12-10"><a></a></span>
-<span id="cb12-11"><a></a><span class="co"># Count sequences in FASTA file (lines starting with &gt;)</span></span>
-<span id="cb12-12"><a></a><span class="co"># grep can't read gzip data directly - use zgrep (or zcat | grep)</span></span>
-<span id="cb12-13"><a></a></span>
-<span id="cb12-14"><a></a><span class="fu">zgrep</span> <span class="st">"^&gt;"</span> chr21.fa.gz <span class="kw">|</span> <span class="fu">wc</span> <span class="at">-l</span></span>
-<span id="cb12-15"><a></a></span>
-<span id="cb12-16"><a></a><span class="co"># View sequence headers only</span></span>
-<span id="cb12-17"><a></a></span>
-<span id="cb12-18"><a></a><span class="fu">zgrep</span> <span class="st">"^&gt;"</span> chr21.fa.gz <span class="kw">|</span> <span class="fu">less</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb12-11"><a></a><span class="co"># Check file size before and after decompression (-k keeps the .gz)</span></span>
+<span id="cb12-12"><a></a></span>
+<span id="cb12-13"><a></a><span class="fu">ls</span> <span class="at">-lh</span> chr21.fa.gz</span>
+<span id="cb12-14"><a></a><span class="fu">gunzip</span> <span class="at">-k</span> chr21.fa.gz</span>
+<span id="cb12-15"><a></a><span class="fu">ls</span> <span class="at">-lh</span> chr21.fa</span>
+<span id="cb12-16"><a></a></span>
+<span id="cb12-17"><a></a><span class="co"># Count sequences in FASTA file (lines starting with &gt;)</span></span>
+<span id="cb12-18"><a></a><span class="co"># grep can't read gzip data directly - use zgrep (or zcat | grep)</span></span>
+<span id="cb12-19"><a></a></span>
+<span id="cb12-20"><a></a><span class="fu">zgrep</span> <span class="st">"^&gt;"</span> chr21.fa.gz <span class="kw">|</span> <span class="fu">wc</span> <span class="at">-l</span></span>
+<span id="cb12-21"><a></a></span>
+<span id="cb12-22"><a></a><span class="co"># View sequence headers only</span></span>
+<span id="cb12-23"><a></a></span>
+<span id="cb12-24"><a></a><span class="fu">zgrep</span> <span class="st">"^&gt;"</span> chr21.fa.gz <span class="kw">|</span> <span class="fu">less</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="callout callout-note callout-titled callout-style-default">
 <div class="callout-body">
 <div class="callout-title">

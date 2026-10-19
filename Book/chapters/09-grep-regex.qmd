@@ -450,6 +450,24 @@ $ echo "scale=2; 100 * $gc / $total" | bc
 
 Note that counting only `ACGT` characters in the denominator deliberately excludes the `N`s; whether that is what you want depends on the question. A single-pipeline variant of the same calculation appears in @sec-example-pipeline-gc-content.
 
+### Letting the Masking Work for You: ORF-like Stretches {#sec-orf-like}
+
+So far the soft-masking has been an obstacle to defeat with `tr`. It can also be *information*: lowercase marks repeat-derived sequence, and the uppercase remainder is the non-repeat fraction where genes mostly live. An **uppercase-only** pattern therefore searches only the unmasked sequence---no `tr` needed, because a single lowercase base breaks any match:
+
+```bash
+# ATG, then 20 or more in-frame codons, then a stop - masked repeats cannot match
+$ grep -v "^>" genome.fa | tr -d '\n' | \
+    grep -oE "ATG([ACGT]{3}){20,}(TAA|TAG|TGA)" > orf_like.txt
+
+# grep -o writes one match per line, so counting the hits is just counting lines
+$ wc -l orf_like.txt
+
+# and awk ranks the three longest
+$ awk '{ print length($0) }' orf_like.txt | sort -n | tail -3
+```
+
+Call these "ORF-like stretches," not ORFs. The greedy `*` runs each match to the *last* in-frame stop before the pattern breaks, only one strand is searched, and real gene finding must handle splicing, codon bias, and much more. But twenty-plus codons of open reading frame in unmasked sequence is a respectable first filter---and the deeper lesson is worth keeping: sometimes annotation already embedded in the data (here, the case of the letters) can stand in for computation you would otherwise have to do yourself. The Week 4 slides run exactly this pipeline on chromosome 21.
+
 ### Finding Simple Sequence Repeats {#sec-finding-simple-sequence-repeats}
 
 ```bash

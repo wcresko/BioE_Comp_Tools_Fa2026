@@ -266,8 +266,12 @@ Bill Cresko
 <span id="cb1-21"><a></a><span class="fu">cat</span>(<span class="st">"Number of sequences:"</span>, <span class="fu">sum</span>(headers), <span class="st">"</span><span class="sc">\n</span><span class="st">"</span>)</span>
 <span id="cb1-22"><a></a><span class="fu">cat</span>(<span class="st">"Total length:"</span>, <span class="fu">nchar</span>(seq), <span class="st">"bp</span><span class="sc">\n</span><span class="st">"</span>)</span>
 <span id="cb1-23"><a></a><span class="fu">cat</span>(<span class="st">"Average length:"</span>, <span class="fu">nchar</span>(seq) <span class="sc">/</span> <span class="fu">sum</span>(headers), <span class="st">"bp</span><span class="sc">\n</span><span class="st">"</span>)</span>
-<span id="cb1-24"><a></a>gc <span class="ot">&lt;-</span> <span class="fu">sum</span>(<span class="fu">strsplit</span>(<span class="fu">toupper</span>(seq), <span class="st">""</span>)[[<span class="dv">1</span>]] <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"G"</span>, <span class="st">"C"</span>))</span>
-<span id="cb1-25"><a></a><span class="fu">cat</span>(<span class="st">"GC content:"</span>, <span class="fu">round</span>(<span class="dv">100</span> <span class="sc">*</span> gc <span class="sc">/</span> <span class="fu">nchar</span>(seq), <span class="dv">1</span>), <span class="st">"%</span><span class="sc">\n</span><span class="st">"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb1-24"><a></a>n_count <span class="ot">&lt;-</span> <span class="fu">sum</span>(<span class="fu">strsplit</span>(seq, <span class="st">""</span>)[[<span class="dv">1</span>]] <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"N"</span>, <span class="st">"n"</span>))</span>
+<span id="cb1-25"><a></a><span class="fu">cat</span>(<span class="st">"N bases:"</span>, n_count, <span class="st">"</span><span class="sc">\n</span><span class="st">"</span>)</span>
+<span id="cb1-26"><a></a>gc <span class="ot">&lt;-</span> <span class="fu">sum</span>(<span class="fu">strsplit</span>(<span class="fu">toupper</span>(seq), <span class="st">""</span>)[[<span class="dv">1</span>]] <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"G"</span>, <span class="st">"C"</span>))</span>
+<span id="cb1-27"><a></a><span class="fu">cat</span>(<span class="st">"GC content:"</span>, <span class="fu">round</span>(<span class="dv">100</span> <span class="sc">*</span> gc <span class="sc">/</span> <span class="fu">nchar</span>(seq), <span class="dv">1</span>), <span class="st">"%</span><span class="sc">\n</span><span class="st">"</span>)</span>
+<span id="cb1-28"><a></a>orfs <span class="ot">&lt;-</span> <span class="fu">regmatches</span>(seq, <span class="fu">gregexpr</span>(<span class="st">"ATG([ACGT]{3}){20,}(TAA|TAG|TGA)"</span>, seq))[[<span class="dv">1</span>]]</span>
+<span id="cb1-29"><a></a><span class="fu">cat</span>(<span class="st">"ORF-like stretches:"</span>, <span class="fu">length</span>(orfs), <span class="st">"</span><span class="sc">\n</span><span class="st">"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 </div>
 <div id="tabset-1-2">
@@ -276,27 +280,32 @@ Bill Cresko
 <span id="cb2-2"><a></a><span class="co"># Script: fasta_stats.py</span></span>
 <span id="cb2-3"><a></a><span class="co"># Purpose: Calculate basic statistics for a FASTA file</span></span>
 <span id="cb2-4"><a></a></span>
-<span id="cb2-5"><a></a><span class="im">import</span> sys</span>
-<span id="cb2-6"><a></a><span class="im">from</span> pathlib <span class="im">import</span> Path</span>
-<span id="cb2-7"><a></a></span>
-<span id="cb2-8"><a></a><span class="cf">if</span> <span class="bu">len</span>(sys.argv) <span class="op">!=</span> <span class="dv">2</span>:                       <span class="co"># sys.argv[0] is the script name, like $0</span></span>
-<span id="cb2-9"><a></a>    <span class="bu">print</span>(<span class="st">"Usage: python3 fasta_stats.py sequences.fasta"</span>)</span>
-<span id="cb2-10"><a></a>    sys.exit(<span class="dv">1</span>)</span>
-<span id="cb2-11"><a></a>input_file <span class="op">=</span> Path(sys.argv[<span class="dv">1</span>])</span>
-<span id="cb2-12"><a></a><span class="cf">if</span> <span class="kw">not</span> input_file.is_file():</span>
-<span id="cb2-13"><a></a>    <span class="bu">print</span>(<span class="ss">f"Error: File </span><span class="sc">{</span>input_file<span class="sc">}</span><span class="ss"> not found!"</span>)</span>
-<span id="cb2-14"><a></a>    sys.exit(<span class="dv">1</span>)</span>
-<span id="cb2-15"><a></a></span>
-<span id="cb2-16"><a></a>lines   <span class="op">=</span> input_file.read_text().splitlines()</span>
-<span id="cb2-17"><a></a>headers <span class="op">=</span> [line <span class="cf">for</span> line <span class="kw">in</span> lines <span class="cf">if</span> line.startswith(<span class="st">"&gt;"</span>)]</span>
-<span id="cb2-18"><a></a>seq     <span class="op">=</span> <span class="st">""</span>.join(line <span class="cf">for</span> line <span class="kw">in</span> lines <span class="cf">if</span> <span class="kw">not</span> line.startswith(<span class="st">"&gt;"</span>))</span>
-<span id="cb2-19"><a></a></span>
-<span id="cb2-20"><a></a><span class="bu">print</span>(<span class="ss">f"=== FASTA Statistics for </span><span class="sc">{</span>input_file<span class="sc">}</span><span class="ss"> ==="</span>)</span>
-<span id="cb2-21"><a></a><span class="bu">print</span>(<span class="ss">f"Number of sequences: </span><span class="sc">{</span><span class="bu">len</span>(headers)<span class="sc">}</span><span class="ss">"</span>)</span>
-<span id="cb2-22"><a></a><span class="bu">print</span>(<span class="ss">f"Total length: </span><span class="sc">{</span><span class="bu">len</span>(seq)<span class="sc">}</span><span class="ss"> bp"</span>)</span>
-<span id="cb2-23"><a></a><span class="bu">print</span>(<span class="ss">f"Average length: </span><span class="sc">{</span><span class="bu">len</span>(seq) <span class="op">/</span> <span class="bu">len</span>(headers)<span class="sc">:.1f}</span><span class="ss"> bp"</span>)</span>
-<span id="cb2-24"><a></a>gc <span class="op">=</span> seq.upper().count(<span class="st">"G"</span>) <span class="op">+</span> seq.upper().count(<span class="st">"C"</span>)</span>
-<span id="cb2-25"><a></a><span class="bu">print</span>(<span class="ss">f"GC content: </span><span class="sc">{</span><span class="dv">100</span> <span class="op">*</span> gc <span class="op">/</span> <span class="bu">len</span>(seq)<span class="sc">:.1f}</span><span class="ss">%"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb2-5"><a></a><span class="im">import</span> re</span>
+<span id="cb2-6"><a></a><span class="im">import</span> sys</span>
+<span id="cb2-7"><a></a><span class="im">from</span> pathlib <span class="im">import</span> Path</span>
+<span id="cb2-8"><a></a></span>
+<span id="cb2-9"><a></a><span class="cf">if</span> <span class="bu">len</span>(sys.argv) <span class="op">!=</span> <span class="dv">2</span>:                       <span class="co"># sys.argv[0] is the script name, like $0</span></span>
+<span id="cb2-10"><a></a>    <span class="bu">print</span>(<span class="st">"Usage: python3 fasta_stats.py sequences.fasta"</span>)</span>
+<span id="cb2-11"><a></a>    sys.exit(<span class="dv">1</span>)</span>
+<span id="cb2-12"><a></a>input_file <span class="op">=</span> Path(sys.argv[<span class="dv">1</span>])</span>
+<span id="cb2-13"><a></a><span class="cf">if</span> <span class="kw">not</span> input_file.is_file():</span>
+<span id="cb2-14"><a></a>    <span class="bu">print</span>(<span class="ss">f"Error: File </span><span class="sc">{</span>input_file<span class="sc">}</span><span class="ss"> not found!"</span>)</span>
+<span id="cb2-15"><a></a>    sys.exit(<span class="dv">1</span>)</span>
+<span id="cb2-16"><a></a></span>
+<span id="cb2-17"><a></a>lines   <span class="op">=</span> input_file.read_text().splitlines()</span>
+<span id="cb2-18"><a></a>headers <span class="op">=</span> [line <span class="cf">for</span> line <span class="kw">in</span> lines <span class="cf">if</span> line.startswith(<span class="st">"&gt;"</span>)]</span>
+<span id="cb2-19"><a></a>seq     <span class="op">=</span> <span class="st">""</span>.join(line <span class="cf">for</span> line <span class="kw">in</span> lines <span class="cf">if</span> <span class="kw">not</span> line.startswith(<span class="st">"&gt;"</span>))</span>
+<span id="cb2-20"><a></a></span>
+<span id="cb2-21"><a></a><span class="bu">print</span>(<span class="ss">f"=== FASTA Statistics for </span><span class="sc">{</span>input_file<span class="sc">}</span><span class="ss"> ==="</span>)</span>
+<span id="cb2-22"><a></a><span class="bu">print</span>(<span class="ss">f"Number of sequences: </span><span class="sc">{</span><span class="bu">len</span>(headers)<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb2-23"><a></a><span class="bu">print</span>(<span class="ss">f"Total length: </span><span class="sc">{</span><span class="bu">len</span>(seq)<span class="sc">}</span><span class="ss"> bp"</span>)</span>
+<span id="cb2-24"><a></a><span class="bu">print</span>(<span class="ss">f"Average length: </span><span class="sc">{</span><span class="bu">len</span>(seq) <span class="op">/</span> <span class="bu">len</span>(headers)<span class="sc">:.1f}</span><span class="ss"> bp"</span>)</span>
+<span id="cb2-25"><a></a>n_count <span class="op">=</span> seq.count(<span class="st">"N"</span>) <span class="op">+</span> seq.count(<span class="st">"n"</span>)</span>
+<span id="cb2-26"><a></a><span class="bu">print</span>(<span class="ss">f"N bases: </span><span class="sc">{</span>n_count<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb2-27"><a></a>gc <span class="op">=</span> seq.upper().count(<span class="st">"G"</span>) <span class="op">+</span> seq.upper().count(<span class="st">"C"</span>)</span>
+<span id="cb2-28"><a></a><span class="bu">print</span>(<span class="ss">f"GC content: </span><span class="sc">{</span><span class="dv">100</span> <span class="op">*</span> gc <span class="op">/</span> <span class="bu">len</span>(seq)<span class="sc">:.1f}</span><span class="ss">%"</span>)</span>
+<span id="cb2-29"><a></a>orfs <span class="op">=</span> re.findall(<span class="vs">r"ATG</span>(?:<span class="pp">[ACGT]</span><span class="op">{3}</span>)<span class="op">{20,}</span>(?:<span class="vs">TAA</span><span class="cf">|</span><span class="vs">TAG</span><span class="cf">|</span><span class="vs">TGA</span>)<span class="vs">"</span>, seq)</span>
+<span id="cb2-30"><a></a><span class="bu">print</span>(<span class="ss">f"ORF-like stretches: </span><span class="sc">{</span><span class="bu">len</span>(orfs)<span class="sc">}</span><span class="ss">"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 </div>
 </div>
@@ -402,9 +411,9 @@ Bill Cresko
 <img data-src="../images/Lec04_img001.png" class="quarto-figure quarto-figure-center r-stretch" style="width:70.0%"><table class="caption-top">
 <colgroup>
 <col style="width: 22%">
-<col style="width: 15%">
-<col style="width: 27%">
-<col style="width: 33%">
+<col style="width: 22%">
+<col style="width: 25%">
+<col style="width: 30%">
 </colgroup>
 <thead>
 <tr class="header">
@@ -1087,9 +1096,9 @@ Figure&nbsp;1: Each value of x plotted against its square (y = x^2)
 <h2>Types of data in Python</h2>
 <table class="caption-top">
 <colgroup>
-<col style="width: 19%">
-<col style="width: 45%">
-<col style="width: 34%">
+<col style="width: 23%">
+<col style="width: 43%">
+<col style="width: 33%">
 </colgroup>
 <thead>
 <tr class="header">

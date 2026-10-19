@@ -1566,7 +1566,7 @@ Tip
 <span id="cb34-61"><a href="#cb34-61"></a><span class="kw">}</span></span>
 <span id="cb34-62"><a href="#cb34-62"></a></span>
 <span id="cb34-63"><a href="#cb34-63"></a><span class="fu">gc_content()</span> <span class="kw">{</span></span>
-<span id="cb34-64"><a href="#cb34-64"></a>    <span class="bu">local</span> <span class="va">gc</span><span class="op">=</span><span class="va">$(</span><span class="fu">grep</span> <span class="at">-v</span> <span class="st">"^&gt;"</span> <span class="st">"</span><span class="va">$1</span><span class="st">"</span> <span class="kw">|</span> <span class="fu">tr</span> <span class="at">-d</span> <span class="st">'\n'</span> <span class="kw">|</span> <span class="fu">grep</span> <span class="at">-o</span> <span class="st">"[GC]"</span> <span class="kw">|</span> <span class="fu">wc</span> <span class="at">-l</span> <span class="kw">|</span> <span class="fu">tr</span> <span class="at">-d</span> <span class="st">' '</span><span class="va">)</span></span>
+<span id="cb34-64"><a href="#cb34-64"></a>    <span class="bu">local</span> <span class="va">gc</span><span class="op">=</span><span class="va">$(</span><span class="fu">grep</span> <span class="at">-v</span> <span class="st">"^&gt;"</span> <span class="st">"</span><span class="va">$1</span><span class="st">"</span> <span class="kw">|</span> <span class="fu">tr</span> <span class="st">'acgt'</span> <span class="st">'ACGT'</span> <span class="kw">|</span> <span class="fu">tr</span> <span class="at">-d</span> <span class="st">'\n'</span> <span class="kw">|</span> <span class="fu">grep</span> <span class="at">-o</span> <span class="st">"[GC]"</span> <span class="kw">|</span> <span class="fu">wc</span> <span class="at">-l</span> <span class="kw">|</span> <span class="fu">tr</span> <span class="at">-d</span> <span class="st">' '</span><span class="va">)</span></span>
 <span id="cb34-65"><a href="#cb34-65"></a>    <span class="bu">local</span> <span class="va">total</span><span class="op">=</span><span class="va">$(</span><span class="ex">total_length</span> <span class="st">"</span><span class="va">$1</span><span class="st">"</span><span class="va">)</span></span>
 <span id="cb34-66"><a href="#cb34-66"></a>    <span class="cf">if</span> <span class="bu">[</span> <span class="st">"</span><span class="va">$total</span><span class="st">"</span> <span class="ot">-gt</span> 0 <span class="bu">]</span><span class="kw">;</span> <span class="cf">then</span></span>
 <span id="cb34-67"><a href="#cb34-67"></a>        <span class="bu">echo</span> <span class="st">"</span><span class="va">$((gc</span> <span class="op">*</span> <span class="dv">100</span> <span class="op">/</span> <span class="va">total))</span><span class="st">"</span></span>
@@ -1575,94 +1575,112 @@ Tip
 <span id="cb34-70"><a href="#cb34-70"></a>    <span class="cf">fi</span></span>
 <span id="cb34-71"><a href="#cb34-71"></a><span class="kw">}</span></span>
 <span id="cb34-72"><a href="#cb34-72"></a></span>
-<span id="cb34-73"><a href="#cb34-73"></a><span class="co">#-------------------------------------------------------------------------------</span></span>
-<span id="cb34-74"><a href="#cb34-74"></a><span class="co"># Parse Arguments</span></span>
-<span id="cb34-75"><a href="#cb34-75"></a><span class="co">#-------------------------------------------------------------------------------</span></span>
+<span id="cb34-73"><a href="#cb34-73"></a><span class="fu">n_count()</span> <span class="kw">{</span></span>
+<span id="cb34-74"><a href="#cb34-74"></a>    <span class="fu">grep</span> <span class="at">-v</span> <span class="st">"^&gt;"</span> <span class="st">"</span><span class="va">$1</span><span class="st">"</span> <span class="kw">|</span> <span class="fu">tr</span> <span class="at">-cd</span> <span class="st">'Nn'</span> <span class="kw">|</span> <span class="fu">wc</span> <span class="at">-c</span> <span class="kw">|</span> <span class="fu">tr</span> <span class="at">-d</span> <span class="st">' '</span></span>
+<span id="cb34-75"><a href="#cb34-75"></a><span class="kw">}</span></span>
 <span id="cb34-76"><a href="#cb34-76"></a></span>
-<span id="cb34-77"><a href="#cb34-77"></a><span class="va">QUIET</span><span class="op">=</span>false</span>
-<span id="cb34-78"><a href="#cb34-78"></a></span>
-<span id="cb34-79"><a href="#cb34-79"></a><span class="cf">while</span> <span class="kw">[[</span> <span class="va">$#</span> <span class="ot">-gt</span> 0 <span class="kw">]];</span> <span class="cf">do</span></span>
-<span id="cb34-80"><a href="#cb34-80"></a>    <span class="cf">case</span> <span class="va">$1</span> <span class="kw">in</span></span>
-<span id="cb34-81"><a href="#cb34-81"></a>        <span class="ss">-h</span><span class="kw">|</span><span class="ss">--help</span><span class="kw">)</span></span>
-<span id="cb34-82"><a href="#cb34-82"></a>            <span class="ex">usage</span></span>
-<span id="cb34-83"><a href="#cb34-83"></a>            <span class="bu">exit</span> 0</span>
-<span id="cb34-84"><a href="#cb34-84"></a>            <span class="cf">;;</span></span>
-<span id="cb34-85"><a href="#cb34-85"></a>        <span class="ss">-v</span><span class="kw">|</span><span class="ss">--version</span><span class="kw">)</span></span>
-<span id="cb34-86"><a href="#cb34-86"></a>            <span class="bu">echo</span> <span class="st">"</span><span class="va">$(</span><span class="fu">basename</span> <span class="st">"</span><span class="va">$0</span><span class="st">"</span><span class="va">)</span><span class="st"> version </span><span class="va">$VERSION</span><span class="st">"</span></span>
-<span id="cb34-87"><a href="#cb34-87"></a>            <span class="bu">exit</span> 0</span>
-<span id="cb34-88"><a href="#cb34-88"></a>            <span class="cf">;;</span></span>
-<span id="cb34-89"><a href="#cb34-89"></a>        <span class="ss">-q</span><span class="kw">|</span><span class="ss">--quiet</span><span class="kw">)</span></span>
-<span id="cb34-90"><a href="#cb34-90"></a>            <span class="va">QUIET</span><span class="op">=</span>true</span>
-<span id="cb34-91"><a href="#cb34-91"></a>            <span class="bu">shift</span></span>
-<span id="cb34-92"><a href="#cb34-92"></a>            <span class="cf">;;</span></span>
-<span id="cb34-93"><a href="#cb34-93"></a>        <span class="ss">-</span><span class="pp">*</span><span class="kw">)</span></span>
-<span id="cb34-94"><a href="#cb34-94"></a>            <span class="ex">error</span> <span class="st">"Unknown option: </span><span class="va">$1</span><span class="st">"</span></span>
-<span id="cb34-95"><a href="#cb34-95"></a>            <span class="cf">;;</span></span>
-<span id="cb34-96"><a href="#cb34-96"></a>        <span class="pp">*</span><span class="kw">)</span></span>
-<span id="cb34-97"><a href="#cb34-97"></a>            <span class="cf">break</span></span>
+<span id="cb34-77"><a href="#cb34-77"></a><span class="fu">orf_like_count()</span> <span class="kw">{</span></span>
+<span id="cb34-78"><a href="#cb34-78"></a>    <span class="co"># uppercase-only pattern: soft-masked (lowercase) repeats cannot match</span></span>
+<span id="cb34-79"><a href="#cb34-79"></a>    <span class="fu">grep</span> <span class="at">-v</span> <span class="st">"^&gt;"</span> <span class="st">"</span><span class="va">$1</span><span class="st">"</span> <span class="kw">|</span> <span class="fu">tr</span> <span class="at">-d</span> <span class="st">'\n'</span> <span class="kw">|</span> <span class="dt">\</span></span>
+<span id="cb34-80"><a href="#cb34-80"></a>        <span class="fu">grep</span> <span class="at">-oE</span> <span class="st">"ATG([ACGT]{3}){20,}(TAA|TAG|TGA)"</span> <span class="kw">|</span> <span class="fu">wc</span> <span class="at">-l</span> <span class="kw">|</span> <span class="fu">tr</span> <span class="at">-d</span> <span class="st">' '</span></span>
+<span id="cb34-81"><a href="#cb34-81"></a><span class="kw">}</span></span>
+<span id="cb34-82"><a href="#cb34-82"></a></span>
+<span id="cb34-83"><a href="#cb34-83"></a><span class="co">#-------------------------------------------------------------------------------</span></span>
+<span id="cb34-84"><a href="#cb34-84"></a><span class="co"># Parse Arguments</span></span>
+<span id="cb34-85"><a href="#cb34-85"></a><span class="co">#-------------------------------------------------------------------------------</span></span>
+<span id="cb34-86"><a href="#cb34-86"></a></span>
+<span id="cb34-87"><a href="#cb34-87"></a><span class="va">QUIET</span><span class="op">=</span>false</span>
+<span id="cb34-88"><a href="#cb34-88"></a></span>
+<span id="cb34-89"><a href="#cb34-89"></a><span class="cf">while</span> <span class="kw">[[</span> <span class="va">$#</span> <span class="ot">-gt</span> 0 <span class="kw">]];</span> <span class="cf">do</span></span>
+<span id="cb34-90"><a href="#cb34-90"></a>    <span class="cf">case</span> <span class="va">$1</span> <span class="kw">in</span></span>
+<span id="cb34-91"><a href="#cb34-91"></a>        <span class="ss">-h</span><span class="kw">|</span><span class="ss">--help</span><span class="kw">)</span></span>
+<span id="cb34-92"><a href="#cb34-92"></a>            <span class="ex">usage</span></span>
+<span id="cb34-93"><a href="#cb34-93"></a>            <span class="bu">exit</span> 0</span>
+<span id="cb34-94"><a href="#cb34-94"></a>            <span class="cf">;;</span></span>
+<span id="cb34-95"><a href="#cb34-95"></a>        <span class="ss">-v</span><span class="kw">|</span><span class="ss">--version</span><span class="kw">)</span></span>
+<span id="cb34-96"><a href="#cb34-96"></a>            <span class="bu">echo</span> <span class="st">"</span><span class="va">$(</span><span class="fu">basename</span> <span class="st">"</span><span class="va">$0</span><span class="st">"</span><span class="va">)</span><span class="st"> version </span><span class="va">$VERSION</span><span class="st">"</span></span>
+<span id="cb34-97"><a href="#cb34-97"></a>            <span class="bu">exit</span> 0</span>
 <span id="cb34-98"><a href="#cb34-98"></a>            <span class="cf">;;</span></span>
-<span id="cb34-99"><a href="#cb34-99"></a>    <span class="cf">esac</span></span>
-<span id="cb34-100"><a href="#cb34-100"></a><span class="cf">done</span></span>
-<span id="cb34-101"><a href="#cb34-101"></a></span>
-<span id="cb34-102"><a href="#cb34-102"></a><span class="co"># Check required arguments</span></span>
-<span id="cb34-103"><a href="#cb34-103"></a><span class="cf">if</span> <span class="bu">[</span> <span class="va">$#</span> <span class="ot">-lt</span> 1 <span class="bu">]</span><span class="kw">;</span> <span class="cf">then</span></span>
-<span id="cb34-104"><a href="#cb34-104"></a>    <span class="ex">usage</span> <span class="op">&gt;&amp;</span><span class="dv">2</span></span>
-<span id="cb34-105"><a href="#cb34-105"></a>    <span class="bu">exit</span> 1</span>
-<span id="cb34-106"><a href="#cb34-106"></a><span class="cf">fi</span></span>
-<span id="cb34-107"><a href="#cb34-107"></a></span>
-<span id="cb34-108"><a href="#cb34-108"></a><span class="va">INPUT</span><span class="op">=</span><span class="st">"</span><span class="va">$1</span><span class="st">"</span></span>
-<span id="cb34-109"><a href="#cb34-109"></a><span class="va">OUTPUT</span><span class="op">=</span><span class="st">"</span><span class="va">${2</span><span class="op">:-</span>/dev/stdout<span class="va">}</span><span class="st">"</span></span>
-<span id="cb34-110"><a href="#cb34-110"></a></span>
-<span id="cb34-111"><a href="#cb34-111"></a><span class="co">#-------------------------------------------------------------------------------</span></span>
-<span id="cb34-112"><a href="#cb34-112"></a><span class="co"># Validate Input</span></span>
-<span id="cb34-113"><a href="#cb34-113"></a><span class="co">#-------------------------------------------------------------------------------</span></span>
-<span id="cb34-114"><a href="#cb34-114"></a></span>
-<span id="cb34-115"><a href="#cb34-115"></a><span class="cf">if</span> <span class="bu">[</span> <span class="ot">!</span> <span class="ot">-f</span> <span class="st">"</span><span class="va">$INPUT</span><span class="st">"</span> <span class="bu">]</span><span class="kw">;</span> <span class="cf">then</span></span>
-<span id="cb34-116"><a href="#cb34-116"></a>    <span class="ex">error</span> <span class="st">"Input file not found: </span><span class="va">$INPUT</span><span class="st">"</span></span>
-<span id="cb34-117"><a href="#cb34-117"></a><span class="cf">fi</span></span>
-<span id="cb34-118"><a href="#cb34-118"></a></span>
-<span id="cb34-119"><a href="#cb34-119"></a><span class="cf">if</span> <span class="bu">[</span> <span class="ot">!</span> <span class="ot">-r</span> <span class="st">"</span><span class="va">$INPUT</span><span class="st">"</span> <span class="bu">]</span><span class="kw">;</span> <span class="cf">then</span></span>
-<span id="cb34-120"><a href="#cb34-120"></a>    <span class="ex">error</span> <span class="st">"Cannot read input file: </span><span class="va">$INPUT</span><span class="st">"</span></span>
-<span id="cb34-121"><a href="#cb34-121"></a><span class="cf">fi</span></span>
-<span id="cb34-122"><a href="#cb34-122"></a></span>
+<span id="cb34-99"><a href="#cb34-99"></a>        <span class="ss">-q</span><span class="kw">|</span><span class="ss">--quiet</span><span class="kw">)</span></span>
+<span id="cb34-100"><a href="#cb34-100"></a>            <span class="va">QUIET</span><span class="op">=</span>true</span>
+<span id="cb34-101"><a href="#cb34-101"></a>            <span class="bu">shift</span></span>
+<span id="cb34-102"><a href="#cb34-102"></a>            <span class="cf">;;</span></span>
+<span id="cb34-103"><a href="#cb34-103"></a>        <span class="ss">-</span><span class="pp">*</span><span class="kw">)</span></span>
+<span id="cb34-104"><a href="#cb34-104"></a>            <span class="ex">error</span> <span class="st">"Unknown option: </span><span class="va">$1</span><span class="st">"</span></span>
+<span id="cb34-105"><a href="#cb34-105"></a>            <span class="cf">;;</span></span>
+<span id="cb34-106"><a href="#cb34-106"></a>        <span class="pp">*</span><span class="kw">)</span></span>
+<span id="cb34-107"><a href="#cb34-107"></a>            <span class="cf">break</span></span>
+<span id="cb34-108"><a href="#cb34-108"></a>            <span class="cf">;;</span></span>
+<span id="cb34-109"><a href="#cb34-109"></a>    <span class="cf">esac</span></span>
+<span id="cb34-110"><a href="#cb34-110"></a><span class="cf">done</span></span>
+<span id="cb34-111"><a href="#cb34-111"></a></span>
+<span id="cb34-112"><a href="#cb34-112"></a><span class="co"># Check required arguments</span></span>
+<span id="cb34-113"><a href="#cb34-113"></a><span class="cf">if</span> <span class="bu">[</span> <span class="va">$#</span> <span class="ot">-lt</span> 1 <span class="bu">]</span><span class="kw">;</span> <span class="cf">then</span></span>
+<span id="cb34-114"><a href="#cb34-114"></a>    <span class="ex">usage</span> <span class="op">&gt;&amp;</span><span class="dv">2</span></span>
+<span id="cb34-115"><a href="#cb34-115"></a>    <span class="bu">exit</span> 1</span>
+<span id="cb34-116"><a href="#cb34-116"></a><span class="cf">fi</span></span>
+<span id="cb34-117"><a href="#cb34-117"></a></span>
+<span id="cb34-118"><a href="#cb34-118"></a><span class="va">INPUT</span><span class="op">=</span><span class="st">"</span><span class="va">$1</span><span class="st">"</span></span>
+<span id="cb34-119"><a href="#cb34-119"></a><span class="va">OUTPUT</span><span class="op">=</span><span class="st">"</span><span class="va">${2</span><span class="op">:-</span>/dev/stdout<span class="va">}</span><span class="st">"</span></span>
+<span id="cb34-120"><a href="#cb34-120"></a></span>
+<span id="cb34-121"><a href="#cb34-121"></a><span class="co">#-------------------------------------------------------------------------------</span></span>
+<span id="cb34-122"><a href="#cb34-122"></a><span class="co"># Validate Input</span></span>
 <span id="cb34-123"><a href="#cb34-123"></a><span class="co">#-------------------------------------------------------------------------------</span></span>
-<span id="cb34-124"><a href="#cb34-124"></a><span class="co"># Main Analysis</span></span>
-<span id="cb34-125"><a href="#cb34-125"></a><span class="co">#-------------------------------------------------------------------------------</span></span>
-<span id="cb34-126"><a href="#cb34-126"></a></span>
-<span id="cb34-127"><a href="#cb34-127"></a><span class="ex">log</span> <span class="st">"Starting analysis of </span><span class="va">$INPUT</span><span class="st">"</span></span>
+<span id="cb34-124"><a href="#cb34-124"></a></span>
+<span id="cb34-125"><a href="#cb34-125"></a><span class="cf">if</span> <span class="bu">[</span> <span class="ot">!</span> <span class="ot">-f</span> <span class="st">"</span><span class="va">$INPUT</span><span class="st">"</span> <span class="bu">]</span><span class="kw">;</span> <span class="cf">then</span></span>
+<span id="cb34-126"><a href="#cb34-126"></a>    <span class="ex">error</span> <span class="st">"Input file not found: </span><span class="va">$INPUT</span><span class="st">"</span></span>
+<span id="cb34-127"><a href="#cb34-127"></a><span class="cf">fi</span></span>
 <span id="cb34-128"><a href="#cb34-128"></a></span>
-<span id="cb34-129"><a href="#cb34-129"></a><span class="ex">log</span> <span class="st">"Counting sequences..."</span></span>
-<span id="cb34-130"><a href="#cb34-130"></a><span class="va">SEQ_COUNT</span><span class="op">=</span><span class="va">$(</span><span class="ex">count_sequences</span> <span class="st">"</span><span class="va">$INPUT</span><span class="st">"</span><span class="va">)</span></span>
-<span id="cb34-131"><a href="#cb34-131"></a></span>
-<span id="cb34-132"><a href="#cb34-132"></a><span class="ex">log</span> <span class="st">"Calculating total length..."</span></span>
-<span id="cb34-133"><a href="#cb34-133"></a><span class="va">TOTAL_LEN</span><span class="op">=</span><span class="va">$(</span><span class="ex">total_length</span> <span class="st">"</span><span class="va">$INPUT</span><span class="st">"</span><span class="va">)</span></span>
-<span id="cb34-134"><a href="#cb34-134"></a></span>
-<span id="cb34-135"><a href="#cb34-135"></a><span class="ex">log</span> <span class="st">"Computing GC content..."</span></span>
-<span id="cb34-136"><a href="#cb34-136"></a><span class="va">GC_PCT</span><span class="op">=</span><span class="va">$(</span><span class="ex">gc_content</span> <span class="st">"</span><span class="va">$INPUT</span><span class="st">"</span><span class="va">)</span></span>
-<span id="cb34-137"><a href="#cb34-137"></a></span>
-<span id="cb34-138"><a href="#cb34-138"></a><span class="co"># Calculate average length</span></span>
-<span id="cb34-139"><a href="#cb34-139"></a><span class="cf">if</span> <span class="bu">[</span> <span class="st">"</span><span class="va">$SEQ_COUNT</span><span class="st">"</span> <span class="ot">-gt</span> 0 <span class="bu">]</span><span class="kw">;</span> <span class="cf">then</span></span>
-<span id="cb34-140"><a href="#cb34-140"></a>    <span class="va">AVG_LEN</span><span class="op">=</span><span class="va">$((TOTAL_LEN</span> <span class="op">/</span> <span class="va">SEQ_COUNT))</span></span>
-<span id="cb34-141"><a href="#cb34-141"></a><span class="cf">else</span></span>
-<span id="cb34-142"><a href="#cb34-142"></a>    <span class="va">AVG_LEN</span><span class="op">=</span>0</span>
-<span id="cb34-143"><a href="#cb34-143"></a><span class="cf">fi</span></span>
+<span id="cb34-129"><a href="#cb34-129"></a><span class="cf">if</span> <span class="bu">[</span> <span class="ot">!</span> <span class="ot">-r</span> <span class="st">"</span><span class="va">$INPUT</span><span class="st">"</span> <span class="bu">]</span><span class="kw">;</span> <span class="cf">then</span></span>
+<span id="cb34-130"><a href="#cb34-130"></a>    <span class="ex">error</span> <span class="st">"Cannot read input file: </span><span class="va">$INPUT</span><span class="st">"</span></span>
+<span id="cb34-131"><a href="#cb34-131"></a><span class="cf">fi</span></span>
+<span id="cb34-132"><a href="#cb34-132"></a></span>
+<span id="cb34-133"><a href="#cb34-133"></a><span class="co">#-------------------------------------------------------------------------------</span></span>
+<span id="cb34-134"><a href="#cb34-134"></a><span class="co"># Main Analysis</span></span>
+<span id="cb34-135"><a href="#cb34-135"></a><span class="co">#-------------------------------------------------------------------------------</span></span>
+<span id="cb34-136"><a href="#cb34-136"></a></span>
+<span id="cb34-137"><a href="#cb34-137"></a><span class="ex">log</span> <span class="st">"Starting analysis of </span><span class="va">$INPUT</span><span class="st">"</span></span>
+<span id="cb34-138"><a href="#cb34-138"></a></span>
+<span id="cb34-139"><a href="#cb34-139"></a><span class="ex">log</span> <span class="st">"Counting sequences..."</span></span>
+<span id="cb34-140"><a href="#cb34-140"></a><span class="va">SEQ_COUNT</span><span class="op">=</span><span class="va">$(</span><span class="ex">count_sequences</span> <span class="st">"</span><span class="va">$INPUT</span><span class="st">"</span><span class="va">)</span></span>
+<span id="cb34-141"><a href="#cb34-141"></a></span>
+<span id="cb34-142"><a href="#cb34-142"></a><span class="ex">log</span> <span class="st">"Calculating total length..."</span></span>
+<span id="cb34-143"><a href="#cb34-143"></a><span class="va">TOTAL_LEN</span><span class="op">=</span><span class="va">$(</span><span class="ex">total_length</span> <span class="st">"</span><span class="va">$INPUT</span><span class="st">"</span><span class="va">)</span></span>
 <span id="cb34-144"><a href="#cb34-144"></a></span>
-<span id="cb34-145"><a href="#cb34-145"></a><span class="co">#-------------------------------------------------------------------------------</span></span>
-<span id="cb34-146"><a href="#cb34-146"></a><span class="co"># Output Results</span></span>
-<span id="cb34-147"><a href="#cb34-147"></a><span class="co">#-------------------------------------------------------------------------------</span></span>
-<span id="cb34-148"><a href="#cb34-148"></a></span>
-<span id="cb34-149"><a href="#cb34-149"></a><span class="kw">{</span></span>
-<span id="cb34-150"><a href="#cb34-150"></a>    <span class="bu">echo</span> <span class="st">"=== FASTA Statistics ==="</span></span>
-<span id="cb34-151"><a href="#cb34-151"></a>    <span class="bu">echo</span> <span class="st">"File: </span><span class="va">$INPUT</span><span class="st">"</span></span>
-<span id="cb34-152"><a href="#cb34-152"></a>    <span class="bu">echo</span> <span class="st">"Date: </span><span class="va">$(</span><span class="fu">date</span> <span class="st">'+%Y-%m-%d %H:%M:%S'</span><span class="va">)</span><span class="st">"</span></span>
-<span id="cb34-153"><a href="#cb34-153"></a>    <span class="bu">echo</span> <span class="st">""</span></span>
-<span id="cb34-154"><a href="#cb34-154"></a>    <span class="bu">echo</span> <span class="st">"Number of sequences: </span><span class="va">$SEQ_COUNT</span><span class="st">"</span></span>
-<span id="cb34-155"><a href="#cb34-155"></a>    <span class="bu">echo</span> <span class="st">"Total length: </span><span class="va">$TOTAL_LEN</span><span class="st"> bp"</span></span>
-<span id="cb34-156"><a href="#cb34-156"></a>    <span class="bu">echo</span> <span class="st">"Average length: </span><span class="va">$AVG_LEN</span><span class="st"> bp"</span></span>
-<span id="cb34-157"><a href="#cb34-157"></a>    <span class="bu">echo</span> <span class="st">"GC content: </span><span class="va">$GC_PCT</span><span class="st">%"</span></span>
-<span id="cb34-158"><a href="#cb34-158"></a><span class="kw">}</span> <span class="op">&gt;</span> <span class="st">"</span><span class="va">$OUTPUT</span><span class="st">"</span></span>
-<span id="cb34-159"><a href="#cb34-159"></a></span>
-<span id="cb34-160"><a href="#cb34-160"></a><span class="ex">log</span> <span class="st">"Analysis complete. Results written to </span><span class="va">$OUTPUT</span><span class="st">"</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb34-145"><a href="#cb34-145"></a><span class="ex">log</span> <span class="st">"Computing GC content..."</span></span>
+<span id="cb34-146"><a href="#cb34-146"></a><span class="va">GC_PCT</span><span class="op">=</span><span class="va">$(</span><span class="ex">gc_content</span> <span class="st">"</span><span class="va">$INPUT</span><span class="st">"</span><span class="va">)</span></span>
+<span id="cb34-147"><a href="#cb34-147"></a></span>
+<span id="cb34-148"><a href="#cb34-148"></a><span class="ex">log</span> <span class="st">"Counting N bases..."</span></span>
+<span id="cb34-149"><a href="#cb34-149"></a><span class="va">N_BASES</span><span class="op">=</span><span class="va">$(</span><span class="ex">n_count</span> <span class="st">"</span><span class="va">$INPUT</span><span class="st">"</span><span class="va">)</span></span>
+<span id="cb34-150"><a href="#cb34-150"></a></span>
+<span id="cb34-151"><a href="#cb34-151"></a><span class="ex">log</span> <span class="st">"Scanning for ORF-like stretches..."</span></span>
+<span id="cb34-152"><a href="#cb34-152"></a><span class="va">ORF_COUNT</span><span class="op">=</span><span class="va">$(</span><span class="ex">orf_like_count</span> <span class="st">"</span><span class="va">$INPUT</span><span class="st">"</span><span class="va">)</span></span>
+<span id="cb34-153"><a href="#cb34-153"></a></span>
+<span id="cb34-154"><a href="#cb34-154"></a><span class="co"># Calculate average length</span></span>
+<span id="cb34-155"><a href="#cb34-155"></a><span class="cf">if</span> <span class="bu">[</span> <span class="st">"</span><span class="va">$SEQ_COUNT</span><span class="st">"</span> <span class="ot">-gt</span> 0 <span class="bu">]</span><span class="kw">;</span> <span class="cf">then</span></span>
+<span id="cb34-156"><a href="#cb34-156"></a>    <span class="va">AVG_LEN</span><span class="op">=</span><span class="va">$((TOTAL_LEN</span> <span class="op">/</span> <span class="va">SEQ_COUNT))</span></span>
+<span id="cb34-157"><a href="#cb34-157"></a><span class="cf">else</span></span>
+<span id="cb34-158"><a href="#cb34-158"></a>    <span class="va">AVG_LEN</span><span class="op">=</span>0</span>
+<span id="cb34-159"><a href="#cb34-159"></a><span class="cf">fi</span></span>
+<span id="cb34-160"><a href="#cb34-160"></a></span>
+<span id="cb34-161"><a href="#cb34-161"></a><span class="co">#-------------------------------------------------------------------------------</span></span>
+<span id="cb34-162"><a href="#cb34-162"></a><span class="co"># Output Results</span></span>
+<span id="cb34-163"><a href="#cb34-163"></a><span class="co">#-------------------------------------------------------------------------------</span></span>
+<span id="cb34-164"><a href="#cb34-164"></a></span>
+<span id="cb34-165"><a href="#cb34-165"></a><span class="kw">{</span></span>
+<span id="cb34-166"><a href="#cb34-166"></a>    <span class="bu">echo</span> <span class="st">"=== FASTA Statistics ==="</span></span>
+<span id="cb34-167"><a href="#cb34-167"></a>    <span class="bu">echo</span> <span class="st">"File: </span><span class="va">$INPUT</span><span class="st">"</span></span>
+<span id="cb34-168"><a href="#cb34-168"></a>    <span class="bu">echo</span> <span class="st">"Date: </span><span class="va">$(</span><span class="fu">date</span> <span class="st">'+%Y-%m-%d %H:%M:%S'</span><span class="va">)</span><span class="st">"</span></span>
+<span id="cb34-169"><a href="#cb34-169"></a>    <span class="bu">echo</span> <span class="st">""</span></span>
+<span id="cb34-170"><a href="#cb34-170"></a>    <span class="bu">echo</span> <span class="st">"Number of sequences: </span><span class="va">$SEQ_COUNT</span><span class="st">"</span></span>
+<span id="cb34-171"><a href="#cb34-171"></a>    <span class="bu">echo</span> <span class="st">"Total length: </span><span class="va">$TOTAL_LEN</span><span class="st"> bp"</span></span>
+<span id="cb34-172"><a href="#cb34-172"></a>    <span class="bu">echo</span> <span class="st">"Average length: </span><span class="va">$AVG_LEN</span><span class="st"> bp"</span></span>
+<span id="cb34-173"><a href="#cb34-173"></a>    <span class="bu">echo</span> <span class="st">"GC content: </span><span class="va">$GC_PCT</span><span class="st">%"</span></span>
+<span id="cb34-174"><a href="#cb34-174"></a>    <span class="bu">echo</span> <span class="st">"N bases: </span><span class="va">$N_BASES</span><span class="st">"</span></span>
+<span id="cb34-175"><a href="#cb34-175"></a>    <span class="bu">echo</span> <span class="st">"ORF-like stretches: </span><span class="va">$ORF_COUNT</span><span class="st">"</span></span>
+<span id="cb34-176"><a href="#cb34-176"></a><span class="kw">}</span> <span class="op">&gt;</span> <span class="st">"</span><span class="va">$OUTPUT</span><span class="st">"</span></span>
+<span id="cb34-177"><a href="#cb34-177"></a></span>
+<span id="cb34-178"><a href="#cb34-178"></a><span class="ex">log</span> <span class="st">"Analysis complete. Results written to </span><span class="va">$OUTPUT</span><span class="st">"</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </section><section id="sec-scripting-best-practices" class="level2" data-number="10.13"><h2 data-number="10.13" class="anchored" data-anchor-id="sec-scripting-best-practices">
 <span class="header-section-number">10.13</span> Best Practices Summary</h2>
 <div class="callout callout-style-default callout-tip callout-titled" title="Shell Scripting Best Practices">

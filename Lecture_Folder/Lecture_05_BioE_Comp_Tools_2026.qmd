@@ -25,17 +25,17 @@ set.seed(2026)
 
 The course book goes deeper on everything in this lecture. Read before or after class:
 
--   [Ch. 11: R Programming Fundamentals](../book/chapters/11-r-programming.html)
--   [Ch. 12: Python Programming Fundamentals](../book/chapters/12-python-programming.html)
--   *Reference:* [App. E: R Command Reference](../book/chapters/appendix-E-r.html) · [App. F: Python Quick Reference](../book/chapters/appendix-F-python.html)
+- [Ch. 11: R Programming Fundamentals](../book/chapters/11-r-programming.html)
+- [Ch. 12: Python Programming Fundamentals](../book/chapters/12-python-programming.html)
+- *Reference:* [App. E: R Command Reference](../book/chapters/appendix-E-r.html) · [App. F: Python Quick Reference](../book/chapters/appendix-F-python.html)
 
 ## Goals for today
 
--   Warm-up: L04's `fasta_stats.sh` rewritten in R and in Python
--   Using Positron, Visual Studio Code and RStudio as script editors
--   Why R *and* Python - same ideas, different syntax
--   Scripts, variables, arithmetic, strings and vectors
--   Types of data and getting help
+- Warm-up: L04's `fasta_stats.sh` rewritten in R and in Python
+- Using Positron, Visual Studio Code and RStudio as script editors
+- Why R *and* Python - same ideas, different syntax
+- Scripts, variables, arithmetic, strings and vectors
+- Types of data and getting help
 
 # Warm-up - last week's script in R and Python
 
@@ -74,8 +74,12 @@ cat("=== FASTA Statistics for", input, "===\n")
 cat("Number of sequences:", sum(headers), "\n")
 cat("Total length:", nchar(seq), "bp\n")
 cat("Average length:", nchar(seq) / sum(headers), "bp\n")
+n_count <- sum(strsplit(seq, "")[[1]] %in% c("N", "n"))
+cat("N bases:", n_count, "\n")
 gc <- sum(strsplit(toupper(seq), "")[[1]] %in% c("G", "C"))
 cat("GC content:", round(100 * gc / nchar(seq), 1), "%\n")
+orfs <- regmatches(seq, gregexpr("ATG([ACGT]{3}){20,}(TAA|TAG|TGA)", seq))[[1]]
+cat("ORF-like stretches:", length(orfs), "\n")
 ```
 
 ### Python
@@ -89,6 +93,7 @@ cat("GC content:", round(100 * gc / nchar(seq), 1), "%\n")
 # Script: fasta_stats.py
 # Purpose: Calculate basic statistics for a FASTA file
 
+import re
 import sys
 from pathlib import Path
 
@@ -108,8 +113,12 @@ print(f"=== FASTA Statistics for {input_file} ===")
 print(f"Number of sequences: {len(headers)}")
 print(f"Total length: {len(seq)} bp")
 print(f"Average length: {len(seq) / len(headers):.1f} bp")
+n_count = seq.count("N") + seq.count("n")
+print(f"N bases: {n_count}")
 gc = seq.upper().count("G") + seq.upper().count("C")
 print(f"GC content: {100 * gc / len(seq):.1f}%")
+orfs = re.findall(r"ATG(?:[ACGT]{3}){20,}(?:TAA|TAG|TGA)", seq)
+print(f"ORF-like stretches: {len(orfs)}")
 ```
 :::
 
@@ -128,8 +137,8 @@ Rscript -e 'mean(c(1, 2, 3))'               # one-liner without a file
 R                                           # interactive console; quit with q()
 ```
 
--   `Rscript` runs the file top to bottom and prints only what you `cat()` or `print()`
--   In **Positron** / **VS Code** / **RStudio**: open the `.R` file and press `Cmd/Ctrl-Enter` to send lines to the console
+- `Rscript` runs the file top to bottom and prints only what you `cat()` or `print()`
+- In **Positron** / **VS Code** / **RStudio**: open the `.R` file and press `Cmd/Ctrl-Enter` to send lines to the console
 
 ### Python
 
@@ -143,9 +152,9 @@ python3 -c 'print(sum([1, 2, 3]) / 3)'      # one-liner without a file
 python3                                     # interactive REPL; quit with exit() or Ctrl-D
 ```
 
--   `python3 script.py` runs the file top to bottom and prints only what you `print()`
--   In **VS Code** / **Positron**: open the `.py` file and press `Cmd/Ctrl-Enter`, or use the Run button
--   Keep project packages in a virtual environment: `python3 -m venv .venv && source .venv/bin/activate` (environments get their full story in L07)
+- `python3 script.py` runs the file top to bottom and prints only what you `print()`
+- In **VS Code** / **Positron**: open the `.py` file and press `Cmd/Ctrl-Enter`, or use the Run button
+- Keep project packages in a virtual environment: `python3 -m venv .venv && source .venv/bin/activate` (environments get their full story in L07)
 :::
 
 ::: callout-tip
@@ -156,27 +165,27 @@ Both scripts return an **exit status** (`quit(status = 1)` / `sys.exit(1)`), so 
 
 ## Why use `R`?
 
--   Good general scripting tool for statistics and mathematics
--   Powerful and flexible and free
--   Runs on all computer platforms
--   New enhancements coming out all the time
--   Superb data management & graphics capabilities
--   Reproducibility - can keep your scripts to see exactly what was done
--   You can write your own functions
--   Lots of online help available
--   Can use a nice IDE such as `Positron` or `RStudio`
--   Can embed your `R` analyses in dynamic, polished files using `Quarto Markdown`
--   Quarto Markdown can be reused for websites, papers, books, presentations...
+- Good general scripting tool for statistics and mathematics
+- Powerful and flexible and free
+- Runs on all computer platforms
+- New enhancements coming out all the time
+- Superb data management & graphics capabilities
+- Reproducibility - can keep your scripts to see exactly what was done
+- You can write your own functions
+- Lots of online help available
+- Can use a nice IDE such as `Positron` or `RStudio`
+- Can embed your `R` analyses in dynamic, polished files using `Quarto Markdown`
+- Quarto Markdown can be reused for websites, papers, books, presentations...
 
 ## Why use `Python`?
 
--   A general-purpose language that is also excellent for data analysis (`pandas`, `numpy`, `matplotlib`, `scipy`)
--   The language of machine learning, image analysis and instrument control (`scikit-learn`, `PyTorch`, `scikit-image`)
--   Free, open source, runs everywhere - including Talapas (`module load python3`)
--   Huge ecosystem: `pip install` gives you access to \>500,000 packages on PyPI; `conda` adds compiled scientific tools
--   Readable syntax; indentation *is* the structure of the code
--   Runs as scripts (`python3 script.py`), interactively (REPL / IPython), in **Jupyter notebooks**, and in **Quarto** `{python}` chunks
--   Same IDEs: **Positron** and **VS Code** run R and Python side by side
+- A general-purpose language that is also excellent for data analysis (`pandas`, `numpy`, `matplotlib`, `scipy`)
+- The language of machine learning, image analysis and instrument control (`scikit-learn`, `PyTorch`, `scikit-image`)
+- Free, open source, runs everywhere - including Talapas (`module load python3`)
+- Huge ecosystem: `pip install` gives you access to \>500,000 packages on PyPI; `conda` adds compiled scientific tools
+- Readable syntax; indentation *is* the structure of the code
+- Runs as scripts (`python3 script.py`), interactively (REPL / IPython), in **Jupyter notebooks**, and in **Quarto** `{python}` chunks
+- Same IDEs: **Positron** and **VS Code** run R and Python side by side
 
 ::: callout-tip
 You do not have to choose. Most computational biologists use **both**: R for statistics and figures, Python for pipelines, images and machine learning. This lecture shows every idea in both languages - use the tabs.
@@ -186,12 +195,12 @@ You do not have to choose. Most computational biologists use **both**: R for sta
 
 ![](../images/Lec04_img001.png){fig-align="center" width="70%"}
 
-| Pane                     | RStudio location | Positron equivalent            | Purpose                               |
-|:-------------------------|:-----------------|:-------------------------------|:--------------------------------------|
-| **Code editor**          | Top-left         | Editor tabs                    | Write/edit scripts and `.qmd` files   |
-| **Console**              | Bottom-left      | Console (R *or* Python)        | Interactive session; run one line     |
-| **Environment**          | Top-right        | Variables                      | Objects you have created, history     |
-| **Files / Plots / Help** | Bottom-right     | Explorer, Plots, Help, Data Explorer | Navigate files, view plots, read docs |
+| Pane | RStudio location | Positron equivalent | Purpose |
+|:---------------|:---------------|:-----------------|:---------------------|
+| **Code editor** | Top-left | Editor tabs | Write/edit scripts and `.qmd` files |
+| **Console** | Bottom-left | Console (R *or* Python) | Interactive session; run one line |
+| **Environment** | Top-right | Variables | Objects you have created, history |
+| **Files / Plots / Help** | Bottom-right | Explorer, Plots, Help, Data Explorer | Navigate files, view plots, read docs |
 
 ::: callout-tip
 `R` and `Python` are the languages; **RStudio**, **Positron** and **VS Code** are the IDEs you write them in. Write code in the *editor* so it is saved, and send lines to the *console* with `Cmd/Ctrl-Enter`. Customize the RStudio layout in Tools → Global Options → Pane Layout; in Positron, drag panes or use View → Appearance.
@@ -200,7 +209,7 @@ You do not have to choose. Most computational biologists use **both**: R for sta
 ## R vs Python: same ideas, different syntax
 
 | Idea | R | Python |
-|---|---|---|
+|------------------------|------------------------|------------------------|
 | Assignment | `x <- 5` | `x = 5` |
 | Counting starts at | **1**: `x[1]` is the first element | **0**: `x[0]` is the first element |
 | Last element | `x[length(x)]`; `x[-1]` *drops* the first | `x[-1]` *is* the last |
@@ -226,10 +235,10 @@ You do not have to choose. Most computational biologists use **both**: R for sta
 
 ## BASICS of `R` and `Python`
 
--   Commands can be submitted through the terminal, console or scripts (R: `R` / `Rscript`; Python: `python3` / `python3 script.py`)
--   Notice on these slides I'm evaluating the code chunks and showing output
--   Also notice that both languages follow the normal priority of mathematical evaluation
--   Careful: exponent is `^` in R but `**` in Python (`^` in Python is bitwise XOR!)
+- Commands can be submitted through the terminal, console or scripts (R: `R` / `Rscript`; Python: `python3` / `python3 script.py`)
+- Notice on these slides I'm evaluating the code chunks and showing output
+- Also notice that both languages follow the normal priority of mathematical evaluation
+- Careful: exponent is `^` in R but `**` in Python (`^` in Python is bitwise XOR!)
 
 ::: panel-tabset
 ### R
@@ -273,7 +282,7 @@ You do not have to choose. Most computational biologists use **both**: R for sta
 
 ## Assigning Variables
 
--   Assign values with `<-` in R and `=` in Python; names must begin with a letter (or `_` in Python) - and both languages are **case sensitive**
+- Assign values with `<-` in R and `=` in Python; names must begin with a letter (or `_` in Python) - and both languages are **case sensitive**
 
 ::: panel-tabset
 ### R
@@ -330,8 +339,8 @@ These do not work either (`SyntaxError`)
 
 ## Arithmetic operations on functions
 
--   Arithmetic operations can be performed easily on functions as well as numbers.
--   Try the following, and then your own.
+- Arithmetic operations can be performed easily on functions as well as numbers.
+- Try the following, and then your own.
 
 ::: panel-tabset
 ### R
@@ -361,10 +370,10 @@ math.log(x)
 ```
 :::
 
--   Note that the last of these - `log` - is a built in function of `R`, and therefore the object of the function needs to be put in parentheses
--   In Python, `log` lives in the `math` module, so we `import math` once and call `math.log(x)` (`numpy` has `np.log()` for whole arrays)
--   These parentheses will be important, and we'll come back to them later when we add arguments after the object in the parentheses\
--   The outcome of calculations can be assigned to new variables as well, and the results can be checked using the 'print' command
+- Note that the last of these - `log` - is a built in function of `R`, and therefore the object of the function needs to be put in parentheses
+- In Python, `log` lives in the `math` module, so we `import math` once and call `math.log(x)` (`numpy` has `np.log()` for whole arrays)
+- These parentheses will be important, and we'll come back to them later when we add arguments after the object in the parentheses\
+- The outcome of calculations can be assigned to new variables as well, and the results can be checked using the 'print' command
 
 ## Arithmetic operations on functions
 
@@ -404,11 +413,11 @@ print(z)
 
 ## STRINGS
 
--   Variables and operations can be performed on characters as well
--   Note that characters need to be set off by quotation marks to differentiate them from numbers
--   The `c` stands for `concatenate`; in Python square brackets `[ ]` build a **list**
--   Note that we are using the same variable names as we did previously, which means that we're overwriting our previous assignment
--   A good rule of thumb is to use new names for each variable, and make them short but still descriptive
+- Variables and operations can be performed on characters as well
+- Note that characters need to be set off by quotation marks to differentiate them from numbers
+- The `c` stands for `concatenate`; in Python square brackets `[ ]` build a **list**
+- Note that we are using the same variable names as we did previously, which means that we're overwriting our previous assignment
+- A good rule of thumb is to use new names for each variable, and make them short but still descriptive
 
 ## STRINGS
 
@@ -451,11 +460,11 @@ print(x + " " + y)      # + joins strings
 
 ## VECTORS
 
--   In general `R` thinks in terms of vectors (a list of characters, factors or numerical values).
--   It will benefit any `R` user to try to write programs with that in mind, as it will simplify most things.
--   Vectors can be assigned directly using the `c()` function and then entering the exact values.
--   Python has **lists** (`[ ]`) for any collection, and **numpy arrays** (`np.array()`) when you want R-style vector math
--   `x^2` squares every element of an R vector; in Python that only works on a numpy array - a list needs a loop or a *list comprehension*
+- In general `R` thinks in terms of vectors (a list of characters, factors or numerical values).
+- It will benefit any `R` user to try to write programs with that in mind, as it will simplify most things.
+- Vectors can be assigned directly using the `c()` function and then entering the exact values.
+- Python has **lists** (`[ ]`) for any collection, and **numpy arrays** (`np.array()`) when you want R-style vector math
+- `x^2` squares every element of an R vector; in Python that only works on a numpy array - a list needs a loop or a *list comprehension*
 
 ## VECTORS
 
@@ -544,9 +553,9 @@ plt.show()
 
 ## Basic Statistics
 
--   Many functions exist to operate on vectors.
--   Combine these with your previous variable to see what happens.
--   Also, try to find other functions (e.g. standard deviation).
+- Many functions exist to operate on vectors.
+- Combine these with your previous variable to see what happens.
+- Also, try to find other functions (e.g. standard deviation).
 
 ::: panel-tabset
 ### R
@@ -587,10 +596,10 @@ random.choices(list(x), k=len(x))   # sample with replacement
 ```
 :::
 
--   Notice that the last function (`sample`) has an argument (`replace=T`); in Python `random.choices()` samples *with* replacement and `k=` sets how many
--   Python functions come in two flavours: `np.median(x)` (function) and `x.mean()` (a **method** attached to the array)
--   Arguments simply modify or direct the function in some way
--   There are many arguments for each function, some of which are defaults
+- Notice that the last function (`sample`) has an argument (`replace=T`); in Python `random.choices()` samples *with* replacement and `k=` sets how many
+- Python functions come in two flavours: `np.median(x)` (function) and `x.mean()` (a **method** attached to the array)
+- Arguments simply modify or direct the function in some way
+- There are many arguments for each function, some of which are defaults
 
 ::: callout-tip
 In Weeks 6-7 you will run exactly these functions on real columns of our stickleback table (`data/Stickle_RNAseq.tsv`).
@@ -598,11 +607,11 @@ In Weeks 6-7 you will run exactly these functions on real columns of our stickle
 
 ## Getting Help
 
--   Getting Help on any function is very easy - just type a question mark and the name of the function (R), or `help(function)` in Python.
--   There are functions for just about anything within `R` and it is easy enough to write your own functions if none already exist to do what you want to do.
--   In general, function calls have a simple structure: a function name, a set of parentheses and an optional set of parameters to send to the function.
--   Help pages exist for all functions that, at a minimum, explain what parameters exist for the function.\
--   Help can be accessed a few ways - try them :
+- Getting Help on any function is very easy - just type a question mark and the name of the function (R), or `help(function)` in Python.
+- There are functions for just about anything within `R` and it is easy enough to write your own functions if none already exist to do what you want to do.
+- In general, function calls have a simple structure: a function name, a set of parentheses and an optional set of parameters to send to the function.
+- Help pages exist for all functions that, at a minimum, explain what parameters exist for the function.\
+- Help can be accessed a few ways - try them :
 
 ## Getting Help
 
@@ -640,12 +649,12 @@ inspect.signature(np.mean)   # like args(mean)
 ```
 :::
 
--   Online: <https://docs.python.org/3/>, <https://numpy.org/doc/>, <https://pandas.pydata.org/docs/>
+- Online: <https://docs.python.org/3/>, <https://numpy.org/doc/>, <https://pandas.pydata.org/docs/>
 
 ## Creating vectors
 
--   Typing vectors in by hand is a drag - use generating functions instead: `seq()` in R; `range()`, `np.arange()`, `np.linspace()` in Python
--   Try the examples and vary the arguments - can you work out what each one does?
+- Typing vectors in by hand is a drag - use generating functions instead: `seq()` in R; `range()`, `np.arange()`, `np.linspace()` in Python
+- Try the examples and vary the arguments - can you work out what each one does?
 
 ::: panel-tabset
 ### R
@@ -700,24 +709,24 @@ list(range(0, 10))                     # integers only: 0, 1, ..., 9 (stop is ex
 
 ## Types of vectors of data
 
--   `int` stands for integers
+- `int` stands for integers
 
--   `dbl` stands for doubles, or real numbers
+- `dbl` stands for doubles, or real numbers
 
--   `chr` stands for character vectors, or strings
+- `chr` stands for character vectors, or strings
 
--   `dttm` stands for date-times (a date + a time)
+- `dttm` stands for date-times (a date + a time)
 
--   `lgl` stands for logical, vectors that contain only TRUE or FALSE
+- `lgl` stands for logical, vectors that contain only TRUE or FALSE
 
--   `fctr` stands for factors, which R uses to represent categorical variables with fixed possible values
+- `fctr` stands for factors, which R uses to represent categorical variables with fixed possible values
 
--   `date` stands for dates
+- `date` stands for dates
 
 <!-- -->
 
--   Integer and double vectors are known collectively as numeric vectors.
--   In `R` numbers are doubles by default.
+- Integer and double vectors are known collectively as numeric vectors.
+- In `R` numbers are doubles by default.
 
 ## The hierarchy of R vector types
 
@@ -725,31 +734,31 @@ list(range(0, 10))                     # integers only: 0, 1, ..., 9 (stop is ex
 
 ## Types of vectors of data
 
--   Logical vectors can take only three possible values:
-    -   `FALSE`
-    -   `TRUE`
-    -   `NA` which is 'not available'.
--   Integers have one special value: NA, while doubles have four:
-    -   `NA`
-    -   `NaN` which is 'not a number'
-    -   `Inf`
-    -   `-Inf`
+- Logical vectors can take only three possible values:
+  - `FALSE`
+  - `TRUE`
+  - `NA` which is 'not available'.
+- Integers have one special value: NA, while doubles have four:
+  - `NA`
+  - `NaN` which is 'not a number'
+  - `Inf`
+  - `-Inf`
 
 ## Types of data in Python
 
-| R                | Python                                   | Example                        |
-|------------------|------------------------------------------|--------------------------------|
-| `int`            | `int`                                    | `3`                            |
-| `dbl`            | `float`                                  | `3.0`, `2.5e-3`                |
-| `chr`            | `str`                                    | `"low"`                        |
-| `lgl`            | `bool`                                   | `True`, `False`                |
-| `fctr`           | `pandas.Categorical`                     | `pd.Categorical(["low", "high"])` |
-| `date` / `dttm`  | `datetime.date` / `datetime.datetime`    | `datetime.date(2026, 11, 9)`   |
-| `NA`             | `None`, `float("nan")`, `np.nan`, `pd.NA` |                               |
-| `Inf` / `-Inf`   | `math.inf` / `-math.inf`                 |                                |
+| R | Python | Example |
+|-----------------|-------------------------------|------------------------|
+| `int` | `int` | `3` |
+| `dbl` | `float` | `3.0`, `2.5e-3` |
+| `chr` | `str` | `"low"` |
+| `lgl` | `bool` | `True`, `False` |
+| `fctr` | `pandas.Categorical` | `pd.Categorical(["low", "high"])` |
+| `date` / `dttm` | `datetime.date` / `datetime.datetime` | `datetime.date(2026, 11, 9)` |
+| `NA` | `None`, `float("nan")`, `np.nan`, `pd.NA` |  |
+| `Inf` / `-Inf` | `math.inf` / `-math.inf` |  |
 
--   Ask with `type(x)`; a numpy array or pandas column has one **dtype** for all its values (`x.dtype`)
--   `7 / 2` is `3.5` (always a float); `7 // 2` is `3` (integer division); `7 % 2` is the remainder `1`
+- Ask with `type(x)`; a numpy array or pandas column has one **dtype** for all its values (`x.dtype`)
+- `7 / 2` is `3.5` (always a float); `7 // 2` is `3` (integer division); `7 % 2` is the remainder `1`
 
 # Backup - reference slides
 
@@ -757,34 +766,34 @@ Fuller versions of material condensed in the live deck; see [Ch. 11](../book/cha
 
 ## `R scripts` and `Quarto Markdown`
 
--   Often we want to write scripts that can just be run - `R scripts`
--   We can also embed code in Quarto Markdown files that provide more annotations
--   This improves interpretability and reproducibility
--   You can insert `R code chunks` into `Quarto Markdown` documents
+- Often we want to write scripts that can just be run - `R scripts`
+- We can also embed code in Quarto Markdown files that provide more annotations
+- This improves interpretability and reproducibility
+- You can insert `R code chunks` into `Quarto Markdown` documents
 
 ## `Python scripts`, `notebooks` and `Quarto Markdown`
 
--   A `Python script` (`script.py`) is a text file of Python commands run top to bottom with `python3 script.py`
--   A **Jupyter notebook** (`.ipynb`) mixes code cells, output and Markdown - popular in Python, but stored as JSON (hard to read in Git)
--   The same `Quarto Markdown` file can hold `{python}` code chunks - Quarto runs them through Jupyter
--   So the R and Python workflows are the same: **script** for things that just run, **Quarto** when you want prose + code + output
+- A `Python script` (`script.py`) is a text file of Python commands run top to bottom with `python3 script.py`
+- A **Jupyter notebook** (`.ipynb`) mixes code cells, output and Markdown - popular in Python, but stored as JSON (hard to read in Git)
+- The same `Quarto Markdown` file can hold `{python}` code chunks - Quarto runs them through Jupyter
+- So the R and Python workflows are the same: **script** for things that just run, **Quarto** when you want prose + code + output
 
 ## `R script` basics
 
--   A series of R commands that will be executed\
+- A series of R commands that will be executed\
 
--   Can add comments using hashtags `#`\
+- Can add comments using hashtags `#`\
 
--   Can have pipes (`|>`) to connect one step to the next\
+- Can have pipes (`|>`) to connect one step to the next\
 
 ## `Python script` basics
 
--   A series of Python commands that will be executed, top to bottom\
+- A series of Python commands that will be executed, top to bottom\
 
--   Comments also use hashtags `#`\
+- Comments also use hashtags `#`\
 
--   Steps are connected with **method chaining** (`data.dropna().groupby("x").mean()`) rather than pipes\
+- Steps are connected with **method chaining** (`data.dropna().groupby("x").mean()`) rather than pipes\
 
--   Whitespace matters: the body of a loop, `if` or function is **indented** (4 spaces)\
+- Whitespace matters: the body of a loop, `if` or function is **indented** (4 spaces)\
 
--   Start scripts with `#!/usr/bin/env python3` and run them with `python3 script.py` (or `./script.py` after `chmod +x`)
+- Start scripts with `#!/usr/bin/env python3` and run them with `python3 script.py` (or `./script.py` after `chmod +x`)
