@@ -1,16 +1,30 @@
 ---
-title: "Week 4 Exercises - Shell Scripts, sed, and awk"
+title: "Week 4 Exercises - GREP in Practice, Shell Scripts, sed and awk"
 ---
 
-Short, **ungraded** practice tasks - about 20-30 minutes. Companion reading: [Ch. 10](../book/chapters/10-shell-scripting.html) and the sed/awk sections of [Ch. 9](../book/chapters/09-grep-regex.html).
+Short, **ungraded** practice tasks - about 25-35 minutes. Companion reading: [Ch. 10](../book/chapters/10-shell-scripting.html) and [Ch. 9](../book/chapters/09-grep-regex.html) - review the grep/regex sections, and read the **sed and awk sections carefully**: in class we only learned them by example.
 
-1.  In `scripts/`, create `hello.sh` containing a `#!/bin/bash` shebang and a line that prints "Hello from <your name>". Try `./hello.sh` - what error do you get?
-2.  Fix it with `chmod +x hello.sh` and run it again.
-3.  Add a variable: `NAME="..."` and `echo "Hello, $NAME"`. Re-run.
-4.  Make the script greet whoever is passed on the command line using `$1`: `./hello.sh Bill` should print "Hello, Bill".
-5.  Write a `for` loop (in a script or at the prompt) that prints the name of every `.tsv` file under `data/`.
-6.  Add a safety check to a script: `if [ ! -f "$1" ]; then echo "no such file"; exit 1; fi`. Test it with a real and a fake filename.
-7.  Add `set -euo pipefail` near the top of one of your scripts, then introduce a typo in a command and observe how the script now stops instead of plowing on.
-8.  Use `awk` to print the Individual and Genotype columns: `awk -F'\t' '{print $1, $2}' data/raw/Stickle_RNAseq.tsv | head`.
-9.  Use `sed` to replace "mono" with "monoassociated" in a *copy* of the dataset, and verify with `grep -c`.
-10. Re-run one of your scripts from a different working directory. Does it still work? If not, explain why (hint: relative paths).
+::: callout-tip
+## Adjust as you go
+Commands copied from the lecture slides may need small tweaks to run in *your* project - most often a file path: the slides often use `data/`, while your Week 2 skeleton keeps the raw file in `data/raw/`. Spotting and fixing these little mismatches is not busywork; it is a core skill, and the error messages are your friend.
+:::
+
+## GREP on real data
+
+1.  Warm-up from the L04 reminder: run `grep -c "mono" data/raw/Stickle_RNAseq.tsv` and `grep -cw "mono" data/raw/Stickle_RNAseq.tsv`. Both give 40 - work out which column each one matches on, then construct a pattern where adding `-w` *would* change the answer.
+2.  Download human chromosome 21 into `data/raw/` (the `wget`/`curl` command is on the L04 slides) and decompress a copy with `gunzip -k`. Then finish the lecture's "Your turn" tasks if we ran out of time in class: total bases and GC content of `chr21.fa`. Save your working pipelines in `scripts/` - you will want them for the homework.
+
+## Shell scripts
+
+3.  In Week 2 you made `scripts/hello.sh` (if you skipped that, the recipe is on the L04 "mechanics" slide). Make it greet whoever is passed on the command line using `$1`: `./hello.sh Bill` should print "Hello, Bill".
+4.  Write a `for` loop (in a script or at the prompt) that prints the name of every `.tsv` file under `data/`.
+5.  Add a safety check to a script: `if [ ! -f "$1" ]; then echo "no such file" >&2; exit 1; fi`. Test it with a real and a fake filename.
+6.  Add `set -euo pipefail` near the top of one of your scripts, then introduce a typo in a command and observe how the script now stops instead of plowing on.
+7.  Write a function `count_group` that takes a file and a group name and prints how many fish are in that group (the L04 functions slide is your template). Call it in a loop over `convA convB monoA monoB` - do you get 20 of each?
+
+## sed and awk
+
+8.  Fix the awkward column name exactly as in lecture, but matched to your project layout: `sed '1s/Geno&Micro/Geno_Micro/' data/raw/Stickle_RNAseq.tsv > data/processed/stickle_clean.tsv`. Verify with `head -n 1 data/processed/stickle_clean.tsv | cut -f1-4`.
+9.  Use `awk` to print the Individual and Genotype columns (`awk -F'\t' '{print $1, $2}' data/processed/stickle_clean.tsv | head`), then compute the mean of `Gene1` (column 5) - the command is on the L04 slides.
+10. Copy `gene_means.sh` from the lecture into `scripts/`, change its `infile=` line to point at your `data/processed/stickle_clean.tsv`, make it executable, and run it for column 5. Then loop it over columns 5-7. (Annoyed that you had to edit a hardcoded path? That is best practice #6 from the last slide.)
+11. Re-run one of your scripts from a different working directory. Does it still work? If not, explain why (hint: relative paths).

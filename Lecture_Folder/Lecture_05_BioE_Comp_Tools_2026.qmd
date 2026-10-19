@@ -21,8 +21,6 @@ theme_set(theme_minimal(base_size = 14))
 set.seed(2026)
 ```
 
-
-
 ## Book reading for this lecture
 
 The course book goes deeper on everything in this lecture. Read before or after class:
@@ -33,10 +31,126 @@ The course book goes deeper on everything in this lecture. Read before or after 
 
 ## Goals for today
 
+-   Warm-up: L04's `fasta_stats.sh` rewritten in R and in Python
 -   Using Positron, Visual Studio Code and RStudio as script editors
 -   Why R *and* Python - same ideas, different syntax
 -   Scripts, variables, arithmetic, strings and vectors
 -   Types of data and getting help
+
+# Warm-up - last week's script in R and Python
+
+## The same script in R and Python
+
+In L04 we wrote `fasta_stats.sh`. It works, but counting and arithmetic get awkward in bash. Here is the same program as an **R script** and a **Python script** - both take the file name as a command-line argument. Read them as a *preview*: variables, strings, vectors and functions are exactly what L05-L07 teach.
+
+::: panel-tabset
+### R
+
+```{r}
+#| label: lec06-fasta-stats-r
+#| echo: true
+#| eval: false
+
+#!/usr/bin/env Rscript
+# Script: fasta_stats.R
+# Purpose: Calculate basic statistics for a FASTA file
+
+args <- commandArgs(trailingOnly = TRUE)     # like $1 $2 ... in bash
+if (length(args) != 1) {
+  cat("Usage: Rscript fasta_stats.R sequences.fasta\n")
+  quit(status = 1)
+}
+input <- args[1]
+if (!file.exists(input)) {
+  cat("Error: File", input, "not found!\n")
+  quit(status = 1)
+}
+
+lines   <- readLines(input)
+headers <- grepl("^>", lines)                # TRUE for header lines
+seq     <- paste(lines[!headers], collapse = "")
+
+cat("=== FASTA Statistics for", input, "===\n")
+cat("Number of sequences:", sum(headers), "\n")
+cat("Total length:", nchar(seq), "bp\n")
+cat("Average length:", nchar(seq) / sum(headers), "bp\n")
+gc <- sum(strsplit(seq, "")[[1]] %in% c("G", "C"))
+cat("GC content:", round(100 * gc / nchar(seq), 1), "%\n")
+```
+
+### Python
+
+```{python}
+#| label: lec06-fasta-stats-py
+#| echo: true
+#| eval: false
+
+#!/usr/bin/env python3
+# Script: fasta_stats.py
+# Purpose: Calculate basic statistics for a FASTA file
+
+import sys
+from pathlib import Path
+
+if len(sys.argv) != 2:                       # sys.argv[0] is the script name, like $0
+    print("Usage: python3 fasta_stats.py sequences.fasta")
+    sys.exit(1)
+input_file = Path(sys.argv[1])
+if not input_file.is_file():
+    print(f"Error: File {input_file} not found!")
+    sys.exit(1)
+
+lines   = input_file.read_text().splitlines()
+headers = [line for line in lines if line.startswith(">")]
+seq     = "".join(line for line in lines if not line.startswith(">"))
+
+print(f"=== FASTA Statistics for {input_file} ===")
+print(f"Number of sequences: {len(headers)}")
+print(f"Total length: {len(seq)} bp")
+print(f"Average length: {len(seq) / len(headers):.1f} bp")
+gc = seq.count("G") + seq.count("C")
+print(f"GC content: {100 * gc / len(seq):.1f}%")
+```
+:::
+
+## Running R and Python scripts from the shell
+
+::: panel-tabset
+### R
+
+``` bash
+Rscript fasta_stats.R chr21.fa        # run with the interpreter ...
+
+chmod +x fasta_stats.R                      # ... or make it executable
+./fasta_stats.R chr21.fa              #     (needs the #!/usr/bin/env Rscript shebang)
+
+Rscript -e 'mean(c(1, 2, 3))'               # one-liner without a file
+R                                           # interactive console; quit with q()
+```
+
+-   `Rscript` runs the file top to bottom and prints only what you `cat()` or `print()`
+-   In **Positron** / **VS Code** / **RStudio**: open the `.R` file and press `Cmd/Ctrl-Enter` to send lines to the console
+
+### Python
+
+``` bash
+python3 fasta_stats.py chr21.fa       # run with the interpreter ...
+
+chmod +x fasta_stats.py                     # ... or make it executable
+./fasta_stats.py chr21.fa             #     (needs the #!/usr/bin/env python3 shebang)
+
+python3 -c 'print(sum([1, 2, 3]) / 3)'      # one-liner without a file
+python3                                     # interactive REPL; quit with exit() or Ctrl-D
+```
+
+-   `python3 script.py` runs the file top to bottom and prints only what you `print()`
+-   In **VS Code** / **Positron**: open the `.py` file and press `Cmd/Ctrl-Enter`, or use the Run button
+-   Keep project packages in a virtual environment: `python3 -m venv .venv && source .venv/bin/activate`
+:::
+
+::: callout-tip
+Both scripts return an **exit status** (`quit(status = 1)` / `sys.exit(1)`), so a shell pipeline or SLURM job can tell whether they succeeded - just like `exit 1` in bash. In Lecture 08 we submit these scripts to Talapas with `Rscript` and `python3` inside an `sbatch` job.
+:::
 
 # R and Python: two scripting languages for data
 
@@ -100,39 +214,15 @@ You do not have to choose. Most computational biologists use **both**: R for sta
 | Missing value | `NA` | `None`, `float("nan")`, `pd.NA` |
 | Help | `?mean` | `help(statistics.mean)` or `mean?` in Jupyter |
 
-## `R scripts` and `Quarto Markdown`
+## Scripts, notebooks and Quarto Markdown
 
--   Often we want to write scripts that can just be run - `R scripts`
--   We can also embed code in Quarto Markdown files that provide more annotations
--   This improves interpretability and reproducibility
--   You can insert `R code chunks` into `Quarto Markdown` documents
-
-## `Python scripts`, `notebooks` and `Quarto Markdown`
-
--   A `Python script` (`script.py`) is a text file of Python commands run top to bottom with `python3 script.py`
--   A **Jupyter notebook** (`.ipynb`) mixes code cells, output and Markdown - popular in Python, but stored as JSON (hard to read in Git)
--   The same `Quarto Markdown` file can hold `{python}` code chunks - Quarto runs them through Jupyter
--   So the R and Python workflows are the same: **script** for things that just run, **Quarto** when you want prose + code + output
-
-## `R script` basics
-
--   A series of R commands that will be executed\
-
--   Can add comments using hashtags `#`\
-
--   Can have pipes (`|>`) to connect one step to the next\
-
-## `Python script` basics
-
--   A series of Python commands that will be executed, top to bottom\
-
--   Comments also use hashtags `#`\
-
--   Steps are connected with **method chaining** (`data.dropna().groupby("x").mean()`) rather than pipes\
-
--   Whitespace matters: the body of a loop, `if` or function is **indented** (4 spaces)\
-
--   Start scripts with `#!/usr/bin/env python3` and run them with `python3 script.py` (or `./script.py` after `chmod +x`)
+::: incremental
+- A **script** (`.R`, `.py`) is a text file of commands run top to bottom - you have been writing these since L02 (shebang on line 1, `chmod +x`, run with `Rscript` / `python3`)
+- **Quarto Markdown** (`.qmd`) embeds `{r}` and `{python}` code chunks in prose - annotated, reproducible documents (these slides are one!)
+- Python also has **Jupyter notebooks** (`.ipynb`): code cells + output + Markdown - popular, but stored as JSON, which is hard to read and diff in Git; Quarto gives the same workflow in plain text
+- Chaining steps: R uses the pipe (`x |> f() |> g()`), Python uses **method chaining** (`data.dropna().groupby("x").mean()`)
+- Rule of thumb: a **script** for things that just run, **Quarto** when you want prose + code + output together
+:::
 
 ## BASICS of `R` and `Python`
 
@@ -180,14 +270,10 @@ You do not have to choose. Most computational biologists use **both**: R for sta
 # 16
 ```
 :::
-## Assigning Variables
-
--   A better way to do this is to assign variables
--   Variables are assigned values using the `<-` operator in R and the `=` operator in Python.
--   Variable names must begin with a letter (or `_` in Python), but other than that, just about anything goes.
--   Do keep in mind that both `R` and `Python` are case sensitive.
 
 ## Assigning Variables
+
+-   Assign values with `<-` in R and `=` in Python; names must begin with a letter (or `_` in Python) - and both languages are **case sensitive**
 
 ::: panel-tabset
 ### R
@@ -506,6 +592,10 @@ random.choices(list(x), k=len(x))   # sample with replacement
 -   Arguments simply modify or direct the function in some way
 -   There are many arguments for each function, some of which are defaults
 
+::: callout-tip
+In Weeks 6-7 you will run exactly these functions on real columns of our stickleback table (`data/Stickle_RNAseq.tsv`).
+:::
+
 ## Getting Help
 
 -   Getting Help on any function is very easy - just type a question mark and the name of the function (R), or `help(function)` in Python.
@@ -554,13 +644,8 @@ inspect.signature(np.mean)   # like args(mean)
 
 ## Creating vectors
 
--   Creating vector of new data by entering it by hand can be a drag
--   However, it is also very easy to use functions such as `seq` and `sample` (Python: `range()`, `np.arange()`, `np.linspace()`)
--   Try the examples below; can you figure out what the three arguments in the parentheses mean?
--   Try varying the arguments to see what happens.
--   Don't go too crazy with the last one or your computer might slow way down
-
-## Creating vectors
+-   Typing vectors in by hand is a drag - use generating functions instead: `seq()` in R; `range()`, `np.arange()`, `np.linspace()` in Python
+-   Try the examples and vary the arguments - can you work out what each one does?
 
 ::: panel-tabset
 ### R
@@ -573,7 +658,10 @@ inspect.signature(np.mean)   # like args(mean)
 seq_1 <- seq(0.0, 10.0, by = 0.1)
 print(seq_1)
 seq_2 <- seq(10.0, 0.0, by = -0.1)
-print(seq_2)
+
+seq_square     <- seq_2 * seq_2   # element-wise multiplication ...
+seq_square_new <- seq_2^2         # ... or the same thing with the exponent
+print(seq_square_new)
 ```
 
 ### Python
@@ -589,63 +677,13 @@ seq_1 = np.linspace(0.0, 10.0, 101)    # 101 points from 0 to 10 (step 0.1)
 print(seq_1)
 # [ 0.   0.1  0.2 ...  9.8  9.9 10. ]
 seq_2 = np.linspace(10.0, 0.0, 101)
-print(seq_2)
-# [10.   9.9  9.8 ...  0.2  0.1  0. ]
+
+seq_square     = seq_2 * seq_2         # element-wise ...
+seq_square_new = seq_2**2              # ... same result
+print(seq_square_new)
+# [100.    98.01  96.04 ...   0.04   0.01   0.  ]
+
 list(range(0, 10))                     # integers only: 0, 1, ..., 9 (stop is excluded!)
-```
-:::
-
-## Creating vectors
-
-::: panel-tabset
-### R
-
-```{r}
-#| label: lec07-creating-vectors-2
-#| echo: true
-#| eval: true
-
-seq_square <- (seq_2)*(seq_2)
-print(seq_square)
-```
-
-### Python
-
-```{python}
-#| label: lec07-creating-vectors-2-py
-#| echo: true
-#| eval: false
-
-seq_square = (seq_2)*(seq_2)
-print(seq_square)
-# [100.    98.01  96.04 ...   0.04   0.01   0.  ]
-```
-:::
-
-## Creating vectors
-
-::: panel-tabset
-### R
-
-```{r}
-#| label: lec07-creating-vectors-3
-#| echo: true
-#| eval: true
-
-seq_square_new <- (seq_2)^2
-print(seq_square_new)
-```
-
-### Python
-
-```{python}
-#| label: lec07-creating-vectors-3-py
-#| echo: true
-#| eval: false
-
-seq_square_new = (seq_2)**2
-print(seq_square_new)
-# [100.    98.01  96.04 ...   0.04   0.01   0.  ]
 ```
 :::
 
@@ -712,3 +750,41 @@ print(seq_square_new)
 
 -   Ask with `type(x)`; a numpy array or pandas column has one **dtype** for all its values (`x.dtype`)
 -   `7 / 2` is `3.5` (always a float); `7 // 2` is `3` (integer division); `7 % 2` is the remainder `1`
+
+# Backup - reference slides
+
+Fuller versions of material condensed in the live deck; see [Ch. 11](../book/chapters/11-r-programming.html) and [Ch. 12](../book/chapters/12-python-programming.html).
+
+## `R scripts` and `Quarto Markdown`
+
+-   Often we want to write scripts that can just be run - `R scripts`
+-   We can also embed code in Quarto Markdown files that provide more annotations
+-   This improves interpretability and reproducibility
+-   You can insert `R code chunks` into `Quarto Markdown` documents
+
+## `Python scripts`, `notebooks` and `Quarto Markdown`
+
+-   A `Python script` (`script.py`) is a text file of Python commands run top to bottom with `python3 script.py`
+-   A **Jupyter notebook** (`.ipynb`) mixes code cells, output and Markdown - popular in Python, but stored as JSON (hard to read in Git)
+-   The same `Quarto Markdown` file can hold `{python}` code chunks - Quarto runs them through Jupyter
+-   So the R and Python workflows are the same: **script** for things that just run, **Quarto** when you want prose + code + output
+
+## `R script` basics
+
+-   A series of R commands that will be executed\
+
+-   Can add comments using hashtags `#`\
+
+-   Can have pipes (`|>`) to connect one step to the next\
+
+## `Python script` basics
+
+-   A series of Python commands that will be executed, top to bottom\
+
+-   Comments also use hashtags `#`\
+
+-   Steps are connected with **method chaining** (`data.dropna().groupby("x").mean()`) rather than pipes\
+
+-   Whitespace matters: the body of a loop, `if` or function is **indented** (4 spaces)\
+
+-   Start scripts with `#!/usr/bin/env python3` and run them with `python3 script.py` (or `./script.py` after `chmod +x`)
