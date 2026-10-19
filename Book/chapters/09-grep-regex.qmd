@@ -293,7 +293,7 @@ Notice the `*?` in the ORF pattern. A plain `*` is *greedy*—it grabs as many c
 $ grep -P "\tgene\t" annotations.gff
 
 # Find genes on chromosome 1
-$ grep "^chr1" genes.gff | grep -P "\tgene\t"
+$ grep -P "^chr1\t" genes.gff | grep -P "\tgene\t"
 
 # Extract gene IDs
 $ grep -oE "gene_id \"[^\"]+\"" annotations.gtf
@@ -332,9 +332,9 @@ $ grep "^>" sequences.fa | cut -c2-
 # Find headers, then get organism names
 $ grep "^>" proteins.fa | grep -oE "\[.*\]" | sort | uniq -c | sort -rn
 
-# Process FASTA: count bases per sequence
+# Process FASTA: count bases on each sequence line
 $ grep -v "^>" sequence.fa | while read line; do
-    echo "$line" | wc -c
+    echo -n "$line" | wc -c
   done
 ```
 
@@ -797,7 +797,7 @@ Notice the recurring shape: *select* lines (`grep`, `awk`, `tail -n +2`), *extra
 This section applies the chapter to the course dataset described in @sec-course-dataset (80 stickleback, 4 treatment groups, 600 genes). The same steps appear on the Week 3 and 4 slides, so the book and the lecture can be read side by side.
 :::
 
-The stickleback table is small enough to read, but the same commands scale to files with millions of lines. `grep -w` matches whole words, so the treatment label in the third column selects rows without also matching the combined label in the fourth; a regular expression anchored at the start of the line picks out individuals whose ID ends in `1`:
+The stickleback table is small enough to read, but the same commands scale to files with millions of lines. `grep -w` matches whole words, so the treatment label in the third column selects rows without also matching the combined label in the fourth; a regular expression anchored at the start of the line picks out the individuals whose number is exactly `1`:
 
 ```bash
 cd ~/projects/comptools

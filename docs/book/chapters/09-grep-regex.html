@@ -1029,7 +1029,7 @@ Table&nbsp;9.3: Extended regular expression metacharacters
 <span id="cb11-2"><a href="#cb11-2"></a><span class="ex">$</span> grep <span class="at">-P</span> <span class="st">"\tgene\t"</span> annotations.gff</span>
 <span id="cb11-3"><a href="#cb11-3"></a></span>
 <span id="cb11-4"><a href="#cb11-4"></a><span class="co"># Find genes on chromosome 1</span></span>
-<span id="cb11-5"><a href="#cb11-5"></a><span class="ex">$</span> grep <span class="st">"^chr1"</span> genes.gff <span class="kw">|</span> <span class="fu">grep</span> <span class="at">-P</span> <span class="st">"\tgene\t"</span></span>
+<span id="cb11-5"><a href="#cb11-5"></a><span class="ex">$</span> grep <span class="at">-P</span> <span class="st">"^chr1\t"</span> genes.gff <span class="kw">|</span> <span class="fu">grep</span> <span class="at">-P</span> <span class="st">"\tgene\t"</span></span>
 <span id="cb11-6"><a href="#cb11-6"></a></span>
 <span id="cb11-7"><a href="#cb11-7"></a><span class="co"># Extract gene IDs</span></span>
 <span id="cb11-8"><a href="#cb11-8"></a><span class="ex">$</span> grep <span class="at">-oE</span> <span class="st">"gene_id </span><span class="dt">\"</span><span class="st">[^</span><span class="dt">\"</span><span class="st">]+</span><span class="dt">\"</span><span class="st">"</span> annotations.gtf</span>
@@ -1060,9 +1060,9 @@ Table&nbsp;9.3: Extended regular expression metacharacters
 <span id="cb13-7"><a href="#cb13-7"></a><span class="co"># Find headers, then get organism names</span></span>
 <span id="cb13-8"><a href="#cb13-8"></a><span class="ex">$</span> grep <span class="st">"^&gt;"</span> proteins.fa <span class="kw">|</span> <span class="fu">grep</span> <span class="at">-oE</span> <span class="st">"\[.*\]"</span> <span class="kw">|</span> <span class="fu">sort</span> <span class="kw">|</span> <span class="fu">uniq</span> <span class="at">-c</span> <span class="kw">|</span> <span class="fu">sort</span> <span class="at">-rn</span></span>
 <span id="cb13-9"><a href="#cb13-9"></a></span>
-<span id="cb13-10"><a href="#cb13-10"></a><span class="co"># Process FASTA: count bases per sequence</span></span>
+<span id="cb13-10"><a href="#cb13-10"></a><span class="co"># Process FASTA: count bases on each sequence line</span></span>
 <span id="cb13-11"><a href="#cb13-11"></a><span class="ex">$</span> grep <span class="at">-v</span> <span class="st">"^&gt;"</span> sequence.fa <span class="kw">|</span> <span class="cf">while</span> <span class="bu">read</span> <span class="va">line</span><span class="kw">;</span> <span class="cf">do</span></span>
-<span id="cb13-12"><a href="#cb13-12"></a>    <span class="bu">echo</span> <span class="st">"</span><span class="va">$line</span><span class="st">"</span> <span class="kw">|</span> <span class="fu">wc</span> <span class="at">-c</span></span>
+<span id="cb13-12"><a href="#cb13-12"></a>    <span class="bu">echo</span> <span class="at">-n</span> <span class="st">"</span><span class="va">$line</span><span class="st">"</span> <span class="kw">|</span> <span class="fu">wc</span> <span class="at">-c</span></span>
 <span id="cb13-13"><a href="#cb13-13"></a>  <span class="cf">done</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <section id="sec-extracting-matching-regions" class="level3"><h3 class="anchored" data-anchor-id="sec-extracting-matching-regions">Extracting Matching Regions</h3>
 <p>The <code>-o</code> flag prints only the matched portion:</p>
@@ -1518,7 +1518,7 @@ Figure&nbsp;9.3: Choosing the right tool: <code>grep</code> finds lines, <code>s
 <p>This section applies the chapter to the course dataset described in <a href="01-introduction.html#sec-course-dataset" class="quarto-xref"><span>Section 1.5</span></a> (80 stickleback, 4 treatment groups, 600 genes). The same steps appear on the Week 3 and 4 slides, so the book and the lecture can be read side by side.</p>
 </div>
 </div>
-<p>The stickleback table is small enough to read, but the same commands scale to files with millions of lines. <code>grep -w</code> matches whole words, so the treatment label in the third column selects rows without also matching the combined label in the fourth; a regular expression anchored at the start of the line picks out individuals whose ID ends in <code>1</code>:</p>
+<p>The stickleback table is small enough to read, but the same commands scale to files with millions of lines. <code>grep -w</code> matches whole words, so the treatment label in the third column selects rows without also matching the combined label in the fourth; a regular expression anchored at the start of the line picks out the individuals whose number is exactly <code>1</code>:</p>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb42"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb42-1"><a href="#cb42-1"></a><span class="bu">cd</span> ~/projects/comptools</span>
 <span id="cb42-2"><a href="#cb42-2"></a><span class="fu">grep</span> <span class="at">-w</span> <span class="st">"convB"</span> data/Stickle_RNAseq.tsv <span class="kw">|</span> <span class="fu">cut</span> <span class="at">-f</span> 1      <span class="co"># individuals: genotype B, conventional</span></span>
 <span id="cb42-3"><a href="#cb42-3"></a><span class="fu">grep</span> <span class="at">-E</span> <span class="st">"^[A-Z]+1\b"</span> data/Stickle_RNAseq.tsv <span class="kw">|</span> <span class="fu">cut</span> <span class="at">-f</span> 1-3   <span class="co"># AC1, AM1, BC1, BM1</span></span>
