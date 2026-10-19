@@ -599,7 +599,21 @@
     "href": "Lecture_Folder/Lecture_05_BioE_Comp_Tools_2026.html#goals-for-today",
     "title": "Lecture 05",
     "section": "Goals for today",
-    "text": "Goals for today\n\nUsing Positron, Visual Studio Code and RStudio as script editors\nWhy R and Python - same ideas, different syntax\nScripts, variables, arithmetic, strings and vectors\nTypes of data and getting help"
+    "text": "Goals for today\n\nWarm-up: L04’s fasta_stats.sh rewritten in R and in Python\nUsing Positron, Visual Studio Code and RStudio as script editors\nWhy R and Python - same ideas, different syntax\nScripts, variables, arithmetic, strings and vectors\nTypes of data and getting help"
+  },
+  {
+    "objectID": "Lecture_Folder/Lecture_05_BioE_Comp_Tools_2026.html#the-same-script-in-r-and-python",
+    "href": "Lecture_Folder/Lecture_05_BioE_Comp_Tools_2026.html#the-same-script-in-r-and-python",
+    "title": "Lecture 05",
+    "section": "The same script in R and Python",
+    "text": "The same script in R and Python\nIn L04 we wrote fasta_stats.sh. It works, but counting and arithmetic get awkward in bash. Here is the same program as an R script and a Python script - both take the file name as a command-line argument. Read them as a preview: variables, strings, vectors and functions are exactly what L05-L07 teach.\n\nRPython\n\n\n\n#!/usr/bin/env Rscript\n# Script: fasta_stats.R\n# Purpose: Calculate basic statistics for a FASTA file\n\nargs &lt;- commandArgs(trailingOnly = TRUE)     # like $1 $2 ... in bash\nif (length(args) != 1) {\n  cat(\"Usage: Rscript fasta_stats.R sequences.fasta\\n\")\n  quit(status = 1)\n}\ninput &lt;- args[1]\nif (!file.exists(input)) {\n  cat(\"Error: File\", input, \"not found!\\n\")\n  quit(status = 1)\n}\n\nlines   &lt;- readLines(input)\nheaders &lt;- grepl(\"^&gt;\", lines)                # TRUE for header lines\nseq     &lt;- paste(lines[!headers], collapse = \"\")\n\ncat(\"=== FASTA Statistics for\", input, \"===\\n\")\ncat(\"Number of sequences:\", sum(headers), \"\\n\")\ncat(\"Total length:\", nchar(seq), \"bp\\n\")\ncat(\"Average length:\", nchar(seq) / sum(headers), \"bp\\n\")\ngc &lt;- sum(strsplit(seq, \"\")[[1]] %in% c(\"G\", \"C\"))\ncat(\"GC content:\", round(100 * gc / nchar(seq), 1), \"%\\n\")\n\n\n\n\n#!/usr/bin/env python3\n# Script: fasta_stats.py\n# Purpose: Calculate basic statistics for a FASTA file\n\nimport sys\nfrom pathlib import Path\n\nif len(sys.argv) != 2:                       # sys.argv[0] is the script name, like $0\n    print(\"Usage: python3 fasta_stats.py sequences.fasta\")\n    sys.exit(1)\ninput_file = Path(sys.argv[1])\nif not input_file.is_file():\n    print(f\"Error: File {input_file} not found!\")\n    sys.exit(1)\n\nlines   = input_file.read_text().splitlines()\nheaders = [line for line in lines if line.startswith(\"&gt;\")]\nseq     = \"\".join(line for line in lines if not line.startswith(\"&gt;\"))\n\nprint(f\"=== FASTA Statistics for {input_file} ===\")\nprint(f\"Number of sequences: {len(headers)}\")\nprint(f\"Total length: {len(seq)} bp\")\nprint(f\"Average length: {len(seq) / len(headers):.1f} bp\")\ngc = seq.count(\"G\") + seq.count(\"C\")\nprint(f\"GC content: {100 * gc / len(seq):.1f}%\")"
+  },
+  {
+    "objectID": "Lecture_Folder/Lecture_05_BioE_Comp_Tools_2026.html#running-r-and-python-scripts-from-the-shell",
+    "href": "Lecture_Folder/Lecture_05_BioE_Comp_Tools_2026.html#running-r-and-python-scripts-from-the-shell",
+    "title": "Lecture 05",
+    "section": "Running R and Python scripts from the shell",
+    "text": "Running R and Python scripts from the shell\n\nRPython\n\n\nRscript fasta_stats.R chr21.fa        # run with the interpreter ...\n\nchmod +x fasta_stats.R                      # ... or make it executable\n./fasta_stats.R chr21.fa              #     (needs the #!/usr/bin/env Rscript shebang)\n\nRscript -e 'mean(c(1, 2, 3))'               # one-liner without a file\nR                                           # interactive console; quit with q()\n\nRscript runs the file top to bottom and prints only what you cat() or print()\nIn Positron / VS Code / RStudio: open the .R file and press Cmd/Ctrl-Enter to send lines to the console\n\n\n\npython3 fasta_stats.py chr21.fa       # run with the interpreter ...\n\nchmod +x fasta_stats.py                     # ... or make it executable\n./fasta_stats.py chr21.fa             #     (needs the #!/usr/bin/env python3 shebang)\n\npython3 -c 'print(sum([1, 2, 3]) / 3)'      # one-liner without a file\npython3                                     # interactive REPL; quit with exit() or Ctrl-D\n\npython3 script.py runs the file top to bottom and prints only what you print()\nIn VS Code / Positron: open the .py file and press Cmd/Ctrl-Enter, or use the Run button\nKeep project packages in a virtual environment: python3 -m venv .venv && source .venv/bin/activate\n\n\n\n\n\n\n\n\n\n\nTip\n\n\nBoth scripts return an exit status (quit(status = 1) / sys.exit(1)), so a shell pipeline or SLURM job can tell whether they succeeded - just like exit 1 in bash. In Lecture 08 we submit these scripts to Talapas with Rscript and python3 inside an sbatch job."
   },
   {
     "objectID": "Lecture_Folder/Lecture_05_BioE_Comp_Tools_2026.html#why-use-r",
@@ -630,32 +644,11 @@
     "text": "R vs Python: same ideas, different syntax\n\n\n\n\n\n\n\n\nIdea\nR\nPython\n\n\n\n\nAssignment\nx &lt;- 5\nx = 5\n\n\nCounting starts at\n1: x[1] is the first element\n0: x[0] is the first element\n\n\nLast element\nx[length(x)]; x[-1] drops the first\nx[-1] is the last\n\n\nSequence of values\nvector c(1, 2, 3)\nlist [1, 2, 3] or numpy array np.array([1, 2, 3])\n\n\nVector arithmetic\nx^2 on any vector\nx**2 only on a numpy array (a list needs a loop)\n\n\nTable of data\ndata.frame / tibble\npandas DataFrame\n\n\nLoad a package\nlibrary(dplyr)\nimport pandas as pd\n\n\nInstall a package\ninstall.packages(\"dplyr\")\npip install pandas (or uv, conda)\n\n\nChain steps\npipe x \\|&gt; f() \\|&gt; g()\nmethod chaining x.f().g()\n\n\nBlocks\ncurly braces { }\nindentation (4 spaces)\n\n\nMissing value\nNA\nNone, float(\"nan\"), pd.NA\n\n\nHelp\n?mean\nhelp(statistics.mean) or mean? in Jupyter"
   },
   {
-    "objectID": "Lecture_Folder/Lecture_05_BioE_Comp_Tools_2026.html#r-scripts-and-quarto-markdown",
-    "href": "Lecture_Folder/Lecture_05_BioE_Comp_Tools_2026.html#r-scripts-and-quarto-markdown",
+    "objectID": "Lecture_Folder/Lecture_05_BioE_Comp_Tools_2026.html#scripts-notebooks-and-quarto-markdown",
+    "href": "Lecture_Folder/Lecture_05_BioE_Comp_Tools_2026.html#scripts-notebooks-and-quarto-markdown",
     "title": "Lecture 05",
-    "section": "R scripts and Quarto Markdown",
-    "text": "R scripts and Quarto Markdown\n\nOften we want to write scripts that can just be run - R scripts\nWe can also embed code in Quarto Markdown files that provide more annotations\nThis improves interpretability and reproducibility\nYou can insert R code chunks into Quarto Markdown documents"
-  },
-  {
-    "objectID": "Lecture_Folder/Lecture_05_BioE_Comp_Tools_2026.html#python-scripts-notebooks-and-quarto-markdown",
-    "href": "Lecture_Folder/Lecture_05_BioE_Comp_Tools_2026.html#python-scripts-notebooks-and-quarto-markdown",
-    "title": "Lecture 05",
-    "section": "Python scripts, notebooks and Quarto Markdown",
-    "text": "Python scripts, notebooks and Quarto Markdown\n\nA Python script (script.py) is a text file of Python commands run top to bottom with python3 script.py\nA Jupyter notebook (.ipynb) mixes code cells, output and Markdown - popular in Python, but stored as JSON (hard to read in Git)\nThe same Quarto Markdown file can hold {python} code chunks - Quarto runs them through Jupyter\nSo the R and Python workflows are the same: script for things that just run, Quarto when you want prose + code + output"
-  },
-  {
-    "objectID": "Lecture_Folder/Lecture_05_BioE_Comp_Tools_2026.html#r-script-basics",
-    "href": "Lecture_Folder/Lecture_05_BioE_Comp_Tools_2026.html#r-script-basics",
-    "title": "Lecture 05",
-    "section": "R script basics",
-    "text": "R script basics\n\nA series of R commands that will be executed\n\nCan add comments using hashtags #\n\nCan have pipes (|&gt;) to connect one step to the next"
-  },
-  {
-    "objectID": "Lecture_Folder/Lecture_05_BioE_Comp_Tools_2026.html#python-script-basics",
-    "href": "Lecture_Folder/Lecture_05_BioE_Comp_Tools_2026.html#python-script-basics",
-    "title": "Lecture 05",
-    "section": "Python script basics",
-    "text": "Python script basics\n\nA series of Python commands that will be executed, top to bottom\n\nComments also use hashtags #\n\nSteps are connected with method chaining (data.dropna().groupby(\"x\").mean()) rather than pipes\n\nWhitespace matters: the body of a loop, if or function is indented (4 spaces)\n\nStart scripts with #!/usr/bin/env python3 and run them with python3 script.py (or ./script.py after chmod +x)"
+    "section": "Scripts, notebooks and Quarto Markdown",
+    "text": "Scripts, notebooks and Quarto Markdown\n\nA script (.R, .py) is a text file of commands run top to bottom - you have been writing these since L02 (shebang on line 1, chmod +x, run with Rscript / python3)\nQuarto Markdown (.qmd) embeds {r} and {python} code chunks in prose - annotated, reproducible documents (these slides are one!)\nPython also has Jupyter notebooks (.ipynb): code cells + output + Markdown - popular, but stored as JSON, which is hard to read and diff in Git; Quarto gives the same workflow in plain text\nChaining steps: R uses the pipe (x |&gt; f() |&gt; g()), Python uses method chaining (data.dropna().groupby(\"x\").mean())\nRule of thumb: a script for things that just run, Quarto when you want prose + code + output together"
   },
   {
     "objectID": "Lecture_Folder/Lecture_05_BioE_Comp_Tools_2026.html#basics-of-r-and-python",
@@ -669,14 +662,7 @@
     "href": "Lecture_Folder/Lecture_05_BioE_Comp_Tools_2026.html#assigning-variables",
     "title": "Lecture 05",
     "section": "Assigning Variables",
-    "text": "Assigning Variables\n\nA better way to do this is to assign variables\nVariables are assigned values using the &lt;- operator in R and the = operator in Python.\nVariable names must begin with a letter (or _ in Python), but other than that, just about anything goes.\nDo keep in mind that both R and Python are case sensitive."
-  },
-  {
-    "objectID": "Lecture_Folder/Lecture_05_BioE_Comp_Tools_2026.html#assigning-variables-1",
-    "href": "Lecture_Folder/Lecture_05_BioE_Comp_Tools_2026.html#assigning-variables-1",
-    "title": "Lecture 05",
-    "section": "Assigning Variables",
-    "text": "Assigning Variables\n\nRPython\n\n\n\nx &lt;- 2\nx*3\n\n[1] 6\n\ny &lt;- x * 3\ny-2\n\n[1] 4\n\n\nThese do not work\n\n3y &lt;- 3\n3*y &lt;- 3\n\n\n\n\nx = 2\nx*3\n# 6\ny = x * 3\ny-2\n# 4\n\nThese do not work either (SyntaxError)\n\n3y = 3\n3*y = 3"
+    "text": "Assigning Variables\n\nAssign values with &lt;- in R and = in Python; names must begin with a letter (or _ in Python) - and both languages are case sensitive\n\n\nRPython\n\n\n\nx &lt;- 2\nx*3\n\n[1] 6\n\ny &lt;- x * 3\ny-2\n\n[1] 4\n\n\nThese do not work\n\n3y &lt;- 3\n3*y &lt;- 3\n\n\n\n\nx = 2\nx*3\n# 6\ny = x * 3\ny-2\n# 4\n\nThese do not work either (SyntaxError)\n\n3y = 3\n3*y = 3"
   },
   {
     "objectID": "Lecture_Folder/Lecture_05_BioE_Comp_Tools_2026.html#arithmetic-operations-on-functions",
@@ -732,7 +718,7 @@
     "href": "Lecture_Folder/Lecture_05_BioE_Comp_Tools_2026.html#basic-statistics",
     "title": "Lecture 05",
     "section": "Basic Statistics",
-    "text": "Basic Statistics\n\nMany functions exist to operate on vectors.\nCombine these with your previous variable to see what happens.\nAlso, try to find other functions (e.g. standard deviation).\n\n\nRPython\n\n\n\nmean(x)\nmedian(x)\nvar(x)\nlog(x)  # natural log\nsqrt(x)\nsum(x)\nlength(x)\nsample(x, replace = TRUE)\n\n\n\n\nimport numpy as np\nimport random\n\nx.mean()                     # or np.mean(x)\nnp.median(x)\nx.var(ddof=1)                # sample variance, like R's var()\nnp.log(x)                    # natural log, element-wise\nnp.sqrt(x)\nx.sum()                      # sum(x) also works\nlen(x)                       # length(x)\nrandom.choices(list(x), k=len(x))   # sample with replacement\n\n\n\n\n\nNotice that the last function (sample) has an argument (replace=T); in Python random.choices() samples with replacement and k= sets how many\nPython functions come in two flavours: np.median(x) (function) and x.mean() (a method attached to the array)\nArguments simply modify or direct the function in some way\nThere are many arguments for each function, some of which are defaults"
+    "text": "Basic Statistics\n\nMany functions exist to operate on vectors.\nCombine these with your previous variable to see what happens.\nAlso, try to find other functions (e.g. standard deviation).\n\n\nRPython\n\n\n\nmean(x)\nmedian(x)\nvar(x)\nlog(x)  # natural log\nsqrt(x)\nsum(x)\nlength(x)\nsample(x, replace = TRUE)\n\n\n\n\nimport numpy as np\nimport random\n\nx.mean()                     # or np.mean(x)\nnp.median(x)\nx.var(ddof=1)                # sample variance, like R's var()\nnp.log(x)                    # natural log, element-wise\nnp.sqrt(x)\nx.sum()                      # sum(x) also works\nlen(x)                       # length(x)\nrandom.choices(list(x), k=len(x))   # sample with replacement\n\n\n\n\n\nNotice that the last function (sample) has an argument (replace=T); in Python random.choices() samples with replacement and k= sets how many\nPython functions come in two flavours: np.median(x) (function) and x.mean() (a method attached to the array)\nArguments simply modify or direct the function in some way\nThere are many arguments for each function, some of which are defaults\n\n\n\n\n\n\n\nTip\n\n\nIn Weeks 6-7 you will run exactly these functions on real columns of our stickleback table (data/Stickle_RNAseq.tsv)."
   },
   {
     "objectID": "Lecture_Folder/Lecture_05_BioE_Comp_Tools_2026.html#getting-help",
@@ -753,28 +739,7 @@
     "href": "Lecture_Folder/Lecture_05_BioE_Comp_Tools_2026.html#creating-vectors",
     "title": "Lecture 05",
     "section": "Creating vectors",
-    "text": "Creating vectors\n\nCreating vector of new data by entering it by hand can be a drag\nHowever, it is also very easy to use functions such as seq and sample (Python: range(), np.arange(), np.linspace())\nTry the examples below; can you figure out what the three arguments in the parentheses mean?\nTry varying the arguments to see what happens.\nDon’t go too crazy with the last one or your computer might slow way down"
-  },
-  {
-    "objectID": "Lecture_Folder/Lecture_05_BioE_Comp_Tools_2026.html#creating-vectors-1",
-    "href": "Lecture_Folder/Lecture_05_BioE_Comp_Tools_2026.html#creating-vectors-1",
-    "title": "Lecture 05",
-    "section": "Creating vectors",
-    "text": "Creating vectors\n\nRPython\n\n\n\nseq_1 &lt;- seq(0.0, 10.0, by = 0.1)\nprint(seq_1)\n\n  [1]  0.0  0.1  0.2  0.3  0.4  0.5  0.6  0.7  0.8  0.9  1.0  1.1  1.2  1.3  1.4\n [16]  1.5  1.6  1.7  1.8  1.9  2.0  2.1  2.2  2.3  2.4  2.5  2.6  2.7  2.8  2.9\n [31]  3.0  3.1  3.2  3.3  3.4  3.5  3.6  3.7  3.8  3.9  4.0  4.1  4.2  4.3  4.4\n [46]  4.5  4.6  4.7  4.8  4.9  5.0  5.1  5.2  5.3  5.4  5.5  5.6  5.7  5.8  5.9\n [61]  6.0  6.1  6.2  6.3  6.4  6.5  6.6  6.7  6.8  6.9  7.0  7.1  7.2  7.3  7.4\n [76]  7.5  7.6  7.7  7.8  7.9  8.0  8.1  8.2  8.3  8.4  8.5  8.6  8.7  8.8  8.9\n [91]  9.0  9.1  9.2  9.3  9.4  9.5  9.6  9.7  9.8  9.9 10.0\n\nseq_2 &lt;- seq(10.0, 0.0, by = -0.1)\nprint(seq_2)\n\n  [1] 10.0  9.9  9.8  9.7  9.6  9.5  9.4  9.3  9.2  9.1  9.0  8.9  8.8  8.7  8.6\n [16]  8.5  8.4  8.3  8.2  8.1  8.0  7.9  7.8  7.7  7.6  7.5  7.4  7.3  7.2  7.1\n [31]  7.0  6.9  6.8  6.7  6.6  6.5  6.4  6.3  6.2  6.1  6.0  5.9  5.8  5.7  5.6\n [46]  5.5  5.4  5.3  5.2  5.1  5.0  4.9  4.8  4.7  4.6  4.5  4.4  4.3  4.2  4.1\n [61]  4.0  3.9  3.8  3.7  3.6  3.5  3.4  3.3  3.2  3.1  3.0  2.9  2.8  2.7  2.6\n [76]  2.5  2.4  2.3  2.2  2.1  2.0  1.9  1.8  1.7  1.6  1.5  1.4  1.3  1.2  1.1\n [91]  1.0  0.9  0.8  0.7  0.6  0.5  0.4  0.3  0.2  0.1  0.0\n\n\n\n\n\nimport numpy as np\n\nseq_1 = np.linspace(0.0, 10.0, 101)    # 101 points from 0 to 10 (step 0.1)\nprint(seq_1)\n# [ 0.   0.1  0.2 ...  9.8  9.9 10. ]\nseq_2 = np.linspace(10.0, 0.0, 101)\nprint(seq_2)\n# [10.   9.9  9.8 ...  0.2  0.1  0. ]\nlist(range(0, 10))                     # integers only: 0, 1, ..., 9 (stop is excluded!)"
-  },
-  {
-    "objectID": "Lecture_Folder/Lecture_05_BioE_Comp_Tools_2026.html#creating-vectors-2",
-    "href": "Lecture_Folder/Lecture_05_BioE_Comp_Tools_2026.html#creating-vectors-2",
-    "title": "Lecture 05",
-    "section": "Creating vectors",
-    "text": "Creating vectors\n\nRPython\n\n\n\nseq_square &lt;- (seq_2)*(seq_2)\nprint(seq_square)\n\n  [1] 100.00  98.01  96.04  94.09  92.16  90.25  88.36  86.49  84.64  82.81\n [11]  81.00  79.21  77.44  75.69  73.96  72.25  70.56  68.89  67.24  65.61\n [21]  64.00  62.41  60.84  59.29  57.76  56.25  54.76  53.29  51.84  50.41\n [31]  49.00  47.61  46.24  44.89  43.56  42.25  40.96  39.69  38.44  37.21\n [41]  36.00  34.81  33.64  32.49  31.36  30.25  29.16  28.09  27.04  26.01\n [51]  25.00  24.01  23.04  22.09  21.16  20.25  19.36  18.49  17.64  16.81\n [61]  16.00  15.21  14.44  13.69  12.96  12.25  11.56  10.89  10.24   9.61\n [71]   9.00   8.41   7.84   7.29   6.76   6.25   5.76   5.29   4.84   4.41\n [81]   4.00   3.61   3.24   2.89   2.56   2.25   1.96   1.69   1.44   1.21\n [91]   1.00   0.81   0.64   0.49   0.36   0.25   0.16   0.09   0.04   0.01\n[101]   0.00\n\n\n\n\n\nseq_square = (seq_2)*(seq_2)\nprint(seq_square)\n# [100.    98.01  96.04 ...   0.04   0.01   0.  ]"
-  },
-  {
-    "objectID": "Lecture_Folder/Lecture_05_BioE_Comp_Tools_2026.html#creating-vectors-3",
-    "href": "Lecture_Folder/Lecture_05_BioE_Comp_Tools_2026.html#creating-vectors-3",
-    "title": "Lecture 05",
-    "section": "Creating vectors",
-    "text": "Creating vectors\n\nRPython\n\n\n\nseq_square_new &lt;- (seq_2)^2\nprint(seq_square_new)\n\n  [1] 100.00  98.01  96.04  94.09  92.16  90.25  88.36  86.49  84.64  82.81\n [11]  81.00  79.21  77.44  75.69  73.96  72.25  70.56  68.89  67.24  65.61\n [21]  64.00  62.41  60.84  59.29  57.76  56.25  54.76  53.29  51.84  50.41\n [31]  49.00  47.61  46.24  44.89  43.56  42.25  40.96  39.69  38.44  37.21\n [41]  36.00  34.81  33.64  32.49  31.36  30.25  29.16  28.09  27.04  26.01\n [51]  25.00  24.01  23.04  22.09  21.16  20.25  19.36  18.49  17.64  16.81\n [61]  16.00  15.21  14.44  13.69  12.96  12.25  11.56  10.89  10.24   9.61\n [71]   9.00   8.41   7.84   7.29   6.76   6.25   5.76   5.29   4.84   4.41\n [81]   4.00   3.61   3.24   2.89   2.56   2.25   1.96   1.69   1.44   1.21\n [91]   1.00   0.81   0.64   0.49   0.36   0.25   0.16   0.09   0.04   0.01\n[101]   0.00\n\n\n\n\n\nseq_square_new = (seq_2)**2\nprint(seq_square_new)\n# [100.    98.01  96.04 ...   0.04   0.01   0.  ]"
+    "text": "Creating vectors\n\nTyping vectors in by hand is a drag - use generating functions instead: seq() in R; range(), np.arange(), np.linspace() in Python\nTry the examples and vary the arguments - can you work out what each one does?\n\n\nRPython\n\n\n\nseq_1 &lt;- seq(0.0, 10.0, by = 0.1)\nprint(seq_1)\n\n  [1]  0.0  0.1  0.2  0.3  0.4  0.5  0.6  0.7  0.8  0.9  1.0  1.1  1.2  1.3  1.4\n [16]  1.5  1.6  1.7  1.8  1.9  2.0  2.1  2.2  2.3  2.4  2.5  2.6  2.7  2.8  2.9\n [31]  3.0  3.1  3.2  3.3  3.4  3.5  3.6  3.7  3.8  3.9  4.0  4.1  4.2  4.3  4.4\n [46]  4.5  4.6  4.7  4.8  4.9  5.0  5.1  5.2  5.3  5.4  5.5  5.6  5.7  5.8  5.9\n [61]  6.0  6.1  6.2  6.3  6.4  6.5  6.6  6.7  6.8  6.9  7.0  7.1  7.2  7.3  7.4\n [76]  7.5  7.6  7.7  7.8  7.9  8.0  8.1  8.2  8.3  8.4  8.5  8.6  8.7  8.8  8.9\n [91]  9.0  9.1  9.2  9.3  9.4  9.5  9.6  9.7  9.8  9.9 10.0\n\nseq_2 &lt;- seq(10.0, 0.0, by = -0.1)\n\nseq_square     &lt;- seq_2 * seq_2   # element-wise multiplication ...\nseq_square_new &lt;- seq_2^2         # ... or the same thing with the exponent\nprint(seq_square_new)\n\n  [1] 100.00  98.01  96.04  94.09  92.16  90.25  88.36  86.49  84.64  82.81\n [11]  81.00  79.21  77.44  75.69  73.96  72.25  70.56  68.89  67.24  65.61\n [21]  64.00  62.41  60.84  59.29  57.76  56.25  54.76  53.29  51.84  50.41\n [31]  49.00  47.61  46.24  44.89  43.56  42.25  40.96  39.69  38.44  37.21\n [41]  36.00  34.81  33.64  32.49  31.36  30.25  29.16  28.09  27.04  26.01\n [51]  25.00  24.01  23.04  22.09  21.16  20.25  19.36  18.49  17.64  16.81\n [61]  16.00  15.21  14.44  13.69  12.96  12.25  11.56  10.89  10.24   9.61\n [71]   9.00   8.41   7.84   7.29   6.76   6.25   5.76   5.29   4.84   4.41\n [81]   4.00   3.61   3.24   2.89   2.56   2.25   1.96   1.69   1.44   1.21\n [91]   1.00   0.81   0.64   0.49   0.36   0.25   0.16   0.09   0.04   0.01\n[101]   0.00\n\n\n\n\n\nimport numpy as np\n\nseq_1 = np.linspace(0.0, 10.0, 101)    # 101 points from 0 to 10 (step 0.1)\nprint(seq_1)\n# [ 0.   0.1  0.2 ...  9.8  9.9 10. ]\nseq_2 = np.linspace(10.0, 0.0, 101)\n\nseq_square     = seq_2 * seq_2         # element-wise ...\nseq_square_new = seq_2**2              # ... same result\nprint(seq_square_new)\n# [100.    98.01  96.04 ...   0.04   0.01   0.  ]\n\nlist(range(0, 10))                     # integers only: 0, 1, ..., 9 (stop is excluded!)"
   },
   {
     "objectID": "Lecture_Folder/Lecture_05_BioE_Comp_Tools_2026.html#types-of-data",
@@ -810,6 +775,34 @@
     "title": "Lecture 05",
     "section": "Types of data in Python",
     "text": "Types of data in Python\n\n\n\n\n\n\n\n\nR\nPython\nExample\n\n\n\n\nint\nint\n3\n\n\ndbl\nfloat\n3.0, 2.5e-3\n\n\nchr\nstr\n\"low\"\n\n\nlgl\nbool\nTrue, False\n\n\nfctr\npandas.Categorical\npd.Categorical([\"low\", \"high\"])\n\n\ndate / dttm\ndatetime.date / datetime.datetime\ndatetime.date(2026, 11, 9)\n\n\nNA\nNone, float(\"nan\"), np.nan, pd.NA\n\n\n\nInf / -Inf\nmath.inf / -math.inf\n\n\n\n\n\nAsk with type(x); a numpy array or pandas column has one dtype for all its values (x.dtype)\n7 / 2 is 3.5 (always a float); 7 // 2 is 3 (integer division); 7 % 2 is the remainder 1"
+  },
+  {
+    "objectID": "Lecture_Folder/Lecture_05_BioE_Comp_Tools_2026.html#r-scripts-and-quarto-markdown",
+    "href": "Lecture_Folder/Lecture_05_BioE_Comp_Tools_2026.html#r-scripts-and-quarto-markdown",
+    "title": "Lecture 05",
+    "section": "R scripts and Quarto Markdown",
+    "text": "R scripts and Quarto Markdown\n\nOften we want to write scripts that can just be run - R scripts\nWe can also embed code in Quarto Markdown files that provide more annotations\nThis improves interpretability and reproducibility\nYou can insert R code chunks into Quarto Markdown documents"
+  },
+  {
+    "objectID": "Lecture_Folder/Lecture_05_BioE_Comp_Tools_2026.html#python-scripts-notebooks-and-quarto-markdown",
+    "href": "Lecture_Folder/Lecture_05_BioE_Comp_Tools_2026.html#python-scripts-notebooks-and-quarto-markdown",
+    "title": "Lecture 05",
+    "section": "Python scripts, notebooks and Quarto Markdown",
+    "text": "Python scripts, notebooks and Quarto Markdown\n\nA Python script (script.py) is a text file of Python commands run top to bottom with python3 script.py\nA Jupyter notebook (.ipynb) mixes code cells, output and Markdown - popular in Python, but stored as JSON (hard to read in Git)\nThe same Quarto Markdown file can hold {python} code chunks - Quarto runs them through Jupyter\nSo the R and Python workflows are the same: script for things that just run, Quarto when you want prose + code + output"
+  },
+  {
+    "objectID": "Lecture_Folder/Lecture_05_BioE_Comp_Tools_2026.html#r-script-basics",
+    "href": "Lecture_Folder/Lecture_05_BioE_Comp_Tools_2026.html#r-script-basics",
+    "title": "Lecture 05",
+    "section": "R script basics",
+    "text": "R script basics\n\nA series of R commands that will be executed\n\nCan add comments using hashtags #\n\nCan have pipes (|&gt;) to connect one step to the next"
+  },
+  {
+    "objectID": "Lecture_Folder/Lecture_05_BioE_Comp_Tools_2026.html#python-script-basics",
+    "href": "Lecture_Folder/Lecture_05_BioE_Comp_Tools_2026.html#python-script-basics",
+    "title": "Lecture 05",
+    "section": "Python script basics",
+    "text": "Python script basics\n\nA series of Python commands that will be executed, top to bottom\n\nComments also use hashtags #\n\nSteps are connected with method chaining (data.dropna().groupby(\"x\").mean()) rather than pipes\n\nWhitespace matters: the body of a loop, if or function is indented (4 spaces)\n\nStart scripts with #!/usr/bin/env python3 and run them with python3 script.py (or ./script.py after chmod +x)"
   },
   {
     "objectID": "Lecture_Folder/Lecture_03_BioE_Comp_Tools_2026.html#book-reading-for-this-lecture",
@@ -1472,9 +1465,30 @@
   {
     "objectID": "Exercise_Folder/Exercises_Week04.html",
     "href": "Exercise_Folder/Exercises_Week04.html",
-    "title": "Week 4 Exercises - Shell Scripts, sed, and awk",
+    "title": "Week 4 Exercises - GREP in Practice, Shell Scripts, sed and awk",
     "section": "",
-    "text": "Short, ungraded practice tasks - about 20-30 minutes. Companion reading: Ch. 10 and the sed/awk sections of Ch. 9.\n\nIn scripts/, create hello.sh containing a #!/bin/bash shebang and a line that prints “Hello from ”. Try ./hello.sh - what error do you get?\nFix it with chmod +x hello.sh and run it again.\nAdd a variable: NAME=\"...\" and echo \"Hello, $NAME\". Re-run.\nMake the script greet whoever is passed on the command line using $1: ./hello.sh Bill should print “Hello, Bill”.\nWrite a for loop (in a script or at the prompt) that prints the name of every .tsv file under data/.\nAdd a safety check to a script: if [ ! -f \"$1\" ]; then echo \"no such file\"; exit 1; fi. Test it with a real and a fake filename.\nAdd set -euo pipefail near the top of one of your scripts, then introduce a typo in a command and observe how the script now stops instead of plowing on.\nUse awk to print the Individual and Genotype columns: awk -F'\\t' '{print $1, $2}' data/raw/Stickle_RNAseq.tsv | head.\nUse sed to replace “mono” with “monoassociated” in a copy of the dataset, and verify with grep -c.\nRe-run one of your scripts from a different working directory. Does it still work? If not, explain why (hint: relative paths)."
+    "text": "Short, ungraded practice tasks - about 25-35 minutes. Companion reading: Ch. 10 and Ch. 9 - review the grep/regex sections, and read the sed and awk sections carefully: in class we only learned them by example."
+  },
+  {
+    "objectID": "Exercise_Folder/Exercises_Week04.html#grep-on-real-data",
+    "href": "Exercise_Folder/Exercises_Week04.html#grep-on-real-data",
+    "title": "Week 4 Exercises - GREP in Practice, Shell Scripts, sed and awk",
+    "section": "GREP on real data",
+    "text": "GREP on real data\n\nWarm-up from the L04 reminder: run grep -c \"mono\" data/raw/Stickle_RNAseq.tsv and grep -cw \"mono\" data/raw/Stickle_RNAseq.tsv. Both give 40 - work out which column each one matches on, then construct a pattern where adding -w would change the answer.\nDownload human chromosome 21 into data/raw/ (the wget/curl command is on the L04 slides) and decompress a copy with gunzip -k. Then finish the lecture’s “Your turn” tasks if we ran out of time in class: total bases and GC content of chr21.fa. Save your working pipelines in scripts/ - you will want them for the homework."
+  },
+  {
+    "objectID": "Exercise_Folder/Exercises_Week04.html#shell-scripts",
+    "href": "Exercise_Folder/Exercises_Week04.html#shell-scripts",
+    "title": "Week 4 Exercises - GREP in Practice, Shell Scripts, sed and awk",
+    "section": "Shell scripts",
+    "text": "Shell scripts\n\nIn Week 2 you made scripts/hello.sh (if you skipped that, the recipe is on the L04 “mechanics” slide). Make it greet whoever is passed on the command line using $1: ./hello.sh Bill should print “Hello, Bill”.\nWrite a for loop (in a script or at the prompt) that prints the name of every .tsv file under data/.\nAdd a safety check to a script: if [ ! -f \"$1\" ]; then echo \"no such file\" &gt;&2; exit 1; fi. Test it with a real and a fake filename.\nAdd set -euo pipefail near the top of one of your scripts, then introduce a typo in a command and observe how the script now stops instead of plowing on.\nWrite a function count_group that takes a file and a group name and prints how many fish are in that group (the L04 functions slide is your template). Call it in a loop over convA convB monoA monoB - do you get 20 of each?"
+  },
+  {
+    "objectID": "Exercise_Folder/Exercises_Week04.html#sed-and-awk",
+    "href": "Exercise_Folder/Exercises_Week04.html#sed-and-awk",
+    "title": "Week 4 Exercises - GREP in Practice, Shell Scripts, sed and awk",
+    "section": "sed and awk",
+    "text": "sed and awk\n\nFix the awkward column name exactly as in lecture, but matched to your project layout: sed '1s/Geno&Micro/Geno_Micro/' data/raw/Stickle_RNAseq.tsv &gt; data/processed/stickle_clean.tsv. Verify with head -n 1 data/processed/stickle_clean.tsv | cut -f1-4.\nUse awk to print the Individual and Genotype columns (awk -F'\\t' '{print $1, $2}' data/processed/stickle_clean.tsv | head), then compute the mean of Gene1 (column 5) - the command is on the L04 slides.\nCopy gene_means.sh from the lecture into scripts/, change its infile= line to point at your data/processed/stickle_clean.tsv, make it executable, and run it for column 5. Then loop it over columns 5-7. (Annoyed that you had to edit a hardcoded path? That is best practice #6 from the last slide.)\nRe-run one of your scripts from a different working directory. Does it still work? If not, explain why (hint: relative paths)."
   },
   {
     "objectID": "Exercise_Folder/Exercises_Week02.html",
@@ -1705,7 +1719,7 @@
     "href": "Exercise_Folder/Exercises_Week03.html",
     "title": "Week 3 Exercises - Tidy Data, GREP, and Regular Expressions",
     "section": "",
-    "text": "Short, ungraded practice tasks - about 20-30 minutes. Companion reading: Ch. 8 and Ch. 9, with Ch. 7 as review; reference: App. D. All tasks use data/raw/Stickle_RNAseq.tsv from last week."
+    "text": "Short, ungraded practice tasks - about 20-30 minutes. Companion reading: Ch. 8 and Ch. 9, with Ch. 7 as review; reference: App. D. All tasks use data/raw/Stickle_RNAseq.tsv from last week. (We finish grep - and take it to a whole human chromosome - at the start of Week 4, so this week’s practice is the foundation.)"
   },
   {
     "objectID": "Exercise_Folder/Exercises_Week03.html#is-it-tidy",
@@ -1719,7 +1733,7 @@
     "href": "Exercise_Folder/Exercises_Week05.html",
     "title": "Week 5 Exercises - First Steps in R and Python",
     "section": "",
-    "text": "Short, ungraded practice tasks - about 30 minutes. Companion reading: Ch. 11 and Ch. 12; references: App. E and App. F.\n\nIn Positron, start an R console from the interpreter picker. Run 1 + 1, then R.version.string, then sessionInfo().\nCreate a vector of the numbers 1 through 20 and compute its mean() and sd().\nLoad the tidyverse (library(tidyverse)) and read the course dataset: stickle &lt;- read_tsv(\"data/raw/Stickle_RNAseq.tsv\"). If the path fails, check your working directory with getwd().\nHow many rows and columns does stickle have (dim())? Inspect it with glimpse().\nGet help two ways: ?mean in R, and search the Help pane for read_tsv.\nNow start a Python console. Run 2 ** 10, then import sys; sys.version.\nRead the same file with pandas: import pandas as pd; stickle = pd.read_csv(\"data/raw/Stickle_RNAseq.tsv\", sep=\"\\t\"), then check stickle.shape - does it match R?\nIn both languages, compute the mean of the Gene1 column (mean(stickle$Gene1) in R; stickle[\"Gene1\"].mean() in Python). Do they agree?\nSave your R commands into a script scripts/week05.R, restart R, and run the whole script top to bottom - does it work from a clean session?\nDeliberately cause an error in each language (e.g., call a function that does not exist), and read the message carefully: what part tells you what went wrong, and what part tells you where?"
+    "text": "Short, ungraded practice tasks - about 30 minutes. Companion reading: Ch. 11 and Ch. 12; references: App. E and App. F.\n\n\n\n\n\n\nTipAdjust as you go\n\n\n\nCommands copied from the lecture slides may need small tweaks to run in your project - most often a file path: the slides often use data/, while your Week 2 skeleton keeps the raw file in data/raw/. Spotting and fixing these little mismatches is not busywork; it is a core skill, and the error messages are your friend.\n\n\n\nIn Positron, start an R console from the interpreter picker. Run 1 + 1, then R.version.string, then sessionInfo().\nCreate a vector of the numbers 1 through 20 and compute its mean() and sd().\nBuild a vector without typing it in: x &lt;- seq(0, 10, by = 0.5), square every element with x^2, and check length(x). What happens if you run the sequence backwards (by = -0.5)?\nCopy fasta_stats.R from the L05 warm-up slides into scripts/ and run it from the terminal: Rscript scripts/fasta_stats.R data/raw/chr21.fa (the chromosome you downloaded and decompressed in Week 4).\nGet help two ways: ?mean in the R console, and help(np.mean) (or np.mean?) in a Python console.\nNow start a Python console. Run 2 ** 10, then import sys; sys.version. Careful: what does 2 ^ 10 give you, and why? (Check the L05 “same ideas, different syntax” table.)\nThe list-vs-array distinction from lecture: make x = [1, 2, 3, 4] and try x**2 - read the error. Then import numpy as np; np.array(x)**2. Finally, square the plain list with a list comprehension.\nCopy fasta_stats.py from the same warm-up slide and run it: python3 scripts/fasta_stats.py data/raw/chr21.fa. Do R and Python report the same GC content - and does it match your Week 4 shell pipeline?\nTypes: in R run class(TRUE), class(\"A\"), class(2), class(2L); in Python run type(True), type(\"A\"), type(2), type(2.0), then 7 / 2 and 7 // 2. Map each R answer onto its Python counterpart using the table on the last L05 slide.\nSave your R commands into a script scripts/week05.R, restart R, and run the whole script top to bottom - does it work from a clean session?\nDeliberately cause an error in each language (e.g., call a function that does not exist), and read the message carefully: what part tells you what went wrong, and what part tells you where?"
   },
   {
     "objectID": "Exercise_Folder/Exercises_Week07.html",
@@ -2594,63 +2608,133 @@
     "href": "Lecture_Folder/Lecture_04_BioE_Comp_Tools_2026.html#goals-for-today",
     "title": "Lecture 04",
     "section": "Goals for today",
-    "text": "Goals for today\n\nFinishing from L03: grep and regular expressions - a quick reminder\ngrep in action on the stickleback table and a whole human chromosome (worked example)\nIntroduction to scripts in Unix, R and Python\nWriting shell scripts: variables, conditionals, loops and functions\nError handling and best practices\nsed and awk for editing text and working with columns inside a pipeline\nThe same script written in R (Rscript) and in Python (python3)\nUsing Positron, VS Code or RStudio as script editors"
+    "text": "Goals for today\n\nFinishing from L03: grep and regular expressions - a quick reminder\ngrep in action on the stickleback table and a whole human chromosome (worked example)\nIntroduction to scripts in Unix, R and Python\nWriting shell scripts: variables, conditionals, loops and functions\nError handling and best practices\nsed and awk by example on the stickleback table (the systematic tour is Ch. 9, on your own)\nNext week (L05): the same script rewritten in R and in Python"
+  },
+  {
+    "objectID": "Lecture_Folder/Lecture_04_BioE_Comp_Tools_2026.html#reminder-grep-finds-lines-that-match-a-pattern",
+    "href": "Lecture_Folder/Lecture_04_BioE_Comp_Tools_2026.html#reminder-grep-finds-lines-that-match-a-pattern",
+    "title": "Lecture 04",
+    "section": "Reminder: grep finds lines that match a pattern",
+    "text": "Reminder: grep finds lines that match a pattern\ngrep [options] pattern [file...]\n\nGREP = Global Regular Expression Print - reads lines, prints the ones that match\nThe flags you will use constantly:\n\n-i ignore case · -c count matching lines · -n show line numbers\n-v invert (print lines that do not match) · -w match whole words only\n-o print only the matching text · -E extended regex (alternation, +, {n,m})\n\nThe pattern is a regular expression:\n\n^ start of line · $ end of line · . any one character\n[ACGT] one character from the set · [^ACGT] one character not in the set\n* zero or more · + one or more (-E) · \\{3\\} exactly 3 (or {3} with -E)\n(ATG|GTG|TTG) grouping and alternation with -E\n\nFull treatment: the L03 slides, Ch. 9 and App. D"
+  },
+  {
+    "objectID": "Lecture_Folder/Lecture_04_BioE_Comp_Tools_2026.html#reminder-grep-lives-in-pipelines",
+    "href": "Lecture_Folder/Lecture_04_BioE_Comp_Tools_2026.html#reminder-grep-lives-in-pipelines",
+    "title": "Lecture 04",
+    "section": "Reminder: grep lives in pipelines",
+    "text": "Reminder: grep lives in pipelines\n# Count the mono-associated fish in our stickleback table\ngrep -cw \"mono\" data/Stickle_RNAseq.tsv\n\n# Skip comments, pull one column, tally the unique values\ngrep -v \"^#\" annotation.gff | cut -f3 | sort | uniq -c\n\n# Most genomic data is gzip-compressed - zgrep/zcat read .gz directly\nzgrep -c \"^&gt;\" chr21.fa.gz\nzcat reads.fastq.gz | awk 'NR % 4 == 2' | grep -c \"N\"\n\n# Print only the matching text, not the whole line\ngrep -oE \"gene=[^;]+\" annotation.gff | head\n\n\n\n\n\n\nNote\n\n\nFrom L03: FASTA = &gt; header + sequence lines; FASTQ = 4 lines per read; zcat / zless / zgrep read compressed files without unpacking them."
+  },
+  {
+    "objectID": "Lecture_Folder/Lecture_04_BioE_Comp_Tools_2026.html#warm-up-quiz-which-lines-match",
+    "href": "Lecture_Folder/Lecture_04_BioE_Comp_Tools_2026.html#warm-up-quiz-which-lines-match",
+    "title": "Lecture 04",
+    "section": "Warm-up quiz: which lines match?",
+    "text": "Warm-up quiz: which lines match?\nThe file test.txt has four lines:\nATGCCCTAG\nCCATG\nATG\nACG\nPredict the output of each command before you run it:\ngrep \"^ATG\" test.txt\ngrep \"ATG$\" test.txt\ngrep \"^A.G$\" test.txt\n\n^ATG → lines 1 and 3 (must start with ATG)\nATG$ → lines 2 and 3 (must end with ATG)\n^A.G$ → lines 3 and 4 (exactly three characters: A, anything, G)"
+  },
+  {
+    "objectID": "Lecture_Folder/Lecture_04_BioE_Comp_Tools_2026.html#streams-and-grep-on-the-stickleback-table",
+    "href": "Lecture_Folder/Lecture_04_BioE_Comp_Tools_2026.html#streams-and-grep-on-the-stickleback-table",
+    "title": "Lecture 04",
+    "section": "streams and grep on the stickleback table",
+    "text": "streams and grep on the stickleback table\n\n# Keep only the header plus the mono-associated fish, save to a new file\nhead -n 1 data/Stickle_RNAseq.tsv &gt; results/mono.tsv\ngrep -w \"mono\" data/Stickle_RNAseq.tsv &gt;&gt; results/mono.tsv\nwc -l results/mono.tsv                        \n\n# Which individuals are genotype B raised conventionally?\ngrep -w \"convB\" data/Stickle_RNAseq.tsv | cut -f 1\n\n# A regular expression: individuals whose ID ends in a 1\ngrep -E \"^[A-Z]+1\\b\" data/Stickle_RNAseq.tsv | cut -f 1-3\n\n# Send errors somewhere useful: a typo in the path goes to the log, not the screen\ngrep -w \"mono\" data/Stickle_RNAseq.tsv 2&gt; results/errors.log; cat results/errors.log\n\n\n\n\n\n\nTip\n\n\n\n&gt; creates the file, &gt;&gt; appends to it, 2&gt; captures stderr.\ngrep -w \"mono\" matches mono only as a whole word, so it finds the 40 mono-associated fish through the third column but would not match monoA on its own.\nTry grep -c mono versus grep -cw mono: both give 40 here.\nWork out why (which column does each one match on?) - experiments like this are how you learn what a flag really does."
+  },
+  {
+    "objectID": "Lecture_Folder/Lecture_04_BioE_Comp_Tools_2026.html#human-chromosome-data",
+    "href": "Lecture_Folder/Lecture_04_BioE_Comp_Tools_2026.html#human-chromosome-data",
+    "title": "Lecture 04",
+    "section": "Human Chromosome Data",
+    "text": "Human Chromosome Data\n\nEverything so far - reading files, pipes, redirection, grep - in one realistic job: grab a big public dataset and ask it questions, straight from the shell\nGenomic data files can be massive (the full human genome is ~3.1 GB compressed)\nFASTA format is standard for sequence data\nPerfect use case for Unix pipes and redirection\nWe will practice on human chromosome 21 - the smallest autosome (~13 MB compressed, ~46 Mb of sequence), so every command finishes in seconds\nThe same commands work unchanged on the whole genome - only the wait time changes\nThe course book works through the same file in Chapter 9"
+  },
+  {
+    "objectID": "Lecture_Folder/Lecture_04_BioE_Comp_Tools_2026.html#downloading-genomic-data",
+    "href": "Lecture_Folder/Lecture_04_BioE_Comp_Tools_2026.html#downloading-genomic-data",
+    "title": "Lecture 04",
+    "section": "Downloading Genomic Data",
+    "text": "Downloading Genomic Data\nDownload chromosome 21 of the human genome (hg38 / GRCh38) from UCSC:\n# Using `wget` to download chr21 (~13 MB)\n\nwget https://hgdownload.soe.ucsc.edu/goldenPath/hg38/chromosomes/chr21.fa.gz\n\n# Or using `curl` and save with a specific name (-L follows redirects)\n\ncurl -L -o chr21.fa.gz \\\n  https://hgdownload.soe.ucsc.edu/goldenPath/hg38/chromosomes/chr21.fa.gz\n\nwget and curl are both tools for downloading files (macOS ships curl; install wget with Homebrew if you want it)\nThe backslash lets a long command span multiple lines\n.gz extension means the file is compressed\nThe whole genome lives in the same directory as hg38.fa.gz (~1 GB) - same commands, much longer runs"
+  },
+  {
+    "objectID": "Lecture_Folder/Lecture_04_BioE_Comp_Tools_2026.html#examining-large-files-efficiently",
+    "href": "Lecture_Folder/Lecture_04_BioE_Comp_Tools_2026.html#examining-large-files-efficiently",
+    "title": "Lecture 04",
+    "section": "Examining Large Files Efficiently",
+    "text": "Examining Large Files Efficiently\nDon’t use cat on huge files! Use these approaches:\n# Decompress and look at first 10 lines\n\ngunzip -c chr21.fa.gz | head -10\n\n# Check file size before and after decompression (-k keeps the .gz)\n\nls -lh chr21.fa.gz\ngunzip -k chr21.fa.gz\nls -lh chr21.fa\n\n# Count sequences in FASTA file (lines starting with &gt;)\n# grep can't read gzip data directly - use zgrep (or zcat | grep)\n\nzgrep \"^&gt;\" chr21.fa.gz | wc -l\n\n# View sequence headers only\n\nzgrep \"^&gt;\" chr21.fa.gz | less\n\n\n\n\n\n\nNote\n\n\n\nThe UCSC file is soft-masked: repeats are written in lowercase (acgt).\nPatterns like GAATTC will miss sites inside masked regions - add -i to grep\nOr uppercase everything first with tr 'acgt' 'ACGT'."
+  },
+  {
+    "objectID": "Lecture_Folder/Lecture_04_BioE_Comp_Tools_2026.html#creating-a-subset-for-analysis",
+    "href": "Lecture_Folder/Lecture_04_BioE_Comp_Tools_2026.html#creating-a-subset-for-analysis",
+    "title": "Lecture 04",
+    "section": "Creating a Subset for Analysis",
+    "text": "Creating a Subset for Analysis\nMake a smaller working file for testing:\n# Extract the first ~1 Mb of sequence for testing (50 bases per line)\n\nzcat chr21.fa.gz | head -n 20000 &gt; chr21_subset.fa\n\n# Extract a specific record by name from a multi-sequence FASTA\n# (e.g. from hg38.fa - chr21.fa has only one record)\n\nawk '/^&gt;chr21$/,/^&gt;chr22$/' hg38.fa | head -n -1 &gt; chr21_from_genome.fa\n\n# Pull out a window of lines from the middle of the chromosome\n\nsed -n '400000,420000p' chr21.fa &gt; region_of_interest.fa\n\n\n\n\n\n\nNote\n\n\nawk and sed get their full treatment later today - read those two lines as recipes for now."
+  },
+  {
+    "objectID": "Lecture_Folder/Lecture_04_BioE_Comp_Tools_2026.html#processing-fasta-files-with-pipes",
+    "href": "Lecture_Folder/Lecture_04_BioE_Comp_Tools_2026.html#processing-fasta-files-with-pipes",
+    "title": "Lecture 04",
+    "section": "Processing FASTA Files with Pipes",
+    "text": "Processing FASTA Files with Pipes\nExtract specific regions or sequences:\n# Extract just the sequence (no headers) and count bases\n\ngrep -v \"^&gt;\" chr21.fa | tr -d '\\n' | wc -c\n\n# Count each type of nucleotide (uppercase first so a == A)\n\ngrep -v \"^&gt;\" chr21.fa | \\\n  tr 'acgtn' 'ACGTN' | \\\n  tr -d '\\n' | \\\n  fold -w1 | \\\n  sort | \\\n  uniq -c\n\ngrep -v inverts the match (excludes lines)\ntr -d '\\n' removes newlines\nfold -w1 puts each character on its own line\nExpect a lot of N - the first ~5 Mb of chr21 is unassembled"
+  },
+  {
+    "objectID": "Lecture_Folder/Lecture_04_BioE_Comp_Tools_2026.html#finding-patterns-in-genomic-data",
+    "href": "Lecture_Folder/Lecture_04_BioE_Comp_Tools_2026.html#finding-patterns-in-genomic-data",
+    "title": "Lecture 04",
+    "section": "Finding Patterns in Genomic Data",
+    "text": "Finding Patterns in Genomic Data\nSearch for specific sequences and motifs:\n# Find all instances of a restriction enzyme site (EcoRI: GAATTC)\n\ngrep -v \"^&gt;\" chr21.fa | \\\n  tr 'acgt' 'ACGT' | \\\n  tr -d '\\n' | \\\n  grep -o \"GAATTC\" | \\\n  wc -l\n\n# Extract 100 bases around each EcoRI site\n\ngrep -v \"^&gt;\" chr21.fa | \\\n  tr 'acgt' 'ACGT' | \\\n  tr -d '\\n' | \\\n  grep -oE \".{100}GAATTC.{100}\" &gt; ecori_contexts.txt\n\n# Find all start codons (ATG) and their byte offsets\n\ngrep -v \"^&gt;\" chr21.fa | \\\n  tr 'acgt' 'ACGT' | \\\n  tr -d '\\n' | \\\n  grep -b -o \"ATG\" | \\\n  head -20"
+  },
+  {
+    "objectID": "Lecture_Folder/Lecture_04_BioE_Comp_Tools_2026.html#combining-downloads-with-processing",
+    "href": "Lecture_Folder/Lecture_04_BioE_Comp_Tools_2026.html#combining-downloads-with-processing",
+    "title": "Lecture 04",
+    "section": "Combining Downloads with Processing",
+    "text": "Combining Downloads with Processing\nStream processing without saving intermediate files:\n# Download, decompress, and process in one pipeline\ncurl -sL https://hgdownload.soe.ucsc.edu/goldenPath/hg38/chromosomes/chr21.fa.gz | \\\n  gunzip -c | \\\n  grep -v \"^&gt;\" | \\\n  tr -d '\\n' | \\\n  cut -c1-1000000 &gt; first_megabase.txt\n\n# Download and immediately analyze GC content\nwget -qO - https://hgdownload.soe.ucsc.edu/goldenPath/hg38/chromosomes/chr21.fa.gz | \\\n  gunzip -c | \\\n  grep -v \"^&gt;\" | \\\n  tr 'acgtn' 'ACGTN' | \\\n  tr -d 'N\\n' | \\\n  tr 'ATGC' '0011' | \\\n  awk '{n = length($0); gc = gsub(/1/, \"\"); print \"GC%:\", 100 * gc / n}'\n\n\nThe -O - flag tells wget to output to stdout\nThis approach saves disk space and time"
+  },
+  {
+    "objectID": "Lecture_Folder/Lecture_04_BioE_Comp_Tools_2026.html#your-turn-sequence-content-of-chr21",
+    "href": "Lecture_Folder/Lecture_04_BioE_Comp_Tools_2026.html#your-turn-sequence-content-of-chr21",
+    "title": "Lecture 04",
+    "section": "Your turn: sequence content of chr21",
+    "text": "Your turn: sequence content of chr21\nUsing only commands you now know (grep -v, tr, fold, sort, uniq, wc):\n\nCount the total number of bases in chr21.fa\nCalculate the GC content (percent of bases that are G or C)\nFind runs of the dinucleotide repeat AT five or more units long\nBonus: what fraction of the chromosome is N?\n\n\n\n\n\n\n\nTip\n\n\nBuild each pipeline one command at a time and check the output at every stage. Remember the soft-masking: uppercase first with tr 'acgt' 'ACGT'.\n\n\n\n\nSolutions:\n\nTotal bases: grep -v “^&gt;” chr21.fa | tr -d ‘’ | wc -c\nGC content: grep -v “^&gt;” chr21.fa | tr -d ‘’ | tr -cd ‘GCgc’ | wc -c, divided by the total\nRepeats: grep -v “^&gt;” chr21.fa | tr ‘acgt’ ‘ACGT’ | tr -d ‘’ | grep -oE “(AT){5,}”\nN fraction: same pipeline with tr -cd ‘Nn’ | wc -c, divided by the total"
+  },
+  {
+    "objectID": "Lecture_Folder/Lecture_04_BioE_Comp_Tools_2026.html#takeaways-from-the-worked-example",
+    "href": "Lecture_Folder/Lecture_04_BioE_Comp_Tools_2026.html#takeaways-from-the-worked-example",
+    "title": "Lecture 04",
+    "section": "Takeaways from the worked example",
+    "text": "Takeaways from the worked example\n\nReal bioinformatics often involves gigabytes of data - these Unix tools scale beautifully!\nNever load entire genome files into memory - use streaming\nCombine tools - each does one thing well\nTest on subsets first - extract small portions for development\nUse compression - work with .gz files directly when possible\nThink in streams - data flows through pipes without intermediate files\nDocument your pipelines - save commands in scripts … which is the rest of today"
   },
   {
     "objectID": "Lecture_Folder/Lecture_04_BioE_Comp_Tools_2026.html#three-languages-one-idea-a-script",
     "href": "Lecture_Folder/Lecture_04_BioE_Comp_Tools_2026.html#three-languages-one-idea-a-script",
     "title": "Lecture 04",
     "section": "Three languages, one idea: a script",
-    "text": "Three languages, one idea: a script\n\n\n\n\n\n\n\n\n\n\nShell (bash)\nR\nPython\n\n\n\n\nFile\nscript.sh\nscript.R\nscript.py\n\n\nShebang (line 1)\n#!/bin/bash\n#!/usr/bin/env Rscript\n#!/usr/bin/env python3\n\n\nRun it\nbash script.sh or ./script.sh\nRscript script.R\npython3 script.py\n\n\nComments\n#\n#\n#\n\n\nArguments\n$1, $2, $@\ncommandArgs(trailingOnly = TRUE)\nsys.argv[1:] (or argparse)\n\n\nBest at\ngluing programs and files together\nstatistics, data frames, figures\ngeneral programming, images, ML\n\n\n\n\n\n\n\n\n\nTip\n\n\nToday is mostly about shell scripts. At the end we will write the same FASTA-statistics script in R and in Python - and Lectures 05-07 go deep on both languages."
+    "text": "Three languages, one idea: a script\n\n\n\n\n\n\n\n\n\n\nShell (bash)\nR\nPython\n\n\n\n\nFile\nscript.sh\nscript.R\nscript.py\n\n\nShebang (line 1)\n#!/bin/bash\n#!/usr/bin/env Rscript\n#!/usr/bin/env python3\n\n\nRun it\nbash script.sh or ./script.sh\nRscript script.R\npython3 script.py\n\n\nComments\n#\n#\n#\n\n\nArguments\n$1, $2, $@\ncommandArgs(trailingOnly = TRUE)\nsys.argv[1:] (or argparse)\n\n\nBest at\ngluing programs and files together\nstatistics, data frames, figures\ngeneral programming, images, ML\n\n\n\n\n\n\n\n\n\nTip\n\n\nToday is about shell scripts. L05 opens by rewriting today’s FASTA-statistics script in R and in Python, and Lectures 05-07 go deep on both languages."
   },
   {
-    "objectID": "Lecture_Folder/Lecture_04_BioE_Comp_Tools_2026.html#what-is-a-shell-script",
-    "href": "Lecture_Folder/Lecture_04_BioE_Comp_Tools_2026.html#what-is-a-shell-script",
+    "objectID": "Lecture_Folder/Lecture_04_BioE_Comp_Tools_2026.html#shell-scripts-the-mechanics-reminder",
+    "href": "Lecture_Folder/Lecture_04_BioE_Comp_Tools_2026.html#shell-scripts-the-mechanics-reminder",
     "title": "Lecture 04",
-    "section": "What is a Shell Script?",
-    "text": "What is a Shell Script?\n\nText file containing Unix commands\nAutomates repetitive tasks\nMakes complex workflows reproducible\nEssential for bioinformatics pipelines\nCan include:\n\nVariables and arrays\nConditionals (if/then/else)\nLoops (for/while)\nFunctions\nCommand-line arguments"
-  },
-  {
-    "objectID": "Lecture_Folder/Lecture_04_BioE_Comp_Tools_2026.html#creating-your-first-script",
-    "href": "Lecture_Folder/Lecture_04_BioE_Comp_Tools_2026.html#creating-your-first-script",
-    "title": "Lecture 04",
-    "section": "Creating Your First Script",
-    "text": "Creating Your First Script\n#!/bin/bash\n# This is a shebang - tells system which interpreter to use\n\n# This is a comment - documents your code\necho \"Hello, Bioengineering!\"\n\n# Set a variable\nNAME=\"DNA Analysis\"\necho \"Running $NAME\"\n\n# Use command output as variable\nDATE=$(date +%Y-%m-%d)\necho \"Analysis date: $DATE\"\n\n# Simple calculation\nCOUNT=5\nDOUBLE=$((COUNT * 2))\necho \"Double of $COUNT is $DOUBLE\"\nSave as first_script.sh and run with bash first_script.sh"
-  },
-  {
-    "objectID": "Lecture_Folder/Lecture_04_BioE_Comp_Tools_2026.html#making-scripts-executable",
-    "href": "Lecture_Folder/Lecture_04_BioE_Comp_Tools_2026.html#making-scripts-executable",
-    "title": "Lecture 04",
-    "section": "Making Scripts Executable",
-    "text": "Making Scripts Executable\n# Check current permissions\nls -l first_script.sh\n\n# Make executable (add execute permission)\nchmod +x first_script.sh\n\n# Now you can run it directly\n./first_script.sh\nBest practice: Always use chmod +x for your scripts"
+    "section": "Shell scripts: the mechanics (reminder)",
+    "text": "Shell scripts: the mechanics (reminder)\nFrom L02 and the L03 warm-up: a script is a text file of commands, with a shebang on line 1 and execute permission added once.\n#!/bin/bash\n# first_script.sh - comments start with #\n\necho \"Hello, Bioengineering!\"\n\nNAME=\"DNA Analysis\"               # set a variable (no spaces around =)\necho \"Running $NAME\"\n\nDATE=$(date +%Y-%m-%d)            # capture a command's output\necho \"Analysis date: $DATE\"\n\nCOUNT=5\necho \"Double of $COUNT is $((COUNT * 2))\"    # arithmetic with $(( ))\nchmod +x first_script.sh     # make it executable, once\n./first_script.sh            # run it (or: bash first_script.sh)\nNew today: arguments, conditionals, loops, functions and error handling - the pieces that turn saved commands into real pipelines."
   },
   {
     "objectID": "Lecture_Folder/Lecture_04_BioE_Comp_Tools_2026.html#command-line-arguments",
     "href": "Lecture_Folder/Lecture_04_BioE_Comp_Tools_2026.html#command-line-arguments",
     "title": "Lecture 04",
     "section": "Command-Line Arguments",
-    "text": "Command-Line Arguments\n#!/bin/bash\n# Script: process_fasta.sh\n\n# $0 is the script name\n\necho \"Script name: $0\"\n\n# $# is the number of arguments\n\necho \"Number of arguments: $#\"\n\n# Check if enough arguments provided FIRST\n\nif [ $# -lt 2 ]; then\n    echo \"Usage: $0 input.fasta output.txt\"\n    exit 1\nfi\n\n# Now safe to use the arguments\n\necho \"Processing file: $1\"\necho \"Output will be: $2\"\n\n# $@ is all arguments (should be quoted)\n\necho \"All arguments: $@\"\nRun as: ./process_fasta.sh input.fa results.txt"
+    "text": "Command-Line Arguments\n#!/bin/bash\n# Script: process_fasta.sh\n\n# $0 is the script name\n\necho \"Script name: $0\"\n\n# $# is the number of arguments\n\necho \"Number of arguments: $#\"\n\n# Check if enough arguments provided FIRST\n\nif [ $# -lt 2 ]; then\n    echo \"Usage: $0 input.fasta output.txt\"\n    exit 1\nfi\n\n# Now safe to use the arguments\n\necho \"Processing file: $1\"\necho \"Output will be: $2\"\n\n# $@ is all arguments (should be quoted)\n\necho \"All arguments: $@\"\nRun as: ./process_fasta.sh chr21.fa results/chr21_headers.txt"
   },
   {
-    "objectID": "Lecture_Folder/Lecture_04_BioE_Comp_Tools_2026.html#variables-and-arrays",
-    "href": "Lecture_Folder/Lecture_04_BioE_Comp_Tools_2026.html#variables-and-arrays",
+    "objectID": "Lecture_Folder/Lecture_04_BioE_Comp_Tools_2026.html#variables-and-strings",
+    "href": "Lecture_Folder/Lecture_04_BioE_Comp_Tools_2026.html#variables-and-strings",
     "title": "Lecture 04",
-    "section": "Variables and Arrays",
-    "text": "Variables and Arrays\n#!/bin/bash\n\n# Variables (no spaces around =)\nSPECIES=\"Homo sapiens\"\nCHROMOSOME=21\nGENE_COUNT=234\n\n# Arrays\nBASES=(A C G T)\necho \"First base: ${BASES[0]}\"\necho \"All bases: ${BASES[@]}\"\n\n# Add to array\nBASES+=(N)\n\n# Array length\necho \"Number of bases: ${#BASES[@]}\"\n\n# String operations\nFILE=\"sample_001.fastq.gz\"\nNAME=\"${FILE%.fastq.gz}\"     # Remove suffix\necho \"Sample name: $NAME\""
+    "section": "Variables and strings",
+    "text": "Variables and strings\n#!/bin/bash\n\n# Variables (no spaces around =)\nSPECIES=\"Homo sapiens\"\nCHROMOSOME=21\n\n# Use them with $ (quote to protect spaces)\necho \"$SPECIES chromosome $CHROMOSOME\"\n\n# Capture command output - how many fish are in our stickleback table?\nN_FISH=$(tail -n +2 data/Stickle_RNAseq.tsv | wc -l)\necho \"The table has $N_FISH fish\"\n\n# String operations on file names\nFILE=\"sample_001.fastq.gz\"\nNAME=\"${FILE%.fastq.gz}\"     # strip the suffix -&gt; sample_001\necho \"Sample name: $NAME\"\n\n\n\n\n\n\nNote\n\n\nBash also has arrays (BASES=(A C G T)) - you will rarely need them in this course. See Ch. 10 and the backup slide at the end of this deck."
   },
   {
     "objectID": "Lecture_Folder/Lecture_04_BioE_Comp_Tools_2026.html#conditionals-ifthenelse",
     "href": "Lecture_Folder/Lecture_04_BioE_Comp_Tools_2026.html#conditionals-ifthenelse",
     "title": "Lecture 04",
     "section": "Conditionals (if/then/else)",
-    "text": "Conditionals (if/then/else)\n#!/bin/bash\n\n# Numeric comparisons\nCOUNT=100\nif [ $COUNT -gt 50 ]; then\n    echo \"High read count\"\nelif [ $COUNT -gt 10 ]; then\n    echo \"Medium read count\"\nelse\n    echo \"Low read count\"\nfi\n\n# String comparisons\nFILETYPE=\"fasta\"\nif [ \"$FILETYPE\" = \"fasta\" ]; then\n    echo \"Processing FASTA file\"\nfi\n\n# File tests\nif [ -f \"data.txt\" ]; then\n    echo \"File exists\"\nfi\n\nif [ -d \"results\" ]; then\n    echo \"Directory exists\"\nelse\n    mkdir results\nfi"
-  },
-  {
-    "objectID": "Lecture_Folder/Lecture_04_BioE_Comp_Tools_2026.html#test-operators-for",
-    "href": "Lecture_Folder/Lecture_04_BioE_Comp_Tools_2026.html#test-operators-for",
-    "title": "Lecture 04",
-    "section": "Test operators for [ ]",
-    "text": "Test operators for [ ]\n\n\n\n\n\n\n\n\n\nOperator\nMeaning\nOperator\nMeaning\n\n\n\n\n-eq\nEqual (numbers)\n=\nStrings are equal\n\n\n-ne\nNot equal (numbers)\n!=\nStrings differ\n\n\n-gt\nGreater than\n-z\nString is empty\n\n\n-lt\nLess than\n-f\nFile exists\n\n\n-ge\nGreater than or equal\n-d\nDirectory exists\n\n\n-le\nLess than or equal\n-s\nFile exists, not empty\n\n\n\n\n\n\n\n\n\nTip\n\n\nAlways put spaces inside the brackets ([ $x -gt 5 ], not [$x -gt 5]) and quote your variables (\"$FILE\") so file names with spaces don’t break your script."
+    "text": "Conditionals (if/then/else)\n#!/bin/bash\n\n# Numeric comparisons\nCOUNT=100\nif [ $COUNT -gt 50 ]; then\n    echo \"High read count\"\nelif [ $COUNT -gt 10 ]; then\n    echo \"Medium read count\"\nelse\n    echo \"Low read count\"\nfi\n\n# String comparisons\nFILETYPE=\"fasta\"\nif [ \"$FILETYPE\" = \"fasta\" ]; then\n    echo \"Processing FASTA file\"\nfi\n\n# File tests\nif [ -f \"data.txt\" ]; then\n    echo \"File exists\"\nfi\n\nif [ -d \"results\" ]; then\n    echo \"Directory exists\"\nelse\n    mkdir results\nfi\n\n\n\n\n\n\nTip\n\n\nAlways put spaces inside the brackets ([ $x -gt 5 ]) and quote your variables (\"$FILE\"). The full table of test operators (-eq, -ne, -z, -f, -d, …) is in the backup slides, App. B and Ch. 10."
   },
   {
     "objectID": "Lecture_Folder/Lecture_04_BioE_Comp_Tools_2026.html#loops-in-shell-scripts",
@@ -2664,35 +2748,21 @@
     "href": "Lecture_Folder/Lecture_04_BioE_Comp_Tools_2026.html#functions-in-scripts",
     "title": "Lecture 04",
     "section": "Functions in Scripts",
-    "text": "Functions in Scripts\n#!/bin/bash\n\n# Define a function\ncount_sequences() {\n    local FILE=$1  # Local variable\n    local COUNT=$(grep -c \"^&gt;\" \"$FILE\")\n    echo \"$COUNT\"  # \"Return\" a value by printing it\n}\n# Note: bash 'return' only carries an exit status (0-255), not data -\n# so functions hand back results via echo, captured with $(...)\nn=$(count_sequences proteins.fasta)\necho \"proteins.fasta has $n sequences\"\n\n# Another function with multiple parameters\nprocess_fasta() {\n    local INPUT=$1\n    local OUTPUT=$2\n    \n    echo \"Processing $INPUT...\"\n    grep \"^&gt;\" \"$INPUT\" &gt; \"$OUTPUT\"\n    echo \"$INPUT has $(count_sequences \"$INPUT\") sequences\"\n}\n\n# Call functions\nprocess_fasta \"input.fasta\" \"headers.txt\""
+    "text": "Functions in Scripts\n#!/bin/bash\n\n# Define a function\ncount_group() {\n    local FILE=$1 GROUP=$2          # Local variables\n    local COUNT=$(grep -cw \"$GROUP\" \"$FILE\")\n    echo \"$COUNT\"                   # \"Return\" a value by printing it\n}\n# Note: bash 'return' only carries an exit status (0-255), not data -\n# so functions hand back results via echo, captured with $(...)\nn=$(count_group data/Stickle_RNAseq.tsv convA)\necho \"convA has $n fish\"\n\n# Another function with multiple parameters, reusing the first\ngroup_report() {\n    local INFILE=$1\n    local OUTFILE=$2\n\n    echo \"Summarizing $INFILE...\"\n    for g in convA convB monoA monoB; do\n        echo \"$g: $(count_group \"$INFILE\" \"$g\") fish\"\n    done &gt; \"$OUTFILE\"\n}\n\n# Call functions\ngroup_report \"data/Stickle_RNAseq.tsv\" \"results/group_counts.txt\""
   },
   {
-    "objectID": "Lecture_Folder/Lecture_04_BioE_Comp_Tools_2026.html#error-handling",
-    "href": "Lecture_Folder/Lecture_04_BioE_Comp_Tools_2026.html#error-handling",
+    "objectID": "Lecture_Folder/Lecture_04_BioE_Comp_Tools_2026.html#error-handling-the-two-lines-to-memorize",
+    "href": "Lecture_Folder/Lecture_04_BioE_Comp_Tools_2026.html#error-handling-the-two-lines-to-memorize",
     "title": "Lecture 04",
-    "section": "Error Handling",
-    "text": "Error Handling\n#!/bin/bash\n\n# Exit on error\nset -e\n\n# Exit on undefined variable\nset -u\n\n# Pipe failure detection\nset -o pipefail\n\n# Custom error handling\ncheck_file() {\n    if [ ! -f \"$1\" ]; then\n        echo \"Error: File $1 not found!\" &gt;&2\n        exit 1\n    fi\n}\n\n# Trap errors\ntrap 'echo \"Error on line $LINENO\"' ERR\n\n# Try-catch style\nif ! grep \"pattern\" file.txt &gt; /dev/null 2&gt;&1; then\n    echo \"Pattern not found\"\nfi"
+    "section": "Error handling: the two lines to memorize",
+    "text": "Error handling: the two lines to memorize\n#!/bin/bash\nset -euo pipefail   # exit on any error, on unset variables, and on pipe failures\n\n# ... and check your inputs before using them\nif [ ! -f \"$1\" ]; then\n    echo \"Error: File $1 not found!\" &gt;&2\n    exit 1\nfi\n\nset -euo pipefail turns silent failures into loud, early ones - put it at the top of every script (our gene_means.sh below does)\nSend error messages to stderr (&gt;&2) so they never pollute piped output\nMore patterns (trap, try/catch style) in Ch. 10 and the backup slides"
   },
   {
     "objectID": "Lecture_Folder/Lecture_04_BioE_Comp_Tools_2026.html#editing-streams-inside-a-script",
     "href": "Lecture_Folder/Lecture_04_BioE_Comp_Tools_2026.html#editing-streams-inside-a-script",
     "title": "Lecture 04",
     "section": "Editing streams inside a script",
-    "text": "Editing streams inside a script\nShell scripts rarely do arithmetic or text editing themselves - they glue together small tools. Two of the most useful in a pipeline are sed (edit text as it streams past) and awk (work with columns). You met grep last week; these complete the trio."
-  },
-  {
-    "objectID": "Lecture_Folder/Lecture_04_BioE_Comp_Tools_2026.html#beyond-grep-sed-for-search-and-replace",
-    "href": "Lecture_Folder/Lecture_04_BioE_Comp_Tools_2026.html#beyond-grep-sed-for-search-and-replace",
-    "title": "Lecture 04",
-    "section": "Beyond grep: sed for search-and-replace",
-    "text": "Beyond grep: sed for search-and-replace\n# Substitute the first match on each line (s/pattern/replacement/)\nsed 's/chr/Chr/' regions.bed\n\n# Substitute every match on each line (g = global)\nsed 's/T/U/g' dna.txt &gt; rna.txt\n\n# Delete lines matching a pattern (e.g. comment lines)\nsed '/^#/d' annotation.gff\n\n# Print only lines 10-20\nsed -n '10,20p' big_file.txt\n\n\n\n\n\n\nWarning\n\n\nsed -i edits a file in place - and the syntax differs between Linux (sed -i 's/a/b/' f) and macOS (sed -i '' 's/a/b/' f). Write to a new file until you’re confident."
-  },
-  {
-    "objectID": "Lecture_Folder/Lecture_04_BioE_Comp_Tools_2026.html#beyond-grep-awk-for-columns",
-    "href": "Lecture_Folder/Lecture_04_BioE_Comp_Tools_2026.html#beyond-grep-awk-for-columns",
-    "title": "Lecture 04",
-    "section": "Beyond grep: awk for columns",
-    "text": "Beyond grep: awk for columns\n# Print columns 1 and 3 of a tab- or space-separated file\nawk '{print $1, $3}' data.tsv\n\n# Keep rows where column 5 is greater than 30\nawk '$5 &gt; 30' measurements.tsv\n\n# Comma-separated file: set the field separator, skip the header\nawk -F',' 'NR &gt; 1 {print $2}' samples.csv\n\n# Sum and average a column\nawk -F',' 'NR &gt; 1 {sum += $3; n++} END {print sum, sum/n}' samples.csv\n\n\n\n\n\n\nTip\n\n\nRule of thumb: grep finds lines, sed edits text, awk works with columns. More in the course book’s sed and awk sections and Regular Expression Reference."
+    "text": "Editing streams inside a script\nShell scripts rarely do text editing themselves - they glue together small tools:\n\ngrep finds lines (last week, and today’s warm-up)\nsed edits text as it streams past: sed 's/old/new/g' file\nawk works with columns: awk -F'\\t' '$5 &gt; 30 {print $1}' file\n\n\n\n\n\n\n\nNote\n\n\nWe will learn sed and awk by example on the stickleback table rather than flag by flag. The systematic tour - substitution, deletion, line ranges, NR, BEGIN/END, awk arrays - is yours to read in the sed and awk sections of Ch. 9, with two reference slides at the end of this deck.\n\n\n\n\n\n\n\n\n\nWarning\n\n\nsed -i edits a file in place - and the syntax differs between Linux (sed -i 's/a/b/' f) and macOS (sed -i '' 's/a/b/' f). Write to a new file until you’re confident."
   },
   {
     "objectID": "Lecture_Folder/Lecture_04_BioE_Comp_Tools_2026.html#running-example-sed-awk-and-a-script-on-the-stickleback-table",
@@ -2713,21 +2783,7 @@
     "href": "Lecture_Folder/Lecture_04_BioE_Comp_Tools_2026.html#real-bioinformatics-script-example",
     "title": "Lecture 04",
     "section": "Real Bioinformatics Script Example",
-    "text": "Real Bioinformatics Script Example\n#!/bin/bash\n# Script: fasta_stats.sh\n# Purpose: Calculate basic statistics for FASTA files\n\n# Check arguments\nif [ $# -ne 1 ]; then\n    echo \"Usage: $0 sequences.fasta\"\n    exit 1\nfi\n\nINPUT=$1\n\n# Check if file exists\nif [ ! -f \"$INPUT\" ]; then\n    echo \"Error: File $INPUT not found!\"\n    exit 1\nfi\n\necho \"=== FASTA Statistics for $INPUT ===\"\n\n# Count sequences\nSEQ_COUNT=$(grep -c \"^&gt;\" \"$INPUT\")\necho \"Number of sequences: $SEQ_COUNT\"\n\n# Calculate total length\nTOTAL_LENGTH=$(grep -v \"^&gt;\" \"$INPUT\" | tr -d '\\n' | wc -c)\necho \"Total length: $TOTAL_LENGTH bp\"\n\n# Average length\nAVG_LENGTH=$((TOTAL_LENGTH / SEQ_COUNT))\necho \"Average length: $AVG_LENGTH bp\"\n\n# GC content\nGC_COUNT=$(grep -v \"^&gt;\" \"$INPUT\" | tr -d '\\n' | grep -o \"[GC]\" | wc -l)\nGC_PERCENT=$((GC_COUNT * 100 / TOTAL_LENGTH))\necho \"GC content: $GC_PERCENT%\""
-  },
-  {
-    "objectID": "Lecture_Folder/Lecture_04_BioE_Comp_Tools_2026.html#the-same-script-in-r-and-python",
-    "href": "Lecture_Folder/Lecture_04_BioE_Comp_Tools_2026.html#the-same-script-in-r-and-python",
-    "title": "Lecture 04",
-    "section": "The same script in R and Python",
-    "text": "The same script in R and Python\nThe shell version of fasta_stats.sh works, but counting and arithmetic get awkward in bash. Here is the same program as an R script and a Python script - both take the file name as a command-line argument.\n\nRPython\n\n\n\n#!/usr/bin/env Rscript\n# Script: fasta_stats.R\n# Purpose: Calculate basic statistics for a FASTA file\n\nargs &lt;- commandArgs(trailingOnly = TRUE)     # like $1 $2 ... in bash\nif (length(args) != 1) {\n  cat(\"Usage: Rscript fasta_stats.R sequences.fasta\\n\")\n  quit(status = 1)\n}\ninput &lt;- args[1]\nif (!file.exists(input)) {\n  cat(\"Error: File\", input, \"not found!\\n\")\n  quit(status = 1)\n}\n\nlines   &lt;- readLines(input)\nheaders &lt;- grepl(\"^&gt;\", lines)                # TRUE for header lines\nseq     &lt;- paste(lines[!headers], collapse = \"\")\n\ncat(\"=== FASTA Statistics for\", input, \"===\\n\")\ncat(\"Number of sequences:\", sum(headers), \"\\n\")\ncat(\"Total length:\", nchar(seq), \"bp\\n\")\ncat(\"Average length:\", nchar(seq) / sum(headers), \"bp\\n\")\ngc &lt;- sum(strsplit(seq, \"\")[[1]] %in% c(\"G\", \"C\"))\ncat(\"GC content:\", round(100 * gc / nchar(seq), 1), \"%\\n\")\n\n\n\n\n#!/usr/bin/env python3\n# Script: fasta_stats.py\n# Purpose: Calculate basic statistics for a FASTA file\n\nimport sys\nfrom pathlib import Path\n\nif len(sys.argv) != 2:                       # sys.argv[0] is the script name, like $0\n    print(\"Usage: python3 fasta_stats.py sequences.fasta\")\n    sys.exit(1)\ninput_file = Path(sys.argv[1])\nif not input_file.is_file():\n    print(f\"Error: File {input_file} not found!\")\n    sys.exit(1)\n\nlines   = input_file.read_text().splitlines()\nheaders = [line for line in lines if line.startswith(\"&gt;\")]\nseq     = \"\".join(line for line in lines if not line.startswith(\"&gt;\"))\n\nprint(f\"=== FASTA Statistics for {input_file} ===\")\nprint(f\"Number of sequences: {len(headers)}\")\nprint(f\"Total length: {len(seq)} bp\")\nprint(f\"Average length: {len(seq) / len(headers):.1f} bp\")\ngc = seq.count(\"G\") + seq.count(\"C\")\nprint(f\"GC content: {100 * gc / len(seq):.1f}%\")"
-  },
-  {
-    "objectID": "Lecture_Folder/Lecture_04_BioE_Comp_Tools_2026.html#running-r-and-python-scripts-from-the-shell",
-    "href": "Lecture_Folder/Lecture_04_BioE_Comp_Tools_2026.html#running-r-and-python-scripts-from-the-shell",
-    "title": "Lecture 04",
-    "section": "Running R and Python scripts from the shell",
-    "text": "Running R and Python scripts from the shell\n\nRPython\n\n\nRscript fasta_stats.R proteins.fasta        # run with the interpreter ...\n\nchmod +x fasta_stats.R                      # ... or make it executable\n./fasta_stats.R proteins.fasta              #     (needs the #!/usr/bin/env Rscript shebang)\n\nRscript -e 'mean(c(1, 2, 3))'               # one-liner without a file\nR                                           # interactive console; quit with q()\n\nRscript runs the file top to bottom and prints only what you cat() or print()\nIn Positron / VS Code / RStudio: open the .R file and press Cmd/Ctrl-Enter to send lines to the console\n\n\n\npython3 fasta_stats.py proteins.fasta       # run with the interpreter ...\n\nchmod +x fasta_stats.py                     # ... or make it executable\n./fasta_stats.py proteins.fasta             #     (needs the #!/usr/bin/env python3 shebang)\n\npython3 -c 'print(sum([1, 2, 3]) / 3)'      # one-liner without a file\npython3                                     # interactive REPL; quit with exit() or Ctrl-D\n\npython3 script.py runs the file top to bottom and prints only what you print()\nIn VS Code / Positron: open the .py file and press Cmd/Ctrl-Enter, or use the Run button\nKeep project packages in a virtual environment: python3 -m venv .venv && source .venv/bin/activate\n\n\n\n\n\n\n\n\n\n\nTip\n\n\nBoth scripts return an exit status (quit(status = 1) / sys.exit(1)), so a shell pipeline or SLURM job can tell whether they succeeded - just like exit 1 in bash. In Lecture 08 we submit these scripts to Talapas with Rscript and python3 inside an sbatch job."
+    "text": "Real Bioinformatics Script Example\n#!/bin/bash\n# Script: fasta_stats.sh\n# Purpose: Calculate basic statistics for FASTA files\n\n# Check arguments\nif [ $# -ne 1 ]; then\n    echo \"Usage: $0 sequences.fasta\"\n    exit 1\nfi\n\nINPUT=$1\n\n# Check if file exists\nif [ ! -f \"$INPUT\" ]; then\n    echo \"Error: File $INPUT not found!\"\n    exit 1\nfi\n\necho \"=== FASTA Statistics for $INPUT ===\"\n\n# Count sequences\nSEQ_COUNT=$(grep -c \"^&gt;\" \"$INPUT\")\necho \"Number of sequences: $SEQ_COUNT\"\n\n# Calculate total length\nTOTAL_LENGTH=$(grep -v \"^&gt;\" \"$INPUT\" | tr -d '\\n' | wc -c)\necho \"Total length: $TOTAL_LENGTH bp\"\n\n# Average length\nAVG_LENGTH=$((TOTAL_LENGTH / SEQ_COUNT))\necho \"Average length: $AVG_LENGTH bp\"\n\n# GC content\nGC_COUNT=$(grep -v \"^&gt;\" \"$INPUT\" | tr -d '\\n' | grep -o \"[GC]\" | wc -l)\nGC_PERCENT=$((GC_COUNT * 100 / TOTAL_LENGTH))\necho \"GC content: $GC_PERCENT%\"\n./fasta_stats.sh chr21.fa    # run it on the chromosome from the worked example\n\n\n\n\n\n\nNote\n\n\nNext week (L05) opens with this same script rewritten in R and in Python - same logic, friendlier arithmetic."
   },
   {
     "objectID": "Lecture_Folder/Lecture_04_BioE_Comp_Tools_2026.html#best-practices-for-shell-scripts",
@@ -2735,6 +2791,55 @@
     "title": "Lecture 04",
     "section": "Best Practices for Shell Scripts",
     "text": "Best Practices for Shell Scripts\n\nAlways include a shebang: #!/bin/bash\nComment your code: Explain what and why\nUse meaningful variable names: GENE_COUNT not GC\nCheck inputs: Validate files exist and arguments are correct\nHandle errors gracefully: Use set -e and error checking\nMake scripts portable: Don’t hardcode paths\nUse version control: Track changes with git\nTest incrementally: Build scripts step by step\nCreate help messages: Document usage\nLog important steps: Keep records of what was done\n\n\n\n\n\n\n\nNote\n\n\nEvery one of these applies to R and Python scripts too: shebang line, comments, checking commandArgs() / sys.argv, meaningful names, relative paths, Git, and testing on a tiny input first."
+  },
+  {
+    "objectID": "Lecture_Folder/Lecture_04_BioE_Comp_Tools_2026.html#creating-your-first-script",
+    "href": "Lecture_Folder/Lecture_04_BioE_Comp_Tools_2026.html#creating-your-first-script",
+    "title": "Lecture 04",
+    "section": "Creating Your First Script",
+    "text": "Creating Your First Script\n#!/bin/bash\n# This is a shebang - tells system which interpreter to use\n\n# This is a comment - documents your code\necho \"Hello, Bioengineering!\"\n\n# Set a variable\nNAME=\"DNA Analysis\"\necho \"Running $NAME\"\n\n# Use command output as variable\nDATE=$(date +%Y-%m-%d)\necho \"Analysis date: $DATE\"\n\n# Simple calculation\nCOUNT=5\nDOUBLE=$((COUNT * 2))\necho \"Double of $COUNT is $DOUBLE\"\nSave as first_script.sh and run with bash first_script.sh"
+  },
+  {
+    "objectID": "Lecture_Folder/Lecture_04_BioE_Comp_Tools_2026.html#making-scripts-executable",
+    "href": "Lecture_Folder/Lecture_04_BioE_Comp_Tools_2026.html#making-scripts-executable",
+    "title": "Lecture 04",
+    "section": "Making Scripts Executable",
+    "text": "Making Scripts Executable\n# Check current permissions\nls -l first_script.sh\n\n# Make executable (add execute permission)\nchmod +x first_script.sh\n\n# Now you can run it directly\n./first_script.sh\nBest practice: Always use chmod +x for your scripts"
+  },
+  {
+    "objectID": "Lecture_Folder/Lecture_04_BioE_Comp_Tools_2026.html#variables-and-arrays",
+    "href": "Lecture_Folder/Lecture_04_BioE_Comp_Tools_2026.html#variables-and-arrays",
+    "title": "Lecture 04",
+    "section": "Variables and Arrays",
+    "text": "Variables and Arrays\n#!/bin/bash\n\n# Variables (no spaces around =)\nSPECIES=\"Homo sapiens\"\nCHROMOSOME=21\nGENE_COUNT=234\n\n# Arrays\nBASES=(A C G T)\necho \"First base: ${BASES[0]}\"\necho \"All bases: ${BASES[@]}\"\n\n# Add to array\nBASES+=(N)\n\n# Array length\necho \"Number of bases: ${#BASES[@]}\"\n\n# String operations\nFILE=\"sample_001.fastq.gz\"\nNAME=\"${FILE%.fastq.gz}\"     # Remove suffix\necho \"Sample name: $NAME\""
+  },
+  {
+    "objectID": "Lecture_Folder/Lecture_04_BioE_Comp_Tools_2026.html#test-operators-for",
+    "href": "Lecture_Folder/Lecture_04_BioE_Comp_Tools_2026.html#test-operators-for",
+    "title": "Lecture 04",
+    "section": "Test operators for [ ]",
+    "text": "Test operators for [ ]\n\n\n\n\n\n\n\n\n\nOperator\nMeaning\nOperator\nMeaning\n\n\n\n\n-eq\nEqual (numbers)\n=\nStrings are equal\n\n\n-ne\nNot equal (numbers)\n!=\nStrings differ\n\n\n-gt\nGreater than\n-z\nString is empty\n\n\n-lt\nLess than\n-f\nFile exists\n\n\n-ge\nGreater than or equal\n-d\nDirectory exists\n\n\n-le\nLess than or equal\n-s\nFile exists, not empty\n\n\n\n\n\n\n\n\n\nTip\n\n\nAlways put spaces inside the brackets ([ $x -gt 5 ], not [$x -gt 5]) and quote your variables (\"$FILE\") so file names with spaces don’t break your script."
+  },
+  {
+    "objectID": "Lecture_Folder/Lecture_04_BioE_Comp_Tools_2026.html#error-handling",
+    "href": "Lecture_Folder/Lecture_04_BioE_Comp_Tools_2026.html#error-handling",
+    "title": "Lecture 04",
+    "section": "Error Handling",
+    "text": "Error Handling\n#!/bin/bash\n\n# Exit on error\nset -e\n\n# Exit on undefined variable\nset -u\n\n# Pipe failure detection\nset -o pipefail\n\n# Custom error handling\ncheck_file() {\n    if [ ! -f \"$1\" ]; then\n        echo \"Error: File $1 not found!\" &gt;&2\n        exit 1\n    fi\n}\n\n# Trap errors\ntrap 'echo \"Error on line $LINENO\"' ERR\n\n# Try-catch style\nif ! grep \"pattern\" file.txt &gt; /dev/null 2&gt;&1; then\n    echo \"Pattern not found\"\nfi"
+  },
+  {
+    "objectID": "Lecture_Folder/Lecture_04_BioE_Comp_Tools_2026.html#beyond-grep-sed-for-search-and-replace",
+    "href": "Lecture_Folder/Lecture_04_BioE_Comp_Tools_2026.html#beyond-grep-sed-for-search-and-replace",
+    "title": "Lecture 04",
+    "section": "Beyond grep: sed for search-and-replace",
+    "text": "Beyond grep: sed for search-and-replace\n# Substitute the first match on each line (s/pattern/replacement/)\nsed 's/chr/Chr/' regions.bed\n\n# Substitute every match on each line (g = global)\nsed 's/T/U/g' dna.txt &gt; rna.txt\n\n# Delete lines matching a pattern (e.g. comment lines)\nsed '/^#/d' annotation.gff\n\n# Print only lines 10-20\nsed -n '10,20p' big_file.txt\n\n\n\n\n\n\nWarning\n\n\nsed -i edits a file in place - and the syntax differs between Linux (sed -i 's/a/b/' f) and macOS (sed -i '' 's/a/b/' f). Write to a new file until you’re confident."
+  },
+  {
+    "objectID": "Lecture_Folder/Lecture_04_BioE_Comp_Tools_2026.html#beyond-grep-awk-for-columns",
+    "href": "Lecture_Folder/Lecture_04_BioE_Comp_Tools_2026.html#beyond-grep-awk-for-columns",
+    "title": "Lecture 04",
+    "section": "Beyond grep: awk for columns",
+    "text": "Beyond grep: awk for columns\n# Print columns 1 and 3 of a tab- or space-separated file\nawk '{print $1, $3}' data.tsv\n\n# Keep rows where column 5 is greater than 30\nawk '$5 &gt; 30' measurements.tsv\n\n# Comma-separated file: set the field separator, skip the header\nawk -F',' 'NR &gt; 1 {print $2}' samples.csv\n\n# Sum and average a column\nawk -F',' 'NR &gt; 1 {sum += $3; n++} END {print sum, sum/n}' samples.csv\n\n\n\n\n\n\nTip\n\n\nRule of thumb: grep finds lines, sed edits text, awk works with columns. More in the course book’s sed and awk sections and Regular Expression Reference."
   },
   {
     "objectID": "Lecture_Folder/Lecture_06_BioE_Comp_Tools_2026.html#book-reading-for-this-lecture",
@@ -3393,96 +3498,5 @@
     "title": "About",
     "section": "Technical Requirements",
     "text": "Technical Requirements\n\nYou will be working on your own laptop computer.\nIf you would like to borrow a laptop let me know.\nIf you are working on Windows you need to install WSL2 via PowerShell (see Software page)\nFor the bootcamp (Week 0): latest version of R (install here), Python 3 (install here; on Windows check “Add python.exe to PATH”), and Positron (install here), the IDE used in class, which bundles Quarto.\nOptional alternative IDEs: VS Code (install here) and RStudio (install here).\nLater in the course (Week 9): a LaTeX distribution for PDF output - TinyTeX via quarto install tinytex (details here), or a full distribution such as MacTeX or MiKTeX.\nLater in the course (Weeks 9-10): Git (install here) and a GitHub account (sign up here) using your UO email.\nA terminal that allows ssh connection to the UO computing cluster (Talapas)."
-  },
-  {
-    "objectID": "Lecture_Folder/Lecture_04_BioE_Comp_Tools_2026.html#reminder-grep-finds-lines-that-match-a-pattern",
-    "href": "Lecture_Folder/Lecture_04_BioE_Comp_Tools_2026.html#reminder-grep-finds-lines-that-match-a-pattern",
-    "title": "Lecture 04",
-    "section": "Reminder: grep finds lines that match a pattern",
-    "text": "Reminder: grep finds lines that match a pattern\ngrep [options] pattern [file...]\n\nGREP = Global Regular Expression Print - reads lines, prints the ones that match\nThe flags you will use constantly:\n\n-i ignore case · -c count matching lines · -n show line numbers\n-v invert (print lines that do not match) · -w match whole words only\n-o print only the matching text · -E extended regex (alternation, +, {n,m})\n\nThe pattern is a regular expression:\n\n^ start of line · $ end of line · . any one character\n[ACGT] one character from the set · [^ACGT] one character not in the set\n* zero or more · + one or more (-E) · \\{3\\} exactly 3 (or {3} with -E)\n(ATG|GTG|TTG) grouping and alternation with -E\n\nFull treatment: the L03 slides, Ch. 9 and App. D"
-  },
-  {
-    "objectID": "Lecture_Folder/Lecture_04_BioE_Comp_Tools_2026.html#reminder-grep-lives-in-pipelines",
-    "href": "Lecture_Folder/Lecture_04_BioE_Comp_Tools_2026.html#reminder-grep-lives-in-pipelines",
-    "title": "Lecture 04",
-    "section": "Reminder: grep lives in pipelines",
-    "text": "Reminder: grep lives in pipelines\n# Count sequences in a FASTA file (headers start with &gt;)\ngrep -c \"^&gt;\" proteins.fasta\n\n# Skip comments, pull one column, tally the unique values\ngrep -v \"^#\" annotation.gff | cut -f3 | sort | uniq -c\n\n# Most genomic data is gzip-compressed - zgrep/zcat read .gz directly\nzgrep -c \"^&gt;\" chr21.fa.gz\nzcat reads.fastq.gz | awk 'NR % 4 == 2' | grep -c \"N\"\n\n# Print only the matching text, not the whole line\ngrep -oE \"gene=[^;]+\" annotation.gff | head\n\n\n\n\n\n\nNote\n\n\nFrom L03: FASTA = &gt; header + sequence lines; FASTQ = 4 lines per read; zcat / zless / zgrep read compressed files without unpacking them."
-  },
-  {
-    "objectID": "Lecture_Folder/Lecture_04_BioE_Comp_Tools_2026.html#warm-up-quiz-which-lines-match",
-    "href": "Lecture_Folder/Lecture_04_BioE_Comp_Tools_2026.html#warm-up-quiz-which-lines-match",
-    "title": "Lecture 04",
-    "section": "Warm-up quiz: which lines match?",
-    "text": "Warm-up quiz: which lines match?\nThe file test.txt has four lines:\nATGCCCTAG\nCCATG\nATG\nACG\nPredict the output of each command before you run it:\ngrep \"^ATG\" test.txt\ngrep \"ATG$\" test.txt\ngrep \"^A.G$\" test.txt\n\n^ATG → lines 1 and 3 (must start with ATG)\nATG$ → lines 2 and 3 (must end with ATG)\n^A.G$ → lines 3 and 4 (exactly three characters: A, anything, G)"
-  },
-  {
-    "objectID": "Lecture_Folder/Lecture_04_BioE_Comp_Tools_2026.html#streams-and-grep-on-the-stickleback-table",
-    "href": "Lecture_Folder/Lecture_04_BioE_Comp_Tools_2026.html#streams-and-grep-on-the-stickleback-table",
-    "title": "Lecture 04",
-    "section": "streams and grep on the stickleback table",
-    "text": "streams and grep on the stickleback table\n\n# Keep only the header plus the mono-associated fish, save to a new file\nhead -n 1 data/Stickle_RNAseq.tsv &gt; results/mono.tsv\ngrep -w \"mono\" data/Stickle_RNAseq.tsv &gt;&gt; results/mono.tsv\nwc -l results/mono.tsv                        \n\n# Which individuals are genotype B raised conventionally?\ngrep -w \"convB\" data/Stickle_RNAseq.tsv | cut -f 1\n\n# A regular expression: individuals whose ID ends in a 1\ngrep -E \"^[A-Z]+1\\b\" data/Stickle_RNAseq.tsv | cut -f 1-3\n\n# Send errors somewhere useful: a typo in the path goes to the log, not the screen\ngrep -w \"mono\" data/Stickle_RNAseq.tsv 2&gt; results/errors.log; cat results/errors.log\n\n\n\n\n\n\nTip\n\n\n\n&gt; creates the file, &gt;&gt; appends to it, 2&gt; captures stderr.\ngrep -w \"mono\" matches mono only as a whole word, so it finds the 40 mono-associated fish through the third column but would not match monoA on its own.\nTry grep -c mono versus grep -cw mono: both give 40 here.\nWork out why (which column does each one match on?) - experiments like this are how you learn what a flag really does."
-  },
-  {
-    "objectID": "Lecture_Folder/Lecture_04_BioE_Comp_Tools_2026.html#human-chromosome-data",
-    "href": "Lecture_Folder/Lecture_04_BioE_Comp_Tools_2026.html#human-chromosome-data",
-    "title": "Lecture 04",
-    "section": "Human Chromosome Data",
-    "text": "Human Chromosome Data\n\nEverything so far - reading files, pipes, redirection, grep - in one realistic job: grab a big public dataset and ask it questions, straight from the shell\nGenomic data files can be massive (the full human genome is ~3.1 GB compressed)\nFASTA format is standard for sequence data\nPerfect use case for Unix pipes and redirection\nWe will practice on human chromosome 21 - the smallest autosome (~13 MB compressed, ~46 Mb of sequence), so every command finishes in seconds\nThe same commands work unchanged on the whole genome - only the wait time changes\nThe course book works through the same file in Chapter 9"
-  },
-  {
-    "objectID": "Lecture_Folder/Lecture_04_BioE_Comp_Tools_2026.html#downloading-genomic-data",
-    "href": "Lecture_Folder/Lecture_04_BioE_Comp_Tools_2026.html#downloading-genomic-data",
-    "title": "Lecture 04",
-    "section": "Downloading Genomic Data",
-    "text": "Downloading Genomic Data\nDownload chromosome 21 of the human genome (hg38 / GRCh38) from UCSC:\n# Using `wget` to download chr21 (~13 MB)\n\nwget https://hgdownload.soe.ucsc.edu/goldenPath/hg38/chromosomes/chr21.fa.gz\n\n# Or using `curl` and save with a specific name (-L follows redirects)\n\ncurl -L -o chr21.fa.gz \\\n  https://hgdownload.soe.ucsc.edu/goldenPath/hg38/chromosomes/chr21.fa.gz\n\nwget and curl are both tools for downloading files (macOS ships curl; install wget with Homebrew if you want it)\nThe backslash lets a long command span multiple lines\n.gz extension means the file is compressed\nThe whole genome lives in the same directory as hg38.fa.gz (~1 GB) - same commands, much longer runs"
-  },
-  {
-    "objectID": "Lecture_Folder/Lecture_04_BioE_Comp_Tools_2026.html#examining-large-files-efficiently",
-    "href": "Lecture_Folder/Lecture_04_BioE_Comp_Tools_2026.html#examining-large-files-efficiently",
-    "title": "Lecture 04",
-    "section": "Examining Large Files Efficiently",
-    "text": "Examining Large Files Efficiently\nDon’t use cat on huge files! Use these approaches:\n# Decompress and look at first 10 lines\n\ngunzip -c chr21.fa.gz | head -10\n\n# Check file size before and after decompression (-k keeps the .gz)\n\nls -lh chr21.fa.gz\ngunzip -k chr21.fa.gz\nls -lh chr21.fa\n\n# Count sequences in FASTA file (lines starting with &gt;)\n# grep can't read gzip data directly - use zgrep (or zcat | grep)\n\nzgrep \"^&gt;\" chr21.fa.gz | wc -l\n\n# View sequence headers only\n\nzgrep \"^&gt;\" chr21.fa.gz | less\n\n\n\n\n\n\nNote\n\n\n\nThe UCSC file is soft-masked: repeats are written in lowercase (acgt).\nPatterns like GAATTC will miss sites inside masked regions - add -i to grep\nOr uppercase everything first with tr 'acgt' 'ACGT'."
-  },
-  {
-    "objectID": "Lecture_Folder/Lecture_04_BioE_Comp_Tools_2026.html#creating-a-subset-for-analysis",
-    "href": "Lecture_Folder/Lecture_04_BioE_Comp_Tools_2026.html#creating-a-subset-for-analysis",
-    "title": "Lecture 04",
-    "section": "Creating a Subset for Analysis",
-    "text": "Creating a Subset for Analysis\nMake a smaller working file for testing:\n# Extract the first ~1 Mb of sequence for testing (50 bases per line)\n\nzcat chr21.fa.gz | head -n 20000 &gt; chr21_subset.fa\n\n# Extract a specific record by name from a multi-sequence FASTA\n# (e.g. from hg38.fa - chr21.fa has only one record)\n\nawk '/^&gt;chr21$/,/^&gt;chr22$/' hg38.fa | head -n -1 &gt; chr21_from_genome.fa\n\n# Pull out a window of lines from the middle of the chromosome\n\nsed -n '400000,420000p' chr21.fa &gt; region_of_interest.fa\n\n\n\n\n\n\nNote\n\n\nawk and sed get their full treatment later today - read those two lines as recipes for now."
-  },
-  {
-    "objectID": "Lecture_Folder/Lecture_04_BioE_Comp_Tools_2026.html#processing-fasta-files-with-pipes",
-    "href": "Lecture_Folder/Lecture_04_BioE_Comp_Tools_2026.html#processing-fasta-files-with-pipes",
-    "title": "Lecture 04",
-    "section": "Processing FASTA Files with Pipes",
-    "text": "Processing FASTA Files with Pipes\nExtract specific regions or sequences:\n# Extract just the sequence (no headers) and count bases\n\ngrep -v \"^&gt;\" chr21.fa | tr -d '\\n' | wc -c\n\n# Count each type of nucleotide (uppercase first so a == A)\n\ngrep -v \"^&gt;\" chr21.fa | \\\n  tr 'acgtn' 'ACGTN' | \\\n  tr -d '\\n' | \\\n  fold -w1 | \\\n  sort | \\\n  uniq -c\n\ngrep -v inverts the match (excludes lines)\ntr -d '\\n' removes newlines\nfold -w1 puts each character on its own line\nExpect a lot of N - the first ~5 Mb of chr21 is unassembled"
-  },
-  {
-    "objectID": "Lecture_Folder/Lecture_04_BioE_Comp_Tools_2026.html#finding-patterns-in-genomic-data",
-    "href": "Lecture_Folder/Lecture_04_BioE_Comp_Tools_2026.html#finding-patterns-in-genomic-data",
-    "title": "Lecture 04",
-    "section": "Finding Patterns in Genomic Data",
-    "text": "Finding Patterns in Genomic Data\nSearch for specific sequences and motifs:\n# Find all instances of a restriction enzyme site (EcoRI: GAATTC)\n\ngrep -v \"^&gt;\" chr21.fa | \\\n  tr 'acgt' 'ACGT' | \\\n  tr -d '\\n' | \\\n  grep -o \"GAATTC\" | \\\n  wc -l\n\n# Extract 100 bases around each EcoRI site\n\ngrep -v \"^&gt;\" chr21.fa | \\\n  tr 'acgt' 'ACGT' | \\\n  tr -d '\\n' | \\\n  grep -oE \".{100}GAATTC.{100}\" &gt; ecori_contexts.txt\n\n# Find all start codons (ATG) and their byte offsets\n\ngrep -v \"^&gt;\" chr21.fa | \\\n  tr 'acgt' 'ACGT' | \\\n  tr -d '\\n' | \\\n  grep -b -o \"ATG\" | \\\n  head -20"
-  },
-  {
-    "objectID": "Lecture_Folder/Lecture_04_BioE_Comp_Tools_2026.html#combining-downloads-with-processing",
-    "href": "Lecture_Folder/Lecture_04_BioE_Comp_Tools_2026.html#combining-downloads-with-processing",
-    "title": "Lecture 04",
-    "section": "Combining Downloads with Processing",
-    "text": "Combining Downloads with Processing\nStream processing without saving intermediate files:\n# Download, decompress, and process in one pipeline\ncurl -sL https://hgdownload.soe.ucsc.edu/goldenPath/hg38/chromosomes/chr21.fa.gz | \\\n  gunzip -c | \\\n  grep -v \"^&gt;\" | \\\n  tr -d '\\n' | \\\n  cut -c1-1000000 &gt; first_megabase.txt\n\n# Download and immediately analyze GC content\nwget -qO - https://hgdownload.soe.ucsc.edu/goldenPath/hg38/chromosomes/chr21.fa.gz | \\\n  gunzip -c | \\\n  grep -v \"^&gt;\" | \\\n  tr 'acgtn' 'ACGTN' | \\\n  tr -d 'N\\n' | \\\n  tr 'ATGC' '0011' | \\\n  awk '{n = length($0); gc = gsub(/1/, \"\"); print \"GC%:\", 100 * gc / n}'\n\n\nThe -O - flag tells wget to output to stdout\nThis approach saves disk space and time"
-  },
-  {
-    "objectID": "Lecture_Folder/Lecture_04_BioE_Comp_Tools_2026.html#your-turn-sequence-content-of-chr21",
-    "href": "Lecture_Folder/Lecture_04_BioE_Comp_Tools_2026.html#your-turn-sequence-content-of-chr21",
-    "title": "Lecture 04",
-    "section": "Your turn: sequence content of chr21",
-    "text": "Your turn: sequence content of chr21\nUsing only commands you now know (grep -v, tr, fold, sort, uniq, wc):\n\nCount the total number of bases in chr21.fa\nCalculate the GC content (percent of bases that are G or C)\nFind runs of the dinucleotide repeat AT five or more units long\nBonus: what fraction of the chromosome is N?\n\n\n\n\n\n\n\nTip\n\n\nBuild each pipeline one command at a time and check the output at every stage. Remember the soft-masking: uppercase first with tr 'acgt' 'ACGT'.\n\n\n\n\nSolutions:\n\nTotal bases: grep -v “^&gt;” chr21.fa | tr -d ‘’ | wc -c\nGC content: grep -v “^&gt;” chr21.fa | tr -d ‘’ | tr -cd ‘GCgc’ | wc -c, divided by the total\nRepeats: grep -v “^&gt;” chr21.fa | tr ‘acgt’ ‘ACGT’ | tr -d ‘’ | grep -oE “(AT){5,}”\nN fraction: same pipeline with tr -cd ‘Nn’ | wc -c, divided by the total"
-  },
-  {
-    "objectID": "Lecture_Folder/Lecture_04_BioE_Comp_Tools_2026.html#takeaways-from-the-worked-example",
-    "href": "Lecture_Folder/Lecture_04_BioE_Comp_Tools_2026.html#takeaways-from-the-worked-example",
-    "title": "Lecture 04",
-    "section": "Takeaways from the worked example",
-    "text": "Takeaways from the worked example\n\nReal bioinformatics often involves gigabytes of data - these Unix tools scale beautifully!\nNever load entire genome files into memory - use streaming\nCombine tools - each does one thing well\nTest on subsets first - extract small portions for development\nUse compression - work with .gz files directly when possible\nThink in streams - data flows through pipes without intermediate files\nDocument your pipelines - save commands in scripts … which is the rest of today"
   }
 ]

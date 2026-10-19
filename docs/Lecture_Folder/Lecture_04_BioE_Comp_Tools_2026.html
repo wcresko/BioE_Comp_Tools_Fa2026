@@ -228,9 +228,8 @@ Bill Cresko
 <li>Introduction to scripts in Unix, R and Python</li>
 <li>Writing shell scripts: variables, conditionals, loops and functions</li>
 <li>Error handling and best practices</li>
-<li><code>sed</code> and <code>awk</code> for editing text and working with columns inside a pipeline</li>
-<li>The same script written in R (<code>Rscript</code>) and in Python (<code>python3</code>)</li>
-<li>Using Positron, VS Code or RStudio as script editors</li>
+<li><code>sed</code> and <code>awk</code> by example on the stickleback table (the systematic tour is Ch. 9, on your own)</li>
+<li>Next week (L05): the same script rewritten in R and in Python</li>
 </ul>
 </section>
 <section>
@@ -261,8 +260,8 @@ Bill Cresko
 </section>
 <section id="reminder-grep-lives-in-pipelines" class="slide level2">
 <h2>Reminder: <code>grep</code> lives in pipelines</h2>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2" data-code-line-numbers="|1-2|4-5|7-9|11-12"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb2-1"><a></a><span class="co"># Count sequences in a FASTA file (headers start with &gt;)</span></span>
-<span id="cb2-2"><a></a><span class="fu">grep</span> <span class="at">-c</span> <span class="st">"^&gt;"</span> proteins.fasta</span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2" data-code-line-numbers="|1-2|4-5|7-9|11-12"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb2-1"><a></a><span class="co"># Count the mono-associated fish in our stickleback table</span></span>
+<span id="cb2-2"><a></a><span class="fu">grep</span> <span class="at">-cw</span> <span class="st">"mono"</span> data/Stickle_RNAseq.tsv</span>
 <span id="cb2-3"><a></a></span>
 <span id="cb2-4"><a></a><span class="co"># Skip comments, pull one column, tally the unique values</span></span>
 <span id="cb2-5"><a></a><span class="fu">grep</span> <span class="at">-v</span> <span class="st">"^#"</span> annotation.gff <span class="kw">|</span> <span class="fu">cut</span> <span class="at">-f3</span> <span class="kw">|</span> <span class="fu">sort</span> <span class="kw">|</span> <span class="fu">uniq</span> <span class="at">-c</span></span>
@@ -649,61 +648,30 @@ ACG</code></pre>
 <p><strong>Tip</strong></p>
 </div>
 <div class="callout-content">
-<p>Today is mostly about <strong>shell</strong> scripts. At the end we will write the same FASTA-statistics script in R and in Python - and <strong>Lectures 05-07</strong> go deep on both languages.</p>
+<p>Today is about <strong>shell</strong> scripts. <strong>L05</strong> opens by rewriting today’s FASTA-statistics script in R and in Python, and <strong>Lectures 05-07</strong> go deep on both languages.</p>
 </div>
 </div>
 </div>
 </section>
-<section id="what-is-a-shell-script" class="slide level2">
-<h2>What is a Shell Script?</h2>
-<ul>
-<li>Text file containing Unix commands</li>
-<li>Automates repetitive tasks</li>
-<li>Makes complex workflows reproducible</li>
-<li>Essential for bioinformatics pipelines</li>
-<li>Can include:
-<ul>
-<li>Variables and arrays</li>
-<li>Conditionals (if/then/else)</li>
-<li>Loops (for/while)</li>
-<li>Functions</li>
-<li>Command-line arguments</li>
-</ul></li>
-</ul>
-</section>
-<section id="creating-your-first-script" class="slide level2">
-<h2>Creating Your First Script</h2>
+<section id="shell-scripts-the-mechanics-reminder" class="slide level2">
+<h2>Shell scripts: the mechanics (reminder)</h2>
+<p>From L02 and the L03 warm-up: a script is a <strong>text file of commands</strong>, with a shebang on line 1 and execute permission added once.</p>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb12"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb12-1"><a></a><span class="co">#!/bin/bash</span></span>
-<span id="cb12-2"><a></a><span class="co"># This is a shebang - tells system which interpreter to use</span></span>
+<span id="cb12-2"><a></a><span class="co"># first_script.sh - comments start with #</span></span>
 <span id="cb12-3"><a></a></span>
-<span id="cb12-4"><a></a><span class="co"># This is a comment - documents your code</span></span>
-<span id="cb12-5"><a></a><span class="bu">echo</span> <span class="st">"Hello, Bioengineering!"</span></span>
-<span id="cb12-6"><a></a></span>
-<span id="cb12-7"><a></a><span class="co"># Set a variable</span></span>
-<span id="cb12-8"><a></a><span class="va">NAME</span><span class="op">=</span><span class="st">"DNA Analysis"</span></span>
-<span id="cb12-9"><a></a><span class="bu">echo</span> <span class="st">"Running </span><span class="va">$NAME</span><span class="st">"</span></span>
-<span id="cb12-10"><a></a></span>
-<span id="cb12-11"><a></a><span class="co"># Use command output as variable</span></span>
-<span id="cb12-12"><a></a><span class="va">DATE</span><span class="op">=</span><span class="va">$(</span><span class="fu">date</span> +%Y-%m-%d<span class="va">)</span></span>
-<span id="cb12-13"><a></a><span class="bu">echo</span> <span class="st">"Analysis date: </span><span class="va">$DATE</span><span class="st">"</span></span>
-<span id="cb12-14"><a></a></span>
-<span id="cb12-15"><a></a><span class="co"># Simple calculation</span></span>
-<span id="cb12-16"><a></a><span class="va">COUNT</span><span class="op">=</span>5</span>
-<span id="cb12-17"><a></a><span class="va">DOUBLE</span><span class="op">=</span><span class="va">$((COUNT</span> <span class="op">*</span> <span class="dv">2</span><span class="va">))</span></span>
-<span id="cb12-18"><a></a><span class="bu">echo</span> <span class="st">"Double of </span><span class="va">$COUNT</span><span class="st"> is </span><span class="va">$DOUBLE</span><span class="st">"</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<p>Save as <code>first_script.sh</code> and run with <code>bash first_script.sh</code></p>
-</section>
-<section id="making-scripts-executable" class="slide level2">
-<h2>Making Scripts Executable</h2>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb13"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb13-1"><a></a><span class="co"># Check current permissions</span></span>
-<span id="cb13-2"><a></a><span class="fu">ls</span> <span class="at">-l</span> first_script.sh</span>
-<span id="cb13-3"><a></a></span>
-<span id="cb13-4"><a></a><span class="co"># Make executable (add execute permission)</span></span>
-<span id="cb13-5"><a></a><span class="fu">chmod</span> +x first_script.sh</span>
-<span id="cb13-6"><a></a></span>
-<span id="cb13-7"><a></a><span class="co"># Now you can run it directly</span></span>
-<span id="cb13-8"><a></a><span class="ex">./first_script.sh</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<p>Best practice: Always use <code>chmod +x</code> for your scripts</p>
+<span id="cb12-4"><a></a><span class="bu">echo</span> <span class="st">"Hello, Bioengineering!"</span></span>
+<span id="cb12-5"><a></a></span>
+<span id="cb12-6"><a></a><span class="va">NAME</span><span class="op">=</span><span class="st">"DNA Analysis"</span>               <span class="co"># set a variable (no spaces around =)</span></span>
+<span id="cb12-7"><a></a><span class="bu">echo</span> <span class="st">"Running </span><span class="va">$NAME</span><span class="st">"</span></span>
+<span id="cb12-8"><a></a></span>
+<span id="cb12-9"><a></a><span class="va">DATE</span><span class="op">=</span><span class="va">$(</span><span class="fu">date</span> +%Y-%m-%d<span class="va">)</span>            <span class="co"># capture a command's output</span></span>
+<span id="cb12-10"><a></a><span class="bu">echo</span> <span class="st">"Analysis date: </span><span class="va">$DATE</span><span class="st">"</span></span>
+<span id="cb12-11"><a></a></span>
+<span id="cb12-12"><a></a><span class="va">COUNT</span><span class="op">=</span>5</span>
+<span id="cb12-13"><a></a><span class="bu">echo</span> <span class="st">"Double of </span><span class="va">$COUNT</span><span class="st"> is </span><span class="va">$((COUNT</span> <span class="op">*</span> <span class="dv">2</span><span class="va">))</span><span class="st">"</span>    <span class="co"># arithmetic with $(( ))</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb13"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb13-1"><a></a><span class="fu">chmod</span> +x first_script.sh     <span class="co"># make it executable, once</span></span>
+<span id="cb13-2"><a></a><span class="ex">./first_script.sh</span>            <span class="co"># run it (or: bash first_script.sh)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p><strong>New today:</strong> arguments, conditionals, loops, functions and error handling - the pieces that turn saved commands into real <strong>pipelines</strong>.</p>
 </section>
 <section id="command-line-arguments" class="slide level2">
 <h2>Command-Line Arguments</h2>
@@ -733,32 +701,40 @@ ACG</code></pre>
 <span id="cb14-24"><a></a><span class="co"># $@ is all arguments (should be quoted)</span></span>
 <span id="cb14-25"><a></a></span>
 <span id="cb14-26"><a></a><span class="bu">echo</span> <span class="st">"All arguments: </span><span class="va">$@</span><span class="st">"</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<p>Run as: <code>./process_fasta.sh input.fa results.txt</code></p>
+<p>Run as: <code>./process_fasta.sh chr21.fa results/chr21_headers.txt</code></p>
 </section>
-<section id="variables-and-arrays" class="slide level2">
-<h2>Variables and Arrays</h2>
+<section id="variables-and-strings" class="slide level2">
+<h2>Variables and strings</h2>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb15"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb15-1"><a></a><span class="co">#!/bin/bash</span></span>
 <span id="cb15-2"><a></a></span>
 <span id="cb15-3"><a></a><span class="co"># Variables (no spaces around =)</span></span>
 <span id="cb15-4"><a></a><span class="va">SPECIES</span><span class="op">=</span><span class="st">"Homo sapiens"</span></span>
 <span id="cb15-5"><a></a><span class="va">CHROMOSOME</span><span class="op">=</span>21</span>
-<span id="cb15-6"><a></a><span class="va">GENE_COUNT</span><span class="op">=</span>234</span>
-<span id="cb15-7"><a></a></span>
-<span id="cb15-8"><a></a><span class="co"># Arrays</span></span>
-<span id="cb15-9"><a></a><span class="va">BASES</span><span class="op">=</span><span class="va">(</span>A C G T<span class="va">)</span></span>
-<span id="cb15-10"><a></a><span class="bu">echo</span> <span class="st">"First base: </span><span class="va">${BASES</span><span class="op">[</span><span class="dv">0</span><span class="op">]</span><span class="va">}</span><span class="st">"</span></span>
-<span id="cb15-11"><a></a><span class="bu">echo</span> <span class="st">"All bases: </span><span class="va">${BASES</span><span class="op">[@]</span><span class="va">}</span><span class="st">"</span></span>
-<span id="cb15-12"><a></a></span>
-<span id="cb15-13"><a></a><span class="co"># Add to array</span></span>
-<span id="cb15-14"><a></a><span class="va">BASES</span><span class="op">+=</span><span class="va">(</span>N<span class="va">)</span></span>
-<span id="cb15-15"><a></a></span>
-<span id="cb15-16"><a></a><span class="co"># Array length</span></span>
-<span id="cb15-17"><a></a><span class="bu">echo</span> <span class="st">"Number of bases: </span><span class="va">${</span><span class="op">#</span><span class="va">BASES</span><span class="op">[@]</span><span class="va">}</span><span class="st">"</span></span>
-<span id="cb15-18"><a></a></span>
-<span id="cb15-19"><a></a><span class="co"># String operations</span></span>
-<span id="cb15-20"><a></a><span class="va">FILE</span><span class="op">=</span><span class="st">"sample_001.fastq.gz"</span></span>
-<span id="cb15-21"><a></a><span class="va">NAME</span><span class="op">=</span><span class="st">"</span><span class="va">${FILE</span><span class="op">%</span>.fastq.gz<span class="va">}</span><span class="st">"</span>     <span class="co"># Remove suffix</span></span>
-<span id="cb15-22"><a></a><span class="bu">echo</span> <span class="st">"Sample name: </span><span class="va">$NAME</span><span class="st">"</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb15-6"><a></a></span>
+<span id="cb15-7"><a></a><span class="co"># Use them with $ (quote to protect spaces)</span></span>
+<span id="cb15-8"><a></a><span class="bu">echo</span> <span class="st">"</span><span class="va">$SPECIES</span><span class="st"> chromosome </span><span class="va">$CHROMOSOME</span><span class="st">"</span></span>
+<span id="cb15-9"><a></a></span>
+<span id="cb15-10"><a></a><span class="co"># Capture command output - how many fish are in our stickleback table?</span></span>
+<span id="cb15-11"><a></a><span class="va">N_FISH</span><span class="op">=</span><span class="va">$(</span><span class="fu">tail</span> <span class="at">-n</span> +2 data/Stickle_RNAseq.tsv <span class="kw">|</span> <span class="fu">wc</span> <span class="at">-l</span><span class="va">)</span></span>
+<span id="cb15-12"><a></a><span class="bu">echo</span> <span class="st">"The table has </span><span class="va">$N_FISH</span><span class="st"> fish"</span></span>
+<span id="cb15-13"><a></a></span>
+<span id="cb15-14"><a></a><span class="co"># String operations on file names</span></span>
+<span id="cb15-15"><a></a><span class="va">FILE</span><span class="op">=</span><span class="st">"sample_001.fastq.gz"</span></span>
+<span id="cb15-16"><a></a><span class="va">NAME</span><span class="op">=</span><span class="st">"</span><span class="va">${FILE</span><span class="op">%</span>.fastq.gz<span class="va">}</span><span class="st">"</span>     <span class="co"># strip the suffix -&gt; sample_001</span></span>
+<span id="cb15-17"><a></a><span class="bu">echo</span> <span class="st">"Sample name: </span><span class="va">$NAME</span><span class="st">"</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="callout callout-note callout-titled callout-style-default">
+<div class="callout-body">
+<div class="callout-title">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<p><strong>Note</strong></p>
+</div>
+<div class="callout-content">
+<p>Bash also has arrays (<code>BASES=(A C G T)</code>) - you will rarely need them in this course. See <a href="../book/chapters/10-shell-scripting.html">Ch. 10</a> and the backup slide at the end of this deck.</p>
+</div>
+</div>
+</div>
 </section>
 <section id="conditionals-ifthenelse" class="slide level2">
 <h2>Conditionals (if/then/else)</h2>
@@ -790,6 +766,310 @@ ACG</code></pre>
 <span id="cb16-26"><a></a><span class="cf">else</span></span>
 <span id="cb16-27"><a></a>    <span class="fu">mkdir</span> results</span>
 <span id="cb16-28"><a></a><span class="cf">fi</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="callout callout-tip callout-titled callout-style-default">
+<div class="callout-body">
+<div class="callout-title">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<p><strong>Tip</strong></p>
+</div>
+<div class="callout-content">
+<p>Always put <strong>spaces inside the brackets</strong> (<code>[ $x -gt 5 ]</code>) and <strong>quote your variables</strong> (<code>"$FILE"</code>). The full table of test operators (<code>-eq</code>, <code>-ne</code>, <code>-z</code>, <code>-f</code>, <code>-d</code>, …) is in the backup slides, <a href="../book/chapters/appendix-B-unix.html">App. B</a> and <a href="../book/chapters/10-shell-scripting.html">Ch. 10</a>.</p>
+</div>
+</div>
+</div>
+</section>
+<section id="loops-in-shell-scripts" class="slide level2">
+<h2>Loops in Shell Scripts</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb17"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb17-1"><a></a><span class="co">#!/bin/bash</span></span>
+<span id="cb17-2"><a></a></span>
+<span id="cb17-3"><a></a><span class="co"># For loop over list</span></span>
+<span id="cb17-4"><a></a><span class="cf">for</span> BASE <span class="kw">in</span> A C G T<span class="kw">;</span> <span class="cf">do</span></span>
+<span id="cb17-5"><a></a>    <span class="bu">echo</span> <span class="st">"Processing base: </span><span class="va">$BASE</span><span class="st">"</span></span>
+<span id="cb17-6"><a></a><span class="cf">done</span></span>
+<span id="cb17-7"><a></a></span>
+<span id="cb17-8"><a></a><span class="co"># For loop over files</span></span>
+<span id="cb17-9"><a></a><span class="cf">for</span> FILE <span class="kw">in</span> <span class="pp">*</span>.fasta<span class="kw">;</span> <span class="cf">do</span></span>
+<span id="cb17-10"><a></a>    <span class="bu">echo</span> <span class="st">"Analyzing </span><span class="va">$FILE</span><span class="st">"</span></span>
+<span id="cb17-11"><a></a>    <span class="fu">grep</span> <span class="at">-c</span> <span class="st">"&gt;"</span> <span class="st">"</span><span class="va">$FILE</span><span class="st">"</span></span>
+<span id="cb17-12"><a></a><span class="cf">done</span></span>
+<span id="cb17-13"><a></a></span>
+<span id="cb17-14"><a></a><span class="co"># For loop with counter</span></span>
+<span id="cb17-15"><a></a><span class="cf">for</span> i <span class="kw">in</span> <span class="dt">{</span><span class="dv">1</span><span class="dt">..</span><span class="dv">10</span><span class="dt">}</span><span class="kw">;</span> <span class="cf">do</span></span>
+<span id="cb17-16"><a></a>    <span class="bu">echo</span> <span class="st">"Iteration </span><span class="va">$i</span><span class="st">"</span></span>
+<span id="cb17-17"><a></a><span class="cf">done</span></span>
+<span id="cb17-18"><a></a></span>
+<span id="cb17-19"><a></a><span class="co"># While loop</span></span>
+<span id="cb17-20"><a></a><span class="va">COUNT</span><span class="op">=</span>1</span>
+<span id="cb17-21"><a></a><span class="cf">while</span> <span class="bu">[</span> <span class="va">$COUNT</span> <span class="ot">-le</span> 5 <span class="bu">]</span><span class="kw">;</span> <span class="cf">do</span></span>
+<span id="cb17-22"><a></a>    <span class="bu">echo</span> <span class="st">"Count: </span><span class="va">$COUNT</span><span class="st">"</span></span>
+<span id="cb17-23"><a></a>    <span class="va">COUNT</span><span class="op">=</span><span class="va">$((COUNT</span> <span class="op">+</span> <span class="dv">1</span><span class="va">))</span></span>
+<span id="cb17-24"><a></a><span class="cf">done</span></span>
+<span id="cb17-25"><a></a></span>
+<span id="cb17-26"><a></a><span class="co"># Read file line by line</span></span>
+<span id="cb17-27"><a></a><span class="cf">while</span> <span class="bu">read</span> <span class="va">LINE</span><span class="kw">;</span> <span class="cf">do</span></span>
+<span id="cb17-28"><a></a>    <span class="bu">echo</span> <span class="st">"Processing: </span><span class="va">$LINE</span><span class="st">"</span></span>
+<span id="cb17-29"><a></a><span class="cf">done</span> <span class="op">&lt;</span> input.txt</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="functions-in-scripts" class="slide level2">
+<h2>Functions in Scripts</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb18"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb18-1"><a></a><span class="co">#!/bin/bash</span></span>
+<span id="cb18-2"><a></a></span>
+<span id="cb18-3"><a></a><span class="co"># Define a function</span></span>
+<span id="cb18-4"><a></a><span class="fu">count_group()</span> <span class="kw">{</span></span>
+<span id="cb18-5"><a></a>    <span class="bu">local</span> <span class="va">FILE</span><span class="op">=</span><span class="va">$1</span> <span class="va">GROUP</span><span class="op">=</span><span class="va">$2</span>          <span class="co"># Local variables</span></span>
+<span id="cb18-6"><a></a>    <span class="bu">local</span> <span class="va">COUNT</span><span class="op">=</span><span class="va">$(</span><span class="fu">grep</span> <span class="at">-cw</span> <span class="st">"</span><span class="va">$GROUP</span><span class="st">"</span> <span class="st">"</span><span class="va">$FILE</span><span class="st">"</span><span class="va">)</span></span>
+<span id="cb18-7"><a></a>    <span class="bu">echo</span> <span class="st">"</span><span class="va">$COUNT</span><span class="st">"</span>                   <span class="co"># "Return" a value by printing it</span></span>
+<span id="cb18-8"><a></a><span class="kw">}</span></span>
+<span id="cb18-9"><a></a><span class="co"># Note: bash 'return' only carries an exit status (0-255), not data -</span></span>
+<span id="cb18-10"><a></a><span class="co"># so functions hand back results via echo, captured with $(...)</span></span>
+<span id="cb18-11"><a></a><span class="va">n</span><span class="op">=</span><span class="va">$(</span><span class="ex">count_group</span> data/Stickle_RNAseq.tsv convA<span class="va">)</span></span>
+<span id="cb18-12"><a></a><span class="bu">echo</span> <span class="st">"convA has </span><span class="va">$n</span><span class="st"> fish"</span></span>
+<span id="cb18-13"><a></a></span>
+<span id="cb18-14"><a></a><span class="co"># Another function with multiple parameters, reusing the first</span></span>
+<span id="cb18-15"><a></a><span class="fu">group_report()</span> <span class="kw">{</span></span>
+<span id="cb18-16"><a></a>    <span class="bu">local</span> <span class="va">INFILE</span><span class="op">=</span><span class="va">$1</span></span>
+<span id="cb18-17"><a></a>    <span class="bu">local</span> <span class="va">OUTFILE</span><span class="op">=</span><span class="va">$2</span></span>
+<span id="cb18-18"><a></a></span>
+<span id="cb18-19"><a></a>    <span class="bu">echo</span> <span class="st">"Summarizing </span><span class="va">$INFILE</span><span class="st">..."</span></span>
+<span id="cb18-20"><a></a>    <span class="cf">for</span> g <span class="kw">in</span> convA convB monoA monoB<span class="kw">;</span> <span class="cf">do</span></span>
+<span id="cb18-21"><a></a>        <span class="bu">echo</span> <span class="st">"</span><span class="va">$g</span><span class="st">: </span><span class="va">$(</span><span class="ex">count_group</span> <span class="st">"</span><span class="va">$INFILE</span><span class="st">"</span> <span class="st">"</span><span class="va">$g</span><span class="st">"</span><span class="va">)</span><span class="st"> fish"</span></span>
+<span id="cb18-22"><a></a>    <span class="cf">done</span> <span class="op">&gt;</span> <span class="st">"</span><span class="va">$OUTFILE</span><span class="st">"</span></span>
+<span id="cb18-23"><a></a><span class="kw">}</span></span>
+<span id="cb18-24"><a></a></span>
+<span id="cb18-25"><a></a><span class="co"># Call functions</span></span>
+<span id="cb18-26"><a></a><span class="ex">group_report</span> <span class="st">"data/Stickle_RNAseq.tsv"</span> <span class="st">"results/group_counts.txt"</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="error-handling-the-two-lines-to-memorize" class="slide level2">
+<h2>Error handling: the two lines to memorize</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb19"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb19-1"><a></a><span class="co">#!/bin/bash</span></span>
+<span id="cb19-2"><a></a><span class="bu">set</span> <span class="at">-euo</span> pipefail   <span class="co"># exit on any error, on unset variables, and on pipe failures</span></span>
+<span id="cb19-3"><a></a></span>
+<span id="cb19-4"><a></a><span class="co"># ... and check your inputs before using them</span></span>
+<span id="cb19-5"><a></a><span class="cf">if</span> <span class="bu">[</span> <span class="ot">!</span> <span class="ot">-f</span> <span class="st">"</span><span class="va">$1</span><span class="st">"</span> <span class="bu">]</span><span class="kw">;</span> <span class="cf">then</span></span>
+<span id="cb19-6"><a></a>    <span class="bu">echo</span> <span class="st">"Error: File </span><span class="va">$1</span><span class="st"> not found!"</span> <span class="op">&gt;&amp;</span><span class="dv">2</span></span>
+<span id="cb19-7"><a></a>    <span class="bu">exit</span> 1</span>
+<span id="cb19-8"><a></a><span class="cf">fi</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<ul>
+<li><code>set -euo pipefail</code> turns silent failures into loud, early ones - put it at the top of every script (our <code>gene_means.sh</code> below does)</li>
+<li>Send error messages to <strong>stderr</strong> (<code>&gt;&amp;2</code>) so they never pollute piped output</li>
+<li>More patterns (<code>trap</code>, try/catch style) in <a href="../book/chapters/10-shell-scripting.html">Ch. 10</a> and the backup slides</li>
+</ul>
+</section></section>
+<section>
+<section id="two-more-tools-for-scripts-sed-and-awk" class="title-slide slide level1 center">
+<h1>Two more tools for scripts: <code>sed</code> and <code>awk</code></h1>
+
+</section>
+<section id="editing-streams-inside-a-script" class="slide level2">
+<h2>Editing streams inside a script</h2>
+<p>Shell scripts rarely do text editing themselves - they <strong>glue together</strong> small tools:</p>
+<ul>
+<li><strong><code>grep</code></strong> finds lines (last week, and today’s warm-up)</li>
+<li><strong><code>sed</code></strong> edits text as it streams past: <code>sed 's/old/new/g' file</code></li>
+<li><strong><code>awk</code></strong> works with columns: <code>awk -F'\t' '$5 &gt; 30 {print $1}' file</code></li>
+</ul>
+<div class="callout callout-note callout-titled callout-style-default">
+<div class="callout-body">
+<div class="callout-title">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<p><strong>Note</strong></p>
+</div>
+<div class="callout-content">
+<p>We will learn <code>sed</code> and <code>awk</code> <strong>by example</strong> on the stickleback table rather than flag by flag. The systematic tour - substitution, deletion, line ranges, <code>NR</code>, <code>BEGIN</code>/<code>END</code>, awk arrays - is yours to read in the <a href="../book/chapters/09-grep-regex.html#sec-sed">sed and awk sections of Ch. 9</a>, with two reference slides at the end of this deck.</p>
+</div>
+</div>
+</div>
+<div class="callout callout-warning callout-titled callout-style-default">
+<div class="callout-body">
+<div class="callout-title">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<p><strong>Warning</strong></p>
+</div>
+<div class="callout-content">
+<p><code>sed -i</code> edits a file <strong>in place</strong> - and the syntax differs between Linux (<code>sed -i 's/a/b/' f</code>) and macOS (<code>sed -i '' 's/a/b/' f</code>). Write to a new file until you’re confident.</p>
+</div>
+</div>
+</div>
+</section>
+<section id="running-example-sed-awk-and-a-script-on-the-stickleback-table" class="slide level2">
+<h2>Running example: <code>sed</code>, <code>awk</code> and a script on the stickleback table</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb20"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb20-1"><a></a><span class="bu">cd</span> ~/projects/comptools <span class="kw">&amp;&amp;</span> <span class="fu">mkdir</span> <span class="at">-p</span> results</span>
+<span id="cb20-2"><a></a></span>
+<span id="cb20-3"><a></a><span class="co"># Fix the awkward column name once, writing a new file (never edit raw data in place)</span></span>
+<span id="cb20-4"><a></a><span class="fu">sed</span> <span class="st">'1s/Geno&amp;Micro/Geno_Micro/'</span> data/Stickle_RNAseq.tsv <span class="op">&gt;</span> results/stickle_clean.tsv</span>
+<span id="cb20-5"><a></a></span>
+<span id="cb20-6"><a></a><span class="co"># Mean of Gene1 (column 5) across all 80 fish</span></span>
+<span id="cb20-7"><a></a><span class="fu">awk</span> <span class="at">-F</span><span class="st">'\t'</span> <span class="st">'NR &gt; 1 { sum += $5; n++ } END { print "Gene1 mean:", sum/n }'</span> results/stickle_clean.tsv</span>
+<span id="cb20-8"><a></a></span>
+<span id="cb20-9"><a></a><span class="co"># Mean of Gene1 by genotype - awk arrays keyed by the group</span></span>
+<span id="cb20-10"><a></a><span class="fu">awk</span> <span class="at">-F</span><span class="st">'\t'</span> <span class="st">'NR &gt; 1 { sum[$2] += $5; n[$2]++ } END { for (g in sum) print g, sum[g]/n[g] }'</span> results/stickle_clean.tsv</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="turn-it-into-a-script" class="slide level2">
+<h2>Turn it into a script</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb21"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb21-1"><a></a><span class="co">#!/bin/bash</span></span>
+<span id="cb21-2"><a></a><span class="co"># gene_means.sh - mean count of one gene per treatment group</span></span>
+<span id="cb21-3"><a></a><span class="co"># Usage: ./gene_means.sh &lt;gene column number&gt;</span></span>
+<span id="cb21-4"><a></a><span class="bu">set</span> <span class="at">-euo</span> pipefail</span>
+<span id="cb21-5"><a></a><span class="va">col</span><span class="op">=</span><span class="va">${1</span><span class="op">:?</span>Give a gene column number, e.g. 5 for Gene1<span class="va">}</span></span>
+<span id="cb21-6"><a></a><span class="va">infile</span><span class="op">=</span>results/stickle_clean.tsv</span>
+<span id="cb21-7"><a></a></span>
+<span id="cb21-8"><a></a><span class="va">gene</span><span class="op">=</span><span class="va">$(</span><span class="fu">head</span> <span class="at">-n</span> 1 <span class="st">"</span><span class="va">$infile</span><span class="st">"</span> <span class="kw">|</span> <span class="fu">cut</span> <span class="at">-f</span> <span class="st">"</span><span class="va">$col</span><span class="st">"</span><span class="va">)</span></span>
+<span id="cb21-9"><a></a><span class="bu">echo</span> <span class="st">"Mean of </span><span class="va">$gene</span><span class="st"> by group:"</span></span>
+<span id="cb21-10"><a></a><span class="fu">awk</span> <span class="at">-F</span><span class="st">'\t'</span> <span class="at">-v</span> c=<span class="st">"</span><span class="va">$col</span><span class="st">"</span> <span class="st">'NR &gt; 1 { sum[$4] += $c; n[$4]++ } END { for (g in sum) printf "  %-6s %8.1f\n", g, sum[g]/n[g] }'</span> <span class="st">"</span><span class="va">$infile</span><span class="st">"</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb22"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb22-1"><a></a><span class="fu">chmod</span> +x gene_means.sh</span>
+<span id="cb22-2"><a></a><span class="ex">./gene_means.sh</span> 5            <span class="co"># Gene1</span></span>
+<span id="cb22-3"><a></a><span class="cf">for</span> c <span class="kw">in</span> 5 6 7<span class="kw">;</span> <span class="cf">do</span> <span class="ex">./gene_means.sh</span> <span class="va">$c</span><span class="kw">;</span> <span class="cf">done</span>    <span class="co"># loop over the first three genes</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="real-bioinformatics-script-example" class="slide level2">
+<h2>Real Bioinformatics Script Example</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb23"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb23-1"><a></a><span class="co">#!/bin/bash</span></span>
+<span id="cb23-2"><a></a><span class="co"># Script: fasta_stats.sh</span></span>
+<span id="cb23-3"><a></a><span class="co"># Purpose: Calculate basic statistics for FASTA files</span></span>
+<span id="cb23-4"><a></a></span>
+<span id="cb23-5"><a></a><span class="co"># Check arguments</span></span>
+<span id="cb23-6"><a></a><span class="cf">if</span> <span class="bu">[</span> <span class="va">$#</span> <span class="ot">-ne</span> 1 <span class="bu">]</span><span class="kw">;</span> <span class="cf">then</span></span>
+<span id="cb23-7"><a></a>    <span class="bu">echo</span> <span class="st">"Usage: </span><span class="va">$0</span><span class="st"> sequences.fasta"</span></span>
+<span id="cb23-8"><a></a>    <span class="bu">exit</span> 1</span>
+<span id="cb23-9"><a></a><span class="cf">fi</span></span>
+<span id="cb23-10"><a></a></span>
+<span id="cb23-11"><a></a><span class="va">INPUT</span><span class="op">=</span><span class="va">$1</span></span>
+<span id="cb23-12"><a></a></span>
+<span id="cb23-13"><a></a><span class="co"># Check if file exists</span></span>
+<span id="cb23-14"><a></a><span class="cf">if</span> <span class="bu">[</span> <span class="ot">!</span> <span class="ot">-f</span> <span class="st">"</span><span class="va">$INPUT</span><span class="st">"</span> <span class="bu">]</span><span class="kw">;</span> <span class="cf">then</span></span>
+<span id="cb23-15"><a></a>    <span class="bu">echo</span> <span class="st">"Error: File </span><span class="va">$INPUT</span><span class="st"> not found!"</span></span>
+<span id="cb23-16"><a></a>    <span class="bu">exit</span> 1</span>
+<span id="cb23-17"><a></a><span class="cf">fi</span></span>
+<span id="cb23-18"><a></a></span>
+<span id="cb23-19"><a></a><span class="bu">echo</span> <span class="st">"=== FASTA Statistics for </span><span class="va">$INPUT</span><span class="st"> ==="</span></span>
+<span id="cb23-20"><a></a></span>
+<span id="cb23-21"><a></a><span class="co"># Count sequences</span></span>
+<span id="cb23-22"><a></a><span class="va">SEQ_COUNT</span><span class="op">=</span><span class="va">$(</span><span class="fu">grep</span> <span class="at">-c</span> <span class="st">"^&gt;"</span> <span class="st">"</span><span class="va">$INPUT</span><span class="st">"</span><span class="va">)</span></span>
+<span id="cb23-23"><a></a><span class="bu">echo</span> <span class="st">"Number of sequences: </span><span class="va">$SEQ_COUNT</span><span class="st">"</span></span>
+<span id="cb23-24"><a></a></span>
+<span id="cb23-25"><a></a><span class="co"># Calculate total length</span></span>
+<span id="cb23-26"><a></a><span class="va">TOTAL_LENGTH</span><span class="op">=</span><span class="va">$(</span><span class="fu">grep</span> <span class="at">-v</span> <span class="st">"^&gt;"</span> <span class="st">"</span><span class="va">$INPUT</span><span class="st">"</span> <span class="kw">|</span> <span class="fu">tr</span> <span class="at">-d</span> <span class="st">'\n'</span> <span class="kw">|</span> <span class="fu">wc</span> <span class="at">-c</span><span class="va">)</span></span>
+<span id="cb23-27"><a></a><span class="bu">echo</span> <span class="st">"Total length: </span><span class="va">$TOTAL_LENGTH</span><span class="st"> bp"</span></span>
+<span id="cb23-28"><a></a></span>
+<span id="cb23-29"><a></a><span class="co"># Average length</span></span>
+<span id="cb23-30"><a></a><span class="va">AVG_LENGTH</span><span class="op">=</span><span class="va">$((TOTAL_LENGTH</span> <span class="op">/</span> <span class="va">SEQ_COUNT))</span></span>
+<span id="cb23-31"><a></a><span class="bu">echo</span> <span class="st">"Average length: </span><span class="va">$AVG_LENGTH</span><span class="st"> bp"</span></span>
+<span id="cb23-32"><a></a></span>
+<span id="cb23-33"><a></a><span class="co"># GC content</span></span>
+<span id="cb23-34"><a></a><span class="va">GC_COUNT</span><span class="op">=</span><span class="va">$(</span><span class="fu">grep</span> <span class="at">-v</span> <span class="st">"^&gt;"</span> <span class="st">"</span><span class="va">$INPUT</span><span class="st">"</span> <span class="kw">|</span> <span class="fu">tr</span> <span class="at">-d</span> <span class="st">'\n'</span> <span class="kw">|</span> <span class="fu">grep</span> <span class="at">-o</span> <span class="st">"[GC]"</span> <span class="kw">|</span> <span class="fu">wc</span> <span class="at">-l</span><span class="va">)</span></span>
+<span id="cb23-35"><a></a><span class="va">GC_PERCENT</span><span class="op">=</span><span class="va">$((GC_COUNT</span> <span class="op">*</span> <span class="dv">100</span> <span class="op">/</span> <span class="va">TOTAL_LENGTH))</span></span>
+<span id="cb23-36"><a></a><span class="bu">echo</span> <span class="st">"GC content: </span><span class="va">$GC_PERCENT</span><span class="st">%"</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb24"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb24-1"><a></a><span class="ex">./fasta_stats.sh</span> chr21.fa    <span class="co"># run it on the chromosome from the worked example</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="callout callout-note callout-titled callout-style-default">
+<div class="callout-body">
+<div class="callout-title">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<p><strong>Note</strong></p>
+</div>
+<div class="callout-content">
+<p>Next week (L05) opens with this same script rewritten in <strong>R</strong> and in <strong>Python</strong> - same logic, friendlier arithmetic.</p>
+</div>
+</div>
+</div>
+</section>
+<section id="best-practices-for-shell-scripts" class="slide level2">
+<h2>Best Practices for Shell Scripts</h2>
+<ol type="1">
+<li><strong>Always include a shebang</strong>: <code>#!/bin/bash</code></li>
+<li><strong>Comment your code</strong>: Explain what and why</li>
+<li><strong>Use meaningful variable names</strong>: <code>GENE_COUNT</code> not <code>GC</code></li>
+<li><strong>Check inputs</strong>: Validate files exist and arguments are correct</li>
+<li><strong>Handle errors gracefully</strong>: Use <code>set -e</code> and error checking</li>
+<li><strong>Make scripts portable</strong>: Don’t hardcode paths</li>
+<li><strong>Use version control</strong>: Track changes with git</li>
+<li><strong>Test incrementally</strong>: Build scripts step by step</li>
+<li><strong>Create help messages</strong>: Document usage</li>
+<li><strong>Log important steps</strong>: Keep records of what was done</li>
+</ol>
+<div class="callout callout-note callout-titled callout-style-default">
+<div class="callout-body">
+<div class="callout-title">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<p><strong>Note</strong></p>
+</div>
+<div class="callout-content">
+<p>Every one of these applies to <strong>R and Python scripts</strong> too: shebang line, comments, checking <code>commandArgs()</code> / <code>sys.argv</code>, meaningful names, relative paths, Git, and testing on a tiny input first.</p>
+</div>
+</div>
+</div>
+</section></section>
+<section>
+<section id="backup---reference-slides" class="title-slide slide level1 center">
+<h1>Backup - reference slides</h1>
+<p>Moved out of the live deck to keep the session on time. Everything here is covered in <a href="../book/chapters/09-grep-regex.html">Ch. 9</a> and <a href="../book/chapters/10-shell-scripting.html">Ch. 10</a> of the course book - read on your own.</p>
+</section>
+<section id="creating-your-first-script" class="slide level2">
+<h2>Creating Your First Script</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb25"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb25-1"><a></a><span class="co">#!/bin/bash</span></span>
+<span id="cb25-2"><a></a><span class="co"># This is a shebang - tells system which interpreter to use</span></span>
+<span id="cb25-3"><a></a></span>
+<span id="cb25-4"><a></a><span class="co"># This is a comment - documents your code</span></span>
+<span id="cb25-5"><a></a><span class="bu">echo</span> <span class="st">"Hello, Bioengineering!"</span></span>
+<span id="cb25-6"><a></a></span>
+<span id="cb25-7"><a></a><span class="co"># Set a variable</span></span>
+<span id="cb25-8"><a></a><span class="va">NAME</span><span class="op">=</span><span class="st">"DNA Analysis"</span></span>
+<span id="cb25-9"><a></a><span class="bu">echo</span> <span class="st">"Running </span><span class="va">$NAME</span><span class="st">"</span></span>
+<span id="cb25-10"><a></a></span>
+<span id="cb25-11"><a></a><span class="co"># Use command output as variable</span></span>
+<span id="cb25-12"><a></a><span class="va">DATE</span><span class="op">=</span><span class="va">$(</span><span class="fu">date</span> +%Y-%m-%d<span class="va">)</span></span>
+<span id="cb25-13"><a></a><span class="bu">echo</span> <span class="st">"Analysis date: </span><span class="va">$DATE</span><span class="st">"</span></span>
+<span id="cb25-14"><a></a></span>
+<span id="cb25-15"><a></a><span class="co"># Simple calculation</span></span>
+<span id="cb25-16"><a></a><span class="va">COUNT</span><span class="op">=</span>5</span>
+<span id="cb25-17"><a></a><span class="va">DOUBLE</span><span class="op">=</span><span class="va">$((COUNT</span> <span class="op">*</span> <span class="dv">2</span><span class="va">))</span></span>
+<span id="cb25-18"><a></a><span class="bu">echo</span> <span class="st">"Double of </span><span class="va">$COUNT</span><span class="st"> is </span><span class="va">$DOUBLE</span><span class="st">"</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Save as <code>first_script.sh</code> and run with <code>bash first_script.sh</code></p>
+</section>
+<section id="making-scripts-executable" class="slide level2">
+<h2>Making Scripts Executable</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb26"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb26-1"><a></a><span class="co"># Check current permissions</span></span>
+<span id="cb26-2"><a></a><span class="fu">ls</span> <span class="at">-l</span> first_script.sh</span>
+<span id="cb26-3"><a></a></span>
+<span id="cb26-4"><a></a><span class="co"># Make executable (add execute permission)</span></span>
+<span id="cb26-5"><a></a><span class="fu">chmod</span> +x first_script.sh</span>
+<span id="cb26-6"><a></a></span>
+<span id="cb26-7"><a></a><span class="co"># Now you can run it directly</span></span>
+<span id="cb26-8"><a></a><span class="ex">./first_script.sh</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Best practice: Always use <code>chmod +x</code> for your scripts</p>
+</section>
+<section id="variables-and-arrays" class="slide level2">
+<h2>Variables and Arrays</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb27"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb27-1"><a></a><span class="co">#!/bin/bash</span></span>
+<span id="cb27-2"><a></a></span>
+<span id="cb27-3"><a></a><span class="co"># Variables (no spaces around =)</span></span>
+<span id="cb27-4"><a></a><span class="va">SPECIES</span><span class="op">=</span><span class="st">"Homo sapiens"</span></span>
+<span id="cb27-5"><a></a><span class="va">CHROMOSOME</span><span class="op">=</span>21</span>
+<span id="cb27-6"><a></a><span class="va">GENE_COUNT</span><span class="op">=</span>234</span>
+<span id="cb27-7"><a></a></span>
+<span id="cb27-8"><a></a><span class="co"># Arrays</span></span>
+<span id="cb27-9"><a></a><span class="va">BASES</span><span class="op">=</span><span class="va">(</span>A C G T<span class="va">)</span></span>
+<span id="cb27-10"><a></a><span class="bu">echo</span> <span class="st">"First base: </span><span class="va">${BASES</span><span class="op">[</span><span class="dv">0</span><span class="op">]</span><span class="va">}</span><span class="st">"</span></span>
+<span id="cb27-11"><a></a><span class="bu">echo</span> <span class="st">"All bases: </span><span class="va">${BASES</span><span class="op">[@]</span><span class="va">}</span><span class="st">"</span></span>
+<span id="cb27-12"><a></a></span>
+<span id="cb27-13"><a></a><span class="co"># Add to array</span></span>
+<span id="cb27-14"><a></a><span class="va">BASES</span><span class="op">+=</span><span class="va">(</span>N<span class="va">)</span></span>
+<span id="cb27-15"><a></a></span>
+<span id="cb27-16"><a></a><span class="co"># Array length</span></span>
+<span id="cb27-17"><a></a><span class="bu">echo</span> <span class="st">"Number of bases: </span><span class="va">${</span><span class="op">#</span><span class="va">BASES</span><span class="op">[@]</span><span class="va">}</span><span class="st">"</span></span>
+<span id="cb27-18"><a></a></span>
+<span id="cb27-19"><a></a><span class="co"># String operations</span></span>
+<span id="cb27-20"><a></a><span class="va">FILE</span><span class="op">=</span><span class="st">"sample_001.fastq.gz"</span></span>
+<span id="cb27-21"><a></a><span class="va">NAME</span><span class="op">=</span><span class="st">"</span><span class="va">${FILE</span><span class="op">%</span>.fastq.gz<span class="va">}</span><span class="st">"</span>     <span class="co"># Remove suffix</span></span>
+<span id="cb27-22"><a></a><span class="bu">echo</span> <span class="st">"Sample name: </span><span class="va">$NAME</span><span class="st">"</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </section>
 <section id="test-operators-for" class="slide level2">
 <h2>Test operators for <code>[ ]</code></h2>
@@ -861,117 +1141,48 @@ ACG</code></pre>
 </div>
 </div>
 </section>
-<section id="loops-in-shell-scripts" class="slide level2">
-<h2>Loops in Shell Scripts</h2>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb17"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb17-1"><a></a><span class="co">#!/bin/bash</span></span>
-<span id="cb17-2"><a></a></span>
-<span id="cb17-3"><a></a><span class="co"># For loop over list</span></span>
-<span id="cb17-4"><a></a><span class="cf">for</span> BASE <span class="kw">in</span> A C G T<span class="kw">;</span> <span class="cf">do</span></span>
-<span id="cb17-5"><a></a>    <span class="bu">echo</span> <span class="st">"Processing base: </span><span class="va">$BASE</span><span class="st">"</span></span>
-<span id="cb17-6"><a></a><span class="cf">done</span></span>
-<span id="cb17-7"><a></a></span>
-<span id="cb17-8"><a></a><span class="co"># For loop over files</span></span>
-<span id="cb17-9"><a></a><span class="cf">for</span> FILE <span class="kw">in</span> <span class="pp">*</span>.fasta<span class="kw">;</span> <span class="cf">do</span></span>
-<span id="cb17-10"><a></a>    <span class="bu">echo</span> <span class="st">"Analyzing </span><span class="va">$FILE</span><span class="st">"</span></span>
-<span id="cb17-11"><a></a>    <span class="fu">grep</span> <span class="at">-c</span> <span class="st">"&gt;"</span> <span class="st">"</span><span class="va">$FILE</span><span class="st">"</span></span>
-<span id="cb17-12"><a></a><span class="cf">done</span></span>
-<span id="cb17-13"><a></a></span>
-<span id="cb17-14"><a></a><span class="co"># For loop with counter</span></span>
-<span id="cb17-15"><a></a><span class="cf">for</span> i <span class="kw">in</span> <span class="dt">{</span><span class="dv">1</span><span class="dt">..</span><span class="dv">10</span><span class="dt">}</span><span class="kw">;</span> <span class="cf">do</span></span>
-<span id="cb17-16"><a></a>    <span class="bu">echo</span> <span class="st">"Iteration </span><span class="va">$i</span><span class="st">"</span></span>
-<span id="cb17-17"><a></a><span class="cf">done</span></span>
-<span id="cb17-18"><a></a></span>
-<span id="cb17-19"><a></a><span class="co"># While loop</span></span>
-<span id="cb17-20"><a></a><span class="va">COUNT</span><span class="op">=</span>1</span>
-<span id="cb17-21"><a></a><span class="cf">while</span> <span class="bu">[</span> <span class="va">$COUNT</span> <span class="ot">-le</span> 5 <span class="bu">]</span><span class="kw">;</span> <span class="cf">do</span></span>
-<span id="cb17-22"><a></a>    <span class="bu">echo</span> <span class="st">"Count: </span><span class="va">$COUNT</span><span class="st">"</span></span>
-<span id="cb17-23"><a></a>    <span class="va">COUNT</span><span class="op">=</span><span class="va">$((COUNT</span> <span class="op">+</span> <span class="dv">1</span><span class="va">))</span></span>
-<span id="cb17-24"><a></a><span class="cf">done</span></span>
-<span id="cb17-25"><a></a></span>
-<span id="cb17-26"><a></a><span class="co"># Read file line by line</span></span>
-<span id="cb17-27"><a></a><span class="cf">while</span> <span class="bu">read</span> <span class="va">LINE</span><span class="kw">;</span> <span class="cf">do</span></span>
-<span id="cb17-28"><a></a>    <span class="bu">echo</span> <span class="st">"Processing: </span><span class="va">$LINE</span><span class="st">"</span></span>
-<span id="cb17-29"><a></a><span class="cf">done</span> <span class="op">&lt;</span> input.txt</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</section>
-<section id="functions-in-scripts" class="slide level2">
-<h2>Functions in Scripts</h2>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb18"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb18-1"><a></a><span class="co">#!/bin/bash</span></span>
-<span id="cb18-2"><a></a></span>
-<span id="cb18-3"><a></a><span class="co"># Define a function</span></span>
-<span id="cb18-4"><a></a><span class="fu">count_sequences()</span> <span class="kw">{</span></span>
-<span id="cb18-5"><a></a>    <span class="bu">local</span> <span class="va">FILE</span><span class="op">=</span><span class="va">$1</span>  <span class="co"># Local variable</span></span>
-<span id="cb18-6"><a></a>    <span class="bu">local</span> <span class="va">COUNT</span><span class="op">=</span><span class="va">$(</span><span class="fu">grep</span> <span class="at">-c</span> <span class="st">"^&gt;"</span> <span class="st">"</span><span class="va">$FILE</span><span class="st">"</span><span class="va">)</span></span>
-<span id="cb18-7"><a></a>    <span class="bu">echo</span> <span class="st">"</span><span class="va">$COUNT</span><span class="st">"</span>  <span class="co"># "Return" a value by printing it</span></span>
-<span id="cb18-8"><a></a><span class="kw">}</span></span>
-<span id="cb18-9"><a></a><span class="co"># Note: bash 'return' only carries an exit status (0-255), not data -</span></span>
-<span id="cb18-10"><a></a><span class="co"># so functions hand back results via echo, captured with $(...)</span></span>
-<span id="cb18-11"><a></a><span class="va">n</span><span class="op">=</span><span class="va">$(</span><span class="ex">count_sequences</span> proteins.fasta<span class="va">)</span></span>
-<span id="cb18-12"><a></a><span class="bu">echo</span> <span class="st">"proteins.fasta has </span><span class="va">$n</span><span class="st"> sequences"</span></span>
-<span id="cb18-13"><a></a></span>
-<span id="cb18-14"><a></a><span class="co"># Another function with multiple parameters</span></span>
-<span id="cb18-15"><a></a><span class="fu">process_fasta()</span> <span class="kw">{</span></span>
-<span id="cb18-16"><a></a>    <span class="bu">local</span> <span class="va">INPUT</span><span class="op">=</span><span class="va">$1</span></span>
-<span id="cb18-17"><a></a>    <span class="bu">local</span> <span class="va">OUTPUT</span><span class="op">=</span><span class="va">$2</span></span>
-<span id="cb18-18"><a></a>    </span>
-<span id="cb18-19"><a></a>    <span class="bu">echo</span> <span class="st">"Processing </span><span class="va">$INPUT</span><span class="st">..."</span></span>
-<span id="cb18-20"><a></a>    <span class="fu">grep</span> <span class="st">"^&gt;"</span> <span class="st">"</span><span class="va">$INPUT</span><span class="st">"</span> <span class="op">&gt;</span> <span class="st">"</span><span class="va">$OUTPUT</span><span class="st">"</span></span>
-<span id="cb18-21"><a></a>    <span class="bu">echo</span> <span class="st">"</span><span class="va">$INPUT</span><span class="st"> has </span><span class="va">$(</span><span class="ex">count_sequences</span> <span class="st">"</span><span class="va">$INPUT</span><span class="st">"</span><span class="va">)</span><span class="st"> sequences"</span></span>
-<span id="cb18-22"><a></a><span class="kw">}</span></span>
-<span id="cb18-23"><a></a></span>
-<span id="cb18-24"><a></a><span class="co"># Call functions</span></span>
-<span id="cb18-25"><a></a><span class="ex">process_fasta</span> <span class="st">"input.fasta"</span> <span class="st">"headers.txt"</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</section>
 <section id="error-handling" class="slide level2">
 <h2>Error Handling</h2>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb19"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb19-1"><a></a><span class="co">#!/bin/bash</span></span>
-<span id="cb19-2"><a></a></span>
-<span id="cb19-3"><a></a><span class="co"># Exit on error</span></span>
-<span id="cb19-4"><a></a><span class="bu">set</span> <span class="at">-e</span></span>
-<span id="cb19-5"><a></a></span>
-<span id="cb19-6"><a></a><span class="co"># Exit on undefined variable</span></span>
-<span id="cb19-7"><a></a><span class="bu">set</span> <span class="at">-u</span></span>
-<span id="cb19-8"><a></a></span>
-<span id="cb19-9"><a></a><span class="co"># Pipe failure detection</span></span>
-<span id="cb19-10"><a></a><span class="bu">set</span> <span class="at">-o</span> pipefail</span>
-<span id="cb19-11"><a></a></span>
-<span id="cb19-12"><a></a><span class="co"># Custom error handling</span></span>
-<span id="cb19-13"><a></a><span class="fu">check_file()</span> <span class="kw">{</span></span>
-<span id="cb19-14"><a></a>    <span class="cf">if</span> <span class="bu">[</span> <span class="ot">!</span> <span class="ot">-f</span> <span class="st">"</span><span class="va">$1</span><span class="st">"</span> <span class="bu">]</span><span class="kw">;</span> <span class="cf">then</span></span>
-<span id="cb19-15"><a></a>        <span class="bu">echo</span> <span class="st">"Error: File </span><span class="va">$1</span><span class="st"> not found!"</span> <span class="op">&gt;&amp;</span><span class="dv">2</span></span>
-<span id="cb19-16"><a></a>        <span class="bu">exit</span> 1</span>
-<span id="cb19-17"><a></a>    <span class="cf">fi</span></span>
-<span id="cb19-18"><a></a><span class="kw">}</span></span>
-<span id="cb19-19"><a></a></span>
-<span id="cb19-20"><a></a><span class="co"># Trap errors</span></span>
-<span id="cb19-21"><a></a><span class="bu">trap</span> <span class="st">'echo "Error on line $LINENO"'</span> ERR</span>
-<span id="cb19-22"><a></a></span>
-<span id="cb19-23"><a></a><span class="co"># Try-catch style</span></span>
-<span id="cb19-24"><a></a><span class="cf">if</span> <span class="ot">! </span><span class="fu">grep</span> <span class="st">"pattern"</span> file.txt <span class="op">&gt;</span> /dev/null <span class="dv">2</span><span class="op">&gt;&amp;</span><span class="dv">1</span><span class="kw">;</span> <span class="cf">then</span></span>
-<span id="cb19-25"><a></a>    <span class="bu">echo</span> <span class="st">"Pattern not found"</span></span>
-<span id="cb19-26"><a></a><span class="cf">fi</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</section></section>
-<section>
-<section id="two-more-tools-for-scripts-sed-and-awk" class="title-slide slide level1 center">
-<h1>Two more tools for scripts: <code>sed</code> and <code>awk</code></h1>
-
-</section>
-<section id="editing-streams-inside-a-script" class="slide level2">
-<h2>Editing streams inside a script</h2>
-<p>Shell scripts rarely do arithmetic or text editing themselves - they <strong>glue together</strong> small tools. Two of the most useful in a pipeline are <code>sed</code> (edit text as it streams past) and <code>awk</code> (work with columns). You met <code>grep</code> last week; these complete the trio.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb28"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb28-1"><a></a><span class="co">#!/bin/bash</span></span>
+<span id="cb28-2"><a></a></span>
+<span id="cb28-3"><a></a><span class="co"># Exit on error</span></span>
+<span id="cb28-4"><a></a><span class="bu">set</span> <span class="at">-e</span></span>
+<span id="cb28-5"><a></a></span>
+<span id="cb28-6"><a></a><span class="co"># Exit on undefined variable</span></span>
+<span id="cb28-7"><a></a><span class="bu">set</span> <span class="at">-u</span></span>
+<span id="cb28-8"><a></a></span>
+<span id="cb28-9"><a></a><span class="co"># Pipe failure detection</span></span>
+<span id="cb28-10"><a></a><span class="bu">set</span> <span class="at">-o</span> pipefail</span>
+<span id="cb28-11"><a></a></span>
+<span id="cb28-12"><a></a><span class="co"># Custom error handling</span></span>
+<span id="cb28-13"><a></a><span class="fu">check_file()</span> <span class="kw">{</span></span>
+<span id="cb28-14"><a></a>    <span class="cf">if</span> <span class="bu">[</span> <span class="ot">!</span> <span class="ot">-f</span> <span class="st">"</span><span class="va">$1</span><span class="st">"</span> <span class="bu">]</span><span class="kw">;</span> <span class="cf">then</span></span>
+<span id="cb28-15"><a></a>        <span class="bu">echo</span> <span class="st">"Error: File </span><span class="va">$1</span><span class="st"> not found!"</span> <span class="op">&gt;&amp;</span><span class="dv">2</span></span>
+<span id="cb28-16"><a></a>        <span class="bu">exit</span> 1</span>
+<span id="cb28-17"><a></a>    <span class="cf">fi</span></span>
+<span id="cb28-18"><a></a><span class="kw">}</span></span>
+<span id="cb28-19"><a></a></span>
+<span id="cb28-20"><a></a><span class="co"># Trap errors</span></span>
+<span id="cb28-21"><a></a><span class="bu">trap</span> <span class="st">'echo "Error on line $LINENO"'</span> ERR</span>
+<span id="cb28-22"><a></a></span>
+<span id="cb28-23"><a></a><span class="co"># Try-catch style</span></span>
+<span id="cb28-24"><a></a><span class="cf">if</span> <span class="ot">! </span><span class="fu">grep</span> <span class="st">"pattern"</span> file.txt <span class="op">&gt;</span> /dev/null <span class="dv">2</span><span class="op">&gt;&amp;</span><span class="dv">1</span><span class="kw">;</span> <span class="cf">then</span></span>
+<span id="cb28-25"><a></a>    <span class="bu">echo</span> <span class="st">"Pattern not found"</span></span>
+<span id="cb28-26"><a></a><span class="cf">fi</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </section>
 <section id="beyond-grep-sed-for-search-and-replace" class="slide level2">
 <h2>Beyond grep: <code>sed</code> for search-and-replace</h2>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb20"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb20-1"><a></a><span class="co"># Substitute the first match on each line (s/pattern/replacement/)</span></span>
-<span id="cb20-2"><a></a><span class="fu">sed</span> <span class="st">'s/chr/Chr/'</span> regions.bed</span>
-<span id="cb20-3"><a></a></span>
-<span id="cb20-4"><a></a><span class="co"># Substitute every match on each line (g = global)</span></span>
-<span id="cb20-5"><a></a><span class="fu">sed</span> <span class="st">'s/T/U/g'</span> dna.txt <span class="op">&gt;</span> rna.txt</span>
-<span id="cb20-6"><a></a></span>
-<span id="cb20-7"><a></a><span class="co"># Delete lines matching a pattern (e.g. comment lines)</span></span>
-<span id="cb20-8"><a></a><span class="fu">sed</span> <span class="st">'/^#/d'</span> annotation.gff</span>
-<span id="cb20-9"><a></a></span>
-<span id="cb20-10"><a></a><span class="co"># Print only lines 10-20</span></span>
-<span id="cb20-11"><a></a><span class="fu">sed</span> <span class="at">-n</span> <span class="st">'10,20p'</span> big_file.txt</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb29"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb29-1"><a></a><span class="co"># Substitute the first match on each line (s/pattern/replacement/)</span></span>
+<span id="cb29-2"><a></a><span class="fu">sed</span> <span class="st">'s/chr/Chr/'</span> regions.bed</span>
+<span id="cb29-3"><a></a></span>
+<span id="cb29-4"><a></a><span class="co"># Substitute every match on each line (g = global)</span></span>
+<span id="cb29-5"><a></a><span class="fu">sed</span> <span class="st">'s/T/U/g'</span> dna.txt <span class="op">&gt;</span> rna.txt</span>
+<span id="cb29-6"><a></a></span>
+<span id="cb29-7"><a></a><span class="co"># Delete lines matching a pattern (e.g. comment lines)</span></span>
+<span id="cb29-8"><a></a><span class="fu">sed</span> <span class="st">'/^#/d'</span> annotation.gff</span>
+<span id="cb29-9"><a></a></span>
+<span id="cb29-10"><a></a><span class="co"># Print only lines 10-20</span></span>
+<span id="cb29-11"><a></a><span class="fu">sed</span> <span class="at">-n</span> <span class="st">'10,20p'</span> big_file.txt</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="callout callout-warning callout-titled callout-style-default">
 <div class="callout-body">
 <div class="callout-title">
@@ -988,17 +1199,17 @@ ACG</code></pre>
 </section>
 <section id="beyond-grep-awk-for-columns" class="slide level2">
 <h2>Beyond grep: <code>awk</code> for columns</h2>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb21"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb21-1"><a></a><span class="co"># Print columns 1 and 3 of a tab- or space-separated file</span></span>
-<span id="cb21-2"><a></a><span class="fu">awk</span> <span class="st">'{print $1, $3}'</span> data.tsv</span>
-<span id="cb21-3"><a></a></span>
-<span id="cb21-4"><a></a><span class="co"># Keep rows where column 5 is greater than 30</span></span>
-<span id="cb21-5"><a></a><span class="fu">awk</span> <span class="st">'$5 &gt; 30'</span> measurements.tsv</span>
-<span id="cb21-6"><a></a></span>
-<span id="cb21-7"><a></a><span class="co"># Comma-separated file: set the field separator, skip the header</span></span>
-<span id="cb21-8"><a></a><span class="fu">awk</span> <span class="at">-F</span><span class="st">','</span> <span class="st">'NR &gt; 1 {print $2}'</span> samples.csv</span>
-<span id="cb21-9"><a></a></span>
-<span id="cb21-10"><a></a><span class="co"># Sum and average a column</span></span>
-<span id="cb21-11"><a></a><span class="fu">awk</span> <span class="at">-F</span><span class="st">','</span> <span class="st">'NR &gt; 1 {sum += $3; n++} END {print sum, sum/n}'</span> samples.csv</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb30"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb30-1"><a></a><span class="co"># Print columns 1 and 3 of a tab- or space-separated file</span></span>
+<span id="cb30-2"><a></a><span class="fu">awk</span> <span class="st">'{print $1, $3}'</span> data.tsv</span>
+<span id="cb30-3"><a></a></span>
+<span id="cb30-4"><a></a><span class="co"># Keep rows where column 5 is greater than 30</span></span>
+<span id="cb30-5"><a></a><span class="fu">awk</span> <span class="st">'$5 &gt; 30'</span> measurements.tsv</span>
+<span id="cb30-6"><a></a></span>
+<span id="cb30-7"><a></a><span class="co"># Comma-separated file: set the field separator, skip the header</span></span>
+<span id="cb30-8"><a></a><span class="fu">awk</span> <span class="at">-F</span><span class="st">','</span> <span class="st">'NR &gt; 1 {print $2}'</span> samples.csv</span>
+<span id="cb30-9"><a></a></span>
+<span id="cb30-10"><a></a><span class="co"># Sum and average a column</span></span>
+<span id="cb30-11"><a></a><span class="fu">awk</span> <span class="at">-F</span><span class="st">','</span> <span class="st">'NR &gt; 1 {sum += $3; n++} END {print sum, sum/n}'</span> samples.csv</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="callout callout-tip callout-titled callout-style-default">
 <div class="callout-body">
 <div class="callout-title">
@@ -1009,217 +1220,6 @@ ACG</code></pre>
 </div>
 <div class="callout-content">
 <p>Rule of thumb: <strong><code>grep</code></strong> finds lines, <strong><code>sed</code></strong> edits text, <strong><code>awk</code></strong> works with columns. More in the course book’s <a href="../book/chapters/09-grep-regex.html#sec-sed">sed and awk sections</a> and <a href="../book/chapters/appendix-D-regex.html">Regular Expression Reference</a>.</p>
-</div>
-</div>
-</div>
-</section>
-<section id="running-example-sed-awk-and-a-script-on-the-stickleback-table" class="slide level2">
-<h2>Running example: <code>sed</code>, <code>awk</code> and a script on the stickleback table</h2>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb22"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb22-1"><a></a><span class="bu">cd</span> ~/projects/comptools <span class="kw">&amp;&amp;</span> <span class="fu">mkdir</span> <span class="at">-p</span> results</span>
-<span id="cb22-2"><a></a></span>
-<span id="cb22-3"><a></a><span class="co"># Fix the awkward column name once, writing a new file (never edit raw data in place)</span></span>
-<span id="cb22-4"><a></a><span class="fu">sed</span> <span class="st">'1s/Geno&amp;Micro/Geno_Micro/'</span> data/Stickle_RNAseq.tsv <span class="op">&gt;</span> results/stickle_clean.tsv</span>
-<span id="cb22-5"><a></a></span>
-<span id="cb22-6"><a></a><span class="co"># Mean of Gene1 (column 5) across all 80 fish</span></span>
-<span id="cb22-7"><a></a><span class="fu">awk</span> <span class="at">-F</span><span class="st">'\t'</span> <span class="st">'NR &gt; 1 { sum += $5; n++ } END { print "Gene1 mean:", sum/n }'</span> results/stickle_clean.tsv</span>
-<span id="cb22-8"><a></a></span>
-<span id="cb22-9"><a></a><span class="co"># Mean of Gene1 by genotype - awk arrays keyed by the group</span></span>
-<span id="cb22-10"><a></a><span class="fu">awk</span> <span class="at">-F</span><span class="st">'\t'</span> <span class="st">'NR &gt; 1 { sum[$2] += $5; n[$2]++ } END { for (g in sum) print g, sum[g]/n[g] }'</span> results/stickle_clean.tsv</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</section>
-<section id="turn-it-into-a-script" class="slide level2">
-<h2>Turn it into a script</h2>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb23"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb23-1"><a></a><span class="co">#!/bin/bash</span></span>
-<span id="cb23-2"><a></a><span class="co"># gene_means.sh - mean count of one gene per treatment group</span></span>
-<span id="cb23-3"><a></a><span class="co"># Usage: ./gene_means.sh &lt;gene column number&gt;</span></span>
-<span id="cb23-4"><a></a><span class="bu">set</span> <span class="at">-euo</span> pipefail</span>
-<span id="cb23-5"><a></a><span class="va">col</span><span class="op">=</span><span class="va">${1</span><span class="op">:?</span>Give a gene column number, e.g. 5 for Gene1<span class="va">}</span></span>
-<span id="cb23-6"><a></a><span class="va">infile</span><span class="op">=</span>results/stickle_clean.tsv</span>
-<span id="cb23-7"><a></a></span>
-<span id="cb23-8"><a></a><span class="va">gene</span><span class="op">=</span><span class="va">$(</span><span class="fu">head</span> <span class="at">-n</span> 1 <span class="st">"</span><span class="va">$infile</span><span class="st">"</span> <span class="kw">|</span> <span class="fu">cut</span> <span class="at">-f</span> <span class="st">"</span><span class="va">$col</span><span class="st">"</span><span class="va">)</span></span>
-<span id="cb23-9"><a></a><span class="bu">echo</span> <span class="st">"Mean of </span><span class="va">$gene</span><span class="st"> by group:"</span></span>
-<span id="cb23-10"><a></a><span class="fu">awk</span> <span class="at">-F</span><span class="st">'\t'</span> <span class="at">-v</span> c=<span class="st">"</span><span class="va">$col</span><span class="st">"</span> <span class="st">'NR &gt; 1 { sum[$4] += $c; n[$4]++ } END { for (g in sum) printf "  %-6s %8.1f\n", g, sum[g]/n[g] }'</span> <span class="st">"</span><span class="va">$infile</span><span class="st">"</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb24"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb24-1"><a></a><span class="fu">chmod</span> +x gene_means.sh</span>
-<span id="cb24-2"><a></a><span class="ex">./gene_means.sh</span> 5            <span class="co"># Gene1</span></span>
-<span id="cb24-3"><a></a><span class="cf">for</span> c <span class="kw">in</span> 5 6 7<span class="kw">;</span> <span class="cf">do</span> <span class="ex">./gene_means.sh</span> <span class="va">$c</span><span class="kw">;</span> <span class="cf">done</span>    <span class="co"># loop over the first three genes</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</section>
-<section id="real-bioinformatics-script-example" class="slide level2">
-<h2>Real Bioinformatics Script Example</h2>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb25"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb25-1"><a></a><span class="co">#!/bin/bash</span></span>
-<span id="cb25-2"><a></a><span class="co"># Script: fasta_stats.sh</span></span>
-<span id="cb25-3"><a></a><span class="co"># Purpose: Calculate basic statistics for FASTA files</span></span>
-<span id="cb25-4"><a></a></span>
-<span id="cb25-5"><a></a><span class="co"># Check arguments</span></span>
-<span id="cb25-6"><a></a><span class="cf">if</span> <span class="bu">[</span> <span class="va">$#</span> <span class="ot">-ne</span> 1 <span class="bu">]</span><span class="kw">;</span> <span class="cf">then</span></span>
-<span id="cb25-7"><a></a>    <span class="bu">echo</span> <span class="st">"Usage: </span><span class="va">$0</span><span class="st"> sequences.fasta"</span></span>
-<span id="cb25-8"><a></a>    <span class="bu">exit</span> 1</span>
-<span id="cb25-9"><a></a><span class="cf">fi</span></span>
-<span id="cb25-10"><a></a></span>
-<span id="cb25-11"><a></a><span class="va">INPUT</span><span class="op">=</span><span class="va">$1</span></span>
-<span id="cb25-12"><a></a></span>
-<span id="cb25-13"><a></a><span class="co"># Check if file exists</span></span>
-<span id="cb25-14"><a></a><span class="cf">if</span> <span class="bu">[</span> <span class="ot">!</span> <span class="ot">-f</span> <span class="st">"</span><span class="va">$INPUT</span><span class="st">"</span> <span class="bu">]</span><span class="kw">;</span> <span class="cf">then</span></span>
-<span id="cb25-15"><a></a>    <span class="bu">echo</span> <span class="st">"Error: File </span><span class="va">$INPUT</span><span class="st"> not found!"</span></span>
-<span id="cb25-16"><a></a>    <span class="bu">exit</span> 1</span>
-<span id="cb25-17"><a></a><span class="cf">fi</span></span>
-<span id="cb25-18"><a></a></span>
-<span id="cb25-19"><a></a><span class="bu">echo</span> <span class="st">"=== FASTA Statistics for </span><span class="va">$INPUT</span><span class="st"> ==="</span></span>
-<span id="cb25-20"><a></a></span>
-<span id="cb25-21"><a></a><span class="co"># Count sequences</span></span>
-<span id="cb25-22"><a></a><span class="va">SEQ_COUNT</span><span class="op">=</span><span class="va">$(</span><span class="fu">grep</span> <span class="at">-c</span> <span class="st">"^&gt;"</span> <span class="st">"</span><span class="va">$INPUT</span><span class="st">"</span><span class="va">)</span></span>
-<span id="cb25-23"><a></a><span class="bu">echo</span> <span class="st">"Number of sequences: </span><span class="va">$SEQ_COUNT</span><span class="st">"</span></span>
-<span id="cb25-24"><a></a></span>
-<span id="cb25-25"><a></a><span class="co"># Calculate total length</span></span>
-<span id="cb25-26"><a></a><span class="va">TOTAL_LENGTH</span><span class="op">=</span><span class="va">$(</span><span class="fu">grep</span> <span class="at">-v</span> <span class="st">"^&gt;"</span> <span class="st">"</span><span class="va">$INPUT</span><span class="st">"</span> <span class="kw">|</span> <span class="fu">tr</span> <span class="at">-d</span> <span class="st">'\n'</span> <span class="kw">|</span> <span class="fu">wc</span> <span class="at">-c</span><span class="va">)</span></span>
-<span id="cb25-27"><a></a><span class="bu">echo</span> <span class="st">"Total length: </span><span class="va">$TOTAL_LENGTH</span><span class="st"> bp"</span></span>
-<span id="cb25-28"><a></a></span>
-<span id="cb25-29"><a></a><span class="co"># Average length</span></span>
-<span id="cb25-30"><a></a><span class="va">AVG_LENGTH</span><span class="op">=</span><span class="va">$((TOTAL_LENGTH</span> <span class="op">/</span> <span class="va">SEQ_COUNT))</span></span>
-<span id="cb25-31"><a></a><span class="bu">echo</span> <span class="st">"Average length: </span><span class="va">$AVG_LENGTH</span><span class="st"> bp"</span></span>
-<span id="cb25-32"><a></a></span>
-<span id="cb25-33"><a></a><span class="co"># GC content</span></span>
-<span id="cb25-34"><a></a><span class="va">GC_COUNT</span><span class="op">=</span><span class="va">$(</span><span class="fu">grep</span> <span class="at">-v</span> <span class="st">"^&gt;"</span> <span class="st">"</span><span class="va">$INPUT</span><span class="st">"</span> <span class="kw">|</span> <span class="fu">tr</span> <span class="at">-d</span> <span class="st">'\n'</span> <span class="kw">|</span> <span class="fu">grep</span> <span class="at">-o</span> <span class="st">"[GC]"</span> <span class="kw">|</span> <span class="fu">wc</span> <span class="at">-l</span><span class="va">)</span></span>
-<span id="cb25-35"><a></a><span class="va">GC_PERCENT</span><span class="op">=</span><span class="va">$((GC_COUNT</span> <span class="op">*</span> <span class="dv">100</span> <span class="op">/</span> <span class="va">TOTAL_LENGTH))</span></span>
-<span id="cb25-36"><a></a><span class="bu">echo</span> <span class="st">"GC content: </span><span class="va">$GC_PERCENT</span><span class="st">%"</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</section>
-<section id="the-same-script-in-r-and-python" class="slide level2">
-<h2>The same script in R and Python</h2>
-<p>The shell version of <code>fasta_stats.sh</code> works, but counting and arithmetic get awkward in bash. Here is the same program as an <strong>R script</strong> and a <strong>Python script</strong> - both take the file name as a command-line argument.</p>
-<div class="panel-tabset">
-<ul id="tabset-1" class="panel-tabset-tabby"><li><a data-tabby-default="" href="#tabset-1-1">R</a></li><li><a href="#tabset-1-2">Python</a></li></ul>
-<div class="tab-content">
-<div id="tabset-1-1">
-<div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb26"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb26-1"><a></a><span class="co">#!/usr/bin/env Rscript</span></span>
-<span id="cb26-2"><a></a><span class="co"># Script: fasta_stats.R</span></span>
-<span id="cb26-3"><a></a><span class="co"># Purpose: Calculate basic statistics for a FASTA file</span></span>
-<span id="cb26-4"><a></a></span>
-<span id="cb26-5"><a></a>args <span class="ot">&lt;-</span> <span class="fu">commandArgs</span>(<span class="at">trailingOnly =</span> <span class="cn">TRUE</span>)     <span class="co"># like $1 $2 ... in bash</span></span>
-<span id="cb26-6"><a></a><span class="cf">if</span> (<span class="fu">length</span>(args) <span class="sc">!=</span> <span class="dv">1</span>) {</span>
-<span id="cb26-7"><a></a>  <span class="fu">cat</span>(<span class="st">"Usage: Rscript fasta_stats.R sequences.fasta</span><span class="sc">\n</span><span class="st">"</span>)</span>
-<span id="cb26-8"><a></a>  <span class="fu">quit</span>(<span class="at">status =</span> <span class="dv">1</span>)</span>
-<span id="cb26-9"><a></a>}</span>
-<span id="cb26-10"><a></a>input <span class="ot">&lt;-</span> args[<span class="dv">1</span>]</span>
-<span id="cb26-11"><a></a><span class="cf">if</span> (<span class="sc">!</span><span class="fu">file.exists</span>(input)) {</span>
-<span id="cb26-12"><a></a>  <span class="fu">cat</span>(<span class="st">"Error: File"</span>, input, <span class="st">"not found!</span><span class="sc">\n</span><span class="st">"</span>)</span>
-<span id="cb26-13"><a></a>  <span class="fu">quit</span>(<span class="at">status =</span> <span class="dv">1</span>)</span>
-<span id="cb26-14"><a></a>}</span>
-<span id="cb26-15"><a></a></span>
-<span id="cb26-16"><a></a>lines   <span class="ot">&lt;-</span> <span class="fu">readLines</span>(input)</span>
-<span id="cb26-17"><a></a>headers <span class="ot">&lt;-</span> <span class="fu">grepl</span>(<span class="st">"^&gt;"</span>, lines)                <span class="co"># TRUE for header lines</span></span>
-<span id="cb26-18"><a></a>seq     <span class="ot">&lt;-</span> <span class="fu">paste</span>(lines[<span class="sc">!</span>headers], <span class="at">collapse =</span> <span class="st">""</span>)</span>
-<span id="cb26-19"><a></a></span>
-<span id="cb26-20"><a></a><span class="fu">cat</span>(<span class="st">"=== FASTA Statistics for"</span>, input, <span class="st">"===</span><span class="sc">\n</span><span class="st">"</span>)</span>
-<span id="cb26-21"><a></a><span class="fu">cat</span>(<span class="st">"Number of sequences:"</span>, <span class="fu">sum</span>(headers), <span class="st">"</span><span class="sc">\n</span><span class="st">"</span>)</span>
-<span id="cb26-22"><a></a><span class="fu">cat</span>(<span class="st">"Total length:"</span>, <span class="fu">nchar</span>(seq), <span class="st">"bp</span><span class="sc">\n</span><span class="st">"</span>)</span>
-<span id="cb26-23"><a></a><span class="fu">cat</span>(<span class="st">"Average length:"</span>, <span class="fu">nchar</span>(seq) <span class="sc">/</span> <span class="fu">sum</span>(headers), <span class="st">"bp</span><span class="sc">\n</span><span class="st">"</span>)</span>
-<span id="cb26-24"><a></a>gc <span class="ot">&lt;-</span> <span class="fu">sum</span>(<span class="fu">strsplit</span>(seq, <span class="st">""</span>)[[<span class="dv">1</span>]] <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"G"</span>, <span class="st">"C"</span>))</span>
-<span id="cb26-25"><a></a><span class="fu">cat</span>(<span class="st">"GC content:"</span>, <span class="fu">round</span>(<span class="dv">100</span> <span class="sc">*</span> gc <span class="sc">/</span> <span class="fu">nchar</span>(seq), <span class="dv">1</span>), <span class="st">"%</span><span class="sc">\n</span><span class="st">"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</div>
-</div>
-<div id="tabset-1-2">
-<div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb27"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb27-1"><a></a><span class="co">#!/usr/bin/env python3</span></span>
-<span id="cb27-2"><a></a><span class="co"># Script: fasta_stats.py</span></span>
-<span id="cb27-3"><a></a><span class="co"># Purpose: Calculate basic statistics for a FASTA file</span></span>
-<span id="cb27-4"><a></a></span>
-<span id="cb27-5"><a></a><span class="im">import</span> sys</span>
-<span id="cb27-6"><a></a><span class="im">from</span> pathlib <span class="im">import</span> Path</span>
-<span id="cb27-7"><a></a></span>
-<span id="cb27-8"><a></a><span class="cf">if</span> <span class="bu">len</span>(sys.argv) <span class="op">!=</span> <span class="dv">2</span>:                       <span class="co"># sys.argv[0] is the script name, like $0</span></span>
-<span id="cb27-9"><a></a>    <span class="bu">print</span>(<span class="st">"Usage: python3 fasta_stats.py sequences.fasta"</span>)</span>
-<span id="cb27-10"><a></a>    sys.exit(<span class="dv">1</span>)</span>
-<span id="cb27-11"><a></a>input_file <span class="op">=</span> Path(sys.argv[<span class="dv">1</span>])</span>
-<span id="cb27-12"><a></a><span class="cf">if</span> <span class="kw">not</span> input_file.is_file():</span>
-<span id="cb27-13"><a></a>    <span class="bu">print</span>(<span class="ss">f"Error: File </span><span class="sc">{</span>input_file<span class="sc">}</span><span class="ss"> not found!"</span>)</span>
-<span id="cb27-14"><a></a>    sys.exit(<span class="dv">1</span>)</span>
-<span id="cb27-15"><a></a></span>
-<span id="cb27-16"><a></a>lines   <span class="op">=</span> input_file.read_text().splitlines()</span>
-<span id="cb27-17"><a></a>headers <span class="op">=</span> [line <span class="cf">for</span> line <span class="kw">in</span> lines <span class="cf">if</span> line.startswith(<span class="st">"&gt;"</span>)]</span>
-<span id="cb27-18"><a></a>seq     <span class="op">=</span> <span class="st">""</span>.join(line <span class="cf">for</span> line <span class="kw">in</span> lines <span class="cf">if</span> <span class="kw">not</span> line.startswith(<span class="st">"&gt;"</span>))</span>
-<span id="cb27-19"><a></a></span>
-<span id="cb27-20"><a></a><span class="bu">print</span>(<span class="ss">f"=== FASTA Statistics for </span><span class="sc">{</span>input_file<span class="sc">}</span><span class="ss"> ==="</span>)</span>
-<span id="cb27-21"><a></a><span class="bu">print</span>(<span class="ss">f"Number of sequences: </span><span class="sc">{</span><span class="bu">len</span>(headers)<span class="sc">}</span><span class="ss">"</span>)</span>
-<span id="cb27-22"><a></a><span class="bu">print</span>(<span class="ss">f"Total length: </span><span class="sc">{</span><span class="bu">len</span>(seq)<span class="sc">}</span><span class="ss"> bp"</span>)</span>
-<span id="cb27-23"><a></a><span class="bu">print</span>(<span class="ss">f"Average length: </span><span class="sc">{</span><span class="bu">len</span>(seq) <span class="op">/</span> <span class="bu">len</span>(headers)<span class="sc">:.1f}</span><span class="ss"> bp"</span>)</span>
-<span id="cb27-24"><a></a>gc <span class="op">=</span> seq.count(<span class="st">"G"</span>) <span class="op">+</span> seq.count(<span class="st">"C"</span>)</span>
-<span id="cb27-25"><a></a><span class="bu">print</span>(<span class="ss">f"GC content: </span><span class="sc">{</span><span class="dv">100</span> <span class="op">*</span> gc <span class="op">/</span> <span class="bu">len</span>(seq)<span class="sc">:.1f}</span><span class="ss">%"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</div>
-</div>
-</div>
-</div>
-</section>
-<section id="running-r-and-python-scripts-from-the-shell" class="slide level2">
-<h2>Running R and Python scripts from the shell</h2>
-<div class="panel-tabset">
-<ul id="tabset-2" class="panel-tabset-tabby"><li><a data-tabby-default="" href="#tabset-2-1">R</a></li><li><a href="#tabset-2-2">Python</a></li></ul>
-<div class="tab-content">
-<div id="tabset-2-1">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb28"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb28-1"><a></a><span class="ex">Rscript</span> fasta_stats.R proteins.fasta        <span class="co"># run with the interpreter ...</span></span>
-<span id="cb28-2"><a></a></span>
-<span id="cb28-3"><a></a><span class="fu">chmod</span> +x fasta_stats.R                      <span class="co"># ... or make it executable</span></span>
-<span id="cb28-4"><a></a><span class="ex">./fasta_stats.R</span> proteins.fasta              <span class="co">#     (needs the #!/usr/bin/env Rscript shebang)</span></span>
-<span id="cb28-5"><a></a></span>
-<span id="cb28-6"><a></a><span class="ex">Rscript</span> <span class="at">-e</span> <span class="st">'mean(c(1, 2, 3))'</span>               <span class="co"># one-liner without a file</span></span>
-<span id="cb28-7"><a></a><span class="ex">R</span>                                           <span class="co"># interactive console; quit with q()</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<ul>
-<li><code>Rscript</code> runs the file top to bottom and prints only what you <code>cat()</code> or <code>print()</code></li>
-<li>In <strong>Positron</strong> / <strong>VS Code</strong> / <strong>RStudio</strong>: open the <code>.R</code> file and press <code>Cmd/Ctrl-Enter</code> to send lines to the console</li>
-</ul>
-</div>
-<div id="tabset-2-2">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb29"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb29-1"><a></a><span class="ex">python3</span> fasta_stats.py proteins.fasta       <span class="co"># run with the interpreter ...</span></span>
-<span id="cb29-2"><a></a></span>
-<span id="cb29-3"><a></a><span class="fu">chmod</span> +x fasta_stats.py                     <span class="co"># ... or make it executable</span></span>
-<span id="cb29-4"><a></a><span class="ex">./fasta_stats.py</span> proteins.fasta             <span class="co">#     (needs the #!/usr/bin/env python3 shebang)</span></span>
-<span id="cb29-5"><a></a></span>
-<span id="cb29-6"><a></a><span class="ex">python3</span> <span class="at">-c</span> <span class="st">'print(sum([1, 2, 3]) / 3)'</span>      <span class="co"># one-liner without a file</span></span>
-<span id="cb29-7"><a></a><span class="ex">python3</span>                                     <span class="co"># interactive REPL; quit with exit() or Ctrl-D</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<ul>
-<li><code>python3 script.py</code> runs the file top to bottom and prints only what you <code>print()</code></li>
-<li>In <strong>VS Code</strong> / <strong>Positron</strong>: open the <code>.py</code> file and press <code>Cmd/Ctrl-Enter</code>, or use the Run button</li>
-<li>Keep project packages in a virtual environment: <code>python3 -m venv .venv &amp;&amp; source .venv/bin/activate</code></li>
-</ul>
-</div>
-</div>
-</div>
-<div class="callout callout-tip callout-titled callout-style-default">
-<div class="callout-body">
-<div class="callout-title">
-<div class="callout-icon-container">
-<i class="callout-icon"></i>
-</div>
-<p><strong>Tip</strong></p>
-</div>
-<div class="callout-content">
-<p>Both scripts return an <strong>exit status</strong> (<code>quit(status = 1)</code> / <code>sys.exit(1)</code>), so a shell pipeline or SLURM job can tell whether they succeeded - just like <code>exit 1</code> in bash. In Lecture 08 we submit these scripts to Talapas with <code>Rscript</code> and <code>python3</code> inside an <code>sbatch</code> job.</p>
-</div>
-</div>
-</div>
-</section>
-<section id="best-practices-for-shell-scripts" class="slide level2">
-<h2>Best Practices for Shell Scripts</h2>
-<ol type="1">
-<li><strong>Always include a shebang</strong>: <code>#!/bin/bash</code></li>
-<li><strong>Comment your code</strong>: Explain what and why</li>
-<li><strong>Use meaningful variable names</strong>: <code>GENE_COUNT</code> not <code>GC</code></li>
-<li><strong>Check inputs</strong>: Validate files exist and arguments are correct</li>
-<li><strong>Handle errors gracefully</strong>: Use <code>set -e</code> and error checking</li>
-<li><strong>Make scripts portable</strong>: Don’t hardcode paths</li>
-<li><strong>Use version control</strong>: Track changes with git</li>
-<li><strong>Test incrementally</strong>: Build scripts step by step</li>
-<li><strong>Create help messages</strong>: Document usage</li>
-<li><strong>Log important steps</strong>: Keep records of what was done</li>
-</ol>
-<div class="callout callout-note callout-titled callout-style-default">
-<div class="callout-body">
-<div class="callout-title">
-<div class="callout-icon-container">
-<i class="callout-icon"></i>
-</div>
-<p><strong>Note</strong></p>
-</div>
-<div class="callout-content">
-<p>Every one of these applies to <strong>R and Python scripts</strong> too: shebang line, comments, checking <code>commandArgs()</code> / <code>sys.argv</code>, meaningful names, relative paths, Git, and testing on a tiny input first.</p>
 </div>
 </div>
 </div>

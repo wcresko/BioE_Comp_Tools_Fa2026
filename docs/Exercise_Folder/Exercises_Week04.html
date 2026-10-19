@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>Week 4 Exercises - Shell Scripts, sed, and awk – Comp Tools Bioengineers F26</title>
+<title>Week 4 Exercises - GREP in Practice, Shell Scripts, sed and awk – Comp Tools Bioengineers F26</title>
 <style>
 /* Default styles provided by pandoc.
 ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
@@ -143,15 +143,23 @@ ul.task-list li input[type="checkbox"] {
 <div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
 <!-- sidebar -->
 <!-- margin-sidebar -->
-    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar zindex-bottom">
-        
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#grep-on-real-data" id="toc-grep-on-real-data" class="nav-link active" data-scroll-target="#grep-on-real-data">GREP on real data</a></li>
+  <li><a href="#shell-scripts" id="toc-shell-scripts" class="nav-link" data-scroll-target="#shell-scripts">Shell scripts</a></li>
+  <li><a href="#sed-and-awk" id="toc-sed-and-awk" class="nav-link" data-scroll-target="#sed-and-awk">sed and awk</a></li>
+  </ul>
+</nav>
     </div>
 <!-- main -->
 <main class="content" id="quarto-document-content">
 
 <header id="title-block-header" class="quarto-title-block default">
 <div class="quarto-title">
-<h1 class="title">Week 4 Exercises - Shell Scripts, sed, and awk</h1>
+<h1 class="title">Week 4 Exercises - GREP in Practice, Shell Scripts, sed and awk</h1>
 </div>
 
 
@@ -168,21 +176,48 @@ ul.task-list li input[type="checkbox"] {
 </header>
 
 
-<p>Short, <strong>ungraded</strong> practice tasks - about 20-30 minutes. Companion reading: <a href="../book/chapters/10-shell-scripting.html">Ch. 10</a> and the sed/awk sections of <a href="../book/chapters/09-grep-regex.html">Ch. 9</a>.</p>
+<p>Short, <strong>ungraded</strong> practice tasks - about 25-35 minutes. Companion reading: <a href="../book/chapters/10-shell-scripting.html">Ch. 10</a> and <a href="../book/chapters/09-grep-regex.html">Ch. 9</a> - review the grep/regex sections, and read the <strong>sed and awk sections carefully</strong>: in class we only learned them by example.</p>
+<div class="callout callout-style-default callout-tip callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Tip</span>Adjust as you go
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Commands copied from the lecture slides may need small tweaks to run in <em>your</em> project - most often a file path: the slides often use <code>data/</code>, while your Week 2 skeleton keeps the raw file in <code>data/raw/</code>. Spotting and fixing these little mismatches is not busywork; it is a core skill, and the error messages are your friend.</p>
+</div>
+</div>
+<section id="grep-on-real-data" class="level2">
+<h2 class="anchored" data-anchor-id="grep-on-real-data">GREP on real data</h2>
 <ol type="1">
-<li>In <code>scripts/</code>, create <code>hello.sh</code> containing a <code>#!/bin/bash</code> shebang and a line that prints “Hello from <your name="">”. Try <code>./hello.sh</code> - what error do you get?</your></li>
-<li>Fix it with <code>chmod +x hello.sh</code> and run it again.</li>
-<li>Add a variable: <code>NAME="..."</code> and <code>echo "Hello, $NAME"</code>. Re-run.</li>
-<li>Make the script greet whoever is passed on the command line using <code>$1</code>: <code>./hello.sh Bill</code> should print “Hello, Bill”.</li>
+<li>Warm-up from the L04 reminder: run <code>grep -c "mono" data/raw/Stickle_RNAseq.tsv</code> and <code>grep -cw "mono" data/raw/Stickle_RNAseq.tsv</code>. Both give 40 - work out which column each one matches on, then construct a pattern where adding <code>-w</code> <em>would</em> change the answer.</li>
+<li>Download human chromosome 21 into <code>data/raw/</code> (the <code>wget</code>/<code>curl</code> command is on the L04 slides) and decompress a copy with <code>gunzip -k</code>. Then finish the lecture’s “Your turn” tasks if we ran out of time in class: total bases and GC content of <code>chr21.fa</code>. Save your working pipelines in <code>scripts/</code> - you will want them for the homework.</li>
+</ol>
+</section>
+<section id="shell-scripts" class="level2">
+<h2 class="anchored" data-anchor-id="shell-scripts">Shell scripts</h2>
+<ol start="3" type="1">
+<li>In Week 2 you made <code>scripts/hello.sh</code> (if you skipped that, the recipe is on the L04 “mechanics” slide). Make it greet whoever is passed on the command line using <code>$1</code>: <code>./hello.sh Bill</code> should print “Hello, Bill”.</li>
 <li>Write a <code>for</code> loop (in a script or at the prompt) that prints the name of every <code>.tsv</code> file under <code>data/</code>.</li>
-<li>Add a safety check to a script: <code>if [ ! -f "$1" ]; then echo "no such file"; exit 1; fi</code>. Test it with a real and a fake filename.</li>
+<li>Add a safety check to a script: <code>if [ ! -f "$1" ]; then echo "no such file" &gt;&amp;2; exit 1; fi</code>. Test it with a real and a fake filename.</li>
 <li>Add <code>set -euo pipefail</code> near the top of one of your scripts, then introduce a typo in a command and observe how the script now stops instead of plowing on.</li>
-<li>Use <code>awk</code> to print the Individual and Genotype columns: <code>awk -F'\t' '{print $1, $2}' data/raw/Stickle_RNAseq.tsv | head</code>.</li>
-<li>Use <code>sed</code> to replace “mono” with “monoassociated” in a <em>copy</em> of the dataset, and verify with <code>grep -c</code>.</li>
+<li>Write a function <code>count_group</code> that takes a file and a group name and prints how many fish are in that group (the L04 functions slide is your template). Call it in a loop over <code>convA convB monoA monoB</code> - do you get 20 of each?</li>
+</ol>
+</section>
+<section id="sed-and-awk" class="level2">
+<h2 class="anchored" data-anchor-id="sed-and-awk">sed and awk</h2>
+<ol start="8" type="1">
+<li>Fix the awkward column name exactly as in lecture, but matched to your project layout: <code>sed '1s/Geno&amp;Micro/Geno_Micro/' data/raw/Stickle_RNAseq.tsv &gt; data/processed/stickle_clean.tsv</code>. Verify with <code>head -n 1 data/processed/stickle_clean.tsv | cut -f1-4</code>.</li>
+<li>Use <code>awk</code> to print the Individual and Genotype columns (<code>awk -F'\t' '{print $1, $2}' data/processed/stickle_clean.tsv | head</code>), then compute the mean of <code>Gene1</code> (column 5) - the command is on the L04 slides.</li>
+<li>Copy <code>gene_means.sh</code> from the lecture into <code>scripts/</code>, change its <code>infile=</code> line to point at your <code>data/processed/stickle_clean.tsv</code>, make it executable, and run it for column 5. Then loop it over columns 5-7. (Annoyed that you had to edit a hardcoded path? That is best practice #6 from the last slide.)</li>
 <li>Re-run one of your scripts from a different working directory. Does it still work? If not, explain why (hint: relative paths).</li>
 </ol>
 
 
+</section>
 
 </main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">
