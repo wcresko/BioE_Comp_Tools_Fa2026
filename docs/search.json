@@ -2639,18 +2639,18 @@
     "text": "Reminder: grep finds lines that match a pattern\ngrep [options] pattern [file...]\n\nGREP = Global Regular Expression Print - reads lines, prints the ones that match\nThe flags you will use constantly:\n\n-i ignore case · -c count matching lines · -n show line numbers\n-v invert (print lines that do not match) · -w match whole words only\n-o print only the matching text · -E extended regex (alternation, +, {n,m})\n\nThe pattern is a regular expression:\n\n^ start of line · $ end of line · . any one character\n[ACGT] one character from the set · [^ACGT] one character not in the set\n* zero or more · + one or more (-E) · \\{3\\} exactly 3 (or {3} with -E)\n(ATG|GTG|TTG) grouping and alternation with -E\n\nFull treatment: the L03 slides, Ch. 9 and App. D"
   },
   {
-    "objectID": "Lecture_Folder/Lecture_04_BioE_Comp_Tools_2026.html#reminder-grep-can-live-in-pipelines",
-    "href": "Lecture_Folder/Lecture_04_BioE_Comp_Tools_2026.html#reminder-grep-can-live-in-pipelines",
-    "title": "Lecture 04",
-    "section": "Reminder: grep can live in pipelines",
-    "text": "Reminder: grep can live in pipelines\n# -c counts matching lines, -w matches whole words only: the mono fish\ngrep -cw \"mono\" data/Stickle_RNAseq.tsv\n\n# Combine with pipes: genotype-A fish only, then tally their microbiota column\ngrep -w \"A\" data/Stickle_RNAseq.tsv | cut -f 3 | sort | uniq -c\n\n# -n shows line numbers: where in the file is fish BM7?\ngrep -nw \"BM7\" data/Stickle_RNAseq.tsv | cut -f 1-4\n\n# -v inverts the match: everything NOT mono (40 conventional fish + 1 header = 41)\ngrep -vw \"mono\" data/Stickle_RNAseq.tsv | wc -l\n\n# -o prints only the matching text itself, one match per line\ngrep -ow \"conventional\" data/Stickle_RNAseq.tsv | head -3\n\n\n\n\n\n\nNote\n\n\n\nEvery one of these works unchanged on compressed files through zgrep - handy for the genomic data later today"
-  },
-  {
     "objectID": "Lecture_Folder/Lecture_04_BioE_Comp_Tools_2026.html#test-your-knowledge---which-lines-match",
     "href": "Lecture_Folder/Lecture_04_BioE_Comp_Tools_2026.html#test-your-knowledge---which-lines-match",
     "title": "Lecture 04",
     "section": "Test your knowledge - which lines match?",
     "text": "Test your knowledge - which lines match?\nCreate the file test.txt with four lines - one printf does it:\nATGCCCTAG\nCCATG\nATG\nACG\nprintf \"ATGCCCTAG\\nCCATG\\nATG\\nACG\\n\" &gt; test.txt\nPredict the output of each command before you run it:\ngrep \"^ATG\" test.txt\ngrep \"ATG$\" test.txt\ngrep \"^A.G$\" test.txt\n\n^ATG → lines 1 and 3 (must start with ATG)\nATG$ → lines 2 and 3 (must end with ATG)\n^A.G$ → lines 3 and 4 (exactly three characters: A, anything, G)"
+  },
+  {
+    "objectID": "Lecture_Folder/Lecture_04_BioE_Comp_Tools_2026.html#reminder-grep-can-live-in-pipelines",
+    "href": "Lecture_Folder/Lecture_04_BioE_Comp_Tools_2026.html#reminder-grep-can-live-in-pipelines",
+    "title": "Lecture 04",
+    "section": "Reminder: grep can live in pipelines",
+    "text": "Reminder: grep can live in pipelines\n# -c counts matching lines, -w matches whole words only: the mono fish\ngrep -cw \"mono\" data/Stickle_RNAseq.tsv\n\n# Combine with pipes: genotype-A fish only, then tally their microbiota column\ngrep -w \"A\" data/Stickle_RNAseq.tsv | cut -f 3 | sort | uniq -c\n\n# -n shows line numbers: where in the file is fish BM7?\ngrep -nw \"BM7\" data/Stickle_RNAseq.tsv | cut -f 1-4\n\n# -v inverts the match: everything NOT mono (40 conventional fish + 1 header = 41)\ngrep -vw \"mono\" data/Stickle_RNAseq.tsv | wc -l\n\n# -o prints only the matching text itself, one match per line\ngrep -ow \"conventional\" data/Stickle_RNAseq.tsv | head -3\n\n\n\n\n\n\nNote\n\n\n\nEvery one of these works unchanged on compressed files through zgrep - handy for the genomic data later today"
   },
   {
     "objectID": "Lecture_Folder/Lecture_04_BioE_Comp_Tools_2026.html#streams-with-grep-filtering-the-stickleback-table",
@@ -2723,6 +2723,13 @@
     "text": "Processing FASTA Files with Pipes\n# Extract the sequence (no header) - the start of every pipeline on this slide\n\ngrep -v \"^&gt;\" chr21.fa | head -2\n\n# How many N's? tr -cd keeps ONLY the listed characters\n\ngrep -v \"^&gt;\" chr21.fa | tr -cd 'Nn' | wc -c\n\n# Strip the N's (and the newlines), and count the real bases that remain\n\ngrep -v \"^&gt;\" chr21.fa | tr -d 'Nn\\n' | wc -c\n\n# Count each type of nucleotide (uppercase first so a == A)\n\ngrep -v \"^&gt;\" chr21.fa | \\\n  tr 'acgtn' 'ACGTN' | \\\n  tr -d '\\n' | \\\n  fold -w1 | \\\n  sort | \\\n  uniq -c\n\ngrep -v inverts the match (drops the &gt; header line)\ntr -d deletes the listed characters; tr -cd deletes the complement - keeping only them\nfold -w1 puts each character on its own line\nExpect a lot of N - the first ~5 Mb of chr21 is unassembled"
   },
   {
+    "objectID": "Lecture_Folder/Lecture_04_BioE_Comp_Tools_2026.html#tying-it-together-finding-orf-like-stretches",
+    "href": "Lecture_Folder/Lecture_04_BioE_Comp_Tools_2026.html#tying-it-together-finding-orf-like-stretches",
+    "title": "Lecture 04",
+    "section": "Tying it together: finding ORF-like stretches",
+    "text": "Tying it together: finding ORF-like stretches\nThis time the lowercase masking is information, not a nuisance: an uppercase-only pattern automatically skips the repeats.\n# ATG, then in-frame codons, then a stop - uppercase only, so masked repeats cannot match\ngrep -v \"^&gt;\" chr21.fa | \\\n  tr -d '\\n' | \\\n  grep -oE \"ATG([ACGT]{3}){20,}(TAA|TAG|TGA)\" &gt; orf_like.txt\n\n# grep -o wrote one match per line - how many ORF-like stretches?\nwc -l orf_like.txt\n\n# Peek at the start of the first one\nhead -1 orf_like.txt | cut -c 1-60\n\n# awk again: how long are the three longest?\nawk '{ print length($0) }' orf_like.txt | sort -n | tail -3\n\n\n\n\n\n\nNote\n\n\n\nrecall the soft-masking: lowercase (acgt) marks repeat-derived sequence, UPPERCASE (ACGT) is the non-repeat fraction - which is where genes mostly live\n“ORF-like”, not ORFs: the greedy * runs to the last in-frame stop, we only searched one strand, and real gene-finding needs much more - but 20+ codons of unmasked open frame is a respectable first filter\ncompare: earlier we uppercased to defeat the masking; here we keep it and let case do the filtering"
+  },
+  {
     "objectID": "Lecture_Folder/Lecture_04_BioE_Comp_Tools_2026.html#finding-patterns-in-genomic-data",
     "href": "Lecture_Folder/Lecture_04_BioE_Comp_Tools_2026.html#finding-patterns-in-genomic-data",
     "title": "Lecture 04",
@@ -2737,11 +2744,11 @@
     "text": "Combining Downloads with Processing (if time allows)\nStream processing without saving intermediate files:\n# Download, decompress, and process in one pipeline\ncurl -sL https://hgdownload.soe.ucsc.edu/goldenPath/hg38/chromosomes/chr21.fa.gz | \\\n  gunzip -c | \\\n  grep -v \"^&gt;\" | \\\n  tr -d '\\n' | \\\n  cut -c1-1000000 &gt; first_megabase.txt\n\n# Download and immediately analyze GC content\nwget -qO - https://hgdownload.soe.ucsc.edu/goldenPath/hg38/chromosomes/chr21.fa.gz | \\\n  gunzip -c | \\\n  grep -v \"^&gt;\" | \\\n  tr 'acgtn' 'ACGTN' | \\\n  tr -d 'N\\n' | \\\n  tr 'ATGC' '0011' | \\\n  awk '{n = length($0); gc = gsub(/1/, \"\"); print \"GC%:\", 100 * gc / n}'\n\n\nThe -O - flag tells wget to output to stdout\nThis approach saves disk space and time"
   },
   {
-    "objectID": "Lecture_Folder/Lecture_04_BioE_Comp_Tools_2026.html#your-turn-sequence-content-of-chr21",
-    "href": "Lecture_Folder/Lecture_04_BioE_Comp_Tools_2026.html#your-turn-sequence-content-of-chr21",
+    "objectID": "Lecture_Folder/Lecture_04_BioE_Comp_Tools_2026.html#on-your-own-outside-of-class---sequence-content-of-chr21",
+    "href": "Lecture_Folder/Lecture_04_BioE_Comp_Tools_2026.html#on-your-own-outside-of-class---sequence-content-of-chr21",
     "title": "Lecture 04",
-    "section": "Your turn: sequence content of chr21",
-    "text": "Your turn: sequence content of chr21\nUsing only commands you now know (grep -v, tr, fold, sort, uniq, wc):\n\nCount the total number of bases in chr21.fa\nCalculate the GC content (percent of bases that are G or C)\nFind runs of the dinucleotide repeat AT five or more units long\nBonus: what fraction of the chromosome is N?\n\n\n\n\n\n\n\nTip\n\n\nBuild each pipeline one command at a time and check the output at every stage. Remember the soft-masking: uppercase first with tr 'acgt' 'ACGT'.\n\n\n\n\nSolutions:\n\nTotal bases: grep -v “^&gt;” chr21.fa | tr -d ‘’ | wc -c\nGC content: grep -v “^&gt;” chr21.fa | tr -d ‘’ | tr -cd ‘GCgc’ | wc -c, divided by the total\nRepeats: grep -v “^&gt;” chr21.fa | tr ‘acgt’ ‘ACGT’ | tr -d ‘’ | grep -oE “(AT){5,}”\nN fraction: same pipeline with tr -cd ‘Nn’ | wc -c, divided by the total"
+    "section": "On your own outside of class - sequence content of chr21",
+    "text": "On your own outside of class - sequence content of chr21\nUsing only commands you now know (grep -v, tr, fold, sort, uniq, wc):\n\nCount the total number of bases in chr21.fa\nCalculate the GC content (percent of bases that are G or C)\nFind runs of the dinucleotide repeat AT five or more units long\nBonus: what fraction of the chromosome is N?\n\n\n\n\n\n\n\nTip\n\n\n\nBuild each pipeline one command at a time and check the output at every stage.\nRemember the soft-masking: uppercase first with tr 'acgt' 'ACGT'.\n\n\n\n\n\nSolutions:\n\nTotal bases: grep -v “^&gt;” chr21.fa | tr -d ‘’ | wc -c\nGC content: grep -v “^&gt;” chr21.fa | tr -d ‘’ | tr -cd ‘GCgc’ | wc -c, divided by the total\nRepeats: grep -v “^&gt;” chr21.fa | tr ‘acgt’ ‘ACGT’ | tr -d ‘’ | grep -oE “(AT){5,}”\nN fraction: same pipeline with tr -cd ‘Nn’ | wc -c, divided by the total"
   },
   {
     "objectID": "Lecture_Folder/Lecture_04_BioE_Comp_Tools_2026.html#takeaways-from-the-worked-example",
@@ -2807,13 +2814,6 @@
     "text": "Functions in Scripts\nA function packages one of today’s one-liners for reuse - here, the grep -cw group count from the trio section:\n#!/bin/bash\n\n# Define a function\ncount_group() {\n    local FILE=$1 GROUP=$2          # Local variables\n    local COUNT=$(grep -cw \"$GROUP\" \"$FILE\")\n    echo \"$COUNT\"                   # \"Return\" a value by printing it\n}\n# Note: bash 'return' only carries an exit status (0-255), not data -\n# so functions hand back results via echo, captured with $(...)\nn=$(count_group data/Stickle_RNAseq.tsv convA)\necho \"convA has $n fish\"\n\n# Another function with multiple parameters, reusing the first\ngroup_report() {\n    local INFILE=$1\n    local OUTFILE=$2\n\n    echo \"Summarizing $INFILE...\"\n    for g in convA convB monoA monoB; do\n        echo \"$g: $(count_group \"$INFILE\" \"$g\") fish\"\n    done &gt; \"$OUTFILE\"\n}\n\n# Call functions\ngroup_report \"data/Stickle_RNAseq.tsv\" \"results/group_counts.txt\""
   },
   {
-    "objectID": "Lecture_Folder/Lecture_04_BioE_Comp_Tools_2026.html#error-handling-the-two-lines-to-memorize",
-    "href": "Lecture_Folder/Lecture_04_BioE_Comp_Tools_2026.html#error-handling-the-two-lines-to-memorize",
-    "title": "Lecture 04",
-    "section": "Error handling: the two lines to memorize",
-    "text": "Error handling: the two lines to memorize\n#!/bin/bash\nset -euo pipefail   # exit on any error, on unset variables, and on pipe failures\n\n# ... and check your inputs before using them\nif [ ! -f \"$1\" ]; then\n    echo \"Error: File $1 not found!\" &gt;&2\n    exit 1\nfi\n\nset -euo pipefail turns silent failures into loud, early ones - put it at the top of every script (our gene_means.sh below does)\nSend error messages to stderr (&gt;&2) so they never pollute piped output\nMore patterns (trap, try/catch style) in Ch. 10"
-  },
-  {
     "objectID": "Lecture_Folder/Lecture_04_BioE_Comp_Tools_2026.html#from-one-liner-to-tool-gene_means.sh",
     "href": "Lecture_Folder/Lecture_04_BioE_Comp_Tools_2026.html#from-one-liner-to-tool-gene_means.sh",
     "title": "Lecture 04",
@@ -2828,11 +2828,11 @@
     "text": "Script the worked example: fasta_stats.sh\n\nThe same for the genomic data:\nThe counting, N, GC and ORF-finding pipelines from the chr21 worked example\nWrapped with argument checks into one tool that runs on any FASTA file:\n\n#!/bin/bash\n# Script: fasta_stats.sh\n# Purpose: Calculate basic statistics for FASTA files\n\n# Check arguments\nif [ $# -ne 1 ]; then\n    echo \"Usage: $0 sequences.fasta\"\n    exit 1\nfi\n\nINPUT=$1\n\n# Check if file exists\nif [ ! -f \"$INPUT\" ]; then\n    echo \"Error: File $INPUT not found!\"\n    exit 1\nfi\n\necho \"=== FASTA Statistics for $INPUT ===\"\n\n# Count sequences\nSEQ_COUNT=$(grep -c \"^&gt;\" \"$INPUT\")\necho \"Number of sequences: $SEQ_COUNT\"\n\n# Calculate total length\nTOTAL_LENGTH=$(grep -v \"^&gt;\" \"$INPUT\" | tr -d '\\n' | wc -c)\necho \"Total length: $TOTAL_LENGTH bp\"\n\n# Average length\nAVG_LENGTH=$((TOTAL_LENGTH / SEQ_COUNT))\necho \"Average length: $AVG_LENGTH bp\"\n\n# Count the N's (unassembled gaps)\nN_COUNT=$(grep -v \"^&gt;\" \"$INPUT\" | tr -cd 'Nn' | wc -c)\necho \"N bases: $N_COUNT\"\n\n# GC content\nGC_COUNT=$(grep -v \"^&gt;\" \"$INPUT\" | tr 'acgt' 'ACGT' | tr -d '\\n' | grep -o \"[GC]\" | wc -l)\nGC_PERCENT=$((GC_COUNT * 100 / TOTAL_LENGTH))\necho \"GC content: $GC_PERCENT%\"\n\n# ORF-like stretches: uppercase-only pattern - the soft-masking does the filtering\nORF_COUNT=$(grep -v \"^&gt;\" \"$INPUT\" | tr -d '\\n' | grep -oE \"ATG([ACGT]{3}){20,}(TAA|TAG|TGA)\" | wc -l)\necho \"ORF-like stretches: $ORF_COUNT\"\n./fasta_stats.sh chr21_subset.fa    # test on the small file first...\n./fasta_stats.sh chr21.fa           # ...then the whole chromosome\n\n\n\n\n\n\nNote\n\n\n\nNext week (L05) opens with this same script rewritten in R and in Python\nSame logic, friendlier arithmetic and syntax."
   },
   {
-    "objectID": "Lecture_Folder/Lecture_04_BioE_Comp_Tools_2026.html#best-practices-for-shell-scripts",
-    "href": "Lecture_Folder/Lecture_04_BioE_Comp_Tools_2026.html#best-practices-for-shell-scripts",
+    "objectID": "Lecture_Folder/Lecture_04_BioE_Comp_Tools_2026.html#best-practices-for-scripts",
+    "href": "Lecture_Folder/Lecture_04_BioE_Comp_Tools_2026.html#best-practices-for-scripts",
     "title": "Lecture 04",
-    "section": "Best Practices for Shell Scripts",
-    "text": "Best Practices for Shell Scripts\n\nAlways include a shebang: #!/bin/bash\nComment your code: Explain what and why\nUse meaningful variable names: GENE_COUNT not GC\nCheck inputs: Validate files exist and arguments are correct\nHandle errors gracefully: Use set -e and error checking\nMake scripts portable: Don’t hardcode paths\nUse version control: Track changes with git\nTest incrementally: Build scripts step by step\nCreate help messages: Document usage\nLog important steps: Keep records of what was done"
+    "section": "Best Practices for Scripts",
+    "text": "Best Practices for Scripts\n\nAlways include a shebang: #!/bin/bash\nComment your code: Explain what and why\nUse meaningful variable names: GENE_COUNT not GC\nCheck inputs: Validate files exist and arguments are correct\nHandle errors gracefully: Use set -e and error checking\nMake scripts portable: Don’t hardcode paths\nUse version control: Track changes with git\nTest incrementally: Build scripts step by step\nCreate help messages: Document usage\nLog important steps: Keep records of what was done"
   },
   {
     "objectID": "Lecture_Folder/Lecture_06_BioE_Comp_Tools_2026.html#book-reading-for-this-lecture",
@@ -3498,26 +3498,5 @@
     "title": "About",
     "section": "Technical Requirements",
     "text": "Technical Requirements\n\nYou will be working on your own laptop computer.\nIf you would like to borrow a laptop let me know.\nIf you are working on Windows you need to install WSL2 via PowerShell (see Software page)\nFor the bootcamp (Week 0): latest version of R (install here), Python 3 (install here; on Windows check “Add python.exe to PATH”), and Positron (install here), the IDE used in class, which bundles Quarto.\nOptional alternative IDEs: VS Code (install here) and RStudio (install here).\nLater in the course (Week 9): a LaTeX distribution for PDF output - TinyTeX via quarto install tinytex (details here), or a full distribution such as MacTeX or MiKTeX.\nLater in the course (Weeks 9-10): Git (install here) and a GitHub account (sign up here) using your UO email.\nA terminal that allows ssh connection to the UO computing cluster (Talapas)."
-  },
-  {
-    "objectID": "Lecture_Folder/Lecture_04_BioE_Comp_Tools_2026.html#tying-it-together-finding-orf-like-stretches",
-    "href": "Lecture_Folder/Lecture_04_BioE_Comp_Tools_2026.html#tying-it-together-finding-orf-like-stretches",
-    "title": "Lecture 04",
-    "section": "Tying it together: finding ORF-like stretches",
-    "text": "Tying it together: finding ORF-like stretches\nThis time the lowercase masking is information, not a nuisance: an uppercase-only pattern automatically skips the repeats.\n# ATG, then in-frame codons, then a stop - uppercase only, so masked repeats cannot match\ngrep -v \"^&gt;\" chr21.fa | \\\n  tr -d '\\n' | \\\n  grep -oE \"ATG([ACGT]{3}){20,}(TAA|TAG|TGA)\" &gt; orf_like.txt\n\n# grep -o wrote one match per line - how many ORF-like stretches?\nwc -l orf_like.txt\n\n# Peek at the start of the first one\nhead -1 orf_like.txt | cut -c 1-60\n\n# awk again: how long are the three longest?\nawk '{ print length($0) }' orf_like.txt | sort -n | tail -3\n\n\n\n\n\n\nNote\n\n\n\nrecall the soft-masking: lowercase (acgt) marks repeat-derived sequence, UPPERCASE (ACGT) is the non-repeat fraction - which is where genes mostly live\n“ORF-like”, not ORFs: the greedy * runs to the last in-frame stop, we only searched one strand, and real gene-finding needs much more - but 20+ codons of unmasked open frame is a respectable first filter\ncompare: earlier we uppercased to defeat the masking; here we keep it and let case do the filtering"
-  },
-  {
-    "objectID": "Lecture_Folder/Lecture_04_BioE_Comp_Tools_2026.html#on-your-own-outside-of-class---sequence-content-of-chr21",
-    "href": "Lecture_Folder/Lecture_04_BioE_Comp_Tools_2026.html#on-your-own-outside-of-class---sequence-content-of-chr21",
-    "title": "Lecture 04",
-    "section": "On your own outside of class - sequence content of chr21",
-    "text": "On your own outside of class - sequence content of chr21\nUsing only commands you now know (grep -v, tr, fold, sort, uniq, wc):\n\nCount the total number of bases in chr21.fa\nCalculate the GC content (percent of bases that are G or C)\nFind runs of the dinucleotide repeat AT five or more units long\nBonus: what fraction of the chromosome is N?\n\n\n\n\n\n\n\nTip\n\n\n\nBuild each pipeline one command at a time and check the output at every stage.\nRemember the soft-masking: uppercase first with tr 'acgt' 'ACGT'.\n\n\n\n\n\nSolutions:\n\nTotal bases: grep -v “^&gt;” chr21.fa | tr -d ‘’ | wc -c\nGC content: grep -v “^&gt;” chr21.fa | tr -d ‘’ | tr -cd ‘GCgc’ | wc -c, divided by the total\nRepeats: grep -v “^&gt;” chr21.fa | tr ‘acgt’ ‘ACGT’ | tr -d ‘’ | grep -oE “(AT){5,}”\nN fraction: same pipeline with tr -cd ‘Nn’ | wc -c, divided by the total"
-  },
-  {
-    "objectID": "Lecture_Folder/Lecture_04_BioE_Comp_Tools_2026.html#best-practices-for-scripts",
-    "href": "Lecture_Folder/Lecture_04_BioE_Comp_Tools_2026.html#best-practices-for-scripts",
-    "title": "Lecture 04",
-    "section": "Best Practices for Scripts",
-    "text": "Best Practices for Scripts\n\nAlways include a shebang: #!/bin/bash\nComment your code: Explain what and why\nUse meaningful variable names: GENE_COUNT not GC\nCheck inputs: Validate files exist and arguments are correct\nHandle errors gracefully: Use set -e and error checking\nMake scripts portable: Don’t hardcode paths\nUse version control: Track changes with git\nTest incrementally: Build scripts step by step\nCreate help messages: Document usage\nLog important steps: Keep records of what was done"
   }
 ]
