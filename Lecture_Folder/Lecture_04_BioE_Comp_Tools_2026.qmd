@@ -1,6 +1,6 @@
 ---
 title: "Lecture 04"
-subtitle: "GREP in Practice and Shell Scripting"
+subtitle: "GREP, AWK and SED in Practice with Shell Scripting"
 date: "Monday, October 19, 2026"
 author: "Bill Cresko"
 ---
@@ -25,18 +25,22 @@ set.seed(2026)
 
 The course book goes deeper on everything in this lecture. Read before or after class:
 
--   [Ch. 10: Shell Scripting](../book/chapters/10-shell-scripting.html)
--   [Ch. 9: GREP, Regular Expressions, sed and awk](../book/chapters/09-grep-regex.html) - review the grep and regex sections from last week; the `sed` and `awk` sections are new today
--   *Reference:* [App. B: Unix Command Reference](../book/chapters/appendix-B-unix.html) · [App. D: Regular Expression Reference](../book/chapters/appendix-D-regex.html)
+- [Ch. 9: GREP, Regular Expressions, sed and awk](../book/chapters/09-grep-regex.html)
+  - review the grep and regex sections from last week
+  - the `sed` and `awk` sections are new today
+- [Ch. 10: Shell Scripting](../book/chapters/10-shell-scripting.html)
+- *Reference:* [App. B: Unix Command Reference](../book/chapters/appendix-B-unix.html) · [App. D: Regular Expression Reference](../book/chapters/appendix-D-regex.html)
 
 ## Goals for today
 
--   Finishing from L03: `grep` and regular expressions - a quick reminder
--   Completing the text-processing trio: `sed` edits text, `awk` works with columns
--   The trio in action on the stickleback table, then a whole human chromosome (worked example)
--   From the command line to scripts: arguments, variables, conditionals, loops, functions and error handling
--   Wrapping today's one-liners into executable tools: `gene_means.sh` and `fasta_stats.sh`
--   Next week (L05): the same script rewritten in R and in Python
+- Finishing from L03: `grep` and regular expressions - a quick reminder
+- Completing the text-processing trio: `sed` edits text, `awk` works with columns
+- The trio in action on the stickleback table, then a whole human chromosome
+- From the command line to scripts: arguments, variables, conditionals, loops, functions and error handling
+- Wrapping today's one-liners into executable tools:
+  - `gene_means.sh`
+  - `fasta_stats.sh`
+- Next week (L05): the same scripts rewritten in R and in Python
 
 # The text-processing trio: `grep`, `sed` and `awk`
 
@@ -62,28 +66,30 @@ grep [options] pattern [file...]
 
 ## Reminder: `grep` lives in pipelines
 
-``` {.bash code-line-numbers="|1-2|4-5|7-9|11-12"}
-# Count the mono-associated fish in our stickleback table
+``` {.bash code-line-numbers="|1-2|4-5|7-8|10-11|13-14"}
+# -c counts matching lines, -w matches whole words only: the mono fish
 grep -cw "mono" data/Stickle_RNAseq.tsv
 
-# Skip comments, pull one column, tally the unique values
-grep -v "^#" annotation.gff | cut -f3 | sort | uniq -c
+# Combine with pipes: genotype-A fish only, then tally their microbiota column
+grep -w "A" data/Stickle_RNAseq.tsv | cut -f 3 | sort | uniq -c
 
-# Most genomic data is gzip-compressed - zgrep/zcat read .gz directly
-zgrep -c "^>" chr21.fa.gz
-zcat reads.fastq.gz | awk 'NR % 4 == 2' | grep -c "N"
+# -n shows line numbers: where in the file is fish BM7?
+grep -nw "BM7" data/Stickle_RNAseq.tsv | cut -f 1-2
 
-# Print only the matching text, not the whole line
-grep -oE "gene=[^;]+" annotation.gff | head
+# -v inverts the match: everything NOT mono (40 conventional fish + 1 header = 41)
+grep -vw "mono" data/Stickle_RNAseq.tsv | wc -l
+
+# -o prints only the matching text itself, one match per line
+grep -ow "conventional" data/Stickle_RNAseq.tsv | head -3
 ```
 
 ::: callout-note
-From L03: **FASTA** = `>` header + sequence lines; **FASTQ** = 4 lines per read; `zcat` / `zless` / `zgrep` read compressed files without unpacking them.
+- Every one of these works unchanged on compressed files through `zgrep` - handy for the genomic data later today
 :::
 
-## Warm-up quiz: which lines match?
+## Test your knowledge - which lines match?
 
-The file `test.txt` has four lines:
+Create the file `test.txt` with four lines - one `printf` does it:
 
 ```         
 ATGCCCTAG
@@ -92,9 +98,13 @@ ATG
 ACG
 ```
 
+``` bash
+printf "ATGCCCTAG\nCCATG\nATG\nACG\n" > test.txt
+```
+
 Predict the output of each command *before* you run it:
 
-``` {.bash}
+``` bash
 grep "^ATG" test.txt
 grep "ATG$" test.txt
 grep "^A.G$" test.txt
@@ -106,47 +116,7 @@ grep "^A.G$" test.txt
 - `^A.G$` → lines 3 and 4 (exactly three characters: A, anything, G)
 :::
 
-## `sed` edits text as it streams past
-
-``` {.bash code-line-numbers="|1-2|4-5|7-8|10-11"}
-# Substitute the first match on each line (s/pattern/replacement/)
-sed 's/chr/Chr/' regions.bed
-
-# Substitute every match on each line (g = global)
-sed 's/T/U/g' dna.txt > rna.txt
-
-# Delete lines matching a pattern (e.g. comment lines)
-sed '/^#/d' annotation.gff
-
-# Print only lines 10-20
-sed -n '10,20p' big_file.txt
-```
-
-::: callout-warning
-`sed -i` edits a file **in place** - and the syntax differs between Linux (`sed -i 's/a/b/' f`) and macOS (`sed -i '' 's/a/b/' f`). Write to a new file until you're confident.
-:::
-
-## `awk` works with columns
-
-``` {.bash code-line-numbers="|1-2|4-5|7-8|10-11"}
-# Print columns 1 and 3 of a tab- or space-separated file
-awk '{print $1, $3}' data.tsv
-
-# Keep rows where column 5 is greater than 30
-awk '$5 > 30' measurements.tsv
-
-# Comma-separated file: set the field separator, skip the header
-awk -F',' 'NR > 1 {print $2}' samples.csv
-
-# Sum and average a column
-awk -F',' 'NR > 1 {sum += $3; n++} END {print sum, sum/n}' samples.csv
-```
-
-::: callout-tip
-Rule of thumb: **`grep`** finds lines, **`sed`** edits text, **`awk`** works with columns - that is the whole structure; everything else is flags and patterns. Today we use all three by example; the systematic tour (line ranges, `NR`, `BEGIN`/`END`, awk arrays) is in the [sed and awk sections of Ch. 9](../book/chapters/09-grep-regex.html#sec-sed) and [App. D](../book/chapters/appendix-D-regex.html).
-:::
-
-## `streams` and `grep` on the stickleback table
+## Streams with `grep`: filtering the stickleback table
 
 ``` {.bash code-line-numbers="|1-4|6-7|9-10|12-13"}
 # Keep only the header plus the mono-associated fish, save to a new file
@@ -165,60 +135,146 @@ grep -w "mono" data/Stickle_RNAseq.tsv 2> results/errors.log; cat results/errors
 ```
 
 ::: callout-tip
-- `>` creates the file, `>>` appends to it, `2>` captures **stderr**. 
-- `grep -w "mono"` matches `mono` only as a whole word, so it finds the 40 mono-associated fish through the third column but would *not* match `monoA` on its own. 
-- Try `grep -c mono` versus `grep -cw mono`: both give 40 here. 
+- reminder that `>` creates the file, `>>` appends to it, `2>` captures **stderr**.
+- `head -n 1` writes the header first - the same header that inflated the `-v` count to 41 on the pipelines slide
+- `grep -w "mono"` matches `mono` only as a whole word, so it finds the 40 mono-associated fish through the third column but would *not* match `monoA` on its own.
+- Try `grep -c mono` versus `grep -cw mono`: both give 40 here.
 - Work out why (which column does each one match on?) - experiments like this are how you learn what a flag really does.
 :::
 
-## `sed` and `awk` on the stickleback table
+## `sed` edits text as it streams past
 
-``` {.bash code-line-numbers="|1|3-4|6-7|9-10"}
+``` {.bash code-line-numbers="|1-2|4-5|7-8|10-11"}
+# s/pattern/replacement/ edits the FIRST match on each line
+sed 's/conventional/conv/' data/Stickle_RNAseq.tsv | cut -f 1-4 | head -3
+
+# add g to edit EVERY match on the line: shorten all 600 gene names in the header
+sed 's/Gene/G/g' data/Stickle_RNAseq.tsv | head -1 | cut -f 1-8
+
+# delete matching lines: drop the header
+sed '/^Individual/d' data/Stickle_RNAseq.tsv | wc -l
+
+# -n plus a line range prints only those lines: the first three fish
+sed -n '2,4p' data/Stickle_RNAseq.tsv | cut -f 1-3
+```
+
+::: callout-warning
+- note that `sed -i` edits a file **in place**
+
+- and the syntax differs between Linux (`sed -i 's/a/b/' f`) and macOS (`sed -i '' 's/a/b/' f`).
+
+<!-- -->
+
+- write to a new file until you're confident.
+:::
+
+## `awk` works with columns
+
+``` {.bash code-line-numbers="|1-2|4-5|7-8|10-11"}
+# print chosen columns: fish ID and genotype
+awk -F'\t' '{print $1, $2}' data/Stickle_RNAseq.tsv | head -3
+
+# filter rows by a condition on a column: Gene1 (column 5) above 50
+awk -F'\t' '$5 > 50' data/Stickle_RNAseq.tsv | cut -f 1-5
+
+# NR is the line number - use it to skip the header
+awk -F'\t' 'NR > 1 {print $1}' data/Stickle_RNAseq.tsv | head -3
+
+# END runs once, after the last line: how many fish did we see?
+awk -F'\t' 'NR > 1 {n++} END {print n, "fish"}' data/Stickle_RNAseq.tsv
+```
+
+::: callout-tip
+- Rule of thumb: **`grep`** finds lines, **`sed`** edits text, **`awk`** works with columns - that is the whole structure
+
+- everything else is flags and patterns.
+
+- Today we use all three by example; the systematic tour (line ranges, `NR`, `BEGIN`/`END`, awk arrays) is in the [sed and awk sections of Ch. 9](../book/chapters/09-grep-regex.html#sec-sed) and [App. D](../book/chapters/appendix-D-regex.html).
+:::
+
+## Streams with `sed`: cleaning the stickleback table
+
+``` {.bash code-line-numbers="|1|3-4|6-8|10-12"}
 cd ~/projects/comptools && mkdir -p results
 
 # Fix the awkward column name once, writing a new file (never edit raw data in place)
 sed '1s/Geno&Micro/Geno_Micro/' data/Stickle_RNAseq.tsv > results/stickle_clean.tsv
 
+# Check the new header - and that the raw file is untouched
+head -n 1 results/stickle_clean.tsv | cut -f 1-4
+head -n 1 data/Stickle_RNAseq.tsv | cut -f 1-4
+
+# A conventional-only copy: delete every mono line (the header survives)
+sed '/mono/d' data/Stickle_RNAseq.tsv > results/conventional_only.tsv
+wc -l results/conventional_only.tsv        # 41 = header + 40 fish
+```
+
+::: callout-tip
+- `>` sends the edited stream to a **new** file - the raw data never changes
+
+- the `1s/.../.../` form applies the substitution to line 1 only, so the 600 gene columns are untouched
+:::
+
+## Streams with `awk`: summarizing the stickleback table
+
+``` {.bash code-line-numbers="|1-2|4-5|7-9"}
 # Mean of Gene1 (column 5) across all 80 fish
 awk -F'\t' 'NR > 1 { sum += $5; n++ } END { print "Gene1 mean:", sum/n }' results/stickle_clean.tsv
 
-# Mean of Gene1 by genotype - awk arrays keyed by the group
+# Means BY GROUP - an awk array keyed by the genotype column
 awk -F'\t' 'NR > 1 { sum[$2] += $5; n[$2]++ } END { for (g in sum) print g, sum[g]/n[g] }' results/stickle_clean.tsv
+
+# Key by the four-group column, and redirect the summary into a file
+awk -F'\t' 'NR > 1 { sum[$4] += $5; n[$4]++ } END { for (g in sum) print g, sum[g]/n[g] }' results/stickle_clean.tsv > results/gene1_group_means.txt
+cat results/gene1_group_means.txt
 ```
+
+::: callout-note
+- `sum[$2]` is an **associative array**: one running total per genotype, built in a single pass through the file
+
+- this one-liner becomes a reusable script later today
+:::
 
 # Worked Example - Downloading and Exploring a Large Genomic File
 
 ## Human Chromosome Data
 
-- Everything so far - reading files, pipes, redirection, `grep` - in one realistic job: grab a big public dataset and ask it questions, straight from the shell
-
+- Everything so far - reading files, pipes, redirection, `grep`, `sed` and `awk` - in one realistic job: grab a big public dataset and ask it questions, straight from the shell
 
 - Genomic data files can be massive (the full human genome is \~1 GB compressed, \~3 GB as plain text)
+
 - FASTA format is standard for sequence data
+
 - Perfect use case for Unix pipes and redirection
+
 - We will practice on **human chromosome 21** - the smallest autosome (\~13 MB compressed, \~46 Mb of sequence), so every command finishes in seconds
+
 - The same commands work unchanged on the whole genome - only the wait time changes
+
 - The course book works through the same file in [Chapter 9](../book/chapters/09-grep-regex.html#sec-genomic-processing)
 
 ## Downloading Genomic Data
 
 Download chromosome 21 of the human genome (hg38 / GRCh38) from UCSC:
 
-``` {.bash code-line-numbers="|1-3|5-8"}
-# Using `wget` to download chr21 (~13 MB)
-
-wget https://hgdownload.soe.ucsc.edu/goldenPath/hg38/chromosomes/chr21.fa.gz
-
-# Or using `curl` and save with a specific name (-L follows redirects)
+``` {.bash code-line-numbers="|1-4|6-8"}
+# Download with `curl` (-L follows redirects, -o names the output file)
 
 curl -L -o chr21.fa.gz \
   https://hgdownload.soe.ucsc.edu/goldenPath/hg38/chromosomes/chr21.fa.gz
+
+# `wget` does the same job with less typing
+
+wget https://hgdownload.soe.ucsc.edu/goldenPath/hg38/chromosomes/chr21.fa.gz
 ```
 
-- `wget` and `curl` are both tools for downloading files (macOS ships `curl`; install `wget` with Homebrew if you want it)
 - The backslash lets a long command span multiple lines
 - `.gz` extension means the file is compressed
 - The whole genome lives in the same directory as `hg38.fa.gz` (\~1 GB) - same commands, much longer runs
+
+::: callout-note
+macOS ships `curl` but not `wget`. Install it once with Homebrew (`brew install wget`); on Ubuntu/WSL it is `sudo apt install wget`.
+:::
 
 ## Examining Large Files Efficiently
 
@@ -246,7 +302,7 @@ zgrep "^>" chr21.fa.gz | less
 ```
 
 ::: callout-note
-- The UCSC file is *soft-masked*: repeats are written in lowercase (`acgt`). 
+- The UCSC file is *soft-masked*: repeats are written in lowercase (`acgt`).
 - Patterns like `GAATTC` will miss sites inside masked regions - add `-i` to `grep`
 - Or uppercase everything first with `tr 'acgt' 'ACGT'`.
 :::
@@ -271,7 +327,9 @@ sed -n '400000,420000p' chr21.fa > region_of_interest.fa
 ```
 
 ::: callout-note
-Both of this morning's new tools reappear here: the `sed -n '400000,420000p'` line is the print-a-line-range pattern from the `sed` slide, and the `awk` line uses a *range pattern* (`/start/,/stop/`) that goes beyond today's basics - treat it as a recipe, with the full story in [Ch. 9](../book/chapters/09-grep-regex.html#sec-awk-ranges).
+- Both of today's new tools reappear here: the `sed -n '400000,420000p'` line is the print-a-line-range pattern from the `sed` slide
+
+- the `awk` line uses a *range pattern* (`/start/,/stop/`) that goes beyond today's basics - treat it as a recipe, with the full story in [Ch. 9](../book/chapters/09-grep-regex.html#sec-awk-ranges).
 :::
 
 ## Processing FASTA Files with Pipes
@@ -327,7 +385,7 @@ grep -v "^>" chr21.fa | \
   head -20
 ```
 
-## Combining Downloads with Processing
+## Combining Downloads with Processing *(if time allows)*
 
 Stream processing without saving intermediate files:
 
@@ -370,10 +428,10 @@ Build each pipeline one command at a time and check the output at every stage. R
 ::: notes
 Solutions:
 
-- Total bases: grep -v "^>" chr21.fa | tr -d '\n' | wc -c
-- GC content: grep -v "^>" chr21.fa | tr -d '\n' | tr -cd 'GCgc' | wc -c, divided by the total
-- Repeats: grep -v "^>" chr21.fa | tr 'acgt' 'ACGT' | tr -d '\n' | grep -oE "(AT){5,}"
-- N fraction: same pipeline with tr -cd 'Nn' | wc -c, divided by the total
+- Total bases: grep -v "\^\>" chr21.fa \| tr -d '\n' \| wc -c
+- GC content: grep -v "\^\>" chr21.fa \| tr -d '\n' \| tr -cd 'GCgc' \| wc -c, divided by the total
+- Repeats: grep -v "\^\>" chr21.fa \| tr 'acgt' 'ACGT' \| tr -d '\n' \| grep -oE "(AT){5,}"
+- N fraction: same pipeline with tr -cd 'Nn' \| wc -c, divided by the total
 :::
 
 ## Takeaways from the worked example
@@ -394,8 +452,8 @@ Solutions:
 
 ## Three languages, one idea: a script
 
-| | **Shell** (`bash`) | **R** | **Python** |
-|---|---|---|---|
+|   | **Shell** (`bash`) | **R** | **Python** |
+|------------------|------------------|------------------|------------------|
 | File | `script.sh` | `script.R` | `script.py` |
 | Shebang (line 1) | `#!/bin/bash` | `#!/usr/bin/env Rscript` | `#!/usr/bin/env python3` |
 | Run it | `bash script.sh` or `./script.sh` | `Rscript script.R` | `python3 script.py` |
@@ -404,169 +462,156 @@ Solutions:
 | Best at | gluing programs and files together | statistics, data frames, figures | general programming, images, ML |
 
 ::: callout-tip
-Today is about **shell** scripts. **L05** opens by rewriting today's FASTA-statistics script in R and in Python, and **Lectures 05-07** go deep on both languages.
+- Today is about **shell** scripts
+
+- **L05** opens by rewriting today's FASTA-statistics script in R and in Python
+
+- **Lectures 05-07** go deep on both languages.
 :::
 
 ## Shell scripts: the mechanics (reminder)
 
-From L02 and the L03 warm-up: a script is a **text file of commands**, with a shebang on line 1 and execute permission added once.
+This is *not* your first shell script - you wrote `hello.sh` in Week 2 and warmed up again last week. The mechanics one more time, on the chr21 subset you just made:
 
-``` {.bash code-line-numbers="|1-2|4|6-7|9-10|12-13"}
+``` {.bash code-line-numbers="|1-2|4|6-7"}
 #!/bin/bash
-# first_script.sh - comments start with #
+# chr21_info.sh - quick report on the chr21 subset we just made
 
-echo "Hello, Bioengineering!"
+echo "=== Report on chr21_subset.fa ==="
 
-NAME="DNA Analysis"               # set a variable (no spaces around =)
-echo "Running $NAME"
-
-DATE=$(date +%Y-%m-%d)            # capture a command's output
-echo "Analysis date: $DATE"
-
-COUNT=5
-echo "Double of $COUNT is $((COUNT * 2))"    # arithmetic with $(( ))
+TODAY=$(date +%Y-%m-%d)                   # set a variable, capture a command's output
+echo "Generated on $TODAY"
 ```
 
 ``` bash
-chmod +x first_script.sh     # make it executable, once
-./first_script.sh            # run it (or: bash first_script.sh)
+chmod +x chr21_info.sh     # make it executable, once
+./chr21_info.sh            # run it (or: bash chr21_info.sh)
 ```
 
 **New today:** arguments, conditionals, loops, functions and error handling - the pieces that turn saved commands into real **pipelines**.
 
 ## Command-Line Arguments
 
-``` {.bash code-line-numbers="|1-2|4-6|8-10|12-17|19-22|24-26"}
+``` {.bash code-line-numbers="|1-2|4-8|10-12"}
 #!/bin/bash
-# Script: process_fasta.sh
+# process_fasta.sh - $1, $2, ... are the words typed after the script name
 
-# $0 is the script name
-
-echo "Script name: $0"
-
-# $# is the number of arguments
-
-echo "Number of arguments: $#"
-
-# Check if enough arguments provided FIRST
-
+# Check that enough arguments were provided FIRST
 if [ $# -lt 2 ]; then
     echo "Usage: $0 input.fasta output.txt"
     exit 1
 fi
 
-# Now safe to use the arguments
-
+# Now safe to use them
 echo "Processing file: $1"
 echo "Output will be: $2"
-
-# $@ is all arguments (should be quoted)
-
-echo "All arguments: $@"
 ```
 
-Run as: `./process_fasta.sh chr21.fa results/chr21_headers.txt`
+- `$0` is the script's own name, `$#` the number of arguments, `$@` all of them (always quoted: `"$@"`)
+- Run as: `./process_fasta.sh chr21.fa results/chr21_headers.txt`
 
 ## Variables and strings
 
-``` {.bash code-line-numbers="|1|3-5|7-8|10-12|14-17"}
+``` {.bash code-line-numbers="|1|3-5|7-8|10-12|14-16"}
 #!/bin/bash
 
 # Variables (no spaces around =)
-SPECIES="Homo sapiens"
-CHROMOSOME=21
+GENOME="chr21_subset.fa"
+WINDOW=1000
 
 # Use them with $ (quote to protect spaces)
-echo "$SPECIES chromosome $CHROMOSOME"
+echo "Analyzing $GENOME in windows of $WINDOW bp"
 
-# Capture command output - how many fish are in our stickleback table?
-N_FISH=$(tail -n +2 data/Stickle_RNAseq.tsv | wc -l)
-echo "The table has $N_FISH fish"
+# Capture command output - how many bases are in the subset?
+N_BASES=$(grep -v "^>" "$GENOME" | tr -d '\n' | wc -c)
+echo "$GENOME has $N_BASES bases"
 
 # String operations on file names
-FILE="sample_001.fastq.gz"
-NAME="${FILE%.fastq.gz}"     # strip the suffix -> sample_001
-echo "Sample name: $NAME"
+NAME="${GENOME%.fa}"         # strip the suffix -> chr21_subset
+echo "Writing results to ${NAME}_stats.txt"
 ```
 
 ::: callout-note
-Bash also has arrays (`BASES=(A C G T)`) - you will rarely need them in this course. See [Ch. 10](../book/chapters/10-shell-scripting.html) and the backup slide at the end of this deck.
+Bash also has arrays (`BASES=(A C G T)`) - you will rarely need them in this course; see [Ch. 10](../book/chapters/10-shell-scripting.html) when you do.
 :::
 
 ## Conditionals (if/then/else)
 
-``` {.bash code-line-numbers="|1|3-11|13-17|19-28"}
+``` {.bash code-line-numbers="|1|3-9|11-15|17-26"}
 #!/bin/bash
 
-# Numeric comparisons
-COUNT=100
-if [ $COUNT -gt 50 ]; then
-    echo "High read count"
-elif [ $COUNT -gt 10 ]; then
-    echo "Medium read count"
+# Numeric comparisons: how big is the chr21 subset?
+N_BASES=$(grep -v "^>" chr21_subset.fa | tr -d '\n' | wc -c)
+if [ "$N_BASES" -gt 500000 ]; then
+    echo "Big subset: $N_BASES bases"
 else
-    echo "Low read count"
+    echo "Small subset: $N_BASES bases"
 fi
 
-# String comparisons
+# String comparisons: which kind of data is this?
 FILETYPE="fasta"
 if [ "$FILETYPE" = "fasta" ]; then
-    echo "Processing FASTA file"
+    echo "Sequence data - use the grep/tr pipelines"
 fi
 
-# File tests
-if [ -f "data.txt" ]; then
-    echo "File exists"
+# File tests: don't repeat the download; make results/ if missing
+if [ -f "chr21.fa.gz" ]; then
+    echo "chr21 already downloaded"
 fi
 
 if [ -d "results" ]; then
-    echo "Directory exists"
+    echo "results/ exists"
 else
     mkdir results
 fi
 ```
 
 ::: callout-tip
-Always put **spaces inside the brackets** (`[ $x -gt 5 ]`) and **quote your variables** (`"$FILE"`). The full table of test operators (`-eq`, `-ne`, `-z`, `-f`, `-d`, ...) is in the backup slides, [App. B](../book/chapters/appendix-B-unix.html) and [Ch. 10](../book/chapters/10-shell-scripting.html).
+Always put **spaces inside the brackets** (`[ $x -gt 5 ]`) and **quote your variables** (`"$FILE"`). The full table of test operators is on the next slide.
 :::
+
+## Test operators for `[ ]`
+
+| Operator | Meaning               | Operator | Meaning                |
+|----------|-----------------------|----------|------------------------|
+| `-eq`    | Equal (numbers)       | `=`      | Strings are equal      |
+| `-ne`    | Not equal (numbers)   | `!=`     | Strings differ         |
+| `-gt`    | Greater than          | `-z`     | String is empty        |
+| `-lt`    | Less than             | `-f`     | File exists            |
+| `-ge`    | Greater than or equal | `-d`     | Directory exists       |
+| `-le`    | Less than or equal    | `-s`     | File exists, not empty |
+
+Full reference: [App. B](../book/chapters/appendix-B-unix.html) and [Ch. 10](../book/chapters/10-shell-scripting.html).
 
 ## Loops in Shell Scripts
 
-``` {.bash code-line-numbers="|1|3-6|8-12|14-17|19-24|26-29"}
+``` {.bash code-line-numbers="|1|3-6|8-11|13-16|18-21"}
 #!/bin/bash
 
-# For loop over list
-for BASE in A C G T; do
-    echo "Processing base: $BASE"
+# For loop over a list: one grep per treatment group
+for GROUP in convA convB monoA monoB; do
+    echo "$GROUP: $(grep -cw "$GROUP" data/Stickle_RNAseq.tsv) fish"
 done
 
-# For loop over files
-for FILE in *.fasta; do
-    echo "Analyzing $FILE"
-    grep -c ">" "$FILE"
+# For loop over files: every FASTA we have made today
+for FILE in *.fa; do
+    echo "$FILE: $(grep -c '^>' "$FILE") sequence(s)"
 done
 
-# For loop with counter
-for i in {1..10}; do
-    echo "Iteration $i"
+# For loop with a counter: peek at gene columns 5, 6 and 7
+for COL in 5 6 7; do
+    cut -f "$COL" data/Stickle_RNAseq.tsv | head -1
 done
 
-# While loop
-COUNT=1
-while [ $COUNT -le 5 ]; do
-    echo "Count: $COUNT"
-    COUNT=$((COUNT + 1))
+# While loop: read the first three fish IDs line by line
+tail -n +2 data/Stickle_RNAseq.tsv | cut -f 1 | head -n 3 | while read ID; do
+    echo "Fish: $ID"
 done
-
-# Read file line by line
-while read LINE; do
-    echo "Processing: $LINE"
-done < input.txt
 ```
 
 ## Functions in Scripts
 
-A function packages one of this morning's one-liners for reuse - here, the `grep -cw` group count from the stickleback slide:
+A function packages one of today's one-liners for reuse - here, the `grep -cw` group count from the trio section:
 
 ``` {.bash code-line-numbers="|1|3-8|9-12|14-23|25-26"}
 #!/bin/bash
@@ -612,11 +657,11 @@ fi
 
 - `set -euo pipefail` turns silent failures into loud, early ones - put it at the top of every script (our `gene_means.sh` below does)
 - Send error messages to **stderr** (`>&2`) so they never pollute piped output
-- More patterns (`trap`, try/catch style) in [Ch. 10](../book/chapters/10-shell-scripting.html) and the backup slides
+- More patterns (`trap`, try/catch style) in [Ch. 10](../book/chapters/10-shell-scripting.html)
 
-## Script the morning's analysis: `gene_means.sh`
+## From one-liner to tool: `gene_means.sh`
 
-This morning we computed Gene1's group means with an `awk` one-liner. Wrapped in a script - argument check, strict mode, the same `awk` - it works for *any* gene:
+The group-means `awk` one-liner from the trio section works for Gene1 only. Wrapped in a script - argument check, strict mode, the same `awk` - it becomes a tool for *any* gene:
 
 ``` {.bash code-line-numbers="|1-3|4|5-6|8-9|10"}
 #!/bin/bash
@@ -639,7 +684,7 @@ for c in 5 6 7; do ./gene_means.sh $c; done    # loop over the first three genes
 
 ## Script the worked example: `fasta_stats.sh`
 
-The same move on chr21: the counting pipelines from the worked example, wrapped with argument checks into one reusable tool:
+The same move for the genomic data: the sequence-counting and GC pipelines from the chr21 worked example, wrapped with argument checks into one tool that runs on *any* FASTA file:
 
 ``` {.bash code-line-numbers="|1-3|5-9|11|13-17|19|21-23|25-27|29-31|33-36"}
 #!/bin/bash
@@ -675,13 +720,14 @@ AVG_LENGTH=$((TOTAL_LENGTH / SEQ_COUNT))
 echo "Average length: $AVG_LENGTH bp"
 
 # GC content
-GC_COUNT=$(grep -v "^>" "$INPUT" | tr -d '\n' | grep -o "[GC]" | wc -l)
+GC_COUNT=$(grep -v "^>" "$INPUT" | tr 'acgt' 'ACGT' | tr -d '\n' | grep -o "[GC]" | wc -l)
 GC_PERCENT=$((GC_COUNT * 100 / TOTAL_LENGTH))
 echo "GC content: $GC_PERCENT%"
 ```
 
 ``` bash
-./fasta_stats.sh chr21.fa    # run it on the chromosome from the worked example
+./fasta_stats.sh chr21_subset.fa    # test on the small file first...
+./fasta_stats.sh chr21.fa           # ...then the whole chromosome
 ```
 
 ::: callout-note
@@ -704,120 +750,3 @@ Next week (L05) opens with this same script rewritten in **R** and in **Python**
 ::: callout-note
 Every one of these applies to **R and Python scripts** too: shebang line, comments, checking `commandArgs()` / `sys.argv`, meaningful names, relative paths, Git, and testing on a tiny input first.
 :::
-
-# Backup - reference slides
-
-Moved out of the live deck to keep the session on time. Everything here is covered in [Ch. 9](../book/chapters/09-grep-regex.html) and [Ch. 10](../book/chapters/10-shell-scripting.html) of the course book - read on your own.
-
-## Creating Your First Script
-
-``` bash
-#!/bin/bash
-# This is a shebang - tells system which interpreter to use
-
-# This is a comment - documents your code
-echo "Hello, Bioengineering!"
-
-# Set a variable
-NAME="DNA Analysis"
-echo "Running $NAME"
-
-# Use command output as variable
-DATE=$(date +%Y-%m-%d)
-echo "Analysis date: $DATE"
-
-# Simple calculation
-COUNT=5
-DOUBLE=$((COUNT * 2))
-echo "Double of $COUNT is $DOUBLE"
-```
-
-Save as `first_script.sh` and run with `bash first_script.sh`
-
-## Making Scripts Executable
-
-``` bash
-# Check current permissions
-ls -l first_script.sh
-
-# Make executable (add execute permission)
-chmod +x first_script.sh
-
-# Now you can run it directly
-./first_script.sh
-```
-
-Best practice: Always use `chmod +x` for your scripts
-
-## Variables and Arrays
-
-``` bash
-#!/bin/bash
-
-# Variables (no spaces around =)
-SPECIES="Homo sapiens"
-CHROMOSOME=21
-GENE_COUNT=234
-
-# Arrays
-BASES=(A C G T)
-echo "First base: ${BASES[0]}"
-echo "All bases: ${BASES[@]}"
-
-# Add to array
-BASES+=(N)
-
-# Array length
-echo "Number of bases: ${#BASES[@]}"
-
-# String operations
-FILE="sample_001.fastq.gz"
-NAME="${FILE%.fastq.gz}"     # Remove suffix
-echo "Sample name: $NAME"
-```
-
-## Test operators for `[ ]`
-
-| Operator | Meaning                  | Operator | Meaning               |
-|----------|--------------------------|----------|-----------------------|
-| `-eq`    | Equal (numbers)          | `=`      | Strings are equal     |
-| `-ne`    | Not equal (numbers)      | `!=`     | Strings differ        |
-| `-gt`    | Greater than             | `-z`     | String is empty       |
-| `-lt`    | Less than                | `-f`     | File exists           |
-| `-ge`    | Greater than or equal    | `-d`     | Directory exists      |
-| `-le`    | Less than or equal       | `-s`     | File exists, not empty|
-
-::: callout-tip
-Always put **spaces inside the brackets** (`[ $x -gt 5 ]`, not `[$x -gt 5]`) and **quote your variables** (`"$FILE"`) so file names with spaces don't break your script.
-:::
-
-## Error Handling
-
-``` bash
-#!/bin/bash
-
-# Exit on error
-set -e
-
-# Exit on undefined variable
-set -u
-
-# Pipe failure detection
-set -o pipefail
-
-# Custom error handling
-check_file() {
-    if [ ! -f "$1" ]; then
-        echo "Error: File $1 not found!" >&2
-        exit 1
-    fi
-}
-
-# Trap errors
-trap 'echo "Error on line $LINENO"' ERR
-
-# Try-catch style
-if ! grep "pattern" file.txt > /dev/null 2>&1; then
-    echo "Pattern not found"
-fi
-```
