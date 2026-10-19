@@ -626,6 +626,7 @@ div.csl-indent {
   <ul class="collapse">
 <li><a href="#sec-hpc-prepare-script" id="toc-sec-hpc-prepare-script" class="nav-link" data-scroll-target="#sec-hpc-prepare-script">1. Prepare Your Script</a></li>
   <li><a href="#sec-hpc-submit-monitor" id="toc-sec-hpc-submit-monitor" class="nav-link" data-scroll-target="#sec-hpc-submit-monitor">2. Submit and Monitor</a></li>
+  <li><a href="#sec-hpc-mixed-language" id="toc-sec-hpc-mixed-language" class="nav-link" data-scroll-target="#sec-hpc-mixed-language">Mixing Languages in One Job</a></li>
   </ul>
 </li>
   <li>
@@ -721,7 +722,7 @@ div.csl-indent {
 <li>3+ petabytes of storage</li>
 </ul></section></section><section id="sec-talapas-architecture" class="level2" data-number="16.2"><h2 data-number="16.2" class="anchored" data-anchor-id="sec-talapas-architecture">
 <span class="header-section-number">16.2</span> Talapas Architecture</h2>
-<p>Understanding the cluster architecture (<a href="#fig-talapas-architecture" class="quarto-xref">Figure&nbsp;<span>16.1</span></a>; compare the generic layout in <a href="04-computer-systems.html#fig-cluster-architecture" class="quarto-xref">Figure&nbsp;<span>4.6</span></a>) helps you use it effectively.</p>
+<p>Understanding the cluster architecture (<a href="#fig-talapas-architecture" class="quarto-xref">Figure&nbsp;<span>16.1</span></a>; compare the generic layout in <a href="04-computer-systems.html#fig-cluster-architecture" class="quarto-xref">Figure&nbsp;<span>4.7</span></a>) helps you use it effectively.</p>
 <div id="fig-talapas-architecture" class="quarto-float quarto-figure quarto-figure-center anchored" data-fig-align="center">
 <figure class="quarto-float quarto-float-fig figure"><div aria-describedby="fig-talapas-architecture-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 <img src="../images/Lec08_img001.svg" class="img-fluid quarto-figure quarto-figure-center figure-img" style="width:85.0%">
@@ -913,9 +914,28 @@ Tip
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1"></a><span class="co"># Connect through the load balancer (works from anywhere)</span></span>
 <span id="cb1-2"><a href="#cb1-2"></a><span class="ex">$</span> ssh yourduckid@login.talapas.uoregon.edu</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p><code>login.talapas.uoregon.edu</code> is a <strong>load balancer</strong> that hands you to one of the four login nodes. Expect a Duo two-step prompt after you enter your password: no characters appear while you type the password (this is normal), and Duo then asks you to type <code>1</code> for a push notification to the Duo Mobile app, <code>2</code> for a text message, or <code>3</code> for a phone call. Mac and Linux users can set up an SSH key (<code>ssh-keygen -t ed25519</code>, then <code>ssh-copy-id</code>) to skip the password, but Duo will still prompt whenever policy requires it.</p>
+<div class="callout callout-style-default callout-note callout-titled" title="Set Up an SSH Key Once">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>Set Up an SSH Key Once
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>An <strong>SSH key</strong> is a matched pair of files: a <em>public</em> key (the lock—safe to share, and the thing you hand to servers) and a <em>private</em> key (the key—it never leaves your computer). Give a server your public key once and it recognizes your machine from then on, so you stop typing your password:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1"></a><span class="co"># On your laptop, one time (accept the defaults; a passphrase is optional but wise)</span></span>
+<span id="cb2-2"><a href="#cb2-2"></a><span class="ex">$</span> ssh-keygen <span class="at">-t</span> ed25519</span>
+<span id="cb2-3"><a href="#cb2-3"></a></span>
+<span id="cb2-4"><a href="#cb2-4"></a><span class="co"># Copy the public key to Talapas (enter your UO password one last time)</span></span>
+<span id="cb2-5"><a href="#cb2-5"></a><span class="ex">$</span> ssh-copy-id yourduckid@login.talapas.uoregon.edu</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p><code>ssh-keygen</code> writes the pair to <code>~/.ssh/</code>: the public half is <code>id_ed25519.pub</code>, the private half <code>id_ed25519</code> (never share or commit that one). Duo still applies when policy requires it. The same key pair authenticates you to GitHub later—<a href="21-git-github.html#sec-github-ssh-keys" class="quarto-xref"><span>Section 21.13.1</span></a> shows where to paste the public key there.</p>
+</div>
+</div>
 <p><strong>Do you need the VPN?</strong> The Talapas Knowledge Base says a UO VPN connection is <em>recommended</em>, not required. Without the VPN, connect to the load balancer as above and answer the Duo prompts. With the <a href="https://service.uoregon.edu/TDClient/2030/Portal/KB/ArticleDet?ID=101392">UO VPN</a> connected, you can also SSH directly to a specific login node:</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1"></a><span class="co"># With the UO VPN: connect to a specific login node</span></span>
-<span id="cb2-2"><a href="#cb2-2"></a><span class="ex">$</span> ssh yourduckid@login1.talapas.uoregon.edu   <span class="co"># or login2, login3, login4</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb3"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1"></a><span class="co"># With the UO VPN: connect to a specific login node</span></span>
+<span id="cb3-2"><a href="#cb3-2"></a><span class="ex">$</span> ssh yourduckid@login1.talapas.uoregon.edu   <span class="co"># or login2, login3, login4</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>Connecting to a specific node is useful when you want to reconnect to a <code>tmux</code> or <code>screen</code> session you left running there.</p>
 <p><strong>Windows users</strong>: Use the Ubuntu (WSL) terminal, or connect from VS Code or Positron with Remote-SSH (<a href="#sec-remote-ssh" class="quarto-xref"><span>Section 16.4.2</span></a>).</p>
 </section><section id="sec-remote-ssh" class="level3"><h3 class="anchored" data-anchor-id="sec-remote-ssh">Connecting Your Editor with Remote-SSH</h3>
@@ -1046,23 +1066,33 @@ Table&nbsp;16.3: Talapas storage locations
 <strong>Nothing is backed up.</strong> RACS does not back up any Talapas file system. Some snapshotting exists for home and project directories, but it is not a substitute for your own copies. Keep code in Git (<a href="21-git-github.html" class="quarto-xref"><span>Chapter 21</span></a>) and irreplaceable data somewhere off the cluster.</li>
 <li>
 <strong>Home is small and shared.</strong> Your home directory is for dotfiles, scripts, and small software installs, not for sequencing data or reference genomes. Put those under <code>/projects</code> (shared with your lab) or <code>/scratch</code>.</li>
-</ul></section><section id="sec-file-transfer" class="level3"><h3 class="anchored" data-anchor-id="sec-file-transfer">Moving Files On and Off Talapas</h3>
+</ul>
+<p><a href="#fig-storage-decision" class="quarto-xref">Figure&nbsp;<span>16.4</span></a> condenses these policies into a single decision.</p>
+<div id="fig-storage-decision" class="quarto-float quarto-figure quarto-figure-center anchored" data-fig-align="center">
+<figure class="quarto-float quarto-float-fig figure"><div aria-describedby="fig-storage-decision-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="../images/bk_storage_decision.svg" class="img-fluid quarto-figure quarto-figure-center figure-img" style="width:95.0%">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-storage-decision-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;16.4: Where a file belongs on Talapas: code lives in home and a Git repository, large active data goes to purged scratch space, results worth keeping move to project space, and small configurations stay in the 250 GB home directory.
+</figcaption></figure>
+</div>
+</section><section id="sec-file-transfer" class="level3"><h3 class="anchored" data-anchor-id="sec-file-transfer">Moving Files On and Off Talapas</h3>
 <p>For files up to a few gigabytes, <code>scp</code>, <code>rsync</code>, or the Open OnDemand file browser are enough:</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb3"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1"></a><span class="co"># From your laptop: copy a file to your project directory</span></span>
-<span id="cb3-2"><a href="#cb3-2"></a><span class="ex">$</span> scp results.csv yourduckid@login.talapas.uoregon.edu:/projects/myPIRG/yourduckid/</span>
-<span id="cb3-3"><a href="#cb3-3"></a></span>
-<span id="cb3-4"><a href="#cb3-4"></a><span class="co"># Sync a whole directory (only changed files are copied; -a keeps timestamps)</span></span>
-<span id="cb3-5"><a href="#cb3-5"></a><span class="ex">$</span> rsync <span class="at">-avz</span> data/ yourduckid@login.talapas.uoregon.edu:/projects/myPIRG/yourduckid/data/</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb4"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1"></a><span class="co"># From your laptop: copy a file to your project directory</span></span>
+<span id="cb4-2"><a href="#cb4-2"></a><span class="ex">$</span> scp results.csv yourduckid@login.talapas.uoregon.edu:/projects/myPIRG/yourduckid/</span>
+<span id="cb4-3"><a href="#cb4-3"></a></span>
+<span id="cb4-4"><a href="#cb4-4"></a><span class="co"># Sync a whole directory (only changed files are copied; -a keeps timestamps)</span></span>
+<span id="cb4-5"><a href="#cb4-5"></a><span class="ex">$</span> rsync <span class="at">-avz</span> data/ yourduckid@login.talapas.uoregon.edu:/projects/myPIRG/yourduckid/data/</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>For large transfers (tens of gigabytes to terabytes, or thousands of files), RACS recommends <a href="https://www.globus.org/"><strong>Globus</strong></a>. Globus moves data between “endpoints” (Talapas, your laptop with Globus Connect Personal, another university’s cluster, or a cloud bucket) in the background, retries automatically after network interruptions, and verifies checksums on arrival. It is also the tool for moving data to and from UO’s Large-Scale Research Storage (LSRS) for long-term archiving. Log in to Globus with your Duck ID, find the Talapas endpoint, and drag folders between panes; the transfer keeps running after you close the browser.</p>
 </section><section id="sec-check-your-storage" class="level3"><h3 class="anchored" data-anchor-id="sec-check-your-storage">Check Your Storage</h3>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb4"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1"></a><span class="co"># Home directory usage</span></span>
-<span id="cb4-2"><a href="#cb4-2"></a><span class="ex">$</span> df <span class="at">-h</span> ~</span>
-<span id="cb4-3"><a href="#cb4-3"></a></span>
-<span id="cb4-4"><a href="#cb4-4"></a><span class="co"># Project directory usage</span></span>
-<span id="cb4-5"><a href="#cb4-5"></a><span class="ex">$</span> du <span class="at">-sh</span> /projects/myPIRG/myusername</span>
-<span id="cb4-6"><a href="#cb4-6"></a></span>
-<span id="cb4-7"><a href="#cb4-7"></a><span class="co"># Detailed breakdown</span></span>
-<span id="cb4-8"><a href="#cb4-8"></a><span class="ex">$</span> du <span class="at">-h</span> <span class="at">--max-depth</span><span class="op">=</span>1 /projects/myPIRG/myusername</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb5"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1"></a><span class="co"># Home directory usage</span></span>
+<span id="cb5-2"><a href="#cb5-2"></a><span class="ex">$</span> df <span class="at">-h</span> ~</span>
+<span id="cb5-3"><a href="#cb5-3"></a></span>
+<span id="cb5-4"><a href="#cb5-4"></a><span class="co"># Project directory usage</span></span>
+<span id="cb5-5"><a href="#cb5-5"></a><span class="ex">$</span> du <span class="at">-sh</span> /projects/myPIRG/myusername</span>
+<span id="cb5-6"><a href="#cb5-6"></a></span>
+<span id="cb5-7"><a href="#cb5-7"></a><span class="co"># Detailed breakdown</span></span>
+<span id="cb5-8"><a href="#cb5-8"></a><span class="ex">$</span> du <span class="at">-h</span> <span class="at">--max-depth</span><span class="op">=</span>1 /projects/myPIRG/myusername</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="callout callout-style-default callout-important callout-titled">
 <div class="callout-header d-flex align-content-center">
 <div class="callout-icon-container">
@@ -1084,13 +1114,13 @@ Important
 <li>Queues jobs when resources are busy</li>
 <li>Tracks resource usage</li>
 </ul>
-<p><a href="#fig-slurm-workflow" class="quarto-xref">Figure&nbsp;<span>16.4</span></a> traces a job from submission to completion.</p>
+<p><a href="#fig-slurm-workflow" class="quarto-xref">Figure&nbsp;<span>16.5</span></a> traces a job from submission to completion.</p>
 <div id="fig-slurm-workflow" class="quarto-float quarto-figure quarto-figure-center anchored" data-fig-align="center">
 <figure class="quarto-float quarto-float-fig figure"><div aria-describedby="fig-slurm-workflow-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 <img src="../images/Lec08_img004.svg" class="img-fluid quarto-figure quarto-figure-center figure-img" style="width:100.0%">
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-slurm-workflow-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;16.4: SLURM job lifecycle: <code>sbatch</code> places the job in the queue, it waits for resources, runs on a compute node, and leaves its output in files
+Figure&nbsp;16.5: SLURM job lifecycle: <code>sbatch</code> places the job in the queue, it waits for resources, runs on a compute node, and leaves its output in files
 </figcaption></figure>
 </div>
 <p>Three words recur in everything that follows. A <strong>job</strong> is a unit of work you submit. A <strong>partition</strong> is a queue with its own hardware and time limits (<a href="#tbl-partitions" class="quarto-xref">Table&nbsp;<span>16.2</span></a>). An <strong>account</strong> is the PIRG your usage is charged to.</p>
@@ -1114,9 +1144,9 @@ Figure&nbsp;16.4: SLURM job lifecycle: <code>sbatch</code> places the job in the
 </div>
 </div>
 <p>Every job at UO must also name an <strong>account</strong>, which is your PIRG. This is how usage is tracked and how fair-share accounting (next section) knows whose turn it is. If you do not know your PIRG, run <code>groups</code> after logging in. You can set it once in your shell profile so you never have to type <code>--account=</code> again:</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb5"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1"></a><span class="ex">$</span> echo <span class="st">'export SLURM_ACCOUNT=myPIRG'</span>  <span class="op">&gt;&gt;</span> ~/.bash_profile</span>
-<span id="cb5-2"><a href="#cb5-2"></a><span class="ex">$</span> echo <span class="st">'export SBATCH_ACCOUNT=myPIRG'</span> <span class="op">&gt;&gt;</span> ~/.bash_profile</span>
-<span id="cb5-3"><a href="#cb5-3"></a><span class="ex">$</span> source ~/.bash_profile</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb6"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb6-1"><a href="#cb6-1"></a><span class="ex">$</span> echo <span class="st">'export SLURM_ACCOUNT=myPIRG'</span>  <span class="op">&gt;&gt;</span> ~/.bash_profile</span>
+<span id="cb6-2"><a href="#cb6-2"></a><span class="ex">$</span> echo <span class="st">'export SBATCH_ACCOUNT=myPIRG'</span> <span class="op">&gt;&gt;</span> ~/.bash_profile</span>
+<span id="cb6-3"><a href="#cb6-3"></a><span class="ex">$</span> source ~/.bash_profile</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <section id="sec-scheduler-fairshare" class="level3"><h3 class="anchored" data-anchor-id="sec-scheduler-fairshare">How SLURM Decides Whose Turn It Is</h3>
 <p>A naive scheduler would run jobs first-come, first-served. SLURM does something more equitable: <strong>fair-share</strong> scheduling. Each job gets a priority that depends in part on how much your PIRG has used the cluster <em>recently</em>. Groups that have consumed a lot of compute in the recent past are nudged down the queue; groups that have used little are nudged up. Over time this balances access so that no single heavy user can monopolize the machine. You can see the factors behind your own jobs’ priority with <code>sprio</code> and your group’s usage with <code>sshare -u $USER</code>.</p>
 <p>Fair-share has a practical, almost counterintuitive implication for how you should size your jobs. Because SLURM also tries to fill small gaps in the schedule (a technique called <strong>backfill</strong>), a <strong>small, well-sized job often starts sooner than a large one</strong>, even if the large one was submitted first. If you ask for 4 cores and 16 GB for one hour, SLURM can slot you into a gap while a bigger job waits for a whole node to free up. If you ask for a whole node for two days, it has to wait until a node-sized gap opens. The lesson is not to game the queue (you cannot) but to <strong>size your jobs honestly to what they need</strong>, which both gets you running sooner and leaves resources for everyone else.</p>
@@ -1124,30 +1154,30 @@ Figure&nbsp;16.4: SLURM job lifecycle: <code>sbatch</code> places the job in the
 </section></section><section id="sec-slurm-scripts" class="level2" data-number="16.7"><h2 data-number="16.7" class="anchored" data-anchor-id="sec-slurm-scripts">
 <span class="header-section-number">16.7</span> Writing SLURM Batch Scripts</h2>
 <p>A batch script combines SLURM directives with your commands:</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb6"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb6-1"><a href="#cb6-1"></a><span class="co">#!/bin/bash</span></span>
-<span id="cb6-2"><a href="#cb6-2"></a><span class="co">#SBATCH --job-name=my_analysis      # Job name (shows in queue)</span></span>
-<span id="cb6-3"><a href="#cb6-3"></a><span class="co">#SBATCH --partition=compute         # Partition (queue)</span></span>
-<span id="cb6-4"><a href="#cb6-4"></a><span class="co">#SBATCH --account=myPIRG            # Your PIRG name</span></span>
-<span id="cb6-5"><a href="#cb6-5"></a><span class="co">#SBATCH --output=output_%j.log      # Standard output (%j = job ID)</span></span>
-<span id="cb6-6"><a href="#cb6-6"></a><span class="co">#SBATCH --error=error_%j.log        # Standard error</span></span>
-<span id="cb6-7"><a href="#cb6-7"></a><span class="co">#SBATCH --time=04:00:00             # Time limit (HH:MM:SS)</span></span>
-<span id="cb6-8"><a href="#cb6-8"></a><span class="co">#SBATCH --nodes=1                   # Number of nodes</span></span>
-<span id="cb6-9"><a href="#cb6-9"></a><span class="co">#SBATCH --ntasks-per-node=1         # Tasks per node</span></span>
-<span id="cb6-10"><a href="#cb6-10"></a><span class="co">#SBATCH --cpus-per-task=4           # CPUs per task</span></span>
-<span id="cb6-11"><a href="#cb6-11"></a><span class="co">#SBATCH --mem=16G                   # Memory per node</span></span>
-<span id="cb6-12"><a href="#cb6-12"></a></span>
-<span id="cb6-13"><a href="#cb6-13"></a><span class="co"># Stop on the first error (see below)</span></span>
-<span id="cb6-14"><a href="#cb6-14"></a><span class="bu">set</span> <span class="at">-euo</span> pipefail</span>
-<span id="cb6-15"><a href="#cb6-15"></a></span>
-<span id="cb6-16"><a href="#cb6-16"></a><span class="co"># Load required modules (inside the script, after the directives)</span></span>
-<span id="cb6-17"><a href="#cb6-17"></a><span class="ex">module</span> purge</span>
-<span id="cb6-18"><a href="#cb6-18"></a><span class="ex">module</span> load R/4.3.3</span>
-<span id="cb6-19"><a href="#cb6-19"></a></span>
-<span id="cb6-20"><a href="#cb6-20"></a><span class="co"># Change to working directory</span></span>
-<span id="cb6-21"><a href="#cb6-21"></a><span class="bu">cd</span> /projects/myPIRG/myusername/analysis</span>
-<span id="cb6-22"><a href="#cb6-22"></a></span>
-<span id="cb6-23"><a href="#cb6-23"></a><span class="co"># Run your program</span></span>
-<span id="cb6-24"><a href="#cb6-24"></a><span class="ex">Rscript</span> my_analysis.R</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb7"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb7-1"><a href="#cb7-1"></a><span class="co">#!/bin/bash</span></span>
+<span id="cb7-2"><a href="#cb7-2"></a><span class="co">#SBATCH --job-name=my_analysis      # Job name (shows in queue)</span></span>
+<span id="cb7-3"><a href="#cb7-3"></a><span class="co">#SBATCH --partition=compute         # Partition (queue)</span></span>
+<span id="cb7-4"><a href="#cb7-4"></a><span class="co">#SBATCH --account=myPIRG            # Your PIRG name</span></span>
+<span id="cb7-5"><a href="#cb7-5"></a><span class="co">#SBATCH --output=output_%j.log      # Standard output (%j = job ID)</span></span>
+<span id="cb7-6"><a href="#cb7-6"></a><span class="co">#SBATCH --error=error_%j.log        # Standard error</span></span>
+<span id="cb7-7"><a href="#cb7-7"></a><span class="co">#SBATCH --time=04:00:00             # Time limit (HH:MM:SS)</span></span>
+<span id="cb7-8"><a href="#cb7-8"></a><span class="co">#SBATCH --nodes=1                   # Number of nodes</span></span>
+<span id="cb7-9"><a href="#cb7-9"></a><span class="co">#SBATCH --ntasks-per-node=1         # Tasks per node</span></span>
+<span id="cb7-10"><a href="#cb7-10"></a><span class="co">#SBATCH --cpus-per-task=4           # CPUs per task</span></span>
+<span id="cb7-11"><a href="#cb7-11"></a><span class="co">#SBATCH --mem=16G                   # Memory per node</span></span>
+<span id="cb7-12"><a href="#cb7-12"></a></span>
+<span id="cb7-13"><a href="#cb7-13"></a><span class="co"># Stop on the first error (see below)</span></span>
+<span id="cb7-14"><a href="#cb7-14"></a><span class="bu">set</span> <span class="at">-euo</span> pipefail</span>
+<span id="cb7-15"><a href="#cb7-15"></a></span>
+<span id="cb7-16"><a href="#cb7-16"></a><span class="co"># Load required modules (inside the script, after the directives)</span></span>
+<span id="cb7-17"><a href="#cb7-17"></a><span class="ex">module</span> purge</span>
+<span id="cb7-18"><a href="#cb7-18"></a><span class="ex">module</span> load R/4.3.3</span>
+<span id="cb7-19"><a href="#cb7-19"></a></span>
+<span id="cb7-20"><a href="#cb7-20"></a><span class="co"># Change to working directory</span></span>
+<span id="cb7-21"><a href="#cb7-21"></a><span class="bu">cd</span> /projects/myPIRG/myusername/analysis</span>
+<span id="cb7-22"><a href="#cb7-22"></a></span>
+<span id="cb7-23"><a href="#cb7-23"></a><span class="co"># Run your program</span></span>
+<span id="cb7-24"><a href="#cb7-24"></a><span class="ex">Rscript</span> my_analysis.R</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>Three details in this script deserve emphasis.</p>
 <p><strong>The <code>#SBATCH</code> lines are the resource declaration.</strong> They must come at the very top, after <code>#!/bin/bash</code> and before any command. To the shell they are comments; to <code>sbatch</code> they are the contract described in <a href="#sec-slurm" class="quarto-xref"><span>Section 16.6</span></a>. Anything you can write as <code>#SBATCH --flag</code> you can also pass on the command line (<code>sbatch --mem=32G my_script.sh</code>), and the command-line version wins, which is handy for one-off overrides.</p>
 <p><strong><code>set -euo pipefail</code> should be the first real command.</strong> This trio of shell options (<a href="10-shell-scripting.html#sec-strict-mode" class="quarto-xref"><span>Section 10.9.2</span></a>) makes the script exit immediately if any command fails (<code>-e</code>), treats unset variables as errors (<code>-u</code>), and makes a pipeline fail if any stage fails rather than only the last (<code>-o pipefail</code>). Without it, a script continues past a failed step: if <code>module load R/4.3.3</code> fails because the module name changed, the script carries on to <code>Rscript ...</code> with no R loaded and produces a confusing “command not found” (or, worse, silently uses a system R with none of your packages). With it, the script stops at the failed line and the <code>.err</code> log shows exactly where. See <a href="10-shell-scripting.html" class="quarto-xref"><span>Chapter 10</span></a> for more on these options.</p>
@@ -1355,18 +1385,18 @@ Table&nbsp;16.5: SLURM environment variables available inside a job
 </section></section><section id="sec-job-management" class="level2" data-number="16.8"><h2 data-number="16.8" class="anchored" data-anchor-id="sec-job-management">
 <span class="header-section-number">16.8</span> Submitting and Managing Jobs</h2>
 <section id="sec-submit-a-job" class="level3"><h3 class="anchored" data-anchor-id="sec-submit-a-job">Submit a Job</h3>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb7"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb7-1"><a href="#cb7-1"></a><span class="co"># Submit batch job</span></span>
-<span id="cb7-2"><a href="#cb7-2"></a><span class="ex">$</span> sbatch my_script.sh</span>
-<span id="cb7-3"><a href="#cb7-3"></a><span class="ex">Submitted</span> batch job 12345678</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb8"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb8-1"><a href="#cb8-1"></a><span class="co"># Submit batch job</span></span>
+<span id="cb8-2"><a href="#cb8-2"></a><span class="ex">$</span> sbatch my_script.sh</span>
+<span id="cb8-3"><a href="#cb8-3"></a><span class="ex">Submitted</span> batch job 12345678</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </section><section id="sec-check-job-status" class="level3"><h3 class="anchored" data-anchor-id="sec-check-job-status">Check Job Status</h3>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb8"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb8-1"><a href="#cb8-1"></a><span class="co"># Your jobs</span></span>
-<span id="cb8-2"><a href="#cb8-2"></a><span class="ex">$</span> squeue <span class="at">-u</span> <span class="va">$USER</span></span>
-<span id="cb8-3"><a href="#cb8-3"></a></span>
-<span id="cb8-4"><a href="#cb8-4"></a><span class="co"># All jobs on a partition</span></span>
-<span id="cb8-5"><a href="#cb8-5"></a><span class="ex">$</span> squeue <span class="at">-p</span> compute</span>
-<span id="cb8-6"><a href="#cb8-6"></a></span>
-<span id="cb8-7"><a href="#cb8-7"></a><span class="co"># Detailed job info</span></span>
-<span id="cb8-8"><a href="#cb8-8"></a><span class="ex">$</span> scontrol show job 12345678</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb9"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb9-1"><a href="#cb9-1"></a><span class="co"># Your jobs</span></span>
+<span id="cb9-2"><a href="#cb9-2"></a><span class="ex">$</span> squeue <span class="at">-u</span> <span class="va">$USER</span></span>
+<span id="cb9-3"><a href="#cb9-3"></a></span>
+<span id="cb9-4"><a href="#cb9-4"></a><span class="co"># All jobs on a partition</span></span>
+<span id="cb9-5"><a href="#cb9-5"></a><span class="ex">$</span> squeue <span class="at">-p</span> compute</span>
+<span id="cb9-6"><a href="#cb9-6"></a></span>
+<span id="cb9-7"><a href="#cb9-7"></a><span class="co"># Detailed job info</span></span>
+<span id="cb9-8"><a href="#cb9-8"></a><span class="ex">$</span> scontrol show job 12345678</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </section><section id="sec-job-status-codes" class="level3"><h3 class="anchored" data-anchor-id="sec-job-status-codes">Job Status Codes</h3>
 <p>The <code>ST</code> column of <code>squeue</code> uses the codes in <a href="#tbl-status-codes" class="quarto-xref">Table&nbsp;<span>16.6</span></a>.</p>
 <div id="tbl-status-codes" class="quarto-float quarto-figure quarto-figure-center anchored">
@@ -1487,18 +1517,18 @@ Table&nbsp;16.7: Common <code>squeue</code> pending reasons and the recommended 
 </div>
 <p>Most pending states require no action; they resolve when resources free up. Cancelling a <code>Priority</code> job and resubmitting it with smaller requests rarely helps: you move to the back of a queue whose front is held up by the same contention. The two reasons that do need intervention are <code>ReqNodeNotAvail, Reserved for maintenance</code> (add <code>--time-min</code> or shorten <code>--time</code>) and <code>AssocGrpCPUMinutesLimit</code> (contact RACS). The Talapas Knowledge Base article <a href="https://uoracs.github.io/talapas2-knowledge-base/docs/faqs/why_is_my_job_not_running/"><em>Why is my SLURM job not running?</em></a> covers the rarer cases.</p>
 </section><section id="sec-cancel-a-job" class="level3"><h3 class="anchored" data-anchor-id="sec-cancel-a-job">Cancel a Job</h3>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb9"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb9-1"><a href="#cb9-1"></a><span class="co"># Cancel specific job</span></span>
-<span id="cb9-2"><a href="#cb9-2"></a><span class="ex">$</span> scancel 12345678</span>
-<span id="cb9-3"><a href="#cb9-3"></a></span>
-<span id="cb9-4"><a href="#cb9-4"></a><span class="co"># Cancel all your jobs</span></span>
-<span id="cb9-5"><a href="#cb9-5"></a><span class="ex">$</span> scancel <span class="at">-u</span> <span class="va">$USER</span></span>
-<span id="cb9-6"><a href="#cb9-6"></a></span>
-<span id="cb9-7"><a href="#cb9-7"></a><span class="co"># Cancel only your pending (not yet running) jobs</span></span>
-<span id="cb9-8"><a href="#cb9-8"></a><span class="ex">$</span> scancel <span class="at">-u</span> <span class="va">$USER</span> <span class="at">-t</span> PENDING</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb10"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb10-1"><a href="#cb10-1"></a><span class="co"># Cancel specific job</span></span>
+<span id="cb10-2"><a href="#cb10-2"></a><span class="ex">$</span> scancel 12345678</span>
+<span id="cb10-3"><a href="#cb10-3"></a></span>
+<span id="cb10-4"><a href="#cb10-4"></a><span class="co"># Cancel all your jobs</span></span>
+<span id="cb10-5"><a href="#cb10-5"></a><span class="ex">$</span> scancel <span class="at">-u</span> <span class="va">$USER</span></span>
+<span id="cb10-6"><a href="#cb10-6"></a></span>
+<span id="cb10-7"><a href="#cb10-7"></a><span class="co"># Cancel only your pending (not yet running) jobs</span></span>
+<span id="cb10-8"><a href="#cb10-8"></a><span class="ex">$</span> scancel <span class="at">-u</span> <span class="va">$USER</span> <span class="at">-t</span> PENDING</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </section><section id="sec-check-resource-usage" class="level3"><h3 class="anchored" data-anchor-id="sec-check-resource-usage">Check Resource Usage</h3>
 <p>After a job completes:</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb10"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb10-1"><a href="#cb10-1"></a><span class="ex">$</span> seff 12345678</span>
-<span id="cb10-2"><a href="#cb10-2"></a><span class="ex">$</span> sacct <span class="at">-j</span> 12345678 <span class="at">--format</span><span class="op">=</span>JobID,JobName,ReqMem,MaxRSS,Elapsed,State,ExitCode</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb11"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb11-1"><a href="#cb11-1"></a><span class="ex">$</span> seff 12345678</span>
+<span id="cb11-2"><a href="#cb11-2"></a><span class="ex">$</span> sacct <span class="at">-j</span> 12345678 <span class="at">--format</span><span class="op">=</span>JobID,JobName,ReqMem,MaxRSS,Elapsed,State,ExitCode</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p><code>seff</code> prints a friendly summary (state, CPU efficiency, memory efficiency, wall-clock time); <code>sacct</code> gives the same facts in tabular form that you can script against. Reading these after every job is the foundation of the next section.</p>
 </section></section><section id="sec-right-sizing" class="level2" data-number="16.9"><h2 data-number="16.9" class="anchored" data-anchor-id="sec-right-sizing">
 <span class="header-section-number">16.9</span> Right-Sizing Your Requests</h2>
@@ -1587,6 +1617,14 @@ Table&nbsp;16.8: What to look at in <code>seff</code> and <code>sacct</code> out
 </figure>
 </div>
 <p>In practice this is a two-submission loop. <strong>First run:</strong> generous but not absurd limits, for example <code>--mem=32G --time=04:00:00 --cpus-per-task=4</code> for an unknown step, then <code>seff &lt;jobid&gt;</code> as soon as it finishes. <strong>Second and later runs:</strong> <code>--mem</code> at <code>MaxRSS × 1.2</code>, <code>--time</code> at <code>Elapsed × 1.2</code>, and <code>--cpus-per-task</code> at whatever the tool actually used. A step that requested 64 GB and used 12 GB has a new request of about 15 GB, a fourfold reduction that noticeably improves its queue position. After one pass through a multi-step pipeline you have an accurate resource profile for every step, and subsequent runs start promptly because each asks only for what it needs.</p>
+<div id="fig-rightsizing-loop" class="quarto-float quarto-figure quarto-figure-center anchored" data-fig-align="center">
+<figure class="quarto-float quarto-float-fig figure"><div aria-describedby="fig-rightsizing-loop-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="../images/bk_rightsizing_loop.svg" class="img-fluid quarto-figure quarto-figure-center figure-img" style="width:85.0%">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-rightsizing-loop-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;16.6: The right-sizing loop: submit the first run with a generous request, read <code>seff</code> when the job finishes, set the next request from <code>MaxRSS</code> × 1.2 and <code>Elapsed</code> × 1.2, and resubmit.
+</figcaption></figure>
+</div>
 <div class="callout callout-style-default callout-warning callout-titled" title="A finished job is not necessarily a successful job">
 <div class="callout-header d-flex align-content-center">
 <div class="callout-icon-container">
@@ -1603,9 +1641,9 @@ Table&nbsp;16.8: What to look at in <code>seff</code> and <code>sacct</code> out
 </section><section id="sec-interactive-jobs" class="level2" data-number="16.10"><h2 data-number="16.10" class="anchored" data-anchor-id="sec-interactive-jobs">
 <span class="header-section-number">16.10</span> Interactive Jobs</h2>
 <p>For testing and development, use interactive jobs instead of batch:</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb11"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb11-1"><a href="#cb11-1"></a><span class="co"># Start interactive session</span></span>
-<span id="cb11-2"><a href="#cb11-2"></a><span class="ex">$</span> srun <span class="at">--pty</span> <span class="at">--partition</span><span class="op">=</span>interactive <span class="at">--account</span><span class="op">=</span>myPIRG <span class="dt">\</span></span>
-<span id="cb11-3"><a href="#cb11-3"></a>       <span class="at">--time</span><span class="op">=</span>2:00:00 <span class="at">--cpus-per-task</span><span class="op">=</span>4 <span class="at">--mem</span><span class="op">=</span>8G /bin/bash</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb12"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb12-1"><a href="#cb12-1"></a><span class="co"># Start interactive session</span></span>
+<span id="cb12-2"><a href="#cb12-2"></a><span class="ex">$</span> srun <span class="at">--pty</span> <span class="at">--partition</span><span class="op">=</span>interactive <span class="at">--account</span><span class="op">=</span>myPIRG <span class="dt">\</span></span>
+<span id="cb12-3"><a href="#cb12-3"></a>       <span class="at">--time</span><span class="op">=</span>2:00:00 <span class="at">--cpus-per-task</span><span class="op">=</span>4 <span class="at">--mem</span><span class="op">=</span>8G /bin/bash</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>The <code>interactive</code> partition is reserved for exactly this kind of session, with a 12-hour limit; use <code>interactivegpu</code> if you need a GPU to test against.</p>
 <p>Your prompt will change from <code>login1</code> to something like <code>n049</code>, indicating you’re on a compute node.</p>
 <p>Interactive jobs are ideal for:</p>
@@ -1620,25 +1658,25 @@ Table&nbsp;16.8: What to look at in <code>seff</code> and <code>sacct</code> out
 <span class="header-section-number">16.11</span> Software Modules</h2>
 <p>Talapas uses the <strong>Lmod</strong> module system to manage software. This lets multiple versions coexist without conflicts.</p>
 <section id="sec-basic-module-commands" class="level3"><h3 class="anchored" data-anchor-id="sec-basic-module-commands">Basic Module Commands</h3>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb12"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb12-1"><a href="#cb12-1"></a><span class="co"># List available modules</span></span>
-<span id="cb12-2"><a href="#cb12-2"></a><span class="ex">$</span> module avail</span>
-<span id="cb12-3"><a href="#cb12-3"></a></span>
-<span id="cb12-4"><a href="#cb12-4"></a><span class="co"># Search for specific software</span></span>
-<span id="cb12-5"><a href="#cb12-5"></a><span class="ex">$</span> module spider R</span>
-<span id="cb12-6"><a href="#cb12-6"></a><span class="ex">$</span> module spider python</span>
-<span id="cb12-7"><a href="#cb12-7"></a></span>
-<span id="cb12-8"><a href="#cb12-8"></a><span class="co"># Load a module</span></span>
-<span id="cb12-9"><a href="#cb12-9"></a><span class="ex">$</span> module load R/4.3.3</span>
-<span id="cb12-10"><a href="#cb12-10"></a><span class="ex">$</span> module load miniconda3/20240410</span>
-<span id="cb12-11"><a href="#cb12-11"></a></span>
-<span id="cb12-12"><a href="#cb12-12"></a><span class="co"># See loaded modules</span></span>
-<span id="cb12-13"><a href="#cb12-13"></a><span class="ex">$</span> module list</span>
-<span id="cb12-14"><a href="#cb12-14"></a></span>
-<span id="cb12-15"><a href="#cb12-15"></a><span class="co"># Unload a module</span></span>
-<span id="cb12-16"><a href="#cb12-16"></a><span class="ex">$</span> module unload R</span>
-<span id="cb12-17"><a href="#cb12-17"></a></span>
-<span id="cb12-18"><a href="#cb12-18"></a><span class="co"># Reset to default state</span></span>
-<span id="cb12-19"><a href="#cb12-19"></a><span class="ex">$</span> module purge</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb13"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb13-1"><a href="#cb13-1"></a><span class="co"># List available modules</span></span>
+<span id="cb13-2"><a href="#cb13-2"></a><span class="ex">$</span> module avail</span>
+<span id="cb13-3"><a href="#cb13-3"></a></span>
+<span id="cb13-4"><a href="#cb13-4"></a><span class="co"># Search for specific software</span></span>
+<span id="cb13-5"><a href="#cb13-5"></a><span class="ex">$</span> module spider R</span>
+<span id="cb13-6"><a href="#cb13-6"></a><span class="ex">$</span> module spider python</span>
+<span id="cb13-7"><a href="#cb13-7"></a></span>
+<span id="cb13-8"><a href="#cb13-8"></a><span class="co"># Load a module</span></span>
+<span id="cb13-9"><a href="#cb13-9"></a><span class="ex">$</span> module load R/4.3.3</span>
+<span id="cb13-10"><a href="#cb13-10"></a><span class="ex">$</span> module load miniconda3/20240410</span>
+<span id="cb13-11"><a href="#cb13-11"></a></span>
+<span id="cb13-12"><a href="#cb13-12"></a><span class="co"># See loaded modules</span></span>
+<span id="cb13-13"><a href="#cb13-13"></a><span class="ex">$</span> module list</span>
+<span id="cb13-14"><a href="#cb13-14"></a></span>
+<span id="cb13-15"><a href="#cb13-15"></a><span class="co"># Unload a module</span></span>
+<span id="cb13-16"><a href="#cb13-16"></a><span class="ex">$</span> module unload R</span>
+<span id="cb13-17"><a href="#cb13-17"></a></span>
+<span id="cb13-18"><a href="#cb13-18"></a><span class="co"># Reset to default state</span></span>
+<span id="cb13-19"><a href="#cb13-19"></a><span class="ex">$</span> module purge</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </section><section id="sec-in-batch-scripts" class="level3"><h3 class="anchored" data-anchor-id="sec-in-batch-scripts">In Batch Scripts</h3>
 <div class="callout callout-style-default callout-important callout-titled">
 <div class="callout-header d-flex align-content-center">
@@ -1651,17 +1689,17 @@ Important
 </div>
 <div class="callout-body-container callout-body">
 <p>Always load modules <strong>after</strong> the <code>#SBATCH</code> directives in your batch scripts:</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb13"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb13-1"><a href="#cb13-1"></a><span class="co">#!/bin/bash</span></span>
-<span id="cb13-2"><a href="#cb13-2"></a><span class="co">#SBATCH --job-name=analysis</span></span>
-<span id="cb13-3"><a href="#cb13-3"></a><span class="co">#SBATCH --partition=compute</span></span>
-<span id="cb13-4"><a href="#cb13-4"></a><span class="co">#SBATCH --account=myPIRG</span></span>
-<span id="cb13-5"><a href="#cb13-5"></a><span class="co"># ... other directives ...</span></span>
-<span id="cb13-6"><a href="#cb13-6"></a></span>
-<span id="cb13-7"><a href="#cb13-7"></a><span class="co"># Load modules here</span></span>
-<span id="cb13-8"><a href="#cb13-8"></a><span class="ex">module</span> load R/4.3.3</span>
-<span id="cb13-9"><a href="#cb13-9"></a></span>
-<span id="cb13-10"><a href="#cb13-10"></a><span class="co"># Now run your code</span></span>
-<span id="cb13-11"><a href="#cb13-11"></a><span class="ex">Rscript</span> analysis.R</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb14"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb14-1"><a href="#cb14-1"></a><span class="co">#!/bin/bash</span></span>
+<span id="cb14-2"><a href="#cb14-2"></a><span class="co">#SBATCH --job-name=analysis</span></span>
+<span id="cb14-3"><a href="#cb14-3"></a><span class="co">#SBATCH --partition=compute</span></span>
+<span id="cb14-4"><a href="#cb14-4"></a><span class="co">#SBATCH --account=myPIRG</span></span>
+<span id="cb14-5"><a href="#cb14-5"></a><span class="co"># ... other directives ...</span></span>
+<span id="cb14-6"><a href="#cb14-6"></a></span>
+<span id="cb14-7"><a href="#cb14-7"></a><span class="co"># Load modules here</span></span>
+<span id="cb14-8"><a href="#cb14-8"></a><span class="ex">module</span> load R/4.3.3</span>
+<span id="cb14-9"><a href="#cb14-9"></a></span>
+<span id="cb14-10"><a href="#cb14-10"></a><span class="co"># Now run your code</span></span>
+<span id="cb14-11"><a href="#cb14-11"></a><span class="ex">Rscript</span> analysis.R</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 </div>
 <p>Modules are loaded <strong>per shell</strong>. They do not persist between logins, and (as <a href="#sec-slurm-scripts" class="quarto-xref"><span>Section 16.7</span></a> explained) they do not travel from the login node into a batch job. Specify version numbers (<code>R/4.3.3</code>, not <code>R</code>) so that a default-version change on the cluster cannot silently change your results.</p>
@@ -1709,15 +1747,42 @@ Table&nbsp;16.9: Three ways to get software onto the cluster
 </div>
 </figure>
 </div>
+<p><a href="#fig-software-layers" class="quarto-xref">Figure&nbsp;<span>16.7</span></a> shows how the layers combine.</p>
+<div id="fig-software-layers" class="quarto-float quarto-figure quarto-figure-center anchored" data-fig-align="center">
+<figure class="quarto-float quarto-float-fig figure"><div aria-describedby="fig-software-layers-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="../images/bk_software_layers.svg" class="img-fluid quarto-figure quarto-figure-center figure-img" style="width:90.0%">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-software-layers-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;16.7: The three software layers on Talapas: centrally installed Lmod modules form the base, your per-user environments sit on top of them, and an Apptainer container seals an entire stack into one portable image as the alternative.
+</figcaption></figure>
+</div>
 <p><strong>Layer 2: per-user environments.</strong> The system R and Python modules are read-only, so packages you install go into your own directory. For R, create a per-user library once and point R at it; <code><a href="https://rdrr.io/r/utils/install.packages.html">install.packages()</a></code> and <code><a href="https://bioconductor.github.io/BiocManager/reference/install.html">BiocManager::install()</a></code> will then write there:</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb14"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb14-1"><a href="#cb14-1"></a><span class="ex">$</span> mkdir <span class="at">-p</span> ~/Rlibs</span>
-<span id="cb14-2"><a href="#cb14-2"></a><span class="ex">$</span> echo <span class="st">'R_LIBS_USER=~/Rlibs'</span> <span class="op">&gt;&gt;</span> ~/.Renviron</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb15"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb15-1"><a href="#cb15-1"></a><span class="ex">$</span> mkdir <span class="at">-p</span> ~/Rlibs</span>
+<span id="cb15-2"><a href="#cb15-2"></a><span class="ex">$</span> echo <span class="st">'R_LIBS_USER=~/Rlibs'</span> <span class="op">&gt;&gt;</span> ~/.Renviron</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>To make a project reproducible, record the exact package versions with <strong>renv</strong>: <code><a href="https://rstudio.github.io/renv/reference/init.html">renv::init()</a></code> in the project, <code><a href="https://rstudio.github.io/renv/reference/snapshot.html">renv::snapshot()</a></code> to write <code>renv.lock</code>, and <code><a href="https://rstudio.github.io/renv/reference/restore.html">renv::restore()</a></code> on a fresh clone to reinstall the same versions. Commit <code>renv.lock</code> (not the library itself) to Git. For Python the equivalent is a conda environment (<code>module load miniconda3/20240410</code>, <code>conda create -n myenv python=3.12 numpy pandas</code>, <code>conda activate myenv</code>) or a <code>venv</code>; many bioinformatics tools are one <code>conda install</code> away thanks to the Bioconda channel <span class="citation" data-cites="gruning2018bioconda">(<a href="../references.html#ref-gruning2018bioconda" role="doc-biblioref">Grüning et al., 2018</a>)</span>. Either way, export the environment (<code>conda env export &gt; environment.yml</code>) and version-control the file. Activate the environment inside the job script, exactly as you load modules.</p>
+<p>The <code>environment.yml</code> file is also how an environment <em>moves to the cluster</em>. If you recorded your project’s environment on your laptop with <code>conda env export &gt; environment.yml</code>, you do not recreate it on Talapas from memory—you rebuild it from the file:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb16"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb16-1"><a href="#cb16-1"></a><span class="ex">$</span> module load miniconda3/20240410</span>
+<span id="cb16-2"><a href="#cb16-2"></a><span class="ex">$</span> conda env create <span class="at">-f</span> environment.yml      <span class="co"># once: rebuilds the environment by name</span></span>
+<span id="cb16-3"><a href="#cb16-3"></a><span class="ex">$</span> conda activate rnaseq                    <span class="co"># every session, and inside every sbatch script</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>The same two lines—<code>module load miniconda3/20240410</code> and <code>conda activate</code>—must appear <strong>inside</strong> your batch scripts, because every batch job starts with a clean shell (<a href="#sec-slurm-scripts" class="quarto-xref"><span>Section 16.7</span></a>).</p>
+<div class="callout callout-style-default callout-warning callout-titled" title="Conda environments live in your home directory">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Warning</span>Conda environments live in your home directory
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>By default conda installs every environment, and caches every package it has ever downloaded, under your <strong>home directory</strong>—whose quota (<a href="#tbl-storage" class="quarto-xref">Table&nbsp;<span>16.3</span></a>) a few heavyweight environments plus the package cache can erode surprisingly quickly. Keep an eye on it: <code>conda env list</code> shows the environments you have accumulated, <code>conda remove -n old_env --all</code> deletes one you no longer need, <code>conda clean -a</code> clears the download cache, and <code>df -h ~</code> (<a href="#sec-check-your-storage" class="quarto-xref"><span>Section 16.5.4</span></a>) tells you where you stand.</p>
+</div>
+</div>
 <p><strong>Layer 3: containers.</strong> A container packages the <em>entire</em> software stack, from operating-system libraries up, into one portable, versioned file. <strong>Docker</strong> <span class="citation" data-cites="merkel2014docker">(<a href="../references.html#ref-merkel2014docker" role="doc-biblioref">Merkel, 2014</a>)</span> is the standard on laptops and in the cloud, but it requires root privileges, so clusters do not run it. <strong>Apptainer</strong> (formerly Singularity) <span class="citation" data-cites="kurtzer2017singularity">(<a href="../references.html#ref-kurtzer2017singularity" role="doc-biblioref">Kurtzer et al., 2017</a>)</span> is its HPC-safe counterpart: it runs as an ordinary user, mounts your home and project directories automatically, and can pull Docker images directly, so an image built on a laptop runs unchanged on Talapas:</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb15"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb15-1"><a href="#cb15-1"></a><span class="co"># On a compute node (interactive session), not the login node</span></span>
-<span id="cb15-2"><a href="#cb15-2"></a><span class="ex">$</span> module load apptainer</span>
-<span id="cb15-3"><a href="#cb15-3"></a><span class="ex">$</span> apptainer pull docker://rocker/tidyverse:4.4.1     <span class="co"># one-time: creates tidyverse_4.4.1.sif</span></span>
-<span id="cb15-4"><a href="#cb15-4"></a><span class="ex">$</span> apptainer exec tidyverse_4.4.1.sif Rscript analysis.R</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb17"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb17-1"><a href="#cb17-1"></a><span class="co"># On a compute node (interactive session), not the login node</span></span>
+<span id="cb17-2"><a href="#cb17-2"></a><span class="ex">$</span> module load apptainer</span>
+<span id="cb17-3"><a href="#cb17-3"></a><span class="ex">$</span> apptainer pull docker://rocker/tidyverse:4.4.1     <span class="co"># one-time: creates tidyverse_4.4.1.sif</span></span>
+<span id="cb17-4"><a href="#cb17-4"></a><span class="ex">$</span> apptainer exec tidyverse_4.4.1.sif Rscript analysis.R</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>Inside a batch script the last line becomes <code>apptainer exec /path/to/image.sif Rscript analysis.R</code>. Containers are the strongest reproducibility guarantee available: a collaborator with the same <code>.sif</code> file gets the same results, on any cluster, years later.</p>
 <div class="callout callout-style-default callout-tip callout-titled" title="Which layer should I use?">
 <div class="callout-header d-flex align-content-center">
@@ -1739,104 +1804,128 @@ Table&nbsp;16.9: Three ways to get software onto the cluster
 </section></section><section id="sec-gpu-jobs" class="level2" data-number="16.12"><h2 data-number="16.12" class="anchored" data-anchor-id="sec-gpu-jobs">
 <span class="header-section-number">16.12</span> GPU Jobs</h2>
 <p>For machine learning and GPU-accelerated computing:</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb16"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb16-1"><a href="#cb16-1"></a><span class="co">#!/bin/bash</span></span>
-<span id="cb16-2"><a href="#cb16-2"></a><span class="co">#SBATCH --job-name=gpu_job</span></span>
-<span id="cb16-3"><a href="#cb16-3"></a><span class="co">#SBATCH --partition=gpu             # GPU partition</span></span>
-<span id="cb16-4"><a href="#cb16-4"></a><span class="co">#SBATCH --account=myPIRG</span></span>
-<span id="cb16-5"><a href="#cb16-5"></a><span class="co">#SBATCH --time=1-00:00:00           # 1 day</span></span>
-<span id="cb16-6"><a href="#cb16-6"></a><span class="co">#SBATCH --nodes=1</span></span>
-<span id="cb16-7"><a href="#cb16-7"></a><span class="co">#SBATCH --gres=gpu:1                # Request 1 GPU</span></span>
-<span id="cb16-8"><a href="#cb16-8"></a><span class="co">#SBATCH --mem=32G</span></span>
-<span id="cb16-9"><a href="#cb16-9"></a></span>
-<span id="cb16-10"><a href="#cb16-10"></a><span class="co"># Load CUDA and your software</span></span>
-<span id="cb16-11"><a href="#cb16-11"></a><span class="ex">module</span> load cuda/12.4</span>
-<span id="cb16-12"><a href="#cb16-12"></a><span class="ex">module</span> load miniconda3/20240410</span>
-<span id="cb16-13"><a href="#cb16-13"></a></span>
-<span id="cb16-14"><a href="#cb16-14"></a><span class="co"># Activate your environment</span></span>
-<span id="cb16-15"><a href="#cb16-15"></a><span class="ex">conda</span> activate ml_env</span>
-<span id="cb16-16"><a href="#cb16-16"></a></span>
-<span id="cb16-17"><a href="#cb16-17"></a><span class="co"># Run GPU code</span></span>
-<span id="cb16-18"><a href="#cb16-18"></a><span class="ex">python</span> train_model.py</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb18"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb18-1"><a href="#cb18-1"></a><span class="co">#!/bin/bash</span></span>
+<span id="cb18-2"><a href="#cb18-2"></a><span class="co">#SBATCH --job-name=gpu_job</span></span>
+<span id="cb18-3"><a href="#cb18-3"></a><span class="co">#SBATCH --partition=gpu             # GPU partition</span></span>
+<span id="cb18-4"><a href="#cb18-4"></a><span class="co">#SBATCH --account=myPIRG</span></span>
+<span id="cb18-5"><a href="#cb18-5"></a><span class="co">#SBATCH --time=1-00:00:00           # 1 day</span></span>
+<span id="cb18-6"><a href="#cb18-6"></a><span class="co">#SBATCH --nodes=1</span></span>
+<span id="cb18-7"><a href="#cb18-7"></a><span class="co">#SBATCH --gres=gpu:1                # Request 1 GPU</span></span>
+<span id="cb18-8"><a href="#cb18-8"></a><span class="co">#SBATCH --mem=32G</span></span>
+<span id="cb18-9"><a href="#cb18-9"></a></span>
+<span id="cb18-10"><a href="#cb18-10"></a><span class="co"># Load CUDA and your software</span></span>
+<span id="cb18-11"><a href="#cb18-11"></a><span class="ex">module</span> load cuda/12.4</span>
+<span id="cb18-12"><a href="#cb18-12"></a><span class="ex">module</span> load miniconda3/20240410</span>
+<span id="cb18-13"><a href="#cb18-13"></a></span>
+<span id="cb18-14"><a href="#cb18-14"></a><span class="co"># Activate your environment</span></span>
+<span id="cb18-15"><a href="#cb18-15"></a><span class="ex">conda</span> activate ml_env</span>
+<span id="cb18-16"><a href="#cb18-16"></a></span>
+<span id="cb18-17"><a href="#cb18-17"></a><span class="co"># Run GPU code</span></span>
+<span id="cb18-18"><a href="#cb18-18"></a><span class="ex">python</span> train_model.py</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>Check available GPUs:</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb17"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb17-1"><a href="#cb17-1"></a><span class="ex">$</span> /packages/racs/bin/slurm-show-gpus</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb19"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb19-1"><a href="#cb19-1"></a><span class="ex">$</span> /packages/racs/bin/slurm-show-gpus</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </section><section id="sec-hpc-example" class="level2" data-number="16.13"><h2 data-number="16.13" class="anchored" data-anchor-id="sec-hpc-example">
 <span class="header-section-number">16.13</span> A Complete Example</h2>
 <p>Let’s walk through a realistic bioinformatics workflow:</p>
 <section id="sec-hpc-prepare-script" class="level3"><h3 class="anchored" data-anchor-id="sec-hpc-prepare-script">1. Prepare Your Script</h3>
 <p>Create <code>genome_analysis.sh</code>:</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb18"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb18-1"><a href="#cb18-1"></a><span class="co">#!/bin/bash</span></span>
-<span id="cb18-2"><a href="#cb18-2"></a><span class="co">#SBATCH --job-name=genome_analysis</span></span>
-<span id="cb18-3"><a href="#cb18-3"></a><span class="co">#SBATCH --partition=compute</span></span>
-<span id="cb18-4"><a href="#cb18-4"></a><span class="co">#SBATCH --account=myPIRG</span></span>
-<span id="cb18-5"><a href="#cb18-5"></a><span class="co">#SBATCH --output=logs/genome_%j.out</span></span>
-<span id="cb18-6"><a href="#cb18-6"></a><span class="co">#SBATCH --error=logs/genome_%j.err</span></span>
-<span id="cb18-7"><a href="#cb18-7"></a><span class="co">#SBATCH --time=08:00:00</span></span>
-<span id="cb18-8"><a href="#cb18-8"></a><span class="co">#SBATCH --cpus-per-task=8</span></span>
-<span id="cb18-9"><a href="#cb18-9"></a><span class="co">#SBATCH --mem=32G</span></span>
-<span id="cb18-10"><a href="#cb18-10"></a></span>
-<span id="cb18-11"><a href="#cb18-11"></a><span class="co"># Exit on error, unset variable, or failed pipeline stage</span></span>
-<span id="cb18-12"><a href="#cb18-12"></a><span class="bu">set</span> <span class="at">-euo</span> pipefail</span>
-<span id="cb18-13"><a href="#cb18-13"></a></span>
-<span id="cb18-14"><a href="#cb18-14"></a><span class="co"># Load modules</span></span>
-<span id="cb18-15"><a href="#cb18-15"></a><span class="ex">module</span> purge</span>
-<span id="cb18-16"><a href="#cb18-16"></a><span class="ex">module</span> load bwa/0.7.17</span>
-<span id="cb18-17"><a href="#cb18-17"></a><span class="ex">module</span> load samtools/1.17</span>
-<span id="cb18-18"><a href="#cb18-18"></a></span>
-<span id="cb18-19"><a href="#cb18-19"></a><span class="co"># Set variables</span></span>
-<span id="cb18-20"><a href="#cb18-20"></a><span class="va">GENOME</span><span class="op">=</span><span class="st">"/projects/myPIRG/shared/reference/human_GRCh38.fa"</span></span>
-<span id="cb18-21"><a href="#cb18-21"></a><span class="va">READS_R1</span><span class="op">=</span><span class="st">"/projects/myPIRG/myuser/data/sample_R1.fastq.gz"</span></span>
-<span id="cb18-22"><a href="#cb18-22"></a><span class="va">READS_R2</span><span class="op">=</span><span class="st">"/projects/myPIRG/myuser/data/sample_R2.fastq.gz"</span></span>
-<span id="cb18-23"><a href="#cb18-23"></a><span class="va">OUTPUT</span><span class="op">=</span><span class="st">"/projects/myPIRG/myuser/results"</span></span>
-<span id="cb18-24"><a href="#cb18-24"></a></span>
-<span id="cb18-25"><a href="#cb18-25"></a><span class="co"># Create output directory</span></span>
-<span id="cb18-26"><a href="#cb18-26"></a><span class="fu">mkdir</span> <span class="at">-p</span> <span class="st">"</span><span class="va">$OUTPUT</span><span class="st">"</span></span>
-<span id="cb18-27"><a href="#cb18-27"></a></span>
-<span id="cb18-28"><a href="#cb18-28"></a><span class="co"># Log start time and where we landed</span></span>
-<span id="cb18-29"><a href="#cb18-29"></a><span class="bu">echo</span> <span class="st">"Job </span><span class="va">$SLURM_JOB_ID</span><span class="st"> starting on </span><span class="va">$(</span><span class="fu">hostname</span><span class="va">)</span><span class="st"> at </span><span class="va">$(</span><span class="fu">date</span><span class="va">)</span><span class="st">"</span></span>
-<span id="cb18-30"><a href="#cb18-30"></a></span>
-<span id="cb18-31"><a href="#cb18-31"></a><span class="co"># Run alignment, using the cores SLURM actually gave us</span></span>
-<span id="cb18-32"><a href="#cb18-32"></a><span class="ex">bwa</span> mem <span class="at">-t</span> <span class="st">"</span><span class="va">$SLURM_CPUS_PER_TASK</span><span class="st">"</span> <span class="st">"</span><span class="va">$GENOME</span><span class="st">"</span> <span class="st">"</span><span class="va">$READS_R1</span><span class="st">"</span> <span class="st">"</span><span class="va">$READS_R2</span><span class="st">"</span> <span class="kw">|</span> <span class="dt">\</span></span>
-<span id="cb18-33"><a href="#cb18-33"></a>    <span class="ex">samtools</span> sort <span class="at">-@</span> <span class="st">"</span><span class="va">$SLURM_CPUS_PER_TASK</span><span class="st">"</span> <span class="at">-o</span> <span class="st">"</span><span class="va">$OUTPUT</span><span class="st">/aligned.bam"</span></span>
-<span id="cb18-34"><a href="#cb18-34"></a></span>
-<span id="cb18-35"><a href="#cb18-35"></a><span class="co"># Index BAM file</span></span>
-<span id="cb18-36"><a href="#cb18-36"></a><span class="ex">samtools</span> index <span class="st">"</span><span class="va">$OUTPUT</span><span class="st">/aligned.bam"</span></span>
-<span id="cb18-37"><a href="#cb18-37"></a></span>
-<span id="cb18-38"><a href="#cb18-38"></a><span class="co"># Log completion</span></span>
-<span id="cb18-39"><a href="#cb18-39"></a><span class="bu">echo</span> <span class="st">"Analysis completed at </span><span class="va">$(</span><span class="fu">date</span><span class="va">)</span><span class="st">"</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb20"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb20-1"><a href="#cb20-1"></a><span class="co">#!/bin/bash</span></span>
+<span id="cb20-2"><a href="#cb20-2"></a><span class="co">#SBATCH --job-name=genome_analysis</span></span>
+<span id="cb20-3"><a href="#cb20-3"></a><span class="co">#SBATCH --partition=compute</span></span>
+<span id="cb20-4"><a href="#cb20-4"></a><span class="co">#SBATCH --account=myPIRG</span></span>
+<span id="cb20-5"><a href="#cb20-5"></a><span class="co">#SBATCH --output=logs/genome_%j.out</span></span>
+<span id="cb20-6"><a href="#cb20-6"></a><span class="co">#SBATCH --error=logs/genome_%j.err</span></span>
+<span id="cb20-7"><a href="#cb20-7"></a><span class="co">#SBATCH --time=08:00:00</span></span>
+<span id="cb20-8"><a href="#cb20-8"></a><span class="co">#SBATCH --cpus-per-task=8</span></span>
+<span id="cb20-9"><a href="#cb20-9"></a><span class="co">#SBATCH --mem=32G</span></span>
+<span id="cb20-10"><a href="#cb20-10"></a></span>
+<span id="cb20-11"><a href="#cb20-11"></a><span class="co"># Exit on error, unset variable, or failed pipeline stage</span></span>
+<span id="cb20-12"><a href="#cb20-12"></a><span class="bu">set</span> <span class="at">-euo</span> pipefail</span>
+<span id="cb20-13"><a href="#cb20-13"></a></span>
+<span id="cb20-14"><a href="#cb20-14"></a><span class="co"># Load modules</span></span>
+<span id="cb20-15"><a href="#cb20-15"></a><span class="ex">module</span> purge</span>
+<span id="cb20-16"><a href="#cb20-16"></a><span class="ex">module</span> load bwa/0.7.17</span>
+<span id="cb20-17"><a href="#cb20-17"></a><span class="ex">module</span> load samtools/1.17</span>
+<span id="cb20-18"><a href="#cb20-18"></a></span>
+<span id="cb20-19"><a href="#cb20-19"></a><span class="co"># Set variables</span></span>
+<span id="cb20-20"><a href="#cb20-20"></a><span class="va">GENOME</span><span class="op">=</span><span class="st">"/projects/myPIRG/shared/reference/human_GRCh38.fa"</span></span>
+<span id="cb20-21"><a href="#cb20-21"></a><span class="va">READS_R1</span><span class="op">=</span><span class="st">"/projects/myPIRG/myuser/data/sample_R1.fastq.gz"</span></span>
+<span id="cb20-22"><a href="#cb20-22"></a><span class="va">READS_R2</span><span class="op">=</span><span class="st">"/projects/myPIRG/myuser/data/sample_R2.fastq.gz"</span></span>
+<span id="cb20-23"><a href="#cb20-23"></a><span class="va">OUTPUT</span><span class="op">=</span><span class="st">"/projects/myPIRG/myuser/results"</span></span>
+<span id="cb20-24"><a href="#cb20-24"></a></span>
+<span id="cb20-25"><a href="#cb20-25"></a><span class="co"># Create output directory</span></span>
+<span id="cb20-26"><a href="#cb20-26"></a><span class="fu">mkdir</span> <span class="at">-p</span> <span class="st">"</span><span class="va">$OUTPUT</span><span class="st">"</span></span>
+<span id="cb20-27"><a href="#cb20-27"></a></span>
+<span id="cb20-28"><a href="#cb20-28"></a><span class="co"># Log start time and where we landed</span></span>
+<span id="cb20-29"><a href="#cb20-29"></a><span class="bu">echo</span> <span class="st">"Job </span><span class="va">$SLURM_JOB_ID</span><span class="st"> starting on </span><span class="va">$(</span><span class="fu">hostname</span><span class="va">)</span><span class="st"> at </span><span class="va">$(</span><span class="fu">date</span><span class="va">)</span><span class="st">"</span></span>
+<span id="cb20-30"><a href="#cb20-30"></a></span>
+<span id="cb20-31"><a href="#cb20-31"></a><span class="co"># Run alignment, using the cores SLURM actually gave us</span></span>
+<span id="cb20-32"><a href="#cb20-32"></a><span class="ex">bwa</span> mem <span class="at">-t</span> <span class="st">"</span><span class="va">$SLURM_CPUS_PER_TASK</span><span class="st">"</span> <span class="st">"</span><span class="va">$GENOME</span><span class="st">"</span> <span class="st">"</span><span class="va">$READS_R1</span><span class="st">"</span> <span class="st">"</span><span class="va">$READS_R2</span><span class="st">"</span> <span class="kw">|</span> <span class="dt">\</span></span>
+<span id="cb20-33"><a href="#cb20-33"></a>    <span class="ex">samtools</span> sort <span class="at">-@</span> <span class="st">"</span><span class="va">$SLURM_CPUS_PER_TASK</span><span class="st">"</span> <span class="at">-o</span> <span class="st">"</span><span class="va">$OUTPUT</span><span class="st">/aligned.bam"</span></span>
+<span id="cb20-34"><a href="#cb20-34"></a></span>
+<span id="cb20-35"><a href="#cb20-35"></a><span class="co"># Index BAM file</span></span>
+<span id="cb20-36"><a href="#cb20-36"></a><span class="ex">samtools</span> index <span class="st">"</span><span class="va">$OUTPUT</span><span class="st">/aligned.bam"</span></span>
+<span id="cb20-37"><a href="#cb20-37"></a></span>
+<span id="cb20-38"><a href="#cb20-38"></a><span class="co"># Log completion</span></span>
+<span id="cb20-39"><a href="#cb20-39"></a><span class="bu">echo</span> <span class="st">"Analysis completed at </span><span class="va">$(</span><span class="fu">date</span><span class="va">)</span><span class="st">"</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>The alignment step uses <code>samtools</code> <span class="citation" data-cites="li2009samtools danecek2021twelve">(<a href="../references.html#ref-danecek2021twelve" role="doc-biblioref">Danecek et al., 2021</a>; <a href="../references.html#ref-li2009samtools" role="doc-biblioref">Li et al., 2009</a>)</span> to sort and index the BAM output; the <code>-t</code> and <code>-@</code> thread counts come from <code>$SLURM_CPUS_PER_TASK</code> so that changing the <code>#SBATCH --cpus-per-task</code> line is the only edit needed to scale the job.</p>
 </section><section id="sec-hpc-submit-monitor" class="level3"><h3 class="anchored" data-anchor-id="sec-hpc-submit-monitor">2. Submit and Monitor</h3>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb19"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb19-1"><a href="#cb19-1"></a><span class="co"># Create logs directory</span></span>
-<span id="cb19-2"><a href="#cb19-2"></a><span class="ex">$</span> mkdir <span class="at">-p</span> logs</span>
-<span id="cb19-3"><a href="#cb19-3"></a></span>
-<span id="cb19-4"><a href="#cb19-4"></a><span class="co"># Submit job</span></span>
-<span id="cb19-5"><a href="#cb19-5"></a><span class="ex">$</span> sbatch genome_analysis.sh</span>
-<span id="cb19-6"><a href="#cb19-6"></a><span class="ex">Submitted</span> batch job 12345678</span>
-<span id="cb19-7"><a href="#cb19-7"></a></span>
-<span id="cb19-8"><a href="#cb19-8"></a><span class="co"># Monitor status</span></span>
-<span id="cb19-9"><a href="#cb19-9"></a><span class="ex">$</span> squeue <span class="at">-u</span> <span class="va">$USER</span></span>
-<span id="cb19-10"><a href="#cb19-10"></a>             <span class="ex">JOBID</span> PARTITION     NAME     USER  ST       TIME  NODES NODELIST<span class="er">(</span><span class="ex">REASON</span><span class="kw">)</span></span>
-<span id="cb19-11"><a href="#cb19-11"></a>          <span class="ex">12345678</span>   compute genome_a   duckid   R       5:32      1 n042</span>
-<span id="cb19-12"><a href="#cb19-12"></a></span>
-<span id="cb19-13"><a href="#cb19-13"></a><span class="co"># Check output in real-time</span></span>
-<span id="cb19-14"><a href="#cb19-14"></a><span class="ex">$</span> tail <span class="at">-f</span> logs/genome_12345678.out</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb21"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb21-1"><a href="#cb21-1"></a><span class="co"># Create logs directory</span></span>
+<span id="cb21-2"><a href="#cb21-2"></a><span class="ex">$</span> mkdir <span class="at">-p</span> logs</span>
+<span id="cb21-3"><a href="#cb21-3"></a></span>
+<span id="cb21-4"><a href="#cb21-4"></a><span class="co"># Submit job</span></span>
+<span id="cb21-5"><a href="#cb21-5"></a><span class="ex">$</span> sbatch genome_analysis.sh</span>
+<span id="cb21-6"><a href="#cb21-6"></a><span class="ex">Submitted</span> batch job 12345678</span>
+<span id="cb21-7"><a href="#cb21-7"></a></span>
+<span id="cb21-8"><a href="#cb21-8"></a><span class="co"># Monitor status</span></span>
+<span id="cb21-9"><a href="#cb21-9"></a><span class="ex">$</span> squeue <span class="at">-u</span> <span class="va">$USER</span></span>
+<span id="cb21-10"><a href="#cb21-10"></a>             <span class="ex">JOBID</span> PARTITION     NAME     USER  ST       TIME  NODES NODELIST<span class="er">(</span><span class="ex">REASON</span><span class="kw">)</span></span>
+<span id="cb21-11"><a href="#cb21-11"></a>          <span class="ex">12345678</span>   compute genome_a   duckid   R       5:32      1 n042</span>
+<span id="cb21-12"><a href="#cb21-12"></a></span>
+<span id="cb21-13"><a href="#cb21-13"></a><span class="co"># Check output in real-time</span></span>
+<span id="cb21-14"><a href="#cb21-14"></a><span class="ex">$</span> tail <span class="at">-f</span> logs/genome_12345678.out</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section><section id="sec-hpc-mixed-language" class="level3"><h3 class="anchored" data-anchor-id="sec-hpc-mixed-language">Mixing Languages in One Job</h3>
+<p>A batch script is just a shell script, so nothing stops one job from running steps in different languages: load both modules, then call each interpreter in turn. This is the natural shape for a small pipeline where, say, Python summarizes raw files into a table and R turns the table into a figure:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb22"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb22-1"><a href="#cb22-1"></a><span class="co">#!/bin/bash</span></span>
+<span id="cb22-2"><a href="#cb22-2"></a><span class="co">#SBATCH --job-name=fasta_pipeline</span></span>
+<span id="cb22-3"><a href="#cb22-3"></a><span class="co">#SBATCH --partition=compute</span></span>
+<span id="cb22-4"><a href="#cb22-4"></a><span class="co">#SBATCH --account=myPIRG</span></span>
+<span id="cb22-5"><a href="#cb22-5"></a><span class="co">#SBATCH --output=logs/%x_%j.out</span></span>
+<span id="cb22-6"><a href="#cb22-6"></a><span class="co">#SBATCH --error=logs/%x_%j.err</span></span>
+<span id="cb22-7"><a href="#cb22-7"></a><span class="co">#SBATCH --time=01:00:00</span></span>
+<span id="cb22-8"><a href="#cb22-8"></a><span class="co">#SBATCH --cpus-per-task=2</span></span>
+<span id="cb22-9"><a href="#cb22-9"></a><span class="co">#SBATCH --mem=8G</span></span>
+<span id="cb22-10"><a href="#cb22-10"></a></span>
+<span id="cb22-11"><a href="#cb22-11"></a><span class="bu">set</span> <span class="at">-euo</span> pipefail</span>
+<span id="cb22-12"><a href="#cb22-12"></a></span>
+<span id="cb22-13"><a href="#cb22-13"></a><span class="ex">module</span> purge</span>
+<span id="cb22-14"><a href="#cb22-14"></a><span class="ex">module</span> load python3/3.11.4</span>
+<span id="cb22-15"><a href="#cb22-15"></a><span class="ex">module</span> load R/4.3.3</span>
+<span id="cb22-16"><a href="#cb22-16"></a></span>
+<span id="cb22-17"><a href="#cb22-17"></a><span class="co"># Step 1 (Python): summarise every FASTA file into one table</span></span>
+<span id="cb22-18"><a href="#cb22-18"></a><span class="ex">python3</span> fasta_stats.py data/<span class="pp">*</span>.fasta <span class="op">&gt;</span> results/fasta_stats.tsv</span>
+<span id="cb22-19"><a href="#cb22-19"></a></span>
+<span id="cb22-20"><a href="#cb22-20"></a><span class="co"># Step 2 (R): read that table, make the figure</span></span>
+<span id="cb22-21"><a href="#cb22-21"></a><span class="ex">Rscript</span> plot_stats.R results/fasta_stats.tsv results/fasta_stats.png</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Two details carry the weight here. First, <code>set -euo pipefail</code> is what makes the chain safe: if the Python step fails, the job stops rather than handing R a truncated or empty table that would produce a plausible-looking but wrong figure. Second, both scripts take their file names from the command line (<code>commandArgs(trailingOnly = TRUE)</code> in R, <code>sys.argv</code> in Python) rather than hard-coding paths, so the same scripts run unchanged on your laptop and on the cluster. When the two steps grow expensive enough to need different resource requests, split them into two jobs chained with <code>--dependency=afterok:</code> (<a href="#tbl-slurm-directives" class="quarto-xref">Table&nbsp;<span>16.4</span></a>) instead.</p>
 </section></section><section id="sec-cluster-pipeline" class="level2" data-number="16.14"><h2 data-number="16.14" class="anchored" data-anchor-id="sec-cluster-pipeline">
 <span class="header-section-number">16.14</span> Designing a Pipeline on the Cluster</h2>
 <p>One job is easy. Real projects are a <em>chain</em> of steps (align, then count, then model, then plot) run over many samples, and the cluster rewards a particular way of organizing that chain. The habits below turn a pile of scripts into a pipeline that can be re-run, resumed after a failure, and scaled from one sample to a hundred without rewriting anything. They apply whether the steps are shell, R, or Python, and they are the same habits that <a href="17-parallel-computing.html" class="quarto-xref"><span>Chapter 17</span></a> recommends within a single R session (test sequentially first, then scale out).</p>
 <section id="sec-hpc-stage-checkpoint" class="level3"><h3 class="anchored" data-anchor-id="sec-hpc-stage-checkpoint">Stage Data, Then Checkpoint Every Step</h3>
 <p><strong>Stage data on fast storage.</strong> Put inputs and intermediates for a run under <code>/scratch/&lt;PIRG&gt;/&lt;duckid&gt;/&lt;project&gt;/</code> and keep only code and final results in <code>/projects</code> (<a href="#sec-scratch-policy" class="quarto-xref"><span>Section 16.5.2</span></a>). Do not hard-code that location: read it from an environment variable or a small config file so the same scripts run unchanged on your laptop, on scratch, or in a collaborator’s directory.</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb20"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb20-1"><a href="#cb20-1"></a><span class="co"># In the job script (or ~/.bash_profile): where this run's data live</span></span>
-<span id="cb20-2"><a href="#cb20-2"></a><span class="bu">export</span> <span class="va">DATA_DIR</span><span class="op">=</span><span class="st">"</span><span class="va">${DATA_DIR</span><span class="op">:-</span>/scratch/myPIRG/<span class="va">$USER</span>/hydrogel_rnaseq<span class="va">}</span><span class="st">"</span></span>
-<span id="cb20-3"><a href="#cb20-3"></a><span class="fu">mkdir</span> <span class="at">-p</span> <span class="st">"</span><span class="va">$DATA_DIR</span><span class="st">"</span>/<span class="dt">{raw</span><span class="op">,</span><span class="dt">aligned</span><span class="op">,</span><span class="dt">counts</span><span class="op">,</span><span class="dt">logs}</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb23"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb23-1"><a href="#cb23-1"></a><span class="co"># In the job script (or ~/.bash_profile): where this run's data live</span></span>
+<span id="cb23-2"><a href="#cb23-2"></a><span class="bu">export</span> <span class="va">DATA_DIR</span><span class="op">=</span><span class="st">"</span><span class="va">${DATA_DIR</span><span class="op">:-</span>/scratch/myPIRG/<span class="va">$USER</span>/hydrogel_rnaseq<span class="va">}</span><span class="st">"</span></span>
+<span id="cb23-3"><a href="#cb23-3"></a><span class="fu">mkdir</span> <span class="at">-p</span> <span class="st">"</span><span class="va">$DATA_DIR</span><span class="st">"</span>/<span class="dt">{raw</span><span class="op">,</span><span class="dt">aligned</span><span class="op">,</span><span class="dt">counts</span><span class="op">,</span><span class="dt">logs}</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>Inside R the same idea is <code>data_dir &lt;- Sys.getenv("DATA_DIR", unset = "data")</code>; in Python, <code>os.environ.get("DATA_DIR", "data")</code>.</p>
 <p><strong>Write a checkpoint after every step.</strong> Each step reads a named file, does its work, and writes a new named file that the next step reads. The file is a <em>checkpoint</em>: a self-contained snapshot of the analysis at that stage. If step 4 fails because of a memory spike, you fix the request and rerun step 4; steps 1 through 3 are untouched. Without checkpoints, a failure anywhere forces a rerun from scratch. The cost is disk space and one discipline: verify the checkpoint (<code>State: COMPLETED</code>, output present and complete) before launching the step that consumes it.</p>
 <p><strong>Skip work that is already done.</strong> Once outputs are checkpoints, the script can test for them and move on, which makes re-running the whole pipeline after a partial failure safe and cheap:</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb21"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb21-1"><a href="#cb21-1"></a><span class="cf">if</span> <span class="kw">[[</span> <span class="ot">-s</span> <span class="st">"</span><span class="va">$DATA_DIR</span><span class="st">/aligned/</span><span class="va">${SAMPLE}</span><span class="st">.bam"</span> <span class="kw">]];</span> <span class="cf">then</span></span>
-<span id="cb21-2"><a href="#cb21-2"></a>    <span class="bu">echo</span> <span class="st">"</span><span class="va">$SAMPLE</span><span class="st"> already aligned, skipping"</span></span>
-<span id="cb21-3"><a href="#cb21-3"></a><span class="cf">else</span></span>
-<span id="cb21-4"><a href="#cb21-4"></a>    <span class="ex">bwa</span> mem <span class="at">-t</span> <span class="st">"</span><span class="va">$SLURM_CPUS_PER_TASK</span><span class="st">"</span> <span class="st">"</span><span class="va">$GENOME</span><span class="st">"</span> <span class="st">"</span><span class="va">$R1</span><span class="st">"</span> <span class="st">"</span><span class="va">$R2</span><span class="st">"</span> <span class="dt">\</span></span>
-<span id="cb21-5"><a href="#cb21-5"></a>        <span class="kw">|</span> <span class="ex">samtools</span> sort <span class="at">-@</span> <span class="st">"</span><span class="va">$SLURM_CPUS_PER_TASK</span><span class="st">"</span> <span class="at">-o</span> <span class="st">"</span><span class="va">$DATA_DIR</span><span class="st">/aligned/</span><span class="va">${SAMPLE}</span><span class="st">.bam.tmp"</span></span>
-<span id="cb21-6"><a href="#cb21-6"></a>    <span class="fu">mv</span> <span class="st">"</span><span class="va">$DATA_DIR</span><span class="st">/aligned/</span><span class="va">${SAMPLE}</span><span class="st">.bam.tmp"</span> <span class="st">"</span><span class="va">$DATA_DIR</span><span class="st">/aligned/</span><span class="va">${SAMPLE}</span><span class="st">.bam"</span></span>
-<span id="cb21-7"><a href="#cb21-7"></a><span class="cf">fi</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb24"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb24-1"><a href="#cb24-1"></a><span class="cf">if</span> <span class="kw">[[</span> <span class="ot">-s</span> <span class="st">"</span><span class="va">$DATA_DIR</span><span class="st">/aligned/</span><span class="va">${SAMPLE}</span><span class="st">.bam"</span> <span class="kw">]];</span> <span class="cf">then</span></span>
+<span id="cb24-2"><a href="#cb24-2"></a>    <span class="bu">echo</span> <span class="st">"</span><span class="va">$SAMPLE</span><span class="st"> already aligned, skipping"</span></span>
+<span id="cb24-3"><a href="#cb24-3"></a><span class="cf">else</span></span>
+<span id="cb24-4"><a href="#cb24-4"></a>    <span class="ex">bwa</span> mem <span class="at">-t</span> <span class="st">"</span><span class="va">$SLURM_CPUS_PER_TASK</span><span class="st">"</span> <span class="st">"</span><span class="va">$GENOME</span><span class="st">"</span> <span class="st">"</span><span class="va">$R1</span><span class="st">"</span> <span class="st">"</span><span class="va">$R2</span><span class="st">"</span> <span class="dt">\</span></span>
+<span id="cb24-5"><a href="#cb24-5"></a>        <span class="kw">|</span> <span class="ex">samtools</span> sort <span class="at">-@</span> <span class="st">"</span><span class="va">$SLURM_CPUS_PER_TASK</span><span class="st">"</span> <span class="at">-o</span> <span class="st">"</span><span class="va">$DATA_DIR</span><span class="st">/aligned/</span><span class="va">${SAMPLE}</span><span class="st">.bam.tmp"</span></span>
+<span id="cb24-6"><a href="#cb24-6"></a>    <span class="fu">mv</span> <span class="st">"</span><span class="va">$DATA_DIR</span><span class="st">/aligned/</span><span class="va">${SAMPLE}</span><span class="st">.bam.tmp"</span> <span class="st">"</span><span class="va">$DATA_DIR</span><span class="st">/aligned/</span><span class="va">${SAMPLE}</span><span class="st">.bam"</span></span>
+<span id="cb24-7"><a href="#cb24-7"></a><span class="cf">fi</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>Writing to a <code>.tmp</code> name and renaming only after success means a job killed mid-write never leaves a truncated file that the <code>-s</code> test would mistake for a finished one.</p>
 </section><section id="sec-hpc-log-test-scale" class="level3"><h3 class="anchored" data-anchor-id="sec-hpc-log-test-scale">Log Everything, Test on a Subset, Then Scale Out</h3>
 <p><strong>Log everything.</strong> A batch job has no terminal, so its logs are your only window into what happened. Print a line at the start (<code>echo "Job $SLURM_JOB_ID on $(hostname), $(date)"</code>), one per major step, and one at the end (“Wrote …”), and keep <code>--output</code>/<code>--error</code> in a <code>logs/</code> directory named with <code>%x_%j</code> so you can match a log to a job weeks later. Record software versions too (<code>module list 2&gt;&amp;1</code>, <code>R --version</code>, <code>samtools --version</code>), because “which version did I use?” is the first question a reviewer asks.</p>
@@ -1844,104 +1933,104 @@ Table&nbsp;16.9: Three ways to get software onto the cluster
 <p><strong>Scale out with job arrays, not copies of the script.</strong> When the same step must run on many samples, do not write one script per sample. Write one script and submit it as a <strong>job array</strong>.</p>
 </section><section id="sec-hpc-job-arrays" class="level3"><h3 class="anchored" data-anchor-id="sec-hpc-job-arrays">Job Arrays: One Script, Many Samples</h3>
 <p><code>--array=1-N</code> submits N independent sub-jobs from a single script, each with its own <code>$SLURM_ARRAY_TASK_ID</code> (1 through N) and its own log, time limit, and resource accounting. The script uses the task ID to pick a sample from a list, so adding a sample means adding a line to <code>samples.txt</code>, not editing code:</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb22"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb22-1"><a href="#cb22-1"></a><span class="co">#!/bin/bash</span></span>
-<span id="cb22-2"><a href="#cb22-2"></a><span class="co">#SBATCH --job-name=align</span></span>
-<span id="cb22-3"><a href="#cb22-3"></a><span class="co">#SBATCH --partition=compute</span></span>
-<span id="cb22-4"><a href="#cb22-4"></a><span class="co">#SBATCH --account=myPIRG</span></span>
-<span id="cb22-5"><a href="#cb22-5"></a><span class="co">#SBATCH --time=02:00:00</span></span>
-<span id="cb22-6"><a href="#cb22-6"></a><span class="co">#SBATCH --cpus-per-task=8</span></span>
-<span id="cb22-7"><a href="#cb22-7"></a><span class="co">#SBATCH --mem=16G</span></span>
-<span id="cb22-8"><a href="#cb22-8"></a><span class="co">#SBATCH --array=1-24%8               # 24 samples, at most 8 running at once</span></span>
-<span id="cb22-9"><a href="#cb22-9"></a><span class="co">#SBATCH --output=logs/%x_%A_%a.out   # %A = array job ID, %a = task ID</span></span>
-<span id="cb22-10"><a href="#cb22-10"></a><span class="co">#SBATCH --error=logs/%x_%A_%a.err</span></span>
-<span id="cb22-11"><a href="#cb22-11"></a></span>
-<span id="cb22-12"><a href="#cb22-12"></a><span class="bu">set</span> <span class="at">-euo</span> pipefail</span>
-<span id="cb22-13"><a href="#cb22-13"></a><span class="ex">module</span> purge</span>
-<span id="cb22-14"><a href="#cb22-14"></a><span class="ex">module</span> load bwa/0.7.17 samtools/1.17</span>
-<span id="cb22-15"><a href="#cb22-15"></a></span>
-<span id="cb22-16"><a href="#cb22-16"></a><span class="co"># Line N of samples.txt is this task's sample</span></span>
-<span id="cb22-17"><a href="#cb22-17"></a><span class="va">SAMPLE</span><span class="op">=</span><span class="va">$(</span><span class="fu">sed</span> <span class="at">-n</span> <span class="st">"</span><span class="va">${SLURM_ARRAY_TASK_ID}</span><span class="st">p"</span> samples.txt<span class="va">)</span></span>
-<span id="cb22-18"><a href="#cb22-18"></a><span class="bu">echo</span> <span class="st">"Task </span><span class="va">$SLURM_ARRAY_TASK_ID</span><span class="st">: aligning </span><span class="va">$SAMPLE</span><span class="st"> on </span><span class="va">$(</span><span class="fu">hostname</span><span class="va">)</span><span class="st">"</span></span>
-<span id="cb22-19"><a href="#cb22-19"></a></span>
-<span id="cb22-20"><a href="#cb22-20"></a><span class="va">R1</span><span class="op">=</span><span class="st">"</span><span class="va">$DATA_DIR</span><span class="st">/raw/</span><span class="va">${SAMPLE}</span><span class="st">_R1.fastq.gz"</span></span>
-<span id="cb22-21"><a href="#cb22-21"></a><span class="va">R2</span><span class="op">=</span><span class="st">"</span><span class="va">$DATA_DIR</span><span class="st">/raw/</span><span class="va">${SAMPLE}</span><span class="st">_R2.fastq.gz"</span></span>
-<span id="cb22-22"><a href="#cb22-22"></a><span class="va">OUT</span><span class="op">=</span><span class="st">"</span><span class="va">$DATA_DIR</span><span class="st">/aligned/</span><span class="va">${SAMPLE}</span><span class="st">.bam"</span></span>
-<span id="cb22-23"><a href="#cb22-23"></a></span>
-<span id="cb22-24"><a href="#cb22-24"></a><span class="cf">if</span> <span class="kw">[[</span> <span class="ot">-s</span> <span class="st">"</span><span class="va">$OUT</span><span class="st">"</span> <span class="kw">]];</span> <span class="cf">then</span></span>
-<span id="cb22-25"><a href="#cb22-25"></a>    <span class="bu">echo</span> <span class="st">"</span><span class="va">$SAMPLE</span><span class="st"> already done"</span><span class="kw">;</span> <span class="bu">exit</span> 0</span>
-<span id="cb22-26"><a href="#cb22-26"></a><span class="cf">fi</span></span>
-<span id="cb22-27"><a href="#cb22-27"></a><span class="ex">bwa</span> mem <span class="at">-t</span> <span class="st">"</span><span class="va">$SLURM_CPUS_PER_TASK</span><span class="st">"</span> <span class="st">"</span><span class="va">$GENOME</span><span class="st">"</span> <span class="st">"</span><span class="va">$R1</span><span class="st">"</span> <span class="st">"</span><span class="va">$R2</span><span class="st">"</span> <span class="dt">\</span></span>
-<span id="cb22-28"><a href="#cb22-28"></a>    <span class="kw">|</span> <span class="ex">samtools</span> sort <span class="at">-@</span> <span class="st">"</span><span class="va">$SLURM_CPUS_PER_TASK</span><span class="st">"</span> <span class="at">-o</span> <span class="st">"</span><span class="va">$OUT</span><span class="st">.tmp"</span></span>
-<span id="cb22-29"><a href="#cb22-29"></a><span class="fu">mv</span> <span class="st">"</span><span class="va">$OUT</span><span class="st">.tmp"</span> <span class="st">"</span><span class="va">$OUT</span><span class="st">"</span></span>
-<span id="cb22-30"><a href="#cb22-30"></a><span class="ex">samtools</span> index <span class="st">"</span><span class="va">$OUT</span><span class="st">"</span></span>
-<span id="cb22-31"><a href="#cb22-31"></a><span class="bu">echo</span> <span class="st">"Wrote </span><span class="va">$OUT</span><span class="st">"</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb25"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb25-1"><a href="#cb25-1"></a><span class="co">#!/bin/bash</span></span>
+<span id="cb25-2"><a href="#cb25-2"></a><span class="co">#SBATCH --job-name=align</span></span>
+<span id="cb25-3"><a href="#cb25-3"></a><span class="co">#SBATCH --partition=compute</span></span>
+<span id="cb25-4"><a href="#cb25-4"></a><span class="co">#SBATCH --account=myPIRG</span></span>
+<span id="cb25-5"><a href="#cb25-5"></a><span class="co">#SBATCH --time=02:00:00</span></span>
+<span id="cb25-6"><a href="#cb25-6"></a><span class="co">#SBATCH --cpus-per-task=8</span></span>
+<span id="cb25-7"><a href="#cb25-7"></a><span class="co">#SBATCH --mem=16G</span></span>
+<span id="cb25-8"><a href="#cb25-8"></a><span class="co">#SBATCH --array=1-24%8               # 24 samples, at most 8 running at once</span></span>
+<span id="cb25-9"><a href="#cb25-9"></a><span class="co">#SBATCH --output=logs/%x_%A_%a.out   # %A = array job ID, %a = task ID</span></span>
+<span id="cb25-10"><a href="#cb25-10"></a><span class="co">#SBATCH --error=logs/%x_%A_%a.err</span></span>
+<span id="cb25-11"><a href="#cb25-11"></a></span>
+<span id="cb25-12"><a href="#cb25-12"></a><span class="bu">set</span> <span class="at">-euo</span> pipefail</span>
+<span id="cb25-13"><a href="#cb25-13"></a><span class="ex">module</span> purge</span>
+<span id="cb25-14"><a href="#cb25-14"></a><span class="ex">module</span> load bwa/0.7.17 samtools/1.17</span>
+<span id="cb25-15"><a href="#cb25-15"></a></span>
+<span id="cb25-16"><a href="#cb25-16"></a><span class="co"># Line N of samples.txt is this task's sample</span></span>
+<span id="cb25-17"><a href="#cb25-17"></a><span class="va">SAMPLE</span><span class="op">=</span><span class="va">$(</span><span class="fu">sed</span> <span class="at">-n</span> <span class="st">"</span><span class="va">${SLURM_ARRAY_TASK_ID}</span><span class="st">p"</span> samples.txt<span class="va">)</span></span>
+<span id="cb25-18"><a href="#cb25-18"></a><span class="bu">echo</span> <span class="st">"Task </span><span class="va">$SLURM_ARRAY_TASK_ID</span><span class="st">: aligning </span><span class="va">$SAMPLE</span><span class="st"> on </span><span class="va">$(</span><span class="fu">hostname</span><span class="va">)</span><span class="st">"</span></span>
+<span id="cb25-19"><a href="#cb25-19"></a></span>
+<span id="cb25-20"><a href="#cb25-20"></a><span class="va">R1</span><span class="op">=</span><span class="st">"</span><span class="va">$DATA_DIR</span><span class="st">/raw/</span><span class="va">${SAMPLE}</span><span class="st">_R1.fastq.gz"</span></span>
+<span id="cb25-21"><a href="#cb25-21"></a><span class="va">R2</span><span class="op">=</span><span class="st">"</span><span class="va">$DATA_DIR</span><span class="st">/raw/</span><span class="va">${SAMPLE}</span><span class="st">_R2.fastq.gz"</span></span>
+<span id="cb25-22"><a href="#cb25-22"></a><span class="va">OUT</span><span class="op">=</span><span class="st">"</span><span class="va">$DATA_DIR</span><span class="st">/aligned/</span><span class="va">${SAMPLE}</span><span class="st">.bam"</span></span>
+<span id="cb25-23"><a href="#cb25-23"></a></span>
+<span id="cb25-24"><a href="#cb25-24"></a><span class="cf">if</span> <span class="kw">[[</span> <span class="ot">-s</span> <span class="st">"</span><span class="va">$OUT</span><span class="st">"</span> <span class="kw">]];</span> <span class="cf">then</span></span>
+<span id="cb25-25"><a href="#cb25-25"></a>    <span class="bu">echo</span> <span class="st">"</span><span class="va">$SAMPLE</span><span class="st"> already done"</span><span class="kw">;</span> <span class="bu">exit</span> 0</span>
+<span id="cb25-26"><a href="#cb25-26"></a><span class="cf">fi</span></span>
+<span id="cb25-27"><a href="#cb25-27"></a><span class="ex">bwa</span> mem <span class="at">-t</span> <span class="st">"</span><span class="va">$SLURM_CPUS_PER_TASK</span><span class="st">"</span> <span class="st">"</span><span class="va">$GENOME</span><span class="st">"</span> <span class="st">"</span><span class="va">$R1</span><span class="st">"</span> <span class="st">"</span><span class="va">$R2</span><span class="st">"</span> <span class="dt">\</span></span>
+<span id="cb25-28"><a href="#cb25-28"></a>    <span class="kw">|</span> <span class="ex">samtools</span> sort <span class="at">-@</span> <span class="st">"</span><span class="va">$SLURM_CPUS_PER_TASK</span><span class="st">"</span> <span class="at">-o</span> <span class="st">"</span><span class="va">$OUT</span><span class="st">.tmp"</span></span>
+<span id="cb25-29"><a href="#cb25-29"></a><span class="fu">mv</span> <span class="st">"</span><span class="va">$OUT</span><span class="st">.tmp"</span> <span class="st">"</span><span class="va">$OUT</span><span class="st">"</span></span>
+<span id="cb25-30"><a href="#cb25-30"></a><span class="ex">samtools</span> index <span class="st">"</span><span class="va">$OUT</span><span class="st">"</span></span>
+<span id="cb25-31"><a href="#cb25-31"></a><span class="bu">echo</span> <span class="st">"Wrote </span><span class="va">$OUT</span><span class="st">"</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>Submit it with <code>sbatch --export=ALL,DATA_DIR=/scratch/myPIRG/$USER/proj,GENOME=/projects/myPIRG/shared/ref.fa align.sh</code>, or set those variables in the script. The <code>%8</code> throttle limits how many tasks run at once, which keeps you under per-user QOS caps (<a href="#tbl-pending-reasons" class="quarto-xref">Table&nbsp;<span>16.7</span></a>) and leaves room for other users. Each task is right-sized independently, so a failure in sample 17 does not touch the other 23, and resubmitting the array skips the samples whose BAM already exists. Chain steps with <code>--dependency=afterok:&lt;array job ID&gt;</code> so the counting step starts only when every alignment task has succeeded.</p>
 </section><section id="sec-workflow-managers" class="level3"><h3 class="anchored" data-anchor-id="sec-workflow-managers">Workflow Managers: Snakemake and Nextflow</h3>
 <p>Shell scripts with checkpoints and arrays are a hand-rolled version of what a <strong>workflow manager</strong> automates. Both <strong>Snakemake</strong> <span class="citation" data-cites="molder2021snakemake">(<a href="../references.html#ref-molder2021snakemake" role="doc-biblioref">Mölder et al., 2021</a>)</span> and <strong>Nextflow</strong> <span class="citation" data-cites="ditommaso2017nextflow">(<a href="../references.html#ref-ditommaso2017nextflow" role="doc-biblioref">Di Tommaso et al., 2017</a>)</span> describe a pipeline as a graph of steps connected by their input and output files. The manager works out the order, re-runs only steps whose inputs changed or whose outputs are missing, runs independent branches in parallel, and, crucially for this chapter, <strong>submits each step to SLURM for you</strong> with per-step resource requests. Both can also create a conda environment <span class="citation" data-cites="gruning2018bioconda">(<a href="../references.html#ref-gruning2018bioconda" role="doc-biblioref">Grüning et al., 2018</a>)</span> or pull a container <span class="citation" data-cites="kurtzer2017singularity">(<a href="../references.html#ref-kurtzer2017singularity" role="doc-biblioref">Kurtzer et al., 2017</a>)</span> for each step, which takes care of the software layers in <a href="#sec-software-layers" class="quarto-xref"><span>Section 16.11.3</span></a>.</p>
 <p><strong>Snakemake</strong> uses a Python-flavored <code>Snakefile</code> of <em>rules</em>. Each rule names its inputs, outputs, and the command that turns one into the other; wildcards (<code>{sample}</code>) let one rule cover every sample:</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb23"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb23-1"><a href="#cb23-1"></a>SAMPLES <span class="op">=</span> [line.strip() <span class="cf">for</span> line <span class="kw">in</span> <span class="bu">open</span>(<span class="st">"samples.txt"</span>)]</span>
-<span id="cb23-2"><a href="#cb23-2"></a></span>
-<span id="cb23-3"><a href="#cb23-3"></a>rule <span class="bu">all</span>:</span>
-<span id="cb23-4"><a href="#cb23-4"></a>    <span class="bu">input</span>: expand(<span class="st">"aligned/</span><span class="sc">{sample}</span><span class="st">.bam.bai"</span>, sample<span class="op">=</span>SAMPLES)</span>
-<span id="cb23-5"><a href="#cb23-5"></a></span>
-<span id="cb23-6"><a href="#cb23-6"></a>rule align:</span>
-<span id="cb23-7"><a href="#cb23-7"></a>    <span class="bu">input</span>:</span>
-<span id="cb23-8"><a href="#cb23-8"></a>        r1 <span class="op">=</span> <span class="st">"raw/</span><span class="sc">{sample}</span><span class="st">_R1.fastq.gz"</span>,</span>
-<span id="cb23-9"><a href="#cb23-9"></a>        r2 <span class="op">=</span> <span class="st">"raw/</span><span class="sc">{sample}</span><span class="st">_R2.fastq.gz"</span>,</span>
-<span id="cb23-10"><a href="#cb23-10"></a>        ref <span class="op">=</span> <span class="st">"ref/genome.fa"</span></span>
-<span id="cb23-11"><a href="#cb23-11"></a>    output: <span class="st">"aligned/</span><span class="sc">{sample}</span><span class="st">.bam"</span></span>
-<span id="cb23-12"><a href="#cb23-12"></a>    threads: <span class="dv">8</span></span>
-<span id="cb23-13"><a href="#cb23-13"></a>    resources: mem_mb <span class="op">=</span> <span class="dv">16000</span>, runtime <span class="op">=</span> <span class="dv">120</span></span>
-<span id="cb23-14"><a href="#cb23-14"></a>    shell:</span>
-<span id="cb23-15"><a href="#cb23-15"></a>        <span class="co">"bwa mem -t {threads} {input.ref} {input.r1} {input.r2} "</span></span>
-<span id="cb23-16"><a href="#cb23-16"></a>        <span class="co">"| samtools sort -@ {threads} -o {output}"</span></span>
-<span id="cb23-17"><a href="#cb23-17"></a></span>
-<span id="cb23-18"><a href="#cb23-18"></a>rule index:</span>
-<span id="cb23-19"><a href="#cb23-19"></a>    <span class="bu">input</span>: <span class="st">"aligned/</span><span class="sc">{sample}</span><span class="st">.bam"</span></span>
-<span id="cb23-20"><a href="#cb23-20"></a>    output: <span class="st">"aligned/</span><span class="sc">{sample}</span><span class="st">.bam.bai"</span></span>
-<span id="cb23-21"><a href="#cb23-21"></a>    shell: <span class="st">"samtools index </span><span class="sc">{input}</span><span class="st">"</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb26"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb26-1"><a href="#cb26-1"></a>SAMPLES <span class="op">=</span> [line.strip() <span class="cf">for</span> line <span class="kw">in</span> <span class="bu">open</span>(<span class="st">"samples.txt"</span>)]</span>
+<span id="cb26-2"><a href="#cb26-2"></a></span>
+<span id="cb26-3"><a href="#cb26-3"></a>rule <span class="bu">all</span>:</span>
+<span id="cb26-4"><a href="#cb26-4"></a>    <span class="bu">input</span>: expand(<span class="st">"aligned/</span><span class="sc">{sample}</span><span class="st">.bam.bai"</span>, sample<span class="op">=</span>SAMPLES)</span>
+<span id="cb26-5"><a href="#cb26-5"></a></span>
+<span id="cb26-6"><a href="#cb26-6"></a>rule align:</span>
+<span id="cb26-7"><a href="#cb26-7"></a>    <span class="bu">input</span>:</span>
+<span id="cb26-8"><a href="#cb26-8"></a>        r1 <span class="op">=</span> <span class="st">"raw/</span><span class="sc">{sample}</span><span class="st">_R1.fastq.gz"</span>,</span>
+<span id="cb26-9"><a href="#cb26-9"></a>        r2 <span class="op">=</span> <span class="st">"raw/</span><span class="sc">{sample}</span><span class="st">_R2.fastq.gz"</span>,</span>
+<span id="cb26-10"><a href="#cb26-10"></a>        ref <span class="op">=</span> <span class="st">"ref/genome.fa"</span></span>
+<span id="cb26-11"><a href="#cb26-11"></a>    output: <span class="st">"aligned/</span><span class="sc">{sample}</span><span class="st">.bam"</span></span>
+<span id="cb26-12"><a href="#cb26-12"></a>    threads: <span class="dv">8</span></span>
+<span id="cb26-13"><a href="#cb26-13"></a>    resources: mem_mb <span class="op">=</span> <span class="dv">16000</span>, runtime <span class="op">=</span> <span class="dv">120</span></span>
+<span id="cb26-14"><a href="#cb26-14"></a>    shell:</span>
+<span id="cb26-15"><a href="#cb26-15"></a>        <span class="co">"bwa mem -t {threads} {input.ref} {input.r1} {input.r2} "</span></span>
+<span id="cb26-16"><a href="#cb26-16"></a>        <span class="co">"| samtools sort -@ {threads} -o {output}"</span></span>
+<span id="cb26-17"><a href="#cb26-17"></a></span>
+<span id="cb26-18"><a href="#cb26-18"></a>rule index:</span>
+<span id="cb26-19"><a href="#cb26-19"></a>    <span class="bu">input</span>: <span class="st">"aligned/</span><span class="sc">{sample}</span><span class="st">.bam"</span></span>
+<span id="cb26-20"><a href="#cb26-20"></a>    output: <span class="st">"aligned/</span><span class="sc">{sample}</span><span class="st">.bam.bai"</span></span>
+<span id="cb26-21"><a href="#cb26-21"></a>    shell: <span class="st">"samtools index </span><span class="sc">{input}</span><span class="st">"</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>Run it on Talapas with the SLURM executor plugin: <code>snakemake --executor slurm --jobs 20 --default-resources slurm_account=myPIRG slurm_partition=compute</code>. Snakemake submits one job per rule instance, waits for them, and stops if anything fails; rerunning the same command afterwards picks up where it left off.</p>
 <p><strong>Nextflow</strong> uses <em>processes</em> connected by <em>channels</em> (streams of files). The same pipeline looks like this:</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb24"><pre class="sourceCode numberSource groovy number-lines code-with-copy"><code class="sourceCode groovy"><span id="cb24-1"><a href="#cb24-1"></a>process ALIGN <span class="op">{</span></span>
-<span id="cb24-2"><a href="#cb24-2"></a>    cpus <span class="dv">8</span></span>
-<span id="cb24-3"><a href="#cb24-3"></a>    memory <span class="st">'16 GB'</span></span>
-<span id="cb24-4"><a href="#cb24-4"></a>    time <span class="st">'2h'</span></span>
-<span id="cb24-5"><a href="#cb24-5"></a></span>
-<span id="cb24-6"><a href="#cb24-6"></a>    input<span class="op">:</span></span>
-<span id="cb24-7"><a href="#cb24-7"></a>    tuple <span class="fu">val</span><span class="op">(</span>sample<span class="op">),</span> <span class="fu">path</span><span class="op">(</span>r1<span class="op">),</span> <span class="fu">path</span><span class="op">(</span>r2<span class="op">)</span></span>
-<span id="cb24-8"><a href="#cb24-8"></a>    path ref</span>
-<span id="cb24-9"><a href="#cb24-9"></a></span>
-<span id="cb24-10"><a href="#cb24-10"></a>    output<span class="op">:</span></span>
-<span id="cb24-11"><a href="#cb24-11"></a>    tuple <span class="fu">val</span><span class="op">(</span>sample<span class="op">),</span> <span class="fu">path</span><span class="op">(</span><span class="st">"</span><span class="ss">${</span>sample<span class="ss">}</span><span class="st">.bam"</span><span class="op">)</span></span>
-<span id="cb24-12"><a href="#cb24-12"></a></span>
-<span id="cb24-13"><a href="#cb24-13"></a>    script<span class="op">:</span></span>
-<span id="cb24-14"><a href="#cb24-14"></a>    <span class="st">"""</span></span>
-<span id="cb24-15"><a href="#cb24-15"></a><span class="st">    bwa mem -t </span><span class="ss">${</span>task<span class="op">.</span>cpus<span class="ss">}</span><span class="st"> </span><span class="ss">${</span>ref<span class="ss">}</span><span class="st"> </span><span class="ss">${</span>r1<span class="ss">}</span><span class="st"> </span><span class="ss">${</span>r2<span class="ss">}</span><span class="st"> </span><span class="sc">\\</span></span>
-<span id="cb24-16"><a href="#cb24-16"></a><span class="st">        | samtools sort -@ </span><span class="ss">${</span>task<span class="op">.</span>cpus<span class="ss">}</span><span class="st"> -o </span><span class="ss">${</span>sample<span class="ss">}</span><span class="st">.bam</span></span>
-<span id="cb24-17"><a href="#cb24-17"></a><span class="st">    """</span></span>
-<span id="cb24-18"><a href="#cb24-18"></a><span class="op">}</span></span>
-<span id="cb24-19"><a href="#cb24-19"></a></span>
-<span id="cb24-20"><a href="#cb24-20"></a>workflow <span class="op">{</span></span>
-<span id="cb24-21"><a href="#cb24-21"></a>    reads <span class="op">=</span> <span class="bu">Channel</span><span class="op">.</span><span class="fu">fromFilePairs</span><span class="op">(</span><span class="st">"raw/*_R{1,2}.fastq.gz"</span><span class="op">)</span></span>
-<span id="cb24-22"><a href="#cb24-22"></a>                   <span class="op">.</span><span class="fu">map</span> <span class="op">{</span> id<span class="op">,</span> files <span class="op">-&gt;</span> <span class="fu">tuple</span><span class="op">(</span>id<span class="op">,</span> files<span class="op">[</span><span class="dv">0</span><span class="op">],</span> files<span class="op">[</span><span class="dv">1</span><span class="op">])</span> <span class="op">}</span></span>
-<span id="cb24-23"><a href="#cb24-23"></a>    <span class="fu">ALIGN</span><span class="op">(</span>reads<span class="op">,</span> <span class="fu">file</span><span class="op">(</span><span class="st">"ref/genome.fa"</span><span class="op">))</span></span>
-<span id="cb24-24"><a href="#cb24-24"></a><span class="op">}</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb27"><pre class="sourceCode numberSource groovy number-lines code-with-copy"><code class="sourceCode groovy"><span id="cb27-1"><a href="#cb27-1"></a>process ALIGN <span class="op">{</span></span>
+<span id="cb27-2"><a href="#cb27-2"></a>    cpus <span class="dv">8</span></span>
+<span id="cb27-3"><a href="#cb27-3"></a>    memory <span class="st">'16 GB'</span></span>
+<span id="cb27-4"><a href="#cb27-4"></a>    time <span class="st">'2h'</span></span>
+<span id="cb27-5"><a href="#cb27-5"></a></span>
+<span id="cb27-6"><a href="#cb27-6"></a>    input<span class="op">:</span></span>
+<span id="cb27-7"><a href="#cb27-7"></a>    tuple <span class="fu">val</span><span class="op">(</span>sample<span class="op">),</span> <span class="fu">path</span><span class="op">(</span>r1<span class="op">),</span> <span class="fu">path</span><span class="op">(</span>r2<span class="op">)</span></span>
+<span id="cb27-8"><a href="#cb27-8"></a>    path ref</span>
+<span id="cb27-9"><a href="#cb27-9"></a></span>
+<span id="cb27-10"><a href="#cb27-10"></a>    output<span class="op">:</span></span>
+<span id="cb27-11"><a href="#cb27-11"></a>    tuple <span class="fu">val</span><span class="op">(</span>sample<span class="op">),</span> <span class="fu">path</span><span class="op">(</span><span class="st">"</span><span class="ss">${</span>sample<span class="ss">}</span><span class="st">.bam"</span><span class="op">)</span></span>
+<span id="cb27-12"><a href="#cb27-12"></a></span>
+<span id="cb27-13"><a href="#cb27-13"></a>    script<span class="op">:</span></span>
+<span id="cb27-14"><a href="#cb27-14"></a>    <span class="st">"""</span></span>
+<span id="cb27-15"><a href="#cb27-15"></a><span class="st">    bwa mem -t </span><span class="ss">${</span>task<span class="op">.</span>cpus<span class="ss">}</span><span class="st"> </span><span class="ss">${</span>ref<span class="ss">}</span><span class="st"> </span><span class="ss">${</span>r1<span class="ss">}</span><span class="st"> </span><span class="ss">${</span>r2<span class="ss">}</span><span class="st"> </span><span class="sc">\\</span></span>
+<span id="cb27-16"><a href="#cb27-16"></a><span class="st">        | samtools sort -@ </span><span class="ss">${</span>task<span class="op">.</span>cpus<span class="ss">}</span><span class="st"> -o </span><span class="ss">${</span>sample<span class="ss">}</span><span class="st">.bam</span></span>
+<span id="cb27-17"><a href="#cb27-17"></a><span class="st">    """</span></span>
+<span id="cb27-18"><a href="#cb27-18"></a><span class="op">}</span></span>
+<span id="cb27-19"><a href="#cb27-19"></a></span>
+<span id="cb27-20"><a href="#cb27-20"></a>workflow <span class="op">{</span></span>
+<span id="cb27-21"><a href="#cb27-21"></a>    reads <span class="op">=</span> <span class="bu">Channel</span><span class="op">.</span><span class="fu">fromFilePairs</span><span class="op">(</span><span class="st">"raw/*_R{1,2}.fastq.gz"</span><span class="op">)</span></span>
+<span id="cb27-22"><a href="#cb27-22"></a>                   <span class="op">.</span><span class="fu">map</span> <span class="op">{</span> id<span class="op">,</span> files <span class="op">-&gt;</span> <span class="fu">tuple</span><span class="op">(</span>id<span class="op">,</span> files<span class="op">[</span><span class="dv">0</span><span class="op">],</span> files<span class="op">[</span><span class="dv">1</span><span class="op">])</span> <span class="op">}</span></span>
+<span id="cb27-23"><a href="#cb27-23"></a>    <span class="fu">ALIGN</span><span class="op">(</span>reads<span class="op">,</span> <span class="fu">file</span><span class="op">(</span><span class="st">"ref/genome.fa"</span><span class="op">))</span></span>
+<span id="cb27-24"><a href="#cb27-24"></a><span class="op">}</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>A short <code>nextflow.config</code> with <code>process.executor = 'slurm'</code> and <code>process.clusterOptions = '--account=myPIRG --partition=compute'</code> sends every process to SLURM; <code>nextflow run main.nf -resume</code> reuses cached results after a failure. Nextflow’s main attraction is the <a href="https://nf-co.re/">nf-core</a> collection of community-maintained, tested pipelines (RNA-seq, variant calling, ATAC-seq, and dozens more) that you can run on Talapas with a single command and a sample sheet.</p>
 <p>For a handful of steps on one dataset, a well-written shell script with checkpoints is clear and sufficient. Once a pipeline grows past that, or must run on many datasets, the learning investment in a workflow manager pays for itself in the first rerun.</p>
 </section></section><section id="sec-hpc-sharing" class="level2" data-number="16.15"><h2 data-number="16.15" class="anchored" data-anchor-id="sec-hpc-sharing">
 <span class="header-section-number">16.15</span> Sharing Files with Your Lab Group</h2>
 <p>On your laptop you are usually the only user, so the permission system (<a href="06-unix-environment.html#sec-file-permissions" class="quarto-xref"><span>Section 6.2</span></a>) mostly matters for making scripts executable. On Talapas it becomes the tool you share with: every file belongs to a <strong>group</strong>, and the group’s permissions decide which of your labmates can read or edit your work.</p>
 <p>Your Talapas account belongs to one or more PIRGs (Principal Investigator Research Groups), and each PIRG has shared space under <code>/projects/</code>:</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb25"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb25-1"><a href="#cb25-1"></a><span class="ex">$</span> groups                            <span class="co"># the groups (PIRGs) you belong to</span></span>
-<span id="cb25-2"><a href="#cb25-2"></a><span class="ex">$</span> ls <span class="at">-l</span> /projects/yourpirg/shared   <span class="co"># the fourth column is each file's group</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb28"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb28-1"><a href="#cb28-1"></a><span class="ex">$</span> groups                            <span class="co"># the groups (PIRGs) you belong to</span></span>
+<span id="cb28-2"><a href="#cb28-2"></a><span class="ex">$</span> ls <span class="at">-l</span> /projects/yourpirg/shared   <span class="co"># the fourth column is each file's group</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>Three commands cover almost all day-to-day sharing:</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb26"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb26-1"><a href="#cb26-1"></a><span class="ex">$</span> chgrp <span class="at">-R</span> yourpirg results/   <span class="co"># assign a directory to the lab's group</span></span>
-<span id="cb26-2"><a href="#cb26-2"></a><span class="ex">$</span> chmod <span class="at">-R</span> g+rX results/       <span class="co"># group members can read files and enter directories</span></span>
-<span id="cb26-3"><a href="#cb26-3"></a><span class="ex">$</span> chmod g+w shared_notes.md    <span class="co"># let the group edit one specific file</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb29"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb29-1"><a href="#cb29-1"></a><span class="ex">$</span> chgrp <span class="at">-R</span> yourpirg results/   <span class="co"># assign a directory to the lab's group</span></span>
+<span id="cb29-2"><a href="#cb29-2"></a><span class="ex">$</span> chmod <span class="at">-R</span> g+rX results/       <span class="co"># group members can read files and enter directories</span></span>
+<span id="cb29-3"><a href="#cb29-3"></a><span class="ex">$</span> chmod g+w shared_notes.md    <span class="co"># let the group edit one specific file</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>The capital <code>X</code> is a small but important refinement of what you learned in <a href="06-unix-environment.html#sec-chmod" class="quarto-xref"><span>Section 6.2.2</span></a>: it adds execute permission only to directories (and to files that are already executable), so a recursive <code>chmod</code> does not accidentally mark every data file as a program.</p>
 <p>The same system protects data from your collaborators as well as sharing it with them:</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb27"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb27-1"><a href="#cb27-1"></a><span class="ex">$</span> chmod <span class="at">-R</span> g-w,o-w data/raw/   <span class="co"># nobody but you can modify the raw data</span></span>
-<span id="cb27-2"><a href="#cb27-2"></a><span class="ex">$</span> chmod 700 scratch_ideas/     <span class="co"># a directory only you can even enter</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb30"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb30-1"><a href="#cb30-1"></a><span class="ex">$</span> chmod <span class="at">-R</span> g-w,o-w data/raw/   <span class="co"># nobody but you can modify the raw data</span></span>
+<span id="cb30-2"><a href="#cb30-2"></a><span class="ex">$</span> chmod 700 scratch_ideas/     <span class="co"># a directory only you can even enter</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>Two conventions make all this painless. First, your home directory on Talapas is private by default—work meant for the lab belongs in your PIRG’s <code>/projects/</code> space, not in <code>$HOME</code>. Second, agree with your lab on group-writable directories <em>before</em> a deadline, not during one; if files created in shared space keep arriving with the wrong group, ask RACS about setting the directory’s setgid bit so new files inherit the project group automatically.</p>
 </section><section id="sec-hpc-best-practices" class="level2" data-number="16.16"><h2 data-number="16.16" class="anchored" data-anchor-id="sec-hpc-best-practices">
 <span class="header-section-number">16.16</span> Best Practices</h2>
@@ -2000,25 +2089,25 @@ Table&nbsp;16.9: Three ways to get software onto the cluster
 </div>
 </div>
 <p>Nothing about an analysis has to change to run on Talapas; what changes is <em>where</em> it runs and <em>who</em> starts it. Put the pipeline from <a href="14-data-wrangling.html" class="quarto-xref"><span>Chapter 14</span></a> in a script, <code>stickle_means.R</code>, that reads the data file and writes <code>results/gene_means.tsv</code>. Then wrap it in a SLURM batch script that asks for modest resources, loads R, and runs it:</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb28"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb28-1"><a href="#cb28-1"></a><span class="co">#!/bin/bash</span></span>
-<span id="cb28-2"><a href="#cb28-2"></a><span class="co">#SBATCH --job-name=stickle_means</span></span>
-<span id="cb28-3"><a href="#cb28-3"></a><span class="co">#SBATCH --account=&lt;your_pirg&gt;</span></span>
-<span id="cb28-4"><a href="#cb28-4"></a><span class="co">#SBATCH --partition=compute</span></span>
-<span id="cb28-5"><a href="#cb28-5"></a><span class="co">#SBATCH --time=00:10:00</span></span>
-<span id="cb28-6"><a href="#cb28-6"></a><span class="co">#SBATCH --mem=4G</span></span>
-<span id="cb28-7"><a href="#cb28-7"></a><span class="co">#SBATCH --cpus-per-task=1</span></span>
-<span id="cb28-8"><a href="#cb28-8"></a><span class="co">#SBATCH --output=logs/stickle_%j.out</span></span>
-<span id="cb28-9"><a href="#cb28-9"></a><span class="co">#SBATCH --error=logs/stickle_%j.err</span></span>
-<span id="cb28-10"><a href="#cb28-10"></a></span>
-<span id="cb28-11"><a href="#cb28-11"></a><span class="ex">module</span> load R/4.4.0</span>
-<span id="cb28-12"><a href="#cb28-12"></a><span class="bu">cd</span> ~/projects/comptools</span>
-<span id="cb28-13"><a href="#cb28-13"></a><span class="ex">Rscript</span> stickle_means.R data/Stickle_RNAseq.tsv results/gene_means.tsv</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb31"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb31-1"><a href="#cb31-1"></a><span class="co">#!/bin/bash</span></span>
+<span id="cb31-2"><a href="#cb31-2"></a><span class="co">#SBATCH --job-name=stickle_means</span></span>
+<span id="cb31-3"><a href="#cb31-3"></a><span class="co">#SBATCH --account=&lt;your_pirg&gt;</span></span>
+<span id="cb31-4"><a href="#cb31-4"></a><span class="co">#SBATCH --partition=compute</span></span>
+<span id="cb31-5"><a href="#cb31-5"></a><span class="co">#SBATCH --time=00:10:00</span></span>
+<span id="cb31-6"><a href="#cb31-6"></a><span class="co">#SBATCH --mem=4G</span></span>
+<span id="cb31-7"><a href="#cb31-7"></a><span class="co">#SBATCH --cpus-per-task=1</span></span>
+<span id="cb31-8"><a href="#cb31-8"></a><span class="co">#SBATCH --output=logs/stickle_%j.out</span></span>
+<span id="cb31-9"><a href="#cb31-9"></a><span class="co">#SBATCH --error=logs/stickle_%j.err</span></span>
+<span id="cb31-10"><a href="#cb31-10"></a></span>
+<span id="cb31-11"><a href="#cb31-11"></a><span class="ex">module</span> load R/4.4.0</span>
+<span id="cb31-12"><a href="#cb31-12"></a><span class="bu">cd</span> ~/projects/comptools</span>
+<span id="cb31-13"><a href="#cb31-13"></a><span class="ex">Rscript</span> stickle_means.R data/Stickle_RNAseq.tsv results/gene_means.tsv</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>Submit it, watch it in the queue, and read what it wrote:</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb29"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb29-1"><a href="#cb29-1"></a><span class="fu">mkdir</span> <span class="at">-p</span> logs results</span>
-<span id="cb29-2"><a href="#cb29-2"></a><span class="ex">sbatch</span> stickle_means.sbatch          <span class="co"># Submitted batch job 1234567</span></span>
-<span id="cb29-3"><a href="#cb29-3"></a><span class="ex">squeue</span> <span class="at">-u</span> <span class="va">$USER</span>                      <span class="co"># is it running?</span></span>
-<span id="cb29-4"><a href="#cb29-4"></a><span class="fu">cat</span> logs/stickle_1234567.out         <span class="co"># what did it print?</span></span>
-<span id="cb29-5"><a href="#cb29-5"></a><span class="fu">head</span> results/gene_means.tsv</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb32"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb32-1"><a href="#cb32-1"></a><span class="fu">mkdir</span> <span class="at">-p</span> logs results</span>
+<span id="cb32-2"><a href="#cb32-2"></a><span class="ex">sbatch</span> stickle_means.sbatch          <span class="co"># Submitted batch job 1234567</span></span>
+<span id="cb32-3"><a href="#cb32-3"></a><span class="ex">squeue</span> <span class="at">-u</span> <span class="va">$USER</span>                      <span class="co"># is it running?</span></span>
+<span id="cb32-4"><a href="#cb32-4"></a><span class="fu">cat</span> logs/stickle_1234567.out         <span class="co"># what did it print?</span></span>
+<span id="cb32-5"><a href="#cb32-5"></a><span class="fu">head</span> results/gene_means.tsv</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>A 160 KB file does not need a cluster, of course, and the job will finish in seconds. The point is the pattern: the same <code>Rscript</code> call you ran on your laptop, launched by <code>sbatch</code> instead of by you, with its output in a log file you read afterwards. For the term project, the identical pattern handles files a thousand times larger, and <a href="17-parallel-computing.html" class="quarto-xref"><span>Chapter 17</span></a> shows how to use more than one core when it does.</p>
 </section><section id="sec-hpc-summary" class="level2" data-number="16.19"><h2 data-number="16.19" class="anchored" data-anchor-id="sec-hpc-summary">
 <span class="header-section-number">16.19</span> Summary</h2>

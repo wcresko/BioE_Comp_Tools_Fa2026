@@ -850,6 +850,79 @@ Tip
 <span id="cb8-17"><a href="#cb8-17"></a><span class="bu">echo</span> <span class="st">"Original: </span><span class="va">$FILE</span><span class="st">"</span></span>
 <span id="cb8-18"><a href="#cb8-18"></a><span class="bu">echo</span> <span class="st">"Name without extension: </span><span class="va">$NAME</span><span class="st">"</span></span>
 <span id="cb8-19"><a href="#cb8-19"></a><span class="bu">echo</span> <span class="st">"Length: </span><span class="va">$LENGTH</span><span class="st"> characters"</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>The <code>#</code>, <code>##</code>, <code>%</code>, and <code>%%</code> operators above belong to a larger family of <strong>parameter expansions</strong>; <a href="#tbl-param-expansion" class="quarto-xref">Table&nbsp;<span>10.2</span></a> collects the forms this course uses most, each applied to the familiar <code>FILE="sample_001.fastq.gz"</code>.</p>
+<div id="tbl-param-expansion" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure"><figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-param-expansion-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;10.2: Bash parameter expansions at a glance
+</figcaption><div aria-describedby="tbl-param-expansion-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<table class="caption-top table">
+<colgroup>
+<col style="width: 29%">
+<col style="width: 24%">
+<col style="width: 24%">
+<col style="width: 21%">
+</colgroup>
+<thead><tr class="header">
+<th style="text-align: left;">Expansion</th>
+<th style="text-align: left;">Meaning</th>
+<th style="text-align: left;">Example</th>
+<th style="text-align: left;">Result</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;"><code>${VAR#pat}</code></td>
+<td style="text-align: left;">Remove shortest matching prefix</td>
+<td style="text-align: left;"><code>${FILE#sample_}</code></td>
+<td style="text-align: left;"><code>001.fastq.gz</code></td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><code>${VAR##pat}</code></td>
+<td style="text-align: left;">Remove longest matching prefix</td>
+<td style="text-align: left;"><code>${FILE##*.}</code></td>
+<td style="text-align: left;"><code>gz</code></td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><code>${VAR%pat}</code></td>
+<td style="text-align: left;">Remove shortest matching suffix</td>
+<td style="text-align: left;"><code>${FILE%.gz}</code></td>
+<td style="text-align: left;"><code>sample_001.fastq</code></td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><code>${VAR%%pat}</code></td>
+<td style="text-align: left;">Remove longest matching suffix</td>
+<td style="text-align: left;"><code>${FILE%%.*}</code></td>
+<td style="text-align: left;"><code>sample_001</code></td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><code>${#VAR}</code></td>
+<td style="text-align: left;">Length in characters</td>
+<td style="text-align: left;"><code>${#FILE}</code></td>
+<td style="text-align: left;"><code>19</code></td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><code>${VAR:-default}</code></td>
+<td style="text-align: left;">Default if unset or empty</td>
+<td style="text-align: left;"><code>${THREADS:-4}</code></td>
+<td style="text-align: left;">
+<code>4</code> when <code>THREADS</code> is unset</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><code>${VAR:?msg}</code></td>
+<td style="text-align: left;">Error and exit if unset or empty</td>
+<td style="text-align: left;"><code>${INPUT:?no input file given}</code></td>
+<td style="text-align: left;">script stops with the message</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><code>${VAR/old/new}</code></td>
+<td style="text-align: left;">Replace first match</td>
+<td style="text-align: left;"><code>${FILE/fastq/fq}</code></td>
+<td style="text-align: left;"><code>sample_001.fq.gz</code></td>
+</tr>
+</tbody>
+</table>
+</div>
+</figure>
+</div>
 </section></section><section id="sec-shell-arrays" class="level2" data-number="10.4"><h2 data-number="10.4" class="anchored" data-anchor-id="sec-shell-arrays">
 <span class="header-section-number">10.4</span> Arrays</h2>
 <p>Arrays store multiple values:</p>
@@ -892,11 +965,11 @@ Tip
 <span id="cb10-10"><a href="#cb10-10"></a>    <span class="bu">echo</span> <span class="st">"Low count"</span></span>
 <span id="cb10-11"><a href="#cb10-11"></a><span class="cf">fi</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </section><section id="sec-test-operators" class="level3"><h3 class="anchored" data-anchor-id="sec-test-operators">Test Operators</h3>
-<p>The operators available inside <code>[ ]</code> are grouped by type in <a href="#tbl-numeric-test-operators" class="quarto-xref">Table&nbsp;<span>10.2</span></a>, <a href="#tbl-string-test-operators" class="quarto-xref">Table&nbsp;<span>10.3</span></a>, and <a href="#tbl-file-test-operators" class="quarto-xref">Table&nbsp;<span>10.4</span></a>.</p>
+<p>The operators available inside <code>[ ]</code> are grouped by type in <a href="#tbl-numeric-test-operators" class="quarto-xref">Table&nbsp;<span>10.3</span></a>, <a href="#tbl-string-test-operators" class="quarto-xref">Table&nbsp;<span>10.4</span></a>, and <a href="#tbl-file-test-operators" class="quarto-xref">Table&nbsp;<span>10.5</span></a>.</p>
 <p><strong>Numeric comparisons:</strong></p>
 <div id="tbl-numeric-test-operators" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-tbl figure"><figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-numeric-test-operators-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Table&nbsp;10.2: Numeric comparison operators for <code>[ ]</code> and <code>[[ ]]</code> tests
+Table&nbsp;10.3: Numeric comparison operators for <code>[ ]</code> and <code>[[ ]]</code> tests
 </figcaption><div aria-describedby="tbl-numeric-test-operators-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 <table class="caption-top table">
 <thead><tr class="header">
@@ -936,7 +1009,7 @@ Table&nbsp;10.2: Numeric comparison operators for <code>[ ]</code> and <code>[[ 
 <p><strong>String comparisons:</strong></p>
 <div id="tbl-string-test-operators" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-tbl figure"><figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-string-test-operators-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Table&nbsp;10.3: String comparison operators
+Table&nbsp;10.4: String comparison operators
 </figcaption><div aria-describedby="tbl-string-test-operators-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 <table class="caption-top table">
 <thead><tr class="header">
@@ -968,7 +1041,7 @@ Table&nbsp;10.3: String comparison operators
 <p><strong>File tests:</strong></p>
 <div id="tbl-file-test-operators" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-tbl figure"><figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-file-test-operators-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Table&nbsp;10.4: File test operators
+Table&nbsp;10.5: File test operators
 </figcaption><div aria-describedby="tbl-file-test-operators-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 <table class="caption-top table">
 <thead><tr class="header">
@@ -1267,6 +1340,8 @@ Important
 <span id="cb21-4"><a href="#cb21-4"></a><span class="bu">set</span> <span class="at">-o</span> pipefail <span class="co"># Catch errors in pipes</span></span>
 <span id="cb21-5"><a href="#cb21-5"></a></span>
 <span id="cb21-6"><a href="#cb21-6"></a><span class="co"># Or combine: set -euo pipefail</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Each flag closes a different silent-failure loophole. Without <code>-e</code>, a script whose third command fails cheerfully runs the fourth on garbage input; with it, the script stops at the first non-zero exit status. Without <code>-u</code>, a misspelled variable (<code>$INPUTT</code> for <code>$INPUT</code>) silently expands to the empty string—so a command like <code>rm -r "$OUTDIRR/tmp"</code> operates on a path you never intended; with it, the misspelling is an immediate, named error. And without <code>pipefail</code>, a pipeline’s exit status is that of its <em>last</em> command, so <code>zcat missing.gz | head</code> reports success because <code>head</code> succeeded even though <code>zcat</code> found nothing; <code>pipefail</code> makes the pipeline fail if any stage fails.</p>
+<p>Make the shebang line and <code>set -euo pipefail</code> the first two lines of every script you write—the course scripts, including <code>gene_means.sh</code> in <a href="#sec-scripting-stickle" class="quarto-xref"><span>Section 10.14</span></a>, all do. One caveat to know about: <code>-e</code> is suspended for commands whose exit status is being tested, such as the condition of an <code>if</code> or the left side of <code>&amp;&amp;</code>/<code>||</code>, which is exactly what makes the try/catch pattern of <a href="#sec-exit-status" class="quarto-xref"><span>Section 10.9.1</span></a> work inside a strict-mode script.</p>
 </section><section id="sec-custom-error-handling" class="level3"><h3 class="anchored" data-anchor-id="sec-custom-error-handling">Custom Error Handling</h3>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb22"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb22-1"><a href="#cb22-1"></a><span class="co">#!/bin/bash</span></span>
 <span id="cb22-2"><a href="#cb22-2"></a><span class="bu">set</span> <span class="at">-euo</span> pipefail</span>

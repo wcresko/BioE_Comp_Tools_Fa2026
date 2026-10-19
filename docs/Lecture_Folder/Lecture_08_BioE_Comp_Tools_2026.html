@@ -225,7 +225,8 @@ Bill Cresko
 <ul>
 <li>Basics of working with Talapas</li>
 <li>The SLURM job scheduler</li>
-<li>Software modules and monitoring jobs</li>
+<li>Software on the cluster: modules, conda and <code>renv</code> environments, and a word on containers</li>
+<li>Monitoring your jobs</li>
 <li>Running R (<code>Rscript</code>) and Python (<code>python3</code>) scripts as batch jobs</li>
 </ul>
 </section>
@@ -800,6 +801,45 @@ Bill Cresko
 </div>
 </div>
 </section>
+<section id="three-ways-to-get-software-onto-talapas" class="slide level2">
+<h2>Three ways to get software onto Talapas</h2>
+<table class="caption-top">
+<colgroup>
+<col style="width: 33%">
+<col style="width: 33%">
+<col style="width: 33%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Layer</th>
+<th>What it is</th>
+<th>Best for</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><strong>Lmod modules</strong></td>
+<td>centrally installed software: <code>module load</code></td>
+<td>compilers, CUDA, R and Python themselves, common tools</td>
+</tr>
+<tr class="even">
+<td><strong>Per-user environments</strong></td>
+<td>a conda env / <code>venv</code>, or an R library pinned with <code>renv</code></td>
+<td><em>your</em> project’s packages, at exact versions</td>
+</tr>
+<tr class="odd">
+<td><strong>Containers (Apptainer)</strong></td>
+<td>one image file holding an entire OS + software stack</td>
+<td>reproducing published pipelines; moving between clusters</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li class="fragment">Most real projects use the first <strong>two together</strong>: <code>module load</code> the interpreter, then activate your own environment - exactly the L07 workflow, now on the cluster</li>
+<li class="fragment">Modules are read-only and their versions change over time - that is <em>why</em> you keep your own environment on top</li>
+<li class="fragment">Containers are the strongest reproducibility guarantee; we won’t need them in this course - see <a href="../book/chapters/16-hpc-talapas.html#sec-software-layers">Ch. 16</a></li>
+</ul>
+</section>
 <section id="r-and-python-packages-on-talapas" class="slide level2">
 <h2>R and Python packages on Talapas</h2>
 <div class="panel-tabset">
@@ -817,16 +857,21 @@ Bill Cresko
 </div>
 <div id="tabset-3-2">
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb14"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb14-1"><a></a><span class="ex">module</span> load miniconda3/20240410</span>
-<span id="cb14-2"><a></a><span class="ex">conda</span> create <span class="at">-n</span> my_env python=3.11 pandas matplotlib biopython   <span class="co"># once</span></span>
-<span id="cb14-3"><a></a><span class="ex">conda</span> activate my_env                                            <span class="co"># every session / job</span></span>
-<span id="cb14-4"><a></a></span>
-<span id="cb14-5"><a></a><span class="co"># or, with the plain python3 module and a virtual environment:</span></span>
-<span id="cb14-6"><a></a><span class="ex">module</span> load python3/3.11.4</span>
-<span id="cb14-7"><a></a><span class="ex">python3</span> <span class="at">-m</span> venv ~/envs/my_env <span class="kw">&amp;&amp;</span> <span class="bu">source</span> ~/envs/my_env/bin/activate</span>
-<span id="cb14-8"><a></a><span class="ex">pip</span> install pandas matplotlib biopython</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb14-2"><a></a></span>
+<span id="cb14-3"><a></a><span class="co"># Best: rebuild the environment you recorded on your laptop in L07</span></span>
+<span id="cb14-4"><a></a><span class="ex">conda</span> env create <span class="at">-f</span> environment.yml      <span class="co"># once</span></span>
+<span id="cb14-5"><a></a><span class="ex">conda</span> activate rnaseq                    <span class="co"># every session / job</span></span>
+<span id="cb14-6"><a></a></span>
+<span id="cb14-7"><a></a><span class="co"># or create one from scratch on the cluster:</span></span>
+<span id="cb14-8"><a></a><span class="ex">conda</span> create <span class="at">-n</span> my_env python=3.11 pandas matplotlib biopython</span>
+<span id="cb14-9"><a></a></span>
+<span id="cb14-10"><a></a><span class="co"># or, with the plain python3 module and a virtual environment:</span></span>
+<span id="cb14-11"><a></a><span class="ex">module</span> load python3/3.11.4</span>
+<span id="cb14-12"><a></a><span class="ex">python3</span> <span class="at">-m</span> venv ~/envs/my_env <span class="kw">&amp;&amp;</span> <span class="bu">source</span> ~/envs/my_env/bin/activate</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <ul>
 <li><code>conda</code> (with the <strong>bioconda</strong> channel) installs compiled bioinformatics tools too - <code>conda install -c bioconda samtools</code></li>
-<li>Put the same <code>module load</code> + <code>conda activate</code> / <code>source .../activate</code> lines in your <code>sbatch</code> script</li>
+<li>Put the same <code>module load</code> + <code>conda activate</code> lines <strong>inside your <code>sbatch</code> script</strong> - every batch job starts with a clean shell</li>
+<li>Conda environments live in your <strong>home directory</strong> and grow large: <code>conda env list</code> to see them, <code>conda clean -a</code> to reclaim cache space, and mind your quota</li>
 </ul>
 </div>
 </div>

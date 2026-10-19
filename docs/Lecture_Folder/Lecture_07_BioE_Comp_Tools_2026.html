@@ -220,18 +220,102 @@ Bill Cresko
 <li><a href="../book/chapters/14-data-wrangling.html">Ch. 14: Data Wrangling with the Tidyverse</a></li>
 <li><a href="../book/chapters/15-writing-functions.html">Ch. 15: Writing Functions in R</a></li>
 <li><em>Reference:</em> <a href="../book/chapters/appendix-E-r.html">App. E: R Command Reference</a> · <a href="../book/chapters/appendix-F-python.html">App. F: Python Quick Reference</a></li>
+<li><em>Environments:</em> <a href="../book/chapters/12-python-programming.html#sec-py-venv">Ch. 12, Virtual Environments</a> · <a href="../book/chapters/16-hpc-talapas.html#sec-software-layers">Ch. 16, The Three Software Layers</a> - the second previews Week 8</li>
 <li><em>Optional:</em> <a href="../book/chapters/22-databases.html">Ch. 22: Working with Databases</a> - for when project data outgrow flat files</li>
 </ul>
 </section>
 <section id="goals-for-today" class="slide level2">
 <h2>Goals for today</h2>
 <ul>
+<li>Environments: what they are, why you need them, and the three tools (<code>venv</code>, <code>conda</code>, <code>renv</code>)</li>
 <li>Installing vs.&nbsp;loading packages; inspecting objects and reading error messages</li>
 <li>Logical operators, filtering, type conversion and missing values</li>
 <li>The tidyverse and the pipe <code>|&gt;</code> for data wrangling</li>
 <li>ggplot2 and the grammar of graphics; choosing the right plot</li>
 </ul>
 </section>
+<section>
+<section id="environments-giving-every-project-its-own-toolbox" class="title-slide slide level1 center">
+<h1>Environments: giving every project its own toolbox</h1>
+
+</section>
+<section id="why-environments" class="slide level2">
+<h2>Why environments?</h2>
+<ul>
+<li class="fragment">By default your computer has <strong>one</strong> R and <strong>one</strong> Python - and every project installs packages into it</li>
+<li class="fragment">Project A needs pandas 2.2; reproducing last year’s analysis needs pandas 1.5. Upgrade for one and you silently break the other - “<strong>dependency hell</strong>”</li>
+<li class="fragment">From the bootcamp: “which Python did that install go into?” is the #1 Python headache</li>
+<li class="fragment">An <strong>environment</strong> is an isolated set of packages (and an interpreter) for <strong>one project</strong></li>
+<li class="fragment">Three payoffs:
+<ul>
+<li class="fragment">projects cannot break each other</li>
+<li class="fragment">you can <strong>record</strong> exactly which versions produced a result</li>
+<li class="fragment">a collaborator - or Talapas - can <strong>rebuild</strong> the same setup from that record</li>
+</ul></li>
+</ul>
+</section>
+<section id="the-three-environment-tools-you-will-meet" class="slide level2">
+<h2>The three environment tools you will meet</h2>
+<table class="caption-top">
+<colgroup>
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Tool</th>
+<th>For</th>
+<th>Environments live…</th>
+<th>The record you share</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><strong><code>venv</code></strong> (+ <code>pip</code>)</td>
+<td>Python</td>
+<td>in the project folder (<code>.venv/</code>)</td>
+<td><code>requirements.txt</code></td>
+</tr>
+<tr class="even">
+<td><strong><code>conda</code></strong> / <code>mamba</code></td>
+<td>Python <em>plus</em> compiled tools (<code>samtools</code>, even R)</td>
+<td>centrally, by name (<code>conda env list</code>)</td>
+<td><code>environment.yml</code></td>
+</tr>
+<tr class="odd">
+<td><strong><code>renv</code></strong></td>
+<td>R</td>
+<td>in the project folder</td>
+<td><code>renv.lock</code></td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li class="fragment"><strong><code>venv</code></strong> is our default on your laptop - you have used it since the bootcamp</li>
+<li class="fragment"><strong><code>conda</code></strong> is the standard in bioinformatics and on <strong>Talapas</strong> (next week) - one tool for <em>any</em> software</li>
+<li class="fragment"><strong><code>renv</code></strong> for R projects: <code>renv::init()</code> once, <code>renv::snapshot()</code> to record, <code>renv::restore()</code> to rebuild</li>
+<li class="fragment">Whichever you use: <strong>commit the record file to Git - never the environment itself</strong></li>
+</ul>
+</section>
+<section id="conda-in-practice---on-your-own-computer" class="slide level2">
+<h2><code>conda</code> in practice - on your own computer</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb1-1"><a></a><span class="co"># Install once: Miniforge, from https://conda-forge.org/download/</span></span>
+<span id="cb1-2"><a></a></span>
+<span id="cb1-3"><a></a><span class="ex">conda</span> create <span class="at">-n</span> rnaseq python=3.12 pandas matplotlib   <span class="co"># make a named environment - once</span></span>
+<span id="cb1-4"><a></a><span class="ex">conda</span> activate rnaseq                                  <span class="co"># turn it on - every session</span></span>
+<span id="cb1-5"><a></a><span class="ex">conda</span> install <span class="at">-c</span> bioconda samtools                     <span class="co"># compiled genomics tools too!</span></span>
+<span id="cb1-6"><a></a><span class="ex">conda</span> env export <span class="op">&gt;</span> environment.yml                     <span class="co"># record it, to rebuild anywhere</span></span>
+<span id="cb1-7"><a></a><span class="ex">conda</span> deactivate                                       <span class="co"># turn it off</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<ul>
+<li class="fragment">Environments are <strong>named and central</strong>, not per-folder: <code>conda env list</code> shows them all</li>
+<li class="fragment">Packages come from <strong>channels</strong>: <code>conda-forge</code> (general) and <code>bioconda</code> (genomics)</li>
+<li class="fragment">Install <strong>Miniforge</strong>, not Anaconda - Anaconda’s default channel requires a paid license at organizations like UO; Miniforge defaults to the free <code>conda-forge</code></li>
+<li class="fragment"><code>mamba</code> (included in Miniforge) is a faster drop-in replacement for <code>conda</code></li>
+<li class="fragment">Next week the <em>same</em> <code>environment.yml</code> rebuilds this environment on Talapas: <code>conda env create -f environment.yml</code></li>
+</ul>
+</section></section>
 <section>
 <section id="going-further-with-r-and-python" class="title-slide slide level1 center">
 <h1>Going further with R and Python</h1>
@@ -243,8 +327,8 @@ Bill Cresko
 <ul id="tabset-1" class="panel-tabset-tabby"><li><a data-tabby-default="" href="#tabset-1-1">R</a></li><li><a href="#tabset-1-2">Python</a></li></ul>
 <div class="tab-content">
 <div id="tabset-1-1">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a></a><span class="fu">install.packages</span>(<span class="st">"tidyverse"</span>)   <span class="co"># download &amp; install - ONCE per computer</span></span>
-<span id="cb1-2"><a></a><span class="fu">library</span>(tidyverse)              <span class="co"># load - EVERY new R session</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a></a><span class="fu">install.packages</span>(<span class="st">"tidyverse"</span>)   <span class="co"># download &amp; install - ONCE per computer</span></span>
+<span id="cb2-2"><a></a><span class="fu">library</span>(tidyverse)              <span class="co"># load - EVERY new R session</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <ul>
 <li class="fragment"><strong><code>install.packages()</code></strong> puts a package on your computer (from CRAN)</li>
 <li class="fragment"><strong><code>library()</code></strong> makes it available in <em>this</em> session - restarting R means re-running <code>library()</code></li>
@@ -254,13 +338,13 @@ Bill Cresko
 </ul>
 </div>
 <div id="tabset-1-2">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb2-1"><a></a><span class="ex">python3</span> <span class="at">-m</span> venv .venv <span class="kw">&amp;&amp;</span> <span class="bu">source</span> .venv/bin/activate   <span class="co"># one environment per project</span></span>
-<span id="cb2-2"><a></a><span class="ex">pip</span> install pandas matplotlib seaborn                 <span class="co"># install - ONCE per environment</span></span>
-<span id="cb2-3"><a></a><span class="co"># alternatives: uv add pandas   |   conda install pandas</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb3"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb3-1"><a></a><span class="ex">python3</span> <span class="at">-m</span> venv .venv <span class="kw">&amp;&amp;</span> <span class="bu">source</span> .venv/bin/activate   <span class="co"># one environment per project</span></span>
+<span id="cb3-2"><a></a><span class="ex">pip</span> install pandas matplotlib seaborn                 <span class="co"># install - ONCE per environment</span></span>
+<span id="cb3-3"><a></a><span class="co"># alternatives: uv add pandas   |   conda install pandas</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a></a><span class="im">import</span> pandas <span class="im">as</span> pd                 <span class="co"># load - EVERY new Python session (pd is the usual alias)</span></span>
-<span id="cb3-2"><a></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
-<span id="cb3-3"><a></a><span class="im">from</span> pathlib <span class="im">import</span> Path            <span class="co"># one name from a module</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a></a><span class="im">import</span> pandas <span class="im">as</span> pd                 <span class="co"># load - EVERY new Python session (pd is the usual alias)</span></span>
+<span id="cb4-2"><a></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
+<span id="cb4-3"><a></a><span class="im">from</span> pathlib <span class="im">import</span> Path            <span class="co"># one name from a module</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <ul>
 <li class="fragment"><strong><code>pip install</code></strong> (from PyPI) puts a package in the <em>active environment</em>; <code>conda</code> also handles compiled tools (e.g.&nbsp;<code>bioconda</code>); <code>uv</code> is a fast modern all-in-one</li>
@@ -278,25 +362,25 @@ Bill Cresko
 <ul id="tabset-2" class="panel-tabset-tabby"><li><a data-tabby-default="" href="#tabset-2-1">R</a></li><li><a href="#tabset-2-2">Python</a></li></ul>
 <div class="tab-content">
 <div id="tabset-2-1">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb4"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a></a><span class="fu">str</span>(mydata)        <span class="co"># structure: type, dimensions, first values - your #1 tool</span></span>
-<span id="cb4-2"><a></a><span class="fu">summary</span>(mydata)    <span class="co"># quick summary of every column</span></span>
-<span id="cb4-3"><a></a><span class="fu">class</span>(mydata)      <span class="co"># what kind of object is this?</span></span>
-<span id="cb4-4"><a></a><span class="fu">dim</span>(mydata)        <span class="co"># rows x columns</span></span>
-<span id="cb4-5"><a></a><span class="fu">names</span>(mydata)      <span class="co"># column names</span></span>
-<span id="cb4-6"><a></a>?mean              <span class="co"># help page for a function</span></span>
-<span id="cb4-7"><a></a>??<span class="st">"linear model"</span>   <span class="co"># search help across all packages</span></span>
-<span id="cb4-8"><a></a><span class="fu">sessionInfo</span>()      <span class="co"># R version + loaded package versions - put at the end of reports</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb5"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a></a><span class="fu">str</span>(mydata)        <span class="co"># structure: type, dimensions, first values - your #1 tool</span></span>
+<span id="cb5-2"><a></a><span class="fu">summary</span>(mydata)    <span class="co"># quick summary of every column</span></span>
+<span id="cb5-3"><a></a><span class="fu">class</span>(mydata)      <span class="co"># what kind of object is this?</span></span>
+<span id="cb5-4"><a></a><span class="fu">dim</span>(mydata)        <span class="co"># rows x columns</span></span>
+<span id="cb5-5"><a></a><span class="fu">names</span>(mydata)      <span class="co"># column names</span></span>
+<span id="cb5-6"><a></a>?mean              <span class="co"># help page for a function</span></span>
+<span id="cb5-7"><a></a>??<span class="st">"linear model"</span>   <span class="co"># search help across all packages</span></span>
+<span id="cb5-8"><a></a><span class="fu">sessionInfo</span>()      <span class="co"># R version + loaded package versions - put at the end of reports</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <div id="tabset-2-2">
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a></a>mydata.info()          <span class="co"># columns, dtypes, non-null counts - your #1 tool</span></span>
-<span id="cb5-2"><a></a>mydata.describe()      <span class="co"># quick summary of every numeric column</span></span>
-<span id="cb5-3"><a></a><span class="bu">type</span>(mydata)           <span class="co"># what kind of object is this?  &lt;class 'pandas.core.frame.DataFrame'&gt;</span></span>
-<span id="cb5-4"><a></a>mydata.shape           <span class="co"># (rows, columns)</span></span>
-<span id="cb5-5"><a></a>mydata.columns         <span class="co"># column names</span></span>
-<span id="cb5-6"><a></a>mydata.dtypes          <span class="co"># type of each column</span></span>
-<span id="cb5-7"><a></a><span class="bu">help</span>(pd.read_csv)      <span class="co"># help page for a function (or pd.read_csv? in Jupyter/Positron)</span></span>
-<span id="cb5-8"><a></a><span class="im">import</span> sys<span class="op">;</span> <span class="bu">print</span>(sys.version)<span class="op">;</span> <span class="bu">print</span>(pd.__version__)   <span class="co"># versions - put at the end of reports</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a></a>mydata.info()          <span class="co"># columns, dtypes, non-null counts - your #1 tool</span></span>
+<span id="cb6-2"><a></a>mydata.describe()      <span class="co"># quick summary of every numeric column</span></span>
+<span id="cb6-3"><a></a><span class="bu">type</span>(mydata)           <span class="co"># what kind of object is this?  &lt;class 'pandas.core.frame.DataFrame'&gt;</span></span>
+<span id="cb6-4"><a></a>mydata.shape           <span class="co"># (rows, columns)</span></span>
+<span id="cb6-5"><a></a>mydata.columns         <span class="co"># column names</span></span>
+<span id="cb6-6"><a></a>mydata.dtypes          <span class="co"># type of each column</span></span>
+<span id="cb6-7"><a></a><span class="bu">help</span>(pd.read_csv)      <span class="co"># help page for a function (or pd.read_csv? in Jupyter/Positron)</span></span>
+<span id="cb6-8"><a></a><span class="im">import</span> sys<span class="op">;</span> <span class="bu">print</span>(sys.version)<span class="op">;</span> <span class="bu">print</span>(pd.__version__)   <span class="co"># versions - put at the end of reports</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 </div>
 </div>
@@ -416,12 +500,12 @@ Bill Cresko
 <div class="tab-content">
 <div id="tabset-4-1">
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a></a>x <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">5</span>, <span class="dv">10</span>, <span class="dv">15</span>, <span class="dv">20</span>)</span>
-<span id="cb6-2"><a></a>x <span class="sc">&gt;</span> <span class="dv">10</span>          <span class="co"># a logical vector, one TRUE/FALSE per element</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a></a>x <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">5</span>, <span class="dv">10</span>, <span class="dv">15</span>, <span class="dv">20</span>)</span>
+<span id="cb7-2"><a></a>x <span class="sc">&gt;</span> <span class="dv">10</span>          <span class="co"># a logical vector, one TRUE/FALSE per element</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>[1] FALSE FALSE FALSE  TRUE  TRUE</code></pre>
 </div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a></a>x[x <span class="sc">&gt;</span> <span class="dv">10</span>]       <span class="co"># keep only the elements where the condition is TRUE</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a></a>x[x <span class="sc">&gt;</span> <span class="dv">10</span>]       <span class="co"># keep only the elements where the condition is TRUE</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>[1] 15 20</code></pre>
 </div>
@@ -429,10 +513,10 @@ Bill Cresko
 </div>
 <div id="tabset-4-2">
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb10"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
-<span id="cb10-2"><a></a>x <span class="op">=</span> np.array([<span class="dv">1</span>, <span class="dv">5</span>, <span class="dv">10</span>, <span class="dv">15</span>, <span class="dv">20</span>])</span>
-<span id="cb10-3"><a></a>x <span class="op">&gt;</span> <span class="dv">10</span>          <span class="co"># array([False, False, False,  True,  True])</span></span>
-<span id="cb10-4"><a></a>x[x <span class="op">&gt;</span> <span class="dv">10</span>]       <span class="co"># array([15, 20])  - boolean indexing, same idea as R</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb11"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
+<span id="cb11-2"><a></a>x <span class="op">=</span> np.array([<span class="dv">1</span>, <span class="dv">5</span>, <span class="dv">10</span>, <span class="dv">15</span>, <span class="dv">20</span>])</span>
+<span id="cb11-3"><a></a>x <span class="op">&gt;</span> <span class="dv">10</span>          <span class="co"># array([False, False, False,  True,  True])</span></span>
+<span id="cb11-4"><a></a>x[x <span class="op">&gt;</span> <span class="dv">10</span>]       <span class="co"># array([15, 20])  - boolean indexing, same idea as R</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 </div>
 </div>
@@ -667,7 +751,7 @@ Bill Cresko
 <p><strong>Tip</strong></p>
 </div>
 <div class="callout-content">
-<p>Read error messages carefully - R reports the failing call, Python reports a <strong>traceback</strong> where the <em>last</em> line tells you what went wrong. Then paste the exact message into a search engine or an AI assistant.</p>
+<p>Read error messages carefully - R reports the failing call, Python reports a <strong>traceback</strong> where the <em>last</em> line tells you what went wrong. Then paste the exact message into a search engine or an AI assistant. And a preview: on Talapas next week, a <code>ModuleNotFoundError</code> inside a batch job usually means you forgot <code>conda activate</code> in the job script.</p>
 </div>
 </div>
 </div>
@@ -736,13 +820,13 @@ Bill Cresko
 <ul id="tabset-7" class="panel-tabset-tabby"><li><a data-tabby-default="" href="#tabset-7-1">R</a></li><li><a href="#tabset-7-2">Python (pandas)</a></li></ul>
 <div class="tab-content">
 <div id="tabset-7-1">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb11"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a></a><span class="fu">library</span>(tidyverse)</span>
-<span id="cb11-2"><a></a></span>
-<span id="cb11-3"><a></a>mydata <span class="sc">|&gt;</span></span>
-<span id="cb11-4"><a></a>  <span class="fu">filter</span>(compression <span class="sc">&gt;</span> <span class="dv">4</span>) <span class="sc">|&gt;</span>                            <span class="co"># keep rows</span></span>
-<span id="cb11-5"><a></a>  <span class="fu">mutate</span>(<span class="at">ratio =</span> conductivity <span class="sc">/</span> compression) <span class="sc">|&gt;</span>         <span class="co"># add a column</span></span>
-<span id="cb11-6"><a></a>  <span class="fu">group_by</span>(hydrogel_concentration) <span class="sc">|&gt;</span>                   <span class="co"># define groups</span></span>
-<span id="cb11-7"><a></a>  <span class="fu">summarise</span>(<span class="at">n =</span> <span class="fu">n</span>(), <span class="at">mean_ratio =</span> <span class="fu">mean</span>(ratio))          <span class="co"># one row per group</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb12"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a></a><span class="fu">library</span>(tidyverse)</span>
+<span id="cb12-2"><a></a></span>
+<span id="cb12-3"><a></a>mydata <span class="sc">|&gt;</span></span>
+<span id="cb12-4"><a></a>  <span class="fu">filter</span>(compression <span class="sc">&gt;</span> <span class="dv">4</span>) <span class="sc">|&gt;</span>                            <span class="co"># keep rows</span></span>
+<span id="cb12-5"><a></a>  <span class="fu">mutate</span>(<span class="at">ratio =</span> conductivity <span class="sc">/</span> compression) <span class="sc">|&gt;</span>         <span class="co"># add a column</span></span>
+<span id="cb12-6"><a></a>  <span class="fu">group_by</span>(hydrogel_concentration) <span class="sc">|&gt;</span>                   <span class="co"># define groups</span></span>
+<span id="cb12-7"><a></a>  <span class="fu">summarise</span>(<span class="at">n =</span> <span class="fu">n</span>(), <span class="at">mean_ratio =</span> <span class="fu">mean</span>(ratio))          <span class="co"># one row per group</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <table class="caption-top">
 <thead>
 <tr class="header">
@@ -776,14 +860,14 @@ Bill Cresko
 </div>
 <div id="tabset-7-2">
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb12"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
-<span id="cb12-2"><a></a></span>
-<span id="cb12-3"><a></a>(mydata</span>
-<span id="cb12-4"><a></a>   .query(<span class="st">"compression &gt; 4"</span>)                                  <span class="co"># keep rows</span></span>
-<span id="cb12-5"><a></a>   .assign(ratio<span class="op">=</span><span class="kw">lambda</span> d: d.conductivity <span class="op">/</span> d.compression)    <span class="co"># add a column</span></span>
-<span id="cb12-6"><a></a>   .groupby(<span class="st">"hydrogel_concentration"</span>, observed<span class="op">=</span><span class="va">True</span>)          <span class="co"># define groups</span></span>
-<span id="cb12-7"><a></a>   .agg(n<span class="op">=</span>(<span class="st">"ratio"</span>, <span class="st">"size"</span>), mean_ratio<span class="op">=</span>(<span class="st">"ratio"</span>, <span class="st">"mean"</span>))    <span class="co"># one row per group</span></span>
-<span id="cb12-8"><a></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb13"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
+<span id="cb13-2"><a></a></span>
+<span id="cb13-3"><a></a>(mydata</span>
+<span id="cb13-4"><a></a>   .query(<span class="st">"compression &gt; 4"</span>)                                  <span class="co"># keep rows</span></span>
+<span id="cb13-5"><a></a>   .assign(ratio<span class="op">=</span><span class="kw">lambda</span> d: d.conductivity <span class="op">/</span> d.compression)    <span class="co"># add a column</span></span>
+<span id="cb13-6"><a></a>   .groupby(<span class="st">"hydrogel_concentration"</span>, observed<span class="op">=</span><span class="va">True</span>)          <span class="co"># define groups</span></span>
+<span id="cb13-7"><a></a>   .agg(n<span class="op">=</span>(<span class="st">"ratio"</span>, <span class="st">"size"</span>), mean_ratio<span class="op">=</span>(<span class="st">"ratio"</span>, <span class="st">"mean"</span>))    <span class="co"># one row per group</span></span>
+<span id="cb13-8"><a></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <table class="caption-top">
 <colgroup>
@@ -842,33 +926,33 @@ Bill Cresko
 <ul id="tabset-8" class="panel-tabset-tabby"><li><a data-tabby-default="" href="#tabset-8-1">R</a></li><li><a href="#tabset-8-2">Python (seaborn)</a></li><li><a href="#tabset-8-3">Python (plotnine)</a></li></ul>
 <div class="tab-content">
 <div id="tabset-8-1">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb13"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a></a><span class="fu">ggplot</span>(mydata, <span class="fu">aes</span>(<span class="at">x =</span> hydrogel_concentration, <span class="at">y =</span> compression)) <span class="sc">+</span></span>
-<span id="cb13-2"><a></a>  <span class="fu">geom_boxplot</span>() <span class="sc">+</span></span>
-<span id="cb13-3"><a></a>  <span class="fu">geom_jitter</span>(<span class="at">width =</span> <span class="fl">0.1</span>) <span class="sc">+</span></span>
-<span id="cb13-4"><a></a>  <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">"Hydrogel concentration"</span>, <span class="at">y =</span> <span class="st">"Compression"</span>) <span class="sc">+</span></span>
-<span id="cb13-5"><a></a>  <span class="fu">theme_minimal</span>()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb14"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a></a><span class="fu">ggplot</span>(mydata, <span class="fu">aes</span>(<span class="at">x =</span> hydrogel_concentration, <span class="at">y =</span> compression)) <span class="sc">+</span></span>
+<span id="cb14-2"><a></a>  <span class="fu">geom_boxplot</span>() <span class="sc">+</span></span>
+<span id="cb14-3"><a></a>  <span class="fu">geom_jitter</span>(<span class="at">width =</span> <span class="fl">0.1</span>) <span class="sc">+</span></span>
+<span id="cb14-4"><a></a>  <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">"Hydrogel concentration"</span>, <span class="at">y =</span> <span class="st">"Compression"</span>) <span class="sc">+</span></span>
+<span id="cb14-5"><a></a>  <span class="fu">theme_minimal</span>()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <div id="tabset-8-2">
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb14"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a></a><span class="im">import</span> seaborn <span class="im">as</span> sns</span>
-<span id="cb14-2"><a></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
-<span id="cb14-3"><a></a></span>
-<span id="cb14-4"><a></a>sns.boxplot(data<span class="op">=</span>mydata, x<span class="op">=</span><span class="st">"hydrogel_concentration"</span>, y<span class="op">=</span><span class="st">"compression"</span>)</span>
-<span id="cb14-5"><a></a>sns.stripplot(data<span class="op">=</span>mydata, x<span class="op">=</span><span class="st">"hydrogel_concentration"</span>, y<span class="op">=</span><span class="st">"compression"</span>, jitter<span class="op">=</span><span class="fl">0.1</span>, color<span class="op">=</span><span class="st">"black"</span>)</span>
-<span id="cb14-6"><a></a>plt.xlabel(<span class="st">"Hydrogel concentration"</span>)</span>
-<span id="cb14-7"><a></a>plt.ylabel(<span class="st">"Compression"</span>)</span>
-<span id="cb14-8"><a></a>plt.show()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb15"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb15-1"><a></a><span class="im">import</span> seaborn <span class="im">as</span> sns</span>
+<span id="cb15-2"><a></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
+<span id="cb15-3"><a></a></span>
+<span id="cb15-4"><a></a>sns.boxplot(data<span class="op">=</span>mydata, x<span class="op">=</span><span class="st">"hydrogel_concentration"</span>, y<span class="op">=</span><span class="st">"compression"</span>)</span>
+<span id="cb15-5"><a></a>sns.stripplot(data<span class="op">=</span>mydata, x<span class="op">=</span><span class="st">"hydrogel_concentration"</span>, y<span class="op">=</span><span class="st">"compression"</span>, jitter<span class="op">=</span><span class="fl">0.1</span>, color<span class="op">=</span><span class="st">"black"</span>)</span>
+<span id="cb15-6"><a></a>plt.xlabel(<span class="st">"Hydrogel concentration"</span>)</span>
+<span id="cb15-7"><a></a>plt.ylabel(<span class="st">"Compression"</span>)</span>
+<span id="cb15-8"><a></a>plt.show()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 </div>
 <div id="tabset-8-3">
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb15"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb15-1"><a></a><span class="im">from</span> plotnine <span class="im">import</span> ggplot, aes, geom_boxplot, geom_jitter, labs, theme_minimal</span>
-<span id="cb15-2"><a></a></span>
-<span id="cb15-3"><a></a>(ggplot(mydata, aes(x<span class="op">=</span><span class="st">"hydrogel_concentration"</span>, y<span class="op">=</span><span class="st">"compression"</span>))</span>
-<span id="cb15-4"><a></a>   <span class="op">+</span> geom_boxplot()</span>
-<span id="cb15-5"><a></a>   <span class="op">+</span> geom_jitter(width<span class="op">=</span><span class="fl">0.1</span>)</span>
-<span id="cb15-6"><a></a>   <span class="op">+</span> labs(x<span class="op">=</span><span class="st">"Hydrogel concentration"</span>, y<span class="op">=</span><span class="st">"Compression"</span>)</span>
-<span id="cb15-7"><a></a>   <span class="op">+</span> theme_minimal())</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb16"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb16-1"><a></a><span class="im">from</span> plotnine <span class="im">import</span> ggplot, aes, geom_boxplot, geom_jitter, labs, theme_minimal</span>
+<span id="cb16-2"><a></a></span>
+<span id="cb16-3"><a></a>(ggplot(mydata, aes(x<span class="op">=</span><span class="st">"hydrogel_concentration"</span>, y<span class="op">=</span><span class="st">"compression"</span>))</span>
+<span id="cb16-4"><a></a>   <span class="op">+</span> geom_boxplot()</span>
+<span id="cb16-5"><a></a>   <span class="op">+</span> geom_jitter(width<span class="op">=</span><span class="fl">0.1</span>)</span>
+<span id="cb16-6"><a></a>   <span class="op">+</span> labs(x<span class="op">=</span><span class="st">"Hydrogel concentration"</span>, y<span class="op">=</span><span class="st">"Compression"</span>)</span>
+<span id="cb16-7"><a></a>   <span class="op">+</span> theme_minimal())</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 </div>
 </div>
@@ -968,13 +1052,13 @@ Bill Cresko
 <section id="running-example-wide-to-long-then-summarize" class="slide level2">
 <h2>Running example: wide to long, then summarize</h2>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb16"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a></a><span class="fu">library</span>(tidyverse)</span>
-<span id="cb16-2"><a></a>stickle <span class="ot">&lt;-</span> <span class="fu">read_tsv</span>(<span class="st">"../Data_Folder/Stickle_RNAseq.tsv"</span>, <span class="at">show_col_types =</span> <span class="cn">FALSE</span>) <span class="sc">|&gt;</span></span>
-<span id="cb16-3"><a></a>  <span class="fu">rename</span>(<span class="at">geno_micro =</span> <span class="st">`</span><span class="at">Geno&amp;Micro</span><span class="st">`</span>)          <span class="co"># fix the awkward name once</span></span>
-<span id="cb16-4"><a></a></span>
-<span id="cb16-5"><a></a>stickle_long <span class="ot">&lt;-</span> stickle <span class="sc">|&gt;</span></span>
-<span id="cb16-6"><a></a>  <span class="fu">pivot_longer</span>(<span class="fu">starts_with</span>(<span class="st">"Gene"</span>), <span class="at">names_to =</span> <span class="st">"gene"</span>, <span class="at">values_to =</span> <span class="st">"count"</span>)</span>
-<span id="cb16-7"><a></a>stickle_long                                  <span class="co"># 80 x 600 = 48,000 rows: one per fish x gene</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb17"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a></a><span class="fu">library</span>(tidyverse)</span>
+<span id="cb17-2"><a></a>stickle <span class="ot">&lt;-</span> <span class="fu">read_tsv</span>(<span class="st">"../Data_Folder/Stickle_RNAseq.tsv"</span>, <span class="at">show_col_types =</span> <span class="cn">FALSE</span>) <span class="sc">|&gt;</span></span>
+<span id="cb17-3"><a></a>  <span class="fu">rename</span>(<span class="at">geno_micro =</span> <span class="st">`</span><span class="at">Geno&amp;Micro</span><span class="st">`</span>)          <span class="co"># fix the awkward name once</span></span>
+<span id="cb17-4"><a></a></span>
+<span id="cb17-5"><a></a>stickle_long <span class="ot">&lt;-</span> stickle <span class="sc">|&gt;</span></span>
+<span id="cb17-6"><a></a>  <span class="fu">pivot_longer</span>(<span class="fu">starts_with</span>(<span class="st">"Gene"</span>), <span class="at">names_to =</span> <span class="st">"gene"</span>, <span class="at">values_to =</span> <span class="st">"count"</span>)</span>
+<span id="cb17-7"><a></a>stickle_long                                  <span class="co"># 80 x 600 = 48,000 rows: one per fish x gene</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code># A tibble: 48,000 × 6
    Individual Genotype Microbiota   geno_micro gene   count
@@ -991,10 +1075,10 @@ Bill Cresko
 10 AC1        A        conventional convA      Gene10   104
 # ℹ 47,990 more rows</code></pre>
 </div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb18"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a></a>gene_means <span class="ot">&lt;-</span> stickle_long <span class="sc">|&gt;</span></span>
-<span id="cb18-2"><a></a>  <span class="fu">group_by</span>(gene, Genotype, Microbiota) <span class="sc">|&gt;</span></span>
-<span id="cb18-3"><a></a>  <span class="fu">summarize</span>(<span class="at">mean_count =</span> <span class="fu">mean</span>(count), <span class="at">.groups =</span> <span class="st">"drop"</span>)</span>
-<span id="cb18-4"><a></a>gene_means <span class="sc">|&gt;</span> <span class="fu">filter</span>(gene <span class="sc">==</span> <span class="st">"Gene1"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb19"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a></a>gene_means <span class="ot">&lt;-</span> stickle_long <span class="sc">|&gt;</span></span>
+<span id="cb19-2"><a></a>  <span class="fu">group_by</span>(gene, Genotype, Microbiota) <span class="sc">|&gt;</span></span>
+<span id="cb19-3"><a></a>  <span class="fu">summarize</span>(<span class="at">mean_count =</span> <span class="fu">mean</span>(count), <span class="at">.groups =</span> <span class="st">"drop"</span>)</span>
+<span id="cb19-4"><a></a>gene_means <span class="sc">|&gt;</span> <span class="fu">filter</span>(gene <span class="sc">==</span> <span class="st">"Gene1"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code># A tibble: 4 × 4
   gene  Genotype Microbiota   mean_count
@@ -1009,13 +1093,13 @@ Bill Cresko
 <section id="running-example-the-same-figure-the-grammar-of-graphics-way" class="slide level2">
 <h2>Running example: the same figure, the grammar-of-graphics way</h2>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb20"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a></a>stickle_long <span class="sc">|&gt;</span></span>
-<span id="cb20-2"><a></a>  <span class="fu">filter</span>(gene <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"Gene1"</span>, <span class="st">"Gene2"</span>, <span class="st">"Gene3"</span>, <span class="st">"Gene4"</span>)) <span class="sc">|&gt;</span></span>
-<span id="cb20-3"><a></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> Genotype, <span class="at">y =</span> count, <span class="at">fill =</span> Microbiota)) <span class="sc">+</span></span>
-<span id="cb20-4"><a></a>  <span class="fu">geom_boxplot</span>() <span class="sc">+</span></span>
-<span id="cb20-5"><a></a>  <span class="fu">facet_wrap</span>(<span class="sc">~</span> gene, <span class="at">scales =</span> <span class="st">"free_y"</span>) <span class="sc">+</span></span>
-<span id="cb20-6"><a></a>  <span class="fu">labs</span>(<span class="at">y =</span> <span class="st">"Read count"</span>, <span class="at">title =</span> <span class="st">"Stickleback gut RNA-seq"</span>) <span class="sc">+</span></span>
-<span id="cb20-7"><a></a>  <span class="fu">theme_minimal</span>(<span class="at">base_size =</span> <span class="dv">14</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb21"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a></a>stickle_long <span class="sc">|&gt;</span></span>
+<span id="cb21-2"><a></a>  <span class="fu">filter</span>(gene <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"Gene1"</span>, <span class="st">"Gene2"</span>, <span class="st">"Gene3"</span>, <span class="st">"Gene4"</span>)) <span class="sc">|&gt;</span></span>
+<span id="cb21-3"><a></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> Genotype, <span class="at">y =</span> count, <span class="at">fill =</span> Microbiota)) <span class="sc">+</span></span>
+<span id="cb21-4"><a></a>  <span class="fu">geom_boxplot</span>() <span class="sc">+</span></span>
+<span id="cb21-5"><a></a>  <span class="fu">facet_wrap</span>(<span class="sc">~</span> gene, <span class="at">scales =</span> <span class="st">"free_y"</span>) <span class="sc">+</span></span>
+<span id="cb21-6"><a></a>  <span class="fu">labs</span>(<span class="at">y =</span> <span class="st">"Read count"</span>, <span class="at">title =</span> <span class="st">"Stickleback gut RNA-seq"</span>) <span class="sc">+</span></span>
+<span id="cb21-7"><a></a>  <span class="fu">theme_minimal</span>(<span class="at">base_size =</span> <span class="dv">14</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 
 </div>
 <img data-src="Lecture_07_BioE_Comp_Tools_2026_files/figure-revealjs/fig-lec07-stickle-ggplot-1.png" style="width:70.0%" class="r-stretch quarto-figure-center" id="fig-lec07-stickle-ggplot"><p class="caption">
@@ -1040,7 +1124,7 @@ Figure&nbsp;1: Counts for four genes by genotype and microbiota treatment
 <li><strong>Same ideas, two syntaxes</strong>: variables, vectors, functions, data frames and plots work the same way in R and Python - once you know one, the other is mostly vocabulary</li>
 <li><strong>R</strong>: <code>&lt;-</code>, counts from 1, <code>c()</code> vectors, <code>data.frame</code>, <code>library()</code>, <code>|&gt;</code> pipes, <code>ggplot2</code></li>
 <li><strong>Python</strong>: <code>=</code>, counts from 0, lists and <code>numpy</code> arrays, <code>pandas</code> <code>DataFrame</code>, <code>import</code>, method chaining, <code>matplotlib</code> / <code>seaborn</code></li>
-<li><strong>Install once, load every session</strong>: <code>install.packages()</code> + <code>library()</code> vs <code>pip install</code> (in a virtual environment) + <code>import</code></li>
+<li><strong>Install once, load every session</strong>: <code>install.packages()</code> + <code>library()</code> vs <code>pip install</code> (in a virtual environment) + <code>import</code> - and record the environment (<code>requirements.txt</code>, <code>environment.yml</code>, <code>renv.lock</code>) so anyone can rebuild it</li>
 <li>Run code as <strong>scripts</strong> (<code>Rscript</code>, <code>python3</code>) for pipelines and in <strong>Quarto</strong> when you want prose, code and output together</li>
 <li>When in doubt: <code>str()</code> / <code>.info()</code>, <code>?fun</code> / <code>help(fun)</code>, and read the error message</li>
 </ul>

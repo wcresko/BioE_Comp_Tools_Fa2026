@@ -665,7 +665,9 @@ div.csl-indent {
 <strong>Cross-validation</strong> in machine learning</li>
 <li>
 <strong>Parameter sweeps</strong> for computational models</li>
-</ul></section><section id="sec-cores" class="level2" data-number="17.2"><h2 data-number="17.2" class="anchored" data-anchor-id="sec-cores">
+</ul>
+<p>Tasks like these share a structure: the <em>same</em> computation is repeated many times, and no repetition depends on the result of any other. Such problems are called <strong>embarrassingly parallel</strong>, and they are the best kind of parallel problem to have—each bootstrap replicate, gene, simulation, or sample can be handed to a different core with no coordination among the workers and the results simply collected at the end. Nearly everything in this chapter targets exactly this situation. When iterations <em>do</em> depend on one another (each step of a Markov chain needs the previous step), parallelizing is far harder, and the techniques here do not directly apply.</p>
+</section><section id="sec-cores" class="level2" data-number="17.2"><h2 data-number="17.2" class="anchored" data-anchor-id="sec-cores">
 <span class="header-section-number">17.2</span> How Many Cores Do You Have?</h2>
 <p>Before parallelizing, find out how many cores are available:</p>
 <div class="cell" data-layout-align="center">
@@ -713,6 +715,19 @@ div.csl-indent {
 <span id="cb4-7"><a href="#cb4-7"></a><span class="co">#&gt; 2.326 sec elapsed</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <p>The parallel version is dramatically faster! With 8 cores, we can process all 8 samples simultaneously, reducing the time from ~16 seconds to ~2 seconds.</p>
+<p><a href="#fig-serial-parallel-gantt" class="quarto-xref">Figure&nbsp;<span>17.1</span></a> shows where that speedup comes from.</p>
+<div class="cell" data-layout-align="center">
+<div class="cell-output-display">
+<div id="fig-serial-parallel-gantt" class="quarto-float quarto-figure quarto-figure-center anchored" data-fig-align="center">
+<figure class="quarto-float quarto-float-fig figure"><div aria-describedby="fig-serial-parallel-gantt-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="17-parallel-computing_files/figure-html/fig-serial-parallel-gantt-1.png" class="img-fluid quarto-figure quarto-figure-center figure-img" style="width:100.0%">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-serial-parallel-gantt-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;17.1: Timeline of the motivating example: eight 2-second samples processed one after another on a single core take about 16 seconds, while the same eight samples spread across eight workers all finish after about 2 seconds.
+</figcaption></figure>
+</div>
+</div>
+</div>
 <p>Let’s verify the results are identical:</p>
 <div class="cell" data-layout-align="center">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1"></a><span class="co"># Results have same structure (values differ due to random generation)</span></span>
@@ -1295,7 +1310,7 @@ Warning
 <li>
 <strong>I/O bound</strong>: Waiting for disk/network, not CPU</li>
 </ul></section><section id="sec-amdahls-law" class="level3"><h3 class="anchored" data-anchor-id="sec-amdahls-law">Amdahl’s Law</h3>
-<p>The maximum speedup from parallelization is limited by the sequential portion of your code. If 50% of your code must run sequentially, you can never achieve more than 2× speedup, regardless of core count (<a href="#fig-amdahl" class="quarto-xref">Figure&nbsp;<span>17.1</span></a>).</p>
+<p>The maximum speedup from parallelization is limited by the sequential portion of your code. If 50% of your code must run sequentially, you can never achieve more than 2× speedup, regardless of core count (<a href="#fig-amdahl" class="quarto-xref">Figure&nbsp;<span>17.2</span></a>).</p>
 <div class="cell" data-layout-align="center">
 <div class="cell-output-display">
 <div id="fig-amdahl" class="quarto-float quarto-figure quarto-figure-center anchored" data-fig-align="center">
@@ -1303,7 +1318,7 @@ Warning
 <img src="17-parallel-computing_files/figure-html/fig-amdahl-1.png" class="img-fluid quarto-figure quarto-figure-center figure-img" style="width:100.0%">
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-amdahl-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;17.1: Amdahl’s law: speedup as a function of core count for different parallel fractions
+Figure&nbsp;17.2: Amdahl’s law: speedup as a function of core count for different parallel fractions
 </figcaption></figure>
 </div>
 </div>

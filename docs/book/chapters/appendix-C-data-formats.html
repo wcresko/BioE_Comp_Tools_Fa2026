@@ -727,6 +727,16 @@ MEEPQSDPSVEPPLSQETFSDLWKLLPENNVLSPLPSQAMDDLMLSPDDIEQWFTEDPGP</code></pre>
 NCATGCAGCGTACGGTAATTGGCAGGCATTAGCAGCATCC
 +
 #AAAAFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF</code></pre>
+<div id="fig-fastq-anatomy" class="quarto-float quarto-figure quarto-figure-center anchored" data-fig-align="center">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-fastq-anatomy-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="../images/bk_fastq_anatomy.svg" class="img-fluid quarto-figure quarto-figure-center figure-img" style="width:90.0%">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-fastq-anatomy-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;D.1: Anatomy of a FASTQ record: four lines per read, with each quality character encoding the Phred score of the base at the same position (Phred+33: Q = ASCII code - 33).
+</figcaption>
+</figure>
+</div>
 <div id="tbl-fastq-record" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-tbl figure">
 <figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-fastq-record-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
@@ -825,6 +835,19 @@ Table&nbsp;D.2: Phred quality scores and the base-call accuracy they encode
 <li>Because each read is exactly 4 lines, <strong>number of reads = lines / 4</strong>: <code>echo $(( $(zcat reads.fastq.gz | wc -l) / 4 ))</code>.</li>
 <li>Quality-control tools such as FastQC summarize quality scores across a whole file.</li>
 </ul>
+<div class="callout callout-style-default callout-warning callout-titled" title="Don't count reads with `grep -c '^@'`">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Warning</span>Don’t count reads with <code>grep -c '^@'</code>
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>It is tempting to count reads by counting header lines, since every header starts with <code>@</code>. But <code>@</code> is also a valid quality character—ASCII 64, which in Phred+33 encodes Q31—so line 4 of a record can begin with <code>@</code> too, and the count comes out too high. The structure of the file, not its characters, is what is reliable: count reads as lines divided by 4 (as above, or <code>zcat reads.fastq.gz | awk 'NR % 4 == 1' | wc -l</code>), and pull out sequences by line position (<code>awk 'NR % 4 == 2'</code>) rather than by pattern matching.</p>
+</div>
+</div>
 </section>
 <section id="sec-gzip-streaming" class="level2" data-number="D.5">
 <h2 data-number="D.5" class="anchored" data-anchor-id="sec-gzip-streaming"><span class="header-section-number">D.5</span> Compressed files (.gz) and streaming</h2>

@@ -168,7 +168,7 @@ ul.task-list li input[type="checkbox"] {
 </header>
 
 
-<p>Short, <strong>ungraded</strong> practice tasks - about 30 minutes, all on Talapas. Companion reading: <a href="../book/chapters/16-hpc-talapas.html">Ch. 16</a> and <a href="../book/chapters/17-parallel-computing.html">Ch. 17</a>; reference: <a href="../book/chapters/appendix-G-slurm.html">App. G</a>. You need your Talapas account working - if it is not, that is task 0: contact me.</p>
+<p>Short, <strong>ungraded</strong> practice tasks - about 40 minutes, all on Talapas. Companion reading: <a href="../book/chapters/16-hpc-talapas.html">Ch. 16</a> and <a href="../book/chapters/17-parallel-computing.html">Ch. 17</a>; reference: <a href="../book/chapters/appendix-G-slurm.html">App. G</a>. You need your Talapas account working - if it is not, that is task 0: contact me.</p>
 <ol type="1">
 <li>Log in to Open OnDemand at <a href="https://ondemand.talapas.uoregon.edu" class="uri">https://ondemand.talapas.uoregon.edu</a> with your Duck ID and open the <strong>file explorer</strong>. What is the path of your home directory?</li>
 <li>Open a <strong>shell</strong> from OnDemand (or <code>ssh yourduckid@login.talapas.uoregon.edu</code>) and run <code>hostname</code> and <code>pwd</code>.</li>
@@ -176,8 +176,10 @@ ul.task-list li input[type="checkbox"] {
 <li>Recreate your course skeleton on the cluster: <code>mkdir -p ~/comptools/{data,scripts,results}</code>.</li>
 <li>Transfer <code>Stickle_RNAseq.tsv</code> to <code>~/comptools/data</code> (OnDemand’s file explorer upload button, or <code>scp</code> from your laptop). Confirm with <code>wc -l</code>.</li>
 <li>Run <code>module avail R</code> (press <code>q</code> to exit the list), then <code>module load</code> an R version and start R on the login node just long enough to run <code>R.version.string</code> and quit.</li>
+<li>Rebuild your laptop environment from Week 7: transfer your <code>environment.yml</code> (same route as task 5), then <code>module spider miniconda</code>, <code>module load</code> it, and run <code>conda env create -f environment.yml</code>. Activate it with <code>conda activate rnaseq</code> and check <code>which python3</code> - you now have the <em>same</em> environment in both places.</li>
 <li>Copy the minimal Slurm script from the book (<a href="../book/chapters/16-hpc-talapas.html">Ch. 16</a>) into <code>scripts/hello.sbatch</code>: it should print <code>hostname</code> and <code>date</code>.</li>
 <li>Submit it with <code>sbatch scripts/hello.sbatch</code>, watch the queue with <code>squeue -u $USER</code>, and when it finishes, <code>cat</code> the <code>slurm-*.out</code> file. Which node did it run on?</li>
+<li>Now prove your environment travels into batch jobs: add <code>module load</code> miniconda, <code>conda activate rnaseq</code>, and <code>python3 -c "import pandas as pd; print(pd.__version__)"</code> to <code>hello.sbatch</code> and resubmit. The pandas version in the log is your environment, running on a compute node.</li>
 <li>Run <code>sinfo</code> and identify one regular partition and the GPU partition.</li>
 <li>From the shell, run your Week 3 grep pipeline on the dataset - identical commands, bigger computer. That is the point of the shell.</li>
 </ol>
