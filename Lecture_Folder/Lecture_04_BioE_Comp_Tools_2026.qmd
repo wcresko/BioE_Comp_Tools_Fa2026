@@ -64,29 +64,6 @@ grep [options] pattern [file...]
 - Full treatment: the L03 slides, [Ch. 9](../book/chapters/09-grep-regex.html) and [App. D](../book/chapters/appendix-D-regex.html)
 :::
 
-## Reminder: `grep` can live in pipelines
-
-``` {.bash code-line-numbers="|1-2|4-5|7-8|10-11|13-14"}
-# -c counts matching lines, -w matches whole words only: the mono fish
-grep -cw "mono" data/Stickle_RNAseq.tsv
-
-# Combine with pipes: genotype-A fish only, then tally their microbiota column
-grep -w "A" data/Stickle_RNAseq.tsv | cut -f 3 | sort | uniq -c
-
-# -n shows line numbers: where in the file is fish BM7?
-grep -nw "BM7" data/Stickle_RNAseq.tsv | cut -f 1-4
-
-# -v inverts the match: everything NOT mono (40 conventional fish + 1 header = 41)
-grep -vw "mono" data/Stickle_RNAseq.tsv | wc -l
-
-# -o prints only the matching text itself, one match per line
-grep -ow "conventional" data/Stickle_RNAseq.tsv | head -3
-```
-
-::: callout-note
-- Every one of these works unchanged on compressed files through `zgrep` - handy for the genomic data later today
-:::
-
 ## Test your knowledge - which lines match?
 
 Create the file `test.txt` with four lines - one `printf` does it:
@@ -114,6 +91,29 @@ grep "^A.G$" test.txt
 - `^ATG` → lines 1 and 3 (must *start* with ATG)
 - `ATG$` → lines 2 and 3 (must *end* with ATG)
 - `^A.G$` → lines 3 and 4 (exactly three characters: A, anything, G)
+:::
+
+## Reminder: `grep` can live in pipelines
+
+``` {.bash code-line-numbers="|1-2|4-5|7-8|10-11|13-14"}
+# -c counts matching lines, -w matches whole words only: the mono fish
+grep -cw "mono" data/Stickle_RNAseq.tsv
+
+# Combine with pipes: genotype-A fish only, then tally their microbiota column
+grep -w "A" data/Stickle_RNAseq.tsv | cut -f 3 | sort | uniq -c
+
+# -n shows line numbers: where in the file is fish BM7?
+grep -nw "BM7" data/Stickle_RNAseq.tsv | cut -f 1-4
+
+# -v inverts the match: everything NOT mono (40 conventional fish + 1 header = 41)
+grep -vw "mono" data/Stickle_RNAseq.tsv | wc -l
+
+# -o prints only the matching text itself, one match per line
+grep -ow "conventional" data/Stickle_RNAseq.tsv | head -3
+```
+
+::: callout-note
+- Every one of these works unchanged on compressed files through `zgrep` - handy for the genomic data later today
 :::
 
 ## Streams with `grep`: filtering the stickleback table
@@ -185,11 +185,19 @@ awk -F'\t' 'NR > 1 {n++} END {print n, "fish"}' data/Stickle_RNAseq.tsv
 ```
 
 ::: callout-tip
-- Rule of thumb: **`grep`** finds lines, **`sed`** edits text, **`awk`** works with columns - that is the whole structure
+- Rule of thumb:
 
-- everything else is flags and patterns.
+  - **`grep`** finds lines
 
-- Today we use all three by example; the systematic tour (line ranges, `NR`, `BEGIN`/`END`, awk arrays) is in the [sed and awk sections of Ch. 9](../book/chapters/09-grep-regex.html#sec-sed) and [App. D](../book/chapters/appendix-D-regex.html).
+  - **`awk`** works with columns
+
+  - **`sed`** edits text
+
+- Everything else is flags and patterns.
+
+- Today we use all three by example
+
+- The systematic description is in the [sed and awk sections of Ch. 9](#0) and [App. D](#0).
 :::
 
 ## Streams with `sed`: cleaning the stickleback table
@@ -237,15 +245,21 @@ cat results/gene1_group_means.txt
 
 ## Human Chromosome Data
 
-- Everything so far - reading files, pipes, redirection, `grep`, `sed` and `awk` - in one realistic job: grab a big public dataset and ask it questions, straight from the shell
+- Genomic data files can be massive
 
-- Genomic data files can be massive (the full human genome is \~1 GB compressed, \~3 GB as plain text)
+  - the full human genome is \~1 GB compressed
 
-- FASTA format is standard for sequence data
+  - \~3 GB as plain text
+
+- FASTA format is standard for sequence data (`file_name.fa` )
 
 - Perfect use case for Unix pipes and redirection
 
-- We will practice on **human chromosome 21** - the smallest autosome (\~13 MB compressed, \~46 Mb of sequence), so every command finishes in seconds
+- We will practice on **human chromosome 21**
+
+  - the smallest autosome (\~13 MB compressed, \~46 Mb of sequence)
+
+  - so every command finishes in seconds
 
 - The same commands work unchanged on the whole genome - only the wait time changes
 
@@ -282,14 +296,17 @@ wget https://hgdownload.soe.ucsc.edu/goldenPath/hg38/chromosomes/chr21.fa.gz
 
 Don't use `cat` on huge files! Use these approaches:
 
-``` {.bash code-line-numbers="|1|3-4|6-8|10|12-14|16-17|19|21|23"}
+``` bash
+# dumps all ~930,000 lines
+
+gunzip -c chr21.fa.gz | cat          
+
 # Peek at the top and the bottom - and see why not to cat the whole thing
 
 gunzip -c chr21.fa.gz | head -10
 gunzip -c chr21.fa.gz | tail -10
 
 # Combine them: two 50-base lines (~100 characters) from the middle of the file
-gunzip -c chr21.fa.gz | cat          # dumps all ~930,000 lines
 gunzip -c chr21.fa.gz | head -n 460000 | tail -n 2
 
 # Check file size before and after decompression (-k keeps the .gz)
@@ -336,8 +353,6 @@ sed -n '400000,420000p' chr21.fa > region_of_interest.fa
 :::
 
 ## Processing FASTA Files with Pipes
-
-Every pipeline here starts the same way: drop the header, keep the sequence.
 
 ``` {.bash code-line-numbers="|1-3|5-7|9-11|13-20"}
 # Extract the sequence (no header) - the start of every pipeline on this slide
@@ -443,7 +458,7 @@ wget -qO - https://hgdownload.soe.ucsc.edu/goldenPath/hg38/chromosomes/chr21.fa.
 - This approach saves disk space and time
 :::
 
-## Your turn: sequence content of chr21
+## On your own outside of class - sequence content of chr21
 
 Using only commands you now know (`grep -v`, `tr`, `fold`, `sort`, `uniq`, `wc`):
 
@@ -453,7 +468,8 @@ Using only commands you now know (`grep -v`, `tr`, `fold`, `sort`, `uniq`, `wc`)
 4.  *Bonus:* what fraction of the chromosome is `N`?
 
 ::: callout-tip
-Build each pipeline one command at a time and check the output at every stage. Remember the soft-masking: uppercase first with `tr 'acgt' 'ACGT'`.
+- Build each pipeline one command at a time and check the output at every stage.
+- Remember the soft-masking: uppercase first with `tr 'acgt' 'ACGT'`.
 :::
 
 ::: notes
@@ -497,12 +513,10 @@ Solutions:
 
 - **L05** opens by rewriting today's FASTA-statistics script in R and in Python
 
-- **Lectures 05-07** go deep on both languages.
+- **Lectures 05-07** go deep on both Python and R languages.
 :::
 
-## Shell scripts: the mechanics (reminder)
-
-This is *not* your first shell script - you wrote `hello.sh` in Week 2 and warmed up again last week. The mechanics one more time, on the chr21 subset you just made:
+## Shell scripts the mechanics (reminder)
 
 ``` {.bash code-line-numbers="|1-2|4|6-7"}
 #!/bin/bash
@@ -519,7 +533,7 @@ chmod +x chr21_info.sh     # make it executable, once
 ./chr21_info.sh            # run it (or: bash chr21_info.sh)
 ```
 
-**New today:** arguments, conditionals, loops, functions and error handling - the pieces that turn saved commands into real **pipelines**.
+- **New today:** arguments, conditionals, loops, functions and error handling the pieces that turn saved commands into real **pipelines**.
 
 ## Command-Line Arguments
 
@@ -563,7 +577,8 @@ echo "Writing results to ${NAME}_stats.txt"
 ```
 
 ::: callout-note
-Bash also has arrays (`BASES=(A C G T)`) - you will rarely need them in this course; see [Ch. 10](../book/chapters/10-shell-scripting.html) when you do.
+- Bash also has arrays (`BASES=(A C G T)`)
+- You will rarely need them in this course; see [Ch. 10](../book/chapters/10-shell-scripting.html) when you do.
 :::
 
 ## Conditionals (if/then/else)
@@ -598,7 +613,9 @@ fi
 ```
 
 ::: callout-tip
-Always put **spaces inside the brackets** (`[ $x -gt 5 ]`) and **quote your variables** (`"$FILE"`). The full table of test operators is on the next slide.
+- Always put **spaces inside the brackets** (`[ $x -gt 5 ]`) and **quote your variables** (`"$FILE"`)
+
+- The full table of test operators is on the next slide.
 :::
 
 ## Test operators for `[ ]`
@@ -673,26 +690,11 @@ group_report() {
 group_report "data/Stickle_RNAseq.tsv" "results/group_counts.txt"
 ```
 
-## Error handling: the two lines to memorize
-
-``` {.bash code-line-numbers="|1-2|4-8"}
-#!/bin/bash
-set -euo pipefail   # exit on any error, on unset variables, and on pipe failures
-
-# ... and check your inputs before using them
-if [ ! -f "$1" ]; then
-    echo "Error: File $1 not found!" >&2
-    exit 1
-fi
-```
-
-- `set -euo pipefail` turns silent failures into loud, early ones - put it at the top of every script (our `gene_means.sh` below does)
-- Send error messages to **stderr** (`>&2`) so they never pollute piped output
-- More patterns (`trap`, try/catch style) in [Ch. 10](../book/chapters/10-shell-scripting.html)
-
 ## From one-liner to tool: `gene_means.sh`
 
-The group-means `awk` one-liner from the trio section works for Gene1 only. Wrapped in a script - argument check, strict mode, the same `awk` - it becomes a tool for *any* gene:
+- The group-means `awk` one-liner from the trio section works for Gene1 only.
+
+- Wrapped in a script - argument check, strict mode, the same `awk` - it becomes a tool for *any* gene:
 
 ``` {.bash code-line-numbers="|1-3|4|5-6|8-9|10"}
 #!/bin/bash
@@ -715,7 +717,11 @@ for c in 5 6 7; do ./gene_means.sh $c; done    # loop over the first three genes
 
 ## Script the worked example: `fasta_stats.sh`
 
-The same move for the genomic data: the counting, N, GC and ORF-finding pipelines from the chr21 worked example, wrapped with argument checks into one tool that runs on *any* FASTA file:
+- The same for the genomic data:
+
+- The counting, N, GC and ORF-finding pipelines from the chr21 worked example
+
+- Wrapped with argument checks into one tool that runs on *any* FASTA file:
 
 ``` {.bash code-line-numbers="|1-3|5-9|11|13-17|19|21-23|25-27|29-31|33-35|37-40|42-44"}
 #!/bin/bash
@@ -770,10 +776,12 @@ echo "ORF-like stretches: $ORF_COUNT"
 ```
 
 ::: callout-note
-Next week (L05) opens with this same script rewritten in **R** and in **Python** - same logic, friendlier arithmetic.
+- Next week (L05) opens with this same script rewritten in **R** and in **Python**
+
+- Same logic, friendlier arithmetic and syntax.
 :::
 
-## Best Practices for Shell Scripts
+## Best Practices for Scripts
 
 1.  **Always include a shebang**: `#!/bin/bash`
 2.  **Comment your code**: Explain what and why
@@ -786,6 +794,3 @@ Next week (L05) opens with this same script rewritten in **R** and in **Python**
 9.  **Create help messages**: Document usage
 10. **Log important steps**: Keep records of what was done
 
-::: callout-note
-Every one of these applies to **R and Python scripts** too: shebang line, comments, checking `commandArgs()` / `sys.argv`, meaningful names, relative paths, Git, and testing on a tiny input first.
-:::
