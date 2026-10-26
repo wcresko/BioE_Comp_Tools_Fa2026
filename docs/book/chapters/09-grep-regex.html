@@ -622,8 +622,16 @@ div.csl-indent {
   <li><a href="#sec-text-tools-together" id="toc-sec-text-tools-together" class="nav-link" data-scroll-target="#sec-text-tools-together">Putting It Together</a></li>
   </ul>
 </li>
-  <li><a href="#sec-regex-stickle" id="toc-sec-regex-stickle" class="nav-link" data-scroll-target="#sec-regex-stickle"><span class="header-section-number">9.11</span> Running Example: The Stickleback Data</a></li>
-  <li><a href="#sec-regex-summary" id="toc-sec-regex-summary" class="nav-link" data-scroll-target="#sec-regex-summary"><span class="header-section-number">9.12</span> Summary</a></li>
+  <li>
+<a href="#sec-regex-r-python" id="toc-sec-regex-r-python" class="nav-link" data-scroll-target="#sec-regex-r-python"><span class="header-section-number">9.11</span> The Same Patterns in R and Python</a>
+  <ul class="collapse">
+<li><a href="#sec-regex-in-r" id="toc-sec-regex-in-r" class="nav-link" data-scroll-target="#sec-regex-in-r">R’s pattern functions</a></li>
+  <li><a href="#sec-regex-in-python" id="toc-sec-regex-in-python" class="nav-link" data-scroll-target="#sec-regex-in-python">Python’s <code>re</code> module</a></li>
+  <li><a href="#sec-regex-three-ways" id="toc-sec-regex-three-ways" class="nav-link" data-scroll-target="#sec-regex-three-ways">One pattern, three languages</a></li>
+  </ul>
+</li>
+  <li><a href="#sec-regex-stickle" id="toc-sec-regex-stickle" class="nav-link" data-scroll-target="#sec-regex-stickle"><span class="header-section-number">9.12</span> Running Example: The Stickleback Data</a></li>
+  <li><a href="#sec-regex-summary" id="toc-sec-regex-summary" class="nav-link" data-scroll-target="#sec-regex-summary"><span class="header-section-number">9.13</span> Summary</a></li>
   <li><a href="#sec-grep-additional-reading" id="toc-sec-grep-additional-reading" class="nav-link" data-scroll-target="#sec-grep-additional-reading">Additional Reading</a></li>
   <li><a href="#sec-grep-exercises" id="toc-sec-grep-exercises" class="nav-link" data-scroll-target="#sec-grep-exercises">Exercises</a></li>
   </ul><div class="toc-actions"><ul><li><a href="https://github.com/wcresko/BioE_Comp_Tools_Fa2026/edit/main/Book/chapters/09-grep-regex.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li><li><a href="https://github.com/wcresko/BioE_Comp_Tools_Fa2026/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></nav>
@@ -1516,8 +1524,108 @@ Figure&nbsp;9.3: Choosing the right tool: <code>grep</code> finds lines, <code>s
 <span id="cb42-16"><a href="#cb42-16"></a><span class="co"># Which feature types does a GFF file contain, and how many of each?</span></span>
 <span id="cb42-17"><a href="#cb42-17"></a><span class="ex">$</span> grep <span class="at">-v</span> <span class="st">"^#"</span> annotations.gff <span class="kw">|</span> <span class="fu">cut</span> <span class="at">-f3</span> <span class="kw">|</span> <span class="fu">sort</span> <span class="kw">|</span> <span class="fu">uniq</span> <span class="at">-c</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>Notice the recurring shape: <em>select</em> lines (<code>grep</code>, <code>awk</code>, <code>tail -n +2</code>), <em>extract</em> a column (<code>cut</code>), <em>sort</em> so that identical values are adjacent, then <em>count</em> (<code>uniq -c</code>, <code>wc -l</code>). Once this idiom is in your fingers, most “how many of each?” questions take seconds.</p>
-</section></section><section id="sec-regex-stickle" class="level2" data-number="9.11"><h2 data-number="9.11" class="anchored" data-anchor-id="sec-regex-stickle">
-<span class="header-section-number">9.11</span> Running Example: The Stickleback Data</h2>
+</section></section><section id="sec-regex-r-python" class="level2" data-number="9.11"><h2 data-number="9.11" class="anchored" data-anchor-id="sec-regex-r-python">
+<span class="header-section-number">9.11</span> The Same Patterns in R and Python</h2>
+<p>From Lecture 05 onward, the regular-expression language you have been using with <code>grep</code>, <code>sed</code>, and <code>awk</code> moves <em>inside</em> R and Python. The patterns themselves — anchors, character classes, quantifiers, alternation — are unchanged; only the functions wrapped around them are new. The map:</p>
+<div id="tbl-regex-three-languages" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure"><figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-regex-three-languages-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;9.6: Pattern-matching functions across the three languages
+</figcaption><div aria-describedby="tbl-regex-three-languages-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<table class="caption-top table">
+<colgroup>
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+</colgroup>
+<thead><tr class="header">
+<th style="text-align: left;">Job</th>
+<th style="text-align: left;">Shell</th>
+<th style="text-align: left;">R</th>
+<th style="text-align: left;">Python (<code>import re</code>)</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">Which elements match?</td>
+<td style="text-align: left;"><code>grep</code></td>
+<td style="text-align: left;">
+<code><a href="https://rdrr.io/r/base/grep.html">grepl()</a></code> (TRUE/FALSE), <code><a href="https://rdrr.io/r/base/grep.html">grep()</a></code> (positions)</td>
+<td style="text-align: left;"><code>re.search()</code></td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Pull out the match itself</td>
+<td style="text-align: left;"><code>grep -o</code></td>
+<td style="text-align: left;">
+<code><a href="https://rdrr.io/r/base/regmatches.html">regmatches()</a></code> + <code><a href="https://rdrr.io/r/base/grep.html">gregexpr()</a></code>
+</td>
+<td style="text-align: left;"><code>re.findall()</code></td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Substitute</td>
+<td style="text-align: left;"><code>sed 's/a/b/'</code></td>
+<td style="text-align: left;">
+<code><a href="https://rdrr.io/r/base/grep.html">sub()</a></code> (first), <code><a href="https://rdrr.io/r/base/grep.html">gsub()</a></code> (all)</td>
+<td style="text-align: left;"><code>re.sub()</code></td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Split on a pattern</td>
+<td style="text-align: left;"><code>awk -F</code></td>
+<td style="text-align: left;"><code><a href="https://rdrr.io/r/base/strsplit.html">strsplit()</a></code></td>
+<td style="text-align: left;"><code>re.split()</code></td>
+</tr>
+</tbody>
+</table>
+</div>
+</figure>
+</div>
+<p>One practical difference between the languages is <strong>escaping</strong>. In an R string, a backslash must itself be escaped, so the digit class <code>\d</code> is written <code>"\\d"</code>. Python avoids the problem with <strong>raw strings</strong>: write every pattern with an <code>r</code> prefix, as in <code>r"\d"</code>, and backslashes pass through untouched. Make the raw-string prefix a habit — a Python regex without it will eventually bite you.</p>
+<section id="sec-regex-in-r" class="level3"><h3 class="anchored" data-anchor-id="sec-regex-in-r">R’s pattern functions</h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb43"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb43-1"><a href="#cb43-1"></a>sequences <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"ATGAAATAA"</span>, <span class="st">"CCCGGG"</span>, <span class="st">"ATGTTTTGA"</span>)</span>
+<span id="cb43-2"><a href="#cb43-2"></a></span>
+<span id="cb43-3"><a href="#cb43-3"></a><span class="fu">grepl</span>(<span class="st">"^ATG"</span>, sequences)           <span class="co"># which elements start with ATG?</span></span>
+<span id="cb43-4"><a href="#cb43-4"></a><span class="co"># [1]  TRUE FALSE  TRUE</span></span>
+<span id="cb43-5"><a href="#cb43-5"></a><span class="fu">grep</span>(<span class="st">"^ATG"</span>, sequences)            <span class="co"># their positions ...</span></span>
+<span id="cb43-6"><a href="#cb43-6"></a><span class="co"># [1] 1 3</span></span>
+<span id="cb43-7"><a href="#cb43-7"></a><span class="fu">grep</span>(<span class="st">"^ATG"</span>, sequences, <span class="at">value =</span> <span class="cn">TRUE</span>)   <span class="co"># ... or the elements themselves</span></span>
+<span id="cb43-8"><a href="#cb43-8"></a><span class="co"># [1] "ATGAAATAA" "ATGTTTTGA"</span></span>
+<span id="cb43-9"><a href="#cb43-9"></a></span>
+<span id="cb43-10"><a href="#cb43-10"></a><span class="fu">gsub</span>(<span class="st">"T"</span>, <span class="st">"U"</span>, sequences)          <span class="co"># substitute ALL matches (sub() does the first)</span></span>
+<span id="cb43-11"><a href="#cb43-11"></a><span class="co"># [1] "AUGAAAUAA" "CCCGGG"    "AUGUUUUGA"</span></span>
+<span id="cb43-12"><a href="#cb43-12"></a></span>
+<span id="cb43-13"><a href="#cb43-13"></a><span class="co"># Extract every match, like grep -o: regmatches() + gregexpr()</span></span>
+<span id="cb43-14"><a href="#cb43-14"></a>seq <span class="ot">&lt;-</span> <span class="st">"ATGAAATAACCCATGTTTTGA"</span></span>
+<span id="cb43-15"><a href="#cb43-15"></a><span class="fu">regmatches</span>(seq, <span class="fu">gregexpr</span>(<span class="st">"ATG([ACGT]{3})*?(TAA|TAG|TGA)"</span>, seq))[[<span class="dv">1</span>]]</span>
+<span id="cb43-16"><a href="#cb43-16"></a><span class="co"># [1] "ATGAAATAA" "ATGTTTTGA"</span></span>
+<span id="cb43-17"><a href="#cb43-17"></a></span>
+<span id="cb43-18"><a href="#cb43-18"></a><span class="fu">strsplit</span>(<span class="st">"convA_rep1_day3"</span>, <span class="st">"_"</span>)[[<span class="dv">1</span>]]   <span class="co"># split on a pattern, like awk -F</span></span>
+<span id="cb43-19"><a href="#cb43-19"></a><span class="co"># [1] "convA" "rep1"  "day3"</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>The tidyverse’s <strong>stringr</strong> package (<a href="14-data-wrangling.html#sec-core-tidyverse-packages" class="quarto-xref"><span>Section 14.1.1</span></a>) wraps these in functions with consistent names and argument order — <code>str_detect()</code>, <code>str_subset()</code>, <code>str_replace_all()</code>, <code>str_extract_all()</code>, <code>str_split()</code> — and is what most modern R code uses; the base functions above are what you will meet in older code and in other people’s scripts.</p>
+</section><section id="sec-regex-in-python" class="level3"><h3 class="anchored" data-anchor-id="sec-regex-in-python">Python’s <code>re</code> module</h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb44"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb44-1"><a href="#cb44-1"></a><span class="im">import</span> re</span>
+<span id="cb44-2"><a href="#cb44-2"></a></span>
+<span id="cb44-3"><a href="#cb44-3"></a>sequences <span class="op">=</span> [<span class="st">"ATGAAATAA"</span>, <span class="st">"CCCGGG"</span>, <span class="st">"ATGTTTTGA"</span>]</span>
+<span id="cb44-4"><a href="#cb44-4"></a></span>
+<span id="cb44-5"><a href="#cb44-5"></a>[s <span class="cf">for</span> s <span class="kw">in</span> sequences <span class="cf">if</span> re.search(<span class="vs">r"</span><span class="dv">^</span><span class="vs">ATG"</span>, s)]     <span class="co"># keep the matching elements</span></span>
+<span id="cb44-6"><a href="#cb44-6"></a><span class="co"># ['ATGAAATAA', 'ATGTTTTGA']</span></span>
+<span id="cb44-7"><a href="#cb44-7"></a></span>
+<span id="cb44-8"><a href="#cb44-8"></a>re.sub(<span class="vs">r"T"</span>, <span class="st">"U"</span>, <span class="st">"ATGAAATAA"</span>)                      <span class="co"># substitute all matches</span></span>
+<span id="cb44-9"><a href="#cb44-9"></a><span class="co"># 'AUGAAAUAA'</span></span>
+<span id="cb44-10"><a href="#cb44-10"></a></span>
+<span id="cb44-11"><a href="#cb44-11"></a>seq <span class="op">=</span> <span class="st">"ATGAAATAACCCATGTTTTGA"</span></span>
+<span id="cb44-12"><a href="#cb44-12"></a>re.findall(<span class="vs">r"ATG</span>(?:<span class="pp">[ACGT]</span><span class="op">{3}</span>)<span class="op">*?</span>(?:<span class="vs">TAA</span><span class="cf">|</span><span class="vs">TAG</span><span class="cf">|</span><span class="vs">TGA</span>)<span class="vs">"</span>, seq)   <span class="co"># extract every match</span></span>
+<span id="cb44-13"><a href="#cb44-13"></a><span class="co"># ['ATGAAATAA', 'ATGTTTTGA']</span></span>
+<span id="cb44-14"><a href="#cb44-14"></a></span>
+<span id="cb44-15"><a href="#cb44-15"></a>re.split(<span class="vs">r"_"</span>, <span class="st">"convA_rep1_day3"</span>)                   <span class="co"># split on a pattern</span></span>
+<span id="cb44-16"><a href="#cb44-16"></a><span class="co"># ['convA', 'rep1', 'day3']</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Two Python details to note. First, <code>(?: ... )</code> is a <em>non-capturing</em> group: it groups for structure, like <code>( ... )</code>, but keeps <code>re.findall()</code> returning the whole match rather than the group’s contents. Second, for a <strong>pandas</strong> column the <code>.str</code> accessor runs a regex down every row at once — <code>df["Individual"].str.contains(r"1$")</code>, <code>.str.replace()</code>, <code>.str.extract()</code> — which is the data-frame version of <code><a href="https://rdrr.io/r/base/grep.html">grepl()</a></code> on an R vector.</p>
+</section><section id="sec-regex-three-ways" class="level3"><h3 class="anchored" data-anchor-id="sec-regex-three-ways">One pattern, three languages</h3>
+<p>The ORF-like pattern from <a href="#sec-searching-for-biological-motifs" class="quarto-xref"><span>Section 9.5.2</span></a> works everywhere; only the function changes:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb45"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb45-1"><a href="#cb45-1"></a><span class="fu">grep</span> <span class="at">-oP</span> <span class="st">"ATG([ACGT]{3})*?(TAA|TAG|TGA)"</span> cds.fa                        <span class="co"># shell</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb46"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb46-1"><a href="#cb46-1"></a><span class="fu">regmatches</span>(seq, <span class="fu">gregexpr</span>(<span class="st">"ATG([ACGT]{3})*?(TAA|TAG|TGA)"</span>, seq))[[<span class="dv">1</span>]]   <span class="co"># R</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb47"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb47-1"><a href="#cb47-1"></a>re.findall(<span class="vs">r"ATG</span>(?:<span class="pp">[ACGT]</span><span class="op">{3}</span>)<span class="op">*?</span>(?:<span class="vs">TAA</span><span class="cf">|</span><span class="vs">TAG</span><span class="cf">|</span><span class="vs">TGA</span>)<span class="vs">"</span>, seq)                  <span class="co"># Python</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>This is the usual division of labor: prototype and explore a pattern with <code>grep</code> on the command line, where feedback is immediate, then move it into an R or Python script once it needs to feed counts, tables, or figures (the <code>fasta_stats</code> scripts of Lecture 05 do exactly that). The pattern syntax reference in <a href="appendix-D-regex.html" class="quarto-xref"><span>Appendix D</span></a> applies to all three.</p>
+</section></section><section id="sec-regex-stickle" class="level2" data-number="9.12"><h2 data-number="9.12" class="anchored" data-anchor-id="sec-regex-stickle">
+<span class="header-section-number">9.12</span> Running Example: The Stickleback Data</h2>
 <div class="callout callout-style-default callout-note callout-titled" title="Running example">
 <div class="callout-header d-flex align-content-center">
 <div class="callout-icon-container">
@@ -1532,18 +1640,18 @@ Figure&nbsp;9.3: Choosing the right tool: <code>grep</code> finds lines, <code>s
 </div>
 </div>
 <p>The stickleback table is small enough to read, but the same commands scale to files with millions of lines. <code>grep -w</code> matches whole words, so the treatment label in the third column selects rows without also matching the combined label in the fourth; a regular expression anchored at the start of the line picks out the individuals whose number is exactly <code>1</code>:</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb43"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb43-1"><a href="#cb43-1"></a><span class="bu">cd</span> ~/projects/comptools</span>
-<span id="cb43-2"><a href="#cb43-2"></a><span class="fu">grep</span> <span class="at">-w</span> <span class="st">"convB"</span> data/Stickle_RNAseq.tsv <span class="kw">|</span> <span class="fu">cut</span> <span class="at">-f</span> 1      <span class="co"># individuals: genotype B, conventional</span></span>
-<span id="cb43-3"><a href="#cb43-3"></a><span class="fu">grep</span> <span class="at">-E</span> <span class="st">"^[A-Z]+1\b"</span> data/Stickle_RNAseq.tsv <span class="kw">|</span> <span class="fu">cut</span> <span class="at">-f</span> 1-3   <span class="co"># AC1, AM1, BC1, BM1</span></span>
-<span id="cb43-4"><a href="#cb43-4"></a><span class="fu">grep</span> <span class="at">-c</span> mono data/Stickle_RNAseq.tsv<span class="kw">;</span> <span class="fu">grep</span> <span class="at">-cw</span> mono data/Stickle_RNAseq.tsv   <span class="co"># both 40 - why?</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb48"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb48-1"><a href="#cb48-1"></a><span class="bu">cd</span> ~/projects/comptools</span>
+<span id="cb48-2"><a href="#cb48-2"></a><span class="fu">grep</span> <span class="at">-w</span> <span class="st">"convB"</span> data/Stickle_RNAseq.tsv <span class="kw">|</span> <span class="fu">cut</span> <span class="at">-f</span> 1      <span class="co"># individuals: genotype B, conventional</span></span>
+<span id="cb48-3"><a href="#cb48-3"></a><span class="fu">grep</span> <span class="at">-E</span> <span class="st">"^[A-Z]+1\b"</span> data/Stickle_RNAseq.tsv <span class="kw">|</span> <span class="fu">cut</span> <span class="at">-f</span> 1-3   <span class="co"># AC1, AM1, BC1, BM1</span></span>
+<span id="cb48-4"><a href="#cb48-4"></a><span class="fu">grep</span> <span class="at">-c</span> mono data/Stickle_RNAseq.tsv<span class="kw">;</span> <span class="fu">grep</span> <span class="at">-cw</span> mono data/Stickle_RNAseq.tsv   <span class="co"># both 40 - why?</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>The last line is worth pausing on. Without <code>-w</code>, <code>mono</code> also matches <code>monoA</code> and <code>monoB</code> in the fourth column, but every line that contains those also contains the bare word <code>mono</code> in the third, so the counts agree. Small experiments like this, comparing two flags on data you understand, are how you learn what a flag really does.</p>
 <p><code>sed</code> and <code>awk</code> complete the picture. The fourth column is named <code>Geno&amp;Micro</code>, and the ampersand will annoy every tool downstream, so the first <code>sed</code> command below renames it <em>in a new file</em>, leaving the raw data untouched (<a href="08-tidy-data.html#sec-preserving-raw-data" class="quarto-xref"><span>Section 8.5.4</span></a>). <code>awk</code> then computes the mean of the first gene column over all fish, and, using an associative array keyed on the genotype, per genotype:</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb44"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb44-1"><a href="#cb44-1"></a><span class="fu">sed</span> <span class="st">'1s/Geno&amp;Micro/Geno_Micro/'</span> data/Stickle_RNAseq.tsv <span class="op">&gt;</span> results/stickle_clean.tsv</span>
-<span id="cb44-2"><a href="#cb44-2"></a><span class="fu">awk</span> <span class="at">-F</span><span class="st">'\t'</span> <span class="st">'NR &gt; 1 { sum += $5; n++ } END { print "Gene1 mean:", sum/n }'</span> results/stickle_clean.tsv</span>
-<span id="cb44-3"><a href="#cb44-3"></a><span class="fu">awk</span> <span class="at">-F</span><span class="st">'\t'</span> <span class="st">'NR &gt; 1 { sum[$2] += $5; n[$2]++ } END { for (g in sum) print g, sum[g]/n[g] }'</span> results/stickle_clean.tsv</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb49"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb49-1"><a href="#cb49-1"></a><span class="fu">sed</span> <span class="st">'1s/Geno&amp;Micro/Geno_Micro/'</span> data/Stickle_RNAseq.tsv <span class="op">&gt;</span> results/stickle_clean.tsv</span>
+<span id="cb49-2"><a href="#cb49-2"></a><span class="fu">awk</span> <span class="at">-F</span><span class="st">'\t'</span> <span class="st">'NR &gt; 1 { sum += $5; n++ } END { print "Gene1 mean:", sum/n }'</span> results/stickle_clean.tsv</span>
+<span id="cb49-3"><a href="#cb49-3"></a><span class="fu">awk</span> <span class="at">-F</span><span class="st">'\t'</span> <span class="st">'NR &gt; 1 { sum[$2] += $5; n[$2]++ } END { for (g in sum) print g, sum[g]/n[g] }'</span> results/stickle_clean.tsv</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>The mean count of the first gene is about 14 in genotype A fish and about 1.4 in genotype B, a tenfold difference visible from three lines of <code>awk</code>. Turning this into a reusable script is the job of <a href="10-shell-scripting.html" class="quarto-xref"><span>Chapter 10</span></a>.</p>
-</section><section id="sec-regex-summary" class="level2" data-number="9.12"><h2 data-number="9.12" class="anchored" data-anchor-id="sec-regex-summary">
-<span class="header-section-number">9.12</span> Summary</h2>
+</section><section id="sec-regex-summary" class="level2" data-number="9.13"><h2 data-number="9.13" class="anchored" data-anchor-id="sec-regex-summary">
+<span class="header-section-number">9.13</span> Summary</h2>
 <p>This chapter covered pattern matching with <code>grep</code> and regular expressions, and the two companion tools that edit and compute on the text <code>grep</code> finds:</p>
 <ul>
 <li>
