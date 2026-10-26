@@ -809,6 +809,88 @@ $ grep -v "^#" annotations.gff | cut -f3 | sort | uniq -c
 
 Notice the recurring shape: *select* lines (`grep`, `awk`, `tail -n +2`), *extract* a column (`cut`), *sort* so that identical values are adjacent, then *count* (`uniq -c`, `wc -l`). Once this idiom is in your fingers, most "how many of each?" questions take seconds.
 
+## The Same Patterns in R and Python {#sec-regex-r-python}
+
+From Lecture 05 onward, the regular-expression language you have been using with `grep`, `sed`, and `awk` moves *inside* R and Python. The patterns themselves — anchors, character classes, quantifiers, alternation — are unchanged; only the functions wrapped around them are new. The map:
+
+| Job | Shell | R | Python (`import re`) |
+|:---|:---|:---|:---|
+| Which elements match? | `grep` | `grepl()` (TRUE/FALSE), `grep()` (positions) | `re.search()` |
+| Pull out the match itself | `grep -o` | `regmatches()` + `gregexpr()` | `re.findall()` |
+| Substitute | `sed 's/a/b/'` | `sub()` (first), `gsub()` (all) | `re.sub()` |
+| Split on a pattern | `awk -F` | `strsplit()` | `re.split()` |
+
+: Pattern-matching functions across the three languages {#tbl-regex-three-languages}
+
+One practical difference between the languages is **escaping**. In an R string, a backslash must itself be escaped, so the digit class `\d` is written `"\\d"`. Python avoids the problem with **raw strings**: write every pattern with an `r` prefix, as in `r"\d"`, and backslashes pass through untouched. Make the raw-string prefix a habit — a Python regex without it will eventually bite you.
+
+### R's pattern functions {#sec-regex-in-r}
+
+```r
+sequences <- c("ATGAAATAA", "CCCGGG", "ATGTTTTGA")
+
+grepl("^ATG", sequences)           # which elements start with ATG?
+# [1]  TRUE FALSE  TRUE
+grep("^ATG", sequences)            # their positions ...
+# [1] 1 3
+grep("^ATG", sequences, value = TRUE)   # ... or the elements themselves
+# [1] "ATGAAATAA" "ATGTTTTGA"
+
+gsub("T", "U", sequences)          # substitute ALL matches (sub() does the first)
+# [1] "AUGAAAUAA" "CCCGGG"    "AUGUUUUGA"
+
+# Extract every match, like grep -o: regmatches() + gregexpr()
+seq <- "ATGAAATAACCCATGTTTTGA"
+regmatches(seq, gregexpr("ATG([ACGT]{3})*?(TAA|TAG|TGA)", seq))[[1]]
+# [1] "ATGAAATAA" "ATGTTTTGA"
+
+strsplit("convA_rep1_day3", "_")[[1]]   # split on a pattern, like awk -F
+# [1] "convA" "rep1"  "day3"
+```
+
+The tidyverse's **stringr** package (@sec-core-tidyverse-packages) wraps these in functions with consistent names and argument order — `str_detect()`, `str_subset()`, `str_replace_all()`, `str_extract_all()`, `str_split()` — and is what most modern R code uses; the base functions above are what you will meet in older code and in other people's scripts.
+
+### Python's `re` module {#sec-regex-in-python}
+
+```python
+import re
+
+sequences = ["ATGAAATAA", "CCCGGG", "ATGTTTTGA"]
+
+[s for s in sequences if re.search(r"^ATG", s)]     # keep the matching elements
+# ['ATGAAATAA', 'ATGTTTTGA']
+
+re.sub(r"T", "U", "ATGAAATAA")                      # substitute all matches
+# 'AUGAAAUAA'
+
+seq = "ATGAAATAACCCATGTTTTGA"
+re.findall(r"ATG(?:[ACGT]{3})*?(?:TAA|TAG|TGA)", seq)   # extract every match
+# ['ATGAAATAA', 'ATGTTTTGA']
+
+re.split(r"_", "convA_rep1_day3")                   # split on a pattern
+# ['convA', 'rep1', 'day3']
+```
+
+Two Python details to note. First, `(?: ... )` is a *non-capturing* group: it groups for structure, like `( ... )`, but keeps `re.findall()` returning the whole match rather than the group's contents. Second, for a **pandas** column the `.str` accessor runs a regex down every row at once — `df["Individual"].str.contains(r"1$")`, `.str.replace()`, `.str.extract()` — which is the data-frame version of `grepl()` on an R vector.
+
+### One pattern, three languages {#sec-regex-three-ways}
+
+The ORF-like pattern from @sec-searching-for-biological-motifs works everywhere; only the function changes:
+
+```bash
+grep -oP "ATG([ACGT]{3})*?(TAA|TAG|TGA)" cds.fa                        # shell
+```
+
+```r
+regmatches(seq, gregexpr("ATG([ACGT]{3})*?(TAA|TAG|TGA)", seq))[[1]]   # R
+```
+
+```python
+re.findall(r"ATG(?:[ACGT]{3})*?(?:TAA|TAG|TGA)", seq)                  # Python
+```
+
+This is the usual division of labor: prototype and explore a pattern with `grep` on the command line, where feedback is immediate, then move it into an R or Python script once it needs to feed counts, tables, or figures (the `fasta_stats` scripts of Lecture 05 do exactly that). The pattern syntax reference in @sec-appendix-regex applies to all three.
+
 ## Running Example: The Stickleback Data {#sec-regex-stickle}
 
 ::: {.callout-note title="Running example"}

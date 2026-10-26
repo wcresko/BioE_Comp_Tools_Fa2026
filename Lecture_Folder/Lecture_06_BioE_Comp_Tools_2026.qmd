@@ -34,20 +34,25 @@ The course book goes deeper on everything in this lecture. Read before or after 
 
 ## Goals for today
 
--   Reading, creating and exporting data frames
+-   Recap: reading, writing and indexing data frames (L05)
 -   Drawing samples from distributions
 -   Visualizing data and combining plots into one figure
--   Indexing data frames and computing summary statistics
+-   Creating data frames and computing summary statistics
 
-## Reading in Data Frames in R
+## Recap from L05: reading, writing and indexing
 
--   A strength of `R` is being able to import data from an external source
--   Create the same table that we will build by hand later today in a spreadsheet like Excel
--   Export it to comma separated and tab separated text files for importing into `R`.
--   Of the two `read.table()` calls on the "Reading in and Exporting Data Frames" slide, the first reads a comma-delimited file, whereas the second reads a tab-delimited one
--   In both cases the header and row.names arguments indicate that there is a header row and row label column
--   Note that the name of the file by itself will have R look in the CWD, whereas a full path can also be used
--   In Python the same job is done by **pandas**: `pd.read_csv()` for comma-separated, `pd.read_csv(sep="\t")` for tab-separated; `pathlib.Path` builds paths that work on every operating system
+Last week ended with files and indexing - today builds straight on them. The one-slide version:
+
+| Job | R | Python |
+|:---|:---|:---|
+| Read a table | `read.delim("data/f.tsv", check.names = FALSE)` | `pd.read_csv("f.tsv", sep="\t")` |
+| Write results | `write.csv(x, "results/f.csv", row.names = FALSE)` | `x.to_csv("f.csv", index=False)` |
+| One column | `df$col` · `df[["weird name"]]` | `df["col"]` |
+| Rows and cells | `df[1:5, c("a", "b")]` · `df[3, 2]` | `df.loc[0:4, ["a", "b"]]` · `df.iloc[2, 1]` |
+| Rows by condition | `df[df$g == "A", ]` | `df[df["g"] == "A"]` |
+
+-   One new reading trick for today: `read.table(..., row.names = 1)` / `pd.read_csv(..., index_col=0)` when the file's first column holds row *labels* rather than data
+-   Full details: the L05 deck, [Ch. 11](../book/chapters/11-r-programming.html) and [Ch. 12](../book/chapters/12-python-programming.html)
 
 ## Drawing samples from distributions
 
@@ -400,63 +405,7 @@ mydata.head(3)
 :::
 
 -   Now you have a hand-made data frame with row names
--   Take a look at it in the Environment pane of RStudio, or the **Data Explorer** in Positron (R and Python)
-
-## Reading in and Exporting Data Frames
-
-\
-
-::: panel-tabset
-### R
-
-```{r}
-#| label: lec07-reading-in-and-exporting-data
-#| echo: true
-#| eval: false
-
-YourFile <- read.table('yourfile.csv', header=T, row.names=1, sep=',')
-YourFile <- read.table('yourfile.txt', header=T, row.names=1, sep='\t')
-```
-
-\
-
-```{r}
-#| label: lec07-reading-in-and-exporting-data-2
-#| echo: true
-#| eval: false
-
-write.table(YourFile, "yourfile.csv", quote=F, row.names=T, sep=",")
-write.table(YourFile, "yourfile.txt", quote=F, row.names=T, sep="\t")
-```
-
-### Python
-
-```{python}
-#| label: lec07-reading-in-and-exporting-data-py
-#| echo: true
-#| eval: false
-
-from pathlib import Path
-
-import pandas as pd
-
-YourFile = pd.read_csv("yourfile.csv", index_col=0)             # header row is the default
-YourFile = pd.read_csv("yourfile.txt", index_col=0, sep="\t")
-YourFile = pd.read_csv(Path("data") / "raw" / "yourfile.csv")   # portable paths with pathlib
-```
-
-\
-
-```{python}
-#| label: lec07-reading-in-and-exporting-data-2-py
-#| echo: true
-#| eval: false
-
-YourFile.to_csv("yourfile.csv")                 # index (row names) is written by default
-YourFile.to_csv("yourfile.txt", sep="\t")
-YourFile.to_csv("yourfile.csv", index=False)    # drop the row names
-```
-:::
+-   Take a look at it in Positron's Variables pane, or open it in the **Data Explorer** (R and Python)
 
 ## Running example: the stickleback table as a data frame
 
@@ -529,43 +478,6 @@ plt.show()
 
 ``` r
 stickle$`Geno&Micro`
-```
-:::
-
-## Indexing in data frames
-
--   Next up - indexing just a subset of the data
--   This is a very important idea in R, that you can analyze just a subset of the data.
--   For example, you can analyze just one column, one row, or one cell of the data frame you made.
--   pandas: `.iloc[row, col]` indexes by **position** (from 0), `.loc[row, col]` by **name**; `df["col"]` or `df.col` picks a column
-
-::: panel-tabset
-### R
-
-```{r}
-#| label: lec07-indexing-in-data-frames
-#| echo: true
-#| eval: false
-
-print (YourFile[,2])
-print (YourFile$variable)
-print (YourFile[2,])
-plot (YourFile$variable1, YourFile$variable2)
-```
-
-### Python
-
-```{python}
-#| label: lec07-indexing-in-data-frames-py
-#| echo: true
-#| eval: false
-
-print(YourFile.iloc[:, 1])          # 2nd column (position 1) - R's YourFile[,2]
-print(YourFile["variable"])         # column by name        - R's YourFile$variable
-print(YourFile.iloc[1])             # 2nd row               - R's YourFile[2,]
-print(YourFile.loc["Sample_2"])     # row by its name
-plt.scatter(YourFile["variable1"], YourFile["variable2"])
-plt.show()
 ```
 :::
 

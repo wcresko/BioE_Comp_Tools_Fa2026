@@ -40,6 +40,7 @@ The course book goes deeper on everything in this lecture. Read before or after 
 -   Environments: what they are, why you need them, and the three tools (`venv`, `conda`, `renv`)
 -   Installing vs. loading packages; inspecting objects and reading error messages
 -   Logical operators, filtering, type conversion and missing values
+-   Control flow: `if`, `for` and `while` - and when a vector beats a loop
 -   The tidyverse and the pipe `|>` for data wrangling
 -   ggplot2 and the grammar of graphics; choosing the right plot
 
@@ -166,7 +167,7 @@ import sys; print(sys.version); print(pd.__version__)   # versions - put at the 
 :::
 
 ::: callout-tip
-When an object surprises you, run `str()` (R) or `.info()` / `type()` (Python) on it first. In **Positron** or **RStudio**, the Variables/Environment pane shows the same information.
+When an object surprises you, run `str()` (R) or `.info()` / `type()` (Python) on it first. In **Positron**, the Variables pane shows the same information.
 :::
 
 ## Common gotchas that bite everyone
@@ -304,6 +305,126 @@ x[x > 10]       # array([15, 20])  - boolean indexing, same idea as R
 ::: callout-tip
 Read error messages carefully - R reports the failing call, Python reports a **traceback** where the *last* line tells you what went wrong. Then paste the exact message into a search engine or an AI assistant. And a preview: on Talapas next week, a `ModuleNotFoundError` inside a batch job usually means you forgot `conda activate` in the job script.
 :::
+
+## Control flow: making decisions with `if`
+
+-   Everything so far ran every line, top to bottom - **control flow** lets a script choose and repeat
+-   You already know this from bash (L03's `if [ ... ]; then`); only the spelling changes
+
+::: panel-tabset
+### R
+
+```{r}
+#| label: lec07-control-if
+#| echo: true
+#| eval: true
+
+mass <- 1.42
+if (mass > 1.0) {
+  cat("big fish\n")
+} else if (mass > 0.5) {
+  cat("medium fish\n")
+} else {
+  cat("small fish\n")
+}
+
+# the vectorized cousin: one answer per element, no loop needed
+x <- c(0.3, 0.8, 1.42)
+ifelse(x > 1.0, "big", "small")
+```
+
+### Python
+
+```{python}
+#| label: lec07-control-if-py
+#| echo: true
+#| eval: false
+
+mass = 1.42
+if mass > 1.0:
+    print("big fish")          # the indented lines ARE the block
+elif mass > 0.5:
+    print("medium fish")
+else:
+    print("small fish")
+# big fish
+
+# the vectorized cousin, for numpy arrays / pandas columns
+import numpy as np
+x = np.array([0.3, 0.8, 1.42])
+np.where(x > 1.0, "big", "small")
+# ['small' 'small' 'big']
+```
+:::
+
+-   R wraps blocks in `{ }`; Python's blocks are the **indentation** (4 spaces) - and `else if` becomes `elif`
+-   The condition is exactly the logical test from two slides ago
+
+## Control flow: repeating with `for` (and `while`)
+
+::: panel-tabset
+### R
+
+```{r}
+#| label: lec07-control-for
+#| echo: true
+#| eval: true
+
+genes <- c("tp53", "brca1", "myc")
+for (g in genes) {              # loop directly over the elements
+  cat(toupper(g), "\n")
+}
+
+for (i in seq_along(genes)) {   # ... or over the positions 1, 2, 3
+  cat(i, genes[i], "\n")
+}
+
+i <- 1
+while (i < 8) {                 # while: repeat until the condition fails
+  i <- i * 2
+}
+i
+```
+
+### Python
+
+```{python}
+#| label: lec07-control-for-py
+#| echo: true
+#| eval: false
+
+genes = ["tp53", "brca1", "myc"]
+for g in genes:                   # loop directly over the elements
+    print(g.upper())
+
+for i, g in enumerate(genes):     # enumerate: position AND element (0-based!)
+    print(i, g)
+
+i = 1
+while i < 8:                      # while: repeat until the condition fails
+    i = i * 2
+print(i)
+# 8
+```
+:::
+
+-   Both languages loop directly over a collection's *elements* - no counters required (bash's `for f in *.txt` worked the same way)
+-   `break` leaves a loop early; skip to the next turn with `next` (R) / `continue` (Python)
+
+## When you do *not* need a loop
+
+-   Your first instinct from other languages may be "loop over everything" - resist it:
+
+| Task | Loop version | The better way |
+|:---|:---|:---|
+| Square every element | `for (i in seq_along(x)) ...` | `x^2` / `x**2` |
+| Sum each row | nested loops | `rowSums(df[, genes])` / `df[genes].sum(axis=1)` |
+| Label by condition | loop + `if` | `ifelse()` / `np.where()` |
+| Mean by group | loop over groups | `tapply()`, `group_by()` (today!) / `.groupby()` |
+
+-   Vectorized code is shorter, faster and easier to read - in R and numpy/pandas the loop still happens, but in fast compiled code
+-   Loops *earn their keep* for: iterating over **files**, per-sequence reports (the L05 `fasta_stats` stretch goal), simulations, and anything where step *n* depends on step *n - 1*
+-   More practice: Parisa's `s2`-`s3` notebooks, [Ch. 11](../book/chapters/11-r-programming.html) and [Ch. 12](../book/chapters/12-python-programming.html) control-flow sections
 
 ## The tidyverse family of packages
 
