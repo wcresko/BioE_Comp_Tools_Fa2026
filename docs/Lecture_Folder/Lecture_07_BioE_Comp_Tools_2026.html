@@ -216,107 +216,34 @@ Bill Cresko
 <p>The course book goes deeper on everything in this lecture. Read before or after class:</p>
 <ul>
 <li><em>Review:</em> <a href="../book/chapters/08-tidy-data.html">Ch. 8: Tidy Data Principles</a></li>
-<li><em>Review:</em> <a href="../book/chapters/13-data-visualization.html">Ch. 13: Data Visualization with ggplot2</a></li>
+<li><a href="../book/chapters/13-data-visualization.html">Ch. 13: Data Visualization with ggplot2</a></li>
 <li><a href="../book/chapters/14-data-wrangling.html">Ch. 14: Data Wrangling with the Tidyverse</a></li>
 <li><a href="../book/chapters/15-writing-functions.html">Ch. 15: Writing Functions in R</a></li>
 <li><em>Reference:</em> <a href="../book/chapters/appendix-E-r.html">App. E: R Command Reference</a> · <a href="../book/chapters/appendix-F-python.html">App. F: Python Quick Reference</a></li>
-<li><em>Environments:</em> <a href="../book/chapters/12-python-programming.html#sec-py-venv">Ch. 12, Virtual Environments</a> · <a href="../book/chapters/16-hpc-talapas.html#sec-software-layers">Ch. 16, The Three Software Layers</a> - the second previews Week 8</li>
 <li><em>Optional:</em> <a href="../book/chapters/22-databases.html">Ch. 22: Working with Databases</a> - for when project data outgrow flat files</li>
 </ul>
 </section>
 <section id="goals-for-today" class="slide level2">
 <h2>Goals for today</h2>
 <ul>
-<li>Environments: what they are, why you need them, and the three tools (<code>venv</code>, <code>conda</code>, <code>renv</code>)</li>
+<li>The destination figure, one more time - <strong>today we build it</strong></li>
 <li>Installing vs.&nbsp;loading packages; inspecting objects and reading error messages</li>
-<li>Logical operators, filtering, type conversion and missing values</li>
 <li>Control flow: <code>if</code>, <code>for</code> and <code>while</code> - and when a vector beats a loop</li>
 <li>The tidyverse and the pipe <code>|&gt;</code> for data wrangling</li>
-<li>ggplot2 and the grammar of graphics; choosing the right plot</li>
+<li>ggplot2: the grammar of graphics, built up layer by layer</li>
+<li>A gallery of figures for bioengineering data: heatmaps, growth curves, dose-response and PCA</li>
 </ul>
 </section>
-<section>
-<section id="environments-giving-every-project-its-own-toolbox" class="title-slide slide level1 center">
-<h1>Environments: giving every project its own toolbox</h1>
+<section id="where-we-are-headed---today-we-arrive" class="slide level2">
+<h2>Where we are headed - today we arrive</h2>
 
-</section>
-<section id="why-environments" class="slide level2">
-<h2>Why environments?</h2>
-<ul>
-<li class="fragment">By default your computer has <strong>one</strong> R and <strong>one</strong> Python - and every project installs packages into it</li>
-<li class="fragment">Project A needs pandas 2.2; reproducing last year’s analysis needs pandas 1.5. Upgrade for one and you silently break the other - “<strong>dependency hell</strong>”</li>
-<li class="fragment">From the bootcamp: “which Python did that install go into?” is the #1 Python headache</li>
-<li class="fragment">An <strong>environment</strong> is an isolated set of packages (and an interpreter) for <strong>one project</strong></li>
-<li class="fragment">Three payoffs:
-<ul>
-<li class="fragment">projects cannot break each other</li>
-<li class="fragment">you can <strong>record</strong> exactly which versions produced a result</li>
-<li class="fragment">a collaborator - or Talapas - can <strong>rebuild</strong> the same setup from that record</li>
-</ul></li>
+<img data-src="Lecture_07_BioE_Comp_Tools_2026_files/figure-revealjs/fig-lec07-destination-1.png" style="width:100.0%" class="r-stretch quarto-figure-center" id="fig-lec07-destination"><p class="caption">
+Figure&nbsp;1: L06’s opening figure. By the end of today you can write every line of it.
+</p><ul>
+<li>The ingredients you already own: reading files, data frames, logical tests, distributions (L05-L06)</li>
+<li>Today’s new ingredients: the <strong>pipe</strong>, <code>pivot_longer()</code>, and the <strong>grammar of graphics</strong></li>
 </ul>
 </section>
-<section id="the-three-environment-tools-you-will-meet" class="slide level2">
-<h2>The three environment tools you will meet</h2>
-<table class="caption-top">
-<colgroup>
-<col style="width: 25%">
-<col style="width: 25%">
-<col style="width: 25%">
-<col style="width: 25%">
-</colgroup>
-<thead>
-<tr class="header">
-<th>Tool</th>
-<th>For</th>
-<th>Environments live…</th>
-<th>The record you share</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td><strong><code>venv</code></strong> (+ <code>pip</code>)</td>
-<td>Python</td>
-<td>in the project folder (<code>.venv/</code>)</td>
-<td><code>requirements.txt</code></td>
-</tr>
-<tr class="even">
-<td><strong><code>conda</code></strong> / <code>mamba</code></td>
-<td>Python <em>plus</em> compiled tools (<code>samtools</code>, even R)</td>
-<td>centrally, by name (<code>conda env list</code>)</td>
-<td><code>environment.yml</code></td>
-</tr>
-<tr class="odd">
-<td><strong><code>renv</code></strong></td>
-<td>R</td>
-<td>in the project folder</td>
-<td><code>renv.lock</code></td>
-</tr>
-</tbody>
-</table>
-<ul>
-<li class="fragment"><strong><code>venv</code></strong> is our default on your laptop - you have used it since the bootcamp</li>
-<li class="fragment"><strong><code>conda</code></strong> is the standard in bioinformatics and on <strong>Talapas</strong> (next week) - one tool for <em>any</em> software</li>
-<li class="fragment"><strong><code>renv</code></strong> for R projects: <code>renv::init()</code> once, <code>renv::snapshot()</code> to record, <code>renv::restore()</code> to rebuild</li>
-<li class="fragment">Whichever you use: <strong>commit the record file to Git - never the environment itself</strong></li>
-</ul>
-</section>
-<section id="conda-in-practice---on-your-own-computer" class="slide level2">
-<h2><code>conda</code> in practice - on your own computer</h2>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb1-1"><a></a><span class="co"># Install once: Miniforge, from https://conda-forge.org/download/</span></span>
-<span id="cb1-2"><a></a></span>
-<span id="cb1-3"><a></a><span class="ex">conda</span> create <span class="at">-n</span> rnaseq python=3.12 pandas matplotlib   <span class="co"># make a named environment - once</span></span>
-<span id="cb1-4"><a></a><span class="ex">conda</span> activate rnaseq                                  <span class="co"># turn it on - every session</span></span>
-<span id="cb1-5"><a></a><span class="ex">conda</span> install <span class="at">-c</span> bioconda samtools                     <span class="co"># compiled genomics tools too!</span></span>
-<span id="cb1-6"><a></a><span class="ex">conda</span> env export <span class="op">&gt;</span> environment.yml                     <span class="co"># record it, to rebuild anywhere</span></span>
-<span id="cb1-7"><a></a><span class="ex">conda</span> deactivate                                       <span class="co"># turn it off</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<ul>
-<li class="fragment">Environments are <strong>named and central</strong>, not per-folder: <code>conda env list</code> shows them all</li>
-<li class="fragment">Packages come from <strong>channels</strong>: <code>conda-forge</code> (general) and <code>bioconda</code> (genomics)</li>
-<li class="fragment">Install <strong>Miniforge</strong>, not Anaconda - Anaconda’s default channel requires a paid license at organizations like UO; Miniforge defaults to the free <code>conda-forge</code></li>
-<li class="fragment"><code>mamba</code> (included in Miniforge) is a faster drop-in replacement for <code>conda</code></li>
-<li class="fragment">Next week the <em>same</em> <code>environment.yml</code> rebuilds this environment on Talapas: <code>conda env create -f environment.yml</code></li>
-</ul>
-</section></section>
 <section>
 <section id="going-further-with-r-and-python" class="title-slide slide level1 center">
 <h1>Going further with R and Python</h1>
@@ -328,8 +255,8 @@ Bill Cresko
 <ul id="tabset-1" class="panel-tabset-tabby"><li><a data-tabby-default="" href="#tabset-1-1">R</a></li><li><a href="#tabset-1-2">Python</a></li></ul>
 <div class="tab-content">
 <div id="tabset-1-1">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a></a><span class="fu">install.packages</span>(<span class="st">"tidyverse"</span>)   <span class="co"># download &amp; install - ONCE per computer</span></span>
-<span id="cb2-2"><a></a><span class="fu">library</span>(tidyverse)              <span class="co"># load - EVERY new R session</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a></a><span class="fu">install.packages</span>(<span class="st">"tidyverse"</span>)   <span class="co"># download &amp; install - ONCE per computer</span></span>
+<span id="cb1-2"><a></a><span class="fu">library</span>(tidyverse)              <span class="co"># load - EVERY new R session</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <ul>
 <li class="fragment"><strong><code>install.packages()</code></strong> puts a package on your computer (from CRAN)</li>
 <li class="fragment"><strong><code>library()</code></strong> makes it available in <em>this</em> session - restarting R means re-running <code>library()</code></li>
@@ -339,12 +266,12 @@ Bill Cresko
 </ul>
 </div>
 <div id="tabset-1-2">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb3"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb3-1"><a></a><span class="ex">python3</span> <span class="at">-m</span> venv .venv <span class="kw">&amp;&amp;</span> <span class="bu">source</span> .venv/bin/activate   <span class="co"># one environment per project</span></span>
-<span id="cb3-2"><a></a><span class="ex">pip</span> install pandas matplotlib seaborn                 <span class="co"># install - ONCE per environment</span></span>
-<span id="cb3-3"><a></a><span class="co"># alternatives: uv add pandas   |   conda install pandas</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb4"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a></a><span class="im">import</span> pandas <span class="im">as</span> pd                 <span class="co"># load - EVERY new Python session (pd is the usual alias)</span></span>
-<span id="cb4-2"><a></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
-<span id="cb4-3"><a></a><span class="im">from</span> pathlib <span class="im">import</span> Path            <span class="co"># one name from a module</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb2-1"><a></a><span class="ex">pip</span> install pandas matplotlib seaborn   <span class="co"># install - ONCE per environment</span></span>
+<span id="cb2-2"><a></a><span class="co"># (activate your project's environment first - environments get their full story in L08)</span></span>
+<span id="cb2-3"><a></a><span class="co"># alternatives: uv add pandas   |   conda install pandas</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb3"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a></a><span class="im">import</span> pandas <span class="im">as</span> pd                 <span class="co"># load - EVERY new Python session (pd is the usual alias)</span></span>
+<span id="cb3-2"><a></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
+<span id="cb3-3"><a></a><span class="im">from</span> pathlib <span class="im">import</span> Path            <span class="co"># one name from a module</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <ul>
 <li class="fragment"><strong><code>pip install</code></strong> (from PyPI) puts a package in the <em>active environment</em>; <code>conda</code> also handles compiled tools (e.g.&nbsp;<code>bioconda</code>); <code>uv</code> is a fast modern all-in-one</li>
 <li class="fragment"><strong><code>import</code></strong> makes it available in <em>this</em> session</li>
@@ -361,24 +288,24 @@ Bill Cresko
 <ul id="tabset-2" class="panel-tabset-tabby"><li><a data-tabby-default="" href="#tabset-2-1">R</a></li><li><a href="#tabset-2-2">Python</a></li></ul>
 <div class="tab-content">
 <div id="tabset-2-1">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb5"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a></a><span class="fu">str</span>(mydata)        <span class="co"># structure: type, dimensions, first values - your #1 tool</span></span>
-<span id="cb5-2"><a></a><span class="fu">summary</span>(mydata)    <span class="co"># quick summary of every column</span></span>
-<span id="cb5-3"><a></a><span class="fu">class</span>(mydata)      <span class="co"># what kind of object is this?</span></span>
-<span id="cb5-4"><a></a><span class="fu">dim</span>(mydata)        <span class="co"># rows x columns</span></span>
-<span id="cb5-5"><a></a><span class="fu">names</span>(mydata)      <span class="co"># column names</span></span>
-<span id="cb5-6"><a></a>?mean              <span class="co"># help page for a function</span></span>
-<span id="cb5-7"><a></a>??<span class="st">"linear model"</span>   <span class="co"># search help across all packages</span></span>
-<span id="cb5-8"><a></a><span class="fu">sessionInfo</span>()      <span class="co"># R version + loaded package versions - put at the end of reports</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb4"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a></a><span class="fu">str</span>(mydata)        <span class="co"># structure: type, dimensions, first values - your #1 tool</span></span>
+<span id="cb4-2"><a></a><span class="fu">summary</span>(mydata)    <span class="co"># quick summary of every column</span></span>
+<span id="cb4-3"><a></a><span class="fu">class</span>(mydata)      <span class="co"># what kind of object is this?</span></span>
+<span id="cb4-4"><a></a><span class="fu">dim</span>(mydata)        <span class="co"># rows x columns</span></span>
+<span id="cb4-5"><a></a><span class="fu">names</span>(mydata)      <span class="co"># column names</span></span>
+<span id="cb4-6"><a></a>?mean              <span class="co"># help page for a function</span></span>
+<span id="cb4-7"><a></a>??<span class="st">"linear model"</span>   <span class="co"># search help across all packages</span></span>
+<span id="cb4-8"><a></a><span class="fu">sessionInfo</span>()      <span class="co"># R version + loaded package versions - put at the end of reports</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <div id="tabset-2-2">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb6"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a></a>mydata.info()          <span class="co"># columns, dtypes, non-null counts - your #1 tool</span></span>
-<span id="cb6-2"><a></a>mydata.describe()      <span class="co"># quick summary of every numeric column</span></span>
-<span id="cb6-3"><a></a><span class="bu">type</span>(mydata)           <span class="co"># what kind of object is this?  &lt;class 'pandas.core.frame.DataFrame'&gt;</span></span>
-<span id="cb6-4"><a></a>mydata.shape           <span class="co"># (rows, columns)</span></span>
-<span id="cb6-5"><a></a>mydata.columns         <span class="co"># column names</span></span>
-<span id="cb6-6"><a></a>mydata.dtypes          <span class="co"># type of each column</span></span>
-<span id="cb6-7"><a></a><span class="bu">help</span>(pd.read_csv)      <span class="co"># help page for a function (or pd.read_csv? in Jupyter/Positron)</span></span>
-<span id="cb6-8"><a></a><span class="im">import</span> sys<span class="op">;</span> <span class="bu">print</span>(sys.version)<span class="op">;</span> <span class="bu">print</span>(pd.__version__)   <span class="co"># versions - put at the end of reports</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb5"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a></a>mydata.info()          <span class="co"># columns, dtypes, non-null counts - your #1 tool</span></span>
+<span id="cb5-2"><a></a>mydata.describe()      <span class="co"># quick summary of every numeric column</span></span>
+<span id="cb5-3"><a></a><span class="bu">type</span>(mydata)           <span class="co"># what kind of object is this?  &lt;class 'pandas.core.frame.DataFrame'&gt;</span></span>
+<span id="cb5-4"><a></a>mydata.shape           <span class="co"># (rows, columns)</span></span>
+<span id="cb5-5"><a></a>mydata.columns         <span class="co"># column names</span></span>
+<span id="cb5-6"><a></a>mydata.dtypes          <span class="co"># type of each column</span></span>
+<span id="cb5-7"><a></a><span class="bu">help</span>(pd.read_csv)      <span class="co"># help page for a function (or pd.read_csv? in Jupyter/Positron)</span></span>
+<span id="cb5-8"><a></a><span class="im">import</span> sys<span class="op">;</span> <span class="bu">print</span>(sys.version)<span class="op">;</span> <span class="bu">print</span>(pd.__version__)   <span class="co"># versions - put at the end of reports</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 </div>
 </div>
@@ -396,8 +323,8 @@ Bill Cresko
 </div>
 </div>
 </section>
-<section id="common-gotchas-that-bite-everyone" class="slide level2">
-<h2>Common gotchas that bite everyone</h2>
+<section id="common-gotchas-that-bite-everyone-reference---skim-now-return-when-bitten" class="slide level2">
+<h2>Common gotchas that bite everyone <em>(reference - skim now, return when bitten)</em></h2>
 <div class="panel-tabset">
 <ul id="tabset-3" class="panel-tabset-tabby"><li><a data-tabby-default="" href="#tabset-3-1">R</a></li><li><a href="#tabset-3-2">Python</a></li></ul>
 <div class="tab-content">
@@ -409,6 +336,7 @@ Bill Cresko
 <li class="fragment"><strong>Floating point</strong>: <code>0.1 + 0.2 == 0.3</code> is <code>FALSE</code> - use <code>all.equal()</code></li>
 <li class="fragment"><strong>Case matters</strong>: <code>Data</code> and <code>data</code> are different objects</li>
 <li class="fragment"><strong>Working directory</strong>: “cannot open file” usually means R is looking in the wrong folder - check <code>getwd()</code> and use project-relative paths</li>
+<li class="fragment"><strong>Factors in disguise</strong>: <code>as.numeric()</code> on a factor returns the level <em>codes</em>, not the labels - use <code>as.numeric(as.character(x))</code></li>
 </ul>
 </div>
 <div id="tabset-3-2">
@@ -422,7 +350,115 @@ Bill Cresko
 <li class="fragment"><strong>Indentation is syntax</strong> - mixing tabs and spaces, or a missing <code>:</code>, gives <code>IndentationError</code> / <code>SyntaxError</code></li>
 <li class="fragment"><strong>Wrong environment</strong>: <code>ModuleNotFoundError</code> usually means the package is installed in a <em>different</em> Python - check <code>which python3</code></li>
 <li class="fragment"><strong>Working directory</strong>: <code>FileNotFoundError</code> - check <code>Path.cwd()</code> and use project-relative paths</li>
+<li class="fragment"><strong>Whole-column conversion</strong>: <code>pd.to_numeric(col, errors="coerce")</code> turns bad values into <code>NaN</code> instead of raising - then <code>col.isna()</code> finds them</li>
 </ul>
+</div>
+</div>
+</div>
+</section>
+<section id="reading-error-messages-reference" class="slide level2">
+<h2>Reading error messages <em>(reference)</em></h2>
+<div class="panel-tabset">
+<ul id="tabset-4" class="panel-tabset-tabby"><li><a data-tabby-default="" href="#tabset-4-1">R</a></li><li><a href="#tabset-4-2">Python</a></li></ul>
+<div class="tab-content">
+<div id="tabset-4-1">
+<table class="caption-top">
+<colgroup>
+<col style="width: 28%">
+<col style="width: 26%">
+<col style="width: 45%">
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: left;">Error message</th>
+<th style="text-align: left;">Meaning</th>
+<th style="text-align: left;">Fix</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;"><code>object 'x' not found</code></td>
+<td style="text-align: left;">Variable doesn’t exist</td>
+<td style="text-align: left;">Check spelling; run the line that creates it</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><code>could not find function</code></td>
+<td style="text-align: left;">Package not loaded</td>
+<td style="text-align: left;"><code>library()</code> the package, or check spelling</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><code>unexpected ')'</code> / <code>unexpected symbol</code></td>
+<td style="text-align: left;">Mismatched brackets or quotes</td>
+<td style="text-align: left;">Count opening/closing brackets</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><code>non-numeric argument to binary operator</code></td>
+<td style="text-align: left;">Wrong data type</td>
+<td style="text-align: left;">Check with <code>class()</code> or <code>str()</code></td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><code>cannot open file ... No such file</code></td>
+<td style="text-align: left;">Wrong working directory or path</td>
+<td style="text-align: left;"><code>getwd()</code>, <code>list.files()</code>, fix the path</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div id="tabset-4-2">
+<table class="caption-top">
+<colgroup>
+<col style="width: 28%">
+<col style="width: 26%">
+<col style="width: 45%">
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: left;">Error message</th>
+<th style="text-align: left;">Meaning</th>
+<th style="text-align: left;">Fix</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;"><code>NameError: name 'x' is not defined</code></td>
+<td style="text-align: left;">Variable doesn’t exist</td>
+<td style="text-align: left;">Check spelling; run the cell that creates it</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><code>ModuleNotFoundError</code></td>
+<td style="text-align: left;">Package not installed <em>in this environment</em></td>
+<td style="text-align: left;"><code>pip install</code>, check <code>which python3</code></td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><code>SyntaxError</code> / <code>IndentationError</code></td>
+<td style="text-align: left;">Missing <code>:</code>, bracket, or bad indentation</td>
+<td style="text-align: left;">Look at the line <strong>above</strong> the arrow too</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><code>TypeError: unsupported operand</code></td>
+<td style="text-align: left;">Wrong data type</td>
+<td style="text-align: left;">Check with <code>type()</code> or <code>.dtypes</code></td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><code>FileNotFoundError</code></td>
+<td style="text-align: left;">Wrong working directory or path</td>
+<td style="text-align: left;"><code>Path.cwd()</code>, fix the path</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<div class="callout callout-tip callout-titled callout-style-default">
+<div class="callout-body">
+<div class="callout-title">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<p><strong>Tip</strong></p>
+</div>
+<div class="callout-content">
+<p>Read error messages carefully - R reports the failing call, Python reports a <strong>traceback</strong> where the <em>last</em> line tells you what went wrong. Then paste the exact message into a search engine or an AI assistant. And a preview: on Talapas next week, a <code>ModuleNotFoundError</code> inside a batch job usually means you forgot <code>conda activate</code> in the job script.</p>
 </div>
 </div>
 </div>
@@ -492,267 +528,11 @@ Bill Cresko
 </figure>
 </div>
 </div></div>
-<div class="panel-tabset">
-<ul id="tabset-4" class="panel-tabset-tabby"><li><a data-tabby-default="" href="#tabset-4-1">R</a></li><li><a href="#tabset-4-2">Python</a></li></ul>
-<div class="tab-content">
-<div id="tabset-4-1">
-<div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a></a>x <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">5</span>, <span class="dv">10</span>, <span class="dv">15</span>, <span class="dv">20</span>)</span>
-<span id="cb7-2"><a></a>x <span class="sc">&gt;</span> <span class="dv">10</span>          <span class="co"># a logical vector, one TRUE/FALSE per element</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>[1] FALSE FALSE FALSE  TRUE  TRUE</code></pre>
-</div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a></a>x[x <span class="sc">&gt;</span> <span class="dv">10</span>]       <span class="co"># keep only the elements where the condition is TRUE</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>[1] 15 20</code></pre>
-</div>
-</div>
-</div>
-<div id="tabset-4-2">
-<div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb11"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
-<span id="cb11-2"><a></a></span>
-<span id="cb11-3"><a></a>x <span class="op">=</span> np.array([<span class="dv">1</span>, <span class="dv">5</span>, <span class="dv">10</span>, <span class="dv">15</span>, <span class="dv">20</span>])</span>
-<span id="cb11-4"><a></a>x <span class="op">&gt;</span> <span class="dv">10</span>          <span class="co"># array([False, False, False,  True,  True])</span></span>
-<span id="cb11-5"><a></a>x[x <span class="op">&gt;</span> <span class="dv">10</span>]       <span class="co"># array([15, 20])  - boolean indexing, same idea as R</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</div>
-</div>
-</div>
-</div>
-</section>
-<section id="converting-types-and-handling-missing-values" class="slide level2">
-<h2>Converting types and handling missing values</h2>
-<div class="panel-tabset">
-<ul id="tabset-5" class="panel-tabset-tabby"><li><a data-tabby-default="" href="#tabset-5-1">R</a></li><li><a href="#tabset-5-2">Python</a></li></ul>
-<div class="tab-content">
-<div id="tabset-5-1">
-<table class="caption-top">
-<colgroup>
-<col style="width: 34%">
-<col style="width: 35%">
-<col style="width: 30%">
-</colgroup>
-<thead>
-<tr class="header">
-<th style="text-align: left;">Task</th>
-<th style="text-align: left;">Code</th>
-<th style="text-align: left;">Result</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td style="text-align: left;">Text to number</td>
-<td style="text-align: left;"><code>as.numeric("42")</code></td>
-<td style="text-align: left;"><code>42</code></td>
-</tr>
-<tr class="even">
-<td style="text-align: left;">Text that isn’t a number</td>
-<td style="text-align: left;"><code>as.numeric("hello")</code></td>
-<td style="text-align: left;"><code>NA</code> (with a warning)</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;">Number to text</td>
-<td style="text-align: left;"><code>as.character(42)</code></td>
-<td style="text-align: left;"><code>"42"</code></td>
-</tr>
-<tr class="even">
-<td style="text-align: left;">Number to logical</td>
-<td style="text-align: left;"><code>as.logical(1)</code></td>
-<td style="text-align: left;"><code>TRUE</code></td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;">Check for missing</td>
-<td style="text-align: left;"><code>is.na(x)</code></td>
-<td style="text-align: left;">logical vector</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;"><strong>Don’t do this!</strong></td>
-<td style="text-align: left;"><code>x == NA</code></td>
-<td style="text-align: left;">always <code>NA</code></td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;">Mean ignoring missing</td>
-<td style="text-align: left;"><code>mean(x, na.rm = TRUE)</code></td>
-<td style="text-align: left;">the mean of the rest</td>
-</tr>
-</tbody>
-</table>
-<div class="callout callout-warning callout-titled callout-style-default">
-<div class="callout-body">
-<div class="callout-title">
-<div class="callout-icon-container">
-<i class="callout-icon"></i>
-</div>
-<p><strong>Warning</strong></p>
-</div>
-<div class="callout-content">
-<p><code>as.numeric()</code> on a <strong>factor</strong> returns the integer level codes, not the labels - use <code>as.numeric(as.character(x))</code>. And always test for missing values with <code>is.na()</code>, never <code>== NA</code>.</p>
-</div>
-</div>
-</div>
-</div>
-<div id="tabset-5-2">
-<table class="caption-top">
-<colgroup>
-<col style="width: 30%">
-<col style="width: 38%">
-<col style="width: 30%">
-</colgroup>
-<thead>
-<tr class="header">
-<th style="text-align: left;">Task</th>
-<th style="text-align: left;">Code</th>
-<th style="text-align: left;">Result</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td style="text-align: left;">Text to number</td>
-<td style="text-align: left;"><code>float("42")</code></td>
-<td style="text-align: left;"><code>42.0</code></td>
-</tr>
-<tr class="even">
-<td style="text-align: left;">Text that isn’t a number</td>
-<td style="text-align: left;"><code>float("hello")</code></td>
-<td style="text-align: left;"><code>ValueError</code> (an error, not <code>NaN</code>)</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;">Number to text</td>
-<td style="text-align: left;"><code>str(42)</code></td>
-<td style="text-align: left;"><code>"42"</code></td>
-</tr>
-<tr class="even">
-<td style="text-align: left;">Whole column to number</td>
-<td style="text-align: left;"><code>pd.to_numeric(col, errors="coerce")</code></td>
-<td style="text-align: left;">bad values become <code>NaN</code></td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;">Check for missing</td>
-<td style="text-align: left;"><code>pd.isna(x)</code> / <code>col.isna()</code></td>
-<td style="text-align: left;">boolean array</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;"><strong>Don’t do this!</strong></td>
-<td style="text-align: left;"><code>x == np.nan</code></td>
-<td style="text-align: left;">always <code>False</code></td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;">Mean ignoring missing</td>
-<td style="text-align: left;"><code>col.mean()</code> (pandas skips <code>NaN</code>) / <code>np.nanmean(x)</code></td>
-<td style="text-align: left;">the mean of the rest</td>
-</tr>
-</tbody>
-</table>
-</div>
-</div>
-</div>
-</section>
-<section id="reading-error-messages" class="slide level2">
-<h2>Reading error messages</h2>
-<div class="panel-tabset">
-<ul id="tabset-6" class="panel-tabset-tabby"><li><a data-tabby-default="" href="#tabset-6-1">R</a></li><li><a href="#tabset-6-2">Python</a></li></ul>
-<div class="tab-content">
-<div id="tabset-6-1">
-<table class="caption-top">
-<colgroup>
-<col style="width: 28%">
-<col style="width: 26%">
-<col style="width: 45%">
-</colgroup>
-<thead>
-<tr class="header">
-<th style="text-align: left;">Error message</th>
-<th style="text-align: left;">Meaning</th>
-<th style="text-align: left;">Fix</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td style="text-align: left;"><code>object 'x' not found</code></td>
-<td style="text-align: left;">Variable doesn’t exist</td>
-<td style="text-align: left;">Check spelling; run the line that creates it</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;"><code>could not find function</code></td>
-<td style="text-align: left;">Package not loaded</td>
-<td style="text-align: left;"><code>library()</code> the package, or check spelling</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;"><code>unexpected ')'</code> / <code>unexpected symbol</code></td>
-<td style="text-align: left;">Mismatched brackets or quotes</td>
-<td style="text-align: left;">Count opening/closing brackets</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;"><code>non-numeric argument to binary operator</code></td>
-<td style="text-align: left;">Wrong data type</td>
-<td style="text-align: left;">Check with <code>class()</code> or <code>str()</code></td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;"><code>cannot open file ... No such file</code></td>
-<td style="text-align: left;">Wrong working directory or path</td>
-<td style="text-align: left;"><code>getwd()</code>, <code>list.files()</code>, fix the path</td>
-</tr>
-</tbody>
-</table>
-</div>
-<div id="tabset-6-2">
-<table class="caption-top">
-<colgroup>
-<col style="width: 28%">
-<col style="width: 26%">
-<col style="width: 45%">
-</colgroup>
-<thead>
-<tr class="header">
-<th style="text-align: left;">Error message</th>
-<th style="text-align: left;">Meaning</th>
-<th style="text-align: left;">Fix</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td style="text-align: left;"><code>NameError: name 'x' is not defined</code></td>
-<td style="text-align: left;">Variable doesn’t exist</td>
-<td style="text-align: left;">Check spelling; run the cell that creates it</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;"><code>ModuleNotFoundError</code></td>
-<td style="text-align: left;">Package not installed <em>in this environment</em></td>
-<td style="text-align: left;"><code>pip install</code>, check <code>which python3</code></td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;"><code>SyntaxError</code> / <code>IndentationError</code></td>
-<td style="text-align: left;">Missing <code>:</code>, bracket, or bad indentation</td>
-<td style="text-align: left;">Look at the line <strong>above</strong> the arrow too</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;"><code>TypeError: unsupported operand</code></td>
-<td style="text-align: left;">Wrong data type</td>
-<td style="text-align: left;">Check with <code>type()</code> or <code>.dtypes</code></td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;"><code>FileNotFoundError</code></td>
-<td style="text-align: left;">Wrong working directory or path</td>
-<td style="text-align: left;"><code>Path.cwd()</code>, fix the path</td>
-</tr>
-</tbody>
-</table>
-</div>
-</div>
-</div>
-<div class="callout callout-tip callout-titled callout-style-default">
-<div class="callout-body">
-<div class="callout-title">
-<div class="callout-icon-container">
-<i class="callout-icon"></i>
-</div>
-<p><strong>Tip</strong></p>
-</div>
-<div class="callout-content">
-<p>Read error messages carefully - R reports the failing call, Python reports a <strong>traceback</strong> where the <em>last</em> line tells you what went wrong. Then paste the exact message into a search engine or an AI assistant. And a preview: on Talapas next week, a <code>ModuleNotFoundError</code> inside a batch job usually means you forgot <code>conda activate</code> in the job script.</p>
-</div>
-</div>
-</div>
+<ul>
+<li><code>x[x &gt; 10]</code> - the logical indexing you used all through L05, unchanged</li>
+<li>New today: <strong>membership</strong> - <code>x %in% c(1, 2, 3)</code> in R, <code>np.isin(x, [1, 2, 3])</code> or <code>col.isin([...])</code> in pandas</li>
+<li>In pandas/numpy, use <code>&amp;</code>, <code>|</code>, <code>~</code> with <strong>parentheses</strong> around each comparison</li>
+</ul>
 </section>
 <section id="control-flow-making-decisions-with-if" class="slide level2">
 <h2>Control flow: making decisions with <code>if</code></h2>
@@ -761,45 +541,45 @@ Bill Cresko
 <li>You already know this from bash (L03’s <code>if [ ... ]; then</code>); only the spelling changes</li>
 </ul>
 <div class="panel-tabset">
-<ul id="tabset-7" class="panel-tabset-tabby"><li><a data-tabby-default="" href="#tabset-7-1">R</a></li><li><a href="#tabset-7-2">Python</a></li></ul>
+<ul id="tabset-5" class="panel-tabset-tabby"><li><a data-tabby-default="" href="#tabset-5-1">R</a></li><li><a href="#tabset-5-2">Python</a></li></ul>
 <div class="tab-content">
-<div id="tabset-7-1">
+<div id="tabset-5-1">
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb12"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a></a>mass <span class="ot">&lt;-</span> <span class="fl">1.42</span></span>
-<span id="cb12-2"><a></a><span class="cf">if</span> (mass <span class="sc">&gt;</span> <span class="fl">1.0</span>) {</span>
-<span id="cb12-3"><a></a>  <span class="fu">cat</span>(<span class="st">"big fish</span><span class="sc">\n</span><span class="st">"</span>)</span>
-<span id="cb12-4"><a></a>} <span class="cf">else</span> <span class="cf">if</span> (mass <span class="sc">&gt;</span> <span class="fl">0.5</span>) {</span>
-<span id="cb12-5"><a></a>  <span class="fu">cat</span>(<span class="st">"medium fish</span><span class="sc">\n</span><span class="st">"</span>)</span>
-<span id="cb12-6"><a></a>} <span class="cf">else</span> {</span>
-<span id="cb12-7"><a></a>  <span class="fu">cat</span>(<span class="st">"small fish</span><span class="sc">\n</span><span class="st">"</span>)</span>
-<span id="cb12-8"><a></a>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a></a>mass <span class="ot">&lt;-</span> <span class="fl">1.42</span></span>
+<span id="cb6-2"><a></a><span class="cf">if</span> (mass <span class="sc">&gt;</span> <span class="fl">1.0</span>) {</span>
+<span id="cb6-3"><a></a>  <span class="fu">cat</span>(<span class="st">"big fish</span><span class="sc">\n</span><span class="st">"</span>)</span>
+<span id="cb6-4"><a></a>} <span class="cf">else</span> <span class="cf">if</span> (mass <span class="sc">&gt;</span> <span class="fl">0.5</span>) {</span>
+<span id="cb6-5"><a></a>  <span class="fu">cat</span>(<span class="st">"medium fish</span><span class="sc">\n</span><span class="st">"</span>)</span>
+<span id="cb6-6"><a></a>} <span class="cf">else</span> {</span>
+<span id="cb6-7"><a></a>  <span class="fu">cat</span>(<span class="st">"small fish</span><span class="sc">\n</span><span class="st">"</span>)</span>
+<span id="cb6-8"><a></a>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>big fish</code></pre>
 </div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb14"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a></a><span class="co"># the vectorized cousin: one answer per element, no loop needed</span></span>
-<span id="cb14-2"><a></a>x <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="fl">0.3</span>, <span class="fl">0.8</span>, <span class="fl">1.42</span>)</span>
-<span id="cb14-3"><a></a><span class="fu">ifelse</span>(x <span class="sc">&gt;</span> <span class="fl">1.0</span>, <span class="st">"big"</span>, <span class="st">"small"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a></a><span class="co"># the vectorized cousin: one answer per element, no loop needed</span></span>
+<span id="cb8-2"><a></a>x <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="fl">0.3</span>, <span class="fl">0.8</span>, <span class="fl">1.42</span>)</span>
+<span id="cb8-3"><a></a><span class="fu">ifelse</span>(x <span class="sc">&gt;</span> <span class="fl">1.0</span>, <span class="st">"big"</span>, <span class="st">"small"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>[1] "small" "small" "big"  </code></pre>
 </div>
 </div>
 </div>
-<div id="tabset-7-2">
+<div id="tabset-5-2">
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb16"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb16-1"><a></a>mass <span class="op">=</span> <span class="fl">1.42</span></span>
-<span id="cb16-2"><a></a><span class="cf">if</span> mass <span class="op">&gt;</span> <span class="fl">1.0</span>:</span>
-<span id="cb16-3"><a></a>    <span class="bu">print</span>(<span class="st">"big fish"</span>)          <span class="co"># the indented lines ARE the block</span></span>
-<span id="cb16-4"><a></a><span class="cf">elif</span> mass <span class="op">&gt;</span> <span class="fl">0.5</span>:</span>
-<span id="cb16-5"><a></a>    <span class="bu">print</span>(<span class="st">"medium fish"</span>)</span>
-<span id="cb16-6"><a></a><span class="cf">else</span>:</span>
-<span id="cb16-7"><a></a>    <span class="bu">print</span>(<span class="st">"small fish"</span>)</span>
-<span id="cb16-8"><a></a><span class="co"># big fish</span></span>
-<span id="cb16-9"><a></a></span>
-<span id="cb16-10"><a></a><span class="co"># the vectorized cousin, for numpy arrays / pandas columns</span></span>
-<span id="cb16-11"><a></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
-<span id="cb16-12"><a></a>x <span class="op">=</span> np.array([<span class="fl">0.3</span>, <span class="fl">0.8</span>, <span class="fl">1.42</span>])</span>
-<span id="cb16-13"><a></a>np.where(x <span class="op">&gt;</span> <span class="fl">1.0</span>, <span class="st">"big"</span>, <span class="st">"small"</span>)</span>
-<span id="cb16-14"><a></a><span class="co"># ['small' 'small' 'big']</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb10"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a></a>mass <span class="op">=</span> <span class="fl">1.42</span></span>
+<span id="cb10-2"><a></a><span class="cf">if</span> mass <span class="op">&gt;</span> <span class="fl">1.0</span>:</span>
+<span id="cb10-3"><a></a>    <span class="bu">print</span>(<span class="st">"big fish"</span>)          <span class="co"># the indented lines ARE the block</span></span>
+<span id="cb10-4"><a></a><span class="cf">elif</span> mass <span class="op">&gt;</span> <span class="fl">0.5</span>:</span>
+<span id="cb10-5"><a></a>    <span class="bu">print</span>(<span class="st">"medium fish"</span>)</span>
+<span id="cb10-6"><a></a><span class="cf">else</span>:</span>
+<span id="cb10-7"><a></a>    <span class="bu">print</span>(<span class="st">"small fish"</span>)</span>
+<span id="cb10-8"><a></a><span class="co"># big fish</span></span>
+<span id="cb10-9"><a></a></span>
+<span id="cb10-10"><a></a><span class="co"># the vectorized cousin, for numpy arrays / pandas columns</span></span>
+<span id="cb10-11"><a></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
+<span id="cb10-12"><a></a>x <span class="op">=</span> np.array([<span class="fl">0.3</span>, <span class="fl">0.8</span>, <span class="fl">1.42</span>])</span>
+<span id="cb10-13"><a></a>np.where(x <span class="op">&gt;</span> <span class="fl">1.0</span>, <span class="st">"big"</span>, <span class="st">"small"</span>)</span>
+<span id="cb10-14"><a></a><span class="co"># ['small' 'small' 'big']</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 </div>
 </div>
@@ -812,51 +592,51 @@ Bill Cresko
 <section id="control-flow-repeating-with-for-and-while" class="slide level2">
 <h2>Control flow: repeating with <code>for</code> (and <code>while</code>)</h2>
 <div class="panel-tabset">
-<ul id="tabset-8" class="panel-tabset-tabby"><li><a data-tabby-default="" href="#tabset-8-1">R</a></li><li><a href="#tabset-8-2">Python</a></li></ul>
+<ul id="tabset-6" class="panel-tabset-tabby"><li><a data-tabby-default="" href="#tabset-6-1">R</a></li><li><a href="#tabset-6-2">Python</a></li></ul>
 <div class="tab-content">
-<div id="tabset-8-1">
+<div id="tabset-6-1">
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb17"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a></a>genes <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"tp53"</span>, <span class="st">"brca1"</span>, <span class="st">"myc"</span>)</span>
-<span id="cb17-2"><a></a><span class="cf">for</span> (g <span class="cf">in</span> genes) {              <span class="co"># loop directly over the elements</span></span>
-<span id="cb17-3"><a></a>  <span class="fu">cat</span>(<span class="fu">toupper</span>(g), <span class="st">"</span><span class="sc">\n</span><span class="st">"</span>)</span>
-<span id="cb17-4"><a></a>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb11"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a></a>genes <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"tp53"</span>, <span class="st">"brca1"</span>, <span class="st">"myc"</span>)</span>
+<span id="cb11-2"><a></a><span class="cf">for</span> (g <span class="cf">in</span> genes) {              <span class="co"># loop directly over the elements</span></span>
+<span id="cb11-3"><a></a>  <span class="fu">cat</span>(<span class="fu">toupper</span>(g), <span class="st">"</span><span class="sc">\n</span><span class="st">"</span>)</span>
+<span id="cb11-4"><a></a>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>TP53 
 BRCA1 
 MYC </code></pre>
 </div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb19"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a></a><span class="cf">for</span> (i <span class="cf">in</span> <span class="fu">seq_along</span>(genes)) {   <span class="co"># ... or over the positions 1, 2, 3</span></span>
-<span id="cb19-2"><a></a>  <span class="fu">cat</span>(i, genes[i], <span class="st">"</span><span class="sc">\n</span><span class="st">"</span>)</span>
-<span id="cb19-3"><a></a>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb13"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a></a><span class="cf">for</span> (i <span class="cf">in</span> <span class="fu">seq_along</span>(genes)) {   <span class="co"># ... or over the positions 1, 2, 3</span></span>
+<span id="cb13-2"><a></a>  <span class="fu">cat</span>(i, genes[i], <span class="st">"</span><span class="sc">\n</span><span class="st">"</span>)</span>
+<span id="cb13-3"><a></a>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>1 tp53 
 2 brca1 
 3 myc </code></pre>
 </div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb21"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a></a>i <span class="ot">&lt;-</span> <span class="dv">1</span></span>
-<span id="cb21-2"><a></a><span class="cf">while</span> (i <span class="sc">&lt;</span> <span class="dv">8</span>) {                 <span class="co"># while: repeat until the condition fails</span></span>
-<span id="cb21-3"><a></a>  i <span class="ot">&lt;-</span> i <span class="sc">*</span> <span class="dv">2</span></span>
-<span id="cb21-4"><a></a>}</span>
-<span id="cb21-5"><a></a>i</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb15"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a></a>i <span class="ot">&lt;-</span> <span class="dv">1</span></span>
+<span id="cb15-2"><a></a><span class="cf">while</span> (i <span class="sc">&lt;</span> <span class="dv">8</span>) {                 <span class="co"># while: repeat until the condition fails</span></span>
+<span id="cb15-3"><a></a>  i <span class="ot">&lt;-</span> i <span class="sc">*</span> <span class="dv">2</span></span>
+<span id="cb15-4"><a></a>}</span>
+<span id="cb15-5"><a></a>i</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>[1] 8</code></pre>
 </div>
 </div>
 </div>
-<div id="tabset-8-2">
+<div id="tabset-6-2">
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb23"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb23-1"><a></a>genes <span class="op">=</span> [<span class="st">"tp53"</span>, <span class="st">"brca1"</span>, <span class="st">"myc"</span>]</span>
-<span id="cb23-2"><a></a><span class="cf">for</span> g <span class="kw">in</span> genes:                   <span class="co"># loop directly over the elements</span></span>
-<span id="cb23-3"><a></a>    <span class="bu">print</span>(g.upper())</span>
-<span id="cb23-4"><a></a></span>
-<span id="cb23-5"><a></a><span class="cf">for</span> i, g <span class="kw">in</span> <span class="bu">enumerate</span>(genes):     <span class="co"># enumerate: position AND element (0-based!)</span></span>
-<span id="cb23-6"><a></a>    <span class="bu">print</span>(i, g)</span>
-<span id="cb23-7"><a></a></span>
-<span id="cb23-8"><a></a>i <span class="op">=</span> <span class="dv">1</span></span>
-<span id="cb23-9"><a></a><span class="cf">while</span> i <span class="op">&lt;</span> <span class="dv">8</span>:                      <span class="co"># while: repeat until the condition fails</span></span>
-<span id="cb23-10"><a></a>    i <span class="op">=</span> i <span class="op">*</span> <span class="dv">2</span></span>
-<span id="cb23-11"><a></a><span class="bu">print</span>(i)</span>
-<span id="cb23-12"><a></a><span class="co"># 8</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb17"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb17-1"><a></a>genes <span class="op">=</span> [<span class="st">"tp53"</span>, <span class="st">"brca1"</span>, <span class="st">"myc"</span>]</span>
+<span id="cb17-2"><a></a><span class="cf">for</span> g <span class="kw">in</span> genes:                   <span class="co"># loop directly over the elements</span></span>
+<span id="cb17-3"><a></a>    <span class="bu">print</span>(g.upper())</span>
+<span id="cb17-4"><a></a></span>
+<span id="cb17-5"><a></a><span class="cf">for</span> i, g <span class="kw">in</span> <span class="bu">enumerate</span>(genes):     <span class="co"># enumerate: position AND element (0-based!)</span></span>
+<span id="cb17-6"><a></a>    <span class="bu">print</span>(i, g)</span>
+<span id="cb17-7"><a></a></span>
+<span id="cb17-8"><a></a>i <span class="op">=</span> <span class="dv">1</span></span>
+<span id="cb17-9"><a></a><span class="cf">while</span> i <span class="op">&lt;</span> <span class="dv">8</span>:                      <span class="co"># while: repeat until the condition fails</span></span>
+<span id="cb17-10"><a></a>    i <span class="op">=</span> i <span class="op">*</span> <span class="dv">2</span></span>
+<span id="cb17-11"><a></a><span class="bu">print</span>(i)</span>
+<span id="cb17-12"><a></a><span class="co"># 8</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 </div>
 </div>
@@ -912,6 +692,11 @@ MYC </code></pre>
 <li>Loops <em>earn their keep</em> for: iterating over <strong>files</strong>, per-sequence reports (the L05 <code>fasta_stats</code> stretch goal), simulations, and anything where step <em>n</em> depends on step <em>n - 1</em></li>
 <li>More practice: Parisa’s <code>s2</code>-<code>s3</code> notebooks, <a href="../book/chapters/11-r-programming.html">Ch. 11</a> and <a href="../book/chapters/12-python-programming.html">Ch. 12</a> control-flow sections</li>
 </ul>
+</section></section>
+<section>
+<section id="the-tidyverse" class="title-slide slide level1 center">
+<h1>The tidyverse</h1>
+
 </section>
 <section id="the-tidyverse-family-of-packages" class="slide level2">
 <h2>The tidyverse family of packages</h2>
@@ -974,16 +759,16 @@ MYC </code></pre>
 <section id="a-taste-of-the-tidyverse-the-pipe" class="slide level2">
 <h2>A taste of the tidyverse: the pipe <code>|&gt;</code></h2>
 <div class="panel-tabset">
-<ul id="tabset-9" class="panel-tabset-tabby"><li><a data-tabby-default="" href="#tabset-9-1">R</a></li><li><a href="#tabset-9-2">Python (pandas)</a></li></ul>
+<ul id="tabset-7" class="panel-tabset-tabby"><li><a data-tabby-default="" href="#tabset-7-1">R</a></li><li><a href="#tabset-7-2">Python (pandas)</a></li></ul>
 <div class="tab-content">
-<div id="tabset-9-1">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb24"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb24-1"><a></a><span class="fu">library</span>(tidyverse)</span>
-<span id="cb24-2"><a></a></span>
-<span id="cb24-3"><a></a>mydata <span class="sc">|&gt;</span></span>
-<span id="cb24-4"><a></a>  <span class="fu">filter</span>(compression <span class="sc">&gt;</span> <span class="dv">4</span>) <span class="sc">|&gt;</span>                            <span class="co"># keep rows</span></span>
-<span id="cb24-5"><a></a>  <span class="fu">mutate</span>(<span class="at">ratio =</span> conductivity <span class="sc">/</span> compression) <span class="sc">|&gt;</span>         <span class="co"># add a column</span></span>
-<span id="cb24-6"><a></a>  <span class="fu">group_by</span>(hydrogel_concentration) <span class="sc">|&gt;</span>                   <span class="co"># define groups</span></span>
-<span id="cb24-7"><a></a>  <span class="fu">summarise</span>(<span class="at">n =</span> <span class="fu">n</span>(), <span class="at">mean_ratio =</span> <span class="fu">mean</span>(ratio))          <span class="co"># one row per group</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div id="tabset-7-1">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb18"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a></a><span class="fu">library</span>(tidyverse)</span>
+<span id="cb18-2"><a></a></span>
+<span id="cb18-3"><a></a>mydata <span class="sc">|&gt;</span></span>
+<span id="cb18-4"><a></a>  <span class="fu">filter</span>(compression <span class="sc">&gt;</span> <span class="dv">4</span>) <span class="sc">|&gt;</span>                            <span class="co"># keep rows</span></span>
+<span id="cb18-5"><a></a>  <span class="fu">mutate</span>(<span class="at">ratio =</span> conductivity <span class="sc">/</span> compression) <span class="sc">|&gt;</span>         <span class="co"># add a column</span></span>
+<span id="cb18-6"><a></a>  <span class="fu">group_by</span>(hydrogel_concentration) <span class="sc">|&gt;</span>                   <span class="co"># define groups</span></span>
+<span id="cb18-7"><a></a>  <span class="fu">summarise</span>(<span class="at">n =</span> <span class="fu">n</span>(), <span class="at">mean_ratio =</span> <span class="fu">mean</span>(ratio))          <span class="co"># one row per group</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <table class="caption-top">
 <thead>
 <tr class="header">
@@ -1015,15 +800,15 @@ MYC </code></pre>
 </tbody>
 </table>
 </div>
-<div id="tabset-9-2">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb25"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb25-1"><a></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
-<span id="cb25-2"><a></a></span>
-<span id="cb25-3"><a></a>(mydata</span>
-<span id="cb25-4"><a></a>   .query(<span class="st">"compression &gt; 4"</span>)                                  <span class="co"># keep rows</span></span>
-<span id="cb25-5"><a></a>   .assign(ratio<span class="op">=</span><span class="kw">lambda</span> d: d.conductivity <span class="op">/</span> d.compression)    <span class="co"># add a column</span></span>
-<span id="cb25-6"><a></a>   .groupby(<span class="st">"hydrogel_concentration"</span>, observed<span class="op">=</span><span class="va">True</span>)          <span class="co"># define groups</span></span>
-<span id="cb25-7"><a></a>   .agg(n<span class="op">=</span>(<span class="st">"ratio"</span>, <span class="st">"size"</span>), mean_ratio<span class="op">=</span>(<span class="st">"ratio"</span>, <span class="st">"mean"</span>))    <span class="co"># one row per group</span></span>
-<span id="cb25-8"><a></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div id="tabset-7-2">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb19"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb19-1"><a></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
+<span id="cb19-2"><a></a></span>
+<span id="cb19-3"><a></a>(mydata</span>
+<span id="cb19-4"><a></a>   .query(<span class="st">"compression &gt; 4"</span>)                                  <span class="co"># keep rows</span></span>
+<span id="cb19-5"><a></a>   .assign(ratio<span class="op">=</span><span class="kw">lambda</span> d: d.conductivity <span class="op">/</span> d.compression)    <span class="co"># add a column</span></span>
+<span id="cb19-6"><a></a>   .groupby(<span class="st">"hydrogel_concentration"</span>, observed<span class="op">=</span><span class="va">True</span>)          <span class="co"># define groups</span></span>
+<span id="cb19-7"><a></a>   .agg(n<span class="op">=</span>(<span class="st">"ratio"</span>, <span class="st">"size"</span>), mean_ratio<span class="op">=</span>(<span class="st">"ratio"</span>, <span class="st">"mean"</span>))    <span class="co"># one row per group</span></span>
+<span id="cb19-8"><a></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <table class="caption-top">
 <colgroup>
 <col style="width: 43%">
@@ -1075,45 +860,89 @@ MYC </code></pre>
 </div>
 </div>
 </section>
-<section id="a-taste-of-ggplot2-the-grammar-of-graphics" class="slide level2">
-<h2>A taste of ggplot2: the grammar of graphics</h2>
+<section id="running-example-wide-to-long-then-summarize" class="slide level2">
+<h2>Running example: wide to long, then summarize</h2>
 <div class="panel-tabset">
-<ul id="tabset-10" class="panel-tabset-tabby"><li><a data-tabby-default="" href="#tabset-10-1">R</a></li><li><a href="#tabset-10-2">Python (seaborn)</a></li><li><a href="#tabset-10-3">Python (plotnine)</a></li></ul>
+<ul id="tabset-8" class="panel-tabset-tabby"><li><a data-tabby-default="" href="#tabset-8-1">R</a></li><li><a href="#tabset-8-2">Python</a></li></ul>
 <div class="tab-content">
-<div id="tabset-10-1">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb26"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb26-1"><a></a><span class="fu">ggplot</span>(mydata, <span class="fu">aes</span>(<span class="at">x =</span> hydrogel_concentration, <span class="at">y =</span> compression)) <span class="sc">+</span></span>
-<span id="cb26-2"><a></a>  <span class="fu">geom_boxplot</span>() <span class="sc">+</span></span>
-<span id="cb26-3"><a></a>  <span class="fu">geom_jitter</span>(<span class="at">width =</span> <span class="fl">0.1</span>) <span class="sc">+</span></span>
-<span id="cb26-4"><a></a>  <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">"Hydrogel concentration"</span>, <span class="at">y =</span> <span class="st">"Compression"</span>) <span class="sc">+</span></span>
-<span id="cb26-5"><a></a>  <span class="fu">theme_minimal</span>()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div id="tabset-8-1">
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb20"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a></a><span class="fu">library</span>(tidyverse)</span>
+<span id="cb20-2"><a></a>stickle <span class="ot">&lt;-</span> <span class="fu">read_tsv</span>(<span class="st">"../Data_Folder/Stickle_RNAseq.tsv"</span>, <span class="at">show_col_types =</span> <span class="cn">FALSE</span>) <span class="sc">|&gt;</span></span>
+<span id="cb20-3"><a></a>  <span class="fu">rename</span>(<span class="at">geno_micro =</span> <span class="st">`</span><span class="at">Geno&amp;Micro</span><span class="st">`</span>)          <span class="co"># fix the awkward name once</span></span>
+<span id="cb20-4"><a></a></span>
+<span id="cb20-5"><a></a>stickle_long <span class="ot">&lt;-</span> stickle <span class="sc">|&gt;</span></span>
+<span id="cb20-6"><a></a>  <span class="fu">pivot_longer</span>(<span class="fu">starts_with</span>(<span class="st">"Gene"</span>), <span class="at">names_to =</span> <span class="st">"gene"</span>, <span class="at">values_to =</span> <span class="st">"count"</span>)</span>
+<span id="cb20-7"><a></a>stickle_long                                  <span class="co"># 80 x 600 = 48,000 rows: one per fish x gene</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 48,000 × 6
+   Individual Genotype Microbiota   geno_micro gene   count
+   &lt;chr&gt;      &lt;chr&gt;    &lt;chr&gt;        &lt;chr&gt;      &lt;chr&gt;  &lt;dbl&gt;
+ 1 AC1        A        conventional convA      Gene1     16
+ 2 AC1        A        conventional convA      Gene2     15
+ 3 AC1        A        conventional convA      Gene3     71
+ 4 AC1        A        conventional convA      Gene4    153
+ 5 AC1        A        conventional convA      Gene5      2
+ 6 AC1        A        conventional convA      Gene6     11
+ 7 AC1        A        conventional convA      Gene7      9
+ 8 AC1        A        conventional convA      Gene8     11
+ 9 AC1        A        conventional convA      Gene9    540
+10 AC1        A        conventional convA      Gene10   104
+# ℹ 47,990 more rows</code></pre>
 </div>
-<div id="tabset-10-2">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb27"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb27-1"><a></a><span class="im">import</span> seaborn <span class="im">as</span> sns</span>
-<span id="cb27-2"><a></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
-<span id="cb27-3"><a></a></span>
-<span id="cb27-4"><a></a>sns.boxplot(data<span class="op">=</span>mydata, x<span class="op">=</span><span class="st">"hydrogel_concentration"</span>, y<span class="op">=</span><span class="st">"compression"</span>)</span>
-<span id="cb27-5"><a></a>sns.stripplot(data<span class="op">=</span>mydata, x<span class="op">=</span><span class="st">"hydrogel_concentration"</span>, y<span class="op">=</span><span class="st">"compression"</span>, jitter<span class="op">=</span><span class="fl">0.1</span>, color<span class="op">=</span><span class="st">"black"</span>)</span>
-<span id="cb27-6"><a></a>plt.xlabel(<span class="st">"Hydrogel concentration"</span>)</span>
-<span id="cb27-7"><a></a>plt.ylabel(<span class="st">"Compression"</span>)</span>
-<span id="cb27-8"><a></a>plt.show()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</div>
-<div id="tabset-10-3">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb28"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb28-1"><a></a><span class="im">from</span> plotnine <span class="im">import</span> ggplot, aes, geom_boxplot, geom_jitter, labs, theme_minimal</span>
-<span id="cb28-2"><a></a></span>
-<span id="cb28-3"><a></a>(ggplot(mydata, aes(x<span class="op">=</span><span class="st">"hydrogel_concentration"</span>, y<span class="op">=</span><span class="st">"compression"</span>))</span>
-<span id="cb28-4"><a></a>   <span class="op">+</span> geom_boxplot()</span>
-<span id="cb28-5"><a></a>   <span class="op">+</span> geom_jitter(width<span class="op">=</span><span class="fl">0.1</span>)</span>
-<span id="cb28-6"><a></a>   <span class="op">+</span> labs(x<span class="op">=</span><span class="st">"Hydrogel concentration"</span>, y<span class="op">=</span><span class="st">"Compression"</span>)</span>
-<span id="cb28-7"><a></a>   <span class="op">+</span> theme_minimal())</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb22"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb22-1"><a></a>gene_means <span class="ot">&lt;-</span> stickle_long <span class="sc">|&gt;</span></span>
+<span id="cb22-2"><a></a>  <span class="fu">group_by</span>(gene, Genotype, Microbiota) <span class="sc">|&gt;</span></span>
+<span id="cb22-3"><a></a>  <span class="fu">summarize</span>(<span class="at">mean_count =</span> <span class="fu">mean</span>(count), <span class="at">.groups =</span> <span class="st">"drop"</span>)</span>
+<span id="cb22-4"><a></a>gene_means <span class="sc">|&gt;</span> <span class="fu">filter</span>(gene <span class="sc">==</span> <span class="st">"Gene1"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 4 × 4
+  gene  Genotype Microbiota   mean_count
+  &lt;chr&gt; &lt;chr&gt;    &lt;chr&gt;             &lt;dbl&gt;
+1 Gene1 A        conventional      12.1 
+2 Gene1 A        mono              15.8 
+3 Gene1 B        conventional       0.6 
+4 Gene1 B        mono               2.15</code></pre>
 </div>
 </div>
 </div>
-<ul>
-<li class="fragment"><strong>Data</strong> + <strong>aesthetic mappings</strong> (<code>aes()</code>: which column goes to x, y, color…) + <strong>geoms</strong> (points, boxes, lines)</li>
-<li class="fragment">Layers are added with <code>+</code></li>
-<li class="fragment">Same pattern for every plot type - learn it once; <code>plotnine</code> brings exactly this grammar to Python, <code>seaborn</code> is the more common Python choice</li>
-<li class="fragment">More in the course book’s <a href="../book/chapters/11-r-programming.html">R Programming chapter</a> and <a href="../book/chapters/appendix-E-r.html">R Command Reference</a></li>
-</ul>
+<div id="tabset-8-2">
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb24"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb24-1"><a></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
+<span id="cb24-2"><a></a></span>
+<span id="cb24-3"><a></a>stickle <span class="op">=</span> pd.read_csv(<span class="st">"../Data_Folder/Stickle_RNAseq.tsv"</span>, sep<span class="op">=</span><span class="st">"</span><span class="ch">\t</span><span class="st">"</span>)</span>
+<span id="cb24-4"><a></a></span>
+<span id="cb24-5"><a></a>stickle_long <span class="op">=</span> stickle.melt(                      <span class="co"># melt = pivot_longer</span></span>
+<span id="cb24-6"><a></a>    id_vars<span class="op">=</span>[<span class="st">"Individual"</span>, <span class="st">"Genotype"</span>, <span class="st">"Microbiota"</span>, <span class="st">"Geno&amp;Micro"</span>],</span>
+<span id="cb24-7"><a></a>    var_name<span class="op">=</span><span class="st">"gene"</span>, value_name<span class="op">=</span><span class="st">"count"</span>)</span>
+<span id="cb24-8"><a></a>stickle_long.shape</span>
+<span id="cb24-9"><a></a><span class="co"># (48000, 6) - one row per fish x gene</span></span>
+<span id="cb24-10"><a></a></span>
+<span id="cb24-11"><a></a>gene_means <span class="op">=</span> (stickle_long</span>
+<span id="cb24-12"><a></a>    .groupby([<span class="st">"gene"</span>, <span class="st">"Genotype"</span>, <span class="st">"Microbiota"</span>], as_index<span class="op">=</span><span class="va">False</span>)</span>
+<span id="cb24-13"><a></a>    .agg(mean_count<span class="op">=</span>(<span class="st">"count"</span>, <span class="st">"mean"</span>)))</span>
+<span id="cb24-14"><a></a>gene_means.query(<span class="st">"gene == 'Gene1'"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+</div>
+</div>
+</div>
+<div class="callout callout-tip callout-titled callout-style-default">
+<div class="callout-body">
+<div class="callout-title">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<p><strong>Tip</strong></p>
+</div>
+<div class="callout-content">
+<p>Same data, three tools: <code>awk</code> gave us one gene’s mean per group in Week 4, base R’s <code>boxplot()</code> one figure in L06, and one <code>pivot_longer()</code> / <code>.melt()</code> now unlocks <em>every</em> gene at once. This is the payoff of tidy, long-format data.</p>
+</div>
+</div>
+</div>
+</section></section>
+<section>
+<section id="ggplot2-the-grammar-of-graphics" class="title-slide slide level1 center">
+<h1>ggplot2: the grammar of graphics</h1>
+
 </section>
 <section id="the-grammar-of-graphics-a-plot-is-a-stack-of-layers" class="slide level2">
 <h2>The grammar of graphics: a plot is a stack of layers</h2>
@@ -1126,6 +955,152 @@ MYC </code></pre>
 <aside><div>
 <p>Source: Leland Wilkinson, <em>The Grammar of Graphics</em>, 1999</p>
 </div></aside></section>
+<section id="building-a-figure-layer-by-layer-1---data-aesthetics-a-geom" class="slide level2">
+<h2>Building a figure layer by layer: 1 - data, aesthetics, a geom</h2>
+<div class="panel-tabset">
+<ul id="tabset-9" class="panel-tabset-tabby"><li><a data-tabby-default="" href="#tabset-9-1">R</a></li><li><a href="#tabset-9-2">Python</a></li></ul>
+<div class="tab-content">
+<div id="tabset-9-1">
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb25"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb25-1"><a></a>gene1 <span class="ot">&lt;-</span> stickle_long <span class="sc">|&gt;</span> <span class="fu">filter</span>(gene <span class="sc">==</span> <span class="st">"Gene1"</span>)</span>
+<span id="cb25-2"><a></a></span>
+<span id="cb25-3"><a></a><span class="fu">ggplot</span>(gene1, <span class="fu">aes</span>(<span class="at">x =</span> Genotype, <span class="at">y =</span> count)) <span class="sc">+</span></span>
+<span id="cb25-4"><a></a>  <span class="fu">geom_jitter</span>(<span class="at">width =</span> <span class="fl">0.08</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div id="fig-lec07-build-1" class="quarto-float quarto-figure quarto-figure-center">
+<figure class="quarto-float quarto-float-fig">
+<div aria-describedby="fig-lec07-build-1-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img data-src="Lecture_07_BioE_Comp_Tools_2026_files/figure-revealjs/fig-lec07-build-1-1.png" style="width:55.0%">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-lec07-build-1-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;2: Layer 1: every Gene1 count, jittered sideways so 80 fish don’t overprint
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+</div>
+<div id="tabset-9-2">
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb26"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb26-1"><a></a><span class="im">import</span> seaborn <span class="im">as</span> sns</span>
+<span id="cb26-2"><a></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
+<span id="cb26-3"><a></a></span>
+<span id="cb26-4"><a></a>gene1 <span class="op">=</span> stickle_long.query(<span class="st">"gene == 'Gene1'"</span>)</span>
+<span id="cb26-5"><a></a>sns.stripplot(data<span class="op">=</span>gene1, x<span class="op">=</span><span class="st">"Genotype"</span>, y<span class="op">=</span><span class="st">"count"</span>, jitter<span class="op">=</span><span class="fl">0.08</span>)</span>
+<span id="cb26-6"><a></a>plt.show()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+</div>
+</div>
+</div>
+<ul>
+<li><code>ggplot(data, aes(...))</code> declares the <strong>mapping</strong>: which column drives which visual channel</li>
+<li>A <strong>geom</strong> draws it; <code>geom_jitter()</code> is <code>geom_point()</code> plus sideways noise</li>
+<li>Nothing is styled yet - and it is already a readable figure</li>
+</ul>
+</section>
+<section id="building-a-figure-layer-by-layer-2---more-aesthetics-more-geoms" class="slide level2">
+<h2>Building a figure layer by layer: 2 - more aesthetics, more geoms</h2>
+<div class="panel-tabset">
+<ul id="tabset-10" class="panel-tabset-tabby"><li><a data-tabby-default="" href="#tabset-10-1">R</a></li><li><a href="#tabset-10-2">Python</a></li></ul>
+<div class="tab-content">
+<div id="tabset-10-1">
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb27"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb27-1"><a></a><span class="fu">ggplot</span>(gene1, <span class="fu">aes</span>(<span class="at">x =</span> Genotype, <span class="at">y =</span> count, <span class="at">fill =</span> Microbiota)) <span class="sc">+</span></span>
+<span id="cb27-2"><a></a>  <span class="fu">geom_violin</span>(<span class="at">alpha =</span> <span class="fl">0.4</span>, <span class="at">color =</span> <span class="cn">NA</span>, <span class="at">position =</span> <span class="fu">position_dodge</span>(<span class="fl">0.8</span>)) <span class="sc">+</span></span>
+<span id="cb27-3"><a></a>  <span class="fu">geom_point</span>(<span class="fu">aes</span>(<span class="at">color =</span> Microbiota), <span class="at">alpha =</span> <span class="fl">0.6</span>,</span>
+<span id="cb27-4"><a></a>             <span class="at">position =</span> <span class="fu">position_jitterdodge</span>(<span class="at">jitter.width =</span> <span class="fl">0.08</span>, <span class="at">dodge.width =</span> <span class="fl">0.8</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div id="fig-lec07-build-2" class="quarto-float quarto-figure quarto-figure-center">
+<figure class="quarto-float quarto-float-fig">
+<div aria-describedby="fig-lec07-build-2-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img data-src="Lecture_07_BioE_Comp_Tools_2026_files/figure-revealjs/fig-lec07-build-2-1.png" style="width:55.0%">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-lec07-build-2-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;3: Layer 2: map Microbiota to fill/color, and stack a violin under the points
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+</div>
+<div id="tabset-10-2">
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb28"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb28-1"><a></a>sns.violinplot(data<span class="op">=</span>gene1, x<span class="op">=</span><span class="st">"Genotype"</span>, y<span class="op">=</span><span class="st">"count"</span>, hue<span class="op">=</span><span class="st">"Microbiota"</span>,</span>
+<span id="cb28-2"><a></a>               inner<span class="op">=</span><span class="va">None</span>, alpha<span class="op">=</span><span class="fl">0.4</span>)</span>
+<span id="cb28-3"><a></a>sns.stripplot(data<span class="op">=</span>gene1, x<span class="op">=</span><span class="st">"Genotype"</span>, y<span class="op">=</span><span class="st">"count"</span>, hue<span class="op">=</span><span class="st">"Microbiota"</span>,</span>
+<span id="cb28-4"><a></a>              dodge<span class="op">=</span><span class="va">True</span>, size<span class="op">=</span><span class="dv">4</span>, alpha<span class="op">=</span><span class="fl">0.6</span>, legend<span class="op">=</span><span class="va">False</span>)</span>
+<span id="cb28-5"><a></a>plt.show()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+</div>
+</div>
+</div>
+<ul>
+<li>Mapping a column to <code>fill</code> / <code>color</code> (<code>hue</code> in seaborn) splits the groups <strong>and</strong> builds the legend - automatically, from the data</li>
+<li>Layers draw in order: violin first, points on top</li>
+<li><code>position_dodge</code> places the two microbiota groups side by side</li>
+</ul>
+</section>
+<section id="building-a-figure-layer-by-layer-3---facets-scales-labels-theme" class="slide level2">
+<h2>Building a figure layer by layer: 3 - facets, scales, labels, theme</h2>
+<div class="panel-tabset">
+<ul id="tabset-11" class="panel-tabset-tabby"><li><a data-tabby-default="" href="#tabset-11-1">R</a></li><li><a href="#tabset-11-2">Python</a></li></ul>
+<div class="tab-content">
+<div id="tabset-11-1">
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb29"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb29-1"><a></a>stickle_long <span class="sc">|&gt;</span></span>
+<span id="cb29-2"><a></a>  <span class="fu">filter</span>(gene <span class="sc">%in%</span> <span class="fu">paste0</span>(<span class="st">"Gene"</span>, <span class="dv">1</span><span class="sc">:</span><span class="dv">4</span>)) <span class="sc">|&gt;</span></span>
+<span id="cb29-3"><a></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(Genotype, count, <span class="at">fill =</span> Microbiota)) <span class="sc">+</span></span>
+<span id="cb29-4"><a></a>  <span class="fu">geom_violin</span>(<span class="at">alpha =</span> <span class="fl">0.4</span>, <span class="at">color =</span> <span class="cn">NA</span>, <span class="at">position =</span> <span class="fu">position_dodge</span>(<span class="fl">0.8</span>)) <span class="sc">+</span></span>
+<span id="cb29-5"><a></a>  <span class="fu">geom_point</span>(<span class="fu">aes</span>(<span class="at">color =</span> Microbiota), <span class="at">alpha =</span> <span class="fl">0.6</span>, <span class="at">size =</span> <span class="fl">1.2</span>,</span>
+<span id="cb29-6"><a></a>             <span class="at">position =</span> <span class="fu">position_jitterdodge</span>(<span class="at">jitter.width =</span> <span class="fl">0.08</span>, <span class="at">dodge.width =</span> <span class="fl">0.8</span>)) <span class="sc">+</span></span>
+<span id="cb29-7"><a></a>  <span class="fu">scale_fill_viridis_d</span>(<span class="at">end =</span> <span class="fl">0.7</span>) <span class="sc">+</span> <span class="fu">scale_color_viridis_d</span>(<span class="at">end =</span> <span class="fl">0.7</span>) <span class="sc">+</span></span>
+<span id="cb29-8"><a></a>  <span class="fu">facet_wrap</span>(<span class="sc">~</span> gene, <span class="at">scales =</span> <span class="st">"free_y"</span>) <span class="sc">+</span></span>
+<span id="cb29-9"><a></a>  <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">"Host genotype"</span>, <span class="at">y =</span> <span class="st">"Read count"</span>,</span>
+<span id="cb29-10"><a></a>       <span class="at">title =</span> <span class="st">"Stickleback gut RNA-seq"</span>,</span>
+<span id="cb29-11"><a></a>       <span class="at">subtitle =</span> <span class="st">"Each point is one fish; violins show the full distribution"</span>) <span class="sc">+</span></span>
+<span id="cb29-12"><a></a>  <span class="fu">theme_minimal</span>(<span class="at">base_size =</span> <span class="dv">14</span>) <span class="sc">+</span> <span class="fu">theme</span>(<span class="at">legend.position =</span> <span class="st">"top"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div id="fig-lec07-build-3" class="quarto-float quarto-figure quarto-figure-center">
+<figure class="quarto-float quarto-float-fig">
+<div aria-describedby="fig-lec07-build-3-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img data-src="Lecture_07_BioE_Comp_Tools_2026_files/figure-revealjs/fig-lec07-build-3-1.png" style="width:60.0%">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-lec07-build-3-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;4: Layers 3-5: one panel per gene, colorblind-safe viridis colors, real labels
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+</div>
+<div id="tabset-11-2">
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb30"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb30-1"><a></a>long4 <span class="op">=</span> stickle_long[stickle_long[<span class="st">"gene"</span>].isin([<span class="ss">f"Gene</span><span class="sc">{</span>i<span class="sc">}</span><span class="ss">"</span> <span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">1</span>, <span class="dv">5</span>)])]</span>
+<span id="cb30-2"><a></a></span>
+<span id="cb30-3"><a></a>g <span class="op">=</span> sns.catplot(data<span class="op">=</span>long4, x<span class="op">=</span><span class="st">"Genotype"</span>, y<span class="op">=</span><span class="st">"count"</span>, hue<span class="op">=</span><span class="st">"Microbiota"</span>,</span>
+<span id="cb30-4"><a></a>                col<span class="op">=</span><span class="st">"gene"</span>, col_wrap<span class="op">=</span><span class="dv">2</span>, kind<span class="op">=</span><span class="st">"violin"</span>, inner<span class="op">=</span><span class="st">"point"</span>,</span>
+<span id="cb30-5"><a></a>                palette<span class="op">=</span>[<span class="st">"#440154"</span>, <span class="st">"#35b779"</span>], sharey<span class="op">=</span><span class="va">False</span>, height<span class="op">=</span><span class="fl">2.6</span>, aspect<span class="op">=</span><span class="fl">1.3</span>)</span>
+<span id="cb30-6"><a></a>g.set_axis_labels(<span class="st">"Host genotype"</span>, <span class="st">"Read count"</span>)</span>
+<span id="cb30-7"><a></a>g.set_titles(<span class="st">"</span><span class="sc">{col_name}</span><span class="st">"</span>)</span>
+<span id="cb30-8"><a></a>g.figure.suptitle(<span class="st">"Stickleback gut RNA-seq"</span>, y<span class="op">=</span><span class="fl">1.02</span>)</span>
+<span id="cb30-9"><a></a>plt.show()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div class="quarto-figure quarto-figure-center">
+<figure>
+<p><img data-src="../images/Lec07_py_gene_panel.svg" style="width:55.0%"></p>
+<figcaption>The figure this code draws (pre-rendered)</figcaption>
+</figure>
+</div>
+</div>
+</div>
+</div>
+<ul>
+<li><code>facet_wrap(~ gene)</code> - one panel per gene, for free; <code>scales = "free_y"</code> lets each gene keep its own axis</li>
+<li>This <strong>is</strong> the left half of the destination figure - and it saves to a file in one line:</li>
+</ul>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb31"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb31-1"><a></a><span class="fu">ggsave</span>(<span class="st">"results/gene_panel.svg"</span>, <span class="at">width =</span> <span class="dv">8</span>, <span class="at">height =</span> <span class="dv">6</span>)   <span class="co"># last plot drawn</span></span>
+<span id="cb31-2"><a></a><span class="co"># g.figure.savefig("results/gene_panel.svg")              # the seaborn version</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
 <section id="common-ggplot2-geoms" class="slide level2">
 <h2>Common <code>ggplot2</code> geoms</h2>
 <table class="caption-top">
@@ -1200,62 +1175,388 @@ MYC </code></pre>
 <h2>Choosing the right kind of plot</h2>
 
 <img data-src="../images/Lec07_img004.svg" style="width:90.0%" class="r-stretch quarto-figure-center"><p class="caption">Start from the question and the type of data you have</p></section>
-<section id="running-example-wide-to-long-then-summarize" class="slide level2">
-<h2>Running example: wide to long, then summarize</h2>
+<section id="the-closer-all-600-genes-in-one-figure" class="slide level2">
+<h2>The closer: all 600 genes in one figure</h2>
+<div class="panel-tabset">
+<ul id="tabset-12" class="panel-tabset-tabby"><li><a data-tabby-default="" href="#tabset-12-1">R</a></li><li><a href="#tabset-12-2">Python</a></li></ul>
+<div class="tab-content">
+<div id="tabset-12-1">
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb29"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb29-1"><a></a><span class="fu">library</span>(tidyverse)</span>
-<span id="cb29-2"><a></a>stickle <span class="ot">&lt;-</span> <span class="fu">read_tsv</span>(<span class="st">"../Data_Folder/Stickle_RNAseq.tsv"</span>, <span class="at">show_col_types =</span> <span class="cn">FALSE</span>) <span class="sc">|&gt;</span></span>
-<span id="cb29-3"><a></a>  <span class="fu">rename</span>(<span class="at">geno_micro =</span> <span class="st">`</span><span class="at">Geno&amp;Micro</span><span class="st">`</span>)          <span class="co"># fix the awkward name once</span></span>
-<span id="cb29-4"><a></a></span>
-<span id="cb29-5"><a></a>stickle_long <span class="ot">&lt;-</span> stickle <span class="sc">|&gt;</span></span>
-<span id="cb29-6"><a></a>  <span class="fu">pivot_longer</span>(<span class="fu">starts_with</span>(<span class="st">"Gene"</span>), <span class="at">names_to =</span> <span class="st">"gene"</span>, <span class="at">values_to =</span> <span class="st">"count"</span>)</span>
-<span id="cb29-7"><a></a>stickle_long                                  <span class="co"># 80 x 600 = 48,000 rows: one per fish x gene</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="cell-output cell-output-stdout">
-<pre><code># A tibble: 48,000 × 6
-   Individual Genotype Microbiota   geno_micro gene   count
-   &lt;chr&gt;      &lt;chr&gt;    &lt;chr&gt;        &lt;chr&gt;      &lt;chr&gt;  &lt;dbl&gt;
- 1 AC1        A        conventional convA      Gene1     16
- 2 AC1        A        conventional convA      Gene2     15
- 3 AC1        A        conventional convA      Gene3     71
- 4 AC1        A        conventional convA      Gene4    153
- 5 AC1        A        conventional convA      Gene5      2
- 6 AC1        A        conventional convA      Gene6     11
- 7 AC1        A        conventional convA      Gene7      9
- 8 AC1        A        conventional convA      Gene8     11
- 9 AC1        A        conventional convA      Gene9    540
-10 AC1        A        conventional convA      Gene10   104
-# ℹ 47,990 more rows</code></pre>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb32"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb32-1"><a></a>stickle_long <span class="sc">|&gt;</span></span>
+<span id="cb32-2"><a></a>  <span class="fu">group_by</span>(gene) <span class="sc">|&gt;</span></span>
+<span id="cb32-3"><a></a>  <span class="fu">summarize</span>(<span class="at">mean =</span> <span class="fu">mean</span>(count), <span class="at">var =</span> <span class="fu">var</span>(count)) <span class="sc">|&gt;</span></span>
+<span id="cb32-4"><a></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(mean, var)) <span class="sc">+</span></span>
+<span id="cb32-5"><a></a>  <span class="fu">geom_point</span>(<span class="at">alpha =</span> <span class="fl">0.4</span>, <span class="at">color =</span> <span class="st">"#31688e"</span>) <span class="sc">+</span></span>
+<span id="cb32-6"><a></a>  <span class="fu">geom_abline</span>(<span class="at">slope =</span> <span class="dv">1</span>, <span class="at">intercept =</span> <span class="dv">0</span>, <span class="at">linetype =</span> <span class="st">"dashed"</span>) <span class="sc">+</span></span>
+<span id="cb32-7"><a></a>  <span class="fu">geom_smooth</span>(<span class="at">se =</span> <span class="cn">FALSE</span>, <span class="at">color =</span> <span class="st">"#440154"</span>) <span class="sc">+</span></span>
+<span id="cb32-8"><a></a>  <span class="fu">scale_x_log10</span>() <span class="sc">+</span> <span class="fu">scale_y_log10</span>() <span class="sc">+</span></span>
+<span id="cb32-9"><a></a>  <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">"Mean count per gene (log)"</span>, <span class="at">y =</span> <span class="st">"Variance (log)"</span>,</span>
+<span id="cb32-10"><a></a>       <span class="at">title =</span> <span class="st">"All 600 genes at once"</span>,</span>
+<span id="cb32-11"><a></a>       <span class="at">subtitle =</span> <span class="st">"Dashed line: variance = mean (Poisson). Real RNA-seq runs hotter."</span>) <span class="sc">+</span></span>
+<span id="cb32-12"><a></a>  <span class="fu">theme_minimal</span>(<span class="at">base_size =</span> <span class="dv">14</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div id="fig-lec07-meanvar" class="quarto-float quarto-figure quarto-figure-center">
+<figure class="quarto-float quarto-float-fig">
+<div aria-describedby="fig-lec07-meanvar-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img data-src="Lecture_07_BioE_Comp_Tools_2026_files/figure-revealjs/fig-lec07-meanvar-1.png" style="width:55.0%">
 </div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb31"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb31-1"><a></a>gene_means <span class="ot">&lt;-</span> stickle_long <span class="sc">|&gt;</span></span>
-<span id="cb31-2"><a></a>  <span class="fu">group_by</span>(gene, Genotype, Microbiota) <span class="sc">|&gt;</span></span>
-<span id="cb31-3"><a></a>  <span class="fu">summarize</span>(<span class="at">mean_count =</span> <span class="fu">mean</span>(count), <span class="at">.groups =</span> <span class="st">"drop"</span>)</span>
-<span id="cb31-4"><a></a>gene_means <span class="sc">|&gt;</span> <span class="fu">filter</span>(gene <span class="sc">==</span> <span class="st">"Gene1"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="cell-output cell-output-stdout">
-<pre><code># A tibble: 4 × 4
-  gene  Genotype Microbiota   mean_count
-  &lt;chr&gt; &lt;chr&gt;    &lt;chr&gt;             &lt;dbl&gt;
-1 Gene1 A        conventional      12.1 
-2 Gene1 A        mono              15.8 
-3 Gene1 B        conventional       0.6 
-4 Gene1 B        mono               2.15</code></pre>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-lec07-meanvar-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;5: Mean vs.&nbsp;variance for every gene, on log scales
+</figcaption>
+</figure>
 </div>
 </div>
-</section>
-<section id="running-example-the-same-figure-the-grammar-of-graphics-way" class="slide level2">
-<h2>Running example: the same figure, the grammar-of-graphics way</h2>
+</div>
+</div>
+<div id="tabset-12-2">
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb33"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb33-1"><a></a>stickle_long <span class="sc">|&gt;</span></span>
-<span id="cb33-2"><a></a>  <span class="fu">filter</span>(gene <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"Gene1"</span>, <span class="st">"Gene2"</span>, <span class="st">"Gene3"</span>, <span class="st">"Gene4"</span>)) <span class="sc">|&gt;</span></span>
-<span id="cb33-3"><a></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> Genotype, <span class="at">y =</span> count, <span class="at">fill =</span> Microbiota)) <span class="sc">+</span></span>
-<span id="cb33-4"><a></a>  <span class="fu">geom_boxplot</span>() <span class="sc">+</span></span>
-<span id="cb33-5"><a></a>  <span class="fu">facet_wrap</span>(<span class="sc">~</span> gene, <span class="at">scales =</span> <span class="st">"free_y"</span>) <span class="sc">+</span></span>
-<span id="cb33-6"><a></a>  <span class="fu">labs</span>(<span class="at">y =</span> <span class="st">"Read count"</span>, <span class="at">title =</span> <span class="st">"Stickleback gut RNA-seq"</span>) <span class="sc">+</span></span>
-<span id="cb33-7"><a></a>  <span class="fu">theme_minimal</span>(<span class="at">base_size =</span> <span class="dv">14</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb33"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb33-1"><a></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
+<span id="cb33-2"><a></a></span>
+<span id="cb33-3"><a></a>genes <span class="op">=</span> [c <span class="cf">for</span> c <span class="kw">in</span> stickle.columns <span class="cf">if</span> c.startswith(<span class="st">"Gene"</span>)]</span>
+<span id="cb33-4"><a></a>mv <span class="op">=</span> pd.DataFrame({<span class="st">"mean"</span>: stickle[genes].mean(), <span class="st">"var"</span>: stickle[genes].var()})</span>
+<span id="cb33-5"><a></a></span>
+<span id="cb33-6"><a></a>fig, ax <span class="op">=</span> plt.subplots()</span>
+<span id="cb33-7"><a></a>ax.scatter(mv[<span class="st">"mean"</span>], mv[<span class="st">"var"</span>], s<span class="op">=</span><span class="dv">10</span>, alpha<span class="op">=</span><span class="fl">0.4</span>, color<span class="op">=</span><span class="st">"#31688e"</span>)</span>
+<span id="cb33-8"><a></a>lims <span class="op">=</span> np.array([mv[<span class="st">"mean"</span>].<span class="bu">min</span>() <span class="op">/</span> <span class="dv">2</span>, mv[<span class="st">"mean"</span>].<span class="bu">max</span>() <span class="op">*</span> <span class="dv">2</span>])</span>
+<span id="cb33-9"><a></a>ax.plot(lims, lims, ls<span class="op">=</span><span class="st">"--"</span>, color<span class="op">=</span><span class="st">"black"</span>)              <span class="co"># variance = mean</span></span>
+<span id="cb33-10"><a></a>ax.<span class="bu">set</span>(xscale<span class="op">=</span><span class="st">"log"</span>, yscale<span class="op">=</span><span class="st">"log"</span>,</span>
+<span id="cb33-11"><a></a>       xlabel<span class="op">=</span><span class="st">"Mean count per gene (log)"</span>, ylabel<span class="op">=</span><span class="st">"Variance (log)"</span>,</span>
+<span id="cb33-12"><a></a>       title<span class="op">=</span><span class="st">"All 600 genes at once"</span>)</span>
+<span id="cb33-13"><a></a>plt.show()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div class="quarto-figure quarto-figure-center">
+<figure>
+<p><img data-src="../images/Lec07_py_meanvar.svg" style="width:50.0%"></p>
+<figcaption>The figure this code draws (pre-rendered)</figcaption>
+</figure>
+</div>
+</div>
+</div>
+</div>
+<ul>
+<li><code>group_by(gene) |&gt; summarize()</code> collapses 48,000 rows to 600 - one point per gene</li>
+<li>The biology in one glance: variance <strong>outruns</strong> the mean, which is why RNA-seq models use the negative binomial rather than the Poisson - a preview of the statistics to come</li>
+<li>And this is the right half of the destination figure - <strong>you can now build all of it</strong></li>
+</ul>
+</section></section>
+<section>
+<section id="a-gallery-of-figures-for-bioengineering-data" class="title-slide slide level1 center">
+<h1>A gallery of figures for bioengineering data</h1>
 
+</section>
+<section id="matching-the-figure-to-the-question" class="slide level2">
+<h2>Matching the figure to the question</h2>
+<table class="caption-top">
+<colgroup>
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: left;">Figure</th>
+<th style="text-align: left;">The question it answers</th>
+<th style="text-align: left;">R</th>
+<th style="text-align: left;">Python</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">Clustered <strong>heatmap</strong> + dendrograms</td>
+<td style="text-align: left;">which samples / genes behave alike?</td>
+<td style="text-align: left;"><code>heatmap()</code></td>
+<td style="text-align: left;"><code>sns.clustermap()</code></td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><strong>Time course</strong> with ribbons</td>
+<td style="text-align: left;">how do trajectories differ, and how noisy are they?</td>
+<td style="text-align: left;"><code>geom_ribbon()</code> + <code>geom_line()</code></td>
+<td style="text-align: left;"><code>plt.fill_between()</code></td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><strong>Dose-response</strong> curve</td>
+<td style="text-align: left;">where is the IC50?</td>
+<td style="text-align: left;"><code>geom_point()</code> + <code>geom_smooth()</code>, log-x</td>
+<td style="text-align: left;"><code>plt.semilogx()</code></td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><strong>PCA</strong> scores plot</td>
+<td style="text-align: left;">what structures 600 dimensions?</td>
+<td style="text-align: left;"><code>prcomp()</code> + <code>geom_point()</code></td>
+<td style="text-align: left;"><code>sklearn</code> <code>PCA</code> + scatter</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><strong>Violin</strong> + jitter</td>
+<td style="text-align: left;">what does the whole distribution look like, by group?</td>
+<td style="text-align: left;"><code>geom_violin()</code></td>
+<td style="text-align: left;"><code>sns.violinplot()</code></td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li>The next four slides draw each one - two from <em>synthesized</em> data (so you can see the generating process), two from the real stickleback table</li>
+<li>Full walk-throughs live in the book’s <a href="../book/chapters/13-data-visualization.html">Ch. 13 figure gallery</a></li>
+</ul>
+</section>
+<section id="gallery-1-a-clustered-heatmap-from-synthesized-expression-data" class="slide level2">
+<h2>Gallery 1: a clustered heatmap, from synthesized expression data</h2>
+<div class="panel-tabset">
+<ul id="tabset-13" class="panel-tabset-tabby"><li><a data-tabby-default="" href="#tabset-13-1">R</a></li><li><a href="#tabset-13-2">Python</a></li></ul>
+<div class="tab-content">
+<div id="tabset-13-1">
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb34"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb34-1"><a></a><span class="fu">set.seed</span>(<span class="dv">2026</span>)</span>
+<span id="cb34-2"><a></a>expr <span class="ot">&lt;-</span> <span class="fu">matrix</span>(<span class="fu">rnorm</span>(<span class="dv">30</span> <span class="sc">*</span> <span class="dv">12</span>, <span class="at">mean =</span> <span class="dv">8</span>, <span class="at">sd =</span> <span class="fl">0.4</span>), <span class="at">nrow =</span> <span class="dv">30</span>) <span class="sc">+</span></span>
+<span id="cb34-3"><a></a>        <span class="fu">rnorm</span>(<span class="dv">30</span>)                                 <span class="co"># a baseline level per gene</span></span>
+<span id="cb34-4"><a></a>expr[<span class="dv">1</span><span class="sc">:</span><span class="dv">15</span>, <span class="dv">7</span><span class="sc">:</span><span class="dv">12</span>]  <span class="ot">&lt;-</span> expr[<span class="dv">1</span><span class="sc">:</span><span class="dv">15</span>, <span class="dv">7</span><span class="sc">:</span><span class="dv">12</span>] <span class="sc">+</span> <span class="dv">2</span>         <span class="co"># module 1: up in treated</span></span>
+<span id="cb34-5"><a></a>expr[<span class="dv">16</span><span class="sc">:</span><span class="dv">30</span>, <span class="dv">7</span><span class="sc">:</span><span class="dv">12</span>] <span class="ot">&lt;-</span> expr[<span class="dv">16</span><span class="sc">:</span><span class="dv">30</span>, <span class="dv">7</span><span class="sc">:</span><span class="dv">12</span>] <span class="sc">-</span> <span class="fl">1.5</span>      <span class="co"># module 2: down in treated</span></span>
+<span id="cb34-6"><a></a><span class="fu">rownames</span>(expr) <span class="ot">&lt;-</span> <span class="fu">paste0</span>(<span class="st">"gene_"</span>, <span class="dv">1</span><span class="sc">:</span><span class="dv">30</span>)</span>
+<span id="cb34-7"><a></a><span class="fu">colnames</span>(expr) <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="fu">paste0</span>(<span class="st">"ctrl_"</span>, <span class="dv">1</span><span class="sc">:</span><span class="dv">6</span>), <span class="fu">paste0</span>(<span class="st">"treat_"</span>, <span class="dv">1</span><span class="sc">:</span><span class="dv">6</span>))</span>
+<span id="cb34-8"><a></a></span>
+<span id="cb34-9"><a></a><span class="fu">heatmap</span>(expr, <span class="at">scale =</span> <span class="st">"row"</span>, <span class="at">col =</span> <span class="fu">hcl.colors</span>(<span class="dv">50</span>, <span class="st">"viridis"</span>), <span class="at">margins =</span> <span class="fu">c</span>(<span class="dv">6</span>, <span class="dv">5</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div id="fig-lec07-zoo-heatmap" class="quarto-float quarto-figure quarto-figure-center">
+<figure class="quarto-float quarto-float-fig">
+<div aria-describedby="fig-lec07-zoo-heatmap-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img data-src="Lecture_07_BioE_Comp_Tools_2026_files/figure-revealjs/fig-lec07-zoo-heatmap-1.png" style="width:48.0%">
 </div>
-<img data-src="Lecture_07_BioE_Comp_Tools_2026_files/figure-revealjs/fig-lec07-stickle-ggplot-1.png" style="width:70.0%" class="r-stretch quarto-figure-center" id="fig-lec07-stickle-ggplot"><p class="caption">
-Figure&nbsp;1: Counts for four genes by genotype and microbiota treatment
-</p><div class="callout callout-tip callout-titled callout-style-default">
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-lec07-zoo-heatmap-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;6: 30 genes x 12 samples; the dendrograms rediscover the two gene modules and the control/treated split we built in
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+</div>
+<div id="tabset-13-2">
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb35"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb35-1"><a></a>expr <span class="op">=</span> pd.DataFrame(</span>
+<span id="cb35-2"><a></a>    rng.normal(<span class="dv">8</span>, <span class="fl">0.4</span>, size<span class="op">=</span>(<span class="dv">30</span>, <span class="dv">12</span>)) <span class="op">+</span> rng.normal(<span class="dv">0</span>, <span class="dv">1</span>, size<span class="op">=</span>(<span class="dv">30</span>, <span class="dv">1</span>)),</span>
+<span id="cb35-3"><a></a>    index<span class="op">=</span>[<span class="ss">f"gene_</span><span class="sc">{</span>i<span class="op">+</span><span class="dv">1</span><span class="sc">}</span><span class="ss">"</span> <span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">30</span>)],</span>
+<span id="cb35-4"><a></a>    columns<span class="op">=</span>[<span class="ss">f"ctrl_</span><span class="sc">{</span>i<span class="op">+</span><span class="dv">1</span><span class="sc">}</span><span class="ss">"</span> <span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">6</span>)] <span class="op">+</span> [<span class="ss">f"treat_</span><span class="sc">{</span>i<span class="op">+</span><span class="dv">1</span><span class="sc">}</span><span class="ss">"</span> <span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">6</span>)])</span>
+<span id="cb35-5"><a></a>expr.iloc[:<span class="dv">15</span>, <span class="dv">6</span>:] <span class="op">+=</span> <span class="fl">2.0</span>          <span class="co"># module 1: up in treated</span></span>
+<span id="cb35-6"><a></a>expr.iloc[<span class="dv">15</span>:, <span class="dv">6</span>:] <span class="op">-=</span> <span class="fl">1.5</span>          <span class="co"># module 2: down in treated</span></span>
+<span id="cb35-7"><a></a></span>
+<span id="cb35-8"><a></a>sns.clustermap(expr, z_score<span class="op">=</span><span class="dv">0</span>, cmap<span class="op">=</span><span class="st">"viridis"</span>, figsize<span class="op">=</span>(<span class="dv">7</span>, <span class="dv">6</span>))</span>
+<span id="cb35-9"><a></a>plt.show()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div class="quarto-figure quarto-figure-center">
+<figure>
+<p><img data-src="../images/Lec07_py_heatmap.svg" style="width:42.0%"></p>
+<figcaption>The figure this code draws (pre-rendered)</figcaption>
+</figure>
+</div>
+</div>
+</div>
+</div>
+<ul>
+<li><code>scale = "row"</code> / <code>z_score=0</code> standardizes each gene, so the colors compare <em>patterns</em>, not absolute levels</li>
+<li>The dendrograms are hierarchical clustering - both tools run it for you; richer R options: <code>pheatmap</code>, <code>ComplexHeatmap</code></li>
+</ul>
+</section>
+<section id="gallery-2-growth-curves-with-ribbons" class="slide level2">
+<h2>Gallery 2: growth curves with ribbons</h2>
+<div class="panel-tabset">
+<ul id="tabset-14" class="panel-tabset-tabby"><li><a data-tabby-default="" href="#tabset-14-1">R</a></li><li><a href="#tabset-14-2">Python</a></li></ul>
+<div class="tab-content">
+<div id="tabset-14-1">
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb36"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb36-1"><a></a>params <span class="ot">&lt;-</span> <span class="fu">tibble</span>(<span class="at">strain =</span> <span class="fu">c</span>(<span class="st">"wild type"</span>, <span class="st">"mutant A"</span>, <span class="st">"mutant B"</span>),</span>
+<span id="cb36-2"><a></a>                 <span class="at">K =</span> <span class="fu">c</span>(<span class="fl">1.8</span>, <span class="fl">1.2</span>, <span class="fl">1.6</span>),            <span class="co"># carrying capacity</span></span>
+<span id="cb36-3"><a></a>                 <span class="at">r =</span> <span class="fu">c</span>(<span class="fl">0.25</span>, <span class="fl">0.35</span>, <span class="fl">0.15</span>))         <span class="co"># growth rate</span></span>
+<span id="cb36-4"><a></a>growth <span class="ot">&lt;-</span> <span class="fu">expand_grid</span>(params, <span class="at">rep =</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">4</span>, <span class="at">time =</span> <span class="fu">seq</span>(<span class="dv">0</span>, <span class="dv">48</span>, <span class="at">by =</span> <span class="dv">2</span>)) <span class="sc">|&gt;</span></span>
+<span id="cb36-5"><a></a>  <span class="fu">mutate</span>(<span class="at">od =</span> K <span class="sc">/</span> (<span class="dv">1</span> <span class="sc">+</span> <span class="fu">exp</span>(<span class="sc">-</span>r <span class="sc">*</span> (time <span class="sc">-</span> <span class="dv">20</span>))) <span class="sc">+</span> <span class="fu">rnorm</span>(<span class="fu">n</span>(), <span class="at">sd =</span> <span class="fl">0.05</span>))</span>
+<span id="cb36-6"><a></a></span>
+<span id="cb36-7"><a></a>growth <span class="sc">|&gt;</span></span>
+<span id="cb36-8"><a></a>  <span class="fu">group_by</span>(strain, time) <span class="sc">|&gt;</span></span>
+<span id="cb36-9"><a></a>  <span class="fu">summarize</span>(<span class="at">mean =</span> <span class="fu">mean</span>(od), <span class="at">sd =</span> <span class="fu">sd</span>(od), <span class="at">.groups =</span> <span class="st">"drop"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb36-10"><a></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(time, mean, <span class="at">color =</span> strain, <span class="at">fill =</span> strain)) <span class="sc">+</span></span>
+<span id="cb36-11"><a></a>  <span class="fu">geom_ribbon</span>(<span class="fu">aes</span>(<span class="at">ymin =</span> mean <span class="sc">-</span> sd, <span class="at">ymax =</span> mean <span class="sc">+</span> sd), <span class="at">alpha =</span> <span class="fl">0.25</span>, <span class="at">color =</span> <span class="cn">NA</span>) <span class="sc">+</span></span>
+<span id="cb36-12"><a></a>  <span class="fu">geom_line</span>(<span class="at">linewidth =</span> <span class="dv">1</span>) <span class="sc">+</span></span>
+<span id="cb36-13"><a></a>  <span class="fu">scale_color_viridis_d</span>(<span class="at">end =</span> <span class="fl">0.8</span>) <span class="sc">+</span> <span class="fu">scale_fill_viridis_d</span>(<span class="at">end =</span> <span class="fl">0.8</span>) <span class="sc">+</span></span>
+<span id="cb36-14"><a></a>  <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">"Time (h)"</span>, <span class="at">y =</span> <span class="st">"OD600"</span>,</span>
+<span id="cb36-15"><a></a>       <span class="at">title =</span> <span class="st">"Bioreactor growth curves (mean ± SD of 4 replicates)"</span>) <span class="sc">+</span></span>
+<span id="cb36-16"><a></a>  <span class="fu">theme_minimal</span>(<span class="at">base_size =</span> <span class="dv">14</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div id="fig-lec07-zoo-timecourse" class="quarto-float quarto-figure quarto-figure-center">
+<figure class="quarto-float quarto-float-fig">
+<div aria-describedby="fig-lec07-zoo-timecourse-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img data-src="Lecture_07_BioE_Comp_Tools_2026_files/figure-revealjs/fig-lec07-zoo-timecourse-1.png" style="width:55.0%">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-lec07-zoo-timecourse-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;7: Synthesized bioreactor growth: logistic curves plus measurement noise
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+</div>
+<div id="tabset-14-2">
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb37"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb37-1"><a></a>t <span class="op">=</span> np.arange(<span class="dv">0</span>, <span class="dv">49</span>, <span class="dv">2</span>)</span>
+<span id="cb37-2"><a></a>strains <span class="op">=</span> {<span class="st">"wild type"</span>: (<span class="fl">1.8</span>, <span class="fl">0.25</span>), <span class="st">"mutant A"</span>: (<span class="fl">1.2</span>, <span class="fl">0.35</span>), <span class="st">"mutant B"</span>: (<span class="fl">1.6</span>, <span class="fl">0.15</span>)}</span>
+<span id="cb37-3"><a></a></span>
+<span id="cb37-4"><a></a>fig, ax <span class="op">=</span> plt.subplots()</span>
+<span id="cb37-5"><a></a><span class="cf">for</span> (name, (K, r)), c <span class="kw">in</span> <span class="bu">zip</span>(strains.items(), [<span class="st">"#440154"</span>, <span class="st">"#31688e"</span>, <span class="st">"#35b779"</span>]):</span>
+<span id="cb37-6"><a></a>    reps <span class="op">=</span> np.array([K <span class="op">/</span> (<span class="dv">1</span> <span class="op">+</span> np.exp(<span class="op">-</span>r <span class="op">*</span> (t <span class="op">-</span> <span class="dv">20</span>))) <span class="op">+</span> rng.normal(<span class="dv">0</span>, <span class="fl">0.05</span>, <span class="bu">len</span>(t))</span>
+<span id="cb37-7"><a></a>                     <span class="cf">for</span> _ <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">4</span>)])</span>
+<span id="cb37-8"><a></a>    m, s <span class="op">=</span> reps.mean(axis<span class="op">=</span><span class="dv">0</span>), reps.std(axis<span class="op">=</span><span class="dv">0</span>)</span>
+<span id="cb37-9"><a></a>    ax.plot(t, m, color<span class="op">=</span>c, lw<span class="op">=</span><span class="dv">2</span>, label<span class="op">=</span>name)</span>
+<span id="cb37-10"><a></a>    ax.fill_between(t, m <span class="op">-</span> s, m <span class="op">+</span> s, color<span class="op">=</span>c, alpha<span class="op">=</span><span class="fl">0.25</span>)</span>
+<span id="cb37-11"><a></a>ax.<span class="bu">set</span>(xlabel<span class="op">=</span><span class="st">"Time (h)"</span>, ylabel<span class="op">=</span><span class="st">"OD600"</span>)</span>
+<span id="cb37-12"><a></a>ax.legend()</span>
+<span id="cb37-13"><a></a>plt.show()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div class="quarto-figure quarto-figure-center">
+<figure>
+<p><img data-src="../images/Lec07_py_timecourse.svg" style="width:52.0%"></p>
+<figcaption>The figure this code draws (pre-rendered)</figcaption>
+</figure>
+</div>
+</div>
+</div>
+</div>
+<ul>
+<li>The <code>group_by() |&gt; summarize()</code> + ribbon pattern works for <em>any</em> repeated time course: sensor logs, qPCR curves, cyclic loading of a hydrogel</li>
+<li>Note the synthesis itself is L06 material: a deterministic curve plus <code>rnorm()</code> noise</li>
+</ul>
+</section>
+<section id="gallery-3-dose-response-curves" class="slide level2">
+<h2>Gallery 3: dose-response curves</h2>
+<div class="panel-tabset">
+<ul id="tabset-15" class="panel-tabset-tabby"><li><a data-tabby-default="" href="#tabset-15-1">R</a></li><li><a href="#tabset-15-2">Python</a></li></ul>
+<div class="tab-content">
+<div id="tabset-15-1">
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb38"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb38-1"><a></a>dr <span class="ot">&lt;-</span> <span class="fu">expand_grid</span>(<span class="fu">tibble</span>(<span class="at">compound =</span> <span class="fu">c</span>(<span class="st">"compound X"</span>, <span class="st">"compound Y"</span>),</span>
+<span id="cb38-2"><a></a>                         <span class="at">ic50 =</span> <span class="fu">c</span>(<span class="fl">3e-7</span>, <span class="fl">5e-6</span>)),</span>
+<span id="cb38-3"><a></a>                  <span class="at">rep =</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">3</span>,</span>
+<span id="cb38-4"><a></a>                  <span class="at">dose =</span> <span class="dv">10</span><span class="sc">^</span><span class="fu">seq</span>(<span class="sc">-</span><span class="dv">9</span>, <span class="sc">-</span><span class="dv">4</span>, <span class="at">length.out =</span> <span class="dv">8</span>)) <span class="sc">|&gt;</span></span>
+<span id="cb38-5"><a></a>  <span class="fu">mutate</span>(<span class="at">viability =</span> <span class="dv">100</span> <span class="sc">/</span> (<span class="dv">1</span> <span class="sc">+</span> (dose <span class="sc">/</span> ic50)<span class="sc">^</span><span class="fl">1.2</span>) <span class="sc">+</span> <span class="fu">rnorm</span>(<span class="fu">n</span>(), <span class="at">sd =</span> <span class="dv">4</span>))</span>
+<span id="cb38-6"><a></a></span>
+<span id="cb38-7"><a></a><span class="fu">ggplot</span>(dr, <span class="fu">aes</span>(dose, viability, <span class="at">color =</span> compound)) <span class="sc">+</span></span>
+<span id="cb38-8"><a></a>  <span class="fu">geom_point</span>(<span class="at">alpha =</span> <span class="fl">0.7</span>, <span class="at">size =</span> <span class="dv">2</span>) <span class="sc">+</span></span>
+<span id="cb38-9"><a></a>  <span class="fu">geom_smooth</span>(<span class="at">se =</span> <span class="cn">FALSE</span>) <span class="sc">+</span></span>
+<span id="cb38-10"><a></a>  <span class="fu">scale_x_log10</span>() <span class="sc">+</span></span>
+<span id="cb38-11"><a></a>  <span class="fu">scale_color_viridis_d</span>(<span class="at">end =</span> <span class="fl">0.6</span>) <span class="sc">+</span></span>
+<span id="cb38-12"><a></a>  <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">"Dose (M)"</span>, <span class="at">y =</span> <span class="st">"Viability (%)"</span>,</span>
+<span id="cb38-13"><a></a>       <span class="at">title =</span> <span class="st">"Dose-response: two compounds, three replicates"</span>) <span class="sc">+</span></span>
+<span id="cb38-14"><a></a>  <span class="fu">theme_minimal</span>(<span class="at">base_size =</span> <span class="dv">14</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div id="fig-lec07-zoo-doseresponse" class="quarto-float quarto-figure quarto-figure-center">
+<figure class="quarto-float quarto-float-fig">
+<div aria-describedby="fig-lec07-zoo-doseresponse-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img data-src="Lecture_07_BioE_Comp_Tools_2026_files/figure-revealjs/fig-lec07-zoo-doseresponse-1.png" style="width:55.0%">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-lec07-zoo-doseresponse-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;8: Two synthesized compounds, three replicates each; the IC50 is where a curve crosses 50%
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+</div>
+<div id="tabset-15-2">
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb39"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb39-1"><a></a>dose <span class="op">=</span> np.logspace(<span class="op">-</span><span class="dv">9</span>, <span class="op">-</span><span class="dv">4</span>, <span class="dv">8</span>)</span>
+<span id="cb39-2"><a></a>fig, ax <span class="op">=</span> plt.subplots()</span>
+<span id="cb39-3"><a></a><span class="cf">for</span> (name, ic50), c <span class="kw">in</span> <span class="bu">zip</span>({<span class="st">"compound X"</span>: <span class="fl">3e-7</span>, <span class="st">"compound Y"</span>: <span class="fl">5e-6</span>}.items(),</span>
+<span id="cb39-4"><a></a>                           [<span class="st">"#440154"</span>, <span class="st">"#35b779"</span>]):</span>
+<span id="cb39-5"><a></a>    <span class="cf">for</span> _ <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">3</span>):</span>
+<span id="cb39-6"><a></a>        viab <span class="op">=</span> <span class="dv">100</span> <span class="op">/</span> (<span class="dv">1</span> <span class="op">+</span> (dose <span class="op">/</span> ic50) <span class="op">**</span> <span class="fl">1.2</span>) <span class="op">+</span> rng.normal(<span class="dv">0</span>, <span class="dv">4</span>, <span class="bu">len</span>(dose))</span>
+<span id="cb39-7"><a></a>        ax.scatter(dose, viab, s<span class="op">=</span><span class="dv">18</span>, alpha<span class="op">=</span><span class="fl">0.6</span>, color<span class="op">=</span>c)</span>
+<span id="cb39-8"><a></a>    grid <span class="op">=</span> np.logspace(<span class="op">-</span><span class="dv">9</span>, <span class="op">-</span><span class="dv">4</span>, <span class="dv">200</span>)</span>
+<span id="cb39-9"><a></a>    ax.plot(grid, <span class="dv">100</span> <span class="op">/</span> (<span class="dv">1</span> <span class="op">+</span> (grid <span class="op">/</span> ic50) <span class="op">**</span> <span class="fl">1.2</span>), color<span class="op">=</span>c, lw<span class="op">=</span><span class="dv">2</span>, label<span class="op">=</span>name)</span>
+<span id="cb39-10"><a></a>ax.<span class="bu">set</span>(xscale<span class="op">=</span><span class="st">"log"</span>, xlabel<span class="op">=</span><span class="st">"Dose (M)"</span>, ylabel<span class="op">=</span><span class="st">"Viability (%)"</span>)</span>
+<span id="cb39-11"><a></a>ax.legend()</span>
+<span id="cb39-12"><a></a>plt.show()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div class="quarto-figure quarto-figure-center">
+<figure>
+<p><img data-src="../images/Lec07_py_doseresponse.svg" style="width:52.0%"></p>
+<figcaption>The figure this code draws (pre-rendered)</figcaption>
+</figure>
+</div>
+</div>
+</div>
+</div>
+<ul>
+<li>A log-scaled x axis (<code>scale_x_log10()</code> / <code>xscale="log"</code>) is what makes dose-response curves readable - doses span five orders of magnitude</li>
+<li><code>geom_smooth()</code> draws a data-driven trend; a real assay would fit a four-parameter logistic model (coming in the statistics sequence)</li>
+</ul>
+</section>
+<section id="gallery-4-pca-of-the-real-stickleback-fish" class="slide level2">
+<h2>Gallery 4: PCA of the real stickleback fish</h2>
+<div class="panel-tabset">
+<ul id="tabset-16" class="panel-tabset-tabby"><li><a data-tabby-default="" href="#tabset-16-1">R</a></li><li><a href="#tabset-16-2">Python</a></li></ul>
+<div class="tab-content">
+<div id="tabset-16-1">
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb40"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb40-1"><a></a>gene_mat <span class="ot">&lt;-</span> stickle <span class="sc">|&gt;</span> <span class="fu">select</span>(<span class="fu">starts_with</span>(<span class="st">"Gene"</span>))</span>
+<span id="cb40-2"><a></a>pca <span class="ot">&lt;-</span> <span class="fu">prcomp</span>(<span class="fu">log1p</span>(gene_mat), <span class="at">scale. =</span> <span class="cn">TRUE</span>)     <span class="co"># log1p tames the counts</span></span>
+<span id="cb40-3"><a></a></span>
+<span id="cb40-4"><a></a><span class="fu">bind_cols</span>(<span class="fu">as_tibble</span>(pca<span class="sc">$</span>x[, <span class="dv">1</span><span class="sc">:</span><span class="dv">2</span>]),</span>
+<span id="cb40-5"><a></a>          stickle <span class="sc">|&gt;</span> <span class="fu">select</span>(geno_micro)) <span class="sc">|&gt;</span></span>
+<span id="cb40-6"><a></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(PC1, PC2, <span class="at">color =</span> geno_micro)) <span class="sc">+</span></span>
+<span id="cb40-7"><a></a>  <span class="fu">geom_point</span>(<span class="at">size =</span> <span class="fl">2.5</span>, <span class="at">alpha =</span> <span class="fl">0.8</span>) <span class="sc">+</span></span>
+<span id="cb40-8"><a></a>  <span class="fu">scale_color_viridis_d</span>(<span class="at">name =</span> <span class="st">"Group"</span>) <span class="sc">+</span></span>
+<span id="cb40-9"><a></a>  <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">"PCA: 80 fish from 600 genes"</span>,</span>
+<span id="cb40-10"><a></a>       <span class="at">subtitle =</span> <span class="st">"Distance between points = overall expression similarity"</span>) <span class="sc">+</span></span>
+<span id="cb40-11"><a></a>  <span class="fu">theme_minimal</span>(<span class="at">base_size =</span> <span class="dv">14</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div id="fig-lec07-zoo-pca" class="quarto-float quarto-figure quarto-figure-center">
+<figure class="quarto-float quarto-float-fig">
+<div aria-describedby="fig-lec07-zoo-pca-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img data-src="Lecture_07_BioE_Comp_Tools_2026_files/figure-revealjs/fig-lec07-zoo-pca-1.png" style="width:55.0%">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-lec07-zoo-pca-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;9: 80 fish placed by the first two principal components of 600 log-counts
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+</div>
+<div id="tabset-16-2">
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb41"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb41-1"><a></a><span class="im">from</span> sklearn.decomposition <span class="im">import</span> PCA</span>
+<span id="cb41-2"><a></a></span>
+<span id="cb41-3"><a></a>X <span class="op">=</span> np.log1p(stickle[genes].to_numpy())</span>
+<span id="cb41-4"><a></a>X <span class="op">=</span> (X <span class="op">-</span> X.mean(axis<span class="op">=</span><span class="dv">0</span>)) <span class="op">/</span> X.std(axis<span class="op">=</span><span class="dv">0</span>)          <span class="co"># like scale. = TRUE</span></span>
+<span id="cb41-5"><a></a>scores <span class="op">=</span> PCA(n_components<span class="op">=</span><span class="dv">2</span>).fit_transform(X)</span>
+<span id="cb41-6"><a></a></span>
+<span id="cb41-7"><a></a>fig, ax <span class="op">=</span> plt.subplots()</span>
+<span id="cb41-8"><a></a><span class="cf">for</span> grp, c <span class="kw">in</span> <span class="bu">zip</span>(<span class="bu">sorted</span>(stickle[<span class="st">"Geno&amp;Micro"</span>].unique()),</span>
+<span id="cb41-9"><a></a>                  [<span class="st">"#440154"</span>, <span class="st">"#31688e"</span>, <span class="st">"#35b779"</span>, <span class="st">"#fde725"</span>]):</span>
+<span id="cb41-10"><a></a>    sel <span class="op">=</span> stickle[<span class="st">"Geno&amp;Micro"</span>] <span class="op">==</span> grp</span>
+<span id="cb41-11"><a></a>    ax.scatter(scores[sel, <span class="dv">0</span>], scores[sel, <span class="dv">1</span>], s<span class="op">=</span><span class="dv">30</span>, alpha<span class="op">=</span><span class="fl">0.8</span>, color<span class="op">=</span>c, label<span class="op">=</span>grp)</span>
+<span id="cb41-12"><a></a>ax.<span class="bu">set</span>(xlabel<span class="op">=</span><span class="st">"PC1"</span>, ylabel<span class="op">=</span><span class="st">"PC2"</span>, title<span class="op">=</span><span class="st">"PCA of 80 fish from 600 genes"</span>)</span>
+<span id="cb41-13"><a></a>ax.legend(title<span class="op">=</span><span class="st">"Group"</span>)</span>
+<span id="cb41-14"><a></a>plt.show()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div class="quarto-figure quarto-figure-center">
+<figure>
+<p><img data-src="../images/Lec07_py_pca.svg" style="width:50.0%"></p>
+<figcaption>The figure this code draws (pre-rendered)</figcaption>
+</figure>
+</div>
+</div>
+</div>
+</div>
+<ul>
+<li>PCA compresses 600 correlated gene columns into a few axes of maximal variation - the workhorse first look at any high-dimensional data set</li>
+<li>One <code>prcomp()</code> call plus one <code>ggplot()</code> call; the groups separate because the biology is real</li>
+</ul>
+</section>
+<section id="your-turn" class="slide level2">
+<h2>Your turn</h2>
+<ol type="1">
+<li><strong>Rebuild the destination figure</strong> for four <em>different</em> genes - in the language you know less well - and <code>ggsave()</code> / <code>savefig()</code> it into <code>results/</code></li>
+<li><strong>Color the mean-variance plot</strong>: compute each gene’s mean separately for genotypes A and B, and color each point by which genotype is higher</li>
+<li><strong>Stretch</strong>: adapt the gallery heatmap to the real data - take the 30 most <em>variable</em> stickleback genes and cluster the 80 fish (<code>scale = "row"</code> matters!)</li>
+</ol>
+<div class="callout callout-tip callout-titled callout-style-default">
 <div class="callout-body">
 <div class="callout-title">
 <div class="callout-icon-container">
@@ -1264,7 +1565,10 @@ Figure&nbsp;1: Counts for four genes by genotype and microbiota treatment
 <p><strong>Tip</strong></p>
 </div>
 <div class="callout-content">
-<p>Same data, three tools: <code>awk</code> gave us one gene’s mean per group in Week 4, base R’s <code>boxplot()</code> one figure in Week 6, and one <code>pivot_longer()</code> now unlocks <em>every</em> gene at once. This is the payoff of tidy, long-format data.</p>
+<ul>
+<li>Parisa’s <code>s8</code> (plotting) and <code>s9</code> (numpy matrices) notebooks on the <a href="../Examples.html">Examples page</a> pair perfectly with today</li>
+<li>Everything on today’s slides is in <a href="../book/chapters/13-data-visualization.html">Ch. 13</a> (including the new figure gallery) and <a href="../book/chapters/14-data-wrangling.html">Ch. 14</a></li>
+</ul>
 </div>
 </div>
 </div>
@@ -1272,12 +1576,12 @@ Figure&nbsp;1: Counts for four genes by genotype and microbiota treatment
 <section id="key-takeaways" class="slide level2">
 <h2>Key Takeaways</h2>
 <ul>
-<li><strong>Same ideas, two syntaxes</strong>: variables, vectors, functions, data frames and plots work the same way in R and Python - once you know one, the other is mostly vocabulary</li>
-<li><strong>R</strong>: <code>&lt;-</code>, counts from 1, <code>c()</code> vectors, <code>data.frame</code>, <code>library()</code>, <code>|&gt;</code> pipes, <code>ggplot2</code></li>
-<li><strong>Python</strong>: <code>=</code>, counts from 0, lists and <code>numpy</code> arrays, <code>pandas</code> <code>DataFrame</code>, <code>import</code>, method chaining, <code>matplotlib</code> / <code>seaborn</code></li>
-<li><strong>Install once, load every session</strong>: <code>install.packages()</code> + <code>library()</code> vs <code>pip install</code> (in a virtual environment) + <code>import</code> - and record the environment (<code>requirements.txt</code>, <code>environment.yml</code>, <code>renv.lock</code>) so anyone can rebuild it</li>
-<li>Run code as <strong>scripts</strong> (<code>Rscript</code>, <code>python3</code>) for pipelines and in <strong>Quarto</strong> when you want prose, code and output together</li>
+<li><strong>Same ideas, two syntaxes</strong>: pipes and method chains, <code>pivot_longer()</code> and <code>.melt()</code>, <code>group_by() |&gt; summarize()</code> and <code>.groupby().agg()</code></li>
+<li><strong>Install once, load every session</strong>: <code>install.packages()</code> + <code>library()</code> vs <code>pip install</code> + <code>import</code> - and record versions so anyone can rebuild (environments get their full story next week)</li>
+<li><strong>The grammar of graphics</strong>: data + aesthetic mappings + layered geoms; facets give small multiples for free; <code>ggsave()</code> writes the file</li>
+<li><strong>Match the figure to the question</strong>: distributions → violins, similarity → heatmaps, trajectories → ribbons, potency → dose-response, high dimensions → PCA</li>
 <li>When in doubt: <code>str()</code> / <code>.info()</code>, <code>?fun</code> / <code>help(fun)</code>, and read the error message</li>
+<li>Next Monday (L08): Talapas - environments, modules, and running your scripts as SLURM batch jobs</li>
 </ul>
 
 

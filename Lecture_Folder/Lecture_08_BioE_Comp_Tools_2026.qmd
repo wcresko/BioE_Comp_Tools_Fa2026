@@ -28,13 +28,15 @@ The course book goes deeper on everything in this lecture. Read before or after 
 
 -   [Ch. 16: High-Performance Computing with Talapas](../book/chapters/16-hpc-talapas.html)
 -   [Ch. 17: Parallel Computing in R](../book/chapters/17-parallel-computing.html)
+-   *Environments:* [Ch. 12, Virtual Environments](../book/chapters/12-python-programming.html#sec-py-venv) · [Ch. 16, The Three Software Layers](../book/chapters/16-hpc-talapas.html#sec-software-layers)
 -   *Reference:* [App. G: SLURM Command Reference](../book/chapters/appendix-G-slurm.html)
 
 ## Goals for today
 
 -   Basics of working with Talapas
 -   The SLURM job scheduler
--   Software on the cluster: modules, conda and `renv` environments, and a word on containers
+-   Environments: giving every project its own toolbox (`venv`, `conda`, `renv`)
+-   Software on the cluster: modules, your environments on top, and a word on containers
 -   Monitoring your jobs
 -   Running R (`Rscript`) and Python (`python3`) scripts as batch jobs
 
@@ -444,6 +446,56 @@ for path in map(Path, sys.argv[1:]):                 # every file given on the c
 Test on a **tiny input on the login node** first (`python3 fasta_stats.py small.fasta`), then submit: `sbatch run_pipeline.sh`. Output and errors land in `output_JOBID.log` and `error_JOBID.log`.
 :::
 
+# Environments: giving every project its own toolbox
+
+## Why environments?
+
+::: incremental
+- By default your computer has **one** R and **one** Python - and every project installs packages into it
+- Project A needs pandas 2.2; reproducing last year's analysis needs pandas 1.5. Upgrade for one and you silently break the other - "**dependency hell**"
+- From the bootcamp: "which Python did that install go into?" is the #1 Python headache
+- An **environment** is an isolated set of packages (and an interpreter) for **one project**
+- Three payoffs:
+  - projects cannot break each other
+  - you can **record** exactly which versions produced a result
+  - a collaborator - or Talapas - can **rebuild** the same setup from that record
+:::
+
+## The three environment tools you will meet
+
+| Tool | For | Environments live... | The record you share |
+|---|---|---|---|
+| **`venv`** (+ `pip`) | Python | in the project folder (`.venv/`) | `requirements.txt` |
+| **`conda`** / `mamba` | Python *plus* compiled tools (`samtools`, even R) | centrally, by name (`conda env list`) | `environment.yml` |
+| **`renv`** | R | in the project folder | `renv.lock` |
+
+::: incremental
+- **`venv`** is our default on your laptop - you have used it since the bootcamp
+- **`conda`** is the standard in bioinformatics and on **Talapas** (today!) - one tool for *any* software
+- **`renv`** for R projects: `renv::init()` once, `renv::snapshot()` to record, `renv::restore()` to rebuild
+- Whichever you use: **commit the record file to Git - never the environment itself**
+:::
+
+## `conda` in practice - on your own computer
+
+``` bash
+# Install once: Miniforge, from https://conda-forge.org/download/
+
+conda create -n rnaseq python=3.12 pandas matplotlib   # make a named environment - once
+conda activate rnaseq                                  # turn it on - every session
+conda install -c bioconda samtools                     # compiled genomics tools too!
+conda env export > environment.yml                     # record it, to rebuild anywhere
+conda deactivate                                       # turn it off
+```
+
+::: incremental
+- Environments are **named and central**, not per-folder: `conda env list` shows them all
+- Packages come from **channels**: `conda-forge` (general) and `bioconda` (genomics)
+- Install **Miniforge**, not Anaconda - Anaconda's default channel requires a paid license at organizations like UO; Miniforge defaults to the free `conda-forge`
+- Modern conda uses the fast **libmamba** solver by default; `mamba` is its older drop-in cousin, still seen in cluster docs
+- In a few slides the *same* `environment.yml` rebuilds this environment on Talapas: `conda env create -f environment.yml`
+:::
+
 ## Three ways to get software onto Talapas
 
 | Layer | What it is | Best for |
@@ -453,7 +505,7 @@ Test on a **tiny input on the login node** first (`python3 fasta_stats.py small.
 | **Containers (Apptainer)** | one image file holding an entire OS + software stack | reproducing published pipelines; moving between clusters |
 
 ::: incremental
-- Most real projects use the first **two together**: `module load` the interpreter, then activate your own environment - exactly the L07 workflow, now on the cluster
+- Most real projects use the first **two together**: `module load` the interpreter, then activate your own environment - exactly the laptop workflow from the slides above, now on the cluster
 - Modules are read-only and their versions change over time - that is *why* you keep your own environment on top
 - Containers are the strongest reproducibility guarantee; we won't need them in this course - see [Ch. 16](../book/chapters/16-hpc-talapas.html#sec-software-layers)
 :::
@@ -481,7 +533,7 @@ library(tidyverse)                  # every session / every script
 ``` bash
 module load miniconda3/20240410
 
-# Best: rebuild the environment you recorded on your laptop in L07
+# Best: rebuild the environment you recorded on your laptop (slides above)
 conda env create -f environment.yml      # once
 conda activate rnaseq                    # every session / job
 

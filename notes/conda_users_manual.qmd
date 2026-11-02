@@ -27,24 +27,25 @@ Conda is a **package and environment manager**: a tool that installs software in
 
 Two ideas explain almost everything about how conda behaves:
 
-1. **An environment is a folder.** Creating one builds a folder (on your Mac, under `~/miniforge3/envs/`); activating one simply puts that folder first on your shell's PATH so its copies of `python`, `samtools`, etc. answer first; deactivating removes it again. There is no magic beyond PATH manipulation.
+1.  **An environment is a folder.** Creating one builds a folder (on your Mac, under `~/miniforge3/envs/`); activating one simply puts that folder first on your shell's PATH so its copies of `python`, `samtools`, etc. answer first; deactivating removes it again. There is no magic beyond PATH manipulation.
 
-2. **Packages come from channels.** A channel is an online repository of pre-built software. You have two configured: **conda-forge** (the community channel for general scientific software) and **bioconda** (the bioinformatics channel, built on top of conda-forge). Between them, nearly every tool in a genomics pipeline is one `conda install` away — no compiling from source.
+2.  **Packages come from channels.** A channel is an online repository of pre-built software. You have two configured: **conda-forge** (the community channel for general scientific software) and **bioconda** (the bioinformatics channel, built on top of conda-forge). Between them, nearly every tool in a genomics pipeline is one `conda install` away — no compiling from source.
 
 ## Your setup at a glance
 
 As configured on your MacBook Pro (October 2026):
 
 | Component | Location | Role |
-|---|---|---|
+|------------------------|------------------------|------------------------|
 | Python 3.14 (python.org) | `/Library/Frameworks/Python.framework/Versions/3.14/` | Everyday Python for Positron, notebooks, teaching |
 | Miniforge (conda) | `~/miniforge3/` | Creates environments on demand; otherwise stays out of the way |
 | Apple's system Python 3.9 | `/usr/bin/python3` | Belongs to macOS; leave it alone |
 
 Key configuration choices already made: `auto_activate` is **off** (conda never hijacks a new terminal; your prompt shows `(name)` only when you explicitly activate), channels are set to **conda-forge + bioconda** with **strict priority** (prevents mixed-channel version conflicts), and conda is initialized for **zsh** (your actual shell).
 
-::: {.callout-tip}
+::: callout-tip
 ## The one rule that prevents most confusion
+
 Every "module not found" or "command not found" mystery is really the question *which Python/tool answered the phone?* Check with `which python3` or `which samtools`. If the path surprises you, look at your prompt: is an environment active that shouldn't be, or inactive that should be?
 :::
 
@@ -54,7 +55,7 @@ Every "module not found" or "command not found" mystery is really the question *
 
 Name the environment after the project and declare what goes in it:
 
-```bash
+``` bash
 conda create -n neuromast python=3.12 numpy pandas samtools
 ```
 
@@ -62,7 +63,7 @@ Conda solves all version compatibility among the requested packages and builds t
 
 ## Activate and deactivate
 
-```bash
+``` bash
 conda activate neuromast     # prompt now shows (neuromast)
 # ... work ...
 conda deactivate             # back to normal; 3.14 in charge again
@@ -74,7 +75,7 @@ Activation is **per terminal window**, not global. A second window starts in you
 
 With the environment active:
 
-```bash
+``` bash
 conda install bwa bcftools        # preferred: conda first
 pip install some-rare-package     # fallback: pip works inside an active env
 ```
@@ -83,7 +84,7 @@ The rule of thumb is **conda first, pip for stragglers, in that order**. Install
 
 ## Inspect
 
-```bash
+``` bash
 conda env list     # all environments; * marks the active one
 conda list         # packages inside the active environment
 conda list samtools  # is this one package installed, and which version?
@@ -91,7 +92,7 @@ conda list samtools  # is this one package installed, and which version?
 
 ## Remove
 
-```bash
+``` bash
 conda env remove -n neuromast
 ```
 
@@ -100,7 +101,7 @@ Environments are disposable by design. When in doubt, recreate rather than repai
 # Quick reference card
 
 | Task | Command |
-|---|---|
+|----|----|
 | Create environment | `conda create -n NAME python=3.12 pkg1 pkg2` |
 | Create from a recipe file | `conda env create -f environment.yml` |
 | Activate / deactivate | `conda activate NAME` / `conda deactivate` |
@@ -120,7 +121,7 @@ Environments are disposable by design. When in doubt, recreate rather than repai
 
 Genomics tools are notoriously painful to compile — C/C++ codebases with chains of library dependencies. The **bioconda** channel distributes thousands of them pre-built: `samtools`, `bcftools`, `bwa`, `bowtie2`, `vcftools`, `plink`, `angsd`, `gatk4`, `stacks`, and far more. A pipeline's whole toolchain becomes one command:
 
-```bash
+``` bash
 conda create -n radseq-2026 python=3.12 stacks samtools bwa bcftools vcftools
 conda activate radseq-2026
 ```
@@ -133,7 +134,7 @@ That environment is also a *record*: six months later, `conda list` tells you ex
 
 **A separate environment for a troublesome tool.** Some tools pin old Python versions or conflict with everything (older ML tools are notorious). Give such a tool its own environment and the problem disappears:
 
-```bash
+``` bash
 conda create -n gatk-only gatk4
 ```
 
@@ -141,8 +142,9 @@ conda create -n gatk-only gatk4
 
 **Python single-cell stack.** If you ever want the Python side of single-cell analysis alongside your R/Seurat workflow, it lives happily in an environment: `conda create -n sc-python python=3.12 scanpy anndata leidenalg`.
 
-::: {.callout-note}
+::: callout-note
 ## R inside conda?
+
 Conda *can* manage R and many R packages (`r-base`, `r-tidyverse`, bioconductor packages as `bioconductor-*`). On a laptop where you already maintain R and Seurat directly, there is usually no reason to move; conda-R matters mostly on clusters where you cannot install R system-wide, or when a pipeline needs a pinned, reproducible R version.
 :::
 
@@ -158,17 +160,17 @@ This is the payoff habit. An `environment.yml` is a small text file describing a
 
 With the environment active:
 
-```bash
+``` bash
 conda env export --from-history | sed '/prefix:/d' > environment.yml
 ```
 
-`--from-history` records only what you *asked for*, not all ~200 resolved dependencies — which keeps the file short and portable across operating systems (a full export from a Mac often fails to rebuild on Linux because low-level dependencies differ). The `sed` removes the machine-specific `prefix:` line; this is the exact form Talapas's documentation recommends for sharing.
+`--from-history` records only what you *asked for*, not all \~200 resolved dependencies — which keeps the file short and portable across operating systems (a full export from a Mac often fails to rebuild on Linux because low-level dependencies differ). The `sed` removes the machine-specific `prefix:` line; this is the exact form Talapas's documentation recommends for sharing.
 
 ## A hand-written recipe
 
 You can equally write one from scratch:
 
-```yaml
+``` yaml
 name: radseq-2026
 channels:
   - bioconda
@@ -183,7 +185,7 @@ dependencies:
 
 ## Rebuild anywhere
 
-```bash
+``` bash
 conda env create -f environment.yml
 ```
 
@@ -195,7 +197,7 @@ Talapas 2 provides conda as a **module** — you load it rather than install it.
 
 ## Loading conda
 
-```bash
+``` bash
 ssh <duckid>@login.talapas.uoregon.edu
 module load miniconda3/20240410
 ```
@@ -206,7 +208,7 @@ module load miniconda3/20240410
 
 Exactly as on your laptop, with the recommended solver flag:
 
-```bash
+``` bash
 conda env create --solver=libmamba -f environment.yml
 # or manually:
 conda create --solver=libmamba --name radseq-2026 python=3.12 stacks samtools
@@ -214,8 +216,9 @@ conda create --solver=libmamba --name radseq-2026 python=3.12 stacks samtools
 
 RACS recommends adding a **date tag** to environment names on the cluster — `radseq-20261001` — so successive rebuilds of a pipeline's environment stay distinguishable.
 
-::: {.callout-warning}
+::: callout-warning
 ## Watch your home-directory quota
+
 Conda environments are large (often several GB) and by default land in your home directory, which on clusters has a limited quota. If environments for a project should live in (or be shared through) your PIRG's project space instead, `conda create --prefix /path/to/project/envs/NAME` places one at an explicit path — check current RACS storage guidance for where your group's space is and what it allows. `conda clean --all` reclaims cached downloads anywhere.
 :::
 
@@ -223,7 +226,7 @@ Conda environments are large (often several GB) and by default land in your home
 
 Login nodes are for editing and submitting, not computing. A batch script loads the module and activates the environment before running the pipeline:
 
-```bash
+``` bash
 #!/bin/bash
 #SBATCH --account=<yourpirg>
 #SBATCH --partition=compute
@@ -248,10 +251,10 @@ Submit with `sbatch script.sh`; check with `squeue --me`. Jobs longer than a day
 
 The complete round trip, which is the real reason to learn all of this:
 
-1. Develop and test an analysis in a small environment on your Mac.
-2. `conda env export --from-history | sed '/prefix:/d' > environment.yml`; commit it to the project repo.
-3. On Talapas: `module load miniconda3/20240410`, then `conda env create --solver=libmamba -f environment.yml`.
-4. Run at scale via SLURM, with the identical toolchain.
+1.  Develop and test an analysis in a small environment on your Mac.
+2.  `conda env export --from-history | sed '/prefix:/d' > environment.yml`; commit it to the project repo.
+3.  On Talapas: `module load miniconda3/20240410`, then `conda env create --solver=libmamba -f environment.yml`.
+4.  Run at scale via SLURM, with the identical toolchain.
 
 # Environments in Positron and notebooks
 
@@ -269,7 +272,7 @@ Conda is not the only environment framework, and you will meet the others consta
 ## At a glance
 
 | Tool | What it manages | Installs from | Compiled tools (samtools etc.)? | One-line verdict |
-|---|---|---|---|---|
+|---------------|---------------|---------------|---------------|---------------|
 | **conda** | Python/R + any compiled software | conda channels (conda-forge, bioconda) | **Yes** | Your default for genomics |
 | **mamba** | Same as conda (drop-in replacement) | conda channels | **Yes** | Faster conda; mostly obsolete now that conda uses the libmamba solver |
 | **micromamba** | Same, as a single tiny binary | conda channels | **Yes** | Conda for containers and CI, no installation ceremony |
@@ -284,7 +287,7 @@ The dividing line in the fourth column is the practical one: if a workflow needs
 
 `venv` ships with Python itself and is the standard tool for pure-Python projects:
 
-```bash
+``` bash
 python3 -m venv .venv              # create (conventionally hidden, inside the project)
 source .venv/bin/activate          # activate; prompt shows (.venv)
 pip install numpy pandas           # install from PyPI
@@ -293,9 +296,9 @@ deactivate
 
 Three differences from conda worth internalizing:
 
-1. **A venv borrows an existing Python** rather than containing its own — so it is small and fast to create, but every venv on your machine depends on the interpreter it was created from.
-2. **It lives inside the project folder** (`.venv/`), not in a central registry. There is no `venv env list`; the environment *is* the directory.
-3. **Its recipe is `requirements.txt`** (or `pyproject.toml`), the pip-world counterpart of `environment.yml`: `pip freeze > requirements.txt` to export, `pip install -r requirements.txt` to rebuild.
+1.  **A venv borrows an existing Python** rather than containing its own — so it is small and fast to create, but every venv on your machine depends on the interpreter it was created from.
+2.  **It lives inside the project folder** (`.venv/`), not in a central registry. There is no `venv env list`; the environment *is* the directory.
+3.  **Its recipe is `requirements.txt`** (or `pyproject.toml`), the pip-world counterpart of `environment.yml`: `pip freeze > requirements.txt` to export, `pip install -r requirements.txt` to rebuild.
 
 When a Python tutorial says "create a virtual environment," this is what it means. (You may also see `virtualenv`, the older third-party package venv was distilled from — for everyday purposes they are the same thing.)
 
@@ -327,8 +330,9 @@ In effect, pixi is `environment.yml` with the reproducibility dialed up (lockfil
 
 On the R side, the analogous per-project tool is `renv`: `renv::init()` gives a project its own package library, `renv.lock` records exact versions, `renv::restore()` rebuilds them. It manages R packages only (conda can manage R itself; renv assumes R is already there), so the two compose naturally: conda provides a pinned R on a cluster, renv pins the packages inside it.
 
-::: {.callout-tip}
+::: callout-tip
 ## So what should *you* use?
+
 Nothing needs to change. Conda via Miniforge remains the right default for your work: it is the only family that delivers bioconda's compiled tools, it is what Talapas provides, and the `environment.yml` loop runs through it. File the rest as vocabulary: venv/uv when a pure-Python project or tutorial calls for them, micromamba if you containerize, pixi as the likely future shape of conda-style work.
 :::
 
@@ -352,7 +356,7 @@ Nothing needs to change. Conda via Miniforge remains the right default for your 
 
 # Glossary
 
-**Anaconda** — A company, and its large (~5 GB) conda distribution bundling hundreds of packages you may never use. You removed one; Miniforge is the lean modern alternative.
+**Anaconda** — A company, and its large (\~5 GB) conda distribution bundling hundreds of packages you may never use. You removed one; Miniforge is the lean modern alternative.
 
 **activate / deactivate** — Switching an environment's folder onto / off of your shell's PATH, so its tools answer first (or stop answering).
 
@@ -429,4 +433,3 @@ Nothing needs to change. Conda via Miniforge remains the right default for your 
 - pixi documentation: <https://pixi.sh/>
 - venv (Python standard library): <https://docs.python.org/3/library/venv.html>
 - renv: <https://rstudio.github.io/renv/>
-

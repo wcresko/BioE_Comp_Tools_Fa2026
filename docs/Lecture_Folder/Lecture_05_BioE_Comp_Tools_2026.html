@@ -278,7 +278,7 @@ Bill Cresko
 <li>Variables, arithmetic, strings and vectors</li>
 <li>Types of data - and what R and Python call them</li>
 <li>Indexing rows, columns and cells of a data set</li>
-<li>Reading and writing files from a script</li>
+<li>Reading and writing files from a script <em>(now opens L06)</em></li>
 <li><code>grep</code> and regular expressions, now in R and Python</li>
 <li>Finale: write and run your own executable scripts</li>
 </ul>
@@ -377,7 +377,7 @@ Bill Cresko
 Figure&nbsp;1: Total RNA-seq reads per fish in each genotype-by-microbiota group - the SVG written by both warm-up scripts
 </p><ul>
 <li>An <strong>SVG</strong> is a <em>vector</em> figure: text-based, tiny, and it stays sharp at any zoom - open it in a browser, Illustrator or Inkscape</li>
-<li>We come back to figure formats at the end of today, in <em>Reading and writing files</em></li>
+<li>Figure formats get their full story at the start of L06, in <em>Reading and writing files</em></li>
 </ul>
 </section>
 <section id="running-r-and-python-scripts-from-the-shell" class="slide level2">
@@ -1671,198 +1671,6 @@ Figure&nbsp;1: Total RNA-seq reads per fish in each genotype-by-microbiota group
 </div>
 </section></section>
 <section>
-<section id="reading-and-writing-files" class="title-slide slide level1 center">
-<h1>Reading and writing files</h1>
-
-</section>
-<section id="reading-tabular-data" class="slide level2">
-<h2>Reading tabular data</h2>
-<div class="panel-tabset">
-<ul id="tabset-22" class="panel-tabset-tabby"><li><a data-tabby-default="" href="#tabset-22-1">R</a></li><li><a href="#tabset-22-2">Python</a></li></ul>
-<div class="tab-content">
-<div id="tabset-22-1">
-<div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb144"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb144-1"><a></a><span class="co"># comma-separated:   read.csv("file.csv")</span></span>
-<span id="cb144-2"><a></a><span class="co"># tab-separated:     read.delim("file.tsv")</span></span>
-<span id="cb144-3"><a></a>stickle <span class="ot">&lt;-</span> <span class="fu">read.delim</span>(<span class="st">"../Data_Folder/Stickle_RNAseq.tsv"</span>,</span>
-<span id="cb144-4"><a></a>                      <span class="at">header =</span> <span class="cn">TRUE</span>,          <span class="co"># first line is column names (default)</span></span>
-<span id="cb144-5"><a></a>                      <span class="at">check.names =</span> <span class="cn">FALSE</span>)    <span class="co"># keep "Geno&amp;Micro" exactly as written</span></span>
-<span id="cb144-6"><a></a><span class="fu">dim</span>(stickle)      <span class="co"># rows, columns</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>[1]  80 604</code></pre>
-</div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb146"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb146-1"><a></a>stickle[<span class="dv">1</span><span class="sc">:</span><span class="dv">2</span>, <span class="dv">1</span><span class="sc">:</span><span class="dv">5</span>]</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>  Individual Genotype   Microbiota Geno&amp;Micro Gene1
-1        AC1        A conventional      convA    16
-2        AC2        A conventional      convA     7</code></pre>
-</div>
-</div>
-</div>
-<div id="tabset-22-2">
-<div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb148"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb148-1"><a></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
-<span id="cb148-2"><a></a></span>
-<span id="cb148-3"><a></a><span class="co"># pd.read_csv handles both - sep="\t" makes it tab-separated</span></span>
-<span id="cb148-4"><a></a>stickle <span class="op">=</span> pd.read_csv(<span class="st">"../Data_Folder/Stickle_RNAseq.tsv"</span>, sep<span class="op">=</span><span class="st">"</span><span class="ch">\t</span><span class="st">"</span>)</span>
-<span id="cb148-5"><a></a>stickle.shape     <span class="co"># (rows, columns)</span></span>
-<span id="cb148-6"><a></a><span class="co"># (80, 604)</span></span>
-<span id="cb148-7"><a></a>stickle.iloc[<span class="dv">0</span>:<span class="dv">2</span>, <span class="dv">0</span>:<span class="dv">5</span>]</span>
-<span id="cb148-8"><a></a></span>
-<span id="cb148-9"><a></a><span class="co"># pandas reads URLs directly - handy for course data:</span></span>
-<span id="cb148-10"><a></a><span class="co"># stickle = pd.read_csv("https://wcresko.github.io/BioE_Comp_Tools_Fa2026/Data_Folder/Stickle_RNAseq.tsv", sep="\t")</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</div>
-</div>
-</div>
-</div>
-<ul>
-<li>The two questions every reader function asks: <em>where are the column names?</em> (<code>header</code>) and <em>what separates the values?</em> (<code>sep</code>)</li>
-<li>Without <code>check.names = FALSE</code>, R “fixes” <code>Geno&amp;Micro</code> to <code>Geno.Micro</code> - fine, until your column names no longer match the file</li>
-<li>The tidyverse’s <code>readr</code> (<code>read_tsv()</code>, faster and friendlier) takes over in L06</li>
-</ul>
-</section>
-<section id="writing-tabular-data" class="slide level2">
-<h2>Writing tabular data</h2>
-<div class="panel-tabset">
-<ul id="tabset-23" class="panel-tabset-tabby"><li><a data-tabby-default="" href="#tabset-23-1">R</a></li><li><a href="#tabset-23-2">Python</a></li></ul>
-<div class="tab-content">
-<div id="tabset-23-1">
-<div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb149"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb149-1"><a></a>totals <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="at">Individual =</span> stickle<span class="sc">$</span>Individual,</span>
-<span id="cb149-2"><a></a>                     <span class="at">Total =</span> <span class="fu">rowSums</span>(stickle[, <span class="fu">grep</span>(<span class="st">"^Gene"</span>, <span class="fu">names</span>(stickle))]))</span>
-<span id="cb149-3"><a></a></span>
-<span id="cb149-4"><a></a><span class="fu">write.csv</span>(totals, <span class="st">"results/totals.csv"</span>, <span class="at">row.names =</span> <span class="cn">FALSE</span>)</span>
-<span id="cb149-5"><a></a><span class="fu">write.table</span>(totals, <span class="st">"results/totals.tsv"</span>, <span class="at">sep =</span> <span class="st">"</span><span class="sc">\t</span><span class="st">"</span>,</span>
-<span id="cb149-6"><a></a>            <span class="at">row.names =</span> <span class="cn">FALSE</span>, <span class="at">quote =</span> <span class="cn">FALSE</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</div>
-</div>
-<div id="tabset-23-2">
-<div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb150"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb150-1"><a></a>genes  <span class="op">=</span> [c <span class="cf">for</span> c <span class="kw">in</span> stickle.columns <span class="cf">if</span> c.startswith(<span class="st">"Gene"</span>)]</span>
-<span id="cb150-2"><a></a>totals <span class="op">=</span> pd.DataFrame({<span class="st">"Individual"</span>: stickle[<span class="st">"Individual"</span>],</span>
-<span id="cb150-3"><a></a>                       <span class="st">"Total"</span>: stickle[genes].<span class="bu">sum</span>(axis<span class="op">=</span><span class="dv">1</span>)})</span>
-<span id="cb150-4"><a></a></span>
-<span id="cb150-5"><a></a>totals.to_csv(<span class="st">"results/totals.csv"</span>, index<span class="op">=</span><span class="va">False</span>)</span>
-<span id="cb150-6"><a></a>totals.to_csv(<span class="st">"results/totals.tsv"</span>, sep<span class="op">=</span><span class="st">"</span><span class="ch">\t</span><span class="st">"</span>, index<span class="op">=</span><span class="va">False</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</div>
-</div>
-</div>
-</div>
-<ul>
-<li><code>row.names = FALSE</code> / <code>index=False</code> - otherwise both languages sneak an extra unnamed column of row numbers into your file</li>
-<li>Write <strong>derived</strong> tables into <code>results/</code> or <code>output/</code>; never overwrite anything in <code>data/</code> (raw data is read-only - the L01 project structure exists for exactly this reason)</li>
-</ul>
-</section>
-<section id="what-can-you-read-and-write" class="slide level2">
-<h2>What can you read and write?</h2>
-<table class="caption-top">
-<colgroup>
-<col style="width: 33%">
-<col style="width: 33%">
-<col style="width: 33%">
-</colgroup>
-<thead>
-<tr class="header">
-<th style="text-align: left;">Format</th>
-<th style="text-align: left;">R</th>
-<th style="text-align: left;">Python</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td style="text-align: left;">CSV / TSV (plain text)</td>
-<td style="text-align: left;"><code>read.csv()</code> / <code>write.csv()</code></td>
-<td style="text-align: left;"><code>pd.read_csv()</code> / <code>.to_csv()</code></td>
-</tr>
-<tr class="even">
-<td style="text-align: left;">Excel <code>.xlsx</code></td>
-<td style="text-align: left;"><code>readxl::read_excel()</code> / <code>writexl</code></td>
-<td style="text-align: left;"><code>pd.read_excel()</code> / <code>.to_excel()</code></td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;">Plain text, line by line</td>
-<td style="text-align: left;"><code>readLines()</code> / <code>writeLines()</code></td>
-<td style="text-align: left;"><code>Path.read_text()</code>, <code>open()</code></td>
-</tr>
-<tr class="even">
-<td style="text-align: left;">JSON</td>
-<td style="text-align: left;"><code>jsonlite::fromJSON()</code></td>
-<td style="text-align: left;"><code>json.load()</code>, <code>pd.read_json()</code></td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;">Native binary objects</td>
-<td style="text-align: left;"><code>saveRDS()</code> / <code>readRDS()</code></td>
-<td style="text-align: left;"><code>pickle</code></td>
-</tr>
-<tr class="even">
-<td style="text-align: left;">Big columnar data</td>
-<td style="text-align: left;"><code>arrow::read_parquet()</code></td>
-<td style="text-align: left;"><code>pd.read_parquet()</code></td>
-</tr>
-</tbody>
-</table>
-<ul>
-<li><strong>Plain-text formats (CSV/TSV) are the default</strong>: portable, future-proof, readable by <code>grep</code>/<code>awk</code>, and diff-able in Git</li>
-<li>Binary formats (<code>.rds</code>, <code>.pickle</code>, <code>.parquet</code>) are faster and preserve types exactly - but only their own language (or ecosystem) can read them</li>
-<li>Excel files are for <em>exchanging with humans</em>; convert to CSV/TSV before analysis when you can (remember the gene-name-to-date horror stories)</li>
-</ul>
-</section>
-<section id="reading-and-writing-in-a-script" class="slide level2">
-<h2>Reading and writing in a script</h2>
-<p>The warm-up scripts already showed the whole pattern - here it is as a checklist:</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb151"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb151-1"><a></a>infile <span class="ot">&lt;-</span> <span class="st">"data/Stickle_RNAseq.tsv"</span>        <span class="co"># 1. relative path from the project root</span></span>
-<span id="cb151-2"><a></a><span class="cf">if</span> (<span class="sc">!</span><span class="fu">file.exists</span>(infile)) {                <span class="co"># 2. check before reading,</span></span>
-<span id="cb151-3"><a></a>  <span class="fu">cat</span>(<span class="st">"Error: File"</span>, infile, <span class="st">"not found!</span><span class="sc">\n</span><span class="st">"</span>)</span>
-<span id="cb151-4"><a></a>  <span class="fu">quit</span>(<span class="at">status =</span> <span class="dv">1</span>)                         <span class="co">#    fail loudly with an exit status</span></span>
-<span id="cb151-5"><a></a>}</span>
-<span id="cb151-6"><a></a>stickle <span class="ot">&lt;-</span> <span class="fu">read.delim</span>(infile, <span class="at">check.names =</span> <span class="cn">FALSE</span>)   <span class="co"># 3. read</span></span>
-<span id="cb151-7"><a></a><span class="co"># ... compute ...</span></span>
-<span id="cb151-8"><a></a><span class="fu">dir.create</span>(<span class="st">"results"</span>, <span class="at">showWarnings =</span> <span class="cn">FALSE</span>)          <span class="co"># 4. make the output folder</span></span>
-<span id="cb151-9"><a></a><span class="fu">write.csv</span>(totals, <span class="st">"results/totals.csv"</span>, <span class="at">row.names =</span> <span class="cn">FALSE</span>)  <span class="co"># 5. write results</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<ul>
-<li><strong>Relative paths</strong> from the project root (<code>data/...</code>, <code>results/...</code>) - never <code>/Users/yourname/...</code>, which breaks on every other machine (including Talapas)</li>
-<li>Python’s version of each step: <code>Path("data/f.tsv")</code>, <code>.is_file()</code>, <code>sys.exit(1)</code>, <code>Path("results").mkdir(exist_ok=True)</code>, <code>.to_csv()</code></li>
-<li>Run scripts <strong>from the project root</strong> so the relative paths resolve</li>
-</ul>
-</section>
-<section id="saving-figures-to-files" class="slide level2">
-<h2>Saving figures to files</h2>
-<div class="panel-tabset">
-<ul id="tabset-24" class="panel-tabset-tabby"><li><a data-tabby-default="" href="#tabset-24-1">R</a></li><li><a href="#tabset-24-2">Python</a></li></ul>
-<div class="tab-content">
-<div id="tabset-24-1">
-<div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb152"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb152-1"><a></a><span class="fu">svg</span>(<span class="st">"results/boxplot.svg"</span>, <span class="at">width =</span> <span class="dv">7</span>, <span class="at">height =</span> <span class="dv">5</span>)   <span class="co"># open a file 'device'</span></span>
-<span id="cb152-2"><a></a><span class="fu">boxplot</span>(totals <span class="sc">~</span> group)                             <span class="co"># draw into it</span></span>
-<span id="cb152-3"><a></a><span class="fu">dev.off</span>()                                           <span class="co"># close it - ALWAYS</span></span>
-<span id="cb152-4"><a></a></span>
-<span id="cb152-5"><a></a><span class="fu">png</span>(<span class="st">"results/boxplot.png"</span>, <span class="at">width =</span> <span class="dv">7</span>, <span class="at">height =</span> <span class="dv">5</span>,</span>
-<span id="cb152-6"><a></a>    <span class="at">units =</span> <span class="st">"in"</span>, <span class="at">res =</span> <span class="dv">300</span>)                        <span class="co"># raster needs a resolution</span></span>
-<span id="cb152-7"><a></a><span class="fu">boxplot</span>(totals <span class="sc">~</span> group)</span>
-<span id="cb152-8"><a></a><span class="fu">dev.off</span>()</span>
-<span id="cb152-9"><a></a></span>
-<span id="cb152-10"><a></a><span class="co"># pdf("results/boxplot.pdf", ...) works the same way</span></span>
-<span id="cb152-11"><a></a><span class="co"># ggplot figures: ggsave("results/boxplot.svg") - coming in L07</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</div>
-</div>
-<div id="tabset-24-2">
-<div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb153"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb153-1"><a></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
-<span id="cb153-2"><a></a></span>
-<span id="cb153-3"><a></a>plt.boxplot([<span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">3</span>])                 <span class="co"># draw ...</span></span>
-<span id="cb153-4"><a></a>plt.savefig(<span class="st">"results/boxplot.svg"</span>)     <span class="co"># ... the extension picks the format</span></span>
-<span id="cb153-5"><a></a>plt.savefig(<span class="st">"results/boxplot.png"</span>, dpi<span class="op">=</span><span class="dv">300</span>)   <span class="co"># raster needs a resolution</span></span>
-<span id="cb153-6"><a></a>plt.savefig(<span class="st">"results/boxplot.pdf"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</div>
-</div>
-</div>
-</div>
-<ul>
-<li><strong>Vector</strong> formats (<code>.svg</code>, <code>.pdf</code>) scale forever - use them for papers and posters; <strong>raster</strong> formats (<code>.png</code>, 300 dpi) for slides and the web</li>
-<li>R’s pattern is <em>open device → plot → <code>dev.off()</code></em> (forget <code>dev.off()</code> and the file is empty or locked); matplotlib’s is simply <code>plt.savefig()</code></li>
-</ul>
-</section></section>
-<section>
 <section id="grep-and-regular-expressions-in-r-and-python" class="title-slide slide level1 center">
 <h1><code>grep</code> and regular expressions in R and Python</h1>
 
@@ -1924,38 +1732,38 @@ Figure&nbsp;1: Total RNA-seq reads per fish in each genotype-by-microbiota group
 <section id="regular-expressions-on-the-stickleback-table" class="slide level2">
 <h2>Regular expressions on the stickleback table</h2>
 <div class="panel-tabset">
-<ul id="tabset-25" class="panel-tabset-tabby"><li><a data-tabby-default="" href="#tabset-25-1">R</a></li><li><a href="#tabset-25-2">Python</a></li></ul>
+<ul id="tabset-22" class="panel-tabset-tabby"><li><a data-tabby-default="" href="#tabset-22-1">R</a></li><li><a href="#tabset-22-2">Python</a></li></ul>
 <div class="tab-content">
-<div id="tabset-25-1">
+<div id="tabset-22-1">
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb154"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb154-1"><a></a><span class="fu">sum</span>(<span class="fu">grepl</span>(<span class="st">"^Gene"</span>, <span class="fu">names</span>(stickle)))        <span class="co"># how many gene columns?</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb144"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb144-1"><a></a><span class="fu">sum</span>(<span class="fu">grepl</span>(<span class="st">"^Gene"</span>, <span class="fu">names</span>(stickle)))        <span class="co"># how many gene columns?</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>[1] 600</code></pre>
 </div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb156"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb156-1"><a></a><span class="fu">grep</span>(<span class="st">"1$"</span>, stickle<span class="sc">$</span>Individual, <span class="at">value =</span> <span class="cn">TRUE</span>)   <span class="co"># IDs ending in 1 (AC1, not AC11)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb146"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb146-1"><a></a><span class="fu">grep</span>(<span class="st">"1$"</span>, stickle<span class="sc">$</span>Individual, <span class="at">value =</span> <span class="cn">TRUE</span>)   <span class="co"># IDs ending in 1 (AC1, not AC11)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>[1] "AC1"  "AC11" "AM1"  "AM11" "BC1"  "BC11" "BM1"  "BM11"</code></pre>
 </div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb158"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb158-1"><a></a><span class="fu">gsub</span>(<span class="st">"^Gene"</span>, <span class="st">"G"</span>, <span class="fu">names</span>(stickle)[<span class="dv">5</span><span class="sc">:</span><span class="dv">8</span>])    <span class="co"># shorten names, like sed s///g</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb148"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb148-1"><a></a><span class="fu">gsub</span>(<span class="st">"^Gene"</span>, <span class="st">"G"</span>, <span class="fu">names</span>(stickle)[<span class="dv">5</span><span class="sc">:</span><span class="dv">8</span>])    <span class="co"># shorten names, like sed s///g</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>[1] "G1" "G2" "G3" "G4"</code></pre>
 </div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb160"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb160-1"><a></a><span class="fu">unlist</span>(<span class="fu">strsplit</span>(<span class="st">"convA"</span>, <span class="st">""</span>))              <span class="co"># split a string into characters</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb150"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb150-1"><a></a><span class="fu">unlist</span>(<span class="fu">strsplit</span>(<span class="st">"convA"</span>, <span class="st">""</span>))              <span class="co"># split a string into characters</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>[1] "c" "o" "n" "v" "A"</code></pre>
 </div>
 </div>
 </div>
-<div id="tabset-25-2">
+<div id="tabset-22-2">
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb162"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb162-1"><a></a><span class="im">import</span> re</span>
-<span id="cb162-2"><a></a>[c <span class="cf">for</span> c <span class="kw">in</span> stickle.columns <span class="cf">if</span> re.search(<span class="vs">r"</span><span class="dv">^</span><span class="vs">Gene"</span>, c)][:<span class="dv">3</span>]  <span class="co"># gene columns</span></span>
-<span id="cb162-3"><a></a><span class="co"># ['Gene1', 'Gene2', 'Gene3']</span></span>
-<span id="cb162-4"><a></a>stickle[<span class="st">"Individual"</span>][stickle[<span class="st">"Individual"</span>].<span class="bu">str</span>.contains(<span class="vs">r"1</span><span class="dv">$</span><span class="vs">"</span>)]</span>
-<span id="cb162-5"><a></a><span class="co"># the pandas .str methods apply a regex down a whole column</span></span>
-<span id="cb162-6"><a></a>[re.sub(<span class="vs">r"</span><span class="dv">^</span><span class="vs">Gene"</span>, <span class="st">"G"</span>, c) <span class="cf">for</span> c <span class="kw">in</span> stickle.columns[<span class="dv">4</span>:<span class="dv">8</span>]]</span>
-<span id="cb162-7"><a></a><span class="co"># ['G1', 'G2', 'G3', 'G4']</span></span>
-<span id="cb162-8"><a></a>re.split(<span class="vs">r""</span>, <span class="st">"convA"</span>)       <span class="co"># and re.findall(r"[A-Z]", "convA") pulls out ['A']</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb152"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb152-1"><a></a><span class="im">import</span> re</span>
+<span id="cb152-2"><a></a>[c <span class="cf">for</span> c <span class="kw">in</span> stickle.columns <span class="cf">if</span> re.search(<span class="vs">r"</span><span class="dv">^</span><span class="vs">Gene"</span>, c)][:<span class="dv">3</span>]  <span class="co"># gene columns</span></span>
+<span id="cb152-3"><a></a><span class="co"># ['Gene1', 'Gene2', 'Gene3']</span></span>
+<span id="cb152-4"><a></a>stickle[<span class="st">"Individual"</span>][stickle[<span class="st">"Individual"</span>].<span class="bu">str</span>.contains(<span class="vs">r"1</span><span class="dv">$</span><span class="vs">"</span>)]</span>
+<span id="cb152-5"><a></a><span class="co"># the pandas .str methods apply a regex down a whole column</span></span>
+<span id="cb152-6"><a></a>[re.sub(<span class="vs">r"</span><span class="dv">^</span><span class="vs">Gene"</span>, <span class="st">"G"</span>, c) <span class="cf">for</span> c <span class="kw">in</span> stickle.columns[<span class="dv">4</span>:<span class="dv">8</span>]]</span>
+<span id="cb152-7"><a></a><span class="co"># ['G1', 'G2', 'G3', 'G4']</span></span>
+<span id="cb152-8"><a></a>re.split(<span class="vs">r""</span>, <span class="st">"convA"</span>)       <span class="co"># and re.findall(r"[A-Z]", "convA") pulls out ['A']</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 </div>
 </div>
@@ -1968,73 +1776,73 @@ Figure&nbsp;1: Total RNA-seq reads per fish in each genotype-by-microbiota group
 <section id="the-l04-fasta_stats-bash-script-in-r-and-python" class="slide level2">
 <h2>The L04 <code>fasta_stats</code> bash script in R and Python</h2>
 <div class="panel-tabset">
-<ul id="tabset-26" class="panel-tabset-tabby"><li><a data-tabby-default="" href="#tabset-26-1">R</a></li><li><a href="#tabset-26-2">Python</a></li></ul>
+<ul id="tabset-23" class="panel-tabset-tabby"><li><a data-tabby-default="" href="#tabset-23-1">R</a></li><li><a href="#tabset-23-2">Python</a></li></ul>
 <div class="tab-content">
-<div id="tabset-26-1">
+<div id="tabset-23-1">
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb163"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb163-1"><a></a><span class="co">#!/usr/bin/env Rscript</span></span>
-<span id="cb163-2"><a></a><span class="co"># Script: fasta_stats.R</span></span>
-<span id="cb163-3"><a></a><span class="co"># Purpose: Calculate basic statistics for a FASTA file</span></span>
-<span id="cb163-4"><a></a></span>
-<span id="cb163-5"><a></a>args <span class="ot">&lt;-</span> <span class="fu">commandArgs</span>(<span class="at">trailingOnly =</span> <span class="cn">TRUE</span>)     <span class="co"># like $1 $2 ... in bash</span></span>
-<span id="cb163-6"><a></a><span class="cf">if</span> (<span class="fu">length</span>(args) <span class="sc">!=</span> <span class="dv">1</span>) {</span>
-<span id="cb163-7"><a></a>  <span class="fu">cat</span>(<span class="st">"Usage: Rscript fasta_stats.R sequences.fasta</span><span class="sc">\n</span><span class="st">"</span>)</span>
-<span id="cb163-8"><a></a>  <span class="fu">quit</span>(<span class="at">status =</span> <span class="dv">1</span>)</span>
-<span id="cb163-9"><a></a>}</span>
-<span id="cb163-10"><a></a>input <span class="ot">&lt;-</span> args[<span class="dv">1</span>]</span>
-<span id="cb163-11"><a></a><span class="cf">if</span> (<span class="sc">!</span><span class="fu">file.exists</span>(input)) {</span>
-<span id="cb163-12"><a></a>  <span class="fu">cat</span>(<span class="st">"Error: File"</span>, input, <span class="st">"not found!</span><span class="sc">\n</span><span class="st">"</span>)</span>
-<span id="cb163-13"><a></a>  <span class="fu">quit</span>(<span class="at">status =</span> <span class="dv">1</span>)</span>
-<span id="cb163-14"><a></a>}</span>
-<span id="cb163-15"><a></a></span>
-<span id="cb163-16"><a></a>lines   <span class="ot">&lt;-</span> <span class="fu">readLines</span>(input)</span>
-<span id="cb163-17"><a></a>headers <span class="ot">&lt;-</span> <span class="fu">grepl</span>(<span class="st">"^&gt;"</span>, lines)                <span class="co"># TRUE for header lines</span></span>
-<span id="cb163-18"><a></a>seq     <span class="ot">&lt;-</span> <span class="fu">paste</span>(lines[<span class="sc">!</span>headers], <span class="at">collapse =</span> <span class="st">""</span>)</span>
-<span id="cb163-19"><a></a></span>
-<span id="cb163-20"><a></a><span class="fu">cat</span>(<span class="st">"=== FASTA Statistics for"</span>, input, <span class="st">"===</span><span class="sc">\n</span><span class="st">"</span>)</span>
-<span id="cb163-21"><a></a><span class="fu">cat</span>(<span class="st">"Number of sequences:"</span>, <span class="fu">sum</span>(headers), <span class="st">"</span><span class="sc">\n</span><span class="st">"</span>)</span>
-<span id="cb163-22"><a></a><span class="fu">cat</span>(<span class="st">"Total length:"</span>, <span class="fu">nchar</span>(seq), <span class="st">"bp</span><span class="sc">\n</span><span class="st">"</span>)</span>
-<span id="cb163-23"><a></a><span class="fu">cat</span>(<span class="st">"Average length:"</span>, <span class="fu">nchar</span>(seq) <span class="sc">/</span> <span class="fu">sum</span>(headers), <span class="st">"bp</span><span class="sc">\n</span><span class="st">"</span>)</span>
-<span id="cb163-24"><a></a>n_count <span class="ot">&lt;-</span> <span class="fu">sum</span>(<span class="fu">strsplit</span>(seq, <span class="st">""</span>)[[<span class="dv">1</span>]] <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"N"</span>, <span class="st">"n"</span>))</span>
-<span id="cb163-25"><a></a><span class="fu">cat</span>(<span class="st">"N bases:"</span>, n_count, <span class="st">"</span><span class="sc">\n</span><span class="st">"</span>)</span>
-<span id="cb163-26"><a></a>gc <span class="ot">&lt;-</span> <span class="fu">sum</span>(<span class="fu">strsplit</span>(<span class="fu">toupper</span>(seq), <span class="st">""</span>)[[<span class="dv">1</span>]] <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"G"</span>, <span class="st">"C"</span>))</span>
-<span id="cb163-27"><a></a><span class="fu">cat</span>(<span class="st">"GC content:"</span>, <span class="fu">round</span>(<span class="dv">100</span> <span class="sc">*</span> gc <span class="sc">/</span> <span class="fu">nchar</span>(seq), <span class="dv">1</span>), <span class="st">"%</span><span class="sc">\n</span><span class="st">"</span>)</span>
-<span id="cb163-28"><a></a>orfs <span class="ot">&lt;-</span> <span class="fu">regmatches</span>(seq, <span class="fu">gregexpr</span>(<span class="st">"ATG([ACGT]{3}){20,}(TAA|TAG|TGA)"</span>, seq))[[<span class="dv">1</span>]]</span>
-<span id="cb163-29"><a></a><span class="fu">cat</span>(<span class="st">"ORF-like stretches:"</span>, <span class="fu">length</span>(orfs), <span class="st">"</span><span class="sc">\n</span><span class="st">"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb153"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb153-1"><a></a><span class="co">#!/usr/bin/env Rscript</span></span>
+<span id="cb153-2"><a></a><span class="co"># Script: fasta_stats.R</span></span>
+<span id="cb153-3"><a></a><span class="co"># Purpose: Calculate basic statistics for a FASTA file</span></span>
+<span id="cb153-4"><a></a></span>
+<span id="cb153-5"><a></a>args <span class="ot">&lt;-</span> <span class="fu">commandArgs</span>(<span class="at">trailingOnly =</span> <span class="cn">TRUE</span>)     <span class="co"># like $1 $2 ... in bash</span></span>
+<span id="cb153-6"><a></a><span class="cf">if</span> (<span class="fu">length</span>(args) <span class="sc">!=</span> <span class="dv">1</span>) {</span>
+<span id="cb153-7"><a></a>  <span class="fu">cat</span>(<span class="st">"Usage: Rscript fasta_stats.R sequences.fasta</span><span class="sc">\n</span><span class="st">"</span>)</span>
+<span id="cb153-8"><a></a>  <span class="fu">quit</span>(<span class="at">status =</span> <span class="dv">1</span>)</span>
+<span id="cb153-9"><a></a>}</span>
+<span id="cb153-10"><a></a>input <span class="ot">&lt;-</span> args[<span class="dv">1</span>]</span>
+<span id="cb153-11"><a></a><span class="cf">if</span> (<span class="sc">!</span><span class="fu">file.exists</span>(input)) {</span>
+<span id="cb153-12"><a></a>  <span class="fu">cat</span>(<span class="st">"Error: File"</span>, input, <span class="st">"not found!</span><span class="sc">\n</span><span class="st">"</span>)</span>
+<span id="cb153-13"><a></a>  <span class="fu">quit</span>(<span class="at">status =</span> <span class="dv">1</span>)</span>
+<span id="cb153-14"><a></a>}</span>
+<span id="cb153-15"><a></a></span>
+<span id="cb153-16"><a></a>lines   <span class="ot">&lt;-</span> <span class="fu">readLines</span>(input)</span>
+<span id="cb153-17"><a></a>headers <span class="ot">&lt;-</span> <span class="fu">grepl</span>(<span class="st">"^&gt;"</span>, lines)                <span class="co"># TRUE for header lines</span></span>
+<span id="cb153-18"><a></a>seq     <span class="ot">&lt;-</span> <span class="fu">paste</span>(lines[<span class="sc">!</span>headers], <span class="at">collapse =</span> <span class="st">""</span>)</span>
+<span id="cb153-19"><a></a></span>
+<span id="cb153-20"><a></a><span class="fu">cat</span>(<span class="st">"=== FASTA Statistics for"</span>, input, <span class="st">"===</span><span class="sc">\n</span><span class="st">"</span>)</span>
+<span id="cb153-21"><a></a><span class="fu">cat</span>(<span class="st">"Number of sequences:"</span>, <span class="fu">sum</span>(headers), <span class="st">"</span><span class="sc">\n</span><span class="st">"</span>)</span>
+<span id="cb153-22"><a></a><span class="fu">cat</span>(<span class="st">"Total length:"</span>, <span class="fu">nchar</span>(seq), <span class="st">"bp</span><span class="sc">\n</span><span class="st">"</span>)</span>
+<span id="cb153-23"><a></a><span class="fu">cat</span>(<span class="st">"Average length:"</span>, <span class="fu">nchar</span>(seq) <span class="sc">/</span> <span class="fu">sum</span>(headers), <span class="st">"bp</span><span class="sc">\n</span><span class="st">"</span>)</span>
+<span id="cb153-24"><a></a>n_count <span class="ot">&lt;-</span> <span class="fu">sum</span>(<span class="fu">strsplit</span>(seq, <span class="st">""</span>)[[<span class="dv">1</span>]] <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"N"</span>, <span class="st">"n"</span>))</span>
+<span id="cb153-25"><a></a><span class="fu">cat</span>(<span class="st">"N bases:"</span>, n_count, <span class="st">"</span><span class="sc">\n</span><span class="st">"</span>)</span>
+<span id="cb153-26"><a></a>gc <span class="ot">&lt;-</span> <span class="fu">sum</span>(<span class="fu">strsplit</span>(<span class="fu">toupper</span>(seq), <span class="st">""</span>)[[<span class="dv">1</span>]] <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"G"</span>, <span class="st">"C"</span>))</span>
+<span id="cb153-27"><a></a><span class="fu">cat</span>(<span class="st">"GC content:"</span>, <span class="fu">round</span>(<span class="dv">100</span> <span class="sc">*</span> gc <span class="sc">/</span> <span class="fu">nchar</span>(seq), <span class="dv">1</span>), <span class="st">"%</span><span class="sc">\n</span><span class="st">"</span>)</span>
+<span id="cb153-28"><a></a>orfs <span class="ot">&lt;-</span> <span class="fu">regmatches</span>(seq, <span class="fu">gregexpr</span>(<span class="st">"ATG([ACGT]{3}){20,}(TAA|TAG|TGA)"</span>, seq))[[<span class="dv">1</span>]]</span>
+<span id="cb153-29"><a></a><span class="fu">cat</span>(<span class="st">"ORF-like stretches:"</span>, <span class="fu">length</span>(orfs), <span class="st">"</span><span class="sc">\n</span><span class="st">"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 </div>
-<div id="tabset-26-2">
+<div id="tabset-23-2">
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb164"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb164-1"><a></a><span class="co">#!/usr/bin/env python3</span></span>
-<span id="cb164-2"><a></a><span class="co"># Script: fasta_stats.py</span></span>
-<span id="cb164-3"><a></a><span class="co"># Purpose: Calculate basic statistics for a FASTA file</span></span>
-<span id="cb164-4"><a></a></span>
-<span id="cb164-5"><a></a><span class="im">import</span> re</span>
-<span id="cb164-6"><a></a><span class="im">import</span> sys</span>
-<span id="cb164-7"><a></a><span class="im">from</span> pathlib <span class="im">import</span> Path</span>
-<span id="cb164-8"><a></a></span>
-<span id="cb164-9"><a></a><span class="cf">if</span> <span class="bu">len</span>(sys.argv) <span class="op">!=</span> <span class="dv">2</span>:                       <span class="co"># sys.argv[0] is the script name, like $0</span></span>
-<span id="cb164-10"><a></a>    <span class="bu">print</span>(<span class="st">"Usage: python3 fasta_stats.py sequences.fasta"</span>)</span>
-<span id="cb164-11"><a></a>    sys.exit(<span class="dv">1</span>)</span>
-<span id="cb164-12"><a></a>input_file <span class="op">=</span> Path(sys.argv[<span class="dv">1</span>])</span>
-<span id="cb164-13"><a></a><span class="cf">if</span> <span class="kw">not</span> input_file.is_file():</span>
-<span id="cb164-14"><a></a>    <span class="bu">print</span>(<span class="ss">f"Error: File </span><span class="sc">{</span>input_file<span class="sc">}</span><span class="ss"> not found!"</span>)</span>
-<span id="cb164-15"><a></a>    sys.exit(<span class="dv">1</span>)</span>
-<span id="cb164-16"><a></a></span>
-<span id="cb164-17"><a></a>lines   <span class="op">=</span> input_file.read_text().splitlines()</span>
-<span id="cb164-18"><a></a>headers <span class="op">=</span> [line <span class="cf">for</span> line <span class="kw">in</span> lines <span class="cf">if</span> line.startswith(<span class="st">"&gt;"</span>)]</span>
-<span id="cb164-19"><a></a>seq     <span class="op">=</span> <span class="st">""</span>.join(line <span class="cf">for</span> line <span class="kw">in</span> lines <span class="cf">if</span> <span class="kw">not</span> line.startswith(<span class="st">"&gt;"</span>))</span>
-<span id="cb164-20"><a></a></span>
-<span id="cb164-21"><a></a><span class="bu">print</span>(<span class="ss">f"=== FASTA Statistics for </span><span class="sc">{</span>input_file<span class="sc">}</span><span class="ss"> ==="</span>)</span>
-<span id="cb164-22"><a></a><span class="bu">print</span>(<span class="ss">f"Number of sequences: </span><span class="sc">{</span><span class="bu">len</span>(headers)<span class="sc">}</span><span class="ss">"</span>)</span>
-<span id="cb164-23"><a></a><span class="bu">print</span>(<span class="ss">f"Total length: </span><span class="sc">{</span><span class="bu">len</span>(seq)<span class="sc">}</span><span class="ss"> bp"</span>)</span>
-<span id="cb164-24"><a></a><span class="bu">print</span>(<span class="ss">f"Average length: </span><span class="sc">{</span><span class="bu">len</span>(seq) <span class="op">/</span> <span class="bu">len</span>(headers)<span class="sc">:.1f}</span><span class="ss"> bp"</span>)</span>
-<span id="cb164-25"><a></a>n_count <span class="op">=</span> seq.count(<span class="st">"N"</span>) <span class="op">+</span> seq.count(<span class="st">"n"</span>)</span>
-<span id="cb164-26"><a></a><span class="bu">print</span>(<span class="ss">f"N bases: </span><span class="sc">{</span>n_count<span class="sc">}</span><span class="ss">"</span>)</span>
-<span id="cb164-27"><a></a>gc <span class="op">=</span> seq.upper().count(<span class="st">"G"</span>) <span class="op">+</span> seq.upper().count(<span class="st">"C"</span>)</span>
-<span id="cb164-28"><a></a><span class="bu">print</span>(<span class="ss">f"GC content: </span><span class="sc">{</span><span class="dv">100</span> <span class="op">*</span> gc <span class="op">/</span> <span class="bu">len</span>(seq)<span class="sc">:.1f}</span><span class="ss">%"</span>)</span>
-<span id="cb164-29"><a></a>orfs <span class="op">=</span> re.findall(<span class="vs">r"ATG</span>(?:<span class="pp">[ACGT]</span><span class="op">{3}</span>)<span class="op">{20,}</span>(?:<span class="vs">TAA</span><span class="cf">|</span><span class="vs">TAG</span><span class="cf">|</span><span class="vs">TGA</span>)<span class="vs">"</span>, seq)</span>
-<span id="cb164-30"><a></a><span class="bu">print</span>(<span class="ss">f"ORF-like stretches: </span><span class="sc">{</span><span class="bu">len</span>(orfs)<span class="sc">}</span><span class="ss">"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb154"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb154-1"><a></a><span class="co">#!/usr/bin/env python3</span></span>
+<span id="cb154-2"><a></a><span class="co"># Script: fasta_stats.py</span></span>
+<span id="cb154-3"><a></a><span class="co"># Purpose: Calculate basic statistics for a FASTA file</span></span>
+<span id="cb154-4"><a></a></span>
+<span id="cb154-5"><a></a><span class="im">import</span> re</span>
+<span id="cb154-6"><a></a><span class="im">import</span> sys</span>
+<span id="cb154-7"><a></a><span class="im">from</span> pathlib <span class="im">import</span> Path</span>
+<span id="cb154-8"><a></a></span>
+<span id="cb154-9"><a></a><span class="cf">if</span> <span class="bu">len</span>(sys.argv) <span class="op">!=</span> <span class="dv">2</span>:                       <span class="co"># sys.argv[0] is the script name, like $0</span></span>
+<span id="cb154-10"><a></a>    <span class="bu">print</span>(<span class="st">"Usage: python3 fasta_stats.py sequences.fasta"</span>)</span>
+<span id="cb154-11"><a></a>    sys.exit(<span class="dv">1</span>)</span>
+<span id="cb154-12"><a></a>input_file <span class="op">=</span> Path(sys.argv[<span class="dv">1</span>])</span>
+<span id="cb154-13"><a></a><span class="cf">if</span> <span class="kw">not</span> input_file.is_file():</span>
+<span id="cb154-14"><a></a>    <span class="bu">print</span>(<span class="ss">f"Error: File </span><span class="sc">{</span>input_file<span class="sc">}</span><span class="ss"> not found!"</span>)</span>
+<span id="cb154-15"><a></a>    sys.exit(<span class="dv">1</span>)</span>
+<span id="cb154-16"><a></a></span>
+<span id="cb154-17"><a></a>lines   <span class="op">=</span> input_file.read_text().splitlines()</span>
+<span id="cb154-18"><a></a>headers <span class="op">=</span> [line <span class="cf">for</span> line <span class="kw">in</span> lines <span class="cf">if</span> line.startswith(<span class="st">"&gt;"</span>)]</span>
+<span id="cb154-19"><a></a>seq     <span class="op">=</span> <span class="st">""</span>.join(line <span class="cf">for</span> line <span class="kw">in</span> lines <span class="cf">if</span> <span class="kw">not</span> line.startswith(<span class="st">"&gt;"</span>))</span>
+<span id="cb154-20"><a></a></span>
+<span id="cb154-21"><a></a><span class="bu">print</span>(<span class="ss">f"=== FASTA Statistics for </span><span class="sc">{</span>input_file<span class="sc">}</span><span class="ss"> ==="</span>)</span>
+<span id="cb154-22"><a></a><span class="bu">print</span>(<span class="ss">f"Number of sequences: </span><span class="sc">{</span><span class="bu">len</span>(headers)<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb154-23"><a></a><span class="bu">print</span>(<span class="ss">f"Total length: </span><span class="sc">{</span><span class="bu">len</span>(seq)<span class="sc">}</span><span class="ss"> bp"</span>)</span>
+<span id="cb154-24"><a></a><span class="bu">print</span>(<span class="ss">f"Average length: </span><span class="sc">{</span><span class="bu">len</span>(seq) <span class="op">/</span> <span class="bu">len</span>(headers)<span class="sc">:.1f}</span><span class="ss"> bp"</span>)</span>
+<span id="cb154-25"><a></a>n_count <span class="op">=</span> seq.count(<span class="st">"N"</span>) <span class="op">+</span> seq.count(<span class="st">"n"</span>)</span>
+<span id="cb154-26"><a></a><span class="bu">print</span>(<span class="ss">f"N bases: </span><span class="sc">{</span>n_count<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb154-27"><a></a>gc <span class="op">=</span> seq.upper().count(<span class="st">"G"</span>) <span class="op">+</span> seq.upper().count(<span class="st">"C"</span>)</span>
+<span id="cb154-28"><a></a><span class="bu">print</span>(<span class="ss">f"GC content: </span><span class="sc">{</span><span class="dv">100</span> <span class="op">*</span> gc <span class="op">/</span> <span class="bu">len</span>(seq)<span class="sc">:.1f}</span><span class="ss">%"</span>)</span>
+<span id="cb154-29"><a></a>orfs <span class="op">=</span> re.findall(<span class="vs">r"ATG</span>(?:<span class="pp">[ACGT]</span><span class="op">{3}</span>)<span class="op">{20,}</span>(?:<span class="vs">TAA</span><span class="cf">|</span><span class="vs">TAG</span><span class="cf">|</span><span class="vs">TGA</span>)<span class="vs">"</span>, seq)</span>
+<span id="cb154-30"><a></a><span class="bu">print</span>(<span class="ss">f"ORF-like stretches: </span><span class="sc">{</span><span class="bu">len</span>(orfs)<span class="sc">}</span><span class="ss">"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 </div>
 </div>
@@ -2124,13 +1932,13 @@ Figure&nbsp;1: Total RNA-seq reads per fish in each genotype-by-microbiota group
 <li>Write <code>scripts/fasta_stats.R</code> or <code>scripts/fasta_stats.py</code></li>
 <li>Test on L04’s small file first, then the real one:</li>
 </ol>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb165"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb165-1"><a></a><span class="ex">./scripts/fasta_stats.py</span> data/chr21_subset.fa     <span class="co"># fast - debug here</span></span>
-<span id="cb165-2"><a></a><span class="ex">./scripts/fasta_stats.py</span> data/chr21.fa            <span class="co"># the whole chromosome</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb155"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb155-1"><a></a><span class="ex">./scripts/fasta_stats.py</span> data/chr21_subset.fa     <span class="co"># fast - debug here</span></span>
+<span id="cb155-2"><a></a><span class="ex">./scripts/fasta_stats.py</span> data/chr21.fa            <span class="co"># the whole chromosome</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <ol start="3" type="1">
 <li>Check yourself against last week: the bash and R/Python versions should agree</li>
 </ol>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb166"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb166-1"><a></a><span class="fu">diff</span> <span class="op">&lt;(</span><span class="ex">./scripts/fasta_stats.sh</span> data/chr21_subset.fa<span class="op">)</span> <span class="dt">\</span></span>
-<span id="cb166-2"><a></a>     <span class="op">&lt;(</span><span class="ex">./scripts/fasta_stats.py</span> data/chr21_subset.fa<span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb156"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb156-1"><a></a><span class="fu">diff</span> <span class="op">&lt;(</span><span class="ex">./scripts/fasta_stats.sh</span> data/chr21_subset.fa<span class="op">)</span> <span class="dt">\</span></span>
+<span id="cb156-2"><a></a>     <span class="op">&lt;(</span><span class="ex">./scripts/fasta_stats.py</span> data/chr21_subset.fa<span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <ol start="4" type="1">
 <li>Stretch goals: report the <strong>longest</strong> ORF-like stretch; print a per-sequence table (name, length, GC) instead of totals; make the ORF minimum length (<code>{20,}</code>) a second command-line argument</li>
 </ol>
@@ -2155,9 +1963,8 @@ Figure&nbsp;1: Total RNA-seq reads per fish in each genotype-by-microbiota group
 <li>A <strong>script</strong> is a text file plus a shebang, <code>chmod +x</code>, arguments and an exit status - in any language</li>
 <li>Every vector/column has <strong>one type</strong>; know <code>class()</code> / <code>type()</code>, convert deliberately, and respect <code>NA</code> / <code>NaN</code> (and the opposite <code>na.rm</code> / <code>skipna</code> defaults)</li>
 <li><strong>Indexing</strong>: <code>x[i]</code>, <code>table[row, col]</code>, <code>$</code> / <code>[[ ]]</code>, <code>.loc</code> / <code>.iloc</code> - and logical tests select rows like <code>grep</code> selects lines</li>
-<li><strong>Files</strong>: read with <code>read.delim()</code> / <code>pd.read_csv()</code>, write results (never raw data!), save figures as vector SVG/PDF</li>
 <li><strong>Regular expressions</strong> moved with you: the L04 patterns now run inside <code>grepl()</code> / <code>gsub()</code> and <code>re.findall()</code> / <code>re.sub()</code></li>
-<li>Next week (L06): data frames in earnest - distributions, summaries and real figures from the stickleback table</li>
+<li>Next week (L06): reading and writing files, then data frames in earnest - distributions, summaries and real figures from the stickleback table</li>
 </ul>
 
 
