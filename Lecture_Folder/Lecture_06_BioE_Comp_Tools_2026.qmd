@@ -24,23 +24,29 @@ set.seed(2026)
 
 ## Book reading for this lecture
 
-The course book goes deeper on everything in this lecture. Read before or after class:
-
--   [Ch. 13: Data Visualization with ggplot2](../book/chapters/13-data-visualization.html)
--   [Ch. 14: Data Wrangling with the Tidyverse](../book/chapters/14-data-wrangling.html)
--   *Review:* [Ch. 11: R Programming Fundamentals](../book/chapters/11-r-programming.html) · [Ch. 12: Python Programming Fundamentals](../book/chapters/12-python-programming.html) *(these also carry this week's self-study: files, control flow, packages)*
--   *Optional:* [Ch. 15: Writing Functions in R](../book/chapters/15-writing-functions.html) · [Ch. 22: Working with Databases](../book/chapters/22-databases.html)
--   *Reference:* [App. E: R Command Reference](../book/chapters/appendix-E-r.html) · [App. F: Python Quick Reference](../book/chapters/appendix-F-python.html)
+- [Ch. 13: Data Visualization with ggplot2](../book/chapters/13-data-visualization.html)
+- [Ch. 14: Data Wrangling with the Tidyverse](../book/chapters/14-data-wrangling.html)
+- *Review:*
+  - [Ch. 11: R Programming Fundamentals](../book/chapters/11-r-programming.html)
+  - [Ch. 12: Python Programming Fundamentals](../book/chapters/12-python-programming.html)
+- *Optional:*
+  - [Ch. 15: Writing Functions in R](../book/chapters/15-writing-functions.html)
+  - [Ch. 22: Working with Databases](../book/chapters/22-databases.html)
+- *Reference:*
+  - [App. E: R Command Reference](../book/chapters/appendix-E-r.html)
+  - [App. F: Python Quick Reference](../book/chapters/appendix-F-python.html)
 
 ## Goals for today
 
--   Where we are headed: one publication-quality figure, built **within the hour**
--   Data frames: creating, inspecting and summarizing them
--   Random draws: four workhorse distributions in one figure
--   The tidyverse: the pipe `|>` and `pivot_longer()`
--   ggplot2: the grammar of graphics, layer by layer
--   A gallery of figures for bioengineering data
--   What to self-study this week: files, control flow and more (notebooks + book)
+- Data frames: creating, inspecting and summarizing them
+
+- Creating data sets using random draws
+
+- The tidyverse: the pipe `|>` and `pivot_longer()`
+
+- ggplot2: the grammar of graphics
+
+- A gallery of figures for bioengineering data
 
 ## Where we are headed: one figure, one hour
 
@@ -81,32 +87,31 @@ p2 <- stickle_dest_long |>
 p1 + p2 + plot_layout(widths = c(3, 2))
 ```
 
--   The route there, in order: **data frames** → **tidy reshaping** → the **grammar of graphics**
--   By the end of this lecture you can write every line of it - and the ideas carry straight into your term project
+- The route there, in order: **data frames** → **tidy reshaping** → the **grammar of graphics**
+- By the end of this lecture you can write every line of it - and the ideas carry straight into your term project
 
 ## Files in one slide (the full story is in this week's self-study)
 
 | Job | R | Python |
-|:---|:---|:---|
+|:-----------------------|:-----------------------|:-----------------------|
 | Read a table | `read.delim("data/f.tsv", check.names = FALSE)` | `pd.read_csv("f.tsv", sep="\t")` |
 | Write results | `write.csv(x, "results/f.csv", row.names = FALSE)` | `x.to_csv("f.csv", index=False)` |
 | Save a figure | `ggsave("results/fig.svg")` · `svg()` … `dev.off()` | `plt.savefig("results/fig.svg")` |
 | One column / rows by condition | `df$col` · `df[df$g == "A", ]` | `df["col"]` · `df[df["g"] == "A"]` |
 
--   Write **derived** results into `results/`; never overwrite anything in `data/` (raw data is read-only)
--   **Vector** figure formats (`.svg`, `.pdf`) scale forever - use them for papers; raster (`.png`) needs 300 dpi
--   Every detail - formats, URLs, Excel, script checklists - is in the **Week 6 companion notebooks** (part 1, sections 1-3) and [Ch. 11](../book/chapters/11-r-programming.html)/[Ch. 12](../book/chapters/12-python-programming.html)
-
+- Write **derived** results into `results/`; never overwrite anything in `data/` (raw data is read-only)
+- **Vector** figure formats (`.svg`, `.pdf`) scale forever - use them for papers; raster (`.png`) needs 300 dpi
+- Every detail - formats, URLs, Excel, script checklists - is in the **Week 6 companion notebooks** (part 1, sections 1-3) and [Ch. 11](../book/chapters/11-r-programming.html)/[Ch. 12](../book/chapters/12-python-programming.html)
 
 # Data frames
 
 ## Creating Data Frames in R and Python
 
--   As you have seen, in R you can generate your own random data set drawn from nearly any distribution very easily.
--   Often we will want to use collected data.
--   Now, let’s make a dummy dataset to get used to dealing with data frames
--   Set up three variables (hydrogel_concentration, compression and conductivity) as vectors
--   In Python the data frame comes from **pandas** (`import pandas as pd`); it has the same idea - rows are samples, columns are variables
+- As you have seen, in R you can generate your own random data set drawn from nearly any distribution very easily.
+- Often we will want to use collected data.
+- Now, let’s make a dummy dataset to get used to dealing with data frames
+- Set up three variables (hydrogel_concentration, compression and conductivity) as vectors
+- In Python the data frame comes from **pandas** (`import pandas as pd`); it has the same idea - rows are samples, columns are variables
 
 ## Creating Data Frames in R and Python
 
@@ -123,7 +128,7 @@ compression <- c(3.4, 3.4, 8.4, 3, 5.6, 8.1, 8.3, 4.5)
 conductivity <- c(0, 9.2, 3.8, 5, 5.6, 4.1, 7.1, 5.3)
 ```
 
--   Create a data frame where vectors become columns
+- Create a data frame where vectors become columns
 
 ```{r}
 #| label: lec06-creating-data-frames-in-r-2
@@ -149,7 +154,7 @@ compression = [3.4, 3.4, 8.4, 3, 5.6, 8.1, 8.3, 4.5]
 conductivity = [0, 9.2, 3.8, 5, 5.6, 4.1, 7.1, 5.3]
 ```
 
--   Create a DataFrame from a dictionary of `column name: values`
+- Create a DataFrame from a dictionary of `column name: values`
 
 ```{python}
 #| label: lec06-creating-data-frames-2-py
@@ -168,8 +173,8 @@ mydata.head(3)
 ```
 :::
 
--   Now you have a hand-made data frame with row names
--   Take a look at it in Positron's Variables pane, or open it in the **Data Explorer** (R and Python)
+- Now you have a hand-made data frame with row names
+- Take a look at it in Positron's Variables pane, or open it in the **Data Explorer** (R and Python)
 
 ## Running example: the stickleback table as a data frame
 
@@ -236,12 +241,12 @@ stickle[["Gene1", "Gene2", "Gene3"]].mean()
 ```
 :::
 
--   `aggregate()`'s formula - *response `~` groups* - is exactly the formula `boxplot()` uses, next slide
--   The tidyverse's `group_by() |> summarize()` and pandas' `.groupby().agg()` generalize this to many statistics at once - coming up in a few slides
+- `aggregate()`'s formula - *response `~` groups* - is exactly the formula `boxplot()` uses, next slide
+- The tidyverse's `group_by() |> summarize()` and pandas' `.groupby().agg()` generalize this to many statistics at once - coming up in a few slides
 
 ## Random draws: four distributions at once
 
--   R's `r*` family - `rnorm()`, `runif()`, `rpois()`, `rbinom()` - draws random numbers from named distributions; `set.seed()` makes them reproducible (numpy: `rng = np.random.default_rng(2026)`)
+- R's `r*` family - `rnorm()`, `runif()`, `rpois()`, `rbinom()` - draws random numbers from named distributions; `set.seed()` makes them reproducible (numpy: `rng = np.random.default_rng(2026)`)
 
 ::: panel-tabset
 ### R
@@ -292,9 +297,9 @@ plt.show()
 ![The figure this code draws (pre-rendered)](../images/Lec06_py_dist_gallery.svg){width="55%"}
 :::
 
--   `par(mfrow = c(2, 2))` splits the plotting device into panels; each high-level call fills the next one (`plt.subplots(2, 2)` hands Python the grid as an array of axes)
--   Four workhorses: **normal** (measurements), **uniform** (anything equally likely), **Poisson** (counts), **binomial** (successes out of *n* tries)
--   Change `n`, the parameters and `breaks` - this one figure is a little simulation lab
+- `par(mfrow = c(2, 2))` splits the plotting device into panels; each high-level call fills the next one (`plt.subplots(2, 2)` hands Python the grid as an array of axes)
+- Four workhorses: **normal** (measurements), **uniform** (anything equally likely), **Poisson** (counts), **binomial** (successes out of *n* tries)
+- Change `n`, the parameters and `breaks` - this one figure is a little simulation lab
 
 # The tidyverse
 
@@ -302,18 +307,18 @@ plt.show()
 
 ![](../images/Lec07_img002.jpeg){fig-align="center" width="70%"}
 
-::: {.aside}
+::: aside
 Source: [tidyverse.org](https://www.tidyverse.org/)
 :::
 
-| Package   | Purpose                                                   | pandas / Python equivalent      |
-|:----------|:----------------------------------------------------------|:--------------------------------|
-| `dplyr`   | Data manipulation (`filter`, `select`, `mutate`, `summarise`) | pandas methods              |
-| `ggplot2` | Data visualization                                        | `matplotlib`, `seaborn`, `plotnine` |
-| `tidyr`   | Reshaping data (`pivot_longer`, `pivot_wider`, `separate`) | `melt`, `pivot`                |
-| `readr`   | Fast reading of CSV, TSV files                            | `pd.read_csv`                   |
-| `stringr` | String manipulation                                       | `str` methods, `re`             |
-| `purrr`   | Functional programming tools (`map`)                      | list comprehensions             |
+| Package | Purpose | pandas / Python equivalent |
+|:--------------|:------------------------------------|:-------------------|
+| `dplyr` | Data manipulation (`filter`, `select`, `mutate`, `summarise`) | pandas methods |
+| `ggplot2` | Data visualization | `matplotlib`, `seaborn`, `plotnine` |
+| `tidyr` | Reshaping data (`pivot_longer`, `pivot_wider`, `separate`) | `melt`, `pivot` |
+| `readr` | Fast reading of CSV, TSV files | `pd.read_csv` |
+| `stringr` | String manipulation | `str` methods, `re` |
+| `purrr` | Functional programming tools (`map`) | list comprehensions |
 
 Loading `tidyverse` loads all of these at once (plus `tibble` and `forcats`).
 
@@ -332,17 +337,17 @@ mydata |>
   summarise(n = n(), mean_ratio = mean(ratio))          # one row per group
 ```
 
-| Verb          | What it does                       |
-|---------------|------------------------------------|
-| `filter()`    | Keep rows matching a condition     |
-| `select()`    | Keep or drop columns               |
-| `mutate()`    | Add or change columns              |
-| `arrange()`   | Sort rows                          |
-| `group_by()` + `summarise()` | Summaries per group |
+| Verb                         | What it does                   |
+|------------------------------|--------------------------------|
+| `filter()`                   | Keep rows matching a condition |
+| `select()`                   | Keep or drop columns           |
+| `mutate()`                   | Add or change columns          |
+| `arrange()`                  | Sort rows                      |
+| `group_by()` + `summarise()` | Summaries per group            |
 
 ### Python (pandas)
 
-```python
+``` python
 import pandas as pd
 
 (mydata
@@ -353,13 +358,13 @@ import pandas as pd
 )
 ```
 
-| dplyr verb                   | pandas method                         |
-|------------------------------|---------------------------------------|
-| `filter()`                   | `.query("...")` or `df[df.col > 4]`    |
-| `select()`                   | `df[["a", "b"]]` / `.drop(columns=)`  |
-| `mutate()`                   | `.assign(new=...)`                    |
-| `arrange()`                  | `.sort_values("col")`                 |
-| `group_by()` + `summarise()` | `.groupby("col").agg(...)`            |
+| dplyr verb                   | pandas method                        |
+|------------------------------|--------------------------------------|
+| `filter()`                   | `.query("...")` or `df[df.col > 4]`  |
+| `select()`                   | `df[["a", "b"]]` / `.drop(columns=)` |
+| `mutate()`                   | `.assign(new=...)`                   |
+| `arrange()`                  | `.sort_values("col")`                |
+| `group_by()` + `summarise()` | `.groupby("col").agg(...)`           |
 :::
 
 ::: callout-note
@@ -425,7 +430,7 @@ Same data, two eras: `awk` gave us one gene's mean per group in Week 4; one `piv
 
 ![](../images/Lec07_img003.jpeg){fig-align="center" width="80%"}
 
-::: {.aside}
+::: aside
 Source: Leland Wilkinson, *The Grammar of Graphics*, 1999
 :::
 
@@ -463,9 +468,9 @@ plt.show()
 ```
 :::
 
--   `ggplot(data, aes(...))` declares the **mapping**: which column drives which visual channel
--   A **geom** draws it; `geom_jitter()` is `geom_point()` plus sideways noise
--   Nothing is styled yet - and it is already a readable figure
+- `ggplot(data, aes(...))` declares the **mapping**: which column drives which visual channel
+- A **geom** draws it; `geom_jitter()` is `geom_point()` plus sideways noise
+- Nothing is styled yet - and it is already a readable figure
 
 ## Building a figure layer by layer: 2 - more aesthetics, more geoms
 
@@ -500,9 +505,9 @@ plt.show()
 ```
 :::
 
--   Mapping a column to `fill` / `color` (`hue` in seaborn) splits the groups **and** builds the legend - automatically, from the data
--   Layers draw in order: violin first, points on top
--   `position_dodge` places the two microbiota groups side by side
+- Mapping a column to `fill` / `color` (`hue` in seaborn) splits the groups **and** builds the legend - automatically, from the data
+- Layers draw in order: violin first, points on top
+- `position_dodge` places the two microbiota groups side by side
 
 ## Building a figure layer by layer: 3 - facets, scales, labels, theme
 
@@ -553,25 +558,24 @@ plt.show()
 ![The figure this code draws (pre-rendered)](../images/Lec07_py_gene_panel.svg){width="55%"}
 :::
 
--   `facet_wrap(~ gene)` - one panel per gene, for free; `scales = "free_y"` lets each gene keep its own axis
--   This **is** the left half of the destination figure - and it saves to a file in one line:
+- `facet_wrap(~ gene)` - one panel per gene, for free; `scales = "free_y"` lets each gene keep its own axis
+- This **is** the left half of the destination figure - and it saves to a file in one line:
 
 ``` r
 ggsave("results/gene_panel.svg", width = 8, height = 6)   # last plot drawn
 # g.figure.savefig("results/gene_panel.svg")              # the seaborn version
 ```
 
-
 ## Common `ggplot2` geoms
 
-| Geom               | Purpose      | Data type               | seaborn equivalent       |
-|:-------------------|:-------------|:------------------------|:-------------------------|
-| `geom_point()`     | Scatterplots | Two continuous          | `sns.scatterplot()`      |
-| `geom_line()`      | Line plots   | Continuous over ordered | `sns.lineplot()`         |
-| `geom_bar()`       | Bar charts   | Categorical counts      | `sns.countplot()`        |
-| `geom_histogram()` | Histograms   | Single continuous       | `sns.histplot()`         |
-| `geom_boxplot()`   | Boxplots     | Continuous by category  | `sns.boxplot()`          |
-| `geom_smooth()`    | Trend lines  | Two continuous          | `sns.regplot()`          |
+| Geom               | Purpose      | Data type               | seaborn equivalent  |
+|:---------------|:---------------|:------------------|:-------------------|
+| `geom_point()`     | Scatterplots | Two continuous          | `sns.scatterplot()` |
+| `geom_line()`      | Line plots   | Continuous over ordered | `sns.lineplot()`    |
+| `geom_bar()`       | Bar charts   | Categorical counts      | `sns.countplot()`   |
+| `geom_histogram()` | Histograms   | Single continuous       | `sns.histplot()`    |
+| `geom_boxplot()`   | Boxplots     | Continuous by category  | `sns.boxplot()`     |
+| `geom_smooth()`    | Trend lines  | Two continuous          | `sns.regplot()`     |
 
 ::: callout-tip
 `facet_wrap(~ group)` splits any plot into one panel per group, and `ggsave("figure.pdf")` writes the last plot to a file. Data-visualization mechanics get a full chapter in the [course book](../book/chapters/13-data-visualization.html).
@@ -633,24 +637,24 @@ plt.show()
 ![The figure this code draws (pre-rendered)](../images/Lec07_py_meanvar.svg){width="50%"}
 :::
 
--   `group_by(gene) |> summarize()` collapses 48,000 rows to 600 - one point per gene
--   The biology in one glance: variance **outruns** the mean, which is why RNA-seq models use the negative binomial rather than the Poisson - a preview of the statistics to come
--   And this is the right half of the destination figure - **you can now build all of it**
+- `group_by(gene) |> summarize()` collapses 48,000 rows to 600 - one point per gene
+- The biology in one glance: variance **outruns** the mean, which is why RNA-seq models use the negative binomial rather than the Poisson - a preview of the statistics to come
+- And this is the right half of the destination figure - **you can now build all of it**
 
 # A gallery of figures for bioengineering data
 
 ## Matching the figure to the question
 
 | Figure | The question it answers | R | Python |
-|:---|:---|:---|:---|
+|:-----------------|:-----------------|:-----------------|:-----------------|
 | Clustered **heatmap** + dendrograms | which samples / genes behave alike? | `heatmap()` | `sns.clustermap()` |
 | **Time course** with ribbons | how do trajectories differ, and how noisy are they? | `geom_ribbon()` + `geom_line()` | `plt.fill_between()` |
 | **Dose-response** curve | where is the IC50? | `geom_point()` + `geom_smooth()`, log-x | `plt.semilogx()` |
 | **PCA** scores plot | what structures 600 dimensions? | `prcomp()` + `geom_point()` | `sklearn` `PCA` + scatter |
 | **Violin** + jitter | what does the whole distribution look like, by group? | `geom_violin()` | `sns.violinplot()` |
 
--   The next four slides draw each one - two from *synthesized* data (so you can see the generating process), two from the real stickleback table
--   Full walk-throughs live in the book's [Ch. 13 figure gallery](../book/chapters/13-data-visualization.html)
+- The next four slides draw each one - two from *synthesized* data (so you can see the generating process), two from the real stickleback table
+- Full walk-throughs live in the book's [Ch. 13 figure gallery](../book/chapters/13-data-visualization.html)
 
 ## Gallery 1: a clustered heatmap, from synthesized expression data
 
@@ -698,8 +702,8 @@ plt.show()
 ![The figure this code draws (pre-rendered)](../images/Lec07_py_heatmap.svg){width="42%"}
 :::
 
--   `scale = "row"` / `z_score=0` standardizes each gene, so the colors compare *patterns*, not absolute levels
--   The dendrograms are hierarchical clustering - both tools run it for you; richer R options: `pheatmap`, `ComplexHeatmap`
+- `scale = "row"` / `z_score=0` standardizes each gene, so the colors compare *patterns*, not absolute levels
+- The dendrograms are hierarchical clustering - both tools run it for you; richer R options: `pheatmap`, `ComplexHeatmap`
 
 ## Gallery 2: growth curves with ribbons
 
@@ -757,8 +761,8 @@ plt.show()
 ![The figure this code draws (pre-rendered)](../images/Lec07_py_timecourse.svg){width="52%"}
 :::
 
--   The `group_by() |> summarize()` + ribbon pattern works for *any* repeated time course: sensor logs, qPCR curves, cyclic loading of a hydrogel
--   Note the synthesis itself is the random-draws slide at work: a deterministic curve plus `rnorm()` noise
+- The `group_by() |> summarize()` + ribbon pattern works for *any* repeated time course: sensor logs, qPCR curves, cyclic loading of a hydrogel
+- Note the synthesis itself is the random-draws slide at work: a deterministic curve plus `rnorm()` noise
 
 ## Gallery 3: dose-response curves
 
@@ -813,8 +817,8 @@ plt.show()
 ![The figure this code draws (pre-rendered)](../images/Lec07_py_doseresponse.svg){width="52%"}
 :::
 
--   A log-scaled x axis (`scale_x_log10()` / `xscale="log"`) is what makes dose-response curves readable - doses span five orders of magnitude
--   `geom_smooth()` draws a data-driven trend; a real assay would fit a four-parameter logistic model (coming in the statistics sequence)
+- A log-scaled x axis (`scale_x_log10()` / `xscale="log"`) is what makes dose-response curves readable - doses span five orders of magnitude
+- `geom_smooth()` draws a data-driven trend; a real assay would fit a four-parameter logistic model (coming in the statistics sequence)
 
 ## Gallery 4: PCA of the real stickleback fish
 
@@ -867,8 +871,8 @@ plt.show()
 ![The figure this code draws (pre-rendered)](../images/Lec07_py_pca.svg){width="50%"}
 :::
 
--   PCA compresses 600 correlated gene columns into a few axes of maximal variation - the workhorse first look at any high-dimensional data set
--   One `prcomp()` call plus one `ggplot()` call; the groups separate because the biology is real
+- PCA compresses 600 correlated gene columns into a few axes of maximal variation - the workhorse first look at any high-dimensional data set
+- One `prcomp()` call plus one `ggplot()` call; the groups separate because the biology is real
 
 ## Your turn
 
@@ -883,7 +887,7 @@ Working versions of both scripts are on the [Examples page](../Examples.html) - 
 The lecture built the spine; these carry the rest. All of it is on the [Examples page](../Examples.html) and in the book - budget a couple of hours before next Monday:
 
 | Topic | Where it lives |
-|:---|:---|
+|:-----------------------------------|:-----------------------------------|
 | Reading & writing files, saving figures, in full | Part-1 notebooks §1-3 · [Ch. 11](../book/chapters/11-r-programming.html)/[Ch. 12](../book/chapters/12-python-programming.html) |
 | Random draws, honest density overlays, base graphics | Part-1 notebooks §4-7 |
 | **Control flow: `if`, `for`, `while` - and when a vector beats a loop** | Part-2 notebooks §4-6 · Parisa's `s2`-`s4` · Ch. 11/12 |
@@ -891,15 +895,15 @@ The lecture built the spine; these carry the rest. All of it is on the [Examples
 | Inspecting objects, common gotchas, reading error messages | Part-2 notebooks §2, §17-18 · Ch. 11/12 |
 | Writing your own functions | [Ch. 15](../book/chapters/15-writing-functions.html) · Parisa's `s4` |
 
--   The **part-1** notebooks (`Lecture06_*_dataframes_figures.ipynb`) and **part-2** notebooks (`Lecture06_*_tidyverse_ggplot.ipynb`) come in matched R/Python pairs - run them side by side
--   Installing packages and managing **environments** get their own lecture in Week 9
--   [Ex 6](../Exercise_Folder/Exercises_Week06.qmd) practices all of today plus the self-study
+- The **part-1** notebooks (`Lecture06_*_dataframes_figures.ipynb`) and **part-2** notebooks (`Lecture06_*_tidyverse_ggplot.ipynb`) come in matched R/Python pairs - run them side by side
+- Installing packages and managing **environments** get their own lecture in Week 9
+- [Ex 6](../Exercise_Folder/Exercises_Week06.qmd) practices all of today plus the self-study
 
 ## Summary
 
--   **Data frames**: columns are vectors with names; `summary()`, `table()`, `aggregate()` / `.describe()`, `pd.crosstab()`, `.groupby()` answer the first questions
--   **Random draws**: `rnorm()`, `runif()`, `rpois()`, `rbinom()` / numpy's `rng.*` - data-generating machines for testing ideas
--   **Tidy reshaping**: one `pivot_longer()` / `.melt()` turns 600 gene columns into one analyzable column - the single most useful move in this course
--   **The grammar of graphics**: data + aesthetic mappings + layered geoms; facets give small multiples for free; `ggsave()` writes the file
--   **Match the figure to the question**: distributions → violins, similarity → heatmaps, trajectories → ribbons, potency → dose-response, high dimensions → PCA
--   This wraps up the scripting foundations - next Monday (L07): **Quarto**, where your code, figures and writing become one reproducible document
+- **Data frames**: columns are vectors with names; `summary()`, `table()`, `aggregate()` / `.describe()`, `pd.crosstab()`, `.groupby()` answer the first questions
+- **Random draws**: `rnorm()`, `runif()`, `rpois()`, `rbinom()` / numpy's `rng.*` - data-generating machines for testing ideas
+- **Tidy reshaping**: one `pivot_longer()` / `.melt()` turns 600 gene columns into one analyzable column - the single most useful move in this course
+- **The grammar of graphics**: data + aesthetic mappings + layered geoms; facets give small multiples for free; `ggsave()` writes the file
+- **Match the figure to the question**: distributions → violins, similarity → heatmaps, trajectories → ribbons, potency → dose-response, high dimensions → PCA
+- This wraps up the scripting foundations - next Monday (L07): **Quarto**, where your code, figures and writing become one reproducible document
