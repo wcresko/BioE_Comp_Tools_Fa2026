@@ -1931,7 +1931,7 @@ Warning
 <span id="cb42-4"><a href="#cb42-4"></a></span>
 <span id="cb42-5"><a href="#cb42-5"></a><span class="co"># Sample with replacement</span></span>
 <span id="cb42-6"><a href="#cb42-6"></a><span class="fu">sample</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">10</span>, <span class="at">size =</span> <span class="dv">5</span>, <span class="at">replace =</span> <span class="cn">TRUE</span>)</span>
-<span id="cb42-7"><a href="#cb42-7"></a><span class="co">#&gt; [1] 8 2 1 1 5</span></span>
+<span id="cb42-7"><a href="#cb42-7"></a><span class="co">#&gt; [1] 4 2 9 9 1</span></span>
 <span id="cb42-8"><a href="#cb42-8"></a></span>
 <span id="cb42-9"><a href="#cb42-9"></a><span class="co"># Mean with NA handling</span></span>
 <span id="cb42-10"><a href="#cb42-10"></a>values <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">2</span>, <span class="cn">NA</span>, <span class="dv">4</span>, <span class="dv">5</span>)</span>
@@ -3171,6 +3171,7 @@ Figure&nbsp;11.10: Vectorized graphical parameters: each point’s color and sha
 </div>
 </div>
 </div>
+<p>With thousands of overlapping points, wrap any color in <code><a href="https://rdrr.io/r/grDevices/adjustcolor.html">adjustcolor()</a></code> to make it translucent — <code>plot(x, y, pch = 16, col = adjustcolor("steelblue", alpha.f = 0.4))</code> — so that point density shows up as color density (the ggplot2 counterpart is <code>alpha</code>, <a href="13-data-visualization.html#sec-dense-data" class="quarto-xref"><span>Section 13.10.3</span></a>).</p>
 </section><section id="sec-multiple-plots" class="level3"><h3 class="anchored" data-anchor-id="sec-multiple-plots">Multiple Plots</h3>
 <p><code><a href="https://rdrr.io/r/graphics/par.html">par()</a></code> sets graphical parameters that persist for the rest of the session; <code>mfrow = c(rows, cols)</code> divides the plotting window into a grid that successive plots fill left to right, top to bottom.</p>
 <div class="cell" data-layout-align="center">
@@ -3611,18 +3612,19 @@ Warning
 <span id="cb91-5"><a href="#cb91-5"></a>uniform_sample <span class="ot">&lt;-</span> <span class="fu">runif</span>(<span class="dv">100</span>, <span class="at">min =</span> <span class="dv">0</span>, <span class="at">max =</span> <span class="dv">1</span>)</span>
 <span id="cb91-6"><a href="#cb91-6"></a>normal_sample <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(<span class="dv">1000</span>, <span class="at">mean =</span> <span class="dv">0</span>, <span class="at">sd =</span> <span class="dv">1</span>)</span>
 <span id="cb91-7"><a href="#cb91-7"></a>poisson_sample <span class="ot">&lt;-</span> <span class="fu">rpois</span>(<span class="dv">100</span>, <span class="at">lambda =</span> <span class="dv">5</span>)</span>
-<span id="cb91-8"><a href="#cb91-8"></a></span>
-<span id="cb91-9"><a href="#cb91-9"></a><span class="co"># Visualize normal distribution</span></span>
-<span id="cb91-10"><a href="#cb91-10"></a><span class="fu">hist</span>(normal_sample, </span>
-<span id="cb91-11"><a href="#cb91-11"></a>     <span class="at">probability =</span> <span class="cn">TRUE</span>,  <span class="co"># Density instead of counts</span></span>
-<span id="cb91-12"><a href="#cb91-12"></a>     <span class="at">main =</span> <span class="st">"Sample vs. Theoretical Distribution"</span>,</span>
-<span id="cb91-13"><a href="#cb91-13"></a>     <span class="at">col =</span> <span class="st">"lightblue"</span>)</span>
-<span id="cb91-14"><a href="#cb91-14"></a></span>
-<span id="cb91-15"><a href="#cb91-15"></a><span class="co"># Add theoretical curve</span></span>
-<span id="cb91-16"><a href="#cb91-16"></a><span class="fu">curve</span>(<span class="fu">dnorm</span>(x, <span class="at">mean =</span> <span class="dv">0</span>, <span class="at">sd =</span> <span class="dv">1</span>), </span>
-<span id="cb91-17"><a href="#cb91-17"></a>      <span class="at">add =</span> <span class="cn">TRUE</span>, </span>
-<span id="cb91-18"><a href="#cb91-18"></a>      <span class="at">col =</span> <span class="st">"red"</span>, </span>
-<span id="cb91-19"><a href="#cb91-19"></a>      <span class="at">lwd =</span> <span class="dv">2</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb91-8"><a href="#cb91-8"></a>binomial_sample <span class="ot">&lt;-</span> <span class="fu">rbinom</span>(<span class="dv">100</span>, <span class="at">size =</span> <span class="dv">20</span>, <span class="at">prob =</span> <span class="fl">0.3</span>)</span>
+<span id="cb91-9"><a href="#cb91-9"></a></span>
+<span id="cb91-10"><a href="#cb91-10"></a><span class="co"># Visualize normal distribution</span></span>
+<span id="cb91-11"><a href="#cb91-11"></a><span class="fu">hist</span>(normal_sample, </span>
+<span id="cb91-12"><a href="#cb91-12"></a>     <span class="at">probability =</span> <span class="cn">TRUE</span>,  <span class="co"># density scale, not counts (freq = FALSE is equivalent)</span></span>
+<span id="cb91-13"><a href="#cb91-13"></a>     <span class="at">main =</span> <span class="st">"Sample vs. Theoretical Distribution"</span>,</span>
+<span id="cb91-14"><a href="#cb91-14"></a>     <span class="at">col =</span> <span class="st">"lightblue"</span>)</span>
+<span id="cb91-15"><a href="#cb91-15"></a></span>
+<span id="cb91-16"><a href="#cb91-16"></a><span class="co"># Add theoretical curve</span></span>
+<span id="cb91-17"><a href="#cb91-17"></a><span class="fu">curve</span>(<span class="fu">dnorm</span>(x, <span class="at">mean =</span> <span class="dv">0</span>, <span class="at">sd =</span> <span class="dv">1</span>), </span>
+<span id="cb91-18"><a href="#cb91-18"></a>      <span class="at">add =</span> <span class="cn">TRUE</span>, </span>
+<span id="cb91-19"><a href="#cb91-19"></a>      <span class="at">col =</span> <span class="st">"red"</span>, </span>
+<span id="cb91-20"><a href="#cb91-20"></a>      <span class="at">lwd =</span> <span class="dv">2</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
 <div id="fig-simulation" class="quarto-float quarto-figure quarto-figure-center anchored" data-fig-align="center">
 <figure class="quarto-float quarto-float-fig figure"><div aria-describedby="fig-simulation-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
@@ -3634,6 +3636,7 @@ Figure&nbsp;11.12: Simulated data from a normal distribution with theoretical cu
 </div>
 </div>
 </div>
+<p><code>probability = TRUE</code> (equivalently <code>freq = FALSE</code>) puts the histogram on the <strong>density</strong> scale, which is why the theoretical <code><a href="https://rdrr.io/r/stats/Normal.html">dnorm()</a></code> curve overlays directly with no rescaling. The binomial draw above shows the fourth workhorse distribution: <code>size</code> tries, each succeeding with probability <code>prob</code>.</p>
 <section id="sec-common-distribution-functions" class="level3"><h3 class="anchored" data-anchor-id="sec-common-distribution-functions">Common Distribution Functions</h3>
 <p>For distribution <code>xxx</code> (e.g., <code>norm</code>, <code>unif</code>, <code>pois</code>, <code>binom</code>):</p>
 <ul>
@@ -3649,7 +3652,7 @@ Figure&nbsp;11.12: Simulated data from a normal distribution with theoretical cu
 <div class="cell" data-layout-align="center">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb92"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb92-1"><a href="#cb92-1"></a><span class="co"># Normal distribution</span></span>
 <span id="cb92-2"><a href="#cb92-2"></a><span class="fu">rnorm</span>(<span class="dv">5</span>)        <span class="co"># 5 random values</span></span>
-<span id="cb92-3"><a href="#cb92-3"></a><span class="co">#&gt; [1]  0.9159921  0.8006224 -0.9365690 -1.4007874  0.1602775</span></span>
+<span id="cb92-3"><a href="#cb92-3"></a><span class="co">#&gt; [1] -0.05697053 -0.95784939  0.59106191  0.17310487  1.39978336</span></span>
 <span id="cb92-4"><a href="#cb92-4"></a><span class="fu">dnorm</span>(<span class="dv">0</span>)        <span class="co"># Density at x=0</span></span>
 <span id="cb92-5"><a href="#cb92-5"></a><span class="co">#&gt; [1] 0.3989423</span></span>
 <span id="cb92-6"><a href="#cb92-6"></a><span class="fu">pnorm</span>(<span class="fl">1.96</span>)     <span class="co"># P(X ≤ 1.96)</span></span>
