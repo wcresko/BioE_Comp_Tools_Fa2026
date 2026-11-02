@@ -28,15 +28,13 @@ The course book goes deeper on everything in this lecture. Read before or after 
 
 -   [Ch. 16: High-Performance Computing with Talapas](../book/chapters/16-hpc-talapas.html)
 -   [Ch. 17: Parallel Computing in R](../book/chapters/17-parallel-computing.html)
--   *Environments:* [Ch. 12, Virtual Environments](../book/chapters/12-python-programming.html#sec-py-venv) · [Ch. 16, The Three Software Layers](../book/chapters/16-hpc-talapas.html#sec-software-layers)
 -   *Reference:* [App. G: SLURM Command Reference](../book/chapters/appendix-G-slurm.html)
 
 ## Goals for today
 
 -   Basics of working with Talapas
 -   The SLURM job scheduler
--   Environments: giving every project its own toolbox (`venv`, `conda`, `renv`)
--   Software on the cluster: modules, your environments on top, and a word on containers
+-   Software on the cluster: modules today - your own environments next week (L09)
 -   Monitoring your jobs
 -   Running R (`Rscript`) and Python (`python3`) scripts as batch jobs
 
@@ -333,7 +331,7 @@ Rscript my_analysis.R
 # Load required modules
 
 module load python3/3.11.4          # or: module load miniconda3/20240410
-                                    #     conda activate my_env
+                                    #     conda activate my_env   (environments: L09)
 
 # Run your program
 
@@ -368,7 +366,7 @@ Rscript plot_stats.R results/fasta_stats.tsv results/fasta_stats.png
 
 ## Running example: the stickleback summary as a batch job
 
-Put the Week 7 code in a script, `stickle_means.R`, that writes `results/gene_means.tsv`, then wrap it in a Slurm script:
+Put the Week 6 code in a script, `stickle_means.R`, that writes `results/gene_means.tsv`, then wrap it in a Slurm script:
 
 ``` bash
 #!/bin/bash
@@ -446,56 +444,6 @@ for path in map(Path, sys.argv[1:]):                 # every file given on the c
 Test on a **tiny input on the login node** first (`python3 fasta_stats.py small.fasta`), then submit: `sbatch run_pipeline.sh`. Output and errors land in `output_JOBID.log` and `error_JOBID.log`.
 :::
 
-# Environments: giving every project its own toolbox
-
-## Why environments?
-
-::: incremental
-- By default your computer has **one** R and **one** Python - and every project installs packages into it
-- Project A needs pandas 2.2; reproducing last year's analysis needs pandas 1.5. Upgrade for one and you silently break the other - "**dependency hell**"
-- From the bootcamp: "which Python did that install go into?" is the #1 Python headache
-- An **environment** is an isolated set of packages (and an interpreter) for **one project**
-- Three payoffs:
-  - projects cannot break each other
-  - you can **record** exactly which versions produced a result
-  - a collaborator - or Talapas - can **rebuild** the same setup from that record
-:::
-
-## The three environment tools you will meet
-
-| Tool | For | Environments live... | The record you share |
-|---|---|---|---|
-| **`venv`** (+ `pip`) | Python | in the project folder (`.venv/`) | `requirements.txt` |
-| **`conda`** / `mamba` | Python *plus* compiled tools (`samtools`, even R) | centrally, by name (`conda env list`) | `environment.yml` |
-| **`renv`** | R | in the project folder | `renv.lock` |
-
-::: incremental
-- **`venv`** is our default on your laptop - you have used it since the bootcamp
-- **`conda`** is the standard in bioinformatics and on **Talapas** (today!) - one tool for *any* software
-- **`renv`** for R projects: `renv::init()` once, `renv::snapshot()` to record, `renv::restore()` to rebuild
-- Whichever you use: **commit the record file to Git - never the environment itself**
-:::
-
-## `conda` in practice - on your own computer
-
-``` bash
-# Install once: Miniforge, from https://conda-forge.org/download/
-
-conda create -n rnaseq python=3.12 pandas matplotlib   # make a named environment - once
-conda activate rnaseq                                  # turn it on - every session
-conda install -c bioconda samtools                     # compiled genomics tools too!
-conda env export > environment.yml                     # record it, to rebuild anywhere
-conda deactivate                                       # turn it off
-```
-
-::: incremental
-- Environments are **named and central**, not per-folder: `conda env list` shows them all
-- Packages come from **channels**: `conda-forge` (general) and `bioconda` (genomics)
-- Install **Miniforge**, not Anaconda - Anaconda's default channel requires a paid license at organizations like UO; Miniforge defaults to the free `conda-forge`
-- Modern conda uses the fast **libmamba** solver by default; `mamba` is its older drop-in cousin, still seen in cluster docs
-- In a few slides the *same* `environment.yml` rebuilds this environment on Talapas: `conda env create -f environment.yml`
-:::
-
 ## Three ways to get software onto Talapas
 
 | Layer | What it is | Best for |
@@ -505,49 +453,10 @@ conda deactivate                                       # turn it off
 | **Containers (Apptainer)** | one image file holding an entire OS + software stack | reproducing published pipelines; moving between clusters |
 
 ::: incremental
-- Most real projects use the first **two together**: `module load` the interpreter, then activate your own environment - exactly the laptop workflow from the slides above, now on the cluster
+- Most real projects use the first **two together**: `module load` the interpreter, then activate your own environment on top - next Monday (L09) is devoted to exactly that
 - Modules are read-only and their versions change over time - that is *why* you keep your own environment on top
 - Containers are the strongest reproducibility guarantee; we won't need them in this course - see [Ch. 16](../book/chapters/16-hpc-talapas.html#sec-software-layers)
-:::
-
-## R and Python packages on Talapas
-
-::: panel-tabset
-### R
-
-``` bash
-module load R/4.3.3
-R                                   # interactive, on an interactive node
-```
-
-``` r
-install.packages("tidyverse")       # goes to your personal library in ~/R/ - once
-library(tidyverse)                  # every session / every script
-```
-
--   Modules give you R itself; **you** install packages into your home directory
--   For a reproducible project, `renv::init()` records exact package versions in the project folder
-
-### Python
-
-``` bash
-module load miniconda3/20240410
-
-# Best: rebuild the environment you recorded on your laptop (slides above)
-conda env create -f environment.yml      # once
-conda activate rnaseq                    # every session / job
-
-# or create one from scratch on the cluster:
-conda create -n my_env python=3.11 pandas matplotlib biopython
-
-# or, with the plain python3 module and a virtual environment:
-module load python3/3.11.4
-python3 -m venv ~/envs/my_env && source ~/envs/my_env/bin/activate
-```
-
--   `conda` (with the **bioconda** channel) installs compiled bioinformatics tools too - `conda install -c bioconda samtools`
--   Put the same `module load` + `conda activate` lines **inside your `sbatch` script** - every batch job starts with a clean shell
--   Conda environments live in your **home directory** and grow large: `conda env list` to see them, `conda clean -a` to reclaim cache space, and mind your quota
+- Today we lean on the **modules**; environments get the full hour next week
 :::
 
 ## Understanding SLURM Directives
@@ -583,7 +492,7 @@ python3 -m venv ~/envs/my_env && source ~/envs/my_env/bin/activate
 module load cuda/12.4
 module load miniconda3/20240410
 
-# Activate your conda environment
+# Activate your conda environment (environments: L09)
 
 conda activate my_ml_env
 

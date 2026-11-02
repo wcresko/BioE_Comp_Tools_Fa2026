@@ -5,7 +5,98 @@ title: "Homework 2 - Computational Tools for Bioengineers 2026"
 ## Due: Submit your work via Canvas by the end of the day (midnight) on Monday, November 30th, 2026.
 
 ::: callout-note
-**Homework 2 will be assigned on Monday, November 16, 2026.** The full directions, learning objectives, and data set will be posted here at that time. It will build on the R/Python, data wrangling, and visualization material from Weeks 5-8.
+**Assigned Monday, November 16, 2026** - and posted early so you can plan ahead. Parts 1 and 2 use material you already have (Weeks 5-7); Part 3 uses the Week 8 lecture (Talapas); Part 4 uses the Week 9 lecture on software environments (Nov 23). Do the parts in order as the lectures land, and the whole assignment stays comfortable.
 :::
 
-Until then, see [Homework 1](HW1_2026.qmd) and the [Term Project](Term_Project.qmd) for the format these assignments follow.
+## Learning Objectives
+
+By completing this homework, you will demonstrate that you can:
+
+-   Write a complete, re-runnable analysis script in R or Python that reads, reshapes, summarizes and visualizes a real dataset
+-   Author a **Quarto report** in which the prose, code, figures and even the numbers in your sentences regenerate from the data on every render
+-   Create and **record** a software environment (`environment.yml`), and rebuild it from that record on **Talapas**
+-   Run your analysis on a compute node via a **SLURM batch script**, and bring the results home
+-   Assemble all of the above into one folder that another scientist could re-run from scratch
+
+## Background
+
+This is the full loop of modern computational science, in miniature: analyze locally, document reproducibly, scale to the cluster, and package it so it travels. You will use the course stickleback RNA-seq dataset (`Stickle_RNAseq.tsv`: 80 fish, 2 host genotypes × 2 microbiota treatments, 600 genes). Everything you need appeared in Lectures 05-09, the Week 6 companion notebooks, and Exercises 6-9 - this assignment asks you to put the pieces together *yourself*. The term project (due December 11) follows exactly this shape, so treat HW2 as its dress rehearsal.
+
+## Part 1: The analysis script
+
+### Task 1.1: Set up the project
+
+Create a clean project folder with the course layout (`data/`, `scripts/`, `results/`, `logs/`), and put `Stickle_RNAseq.tsv` in `data/`.
+
+### Task 1.2: Write `scripts/analyze_stickleback.R` (or `.py`)
+
+Your script must run top to bottom with `Rscript` / `python3` from the project root, and:
+
+1.  Read the dataset and reshape it to **long** format (one row per fish × gene)
+2.  Choose **four genes** (not Gene1-Gene4!) and justify your choice in a comment - e.g., the four most variable genes, or the four with the largest genotype difference
+3.  Write a per-group summary table (mean, median and sd of counts per genotype × microbiota group, for your four genes) to `results/`
+4.  Compute the mean and variance of every one of the 600 genes and write that table to `results/`
+5.  Save **two figures** to `results/` as SVG *and* 300-dpi PNG:
+    -   the faceted violin-plus-points panel of your four genes (the Lecture 06 "destination figure")
+    -   the mean-variance plot of all 600 genes, on log scales, with the variance-equals-mean line
+6.  Fail politely: check that the input file exists and exit with a non-zero status if not
+
+## Part 2: The Quarto report
+
+### Task 2.1: Author `report.qmd`
+
+Write a short (1-2 page) report around your analysis, with:
+
+-   A YAML header (title, your name, `format: html`) and a `setup` chunk
+-   **Inline code** so the fish count, gene count, and your four gene names in the prose come from the data, not your keyboard
+-   Both figures as **labelled chunks** with captions, each **cross-referenced** from the text (`@fig-...`)
+-   One displayed **LaTeX equation** (for example, the standard error or the Poisson mass function you are comparing the mean-variance plot against)
+-   A short *Methods* paragraph stating where the analysis ran and naming the two files that make it reproducible (`environment.yml`, your `.sbatch` script)
+
+### Task 2.2: Render it cleanly
+
+Restart R/Python, clear everything, and render from scratch. A report that only renders because of leftovers in your console is not reproducible.
+
+## Part 3: To the cluster
+
+### Task 3.1: Transfer the project
+
+Copy your project folder to Talapas (OnDemand upload, `scp`, or `rsync`). Raw data to `data/`, nothing into `results/` - the cluster will fill that.
+
+### Task 3.2: Write `scripts/run_analysis.sbatch`
+
+A SLURM batch script with sensible directives (`--job-name`, `--account`, `--partition`, `--time`, `--mem`, and log files into `logs/`) that runs your Part 1 script on a compute node. Request only what this small job needs - note in a comment why you chose your `--time` and `--mem`.
+
+## Part 4: The environment that makes it travel
+
+### Task 4.1: Create and record the environment (laptop)
+
+Create a conda environment containing exactly what your script needs, and record it portably:
+
+``` bash
+conda env export --from-history | sed '/prefix:/d' > environment.yml
+```
+
+### Task 4.2: Rebuild it on Talapas and run the job
+
+Rebuild from the file (`module load miniconda3`, `conda env create -f environment.yml`), add the `module load` + `conda activate` lines **inside** your sbatch script, submit, and confirm from the SLURM log that the job ran on a compute node inside your environment. Bring `results/` and the log back to your laptop and re-render your report against the cluster-produced results.
+
+*(Using R for Part 1? You may instead pin your packages with `renv` and load the cluster's R module - say so in your Methods paragraph. The conda route is still required for Task 4.1, with your four favorite Python packages, so you have practiced it.)*
+
+## What to submit (one zip on Canvas)
+
+```
+hw2_yourname/
+├── report.qmd  +  report.html      # Part 2, rendered from the cluster results
+├── scripts/analyze_stickleback.R   # or .py        (Part 1)
+├── scripts/run_analysis.sbatch     # Part 3
+├── environment.yml                 # Part 4
+├── logs/                           # the SLURM .out/.err from your successful run
+└── results/                        # the tables and figures your job produced
+```
+
+**What we grade (30% of course grade):** the script runs top-to-bottom (8%); the report renders cleanly with working inline code and cross-references (8%); the batch job ran successfully on Talapas with sensible resource requests (7%); the environment record rebuilds and is actually used by the job (5%); organization and professionalism (2%).
+
+::: callout-tip
+Stuck? Ex 6-9 walk through every individual step; the Week 6 companion notebooks and working scripts on the [Examples page](../Examples.qmd#week-6) cover Part 1; and office hours are Friday 11:00-12:00 in the KC2 Computational Suite.
+:::

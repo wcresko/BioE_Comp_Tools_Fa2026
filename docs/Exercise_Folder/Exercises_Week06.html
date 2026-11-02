@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>Week 6 Exercises - Data Frames and First Plots – Comp Tools Bioengineers F26</title>
+<title>Week 6 Exercises - Data Frames, Wrangling and Figures – Comp Tools Bioengineers F26</title>
 <style>
 /* Default styles provided by pandoc.
 ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
@@ -151,7 +151,7 @@ ul.task-list li input[type="checkbox"] {
 
 <header id="title-block-header" class="quarto-title-block default">
 <div class="quarto-title">
-<h1 class="title">Week 6 Exercises - Data Frames and First Plots</h1>
+<h1 class="title">Week 6 Exercises - Data Frames, Wrangling and Figures</h1>
 </div>
 
 
@@ -168,18 +168,22 @@ ul.task-list li input[type="checkbox"] {
 </header>
 
 
-<p>Short, <strong>ungraded</strong> practice tasks - about 30 minutes. Companion reading: <a href="../book/chapters/11-r-programming.html">Ch. 11</a>, <a href="../book/chapters/12-python-programming.html">Ch. 12</a>, and <a href="../book/chapters/13-data-visualization.html">Ch. 13</a>. HW1 is out this week; these tasks are direct warm-ups for it.</p>
+<p>Short, <strong>ungraded</strong> practice tasks - about 40 minutes. Companion reading: <a href="../book/chapters/11-r-programming.html">Ch. 11</a>, <a href="../book/chapters/12-python-programming.html">Ch. 12</a>, <a href="../book/chapters/13-data-visualization.html">Ch. 13</a>, and <a href="../book/chapters/14-data-wrangling.html">Ch. 14</a>. HW1 is out this week and these tasks are direct warm-ups for it; your <strong>project proposal is due Monday</strong> - task 14 is its skeleton.</p>
 <ol type="1">
 <li>Read <code>Stickle_RNAseq.tsv</code> into R with <code>read_tsv()</code> and convert <code>Genotype</code> and <code>Microbiota</code> to factors.</li>
-<li>Make a histogram of <code>Gene1</code> counts with <code>ggplot(stickle, aes(x = Gene1)) + geom_histogram()</code>.</li>
-<li>Make a boxplot of <code>Gene1</code> by <code>Genotype</code>. Add <code>aes(fill = Microbiota)</code> - what changes?</li>
-<li>Give the plot informative axis labels and a title with <code>labs()</code>.</li>
-<li>Change the look with a theme (<code>theme_minimal()</code> or <code>theme_classic()</code>).</li>
-<li>Save your figure to <code>output/figures/gene1_boxplot.png</code> with <code>ggsave()</code> and open the file to check it.</li>
-<li>Compute the mean of <code>Gene1</code> for each of the four Genotype x Microbiota groups with <code>group_by()</code> and <code>summarize()</code>.</li>
-<li>Write that summary table to <code>output/tables/gene1_group_means.csv</code> with <code>write_csv()</code>.</li>
-<li>Repeat the histogram in Python (<code>stickle["Gene1"].plot.hist()</code> or matplotlib) - the point is to see how the ideas transfer, not to master matplotlib.</li>
-<li>Put tasks 1-8 in a script <code>scripts/week06.R</code>, restart R, and run it top to bottom from a clean session.</li>
+<li>Is this table tidy? In one or two sentences, say why or why not for the question “how does expression vary across genes?”</li>
+<li>Reshape it long with <code>pivot_longer(cols = starts_with("Gene"), names_to = "gene", values_to = "count")</code>. How many rows do you expect (80 fish x 600 genes), and how many do you get?</li>
+<li>From the long table, <code>filter()</code> to just <code>Gene1</code> through <code>Gene5</code> (hint: <code>gene %in% paste0("Gene", 1:5)</code>).</li>
+<li>Add a log-transformed column with <code>mutate(log_count = log10(count + 1))</code>. Why the <code>+ 1</code>?</li>
+<li>For those five genes, compute mean and standard deviation of <code>log_count</code> per gene and genotype with <code>group_by()</code> and <code>summarize()</code>; write the table to <code>output/tables/gene_summary.csv</code> with <code>write_csv()</code>.</li>
+<li>Plot the five genes as boxplots of <code>log_count</code> by gene, filled by <code>Genotype</code> - one <code>ggplot()</code> call from the long table.</li>
+<li>Give the plot informative axis labels and a title with <code>labs()</code>, and change the look with a theme (<code>theme_minimal()</code> or <code>theme_classic()</code>).</li>
+<li>Upgrade it the lecture’s way: swap <code>geom_boxplot()</code> for <code>geom_violin()</code> plus jittered points, and add <code>scale_fill_viridis_d()</code>.</li>
+<li>Save your figure to <code>output/figures/gene_panel.png</code> with <code>ggsave()</code> and open the file to check it.</li>
+<li>Do task 3 in Python with <code>stickle.melt(...)</code> and confirm the row count matches.</li>
+<li>Put tasks 1-10 in a script <code>scripts/week06.R</code>, restart R, and run it top to bottom from a clean session.</li>
+<li><strong>Self-study checkpoint</strong> (this week’s at-home half): run the four companion notebooks on the <a href="../Examples.html#week-6">Examples page</a> - part 1 (files, distributions, base graphics) and part 2 (control flow, tidyverse, figure gallery). Stretch: write <code>cv &lt;- function(x) sd(x) / mean(x)</code>, test it on a vector where you know the answer, then use it inside <code>summarize()</code>.</li>
+<li><strong>For your term project (proposal due Monday!)</strong>: write down, in three sentences, what your dataset is, the one question you will ask, and which steps will happen at the shell vs.&nbsp;in R/Python vs.&nbsp;on Talapas. That is the skeleton of your proposal.</li>
 </ol>
 
 

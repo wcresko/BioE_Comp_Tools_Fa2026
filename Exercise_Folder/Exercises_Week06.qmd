@@ -1,16 +1,20 @@
 ---
-title: "Week 6 Exercises - Data Frames and First Plots"
+title: "Week 6 Exercises - Data Frames, Wrangling and Figures"
 ---
 
-Short, **ungraded** practice tasks - about 30 minutes. Companion reading: [Ch. 11](../book/chapters/11-r-programming.html), [Ch. 12](../book/chapters/12-python-programming.html), and [Ch. 13](../book/chapters/13-data-visualization.html). HW1 is out this week; these tasks are direct warm-ups for it.
+Short, **ungraded** practice tasks - about 40 minutes. Companion reading: [Ch. 11](../book/chapters/11-r-programming.html), [Ch. 12](../book/chapters/12-python-programming.html), [Ch. 13](../book/chapters/13-data-visualization.html), and [Ch. 14](../book/chapters/14-data-wrangling.html). HW1 is out this week and these tasks are direct warm-ups for it; your **project proposal is due Monday** - task 14 is its skeleton.
 
 1.  Read `Stickle_RNAseq.tsv` into R with `read_tsv()` and convert `Genotype` and `Microbiota` to factors.
-2.  Make a histogram of `Gene1` counts with `ggplot(stickle, aes(x = Gene1)) + geom_histogram()`.
-3.  Make a boxplot of `Gene1` by `Genotype`. Add `aes(fill = Microbiota)` - what changes?
-4.  Give the plot informative axis labels and a title with `labs()`.
-5.  Change the look with a theme (`theme_minimal()` or `theme_classic()`).
-6.  Save your figure to `output/figures/gene1_boxplot.png` with `ggsave()` and open the file to check it.
-7.  Compute the mean of `Gene1` for each of the four Genotype x Microbiota groups with `group_by()` and `summarize()`.
-8.  Write that summary table to `output/tables/gene1_group_means.csv` with `write_csv()`.
-9.  Repeat the histogram in Python (`stickle["Gene1"].plot.hist()` or matplotlib) - the point is to see how the ideas transfer, not to master matplotlib.
-10. Put tasks 1-8 in a script `scripts/week06.R`, restart R, and run it top to bottom from a clean session.
+2.  Is this table tidy? In one or two sentences, say why or why not for the question "how does expression vary across genes?"
+3.  Reshape it long with `pivot_longer(cols = starts_with("Gene"), names_to = "gene", values_to = "count")`. How many rows do you expect (80 fish x 600 genes), and how many do you get?
+4.  From the long table, `filter()` to just `Gene1` through `Gene5` (hint: `gene %in% paste0("Gene", 1:5)`).
+5.  Add a log-transformed column with `mutate(log_count = log10(count + 1))`. Why the `+ 1`?
+6.  For those five genes, compute mean and standard deviation of `log_count` per gene and genotype with `group_by()` and `summarize()`; write the table to `output/tables/gene_summary.csv` with `write_csv()`.
+7.  Plot the five genes as boxplots of `log_count` by gene, filled by `Genotype` - one `ggplot()` call from the long table.
+8.  Give the plot informative axis labels and a title with `labs()`, and change the look with a theme (`theme_minimal()` or `theme_classic()`).
+9.  Upgrade it the lecture's way: swap `geom_boxplot()` for `geom_violin()` plus jittered points, and add `scale_fill_viridis_d()`.
+10. Save your figure to `output/figures/gene_panel.png` with `ggsave()` and open the file to check it.
+11. Do task 3 in Python with `stickle.melt(...)` and confirm the row count matches.
+12. Put tasks 1-10 in a script `scripts/week06.R`, restart R, and run it top to bottom from a clean session.
+13. **Self-study checkpoint** (this week's at-home half): run the four companion notebooks on the [Examples page](../Examples.qmd#week-6) - part 1 (files, distributions, base graphics) and part 2 (control flow, tidyverse, figure gallery). Stretch: write `cv <- function(x) sd(x) / mean(x)`, test it on a vector where you know the answer, then use it inside `summarize()`.
+14. **For your term project (proposal due Monday!)**: write down, in three sentences, what your dataset is, the one question you will ask, and which steps will happen at the shell vs. in R/Python vs. on Talapas. That is the skeleton of your proposal.

@@ -615,9 +615,9 @@ $ mkdir -p ~/Rlibs
 $ echo 'R_LIBS_USER=~/Rlibs' >> ~/.Renviron
 ```
 
-To make a project reproducible, record the exact package versions with **renv**: `renv::init()` in the project, `renv::snapshot()` to write `renv.lock`, and `renv::restore()` on a fresh clone to reinstall the same versions. Commit `renv.lock` (not the library itself) to Git. For Python the equivalent is a conda environment (`module load miniconda3/20240410`, `conda create -n myenv python=3.12 numpy pandas`, `conda activate myenv`) or a `venv`; many bioinformatics tools are one `conda install` away thanks to the Bioconda channel [@gruning2018bioconda]. Either way, export the environment (`conda env export > environment.yml`) and version-control the file. Activate the environment inside the job script, exactly as you load modules.
+To make a project reproducible, record the exact package versions with **renv**: `renv::init()` in the project, `renv::snapshot()` to write `renv.lock`, and `renv::restore()` on a fresh clone to reinstall the same versions. Commit `renv.lock` (not the library itself) to Git. For Python the equivalent is a conda environment (`module load miniconda3/20240410`, `conda create -n myenv python=3.12 numpy pandas`, `conda activate myenv`) or a `venv`; many bioinformatics tools are one `conda install` away thanks to the Bioconda channel [@gruning2018bioconda]. Either way, export the environment - ideally `conda env export --from-history`, which records only the packages you asked for (@sec-conda-in-depth) - and version-control the file. Activate the environment inside the job script, exactly as you load modules.
 
-The `environment.yml` file is also how an environment *moves to the cluster*. If you recorded your project's environment on your laptop with `conda env export > environment.yml`, you do not recreate it on Talapas from memory---you rebuild it from the file:
+The `environment.yml` file is also how an environment *moves to the cluster*. If you recorded your project's environment on your laptop with `conda env export --from-history > environment.yml`, you do not recreate it on Talapas from memory---you rebuild it from the file:
 
 ```bash
 $ module load miniconda3/20240410
@@ -647,6 +647,83 @@ Inside a batch script the last line becomes `apptainer exec /path/to/image.sif R
 - Just need R or Python and a few packages? Modules plus a per-user library (layers 1 + 2), pinned with `renv` or an `environment.yml`.
 - Reproducing a published pipeline or moving between clusters? A container (layer 3), usually run with a module-provided `apptainer`.
 - Working from a workflow manager (@sec-workflow-managers)? Snakemake and Nextflow can create conda environments or pull containers per step automatically.
+:::
+
+### Conda in Depth {#sec-conda-in-depth}
+
+Conda earns its place as the course default, so it is worth understanding properly. Two ideas explain almost everything about how it behaves.
+
+**An environment is a folder.** Creating an environment builds a directory of software; *activating* it simply puts that directory first on your shell's `PATH`, so its copies of `python`, `R`, or `samtools` answer first; *deactivating* removes it again. There is no magic beyond `PATH` manipulation---which is also why a misbehaving environment is never worth debugging: delete it (`conda env remove -n NAME`) and recreate it from its record file in minutes. When a tool seems to be the wrong version, the first question is always *which copy answered?* --- `which python3` or `which samtools` tells you.
+
+**Packages come from channels.** A channel is an online repository of pre-built software. The two that matter here are **conda-forge**, the community channel for general scientific software, and **bioconda**, which distributes thousands of pre-compiled bioinformatics tools [@gruning2018bioconda]---`samtools`, `bwa`, `gatk4`, `stacks`, and far more, each one `conda install` away with no compiling. Configure them once, with *strict priority* so each package resolves from one channel consistently:
+
+```bash
+$ conda config --add channels bioconda
+$ conda config --add channels conda-forge
+$ conda config --set channel_priority strict
+```
+
+::: {.callout-warning title="Install Miniforge, not Anaconda"}
+Several installers provide conda. **Anaconda** is the company's ~5 GB distribution, and both it and **Miniconda** default to Anaconda's commercial channel, which requires a paid license at organizations like UO. **Miniforge** is the lean community installer that defaults to the free conda-forge channel---it is the one to install, on your laptop and anywhere else.
+:::
+
+**The lifecycle.** One environment per project, named for the project, with the Python version pinned from the start:
+
+```bash
+$ conda create -n rnaseq python=3.12 pandas matplotlib samtools   # once
+$ conda activate rnaseq                                           # every session
+$ conda install bcftools                 # add packages later (conda first, pip after)
+$ conda list                             # what is in here, at which versions?
+$ conda env list                         # all environments; * marks the active one
+$ conda env remove -n rnaseq             # environments are disposable by design
+```
+
+Prefer conda packages over pip within an environment, and install pip stragglers *last*: conda packages installed after pip packages occasionally tangle dependencies, and the clean fix is always to recreate rather than repair.
+
+**A portable record.** A plain `conda env export` lists all ~200 resolved dependencies, and such a file written on a Mac often fails to rebuild on Linux, because low-level dependencies differ by operating system. The portable form records only what you asked for, and drops the machine-specific `prefix:` line---this is the exact form the Talapas documentation recommends for sharing:
+
+```bash
+$ conda env export --from-history | sed '/prefix:/d' > environment.yml
+```
+
+You can equally write one from scratch; it is just a short text file:
+
+```yaml
+name: rnaseq
+channels:
+  - bioconda
+  - conda-forge
+dependencies:
+  - python=3.12
+  - pandas
+  - matplotlib
+  - samtools
+```
+
+Keep an `environment.yml` in each project's repository, next to the code: it is simultaneously your collaborator instructions, your Talapas deployment recipe, and the environment section of your methods.
+
+**Cluster particulars.** Three habits specific to Talapas. If the cluster's conda module is older and a `conda create` grinds for minutes, add `--solver=libmamba`---the fast solver that modern conda uses by default (the standalone `mamba` command, which you will still see in documentation, was its drop-in predecessor). RACS recommends adding a **date tag** to environment names on the cluster (`rnaseq-20261123`) so successive rebuilds of a pipeline's environment stay distinguishable. And because environments are large and land in your quota-limited home directory by default, `conda create --prefix /projects/yourPIRG/.../envs/NAME` places one in project space instead, while `conda clean -a` reclaims the download cache anywhere.
+
+### The Environment-Tool Ecosystem {#sec-env-ecosystem}
+
+Conda is not the only environment framework, and you will meet the others constantly in tutorials, collaborators' repositories, and cluster documentation. They fall into two families: tools that manage **Python packages only**, and tools that manage the **full conda ecosystem** of compiled software. Knowing which family a tool belongs to tells you most of what you need, and the dividing line is practical: if a workflow needs `samtools` or `bwa`, only the conda family can provide it---no amount of `pip install` produces a working aligner.
+
+| Tool | What it manages | Installs from | Compiled tools? | One-line verdict |
+|:---|:---|:---|:---|:---|
+| **conda** | Python/R + any compiled software | conda channels | **Yes** | The default for genomics and this course |
+| **mamba** | Same (drop-in conda replacement) | conda channels | **Yes** | Mostly obsolete now that conda uses its solver |
+| **micromamba** | Same, as one tiny static binary | conda channels | **Yes** | Conda for containers and CI pipelines |
+| **pixi** | Conda packages, per *project* | conda channels + PyPI | **Yes** | The modern project-first take on conda |
+| **venv** | Python packages only | PyPI (via pip) | No | Built into Python; fine for pure-Python work |
+| **uv** | Python packages, versions, projects | PyPI | No | Very fast modern replacement for venv + pip |
+| **renv** | R packages, per project | CRAN/Bioconductor | No | The R-world analogue; composes with conda |
+
+: The environment-tool ecosystem at a glance {#tbl-env-ecosystem}
+
+A few notes beyond the table. **venv** (@sec-py-venv) ships with Python itself: an environment lives *inside* the project folder as `.venv/`, borrows your existing interpreter, and records itself in `requirements.txt`---when a Python tutorial says "create a virtual environment," this is what it means. **micromamba** is a single self-contained binary needing no base environment or installer, which makes it the standard way to get conda packages inside Docker/Apptainer images and CI pipelines. **uv** is a Rust reimplementation of the whole venv-plus-pip toolchain, routinely 10--100× faster, with real project management (`pyproject.toml` plus a lockfile); its limit is the family line---PyPI only. **pixi**, from the mamba developers, installs the *same packages from the same channels* as conda but organizes them per project, with a `pixi.toml` and an exact lockfile in the repository; it is increasingly common in bioinformatics repositories, so when you meet a repo with a `pixi.toml`, `pixi install` in that directory rebuilds the authors' exact environment. And **renv** (above) manages R packages per project---conda can supply a pinned R itself on a cluster, and renv pins the packages inside it, so the two compose rather than compete.
+
+::: {.callout-tip title="So which should you use?"}
+For this course and for genomics work generally: **conda via Miniforge**, because it is the only family that delivers bioconda's compiled tools, it is what Talapas provides, and the `environment.yml` loop runs through it. File the rest as vocabulary---venv or uv when a pure-Python project calls for them, micromamba if you containerize, pixi as the likely future shape of conda-style work.
 :::
 
 ## GPU Jobs {#sec-gpu-jobs}

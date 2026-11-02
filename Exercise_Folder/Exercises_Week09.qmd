@@ -1,16 +1,16 @@
 ---
-title: "Week 9 Exercises - Quarto, LaTeX Math, and AI Assistants"
+title: "Week 9 Exercises - Software Environments, Laptop to Talapas"
 ---
 
-Short, **ungraded** practice tasks - about 30 minutes. Companion reading: [Ch. 18](../book/chapters/18-quarto-documents.html), [Ch. 19](../book/chapters/19-latex-basics.html), and [Ch. 20](../book/chapters/20-ai-assisted-coding.html). These tasks build the skills your final project write-up needs.
+Short, **ungraded** practice tasks - about 40 minutes, half on your laptop and half on Talapas. Companion reading: the environments sections of [Ch. 12](../book/chapters/12-python-programming.html#sec-py-venv) and [Ch. 16](../book/chapters/16-hpc-talapas.html#sec-software-layers). These tasks set up the toolchain your term project should finish inside.
 
-1.  In Positron, create a new Quarto document (Command Palette → **Quarto: New Document**), give it a title and your name in the YAML header, and render it to HTML (`Cmd/Ctrl+Shift+K`).
-2.  Add an R code chunk that reads the stickleback data and prints `dim(stickle)`. Render again.
-3.  Add a chunk that makes one ggplot figure, with a `label` and `fig-cap` chunk option, and render.
-4.  Hide the code of the figure chunk with `echo: false` - the figure should remain.
-5.  Add inline math (a mean, `$\bar{x}$`) and one display equation (e.g., the standard error) between `$$` fences.
-6.  Add a callout block (`::: {.callout-note}`) with a note to your future self.
-7.  Cross-reference your figure from the text with `@fig-...`.
-8.  Restart R, clear everything, and render one more time: does the document run cleanly from scratch? (If not, something lives only in your console - fix that.)
-9.  If you have TinyTeX installed, switch `format: html` to `format: pdf` and render. Read the error log if it fails - what is it asking for?
-10. Take one error message you hit this week, paste it into an AI assistant, and ask for an explanation. Then *verify* the explanation against the documentation. Where was it right, incomplete, or wrong?
+1.  Make your first **conda environment** on your laptop (no conda yet? Install **Miniforge** - the link and the why are in [Ch. 12](../book/chapters/12-python-programming.html#sec-py-venv)): `conda create -n rnaseq python=3.12 pandas matplotlib`, then `conda activate rnaseq`.
+2.  Run `which python3` before and after `conda activate rnaseq` - where does it point each time, and why?
+3.  Install a *compiled* tool that pip could never give you: `conda install -c bioconda samtools`, then `samtools --version`. That is the conda difference.
+4.  Record the environment: `conda env export --from-history > environment.yml`. Open the file and skim what it captured - why is `--from-history` shorter than a full export?
+5.  Transfer `environment.yml` to Talapas (OnDemand upload or `scp`), then `module spider miniconda`, `module load` it, and run `conda env create -f environment.yml`.
+6.  `conda activate rnaseq` on Talapas and check `which python3` - you now have the *same* environment in both places, built from one text file.
+7.  Prove it travels into batch jobs: take last week's `hello.sbatch`, add `module load` miniconda, `conda activate rnaseq`, and `python3 -c "import pandas as pd; print(pd.__version__)"`, and resubmit. The pandas version in the log is your environment, running on a compute node.
+8.  A taste of `venv` (deactivate conda first): `python3 -m venv ~/scratch_env && source ~/scratch_env/bin/activate`, `pip install requests`, `pip freeze`. How does the record (`pip freeze`) compare to `environment.yml`?
+9.  A taste of `renv`: in a scratch R project run `renv::init()`, install one package, `renv::snapshot()`, and read the `renv.lock` it wrote. Same idea, R dialect.
+10. **For your term project**: create the project's own environment now, export its `environment.yml`, and keep it next to the project code. All remaining project computing happens inside it - and next week that folder goes under version control.
