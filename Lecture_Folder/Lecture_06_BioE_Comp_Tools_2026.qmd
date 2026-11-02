@@ -38,17 +38,23 @@ set.seed(2026)
 
 ## Goals for today
 
-- Data frames: creating, inspecting and summarizing them
+- Data frames:
+
+  - creating
+
+  - inspecting
+
+  - summarizing
 
 - Creating data sets using random draws
 
-- The tidyverse: the pipe `|>` and `pivot_longer()`
+- The Tidyverse
 
 - ggplot2: the grammar of graphics
 
-- A gallery of figures for bioengineering data
+- Example figures for bioengineering data
 
-## Where we are headed 1: a panel of figures
+## Example 1 - a panel of figures
 
 ```{r}
 #| label: fig-lec06-destination-panel
@@ -57,7 +63,7 @@ set.seed(2026)
 #| fig-width: 8
 #| fig-height: 4.8
 #| out-width: "62%"
-#| fig-cap: "**Figure 1. Four genes, every fish.** Read counts for Gene1-Gene4 across all 80 fish, split by host genotype and colored by microbiota treatment. Violins show each group's full distribution; each point is one fish."
+#| fig-cap: "**Read Counts of Four Genes.** RNA-seq read counts for Gene1-Gene4 in n = 80 threespine stickleback (20 fish per host genotype x microbiota combination), split by host genotype and colored by microbiota treatment. Violins show each group's full count distribution; each point is one fish, jitter-dodged to reduce overplotting. Panel y-axes are scaled independently."
 
 stickle_dest <- read_tsv("../Data_Folder/Stickle_RNAseq.tsv", show_col_types = FALSE)
 stickle_dest_long <- stickle_dest |>
@@ -75,9 +81,7 @@ stickle_dest_long |>
   theme_minimal(base_size = 12) + theme(legend.position = "top")
 ```
 
-- About 20 lines of R, starting from the raw TSV - by the end of today you can write every line
-
-## Where we are headed 2: all 600 genes at once
+## Example 2 - A range of 600 genes at once
 
 ```{r}
 #| label: fig-lec06-destination-meanvar
@@ -86,7 +90,7 @@ stickle_dest_long |>
 #| fig-width: 7
 #| fig-height: 4.6
 #| out-width: "55%"
-#| fig-cap: "**Figure 2. The mean-variance relationship for all 600 genes.** Each point is one gene, placed by the mean and the variance of its counts across the 80 fish, on log-log axes. The dashed line marks variance = mean, the expectation under Poisson sampling."
+#| fig-cap: "**The mean-variance relationship for all 600 genes.** Each point is one gene, placed by the mean and the variance of its read counts across the 80 fish, on log-log axes. The dashed line marks variance = mean, the expectation under Poisson sampling; nearly all genes fall above it, the overdispersion typical of RNA-seq counts."
 
 stickle_dest_long |>
   group_by(gene) |>
@@ -99,12 +103,9 @@ stickle_dest_long |>
   theme_minimal(base_size = 12)
 ```
 
-- The route to both figures, in order: **data frames** → **tidy reshaping** → the **grammar of graphics**
-- The ideas carry straight into your term project
+# Data frames
 
-# File types and data frames
-
-## File types in one slide (the full story is in this week's self-study)
+## Reading and writing files
 
 | Job | R | Python |
 |:-----------------------|:-----------------------|:-----------------------|
@@ -113,13 +114,21 @@ stickle_dest_long |>
 | Save a figure | `ggsave("results/fig.svg")` · `svg()` … `dev.off()` | `plt.savefig("results/fig.svg")` |
 | One column / rows by condition | `df$col` · `df[df$g == "A", ]` | `df["col"]` · `df[df["g"] == "A"]` |
 
-- Plain-text tables (CSV/TSV) in, derived results out: write into `results/`, never over anything in `data/` (raw data is read-only)
-- **Vector** figure formats (`.svg`, `.pdf`) scale forever - use them for papers; raster (`.png`) needs 300 dpi
+## Reading and writing files
+
+- Plain-text tables (CSV/TSV) in, derived results out:
+  - write into `results/`
+  - never over anything in `data/` (raw data is read-only)
+- **Vector** figure formats (`.svg`, `.pdf`) scale forever
+  - use them for papers
+  - raster (`.png`) needs 300 dpi
 - Every detail - formats, URLs, Excel, script checklists - is in the **Week 6 companion notebooks** (sections 2-4) and [Ch. 11](../book/chapters/11-r-programming.html)/[Ch. 12](../book/chapters/12-python-programming.html)
 
 ## Creating Data Frames in R and Python
 
-- Data can come from a file (last slide), or you can *generate* it with random draws - that's the next section
+- Data can come from a file, or you can *generate* it
+  - Directly or
+  - With random draws - that's the next section
 - For now, let's make a small dummy dataset by hand, to get used to dealing with data frames
 - Set up three variables (hydrogel_concentration, compression and conductivity) as vectors
 - In Python the data frame comes from **pandas** (`import pandas as pd`); it has the same idea - rows are samples, columns are variables
@@ -186,11 +195,13 @@ mydata.head(3)
 ### Notes
 
 - Now you have a hand-made data frame with row names
-- A data frame is a *list of equal-length vectors*: one name per column, one type per column
+- A data frame is a *list of equal-length vectors*:
+  - one name per column
+  - one type per column
 - Take a look at it in Positron's Variables pane, or open it in the **Data Explorer** (R and Python)
 :::
 
-## Running example: the stickleback table as a data frame
+## The stickleback table as a data frame
 
 ::: panel-tabset
 ### R
@@ -274,19 +285,23 @@ stickle[["Gene1", "Gene2", "Gene3"]].mean()
   - **Test your analysis first**: run it on data where you *know* the right answer, before trusting it on real data
   - **Build a null model**: what would the data look like if *nothing* were going on?
   - **Plan an experiment**: simulate it - how many samples before the effect you expect becomes visible?
+
+## Why draw random numbers?
 - Each named distribution is a different *data-generating machine*:
   - **uniform** - every value in a range equally likely (positions, backgrounds)
   - **normal** - measurements that scatter symmetrically around a mean (mass, OD, expression on a log scale)
   - **Poisson** - counts of events in a fixed window (sequencing reads, cells per field, spikes per second)
-- `set.seed()` (R) / `np.random.default_rng(seed)` (Python) make the draws **reproducible**: same seed, same "random" numbers
+- `set.seed()` (R) / `np.random.default_rng(seed)` (Python) make the draws **reproducible**: 
+  - same seed, same "random" numbers
+  - no seed, different "random" numbers each time
 
 ## The functions and their arguments
 
-| Distribution | R | Python (numpy generator) |
-|:-------------|:--------------------------|:--------------------------|
-| Uniform | `runif(n, min = 0, max = 100)` | `rng.uniform(0, 100, n)` |
-| Normal | `rnorm(n, mean = 50, sd = 10)` | `rng.normal(50, 10, n)` |
-| Poisson | `rpois(n, lambda = 5)` | `rng.poisson(5, n)` |
+| Distribution | R                              | Python (numpy generator) |
+|:-------------|:-------------------------------|:-------------------------|
+| Uniform      | `runif(n, min = 0, max = 100)` | `rng.uniform(0, 100, n)` |
+| Normal       | `rnorm(n, mean = 50, sd = 10)` | `rng.normal(50, 10, n)`  |
+| Poisson      | `rpois(n, lambda = 5)`         | `rng.poisson(5, n)`      |
 
 - The **first argument is always `n`**, how many draws you want
 - The remaining arguments are the distribution's **parameters** - the knobs on the machine:
@@ -303,7 +318,7 @@ stickle[["Gene1", "Gene2", "Gene3"]].mean()
 
 ```{r}
 #| label: fig-lec06-dist-gallery
-#| fig-cap: "2,000 draws each from the uniform, normal and Poisson distributions"
+#| fig-cap: "**Random draws from three workhorse distributions.** Histograms of n = 2,000 draws each from Uniform(0, 100), Normal(mean = 50, sd = 10) and Poisson(lambda = 5), generated with seed 2026 for reproducibility. The uniform spreads evenly across its range, the normal mounds symmetrically around its mean, and the Poisson yields discrete counts concentrated near lambda."
 #| fig-width: 10
 #| fig-height: 3.6
 #| out-width: "90%"
@@ -364,17 +379,17 @@ plt.savefig("results/distributions.svg")
 plt.show()
 ```
 
-![The figure this code draws (pre-rendered)](../images/Lec06_py_dist_gallery3.svg){width="80%"}
+
 
 ### Notes
 
 - Same machine, three settings: uniform spreads flat, normal mounds around its mean, Poisson is discrete counts piling near `lambda`
 - Base R saves differently from ggplot: *open a file device → plot → `dev.off()`* - forget `dev.off()` and the file is empty
 - `par(mfrow = c(1, 3))` splits the plotting device into panels; each `hist()` call fills the next one (`plt.subplots(1, 3)` hands Python the grid as an array of axes)
-- Change `n`, the parameters and `breaks` - this one figure is a little simulation lab (notebook sections 5-7)
+- Change `n`, the parameters and `breaks` - this one figure is a little simulation lab (notebook sections 8-10)
 :::
 
-# The tidyverse
+# The Tidyverse for Data Wrangling
 
 ## The tidyverse family of packages
 
@@ -390,7 +405,7 @@ Source: [tidyverse.org](https://www.tidyverse.org/)
 ## The tidyverse packages and their pandas counterparts
 
 | Package | Purpose | pandas / Python equivalent |
-|:--------------|:------------------------------------|:-------------------|
+|:-----------------|:----------------------------------|:------------------|
 | `dplyr` | Data manipulation (`filter`, `select`, `mutate`, `summarise`) | pandas methods |
 | `ggplot2` | Data visualization | `matplotlib`, `seaborn`, `plotnine` |
 | `tidyr` | Reshaping data (`pivot_longer`, `pivot_wider`, `separate`) | `melt`, `pivot` |
@@ -430,7 +445,9 @@ import pandas as pd
 :::
 
 ::: callout-note
-Read `|>` as **"and then"**. The older `%>%` pipe does the same thing. In pandas the dot does the same job - wrap the chain in `( )` so you can put each step on its own line.
+- Read `|>` as **"and then"**. 
+- The older `%>%` pipe does the same thing. 
+- In `pandas` the dot does the same job - wrap the chain in `( )` so you can put each step on its own line.
 :::
 
 ## The verbs, side by side
@@ -457,9 +474,10 @@ Read `|>` as **"and then"**. The older `%>%` pipe does the same thing. In pandas
 | `group_by()` + `summarise()` | `.groupby("col").agg(...)`           |
 :::
 
-- Five verbs cover most everyday wrangling; each takes a data frame and returns a data frame, which is what makes them chainable
+- Five verbs cover most everyday wrangling
+- Each takes a data frame and returns a data frame, which is what makes them chainable
 
-## Running example: wide to long, then summarize
+## Wide to long, then summarize
 
 ::: panel-tabset
 ### R
@@ -508,10 +526,9 @@ gene_means.query("gene == 'Gene1'")
 ```
 :::
 
-::: callout-tip
-Same data, two eras: `awk` gave us one gene's mean per group in Week 4; one `pivot_longer()` / `.melt()` now unlocks *every* gene at once. This is the payoff of tidy, long-format data.
-:::
-# ggplot2: the grammar of graphics
+
+
+# GGplot2: the grammar of graphics
 
 ## The grammar of graphics: a plot is a stack of layers
 
@@ -528,7 +545,7 @@ Source: Leland Wilkinson, *The Grammar of Graphics*, 1999
 
 ```{r}
 #| label: fig-lec07-build-1
-#| fig-cap: "Layer 1: every Gene1 count, jittered sideways so 80 fish don't overprint"
+#| fig-cap: "**Layer 1 - every observation, visible.** Gene1 read counts for all 80 fish by host genotype. Points are individual fish, jittered horizontally (width = 0.08) to prevent overplotting; no summaries are drawn yet."
 #| out-width: "55%"
 #| echo: false
 #| eval: true
@@ -575,7 +592,8 @@ plt.show()
 - `ggplot(data, aes(...))` declares the **mapping**: which column drives which visual channel
 - A **geom** draws it; `geom_jitter()` is `geom_point()` plus sideways noise
 - Nothing is styled yet - and it is already a readable figure
-- **The save-line convention**: every example in this deck ends by writing the figure to `results/` as an SVG - `ggsave()` for ggplot, `plt.savefig()` in Python (create the folder once: `dir.create("results")` / `Path("results").mkdir()`)
+- **The save-line convention**: 
+  every example in this deck ends by writing the figure to `results/` as an SVG - `ggsave()` for ggplot, `plt.savefig()` in Python
 :::
 
 ## Building a figure layer by layer: 2 - more aesthetics, more geoms
@@ -585,7 +603,7 @@ plt.show()
 
 ```{r}
 #| label: fig-lec07-build-2
-#| fig-cap: "Layer 2: map Microbiota to fill/color, and stack a violin under the points"
+#| fig-cap: "**Layer 2 - distributions and raw data together.** Gene1 read counts by host genotype, split by microbiota treatment (fill and color). Violins show each group's density; overlaid points are individual fish, jitter-dodged so the two treatments sit side by side within each genotype."
 #| out-width: "55%"
 #| echo: false
 #| eval: true
@@ -640,7 +658,7 @@ plt.show()
 
 ```{r}
 #| label: fig-lec07-build-3
-#| fig-cap: "Layers 3-5: one panel per gene, colorblind-safe viridis colors, real labels"
+#| fig-cap: "**Stickleback gut RNA-seq - the assembled panel.** Read counts for Gene1-Gene4 (one panel per gene, independent y-axes) by host genotype and microbiota treatment in all 80 fish. Violins show group distributions; points are individual fish; colors are from the colorblind-safe viridis palette."
 #| fig-width: 8
 #| fig-height: 5
 #| out-width: "60%"
@@ -656,8 +674,8 @@ stickle_long |>
   scale_fill_viridis_d(end = 0.7) + scale_color_viridis_d(end = 0.7) +
   facet_wrap(~ gene, scales = "free_y") +
   labs(x = "Host genotype", y = "Read count",
-       title = "Stickleback gut RNA-seq",
-       subtitle = "Each point is one fish; violins show the full distribution") +
+       title = "",
+       subtitle = "") +
   theme_minimal(base_size = 14) + theme(legend.position = "top")
 ```
 
@@ -713,13 +731,13 @@ plt.show()
 
 ## Common `ggplot2` geoms - each with an example from our data
 
-| Geom               | Purpose      | Data type               | seaborn equivalent  |
-|:---------------|:---------------|:------------------|:-------------------|
-| `geom_histogram()` | Histograms   | Single continuous       | `sns.histplot()`    |
-| `geom_boxplot()`   | Boxplots     | Continuous by category  | `sns.boxplot()`     |
-| `geom_point()`     | Scatterplots | Two continuous          | `sns.scatterplot()` |
-| `geom_smooth()`    | Trend lines  | Two continuous          | `sns.regplot()`     |
-| `geom_line()`      | Line plots   | Continuous over ordered | `sns.lineplot()`    |
+| Geom | Purpose | Data type | seaborn equivalent |
+|:-----------------|:-----------------|:------------------|:------------------|
+| `geom_histogram()` | Histograms | Single continuous | `sns.histplot()` |
+| `geom_boxplot()` | Boxplots | Continuous by category | `sns.boxplot()` |
+| `geom_point()` | Scatterplots | Two continuous | `sns.scatterplot()` |
+| `geom_smooth()` | Trend lines | Two continuous | `sns.regplot()` |
+| `geom_line()` | Line plots | Continuous over ordered | `sns.lineplot()` |
 | `geom_bar()` / `geom_col()` | Bar charts | Categorical counts / values | `sns.countplot()` / `sns.barplot()` |
 
 ::: callout-tip
@@ -733,7 +751,7 @@ The next six slides draw each one from the stickleback table. `facet_wrap(~ grou
 
 ```{r}
 #| label: fig-lec06-geom-hist
-#| fig-cap: "The distribution of Gene1 counts across the 80 fish"
+#| fig-cap: "**The distribution of Gene1 expression.** Histogram of Gene1 read counts across all 80 fish (30 bins). The right-skewed shape - many fish with low counts and a long tail of high expressors - is typical of RNA-seq count data."
 #| out-width: "55%"
 #| echo: false
 #| eval: true
@@ -784,7 +802,7 @@ plt.show()
 
 ```{r}
 #| label: fig-lec06-geom-box
-#| fig-cap: "Gene2 counts by genotype, split by microbiota treatment"
+#| fig-cap: "**Gene2 expression by genotype and microbiota.** Boxes show the median, interquartile range and 1.5 x IQR whiskers of Gene2 read counts per host genotype (n = 40 each), split by microbiota treatment (n = 20 per box); values beyond the whiskers are plotted as individual points."
 #| out-width: "55%"
 #| echo: false
 #| eval: true
@@ -843,7 +861,7 @@ plt.show()
 
 ```{r}
 #| label: fig-lec06-geom-point
-#| fig-cap: "Gene1 vs. Gene2 counts; each point is one fish, colored by genotype"
+#| fig-cap: "**Covariation of two genes.** Gene2 versus Gene1 read counts; each point is one of the 80 fish, colored by host genotype. Fish with jointly elevated counts suggest shared regulation - or simply deeper sequencing."
 #| out-width: "55%"
 #| echo: false
 #| eval: true
@@ -896,7 +914,7 @@ plt.show()
 
 ```{r}
 #| label: fig-lec06-geom-smooth
-#| fig-cap: "The same scatter with a fitted linear trend layered on top"
+#| fig-cap: "**A fitted trend as a layer.** Gene2 versus Gene1 read counts for all 80 fish (points), with an ordinary least-squares line fitted by geom_smooth(method = 'lm'); the gray ribbon is the 95 percent confidence interval of the fit."
 #| out-width: "55%"
 #| echo: false
 #| eval: true
@@ -951,7 +969,7 @@ plt.show()
 
 ```{r}
 #| label: fig-lec06-geom-line
-#| fig-cap: "Mean expression of each of the 600 genes, ranked from highest to lowest (log scale)"
+#| fig-cap: "**The ranked expression profile of the transcriptome.** Mean read count per gene for all 600 genes, ordered from most to least expressed, on a log10 y-axis. A handful of highly expressed genes dominate, followed by a long shallow tail - the characteristic shape of an RNA-seq expression profile."
 #| out-width: "55%"
 #| echo: false
 #| eval: true
@@ -1019,7 +1037,7 @@ plt.show()
 
 ```{r}
 #| label: fig-lec06-geom-col
-#| fig-cap: "Median Gene1 count per genotype-by-microbiota group"
+#| fig-cap: "**Group medians of Gene1 expression.** Median Gene1 read count per host genotype x microbiota group (n = 20 fish per bar), with microbiota treatments dodged within each genotype. Bars begin at zero, keeping relative magnitudes honest."
 #| out-width: "55%"
 #| echo: false
 #| eval: true
@@ -1077,16 +1095,120 @@ plt.show()
 
 ## Choosing the right kind of plot
 
-![Start from the question and the type of data you have](../images/Lec07_img004.svg){fig-align="center" width="90%"}
+![](../images/Lec07_img004.svg){fig-align="center" width="90%"}
 
-## The closer: all 600 genes in one figure
+## Four genes in one figure
+
+::: panel-tabset
+### Figure
+
+```{r}
+#| label: fig-lec06-closer-panel
+#| fig-cap: "**Example 1, rebuilt from the raw file.** Read counts for Gene1-Gene4 in all 80 fish, by host genotype and microbiota treatment, produced by the complete script shown in the R and Python tabs: read the raw TSV, reshape to long format, filter to four genes, plot, and save."
+#| fig-width: 8
+#| fig-height: 5
+#| out-width: "60%"
+#| echo: false
+#| eval: true
+#| message: false
+
+stickle <- read_tsv("../Data_Folder/Stickle_RNAseq.tsv", show_col_types = FALSE) |>
+  rename(geno_micro = `Geno&Micro`)
+
+stickle_long <- stickle |>
+  pivot_longer(starts_with("Gene"), names_to = "gene", values_to = "count")
+
+stickle_long |>
+  filter(gene %in% paste0("Gene", 1:4)) |>
+  ggplot(aes(Genotype, count, fill = Microbiota)) +
+  geom_violin(alpha = 0.4, color = NA, position = position_dodge(0.8)) +
+  geom_point(aes(color = Microbiota), alpha = 0.6, size = 1.2,
+             position = position_jitterdodge(jitter.width = 0.08, dodge.width = 0.8)) +
+  scale_fill_viridis_d(end = 0.7) + scale_color_viridis_d(end = 0.7) +
+  facet_wrap(~ gene, scales = "free_y") +
+  labs(x = "Host genotype", y = "Read count",
+       title = "Stickleback gut RNA-seq",
+       subtitle = "Each point is one fish; violins show the full distribution") +
+  theme_minimal(base_size = 14) + theme(legend.position = "top")
+```
+
+### R
+
+```{r}
+#| label: lec06-closer-panel-code
+#| echo: true
+#| eval: false
+
+library(tidyverse)
+
+stickle <- read_tsv("data/Stickle_RNAseq.tsv", show_col_types = FALSE) |>
+  rename(geno_micro = `Geno&Micro`)
+
+stickle_long <- stickle |>
+  pivot_longer(starts_with("Gene"), names_to = "gene", values_to = "count")
+
+stickle_long |>
+  filter(gene %in% paste0("Gene", 1:4)) |>
+  ggplot(aes(Genotype, count, fill = Microbiota)) +
+  geom_violin(alpha = 0.4, color = NA, position = position_dodge(0.8)) +
+  geom_point(aes(color = Microbiota), alpha = 0.6, size = 1.2,
+             position = position_jitterdodge(jitter.width = 0.08, dodge.width = 0.8)) +
+  scale_fill_viridis_d(end = 0.7) + scale_color_viridis_d(end = 0.7) +
+  facet_wrap(~ gene, scales = "free_y") +
+  labs(x = "Host genotype", y = "Read count",
+       title = "Stickleback gut RNA-seq",
+       subtitle = "Each point is one fish; violins show the full distribution") +
+  theme_minimal(base_size = 14) + theme(legend.position = "top")
+
+ggsave("results/gene_panel.svg", width = 8, height = 6)
+```
+
+### Python
+
+```{python}
+#| label: lec06-closer-panel-py
+#| echo: true
+#| eval: false
+
+import pandas as pd
+import seaborn as sns
+import matplotlib.pyplot as plt
+
+stickle = pd.read_csv("data/Stickle_RNAseq.tsv", sep="\t")
+
+stickle_long = stickle.melt(
+    id_vars=["Individual", "Genotype", "Microbiota", "Geno&Micro"],
+    var_name="gene", value_name="count")
+
+long4 = stickle_long[stickle_long["gene"].isin([f"Gene{i}" for i in range(1, 5)])]
+g = sns.catplot(data=long4, x="Genotype", y="count", hue="Microbiota",
+                col="gene", col_wrap=2, kind="violin", inner="point",
+                palette=["#440154", "#35b779"], sharey=False, height=2.6, aspect=1.3)
+g.set_axis_labels("Host genotype", "Read count")
+g.set_titles("{col_name}")
+g.figure.suptitle("Stickleback gut RNA-seq", y=1.02)
+
+plt.savefig("results/gene_panel.svg", bbox_inches="tight")
+plt.show()
+```
+
+![The figure this code draws (pre-rendered)](../images/Lec07_py_gene_panel.svg){width="55%"}
+
+### Notes
+
+- This is **Example 1 from the start of class**, now as one complete, visible script: read the raw TSV → `rename` the awkward column → `pivot_longer` → filter → plot → save
+- Every line was derived earlier today: the reshape in the tidyverse section, each plot layer in the build-up slides
+- About 20 lines, exactly as promised - and swapping the four gene names reuses it for *any* genes (Ex 6 asks you to do exactly that)
+:::
+
+## All 600 genes in one figure
 
 ::: panel-tabset
 ### Figure
 
 ```{r}
 #| label: fig-lec07-meanvar
-#| fig-cap: "Mean vs. variance for every gene, on log scales"
+#| fig-cap: "**Mean versus variance for every gene, with a fitted trend.** Each of the 600 points is one gene, placed by the mean and variance of its read counts across the 80 fish (log10 axes). Dashed line: variance = mean, the Poisson expectation; solid curve: loess trend through the observed genes. Essentially every gene lies above the line - the overdispersion that motivates negative-binomial models of RNA-seq."
 #| out-width: "55%"
 #| echo: false
 #| eval: true
@@ -1160,6 +1282,7 @@ plt.show()
 - The biology in one glance: variance **outruns** the mean, which is why RNA-seq models use the negative binomial rather than the Poisson - a preview of the statistics to come
 - This is Figure 2 from the start of class, plus a trend layer - **you can now build both opening figures**
 :::
+
 # A gallery of figures for bioengineering data
 
 ## Matching the figure to the question
@@ -1182,7 +1305,7 @@ plt.show()
 
 ```{r}
 #| label: fig-lec07-zoo-heatmap
-#| fig-cap: "30 genes x 12 samples; the dendrograms rediscover the two gene modules and the control/treated split we built in"
+#| fig-cap: "**Hierarchical clustering of a synthesized expression matrix.** Simulated log-expression for 30 genes (rows) across 12 samples (columns): per-gene baselines drawn from Normal(8, 1) with Normal(0, 0.4) measurement noise, genes 1-15 shifted up (+2) and genes 16-30 shifted down (-1.5) in the six treated samples. Values are row-standardized before coloring (viridis scale); marginal dendrograms show hierarchical clustering, which recovers both the control/treated split and the two gene modules."
 #| fig-width: 7
 #| fig-height: 6
 #| out-width: "48%"
@@ -1255,7 +1378,7 @@ plt.show()
 
 ```{r}
 #| label: fig-lec07-zoo-timecourse
-#| fig-cap: "Synthesized bioreactor growth: logistic curves plus measurement noise"
+#| fig-cap: "**Simulated bioreactor growth of three strains.** Optical density (OD600) over 48 h for three strains following logistic growth with differing carrying capacities (K = 1.2-1.8) and growth rates (r = 0.15-0.35 per h), sampled every 2 h in quadruplicate with Normal(0, 0.05) measurement noise. Lines are replicate means; shaded ribbons span plus or minus one standard deviation."
 #| out-width: "55%"
 #| echo: false
 #| eval: true
@@ -1344,7 +1467,7 @@ plt.show()
 
 ```{r}
 #| label: fig-lec07-zoo-doseresponse
-#| fig-cap: "Two synthesized compounds, three replicates each; the IC50 is where a curve crosses 50%"
+#| fig-cap: "**Simulated dose-response curves for two compounds.** Cell viability (percent) across eight doses spanning 1 nM to 100 uM (log-scaled x-axis), three replicates per dose, generated from logistic decay with IC50 = 0.3 uM (compound X) and 5 uM (compound Y), Hill slope 1.2, plus Normal(0, 4) noise. Points are individual replicates; curves are loess fits; each compound's IC50 is where its curve crosses 50 percent viability."
 #| out-width: "55%"
 #| echo: false
 #| eval: true
@@ -1428,7 +1551,7 @@ plt.show()
 
 ```{r}
 #| label: fig-lec07-zoo-pca
-#| fig-cap: "80 fish placed by the first two principal components of 600 log-counts"
+#| fig-cap: "**Principal component analysis of all 80 fish.** PCA of log-transformed (log1p), unit-scaled read counts for 600 genes. Each point is one fish, placed by its scores on the first two principal components and colored by genotype x microbiota group; distance between points reflects overall transcriptome similarity."
 #| out-width: "55%"
 #| echo: false
 #| eval: true
@@ -1500,14 +1623,6 @@ plt.show()
 - One `prcomp()` call plus one `ggplot()` call; the groups separate because the biology is real
 :::
 
-## Your turn
-
-1.  **Script the summaries**: write `scripts/summarize_stickleback.R` or `.py` that reads `data/Stickle_RNAseq.tsv`, writes a per-group median table for a gene of your choice to `results/`, and saves the distribution gallery as `results/distributions.svg` *and* a 300-dpi PNG
-2.  **Rebuild Figure 1** for four *different* genes - in the language you know less well - and `ggsave()` / `savefig()` it into `results/`
-3.  **Stretch**: adapt the gallery heatmap to the real data - take the 30 most *variable* stickleback genes and cluster the 80 fish (`scale = "row"` matters!)
-
-Working versions of both scripts are on the [Examples page](../Examples.html) - but only look after your own runs.
-
 ## Self-study this week: the rest of the toolbox
 
 The lecture built the spine; these carry the rest. All of it is on the [Examples page](../Examples.html) and in the book - budget a couple of hours before next Monday:
@@ -1515,7 +1630,7 @@ The lecture built the spine; these carry the rest. All of it is on the [Examples
 | Topic | Where it lives |
 |:-----------------------------------|:-----------------------------------|
 | Reading & writing files, saving figures, in full | Notebook §2-4 · [Ch. 11](../book/chapters/11-r-programming.html)/[Ch. 12](../book/chapters/12-python-programming.html) |
-| Random draws, honest density overlays, base graphics | Notebook §5-8 |
+| Random draws, honest density overlays, base graphics | Notebook §8-11 |
 | **Control flow: `if`, `for`, `while` - and when a vector beats a loop** | Notebook §16-18 · Parisa's `s2`-`s4` · Ch. 11/12 |
 | Logical operators and membership (`%in%` / `.isin()`) | Notebook §15 |
 | Inspecting objects, common gotchas, reading error messages | Notebook §14, §30-31 · Ch. 11/12 |
@@ -1523,13 +1638,5 @@ The lecture built the spine; these carry the rest. All of it is on the [Examples
 
 - The companion notebooks (`Lecture06_R_companion.ipynb`, `Lecture06_Python_companion.ipynb`) are a matched R/Python pair with the same 31 sections - run them side by side
 - Installing packages and managing **environments** get their own lecture in Week 9
-- [Ex 6](../Exercise_Folder/Exercises_Week06.qmd) practices all of today plus the self-study
-
-## Summary
-
-- **Data frames**: columns are vectors with names; `summary()`, `table()`, `aggregate()` / `.describe()`, `pd.crosstab()`, `.groupby()` answer the first questions
-- **Random draws**: `runif()`, `rnorm()`, `rpois()` / numpy's `rng.*` - data-generating machines for testing ideas before trusting real data
-- **Tidy reshaping**: one `pivot_longer()` / `.melt()` turns 600 gene columns into one analyzable column - the single most useful move in this course
-- **The grammar of graphics**: data + aesthetic mappings + layered geoms; facets give small multiples for free; `ggsave()` writes the file
-- **Match the figure to the question**: distributions → violins, similarity → heatmaps, trajectories → ribbons, potency → dose-response, high dimensions → PCA
-- This wraps up the scripting foundations - next Monday (L07): **Quarto**, where your code, figures and writing become one reproducible document
+- [Ex 6](../Exercise_Folder/Exercises_Week06.qmd) practices all of today plus the self-study - including rebuilding the four-gene panel for your own genes
+- Next Monday (L07): **Quarto** - your code, figures and writing become one reproducible document
