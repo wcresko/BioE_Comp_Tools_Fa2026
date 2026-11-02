@@ -1599,6 +1599,8 @@ plot(x, y, col = point_colors, pch = 19,
      xlab = "x", ylab = "10 - x", main = "Two-color scatterplot")
 ```
 
+With thousands of overlapping points, wrap any color in `adjustcolor()` to make it translucent — `plot(x, y, pch = 16, col = adjustcolor("steelblue", alpha.f = 0.4))` — so that point density shows up as color density (the ggplot2 counterpart is `alpha`, @sec-dense-data).
+
 ### Multiple Plots {#sec-multiple-plots}
 
 `par()` sets graphical parameters that persist for the rest of the session; `mfrow = c(rows, cols)` divides the plotting window into a grid that successive plots fill left to right, top to bottom.
@@ -1860,10 +1862,11 @@ set.seed(123)
 uniform_sample <- runif(100, min = 0, max = 1)
 normal_sample <- rnorm(1000, mean = 0, sd = 1)
 poisson_sample <- rpois(100, lambda = 5)
+binomial_sample <- rbinom(100, size = 20, prob = 0.3)
 
 # Visualize normal distribution
 hist(normal_sample, 
-     probability = TRUE,  # Density instead of counts
+     probability = TRUE,  # density scale, not counts (freq = FALSE is equivalent)
      main = "Sample vs. Theoretical Distribution",
      col = "lightblue")
 
@@ -1873,6 +1876,8 @@ curve(dnorm(x, mean = 0, sd = 1),
       col = "red", 
       lwd = 2)
 ```
+
+`probability = TRUE` (equivalently `freq = FALSE`) puts the histogram on the **density** scale, which is why the theoretical `dnorm()` curve overlays directly with no rescaling. The binomial draw above shows the fourth workhorse distribution: `size` tries, each succeeding with probability `prob`.
 
 ### Common Distribution Functions {#sec-common-distribution-functions}
 
