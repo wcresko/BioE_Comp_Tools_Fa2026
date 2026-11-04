@@ -21,41 +21,38 @@ theme_set(theme_minimal(base_size = 14))
 set.seed(2026)
 ```
 
-
 ## Book reading for this lecture
 
 The course book goes deeper on everything in this lecture. Read before or after class:
 
--   [Ch. 19: High-Performance Computing with Talapas](../book/chapters/19-hpc-talapas.html)
--   [Ch. 20: Parallel Computing in R](../book/chapters/20-parallel-computing.html)
--   *Reference:* [App. H: SLURM Command Reference](../book/chapters/appendix-H-slurm.html)
+- [Ch. 19: High-Performance Computing with Talapas](../book/chapters/19-hpc-talapas.html)
+- [Ch. 20: Parallel Computing in R](../book/chapters/20-parallel-computing.html)
+- *Reference:* [App. H: SLURM Command Reference](../book/chapters/appendix-H-slurm.html)
 
 ## Goals for today
 
--   Basics of working with Talapas
--   The SLURM job scheduler
--   Software on the cluster: modules today - your own environments next week (L09)
--   Monitoring your jobs
--   Running R (`Rscript`) and Python (`python3`) scripts as batch jobs
-
-
+- Basics of working with Talapas
+- The SLURM job scheduler
+- Software on the cluster: modules today - your own environments next week (L09)
+- Monitoring your jobs
+- Running R (`Rscript`) and Python (`python3`) scripts as batch jobs
 
 # Talapas and High Performance Computing
 
 ## What is Talapas?
 
--   **Talapas** is UO's high-performance computing (HPC) cluster
--   Named from Chinook word for coyote (educator and keeper of knowledge)
--   Managed by Research Advanced Computing Services (RACS)
--   Located in the Allen Hall Data Center
--   https://uoracs.github.io/talapas2-knowledge-base/
+- **Talapas** is UO's high-performance computing (HPC) cluster
+- Named from Chinook word for coyote (educator and keeper of knowledge)
+- Managed by Research Advanced Computing Services (RACS)
+- Located in the Allen Hall Data Center
+- https://uoracs.github.io/talapas2-knowledge-base/
 
 ### Key Resources:
 
--   Over 14,520 CPU cores
--   129 TB of memory
--   89 GPUs (including A100, H100, V100)
--   3+ Petabytes of storage
+- Over 14,520 CPU cores
+- 129 TB of memory
+- 89 GPUs (including A100, H100, V100)
+- 3+ Petabytes of storage
 
 ## Talapas Architecture
 
@@ -65,28 +62,28 @@ The course book goes deeper on everything in this lecture. Read before or after 
 
 ### Login Nodes (Head Nodes)
 
--   Where you land when you SSH into Talapas
--   For **light tasks only**: file management, editing, job submission
--   Shared by all users - be considerate!
--   Heavy processes will be killed
+- Where you land when you SSH into Talapas
+- For **light tasks only**: file management, editing, job submission
+- Shared by all users - be considerate!
+- Heavy processes will be killed
 
 ### Compute Nodes
 
--   Where your actual work runs
--   Accessed through the SLURM scheduler
--   Different types for different needs:
-    -   Standard CPU nodes
-    -   GPU nodes
-    -   High-memory ("fat") nodes
+- Where your actual work runs
+- Accessed through the SLURM scheduler
+- Different types for different needs:
+  - Standard CPU nodes
+  - GPU nodes
+  - High-memory ("fat") nodes
 
 ## Node Types on Talapas
 
-| Node type (general use)  | How many | Cores per node | Memory per node | Purpose                         |
-|--------------------------|----------|----------------|-----------------|---------------------------------|
-| Standard CPU (AMD Milan) | 43       | 128            | 512 GB          | General computation             |
-| GPU                      | 24       | 48             | 256 - 512 GB    | Machine learning, CUDA (52 NVIDIA A100 GPUs in total) |
-| Large memory             | a few    | varies         | up to 4 TB      | Memory-hungry jobs (e.g. genome assembly) |
-| Interactive              | 19       | varies         | varies          | Testing, development, Open OnDemand sessions |
+| Node type (general use) | How many | Cores per node | Memory per node | Purpose |
+|---------------|---------------|---------------|---------------|---------------|
+| Standard CPU (AMD Milan) | 43 | 128 | 512 GB | General computation |
+| GPU | 24 | 48 | 256 - 512 GB | Machine learning, CUDA (52 NVIDIA A100 GPUs in total) |
+| Large memory | a few | varies | up to 4 TB | Memory-hungry jobs (e.g. genome assembly) |
+| Interactive | 19 | varies | varies | Testing, development, Open OnDemand sessions |
 
 ::: callout-note
 Researchers can also buy **condo** nodes that their group gets priority on - about 166 more CPU nodes plus V100, A100, and H100 GPUs. Numbers from [RACS](https://racs.uoregon.edu/services); check the [Knowledge Base](https://uoracs.github.io/talapas2-knowledge-base/) for the current list.
@@ -94,16 +91,16 @@ Researchers can also buy **condo** nodes that their group gets priority on - abo
 
 ## Partitions (Queues)
 
-| Partition        | Time limit | Use it for                                   |
-|------------------|------------|----------------------------------------------|
-| `compute`        | 1 day      | General CPU jobs (the default choice)        |
-| `computelong`    | 14 days    | Long CPU jobs                                |
-| `gpu`            | 1 day      | Jobs that need a GPU                         |
-| `gpulong`        | 14 days    | Long GPU jobs                                |
-| `interactive`    | 12 hours   | Shorter interactive CPU sessions             |
-| `interactivegpu` | 8 hours    | Shorter interactive GPU sessions             |
-| `memory`         | 1 day      | Jobs needing lots of memory (up to 4 TB)     |
-| `memorylong`     | 14 days    | Long, memory-hungry jobs                     |
+| Partition        | Time limit | Use it for                               |
+|------------------|------------|------------------------------------------|
+| `compute`        | 1 day      | General CPU jobs (the default choice)    |
+| `computelong`    | 14 days    | Long CPU jobs                            |
+| `gpu`            | 1 day      | Jobs that need a GPU                     |
+| `gpulong`        | 14 days    | Long GPU jobs                            |
+| `interactive`    | 12 hours   | Shorter interactive CPU sessions         |
+| `interactivegpu` | 8 hours    | Shorter interactive GPU sessions         |
+| `memory`         | 1 day      | Jobs needing lots of memory (up to 4 TB) |
+| `memorylong`     | 14 days    | Long, memory-hungry jobs                 |
 
 ::: callout-tip
 Run `sinfo` on Talapas to see every partition, including your lab's condo partitions.
@@ -113,42 +110,42 @@ Run `sinfo` on Talapas to see every partition, including your lab's condo partit
 
 ### Step 1: Join or Create a PIRG
 
--   **PIRG** = Principal Investigator Research Group
--   Contact your PI to be added to their PIRG
--   Or contact RACS to create a new PIRG
+- **PIRG** = Principal Investigator Research Group
+- Contact your PI to be added to their PIRG
+- Or contact RACS to create a new PIRG
 
 ### Step 2: Request Access
 
--   Visit [racs.uoregon.edu/request-access](https://racs.uoregon.edu/request-access)
--   Your username = your Duck ID
--   Your password = your UO password
+- Visit [racs.uoregon.edu/request-access](https://racs.uoregon.edu/request-access)
+- Your username = your Duck ID
+- Your password = your UO password
 
 ## Logging Into Talapas - web browser
 
 [ondemand.talapas.uoregon.edu](https://ondemand.talapas.uoregon.edu)
 
--   No command line needed!
--   File browser for uploads/downloads
--   Interactive applications:
-    -   JupyterLab/Notebooks
-    -   RStudio Server
-    -   MATLAB
-    -   Remote desktop
+- No command line needed!
+- File browser for uploads/downloads
+- Interactive applications:
+  - JupyterLab/Notebooks
+  - RStudio Server
+  - MATLAB
+  - Remote desktop
 
 ### Great for:
 
--   Beginners learning HPC
--   Quick file management
--   Interactive data analysis
--   Running GUI applications
+- Beginners learning HPC
+- Quick file management
+- Interactive data analysis
+- Running GUI applications
 
 ## SSH keys - log in without a password
 
 ::: incremental
--   An **SSH key** is a matched pair of files - a **public** key (the lock, safe to share) and a **private** key (the key, never share it)
--   You give the public key to a server once; after that it recognizes your computer - no password typing
--   You'll use SSH keys to connect to **Talapas** (today) and **GitHub** (Lecture 10)
--   Create one now with a single command: `ssh-keygen -t ed25519` (accept the defaults; a passphrase is optional but wise)
+- An **SSH key** is a matched pair of files - a **public** key (the lock, safe to share) and a **private** key (the key, never share it)
+- You give the public key to a server once; after that it recognizes your computer - no password typing
+- You'll use SSH keys to connect to **Talapas** (today) and **GitHub** (Lecture 10)
+- Create one now with a single command: `ssh-keygen -t ed25519` (accept the defaults; a passphrase is optional but wise)
 :::
 
 ::: callout-note
@@ -174,8 +171,8 @@ ssh yourduckid@login4.talapas.uoregon.edu
 
 ### From Windows:
 
--   Use the Ubuntu (WSL) terminal
--   Or VS Code / Positron with the Remote-SSH extension
+- Use the Ubuntu (WSL) terminal
+- Or VS Code / Positron with the Remote-SSH extension
 
 ::: callout-note
 The Knowledge Base says the UO VPN is **recommended, not required**. Off campus without the VPN: SSH to the load balancer `login.talapas.uoregon.edu` and answer the Duo two-step prompts.
@@ -196,7 +193,7 @@ With **Remote - SSH**, VS Code (or Positron) runs its editor on your laptop whil
 ### Directory Structure:
 
 | Location                | Quota                 | Purpose                     |
-|-------------------------|-----------------------|-----------------------------|
+|-----------------------|----------------------|---------------------------|
 | `/home/duckid`          | 250 GB                | Config files, small scripts |
 | `/projects/PIRG/duckid` | Shared (2 TB default) | Large data, analysis        |
 | `/projects/PIRG/shared` | Shared                | Files shared with group     |
@@ -204,9 +201,9 @@ With **Remote - SSH**, VS Code (or Positron) runs its editor on your laptop whil
 
 ## Important Notes:
 
--   **Data is NOT automatically backed up!**
--   Use `/projects` for large files
--   Clean up when done
+- **Data is NOT automatically backed up!**
+- Use `/projects` for large files
+- Clean up when done
 
 ``` bash
 # Check your storage usage
@@ -216,18 +213,18 @@ du -sh /projects/myPIRG/myusername
 
 ## What is SLURM?
 
--   **S**imple **L**inux **U**tility for **R**esource **M**anagement
--   Job scheduler and workload manager
--   Allocates resources fairly among users
--   Ensures efficient cluster utilization
+- **S**imple **L**inux **U**tility for **R**esource **M**anagement
+- Job scheduler and workload manager
+- Allocates resources fairly among users
+- Ensures efficient cluster utilization
 
 ![](../images/Lec08_img004.svg){fig-align="center" width="95%"}
 
 ### Key Concepts:
 
--   **Jobs**: Units of work you submit
--   **Partitions**: Queues with different properties
--   **Accounts**: Your PIRG for resource tracking
+- **Jobs**: Units of work you submit
+- **Partitions**: Queues with different properties
+- **Accounts**: Your PIRG for resource tracking
 
 ## Essential SLURM Commands
 
@@ -277,10 +274,10 @@ srun --pty --partition=interactive --account=myPIRG \
 
 ### When to use interactive jobs:
 
--   Testing your workflow before batch submission
--   Debugging code
--   Quick data exploration
--   Running GUI applications
+- Testing your workflow before batch submission
+- Debugging code
+- Quick data exploration
+- Running GUI applications
 
 **Note**: Your prompt will change from `login1` to something like `n049`
 
@@ -425,7 +422,7 @@ cat("Wrote", args[2], "\n")
 
 ### Python (`fasta_stats.py`)
 
-```python
+``` python
 #!/usr/bin/env python3
 import sys
 from pathlib import Path
@@ -447,7 +444,7 @@ Test on a **tiny input on the login node** first (`python3 fasta_stats.py small.
 ## Three ways to get software onto Talapas
 
 | Layer | What it is | Best for |
-|---|---|---|
+|------------------------|------------------------|------------------------|
 | **Lmod modules** | centrally installed software: `module load` | compilers, CUDA, R and Python themselves, common tools |
 | **Per-user environments** | a conda env / `venv`, or an R library pinned with `renv` | *your* project's packages, at exact versions |
 | **Containers (Apptainer)** | one image file holding an entire OS + software stack | reproducing published pipelines; moving between clusters |
@@ -461,16 +458,16 @@ Test on a **tiny input on the login node** first (`python3 fasta_stats.py small.
 
 ## Understanding SLURM Directives
 
-| Directive         | Description         | Example                           |
-|-------------------|---------------------|-----------------------------------|
-| `--partition`     | Queue to use        | `compute`, `computelong`, `gpu`, `memory` |
-| `--account`       | PIRG for accounting | `myPIRG`                          |
-| `--time`          | Max runtime         | `1-12:00:00` (1 day, 12 hrs)      |
-| `--nodes`         | Number of nodes     | `1`                               |
-| `--cpus-per-task` | Cores per task      | `8`                               |
-| `--mem`           | Memory per node     | `32G`                             |
-| `--mem-per-cpu`   | Memory per CPU      | `4G`                              |
-| `--gres`          | Generic resources   | `gpu:1`                           |
+| Directive | Description | Example |
+|-------------------|---------------------|--------------------------------|
+| `--partition` | Queue to use | `compute`, `computelong`, `gpu`, `memory` |
+| `--account` | PIRG for accounting | `myPIRG` |
+| `--time` | Max runtime | `1-12:00:00` (1 day, 12 hrs) |
+| `--nodes` | Number of nodes | `1` |
+| `--cpus-per-task` | Cores per task | `8` |
+| `--mem` | Memory per node | `32G` |
+| `--mem-per-cpu` | Memory per CPU | `4G` |
+| `--gres` | Generic resources | `gpu:1` |
 
 **Tip**: Request only what you need - smaller jobs run sooner!
 
@@ -572,9 +569,9 @@ sacct -j JOBID --format=JobID,JobName,Elapsed,MaxRSS,State
 ## One node, many cores - but R uses one
 
 ::: incremental
--   A Talapas node has dozens of cores, but a plain R (or Python) script runs on **one** of them
--   Many analyses are **embarrassingly parallel** - the same independent computation repeated many times: bootstraps, per-gene models, simulations, one-file-per-sample processing
--   The `future`/`furrr` packages make parallel R nearly drop-in - that is this week's second reading, [Ch. 20](../book/chapters/20-parallel-computing.html)
+- A Talapas node has dozens of cores, but a plain R (or Python) script runs on **one** of them
+- Many analyses are **embarrassingly parallel** - the same independent computation repeated many times: bootstraps, per-gene models, simulations, one-file-per-sample processing
+- The `future`/`furrr` packages make parallel R nearly drop-in - that is this week's second reading, [Ch. 20](../book/chapters/20-parallel-computing.html)
 :::
 
 ## A taste: parallel R in three lines
@@ -587,36 +584,36 @@ results <- future_map(gene_list, fit_model)  # parallel drop-in for map()
 ```
 
 ::: incremental
--   Match workers to your SLURM request: `#SBATCH --cpus-per-task=8` → `workers = 8`
--   Only worth it when each task takes real time - starting workers has overhead
--   Everything else you saw today - batch scripts, modules, storage - stays exactly the same
+- Match workers to your SLURM request: `#SBATCH --cpus-per-task=8` → `workers = 8`
+- Only worth it when each task takes real time - starting workers has overhead
+- Everything else you saw today - batch scripts, modules, storage - stays exactly the same
 :::
 
 ## Best Practices for Talapas
 
 ### Do:
 
--   Request only resources you need
--   Test with small datasets first
--   Use `--time` conservatively
--   Clean up old files regularly
--   Use `/projects` for large data
+- Request only resources you need
+- Test with small datasets first
+- Use `--time` conservatively
+- Clean up old files regularly
+- Use `/projects` for large data
 
 ### Don't:
 
--   Run heavy computation on login nodes
--   Leave jobs running indefinitely
--   Store sensitive data without encryption
--   Forget to acknowledge RACS in publications
+- Run heavy computation on login nodes
+- Leave jobs running indefinitely
+- Store sensitive data without encryption
+- Forget to acknowledge RACS in publications
 
 ## Getting Help with Talapas
 
 ### Resources:
 
--   Documentation: [uoracs.github.io/talapas2-knowledge-base](https://uoracs.github.io/talapas2-knowledge-base/)
--   Service Desk: [hpcrcf.atlassian.net/servicedesk](https://hpcrcf.atlassian.net/servicedesk/customer/portal/1)
--   Email: racs\@uoregon.edu
--   Office Hours: Knight Library, Dream Lab 122E (Wednesdays 1-3pm)
+- Documentation: [uoracs.github.io/talapas2-knowledge-base](https://uoracs.github.io/talapas2-knowledge-base/)
+- Service Desk: [hpcrcf.atlassian.net/servicedesk](https://hpcrcf.atlassian.net/servicedesk/customer/portal/1)
+- Email: racs\@uoregon.edu
+- Office Hours: Knight Library, Dream Lab 122E (Wednesdays 1-3pm)
 
 ### Acknowledgment Text:
 

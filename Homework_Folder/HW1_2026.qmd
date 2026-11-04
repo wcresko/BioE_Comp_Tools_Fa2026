@@ -4,6 +4,12 @@ title: "Homework 1 - Computational Tools for Bioengineers 2026"
 
 ## Due: Submit your work via Canvas by the end of the day (midnight) on Monday, November 16th, 2026.
 
+::: callout-important
+This homework has **two questions**. Question 1 uses the shell scripting skills from the first half of the course to analyze two bacterial genomes. Question 2 uses the R and Python scripting skills from recent weeks to analyze a bioengineering dataset that we provide. Complete both questions.
+:::
+
+# Question 1: Bacterial Genome Analysis with Shell Scripts
+
 ## Learning Objectives
 
 ::: callout
@@ -281,7 +287,7 @@ chmod +x restriction_sites.sh
 ``` bash
 ../scripts/restriction_sites.sh ecoli/ecoli_genome.fna "E. coli" \
   > ../results/ecoli_restriction.txt
-  
+
 ../scripts/restriction_sites.sh mycoplasma/mycoplasma_genome.fna "Mycoplasma" \
   > ../results/mycoplasma_restriction.txt
 
@@ -325,6 +331,130 @@ grep -v "^>" mycoplasma/mycoplasma_genome.fna | tr -d '\n' | grep -o "AGGAGG" | 
 - This is the same structure as you've used on the previous tasks (e.g. look at Task 4.2)
 - Don't forget to make your scripts executable!
 
+------------------------------------------------------------------------
+
+# Question 2: Analyzing BMP-2 Release from Hydrogels with R or Python
+
+## Learning Objectives
+
+::: callout
+-   Read a tidy dataset from a `.csv` file into R or Python
+-   Compute grouped summary statistics and write them to an output file
+-   Build a plot that layers jittered data points over violin plots, with the median identified
+-   Save a publication-quality figure to a `.svg` file from code
+-   Write an executable analysis script that runs top-to-bottom using **relative paths**
+:::
+
+## Background
+
+::: callout-note
+-   Hydrogels are water-swollen polymer networks widely used in tissue engineering as delivery vehicles for growth factors. A classic application is loading a gel with **bone morphogenetic protein 2 (BMP-2)** and letting it diffuse out to induce bone formation.
+
+-   The polymer concentration of the gel controls the mesh size of the network, and therefore how quickly a loaded ligand can diffuse out.
+
+-   We fabricated two **GelMA** (gelatin methacryloyl) hydrogel formulations — **5% (w/v)** and **10% (w/v)** — and loaded each gel with **10 µg of BMP-2**. For each formulation we made **20 replicate gels** (40 gels total). Each gel was placed in buffer and the cumulative BMP-2 released was measured by ELISA at **days 1, 2, and 3**.
+
+-   The **diffusion rate** for each gel is the cumulative 3-day release divided by 3 (µg/day). This is the main response variable you will summarize and plot.
+
+-   Your job is to write **one script, in either R or Python** (your choice — or both if you're feeling ambitious), that performs the whole analysis from reading the data to saving the figure.
+:::
+
+## The dataset
+
+Download the data file here: <a href="../Data_Folder/Hydrogel_BMP2_release.csv" download>Hydrogel_BMP2_release.csv</a>
+
+The file has one row per gel (40 rows plus a header) with these columns:
+
+| Column | Description |
+|----|----|
+| `gel_id` | Unique ID for each gel (e.g. `G05_01`) |
+| `formulation` | `GelMA_5pct` or `GelMA_10pct` |
+| `replicate` | Replicate number within formulation (1–20) |
+| `bmp2_loaded_ug` | BMP-2 loaded into the gel (µg) — 10 µg for every gel |
+| `release_day1_ug` | Cumulative BMP-2 released by day 1 (µg) |
+| `release_day2_ug` | Cumulative BMP-2 released by day 2 (µg) |
+| `release_day3_ug` | Cumulative BMP-2 released by day 3 (µg) |
+| `diffusion_rate_ug_per_day` | 3-day release ÷ 3 days (µg/day) — **your response variable** |
+
+## Part 5: Setup and Data Download
+
+### Task 5.1: Create your project
+
+-   Just like Question 1, make a project directory with `data`, `scripts`, and `results` subdirectories
+-   Put the `.csv` file in `data` — you can click the link above, or practice your Question 1 skills:
+
+``` bash
+curl -o data/Hydrogel_BMP2_release.csv \
+  https://wcresko.github.io/BioE_Comp_Tools_Fa2026/Data_Folder/Hydrogel_BMP2_release.csv
+```
+
+-   Take a first look at the file from the shell (`head`, `wc -l`, maybe `cut -d',' -f2 | sort | uniq -c`) before you write a single line of R or Python — always know what your data looks like!
+
+## Part 6: Write Your Analysis Script
+
+Write **one script** — `scripts/analyze_hydrogels.R` or `scripts/analyze_hydrogels.py` — that does all of the following when run from your project's top directory.
+
+### Task 6.1: Read in the data
+
+-   Read `data/Hydrogel_BMP2_release.csv` into a data frame
+-   Hints: `read_csv()` from **readr** (tidyverse) in R; `pd.read_csv()` from **pandas** in Python
+-   Make `formulation` a factor (R) or categorical (Python) so the groups plot in the order you want
+
+### Task 6.2: Create a summary table
+
+-   For **each of the two formulations**, compute at least: the number of gels (**n**), **mean**, **standard deviation**, and **median** of `diffusion_rate_ug_per_day`
+-   Write the summary table to `results/diffusion_summary.csv` (a `.txt` is fine too)
+-   Hints: `group_by()` + `summarize()` in R; `groupby()` + `agg()` in Python
+-   Sanity check: the two formulations should *not* look the same — if they do, something has gone wrong
+
+### Task 6.3: Create the figure
+
+Make a single plot with:
+
+-   `formulation` on the **x-axis** (the two categories)
+-   `diffusion_rate_ug_per_day` on the **y-axis**
+-   A **violin plot** for each formulation showing the shape of the distribution
+-   The individual data points **jittered** horizontally on top of the violins (all 20 points per group should be visible)
+-   The **median clearly identified** for each group (a horizontal line, a large point, or a crossbar — your choice, as long as a reader can find it)
+-   Real axis labels with units (e.g. "BMP-2 diffusion rate (µg/day)"), not raw column names
+
+::: callout-note
+-   In **R**: `ggplot2` with `geom_violin()` + `geom_jitter()` is the natural combination; `stat_summary(fun = median, ...)` is one clean way to mark the median. Keep the jitter width small (e.g. `width = 0.1`) so points stay over their violin.
+-   In **Python**: **seaborn**'s `violinplot()` + `stripplot()` on the same axes works well (set `inner="quartile"` or draw the median yourself); or build it from **matplotlib**'s `violinplot(..., showmedians=True)` plus a jittered `scatter()`.
+:::
+
+### Task 6.4: Write the figure to a .svg file
+
+-   Save the figure as `results/diffusion_rates.svg` **from inside the script** — not by exporting from a viewer window
+-   Hints: `ggsave("results/diffusion_rates.svg", ...)` in R (you may need the **svglite** package: `install.packages("svglite")`); `fig.savefig("results/diffusion_rates.svg")` in Python
+-   SVG is a vector format — open it in your browser and zoom in to admire your infinitely sharp plot
+
+## Part 7: Make It Executable and Reproducible
+
+### Task 7.1: Make the script executable
+
+-   Add the appropriate shebang as the **first line** of the script:
+    -   R: `#!/usr/bin/env Rscript`
+    -   Python: `#!/usr/bin/env python3`
+-   Then `chmod +x scripts/analyze_hydrogels.R` (or `.py`), just like your Question 1 shell scripts
+-   Run it from the top of your project: `./scripts/analyze_hydrogels.R` — it should run top-to-bottom with no errors and (re)create both files in `results`
+
+### Task 7.2: Use relative paths — this will be graded!
+
+::: callout-important
+-   Your script must use **relative paths only** (`data/Hydrogel_BMP2_release.csv`, `results/diffusion_rates.svg`) — no absolute paths like `/Users/yourname/...`, and no `setwd()` or `os.chdir()` to a hard-coded location
+-   The test: **I should be able to download your project folder and just run your script**, from the top of the project, and have it work on *my* computer the first time
+-   Before you submit, try it yourself: copy your project folder somewhere else on your computer (or delete `results` and recreate it) and run the script again
+:::
+
+------------------------------------------------------------------------
+
+## What to Submit (both questions)
+
+-   **Question 1**: your shell scripts, and the output files in `results` they produced
+-   **Question 2**: your R or Python script, `results/diffusion_summary.csv`, and `results/diffusion_rates.svg`
+-   The easiest route is to zip each project folder (including `data`, `scripts`, and `results`) and upload both to Canvas
+
 ## Tips for Success
 
 -   Always verify file downloads completed successfully
@@ -334,9 +464,14 @@ grep -v "^>" mycoplasma/mycoplasma_genome.fna | tr -d '\n' | grep -o "AGGAGG" | 
 -   Comment your code to explain what each section does
 -   Save intermediate results in case you need to re-run analyses
 -   If a command is taking too long, you might be able to optimize it
+-   For Question 2, build the script up interactively (in Positron, or the R/Python console), then assemble the working pieces into the final script and run it clean from the top
 
 ## Common Issues and Solutions
 
 **Problem**: Script permissions denied **Solution**: Remember to use `chmod +x script_name.sh`
 
 **Problem**: Very slow GREP on large files **Solution**: Ensure you're not using unnecessary wildcards
+
+**Problem**: `ggsave()` complains about svg **Solution**: Install the **svglite** package
+
+**Problem**: Script runs in your editor but not from the command line **Solution**: You're probably depending on your editor's working directory — run it from the project top with relative paths (see Task 7.2)
