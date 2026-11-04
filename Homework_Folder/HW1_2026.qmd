@@ -13,27 +13,27 @@ This homework has **two questions**. Question 1 uses the shell scripting skills 
 ## Learning Objectives
 
 ::: callout
--   Download genomic data from NCBI using command-line tools
--   Work with compressed genomic files efficiently
--   Apply GREP and regular expressions to analyze biological sequences
--   Use Unix pipes to create analysis workflows
--   Write shell scripts to automate genome analysis
--   Run the shell scripts and create output files
+- Download genomic data from NCBI using command-line tools
+- Work with compressed genomic files efficiently
+- Apply GREP and regular expressions to analyze biological sequences
+- Use Unix pipes to create analysis workflows
+- Write shell scripts to automate genome analysis
+- Run the shell scripts and create output files
 :::
 
 ## Background
 
 ::: callout-note
--   In this exercise, you'll download and analyze two bacterial genomes with very different characteristics:
+- In this exercise, you'll download and analyze two bacterial genomes with very different characteristics:
 
-    1.  ***Escherichia coli*** **K-12 MG1655**: A well-studied model organism with a typical-sized bacterial genome (\~4.6 Mb)
-    2.  ***Mycoplasma genitalium*** **G37**: One of the smallest known genomes of any free-living organism (\~0.58 Mb)
+  1.  ***Escherichia coli*** **K-12 MG1655**: A well-studied model organism with a typical-sized bacterial genome (\~4.6 Mb)
+  2.  ***Mycoplasma genitalium*** **G37**: One of the smallest known genomes of any free-living organism (\~0.58 Mb)
 
--   Your goal is to write all of the commands below and include them into executable shell scripts. Note that you'll probably have several scripts, one for each exercise or task.
+- Your goal is to write all of the commands below and include them into executable shell scripts. Note that you'll probably have several scripts, one for each exercise or task.
 
--   In this exercise I've given you a lot of hints, but you'll have to modify most commands just a little bit to make sure that they work on your computer.
+- In this exercise I've given you a lot of hints, but you'll have to modify most commands just a little bit to make sure that they work on your computer.
 
--   The goal is for you to think about and understand what is happening with each step of the script.
+- The goal is for you to think about and understand what is happening with each step of the script.
 :::
 
 ------------------------------------------------------------------------
@@ -42,17 +42,17 @@ This homework has **two questions**. Question 1 uses the shell scripting skills 
 
 ### Task 1.1: Create your workspace
 
--   Create a working directory structure using `mkdir`
--   Organize your directories into those named something like: `input`, `results` and `scripts`
--   Remember that throughout the rest of the exercise you'll either need to be in the appropriate directory, or use paths to point to the appropriate directory
--   In the examples below I use names for directories in paths but of course they won't be the same as yours
--   You'll need to make sure that you use your directory names in your paths
+- Create a working directory structure using `mkdir`
+- Organize your directories into those named something like: `input`, `results` and `scripts`
+- Remember that throughout the rest of the exercise you'll either need to be in the appropriate directory, or use paths to point to the appropriate directory
+- In the examples below I use names for directories in paths but of course they won't be the same as yours
+- You'll need to make sure that you use your directory names in your paths
 
 ### Task 1.2: Download the *E. coli* and *M. genitalium* genomes
 
--   Navigate into the 'input' directory
--   Download the *E. coli* and *M. genitalium* genomes and CDS files
--   hint - you may want to make more subdirectories for each genome
+- Navigate into the 'input' directory
+- Download the *E. coli* and *M. genitalium* genomes and CDS files
+- hint - you may want to make more subdirectories for each genome
 
 ``` bash
 
@@ -81,19 +81,20 @@ curl -o mycoplasma_cds.fna.gz \
 
 ls -lh *.gz
 ```
+
 ::: callout-note
 - Remind yourself of how `curl` works and the structure of the command
 - Also, you can write this into your first executable script (maybe `download_genomes.sh` or something like that)
 - Once you do run this command: `chmod +x download_genomes.sh`
-- `chmod` means 'change mode' and makes your shell script directly executable without even having to call `bash`
 - You'll want to do this for each of the scripts that you write
+- Remind yourself what `chmod` does
 :::
 
 ### Task 1.3: Initial exploration of compressed files
 
--   use the command `ls -lh */*.gz` to compare the size of each file
+- use the command `ls -lh */*.gz` to compare the size of each file
 
--   Preview each genome without decompressing
+- Preview each genome without decompressing
 
 ``` bash
 
@@ -110,8 +111,8 @@ echo "Mycoplasma sequences: $(zgrep -c '^>' mycoplasma/mycoplasma_genome.fna.gz)
 ```
 
 ::: callout-note
-- We didn't cover this in class, but a number of the standard Unix commands work the same way on compressed files if you use the 'z' version of them (e.g. `zcat` and `zgrep`)
-- You can always unzip first and then use `cat` and `grep`, but sometimes it helps to save disk space
+- I briefly touched on this in calss, but a number of the standard `Unix` commands work the same way on compressed files if you use the 'z' version of them (e.g. `zcat` and `zgrep`)
+- You can always unzip first and then use `cat` and `grep`, but sometimes it helps to save disk space to just work with the zipped files
 - You can run these commands in the command line to begin, but then write a script with the appending redirects `>>` to write the output to the file
 - This will be your first script from this exercise
 :::
@@ -198,10 +199,9 @@ echo "GC content: $GC_PERCENT%"
 AT_COUNT=$(grep -v "^>" "$FASTA" | tr -d '\n' | grep -o "[ATat]" | wc -l)
 AT_PERCENT=$(echo "scale=2; $AT_COUNT * 100 / $TOTAL" | bc)
 echo "AT content: $AT_PERCENT%"
-
 ```
 
-:::callout-note
+::: callout-note
 - This script is allowing you to point it to a file
 - The script also allows you to input a name of the organism
 - The file is then input and analyzed (which is what you'll do in the next section)
@@ -228,11 +228,11 @@ echo ""
 cat ../results/mycoplasma_nucleotides.txt
 echo ""
 ```
+
 ::: callout-note
 - In this case you're running your scripts and redirecting the results into a new file
 - OK, one last time - the names of your files and directories will be different!
 :::
-
 
 ## Part 4: Biological Feature Analysis
 
@@ -273,13 +273,12 @@ grep -v "^>" "$FASTA" | tr -d '\n' | grep -o "GTCGAC" | wc -l
 
 echo -n "XbaI    | TCTAGA  | "
 grep -v "^>" "$FASTA" | tr -d '\n' | grep -o "TCTAGA" | wc -l
-
 ```
 
-Reminder, if you want to make this script executable:
+Reminder to make this script executable:
 
 ``` bash
-chmod +x restriction_sites.sh
+chmod +x 
 ```
 
 ### Task 4.2 Compare restriction sites
@@ -300,7 +299,6 @@ echo ""
 ::: callout-note
 Just like above, this shows you how to execute your script and redirect the results to output files
 :::
-
 
 ### Task 4.3: Search for promoter elements
 
@@ -338,25 +336,25 @@ grep -v "^>" mycoplasma/mycoplasma_genome.fna | tr -d '\n' | grep -o "AGGAGG" | 
 ## Learning Objectives
 
 ::: callout
--   Read a tidy dataset from a `.csv` file into R or Python
--   Compute grouped summary statistics and write them to an output file
--   Build a plot that layers jittered data points over violin plots, with the median identified
--   Save a publication-quality figure to a `.svg` file from code
--   Write an executable analysis script that runs top-to-bottom using **relative paths**
+- Read a tidy dataset from a `.csv` file into R or Python
+- Compute grouped summary statistics and write them to an output file
+- Build a plot that layers jittered data points over violin plots, with the median identified
+- Save a publication-quality figure to a `.svg` file from code
+- Write an executable analysis script that runs top-to-bottom using **relative paths**
 :::
 
 ## Background
 
 ::: callout-note
--   Hydrogels are water-swollen polymer networks widely used in tissue engineering as delivery vehicles for growth factors. A classic application is loading a gel with **bone morphogenetic protein 2 (BMP-2)** and letting it diffuse out to induce bone formation.
+- Hydrogels are water-swollen polymer networks widely used in tissue engineering as delivery vehicles for growth factors. A classic application is loading a gel with **bone morphogenetic protein 2 (BMP-2)** and letting it diffuse out to induce bone formation.
 
--   The polymer concentration of the gel controls the mesh size of the network, and therefore how quickly a loaded ligand can diffuse out.
+- The polymer concentration of the gel controls the mesh size of the network, and therefore how quickly a loaded ligand can diffuse out.
 
--   We fabricated two **GelMA** (gelatin methacryloyl) hydrogel formulations — **5% (w/v)** and **10% (w/v)** — and loaded each gel with **10 µg of BMP-2**. For each formulation we made **20 replicate gels** (40 gels total). Each gel was placed in buffer and the cumulative BMP-2 released was measured by ELISA at **days 1, 2, and 3**.
+- We fabricated two **GelMA** (gelatin methacryloyl) hydrogel formulations — **5% (w/v)** and **10% (w/v)** — and loaded each gel with **10 µg of BMP-2**. For each formulation we made **20 replicate gels** (40 gels total). Each gel was placed in buffer and the cumulative BMP-2 released was measured by ELISA at **days 1, 2, and 3**.
 
--   The **diffusion rate** for each gel is the cumulative 3-day release divided by 3 (µg/day). This is the main response variable you will summarize and plot.
+- The **diffusion rate** for each gel is the cumulative 3-day release divided by 3 (µg/day). This is the main response variable you will summarize and plot.
 
--   Your job is to write **one script, in either R or Python** (your choice — or both if you're feeling ambitious), that performs the whole analysis from reading the data to saving the figure.
+- Your job is to write **one script, in either R or Python** (your choice — or both if you're feeling ambitious), that performs the whole analysis from reading the data to saving the figure.
 :::
 
 ## The dataset
@@ -366,7 +364,7 @@ Download the data file here: <a href="../Data_Folder/Hydrogel_BMP2_release.csv" 
 The file has one row per gel (40 rows plus a header) with these columns:
 
 | Column | Description |
-|----|----|
+|------------------------------------|------------------------------------|
 | `gel_id` | Unique ID for each gel (e.g. `G05_01`) |
 | `formulation` | `GelMA_5pct` or `GelMA_10pct` |
 | `replicate` | Replicate number within formulation (1–20) |
@@ -380,15 +378,15 @@ The file has one row per gel (40 rows plus a header) with these columns:
 
 ### Task 5.1: Create your project
 
--   Just like Question 1, make a project directory with `data`, `scripts`, and `results` subdirectories
--   Put the `.csv` file in `data` — you can click the link above, or practice your Question 1 skills:
+- Just like Question 1, make a project directory with `data`, `scripts`, and `results` subdirectories
+- Put the `.csv` file in `data` — you can click the link above, or practice your Question 1 skills:
 
 ``` bash
 curl -o data/Hydrogel_BMP2_release.csv \
   https://wcresko.github.io/BioE_Comp_Tools_Fa2026/Data_Folder/Hydrogel_BMP2_release.csv
 ```
 
--   Take a first look at the file from the shell (`head`, `wc -l`, maybe `cut -d',' -f2 | sort | uniq -c`) before you write a single line of R or Python — always know what your data looks like!
+- Take a first look at the file from the shell (`head`, `wc -l`, maybe `cut -d',' -f2 | sort | uniq -c`) before you write a single line of R or Python — always know what your data looks like!
 
 ## Part 6: Write Your Analysis Script
 
@@ -396,82 +394,71 @@ Write **one script** — `scripts/analyze_hydrogels.R` or `scripts/analyze_hydro
 
 ### Task 6.1: Read in the data
 
--   Read `data/Hydrogel_BMP2_release.csv` into a data frame
--   Hints: `read_csv()` from **readr** (tidyverse) in R; `pd.read_csv()` from **pandas** in Python
--   Make `formulation` a factor (R) or categorical (Python) so the groups plot in the order you want
+- Read `data/Hydrogel_BMP2_release.csv` into a data frame
+- Hints: `read_csv()` from **readr** (tidyverse) in R; `pd.read_csv()` from **pandas** in Python
+- Make `formulation` a factor (R) or categorical (Python) so the groups plot in the order you want
 
 ### Task 6.2: Create a summary table
 
--   For **each of the two formulations**, compute at least: the number of gels (**n**), **mean**, **standard deviation**, and **median** of `diffusion_rate_ug_per_day`
--   Write the summary table to `results/diffusion_summary.csv` (a `.txt` is fine too)
--   Hints: `group_by()` + `summarize()` in R; `groupby()` + `agg()` in Python
--   Sanity check: the two formulations should *not* look the same — if they do, something has gone wrong
+- For **each of the two formulations**, compute at least: the number of gels (**n**), **mean**, **standard deviation**, and **median** of `diffusion_rate_ug_per_day`
+- Write the summary table to `results/diffusion_summary.csv` (a `.txt` is fine too)
+- Hints: `group_by()` + `summarize()` in R; `groupby()` + `agg()` in Python
+- Sanity check: the two formulations should *not* look the same — if they do, something has gone wrong
 
-### Task 6.3: Create the figure
+### Task 6.3: Create a simple distribution figure
 
 Make a single plot with:
 
--   `formulation` on the **x-axis** (the two categories)
--   `diffusion_rate_ug_per_day` on the **y-axis**
--   A **violin plot** for each formulation showing the shape of the distribution
--   The individual data points **jittered** horizontally on top of the violins (all 20 points per group should be visible)
--   The **median clearly identified** for each group (a horizontal line, a large point, or a crossbar — your choice, as long as a reader can find it)
--   Real axis labels with units (e.g. "BMP-2 diffusion rate (µg/day)"), not raw column names
+- `formulation` on the **x-axis** (the two categories)
+- `diffusion_rate_ug_per_day` on the **y-axis**
+- A **violin plot** for each formulation showing the shape of the distribution
+- The individual data points **jittered** horizontally on top of the violins (all 20 points per group should be visible)
+- The **median clearly identified** for each group (a horizontal line, a large point, or a crossbar — your choice, as long as a reader can find it)
+- Real axis labels with units (e.g. "BMP-2 diffusion rate (µg/day)"), not raw column names
 
 ::: callout-note
--   In **R**: `ggplot2` with `geom_violin()` + `geom_jitter()` is the natural combination; `stat_summary(fun = median, ...)` is one clean way to mark the median. Keep the jitter width small (e.g. `width = 0.1`) so points stay over their violin.
--   In **Python**: **seaborn**'s `violinplot()` + `stripplot()` on the same axes works well (set `inner="quartile"` or draw the median yourself); or build it from **matplotlib**'s `violinplot(..., showmedians=True)` plus a jittered `scatter()`.
+- In **R**: `ggplot2` with `geom_violin()` + `geom_jitter()` is the natural combination; `stat_summary(fun = median, ...)` is one clean way to mark the median. Keep the jitter width small (e.g. `width = 0.1`) so points stay over their violin.
+- In **Python**: **seaborn**'s `violinplot()` + `stripplot()` on the same axes works well (set `inner="quartile"` or draw the median yourself); or build it from **matplotlib**'s `violinplot(..., showmedians=True)` plus a jittered `scatter()`.
 :::
 
 ### Task 6.4: Write the figure to a .svg file
 
--   Save the figure as `results/diffusion_rates.svg` **from inside the script** — not by exporting from a viewer window
--   Hints: `ggsave("results/diffusion_rates.svg", ...)` in R (you may need the **svglite** package: `install.packages("svglite")`); `fig.savefig("results/diffusion_rates.svg")` in Python
--   SVG is a vector format — open it in your browser and zoom in to admire your infinitely sharp plot
+- Save the figure as `results/diffusion_rates.svg` **from inside the script** — not by exporting from a viewer window
+- Hints: `ggsave("results/diffusion_rates.svg", ...)` in R (you may need the **svglite** package: `install.packages("svglite")`); `fig.savefig("results/diffusion_rates.svg")` in Python
+- SVG is a vector format — open it in your browser and zoom in to admire your infinitely sharp plot
 
 ## Part 7: Make It Executable and Reproducible
 
 ### Task 7.1: Make the script executable
 
--   Add the appropriate shebang as the **first line** of the script:
-    -   R: `#!/usr/bin/env Rscript`
-    -   Python: `#!/usr/bin/env python3`
--   Then `chmod +x scripts/analyze_hydrogels.R` (or `.py`), just like your Question 1 shell scripts
--   Run it from the top of your project: `./scripts/analyze_hydrogels.R` — it should run top-to-bottom with no errors and (re)create both files in `results`
+- Add the appropriate shebang as the **first line** of the script:
+  - R: `#!/usr/bin/env Rscript`
+  - Python: `#!/usr/bin/env python3`
+- Then `chmod +x scripts/analyze_hydrogels.R` (or `.py`), just like your Question 1 shell scripts
+- Run it from the top of your project: `./scripts/analyze_hydrogels.R` — it should run top-to-bottom with no errors and (re)create both files in `results`
 
-### Task 7.2: Use relative paths — this will be graded!
+### Task 7.2: Use relative paths
 
 ::: callout-important
--   Your script must use **relative paths only** (`data/Hydrogel_BMP2_release.csv`, `results/diffusion_rates.svg`) — no absolute paths like `/Users/yourname/...`, and no `setwd()` or `os.chdir()` to a hard-coded location
--   The test: **I should be able to download your project folder and just run your script**, from the top of the project, and have it work on *my* computer the first time
--   Before you submit, try it yourself: copy your project folder somewhere else on your computer (or delete `results` and recreate it) and run the script again
+- Your script must use **relative paths only** (`data/Hydrogel_BMP2_release.csv`, `results/diffusion_rates.svg`) — no absolute paths like `/Users/yourname/...`, and no `setwd()` or `os.chdir()` to a hard-coded location
+- The test: **I should be able to download your project folder and just run your script**, from the top of the project, and have it work on *my* computer the first time
+- Before you submit, try it yourself: copy your project folder somewhere else on your computer (or delete `results` and recreate it) and run the script again
 :::
 
 ------------------------------------------------------------------------
 
 ## What to Submit (both questions)
 
--   **Question 1**: your shell scripts, and the output files in `results` they produced
--   **Question 2**: your R or Python script, `results/diffusion_summary.csv`, and `results/diffusion_rates.svg`
--   The easiest route is to zip each project folder (including `data`, `scripts`, and `results`) and upload both to Canvas
+- **Question 1**: your shell scripts, and the output files in `results` they produced
+- **Question 2**: your R or Python script, `results/diffusion_summary.csv`, and `results/diffusion_rates.svg`
 
 ## Tips for Success
 
--   Always verify file downloads completed successfully
--   Test scripts on small test files before running on full genomes
--   Use meaningful variable names in your scripts
--   Add error checking to scripts (verify files exist, etc.)
--   Comment your code to explain what each section does
--   Save intermediate results in case you need to re-run analyses
--   If a command is taking too long, you might be able to optimize it
--   For Question 2, build the script up interactively (in Positron, or the R/Python console), then assemble the working pieces into the final script and run it clean from the top
-
-## Common Issues and Solutions
-
-**Problem**: Script permissions denied **Solution**: Remember to use `chmod +x script_name.sh`
-
-**Problem**: Very slow GREP on large files **Solution**: Ensure you're not using unnecessary wildcards
-
-**Problem**: `ggsave()` complains about svg **Solution**: Install the **svglite** package
-
-**Problem**: Script runs in your editor but not from the command line **Solution**: You're probably depending on your editor's working directory — run it from the project top with relative paths (see Task 7.2)
+- Always verify file downloads completed successfully
+- Test scripts on small test files before running on full genomes
+- Use meaningful variable names in your scripts
+- Add error checking to scripts (verify files exist, etc.)
+- Comment your code to explain what each section does
+- Save intermediate results in case you need to re-run analyses
+- If a command is taking too long, you might be able to optimize it
+- For Question 2, build the script up interactively (in Positron, or the R/Python console), then assemble the working pieces into the final script and run it clean from the top
