@@ -1,0 +1,202 @@
+---
+# ============================================================
+# EXAMPLE 1 - RevealJS slides from a single .qmd file
+# BioE Computational Tools 2026, Week 7
+#
+# Render in Positron with Cmd/Ctrl+Shift+K, or:
+#   quarto render example_slides.qmd
+# Then open example_slides.html in a browser.
+# Press "S" while viewing for speaker notes, "O" for overview,
+# "F" for fullscreen, and "E" for print/export mode.
+# ============================================================
+title: "My Research in Six Slides"
+subtitle: "An example RevealJS deck - open the source next to the result"
+author: "Your Name"
+institute: "Knight Campus, University of Oregon"
+date: today
+format:
+  revealjs:
+    theme: default          # try: simple, serif, moon, solarized, dark
+    slide-number: true      # page numbers bottom right
+    footer: "BioE Comp Tools - Week 7 example"
+    transition: fade        # none, fade, slide, convex, concave, zoom
+    incremental: false      # true = ALL lists reveal point by point
+    code-line-numbers: true
+    chalkboard: false       # true adds a draw-on-slides toolbar (HTML only)
+    # embed-resources: true # one self-contained .html file (bigger, portable)
+execute:
+  echo: true                # slides about code usually SHOW the code
+  warning: false
+---
+
+## A plain bulleted slide
+
+Every level-2 heading (`##`) starts a new slide. A level-1 heading (`#`)
+makes a *section-divider* slide.
+
+-   Text, **bold**, *italic*, `code`, and [links](https://quarto.org)
+    work exactly as in any Quarto document
+-   So do footnotes[^1], images, tables, and math: $E = mc^2$
+-   The YAML header above controls the whole deck - read it!
+
+[^1]: Footnotes collect on a slide at the end.
+
+## Revealing points one at a time
+
+Wrap a list in `::: {.incremental}` to step through it with the arrow key:
+
+::: incremental
+-   First this appears...
+-   ...then this...
+-   ...and finally this. (Set `incremental: true` in the YAML to make
+    this the default for every list.)
+:::
+
+. . .
+
+Three dots on their own line (`. . .`) pause *anything*, not just lists -
+this sentence waited for a keypress.
+
+# Section dividers use `#` {background-color="#1a3a5c"}
+
+## Two-column layouts
+
+:::: columns
+::: {.column width="55%"}
+**Left column** - the syntax is a
+`:::: columns` div containing two
+`::: {.column width="..."}` divs.
+
+Use columns for text next to a
+figure, or two figures side by side.
+:::
+
+::: {.column width="45%"}
+```{r}
+#| echo: false
+#| fig-height: 5
+library(ggplot2)
+ggplot(mtcars, aes(factor(cyl), mpg)) +
+  geom_boxplot(fill = "steelblue") +
+  labs(x = "Cylinders", y = "MPG") +
+  theme_minimal(base_size = 22)
+```
+:::
+::::
+
+## Executed code: the figure is made *during* rendering
+
+```{r}
+#| label: fig-growth
+#| fig-cap: "Simulated bacterial growth. The curve regenerates on every render."
+#| output-location: slide
+set.seed(610)
+t <- seq(0, 10, 0.25)
+od <- 1.2 / (1 + exp(-(t - 5))) + rnorm(length(t), sd = 0.02)
+plot(t, od, pch = 19, col = "darkorange",
+     xlab = "Time (h)", ylab = "OD600", cex.lab = 1.4)
+```
+
+`output-location: slide` puts the plot on its *own* slide - also try
+`column` or `fragment`.
+
+## Highlighting lines of code
+
+Step through code with `code-line-numbers: "1-2|4|6"` as a chunk option:
+
+```{r}
+#| eval: false
+#| code-line-numbers: "1-2|4|6"
+library(readr)
+library(dplyr)
+
+stickle <- read_tsv("Stickle_RNAseq.tsv")
+
+stickle |> count(Genotype, Microbiota)
+```
+
+Each `|`-separated group is one keypress: packages, then reading, then
+counting.
+
+## Tabsets work on slides too
+
+::: panel-tabset
+### Figure
+
+```{r}
+#| echo: false
+#| fig-height: 4.5
+hist(rnorm(500), col = "grey80", border = "white",
+     main = NULL, xlab = "Simulated values")
+```
+
+### Code
+
+```{r}
+#| eval: false
+hist(rnorm(500), col = "grey80", border = "white",
+     main = NULL, xlab = "Simulated values")
+```
+
+### Python
+
+```{python}
+#| eval: false
+# The same idea in Python (shown, not run - no Jupyter needed to render)
+import numpy as np, matplotlib.pyplot as plt
+plt.hist(np.random.default_rng(1).normal(size=500), color="grey")
+plt.show()
+```
+:::
+
+## Tables, math, and callouts
+
+| Group     | n   | Mean stiffness (kPa) |
+|-----------|-----|----------------------|
+| Control   | 12  | 3.1                  |
+| Treated   | 12  | 8.7                  |
+
+The standard error, $\mathrm{SE} = s/\sqrt{n}$, appears inline; display
+math gets its own line:
+
+$$\sigma = E \, \varepsilon$$
+
+::: {.callout-tip}
+All five callout types (`note`, `tip`, `warning`, `important`, `caution`)
+work on slides - use them sparingly.
+:::
+
+## Images, sizing, and fragments
+
+An image is one line of Markdown - local file or URL:
+
+``` markdown
+![SEM of the scaffold](images/scaffold.png){width="60%"}
+```
+
+::: {.fragment}
+Any block with the `.fragment` class appears on a keypress - like this one.
+:::
+
+::: {.fragment .fade-in-then-semi-out}
+Fragments can combine effects (`.fade-in-then-semi-out`, `.grow`,
+`.strike`, `.highlight-red`, ...).
+:::
+
+## Speaker notes and finishing touches {.smaller}
+
+The `{.smaller}` class on this slide's heading shrinks everything to fit;
+`{.scrollable}` adds a scrollbar instead.
+
+-   Press **S** now: this slide has hidden speaker notes
+-   Press **O** for the slide overview; **F** for fullscreen
+-   `quarto render example_slides.qmd --to pptx` makes a PowerPoint from
+    the *same source* (simpler layouts survive the trip)
+
+What to explore next: themes, `logo:`, `title-slide-attributes`, and the
+[RevealJS documentation](https://quarto.org/docs/presentations/revealjs/).
+
+::: notes
+These notes are invisible to the audience - they show in the speaker view
+(press S). Put your reminders, timings, and transitions here.
+:::

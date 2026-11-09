@@ -1,6 +1,6 @@
 ---
 title: "Lecture 07"
-subtitle: "Quarto Markdown, LaTeX and AI-Assisted Coding"
+subtitle: "Reproducible Documents - Quarto, LaTeX and AI-Assisted Coding"
 date: "Monday, November 9, 2026"
 author: "Bill Cresko"
 ---
@@ -11,8 +11,6 @@ author: "Bill Cresko"
 
 # Packages used in the lecture examples
 library(tidyverse)
-library(gt)
-library(readxl)
 
 # Consistent theme for all plots
 theme_set(theme_minimal(base_size = 14))
@@ -28,101 +26,97 @@ The course book goes deeper on everything in this lecture. Read before or after 
 
 -   [Ch. 16: Reproducible Documents with Quarto](../book/chapters/16-quarto-documents.html)
 -   [Ch. 17: LaTeX for Scientific Documents](../book/chapters/17-latex-basics.html)
--   [Ch. 18: Coding with AI Assistants](../book/chapters/18-ai-assisted-coding.html)
+-   [Ch. 18: Coding with AI Assistants](../book/chapters/18-ai-assisted-coding.html) - today's AI section is the *short* version; the chapter has the full treatment
 -   *Reference:* [App. G: LaTeX Command Reference](../book/chapters/appendix-G-latex.html)
 
 ## Goals for today
 
--   Quarto Markdown - with R **and Python** code chunks
--   Typesetting mathematics with LaTeX
--   AI-assisted coding ("vibe coding") - with your eyes open
+-   Why **literate programming** is the backbone of reproducible, FAIR science
+-   The anatomy of a Quarto document - YAML, prose, and code chunks (R **and Python**)
+-   Typesetting mathematics with **LaTeX**; citations from a **`.bib`** file
+-   Three live demos, one per output format: **slides**, a **manuscript PDF**, and a **website**
+-   AI-assisted coding - the core principles
 
-# Markdown and Quarto Markdown
-
-## What is Markdown?
-
-::: {.incremental}
--   a very lightweight but flexible editing language
--   allows the `rendering` of markdown text to a variety of different formats (pdf, html, web pages, powerpoint, etc....)
--   very simple and common across science and engineering
--   involves a `yaml` header (YAML stands for `YAML Ain't Markup Language`, originally `Yet Another Markup Language`)
--   similar to `html` but simpler
+::: callout-tip
+The three demo files are yours to download, break, and reuse: [Example Files, Week 7](../Examples.qmd#week-7).
 :::
 
-## What is Quarto Markdown?
+# Literate programming and reproducible science
 
-Quarto `(https://quarto.org/)` provides a next-generation authoring framework for data science.
+## The problem: your paper and your analysis drift apart
 
--   `Quarto Markdown` is a powerful scientific and technical publishing system that extends the lightweight markup language Markdown for creating formatted text using a plain-text editor
--   You can use `Quarto Markdown` files to save and execute code \*and\* generate high quality reports that can be shared with an audience.
--   You can make html, pdf, docx, websites, slides, books, and more.
+::: incremental
+-   The classic workflow: analyze *over here* (scripts, console), write *over there* (Word), and hand-carry numbers and figures between them
+-   Every revision re-opens the gap: figure version five in a version-three draft, a mean in the text the code no longer produces, methods that describe last month's analysis
+-   Scientific bugs are usually **silent** - nothing crashes when the pasted number is stale
+-   An analysis you cannot regenerate is one you cannot defend - to reviewers, collaborators, or yourself in six months
+:::
 
-When you save your document, the output will be in the format indicated in your YAML header. This could be an html document, Word document, pdf, website, book, etc.
+## Literate programming: the document *is* the analysis
 
-## Getting started
+> "Instead of imagining that our main task is to instruct a computer what to do, let us concentrate rather on explaining to human beings what we want a computer to do." - Donald Knuth, *Literate Programming* (1984)
 
--   Open a new Quarto Markdown document with **File → New File → Quarto Document** in VS Code / Positron / RStudio
+::: incremental
+-   One plain-text document holds the **prose, the code, and the results** - rendering re-runs everything from data to figures
+-   The numbers *in your sentences* are computed, not typed, so they can never disagree with your data
+-   Your methods become **self-documenting**; inconsistencies between what you say and what you do become visible
+-   You already live this: our lab notebook templates, the companion notebooks, this very slide deck and the course book are all Quarto
+:::
 
--   You should see a document that is already populated with some example text and code
+## Reproducibility has a policy behind it: FAIR
 
-## This is Quarto Markdown
+::: incremental
+-   Funders (including NIH's data management and sharing policy) expect research outputs to be **FAIR**:
+    -   **F**indable - deposited somewhere with a persistent identifier, not "available upon request"
+    -   **A**ccessible - retrievable by standard tools, no special software or permission maze
+    -   **I**nteroperable - open, documented formats (tidy `.tsv` and `.qmd`, not binary one-offs)
+    -   **R**eusable - enough documentation and provenance that someone else can actually use it
+-   Literate documents are FAIR practice: plain text any tool can read, methods that travel *with* the analysis, one source anyone can re-run
+-   The arc of the rest of the course: today the **documents** → Week 9 the **environments** → Week 10 **sharing it all** on GitHub
+:::
 
-``` yaml
+# Quarto: one source, many outputs
+
+## Markdown, then Quarto
+
+-   **Markdown**: a lightweight plain-text formatting language
+
+    ``` markdown
+    **bold**   *italic*   `code`   [a link](https://quarto.org)
+
+    # Big header
+    ## Smaller header
+
+    -   a bullet
+    1.  a numbered item
+    ```
+
+-   **Quarto** extends Markdown into a scientific publishing system: the same text, plus a **YAML header** and **executable code chunks**
+
+-   One `.qmd` source can render to HTML, PDF, Word, slides, websites, and books - this deck, the course site, and the course book are all Quarto
+
+## Anatomy of a `.qmd`: three ingredients
+
+```` markdown
 ---
-title: "My Analysis"
-author: "Your Name"
-format: html
+title: "My Analysis"        # 1. YAML header: document settings;
+author: "Your Name"         #    format picks the output
+format: html                #    (html, pdf, docx, revealjs, ...)
 ---
-```
 
--   Note that `---` delineates the `yaml header`.
--   This controls document-level settings and rendering - `format:` picks the output (`html`, `pdf`, `docx`, `revealjs`, ...)
--   There are a lot of options that you can put in the `yaml header`
--   (Older R Markdown files use `output: html_document` here - Quarto uses `format:`)
+## A section heading
 
-## This is Quarto Markdown
+Ordinary Markdown prose.    # 2. Markdown text
 
-```markdown
-# Header size 1
-
-## Header size 2
-
-I can write text and it will look normal!
-
-I can still run code!
-```
-
-## This is Quarto Markdown
-
-::: panel-tabset
-### R
-
-````markdown
 ```{{r}}
-#| label: my-first-chunk
-#| echo: true
-
-x <- 5
-print(x^2)
-```
+#| label: my-first-chunk    # 3. Code chunks, run at render time
+x <- 5                      #    {{r}} runs through knitr,
+print(x^2)                  #    {{python}} through Jupyter -
+```                         #    same chunk options in both
 ````
 
-### Python
-
-````markdown
-```{{python}}
-#| label: my-first-chunk-py
-#| echo: true
-
-x = 5
-print(x**2)
-```
-````
-:::
-
--   By default, the code and output will print to your document
--   Note the back tick marks - these delineate the code
--   The {r} indicates this is r code; {python} indicates Python code - everything else about the chunk is identical
+-   `---` fences the YAML header; back ticks fence the code
+-   Mixing R and Python in one file works too (via `reticulate`) - details in [Ch. 16](../book/chapters/16-quarto-documents.html)
 
 ## Rendered, the chunks look like this
 
@@ -152,172 +146,80 @@ print(x**2)
 :::
 
 -   Code first, output underneath - Quarto ran the code while rendering
--   R chunks run through **knitr**; Python chunks run through **Jupyter** (see the next slides)
+-   Run chunks interactively as you write: the arrows on each chunk in Positron, or `Cmd/Ctrl + Enter` line by line
 
-## Navigating chunks
+## Chunk options control what the reader sees
 
--   Easy to run chunks - a few ways to do this
--   Top right of each chunk - just run, run all above, etc.
--   Cog wheel at the top of the Quarto Markdown document - run options
--   Keyboard shortcuts
+Options go *inside* the chunk with `#|` - identical in every language:
 
-## Chunk options, Quarto style
-
-Quarto puts chunk options *inside* the chunk with `#|` - one per line, the **same options in every language**:
-
-::: panel-tabset
-### R
-
-````markdown
+```` markdown
 ```{{r}}
 #| label: fig-stiffness
 #| echo: false
 #| fig-cap: "Stiffness by hydrogel concentration"
-#| fig-width: 6
 boxplot(compression ~ hydrogel_concentration, data = mydata)
 ```
 ````
 
-### Python
-
-````markdown
-```{{python}}
-#| label: fig-stiffness-py
-#| echo: false
-#| fig-cap: "Stiffness by hydrogel concentration"
-#| fig-width: 6
-mydata.boxplot(column="compression", by="hydrogel_concentration")
-```
-````
-:::
-
-| Option                | Effect                                        |
-|-----------------------|-----------------------------------------------|
-| `echo: false`         | Run the code, **hide** the code               |
-| `eval: false`         | **Show** the code, don't run it               |
-| `include: false`      | Run it, show **nothing** (setup chunks)       |
-| `warning: false`      | Hide warnings (`message: false` for messages) |
-| `fig-cap:`            | Figure caption                                |
-| `cache: true`         | Don't re-run slow chunks unless they change   |
+| Option           | Effect                                        |
+|------------------|-----------------------------------------------|
+| `echo: false`    | Run the code, **hide** the code (manuscripts!) |
+| `eval: false`    | **Show** the code, don't run it               |
+| `include: false` | Run it, show **nothing** (setup chunks)       |
+| `fig-cap:`       | Figure caption                                |
+| `label: fig-...` | Makes the figure numbered and referenceable   |
 
 ::: callout-tip
-Set defaults for the whole document in the YAML header under `execute:` and override chunk-by-chunk only where needed.
+Set document-wide defaults in the YAML under `execute:`; override per chunk only where needed.
 :::
 
-## Python in Quarto: engines, Jupyter and notebooks
-
-::: panel-tabset
-### Setup
-
-``` bash
-python3 -m venv .venv && source .venv/bin/activate   # a project environment
-pip install jupyter pandas matplotlib                # Quarto runs {python} chunks through Jupyter
-quarto check jupyter                                 # does Quarto see it?
-```
-
-``` yaml
----
-title: "My analysis"
-format: html
-jupyter: python3        # optional: name the kernel explicitly
----
-```
-
-### Which engine runs my chunks?
-
--   Only `{r}` chunks → **knitr** (R) runs the document
--   Only `{python}` chunks → **Jupyter** runs the document
--   **Both** in one file → knitr runs it and hands Python chunks to R's `reticulate` package (`install.packages("reticulate")`) - objects can even be shared: `py$x` in R, `r.x` in Python
--   `` `{python} 1 + 1` `` and `` `{r} 1 + 1` `` also work **inline** in the text
-
-### Notebooks
-
-``` bash
-quarto render notebook.ipynb              # a Jupyter notebook is a valid Quarto input
-quarto convert notebook.ipynb             # .ipynb  ->  .qmd (plain text, Git-friendly)
-quarto convert analysis.qmd               # .qmd    ->  .ipynb (to hand to a Jupyter user)
-quarto preview notebook.ipynb
-```
-
--   `.ipynb` stores code, Markdown **and saved output** as JSON - handy interactively, noisy in Git
--   `.qmd` stores only the source; output is regenerated when you render
-:::
-
-## Rendering your document
-
-``` bash
-quarto render report.qmd              # default format from the YAML
-quarto render report.qmd --to pdf     # PDF (needs LaTeX / TinyTeX)
-quarto render report.qmd --to docx    # Word document
-quarto preview report.qmd             # live preview - re-renders every time you save
-quarto render                         # render a whole project/website (_quarto.yml)
-quarto render notebook.ipynb          # Jupyter notebooks render the same way
-```
-
-::: incremental
--   In **VS Code** (Quarto extension) or **Positron**: the **Preview** button or `Cmd/Ctrl-Shift-K`
--   In **RStudio**: the **Render** button (same shortcut)
--   Same source, many outputs: HTML, PDF, Word, slides, websites
-:::
-
-## Running example: a stickleback report in Quarto
-
-One `.qmd` file: prose, the analysis, the figure, and the numbers in the text - all regenerated on every render.
+## Inline code: sentences that cannot go stale
 
 ```` markdown
----
-title: "Genotype and microbiota effects on gut gene expression"
-author: "Your Name"
-format: html
----
-
 ```{{r}}
-#| label: setup
-#| message: false
-library(tidyverse)
-stickle <- read_tsv("data/Stickle_RNAseq.tsv", show_col_types = FALSE)
-long <- stickle |> pivot_longer(starts_with("Gene"), names_to = "gene", values_to = "count")
+#| include: false
+stickle <- read_tsv("data/Stickle_RNAseq.tsv")
 ```
 
-We measured `r knitr::inline_expr("n_distinct(long$gene)")` genes in `r knitr::inline_expr("nrow(stickle)")` fish
-(@fig-gene1).
-
-```{{r}}
-#| label: fig-gene1
-#| fig-cap: "Gene1 counts by genotype and microbiota."
-ggplot(filter(long, gene == "Gene1"), aes(Genotype, count, fill = Microbiota)) + geom_boxplot()
-```
+We measured `r knitr::inline_expr("ncol(stickle) - 3")` genes in
+`r knitr::inline_expr("nrow(stickle)")` fish (@fig-gene1).
 ````
 
-::: callout-tip
-The inline code (`r knitr::inline_expr("...")` inside a sentence) means the numbers in your sentences can never disagree with your data. Add `format: pdf` (once TinyTeX is installed) and the same file becomes a manuscript-ready PDF.
-:::
+-   Renders as: "We measured 600 genes in 80 fish (Figure 1)."
+-   Re-run with more fish next month → the sentence updates itself
+-   This is the single biggest practical win of literate programming
 
-## One source, several output formats
+## Rendering: one command, any format
 
-List more than one format in the YAML header and `quarto render` makes them all:
-
-``` yaml
----
-title: "My Analysis"
-format:
-  html: default
-  pdf: default
-  docx: default
----
+``` bash
+quarto render report.qmd              # the format named in the YAML
+quarto render report.qmd --to pdf     # PDF (needs TinyTeX installed once)
+quarto preview report.qmd             # live preview on every save
+quarto render                         # a whole project or website
 ```
 
-| Output type       | Formats                                          |
+-   In **Positron**: the Preview button, or `Cmd/Ctrl + Shift + K`
+
+-   List several formats in the YAML and render them all from one source:
+
+    ``` yaml
+    format:
+      html: default
+      pdf: default
+      docx: default
+    ```
+
+| Output type | Formats |
 |-------------------|--------------------------------------------------|
-| **Documents**     | HTML, PDF (via LaTeX), Word (`.docx`), Markdown  |
-| **Presentations** | RevealJS (these slides!), PowerPoint, Beamer     |
-| **Websites and books** | HTML (all of our class material!)           |
+| **Documents** | HTML, PDF (via LaTeX), Word |
+| **Presentations** | RevealJS (these slides!), PowerPoint, Beamer |
+| **Websites and books** | HTML (all of our class material!) |
 
 ## Callouts and cross-references
 
 ``` markdown
 ::: {.callout-tip title="Pro tip"}
-Callouts come in five types: note, tip, warning, important, caution.
+Five callout types: note, tip, warning, important, caution.
 :::
 
 ![Scaffold under SEM](images/scaffold.png){#fig-sem width=60%}
@@ -325,178 +227,131 @@ Callouts come in five types: note, tip, warning, important, caution.
 As shown in @fig-sem, the pores are uniform.
 ```
 
-::: incremental
--   A **callout** is a colored box - great for tips, warnings, and definitions (you've seen many in these slides)
--   **Cross-references**: label a figure `#fig-...`, a table `#tbl-...`, or an equation `#eq-...`, then refer to it with `@fig-...` - Quarto numbers them automatically
--   Full syntax reference: the course book's [Quarto chapter](../book/chapters/16-quarto-documents.html)
+Label it once, reference it with `@`, and Quarto numbers everything on every render:
+
+| Type | Label | Reference |
+|:-----------|:----------------------------------------|:---------------|
+| Figure | `#| label: fig-name` or `{#fig-name}` | `@fig-name` |
+| Table | `#| label: tbl-name` or `{#tbl-name}` | `@tbl-name` |
+| Equation | `$$ ... $$ {#eq-name}` | `@eq-name` |
+| Section | `## Heading {#sec-name}` | `@sec-name` |
+
+## Mathematics: LaTeX between dollar signs
+
+-   Single `$` for **inline** math, double `$$` for **display** math on its own line:
+
+    ``` markdown
+    The area, $A = \pi r^2$, appears inline, whereas
+
+    $$Pr(Y=r) = \frac{e^{-\mu}\mu^r}{r!}$$
+
+    gets its own centered line.
+    ```
+
+    The area, $A = \pi r^2$, appears inline, whereas $$Pr(Y=r) = \frac{e^{-\mu}\mu^r}{r!}$$ gets its own centered line.
+
+-   Works identically in HTML, PDF, Word, and slides
+
+## Numbered equations are cross-references too
+
+``` markdown
+$$
+\mathrm{SE} = \frac{s}{\sqrt{n}}
+$$ {#eq-se}
+
+The standard error (@eq-se) shrinks with sample size.
+```
+
+$$
+\mathrm{SE} = \frac{s}{\sqrt{n}}
+$$ {#eq-se}
+
+The standard error (@eq-se) shrinks with sample size.
+
+::: callout-tip
+Every Greek letter, operator, matrix, and aligned multi-line derivation you will ever need: [Ch. 17](../book/chapters/17-latex-basics.html) and [App. G](../book/chapters/appendix-G-latex.html). You'll see matrices and aligned equations live in the manuscript demo.
 :::
 
-## Cross-referencing everything
+## Citations: a `.bib` file and `@key`
 
-Every labelled element can be referenced from the text, and the numbers update automatically each time you render:
-
-| Type      | Where the label goes            | Reference syntax |
-|:----------|:--------------------------------|:-----------------|
-| Figures   | `#| label: fig-name` (code chunk) or `{#fig-name}` (image) | `@fig-name` |
-| Tables    | `#| label: tbl-name` or `{#tbl-name}` | `@tbl-name` |
-| Equations | `$$ ... $$ {#eq-name}`          | `@eq-name`       |
-| Sections  | `## Heading {#sec-name}`        | `@sec-name`      |
-
-``` markdown
-![Alt text](images/your_image.png){#fig-scaffold fig-align="center" width="70%"}
-
-See @fig-scaffold and @sec-methods for details.
+``` bibtex
+@article{knuth1984literate,
+  author  = {Knuth, Donald E.},
+  title   = {Literate Programming},
+  journal = {The Computer Journal},
+  year    = {1984}
+}
 ```
 
-## Quarto Markdown formatting
-
 ``` markdown
-*italic*
-**bold**
-$A = \pi \times r^{2}$
+---
+bibliography: references.bib
+csl: nature.csl        # optional: any journal's citation style
+---
+
+Knuth introduced literate programming [@knuth1984literate].
 ```
 
-*italic*
+-   Zotero and Google Scholar export BibTeX entries directly
+-   Quarto formats every citation *and* builds the reference list automatically; swap the `.csl` file to re-style them all for a different journal
 
-**bold**
+# Three demos - same skeleton, three outputs
 
-$A = \pi \times r^{2}$
+## Demo 1: slides (`example_slides.qmd`)
 
-## Quarto Markdown lists
+**`format: revealjs`** - a deck like this one, from one `.qmd`.
 
-``` markdown
-* Item 1
-* Item 2
-    + Item 2a
-    + Item 2b
-```
+Watch for:
 
--   Item 1
--   Item 2
-    -   Item 2a
-    -   Item 2b
+-   `##` = new slide, `#` = section divider
+-   `::: incremental` and `. . .` to reveal content stepwise
+-   Two-column layouts, executed R chunks, stepwise code highlighting
+-   Tabsets, callouts, and math on slides
+-   Speaker notes (press **S**) and the overview (press **O**)
 
-## Quarto Markdown lists
+## Demo 2: a manuscript (`example_manuscript.qmd`)
 
-``` markdown
-1. Item 1
-2. Item 2
-3. Item 3
-    + Item 3a
-    + Item 3b
-```
+**`format: pdf`** - a Science/Nature-style article, LaTeX without writing LaTeX.
 
-1.  Item 1
-2.  Item 2
-3.  Item 3
-    -   Item 3a
-    -   Item 3b
+Watch for:
 
-## Typesetting Mathematics
+-   Scholarly YAML: authors, **affiliations**, ORCID, corresponding author, abstract, keywords
+-   `echo: false` - readers see results, never code
+-   Inline and display math, **numbered equations**, and `@fig-`/`@tbl-`/`@eq-`/`@sec-` cross-references throughout
+-   Superscript citations from `example_manuscript.bib` + `nature.csl`, reference list built for free
+-   Companion files travel with the source: `.bib`, `.csl`, `title.tex`
 
--   Since 'tex' is embedded in Quarto Markdown you can typeset mathematics easily using LaTeX (https://en.wikibooks.org/wiki/LaTeX)
+::: callout-important
+Your **term project report** should start from this skeleton - create the `.qmd` this week.
+:::
 
--   Essentially, just surround your mathematics in \$ symbols
+## Demo 3: a website (`example_website.zip`)
 
--   \$\$ centers the expressions
+**A folder, not a file** - `_quarto.yml` turns it into a project; every `.qmd` becomes a page.
 
-## Typeset mathematics
+Watch for:
 
-Poisson Sampling Equation
+-   `_quarto.yml`: the navbar, theme, and `output-dir: docs`
+-   An `about:` landing page template for your photo + links
+-   `quarto preview` for a live local version while you edit
+-   Research / publications / CV pages - a complete academic site for a graduate student
 
-``` markdown
-$$\large Pr(Y=r) = \frac{e^{-\mu}\mu^r}{r!}$$
-```
+::: callout-tip
+Keep your copy. In **Week 10** we push exactly this folder to GitHub and flip on GitHub Pages - it becomes `your-username.github.io`, for free.
+:::
 
-$$\large Pr(Y=r) = \frac{e^{-\mu}\mu^r}{r!}$$
+# AI-assisted coding: the principles
 
-## Differential Equations
-
-``` markdown
-$$\iint xy^2\,dx\,dy =\frac{1}{6}x^2y^3$$
-```
-
-$$\iint xy^2\,dx\,dy =\frac{1}{6}x^2y^3$$
-
-## In-line versus fenced
-
-``` markdown
-This equation, $y=\frac{1}{2}$, is included inline
-```
-
-This equation, $y=\frac{1}{2}$, is included inline
-
-``` markdown
-Whereas this equation, $$y=\frac{1}{2}$$, is put on a separate line
-```
-
-Whereas this equation $$y=\frac{1}{2}$$ is put on a separate line
-
-## Matrix formulations
-
-``` markdown
-$$	\begin{matrix}
-		-2 & 1 & 0 & 0 & \cdots & 0  \\
-		1 & -2 & 1 & 0 & \cdots & 0  \\
-		0 & 1 & -2 & 1 & \cdots & 0  \\
-		0 & 0 & 1 & -2 & \ddots & \vdots \\
-		\vdots & \vdots & \vdots & \ddots & \ddots & 1  \\
-		0 & 0 & 0 & \cdots & 1 & -2
-	\end{matrix} $$
-```
-
-$$  \begin{matrix}
-        -2 & 1 & 0 & 0 & \cdots & 0  \\
-        1 & -2 & 1 & 0 & \cdots & 0  \\
-        0 & 1 & -2 & 1 & \cdots & 0  \\
-        0 & 0 & 1 & -2 & \ddots & \vdots \\
-        \vdots & \vdots & \vdots & \ddots & \ddots & 1  \\
-        0 & 0 & 0 & \cdots & 1 & -2
-    \end{matrix} $$
-
-## Quarto Markdown is very flexible
-
--   You can use Quarto templates and open as a new Quarto Markdown file
--   Better yet there are extensions that add functionality
-    -   books
-    -   journal articles
-    -   slide shows (these slides!)
-    -   interactive exercises
-
-## More on Quarto Markdown
-
--   https://quarto.org/docs/authoring/
--   https://quarto.org/docs/reference/
--   Lots more fun stuff you can do!
-
-------------------------------------------------------------------------
-
-# `Vibe coding` with the ***help*** of Large Language Models (LLMs)
-
-## What is "vibe coding"?
+## "Vibe coding" and why it fails in science
 
 ::: incremental
 -   A **large language model (LLM)** predicts the most *plausible* next text - including code
--   **Vibe coding** = describe what you want, accept what comes back, run it, paste the error, repeat - *without reading the code*
+-   **Vibe coding** = describe, accept, run, paste the error, repeat - *without reading the code*
 -   Fun for a weekend project; a problem for science:
     -   you have to **defend** every result
     -   scientific bugs are usually **silent** (wrong number, no crash)
     -   you stop **learning**
 -   Our version: keep the speed, drop the blindness - **the assistant writes, you read, a tiny test decides**
-:::
-
-## The tools - three flavors
-
-| Flavor        | Examples                                                        | Sees               | Can run things? |
-|---------------|-----------------------------------------------------------------|--------------------|-----------------|
-| **Chat**      | ChatGPT, Claude, Gemini, **UO Microsoft Copilot Chat**          | only what you paste | no             |
-| **In-editor** | **GitHub Copilot** (VS Code), **Positron Assistant**            | your open files, console | no        |
-| **Agentic**   | Claude Code, Copilot agent mode                                 | your whole project | **yes** - edits files, runs commands |
-
-::: callout-tip
--   **Microsoft Copilot Chat** signed in with your **UO account** is covered by UO's data agreement
--   **GitHub Copilot** is free for verified students via the [Student Developer Pack](https://education.github.com/pack)
--   Start with chat; try agents only with everything committed in Git (Week 10)
 :::
 
 ## The loop
@@ -514,114 +369,38 @@ $$  \begin{matrix}
 Steps 3 and 5 are the ones people skip. Don't.
 :::
 
-## Live demo - the prompt
-
-> I am on Linux with bash. In the current directory there are files ending in `.fasta`. Write a short script that prints, for each file, the file name and the number of sequences (lines starting with `>`), one per line as `filename<TAB>count`.
-
-Expected shape of the answer:
-
-``` bash
-#!/bin/bash
-# Count sequences in every FASTA file in the current directory
-for f in *.fasta; do
-    n=$(grep -c '^>' "$f")
-    printf '%s\t%d\n' "$f" "$n"
-done
-```
-
--   Read it: `for` over the files, `grep -c '^>'` counts header lines, `printf` formats the output
--   Is `"$f"` quoted? Is the pattern anchored with `^`?
-
-## Now verify it
-
-Build inputs where **you** know the answer:
-
-``` bash
-mkdir ai_test && cd ai_test
-printf '>seq1\nACGT\n>seq2\nGGCC\n' > two.fasta
-printf '>only\nACGTACGT\n'          > one.fasta
-printf ''                            > empty.fasta
-bash count_fasta.sh
-```
-
-```
-empty.fasta	0
-one.fasta	1
-two.fasta	2
-```
-
-::: callout-warning
-What if there are **no** `.fasta` files? `*.fasta` stays literal and `grep` errors. The assistant didn't mention that - you only find it by testing. (`shopt -s nullglob` fixes it.)
-:::
-
-## Where LLMs fail
+## Where LLMs fail - the short list
 
 ::: incremental
--   **Hallucinated** functions, packages, arguments - `read_fasta()` from a package that doesn't exist; `na.ignore = TRUE`
--   **Outdated APIs** - `gather()`/`spread()` instead of `pivot_longer()`/`pivot_wider()`
+-   **Hallucinated** functions, packages, and arguments - delivered with total confidence
+-   **Outdated APIs** - last year's function names in this year's package
 -   **Subtly wrong statistics** - `sd(x) / n` instead of `sd(x) / sqrt(n)`; `mean()` when you asked for `median()`
--   **Off-by-one / precedence** - `x[1:n-1]` is `x[0:(n-1)]`, not "all but the last"; in Python `x[1:n]` *excludes* element `n`
--   **Mixing up R and Python** - `x^2` in Python (that's XOR), `df.append()` (removed from pandas 2.0), `len(x)` in R
--   **Silently changing your data** - drops every row with an `NA`, re-sorts and breaks an alignment
--   **Confident nonsense** - an invented file-format spec, delivered with authority
--   **Security-sensitive code** - shell commands built from pasted strings, keys in plain text
+-   **Silently changing your data** - dropping every row with an `NA`, re-sorting and breaking an alignment
 :::
 
-## What you must never paste
+. . .
 
-::: incremental
--   **Unpublished data or results** - describe the *shape* with 3 made-up rows instead
--   **Human-subjects data / PHI** - anything under an IRB protocol or HIPAA is **red** data
--   **Credentials** - API keys, passwords, SSH keys, `.Renviron`; if you paste one, rotate it
--   Anything above **green** classification - unless the tool is **UO-supported** (Copilot Chat with your UO login)
--   In-editor tools send your **open files** as context - close data and secrets first
-:::
+Every failure has the same root cause - the model predicts text, it does not reason about *your* data - and the same fix: **read the code, test on an input where you know the answer**. [Ch. 18](../book/chapters/18-ai-assisted-coding.html) has worked examples of each failure and a review checklist.
+
+## Data rules and the course policy
+
+**Never paste into an unsupported AI tool:**
+
+-   Unpublished data or results · human-subjects data / PHI · credentials
+-   UO data classes: **green** (published data, your code) / **amber** (unpublished research, FERPA) / **red** (HIPAA). Unsupported tools: **green only**; Microsoft Copilot Chat with your UO login is covered by UO's agreement - see [UO's AI Service Offerings](https://service.uoregon.edu/TDClient/2030/Portal/KB/Article/140911/AI-Service-Offerings)
 
 ::: callout-important
-UO data classes: **green** (published data, your code) / **amber** (unpublished research, FERPA) / **red** (HIPAA, SSNs). Unsupported AI tools: **green only**. See UO's [AI Service Offerings](https://service.uoregon.edu/TDClient/2030/Portal/KB/Article/140911/AI-Service-Offerings).
+**Course policy:** AI may help you learn, explore, and debug. Submitted work must be your own, you must be able to **explain every line**, and AI help gets noted in a comment or your README. Can't explain it? Don't submit it.
 :::
 
-## Course policy on AI
-
-::: callout-important
--   AI may help you **learn, explore, and debug** - explain concepts, explain errors, review your code
--   **Submitted work must be your own**
--   You must be able to **explain every line** you turn in - what it does, why it's there, what breaks if you remove it
--   Note AI help in a comment or your README
--   If you can't explain it, don't submit it - we may ask you to walk through it in person
-:::
-
-Same idea for publications: disclose the tool in your methods or README; the humans remain responsible.
-
-## Use it to learn, not to avoid learning
-
-::: incremental
--   Ask **"why?"** - "why `map()` instead of a loop?" - then check the docs (`?median`, `man grep`)
--   Have it **quiz you** - "five short exercises on joins, hidden answers, then grade mine"
--   Ask for the **wrong version** - "how would a beginner get this wrong?"
--   **Explain your code to it** - "I think this does X because Y - am I right?"
--   Turn **off inline suggestions** while learning new syntax - write it yourself first
--   The test: close the assistant and rewrite the core piece from memory. Can't? You were vibe coding.
-:::
-
-## Read more
-
--   Course book chapter: [Coding with AI Assistants](../book/chapters/18-ai-assisted-coding.html) - worked examples in R and bash, a review checklist, prompting template, exercises with planted bugs
--   Try the live-demo prompt again asking for **Python** instead of bash (`pathlib.Path(".").glob("*.fasta")`) - does it handle the empty-directory case?
--   [GitHub Student Developer Pack](https://education.github.com/pack) - free Copilot
--   [UO AI Service Offerings](https://service.uoregon.edu/TDClient/2030/Portal/KB/Article/140911/AI-Service-Offerings) - which tools, which data
-
-::: callout-tip
-Vendor menus and keybindings change every few months - the loop, the failure modes, and the data rules don't.
-:::
+Everything trimmed from today's slides - the chat / in-editor / agentic tool comparison, live worked examples, prompting patterns, and using assistants *to learn* - is in [Ch. 18](../book/chapters/18-ai-assisted-coding.html).
 
 ------------------------------------------------------------------------
 
 ## Summary
 
--   **Quarto** turns one plain-text `.qmd` into HTML, PDF, Word, slides or a website - code, figures and the numbers *in your sentences* all regenerate on every render
--   Chunk options (`#| echo`, `#| fig-cap`, labels) and cross-references (`@fig-...`) are the same in R and Python chunks
--   **LaTeX math** drops straight into your text between `$` fences
--   **AI assistants**: the assistant writes, *you read*, a tiny test decides - and nothing above green data classification goes into an unsupported tool
--   Start your **term project report** as a `.qmd` now; it becomes the final document
--   Next Monday (L08): **Talapas** - running your scripts on UO's cluster. Check that your account works *before* class ([Ex 7](../Exercise_Folder/Exercises_Week07.qmd) ends with the account check)
+-   **Literate programming** keeps prose, code, and results in one executable document - the practical core of reproducible, **FAIR** science
+-   **Quarto** renders one `.qmd` to HTML, PDF, Word, slides, or a website; chunk options, cross-references, LaTeX math, and `.bib` citations are the same everywhere
+-   The three demo files are templates for *your* work: slides for your next talk, the manuscript for your **term project report** (start it this week!), the website for Week 10
+-   **AI assistants**: the assistant writes, *you read*, a tiny test decides - and nothing above green classification goes into an unsupported tool ([Ch. 18](../book/chapters/18-ai-assisted-coding.html) for the full treatment)
+-   Next Monday (L08): **Talapas** - running your scripts on UO's cluster. Check that your account works *before* class ([Ex 7](../Exercise_Folder/Exercises_Week07.qmd) ends with the account check), and remember **HW1 is due next Monday**

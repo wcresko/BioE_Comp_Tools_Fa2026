@@ -199,7 +199,7 @@
 
 <section id="title-slide" class="quarto-title-block center">
   <h1 class="title">Lecture 07</h1>
-  <p class="subtitle">Quarto Markdown, LaTeX and AI-Assisted Coding</p>
+  <p class="subtitle">Reproducible Documents - Quarto, LaTeX and AI-Assisted Coding</p>
 
 <div class="quarto-title-authors">
 <div class="quarto-title-author">
@@ -215,175 +215,155 @@ Bill Cresko
 <h2>Book reading for this lecture</h2>
 <p>The course book goes deeper on everything in this lecture. Read before or after class:</p>
 <ul>
-<li><a href="../book/chapters/18-quarto-documents.html">Ch. 18: Reproducible Documents with Quarto</a></li>
-<li><a href="../book/chapters/19-latex-basics.html">Ch. 19: LaTeX for Scientific Documents</a></li>
-<li><a href="../book/chapters/20-ai-assisted-coding.html">Ch. 20: Coding with AI Assistants</a></li>
-<li><em>Reference:</em> <a href="../book/chapters/appendix-H-latex.html">App. H: LaTeX Command Reference</a></li>
+<li><a href="../book/chapters/16-quarto-documents.html">Ch. 16: Reproducible Documents with Quarto</a></li>
+<li><a href="../book/chapters/17-latex-basics.html">Ch. 17: LaTeX for Scientific Documents</a></li>
+<li><a href="../book/chapters/18-ai-assisted-coding.html">Ch. 18: Coding with AI Assistants</a> - today’s AI section is the <em>short</em> version; the chapter has the full treatment</li>
+<li><em>Reference:</em> <a href="../book/chapters/appendix-G-latex.html">App. G: LaTeX Command Reference</a></li>
 </ul>
 </section>
 <section id="goals-for-today" class="slide level2">
 <h2>Goals for today</h2>
 <ul>
-<li>Quarto Markdown - with R <strong>and Python</strong> code chunks</li>
-<li>Typesetting mathematics with LaTeX</li>
-<li>AI-assisted coding (“vibe coding”) - with your eyes open</li>
+<li>Why <strong>literate programming</strong> is the backbone of reproducible, FAIR science</li>
+<li>The anatomy of a Quarto document - YAML, prose, and code chunks (R <strong>and Python</strong>)</li>
+<li>Typesetting mathematics with <strong>LaTeX</strong>; citations from a <strong><code>.bib</code></strong> file</li>
+<li>Three live demos, one per output format: <strong>slides</strong>, a <strong>manuscript PDF</strong>, and a <strong>website</strong></li>
+<li>AI-assisted coding - the core principles</li>
 </ul>
+<div class="callout callout-tip callout-titled callout-style-default">
+<div class="callout-body">
+<div class="callout-title">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<p><strong>Tip</strong></p>
+</div>
+<div class="callout-content">
+<p>The three demo files are yours to download, break, and reuse: <a href="../Examples.html#week-7">Example Files, Week 7</a>.</p>
+</div>
+</div>
+</div>
 </section>
 <section>
-<section id="markdown-and-quarto-markdown" class="title-slide slide level1 center">
-<h1>Markdown and Quarto Markdown</h1>
+<section id="literate-programming-and-reproducible-science" class="title-slide slide level1 center">
+<h1>Literate programming and reproducible science</h1>
 
 </section>
-<section id="what-is-markdown" class="slide level2">
-<h2>What is Markdown?</h2>
+<section id="the-problem-your-paper-and-your-analysis-drift-apart" class="slide level2">
+<h2>The problem: your paper and your analysis drift apart</h2>
 <ul>
-<li class="fragment">a very lightweight but flexible editing language</li>
-<li class="fragment">allows the <code>rendering</code> of markdown text to a variety of different formats (pdf, html, web pages, powerpoint, etc….)</li>
-<li class="fragment">very simple and common across science and engineering</li>
-<li class="fragment">involves a <code>yaml</code> header (YAML stands for <code>YAML Ain't Markup Language</code>, originally <code>Yet Another Markup Language</code>)</li>
-<li class="fragment">similar to <code>html</code> but simpler</li>
+<li class="fragment">The classic workflow: analyze <em>over here</em> (scripts, console), write <em>over there</em> (Word), and hand-carry numbers and figures between them</li>
+<li class="fragment">Every revision re-opens the gap: figure version five in a version-three draft, a mean in the text the code no longer produces, methods that describe last month’s analysis</li>
+<li class="fragment">Scientific bugs are usually <strong>silent</strong> - nothing crashes when the pasted number is stale</li>
+<li class="fragment">An analysis you cannot regenerate is one you cannot defend - to reviewers, collaborators, or yourself in six months</li>
 </ul>
 </section>
-<section id="what-is-quarto-markdown" class="slide level2">
-<h2>What is Quarto Markdown?</h2>
-<p>Quarto <code>(https://quarto.org/)</code> provides a next-generation authoring framework for data science.</p>
+<section id="literate-programming-the-document-is-the-analysis" class="slide level2">
+<h2>Literate programming: the document <em>is</em> the analysis</h2>
+<blockquote>
+<p>“Instead of imagining that our main task is to instruct a computer what to do, let us concentrate rather on explaining to human beings what we want a computer to do.” - Donald Knuth, <em>Literate Programming</em> (1984)</p>
+</blockquote>
 <ul>
-<li><code>Quarto Markdown</code> is a powerful scientific and technical publishing system that extends the lightweight markup language Markdown for creating formatted text using a plain-text editor</li>
-<li>You can use <code>Quarto Markdown</code> files to save and execute code *and* generate high quality reports that can be shared with an audience.</li>
-<li>You can make html, pdf, docx, websites, slides, books, and more.</li>
-</ul>
-<p>When you save your document, the output will be in the format indicated in your YAML header. This could be an html document, Word document, pdf, website, book, etc.</p>
-</section>
-<section id="getting-started" class="slide level2">
-<h2>Getting started</h2>
-<ul>
-<li><p>Open a new Quarto Markdown document with <strong>File → New File → Quarto Document</strong> in VS Code / Positron / RStudio</p></li>
-<li><p>You should see a document that is already populated with some example text and code</p></li>
+<li class="fragment">One plain-text document holds the <strong>prose, the code, and the results</strong> - rendering re-runs everything from data to figures</li>
+<li class="fragment">The numbers <em>in your sentences</em> are computed, not typed, so they can never disagree with your data</li>
+<li class="fragment">Your methods become <strong>self-documenting</strong>; inconsistencies between what you say and what you do become visible</li>
+<li class="fragment">You already live this: our lab notebook templates, the companion notebooks, this very slide deck and the course book are all Quarto</li>
 </ul>
 </section>
-<section id="this-is-quarto-markdown" class="slide level2">
-<h2>This is Quarto Markdown</h2>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode numberSource yaml number-lines code-with-copy"><code class="sourceCode yaml"><span id="cb1-1"><a></a><span class="pp">---</span></span>
-<span id="cb1-2"><a></a><span class="fu">title</span><span class="kw">:</span><span class="at"> </span><span class="st">"My Analysis"</span></span>
-<span id="cb1-3"><a></a><span class="fu">author</span><span class="kw">:</span><span class="at"> </span><span class="st">"Your Name"</span></span>
-<span id="cb1-4"><a></a><span class="fu">format</span><span class="kw">:</span><span class="at"> html</span></span>
-<span id="cb1-5"><a></a><span class="pp">---</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<section id="reproducibility-has-a-policy-behind-it-fair" class="slide level2">
+<h2>Reproducibility has a policy behind it: FAIR</h2>
 <ul>
-<li>Note that <code>---</code> delineates the <code>yaml header</code>.</li>
-<li>This controls document-level settings and rendering - <code>format:</code> picks the output (<code>html</code>, <code>pdf</code>, <code>docx</code>, <code>revealjs</code>, …)</li>
-<li>There are a lot of options that you can put in the <code>yaml header</code></li>
-<li>(Older R Markdown files use <code>output: html_document</code> here - Quarto uses <code>format:</code>)</li>
+<li class="fragment">Funders (including NIH’s data management and sharing policy) expect research outputs to be <strong>FAIR</strong>:
+<ul>
+<li class="fragment"><strong>F</strong>indable - deposited somewhere with a persistent identifier, not “available upon request”</li>
+<li class="fragment"><strong>A</strong>ccessible - retrievable by standard tools, no special software or permission maze</li>
+<li class="fragment"><strong>I</strong>nteroperable - open, documented formats (tidy <code>.tsv</code> and <code>.qmd</code>, not binary one-offs)</li>
+<li class="fragment"><strong>R</strong>eusable - enough documentation and provenance that someone else can actually use it</li>
+</ul></li>
+<li class="fragment">Literate documents are FAIR practice: plain text any tool can read, methods that travel <em>with</em> the analysis, one source anyone can re-run</li>
+<li class="fragment">The arc of the rest of the course: today the <strong>documents</strong> → Week 9 the <strong>environments</strong> → Week 10 <strong>sharing it all</strong> on GitHub</li>
+</ul>
+</section></section>
+<section>
+<section id="quarto-one-source-many-outputs" class="title-slide slide level1 center">
+<h1>Quarto: one source, many outputs</h1>
+
+</section>
+<section id="markdown-then-quarto" class="slide level2">
+<h2>Markdown, then Quarto</h2>
+<ul>
+<li><p><strong>Markdown</strong>: a lightweight plain-text formatting language</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode numberSource markdown number-lines code-with-copy"><code class="sourceCode markdown"><span id="cb1-1"><a></a>**bold**   *italic*   <span class="in">`code`</span>   <span class="co">[</span><span class="ot">a link</span><span class="co">](https://quarto.org)</span></span>
+<span id="cb1-2"><a></a></span>
+<span id="cb1-3"><a></a><span class="fu"># Big header</span></span>
+<span id="cb1-4"><a></a><span class="fu">## Smaller header</span></span>
+<span id="cb1-5"><a></a></span>
+<span id="cb1-6"><a></a><span class="ss">-   </span>a bullet</span>
+<span id="cb1-7"><a></a><span class="ss">1.  </span>a numbered item</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div></li>
+<li><p><strong>Quarto</strong> extends Markdown into a scientific publishing system: the same text, plus a <strong>YAML header</strong> and <strong>executable code chunks</strong></p></li>
+<li><p>One <code>.qmd</code> source can render to HTML, PDF, Word, slides, websites, and books - this deck, the course site, and the course book are all Quarto</p></li>
 </ul>
 </section>
-<section id="this-is-quarto-markdown-1" class="slide level2">
-<h2>This is Quarto Markdown</h2>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2"><pre class="sourceCode numberSource markdown number-lines code-with-copy"><code class="sourceCode markdown"><span id="cb2-1"><a></a><span class="fu"># Header size 1</span></span>
-<span id="cb2-2"><a></a></span>
-<span id="cb2-3"><a></a><span class="fu">## Header size 2</span></span>
-<span id="cb2-4"><a></a></span>
-<span id="cb2-5"><a></a>I can write text and it will look normal!</span>
+<section id="anatomy-of-a-.qmd-three-ingredients" class="slide level2">
+<h2>Anatomy of a <code>.qmd</code>: three ingredients</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2"><pre class="sourceCode numberSource markdown number-lines code-with-copy"><code class="sourceCode markdown"><span id="cb2-1"><a></a><span class="co">---</span></span>
+<span id="cb2-2"><a></a><span class="an">title:</span><span class="co"> "My Analysis"        # 1. YAML header: document settings;</span></span>
+<span id="cb2-3"><a></a><span class="an">author:</span><span class="co"> "Your Name"         #    format picks the output</span></span>
+<span id="cb2-4"><a></a><span class="an">format:</span><span class="co"> html                #    (html, pdf, docx, revealjs, ...)</span></span>
+<span id="cb2-5"><a></a><span class="co">---</span></span>
 <span id="cb2-6"><a></a></span>
-<span id="cb2-7"><a></a>I can still run code!</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</section>
-<section id="this-is-quarto-markdown-2" class="slide level2">
-<h2>This is Quarto Markdown</h2>
-<div class="panel-tabset">
-<ul id="tabset-1" class="panel-tabset-tabby"><li><a data-tabby-default="" href="#tabset-1-1">R</a></li><li><a href="#tabset-1-2">Python</a></li></ul>
-<div class="tab-content">
-<div id="tabset-1-1">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb3"><pre class="sourceCode numberSource markdown number-lines code-with-copy"><code class="sourceCode markdown"><span id="cb3-1"><a></a><span class="in">```{r}</span></span>
-<span id="cb3-2"><a></a><span class="co">#| label: my-first-chunk</span></span>
-<span id="cb3-3"><a></a><span class="co">#| echo: true</span></span>
-<span id="cb3-4"><a></a></span>
-<span id="cb3-5"><a></a>x <span class="ot">&lt;-</span> <span class="dv">5</span></span>
-<span id="cb3-6"><a></a><span class="fu">print</span>(x<span class="sc">^</span><span class="dv">2</span>)</span>
-<span id="cb3-7"><a></a><span class="in">```</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</div>
-<div id="tabset-1-2">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb4"><pre class="sourceCode numberSource markdown number-lines code-with-copy"><code class="sourceCode markdown"><span id="cb4-1"><a></a><span class="in">```{python}</span></span>
-<span id="cb4-2"><a></a><span class="co">#| label: my-first-chunk-py</span></span>
-<span id="cb4-3"><a></a><span class="co">#| echo: true</span></span>
-<span id="cb4-4"><a></a></span>
-<span id="cb4-5"><a></a>x <span class="op">=</span> <span class="dv">5</span></span>
-<span id="cb4-6"><a></a><span class="bu">print</span>(x<span class="op">**</span><span class="dv">2</span>)</span>
-<span id="cb4-7"><a></a><span class="in">```</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</div>
-</div>
-</div>
+<span id="cb2-7"><a></a><span class="fu">## A section heading</span></span>
+<span id="cb2-8"><a></a></span>
+<span id="cb2-9"><a></a>Ordinary Markdown prose.    # 2. Markdown text</span>
+<span id="cb2-10"><a></a></span>
+<span id="cb2-11"><a></a><span class="in">```{r}</span></span>
+<span id="cb2-12"><a></a><span class="co">#| label: my-first-chunk    # 3. Code chunks, run at render time</span></span>
+<span id="cb2-13"><a></a>x <span class="ot">&lt;-</span> <span class="dv">5</span>                      <span class="co">#    {{r}} runs through knitr,</span></span>
+<span id="cb2-14"><a></a><span class="fu">print</span>(x<span class="sc">^</span><span class="dv">2</span>)                  <span class="co">#    {{python}} through Jupyter -</span></span>
+<span id="cb2-15"><a></a><span class="st">```</span><span class="at">                         #    same chunk options in both</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <ul>
-<li>By default, the code and output will print to your document</li>
-<li>Note the back tick marks - these delineate the code</li>
-<li>The {r} indicates this is r code; {python} indicates Python code - everything else about the chunk is identical</li>
+<li><code>---</code> fences the YAML header; back ticks fence the code</li>
+<li>Mixing R and Python in one file works too (via <code>reticulate</code>) - details in <a href="../book/chapters/16-quarto-documents.html">Ch. 16</a></li>
 </ul>
 </section>
 <section id="rendered-the-chunks-look-like-this" class="slide level2">
 <h2>Rendered, the chunks look like this</h2>
 <div class="panel-tabset">
-<ul id="tabset-2" class="panel-tabset-tabby"><li><a data-tabby-default="" href="#tabset-2-1">R</a></li><li><a href="#tabset-2-2">Python</a></li></ul>
+<ul id="tabset-1" class="panel-tabset-tabby"><li><a data-tabby-default="" href="#tabset-1-1">R</a></li><li><a href="#tabset-1-2">Python</a></li></ul>
 <div class="tab-content">
-<div id="tabset-2-1">
+<div id="tabset-1-1">
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a></a>x <span class="ot">&lt;-</span> <span class="dv">5</span></span>
-<span id="cb5-2"><a></a><span class="fu">print</span>(x<span class="sc">^</span><span class="dv">2</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a></a>x <span class="ot">&lt;-</span> <span class="dv">5</span></span>
+<span id="cb3-2"><a></a><span class="fu">print</span>(x<span class="sc">^</span><span class="dv">2</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>[1] 25</code></pre>
 </div>
 </div>
 </div>
-<div id="tabset-2-2">
+<div id="tabset-1-2">
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a></a>x <span class="op">=</span> <span class="dv">5</span></span>
-<span id="cb7-2"><a></a><span class="bu">print</span>(x<span class="op">**</span><span class="dv">2</span>)</span>
-<span id="cb7-3"><a></a><span class="co"># 25</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a></a>x <span class="op">=</span> <span class="dv">5</span></span>
+<span id="cb5-2"><a></a><span class="bu">print</span>(x<span class="op">**</span><span class="dv">2</span>)</span>
+<span id="cb5-3"><a></a><span class="co"># 25</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 </div>
 </div>
 </div>
 <ul>
 <li>Code first, output underneath - Quarto ran the code while rendering</li>
-<li>R chunks run through <strong>knitr</strong>; Python chunks run through <strong>Jupyter</strong> (see the next slides)</li>
+<li>Run chunks interactively as you write: the arrows on each chunk in Positron, or <code>Cmd/Ctrl + Enter</code> line by line</li>
 </ul>
 </section>
-<section id="navigating-chunks" class="slide level2">
-<h2>Navigating chunks</h2>
-<ul>
-<li>Easy to run chunks - a few ways to do this</li>
-<li>Top right of each chunk - just run, run all above, etc.</li>
-<li>Cog wheel at the top of the Quarto Markdown document - run options</li>
-<li>Keyboard shortcuts</li>
-</ul>
-</section>
-<section id="chunk-options-quarto-style" class="slide level2">
-<h2>Chunk options, Quarto style</h2>
-<p>Quarto puts chunk options <em>inside</em> the chunk with <code>#|</code> - one per line, the <strong>same options in every language</strong>:</p>
-<div class="panel-tabset">
-<ul id="tabset-3" class="panel-tabset-tabby"><li><a data-tabby-default="" href="#tabset-3-1">R</a></li><li><a href="#tabset-3-2">Python</a></li></ul>
-<div class="tab-content">
-<div id="tabset-3-1">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb8"><pre class="sourceCode numberSource markdown number-lines code-with-copy"><code class="sourceCode markdown"><span id="cb8-1"><a></a><span class="in">```{r}</span></span>
-<span id="cb8-2"><a></a><span class="co">#| label: fig-stiffness</span></span>
-<span id="cb8-3"><a></a><span class="co">#| echo: false</span></span>
-<span id="cb8-4"><a></a><span class="co">#| fig-cap: "Stiffness by hydrogel concentration"</span></span>
-<span id="cb8-5"><a></a><span class="co">#| fig-width: 6</span></span>
-<span id="cb8-6"><a></a><span class="fu">boxplot</span>(compression <span class="sc">~</span> hydrogel_concentration, <span class="at">data =</span> mydata)</span>
-<span id="cb8-7"><a></a><span class="in">```</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</div>
-<div id="tabset-3-2">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb9"><pre class="sourceCode numberSource markdown number-lines code-with-copy"><code class="sourceCode markdown"><span id="cb9-1"><a></a><span class="in">```{python}</span></span>
-<span id="cb9-2"><a></a><span class="co">#| label: fig-stiffness-py</span></span>
-<span id="cb9-3"><a></a><span class="co">#| echo: false</span></span>
-<span id="cb9-4"><a></a><span class="co">#| fig-cap: "Stiffness by hydrogel concentration"</span></span>
-<span id="cb9-5"><a></a><span class="co">#| fig-width: 6</span></span>
-<span id="cb9-6"><a></a>mydata.boxplot(column<span class="op">=</span><span class="st">"compression"</span>, by<span class="op">=</span><span class="st">"hydrogel_concentration"</span>)</span>
-<span id="cb9-7"><a></a><span class="in">```</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</div>
-</div>
-</div>
+<section id="chunk-options-control-what-the-reader-sees" class="slide level2">
+<h2>Chunk options control what the reader sees</h2>
+<p>Options go <em>inside</em> the chunk with <code>#|</code> - identical in every language:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb6"><pre class="sourceCode numberSource markdown number-lines code-with-copy"><code class="sourceCode markdown"><span id="cb6-1"><a></a><span class="in">```{r}</span></span>
+<span id="cb6-2"><a></a><span class="co">#| label: fig-stiffness</span></span>
+<span id="cb6-3"><a></a><span class="co">#| echo: false</span></span>
+<span id="cb6-4"><a></a><span class="co">#| fig-cap: "Stiffness by hydrogel concentration"</span></span>
+<span id="cb6-5"><a></a><span class="fu">boxplot</span>(compression <span class="sc">~</span> hydrogel_concentration, <span class="at">data =</span> mydata)</span>
+<span id="cb6-6"><a></a><span class="in">```</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <table class="caption-top">
-<colgroup>
-<col style="width: 32%">
-<col style="width: 67%">
-</colgroup>
 <thead>
 <tr class="header">
 <th>Option</th>
@@ -393,7 +373,7 @@ Bill Cresko
 <tbody>
 <tr class="odd">
 <td><code>echo: false</code></td>
-<td>Run the code, <strong>hide</strong> the code</td>
+<td>Run the code, <strong>hide</strong> the code (manuscripts!)</td>
 </tr>
 <tr class="even">
 <td><code>eval: false</code></td>
@@ -404,16 +384,12 @@ Bill Cresko
 <td>Run it, show <strong>nothing</strong> (setup chunks)</td>
 </tr>
 <tr class="even">
-<td><code>warning: false</code></td>
-<td>Hide warnings (<code>message: false</code> for messages)</td>
-</tr>
-<tr class="odd">
 <td><code>fig-cap:</code></td>
 <td>Figure caption</td>
 </tr>
-<tr class="even">
-<td><code>cache: true</code></td>
-<td>Don’t re-run slow chunks unless they change</td>
+<tr class="odd">
+<td><code>label: fig-...</code></td>
+<td>Makes the figure numbered and referenceable</td>
 </tr>
 </tbody>
 </table>
@@ -426,110 +402,40 @@ Bill Cresko
 <p><strong>Tip</strong></p>
 </div>
 <div class="callout-content">
-<p>Set defaults for the whole document in the YAML header under <code>execute:</code> and override chunk-by-chunk only where needed.</p>
+<p>Set document-wide defaults in the YAML under <code>execute:</code>; override per chunk only where needed.</p>
 </div>
 </div>
 </div>
 </section>
-<section id="python-in-quarto-engines-jupyter-and-notebooks" class="slide level2">
-<h2>Python in Quarto: engines, Jupyter and notebooks</h2>
-<div class="panel-tabset">
-<ul id="tabset-4" class="panel-tabset-tabby"><li><a data-tabby-default="" href="#tabset-4-1">Setup</a></li><li><a href="#tabset-4-2">Which engine runs my chunks?</a></li><li><a href="#tabset-4-3">Notebooks</a></li></ul>
-<div class="tab-content">
-<div id="tabset-4-1">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb10"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb10-1"><a></a><span class="ex">python3</span> <span class="at">-m</span> venv .venv <span class="kw">&amp;&amp;</span> <span class="bu">source</span> .venv/bin/activate   <span class="co"># a project environment</span></span>
-<span id="cb10-2"><a></a><span class="ex">pip</span> install jupyter pandas matplotlib                <span class="co"># Quarto runs {python} chunks through Jupyter</span></span>
-<span id="cb10-3"><a></a><span class="ex">quarto</span> check jupyter                                 <span class="co"># does Quarto see it?</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb11"><pre class="sourceCode numberSource yaml number-lines code-with-copy"><code class="sourceCode yaml"><span id="cb11-1"><a></a><span class="pp">---</span></span>
-<span id="cb11-2"><a></a><span class="fu">title</span><span class="kw">:</span><span class="at"> </span><span class="st">"My analysis"</span></span>
-<span id="cb11-3"><a></a><span class="fu">format</span><span class="kw">:</span><span class="at"> html</span></span>
-<span id="cb11-4"><a></a><span class="fu">jupyter</span><span class="kw">:</span><span class="at"> python3</span><span class="co">        # optional: name the kernel explicitly</span></span>
-<span id="cb11-5"><a></a><span class="pp">---</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</div>
-<div id="tabset-4-2">
+<section id="inline-code-sentences-that-cannot-go-stale" class="slide level2">
+<h2>Inline code: sentences that cannot go stale</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb7"><pre class="sourceCode numberSource markdown number-lines code-with-copy"><code class="sourceCode markdown"><span id="cb7-1"><a></a><span class="in">```{r}</span></span>
+<span id="cb7-2"><a></a><span class="co">#| include: false</span></span>
+<span id="cb7-3"><a></a>stickle <span class="ot">&lt;-</span> <span class="fu">read_tsv</span>(<span class="st">"data/Stickle_RNAseq.tsv"</span>)</span>
+<span id="cb7-4"><a></a><span class="in">```</span></span>
+<span id="cb7-5"><a></a></span>
+<span id="cb7-6"><a></a>We measured <span class="in">`r ncol(stickle) - 3`</span> genes in</span>
+<span id="cb7-7"><a></a><span class="in">`r nrow(stickle)`</span> fish (@fig-gene1).</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <ul>
-<li>Only <code>{r}</code> chunks → <strong>knitr</strong> (R) runs the document</li>
-<li>Only <code>{python}</code> chunks → <strong>Jupyter</strong> runs the document</li>
-<li><strong>Both</strong> in one file → knitr runs it and hands Python chunks to R’s <code>reticulate</code> package (<code>install.packages("reticulate")</code>) - objects can even be shared: <code>py$x</code> in R, <code>r.x</code> in Python</li>
-<li><code>`{python} 1 + 1`</code> and <code>2</code> also work <strong>inline</strong> in the text</li>
-</ul>
-</div>
-<div id="tabset-4-3">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb12"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb12-1"><a></a><span class="ex">quarto</span> render notebook.ipynb              <span class="co"># a Jupyter notebook is a valid Quarto input</span></span>
-<span id="cb12-2"><a></a><span class="ex">quarto</span> convert notebook.ipynb             <span class="co"># .ipynb  -&gt;  .qmd (plain text, Git-friendly)</span></span>
-<span id="cb12-3"><a></a><span class="ex">quarto</span> convert analysis.qmd               <span class="co"># .qmd    -&gt;  .ipynb (to hand to a Jupyter user)</span></span>
-<span id="cb12-4"><a></a><span class="ex">quarto</span> preview notebook.ipynb</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<ul>
-<li><code>.ipynb</code> stores code, Markdown <strong>and saved output</strong> as JSON - handy interactively, noisy in Git</li>
-<li><code>.qmd</code> stores only the source; output is regenerated when you render</li>
-</ul>
-</div>
-</div>
-</div>
-</section>
-<section id="rendering-your-document" class="slide level2">
-<h2>Rendering your document</h2>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb13"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb13-1"><a></a><span class="ex">quarto</span> render report.qmd              <span class="co"># default format from the YAML</span></span>
-<span id="cb13-2"><a></a><span class="ex">quarto</span> render report.qmd <span class="at">--to</span> pdf     <span class="co"># PDF (needs LaTeX / TinyTeX)</span></span>
-<span id="cb13-3"><a></a><span class="ex">quarto</span> render report.qmd <span class="at">--to</span> docx    <span class="co"># Word document</span></span>
-<span id="cb13-4"><a></a><span class="ex">quarto</span> preview report.qmd             <span class="co"># live preview - re-renders every time you save</span></span>
-<span id="cb13-5"><a></a><span class="ex">quarto</span> render                         <span class="co"># render a whole project/website (_quarto.yml)</span></span>
-<span id="cb13-6"><a></a><span class="ex">quarto</span> render notebook.ipynb          <span class="co"># Jupyter notebooks render the same way</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<ul>
-<li class="fragment">In <strong>VS Code</strong> (Quarto extension) or <strong>Positron</strong>: the <strong>Preview</strong> button or <code>Cmd/Ctrl-Shift-K</code></li>
-<li class="fragment">In <strong>RStudio</strong>: the <strong>Render</strong> button (same shortcut)</li>
-<li class="fragment">Same source, many outputs: HTML, PDF, Word, slides, websites</li>
+<li>Renders as: “We measured 600 genes in 80 fish (Figure 1).”</li>
+<li>Re-run with more fish next month → the sentence updates itself</li>
+<li>This is the single biggest practical win of literate programming</li>
 </ul>
 </section>
-<section id="running-example-a-stickleback-report-in-quarto" class="slide level2">
-<h2>Running example: a stickleback report in Quarto</h2>
-<p>One <code>.qmd</code> file: prose, the analysis, the figure, and the numbers in the text - all regenerated on every render.</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb14"><pre class="sourceCode numberSource markdown number-lines code-with-copy"><code class="sourceCode markdown"><span id="cb14-1"><a></a><span class="co">---</span></span>
-<span id="cb14-2"><a></a><span class="an">title:</span><span class="co"> "Genotype and microbiota effects on gut gene expression"</span></span>
-<span id="cb14-3"><a></a><span class="an">author:</span><span class="co"> "Your Name"</span></span>
-<span id="cb14-4"><a></a><span class="an">format:</span><span class="co"> html</span></span>
-<span id="cb14-5"><a></a><span class="co">---</span></span>
-<span id="cb14-6"><a></a></span>
-<span id="cb14-7"><a></a><span class="in">```{r}</span></span>
-<span id="cb14-8"><a></a><span class="co">#| label: setup</span></span>
-<span id="cb14-9"><a></a><span class="co">#| message: false</span></span>
-<span id="cb14-10"><a></a><span class="fu">library</span>(tidyverse)</span>
-<span id="cb14-11"><a></a>stickle <span class="ot">&lt;-</span> <span class="fu">read_tsv</span>(<span class="st">"data/Stickle_RNAseq.tsv"</span>, <span class="at">show_col_types =</span> <span class="cn">FALSE</span>)</span>
-<span id="cb14-12"><a></a>long <span class="ot">&lt;-</span> stickle <span class="sc">|&gt;</span> <span class="fu">pivot_longer</span>(<span class="fu">starts_with</span>(<span class="st">"Gene"</span>), <span class="at">names_to =</span> <span class="st">"gene"</span>, <span class="at">values_to =</span> <span class="st">"count"</span>)</span>
-<span id="cb14-13"><a></a><span class="in">```</span></span>
-<span id="cb14-14"><a></a></span>
-<span id="cb14-15"><a></a>We measured <span class="in">`r n_distinct(long$gene)`</span> genes in <span class="in">`r nrow(stickle)`</span> fish</span>
-<span id="cb14-16"><a></a>(@fig-gene1).</span>
-<span id="cb14-17"><a></a></span>
-<span id="cb14-18"><a></a><span class="in">```{r}</span></span>
-<span id="cb14-19"><a></a><span class="co">#| label: fig-gene1</span></span>
-<span id="cb14-20"><a></a><span class="co">#| fig-cap: "Gene1 counts by genotype and microbiota."</span></span>
-<span id="cb14-21"><a></a><span class="fu">ggplot</span>(<span class="fu">filter</span>(long, gene <span class="sc">==</span> <span class="st">"Gene1"</span>), <span class="fu">aes</span>(Genotype, count, <span class="at">fill =</span> Microbiota)) <span class="sc">+</span> <span class="fu">geom_boxplot</span>()</span>
-<span id="cb14-22"><a></a><span class="in">```</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="callout callout-tip callout-titled callout-style-default">
-<div class="callout-body">
-<div class="callout-title">
-<div class="callout-icon-container">
-<i class="callout-icon"></i>
-</div>
-<p><strong>Tip</strong></p>
-</div>
-<div class="callout-content">
-<p>The inline code (<code>r ...</code> inside a sentence) means the numbers in your sentences can never disagree with your data. Add <code>format: pdf</code> (once TinyTeX is installed) and the same file becomes a manuscript-ready PDF.</p>
-</div>
-</div>
-</div>
-</section>
-<section id="one-source-several-output-formats" class="slide level2">
-<h2>One source, several output formats</h2>
-<p>List more than one format in the YAML header and <code>quarto render</code> makes them all:</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb15"><pre class="sourceCode numberSource yaml number-lines code-with-copy"><code class="sourceCode yaml"><span id="cb15-1"><a></a><span class="pp">---</span></span>
-<span id="cb15-2"><a></a><span class="fu">title</span><span class="kw">:</span><span class="at"> </span><span class="st">"My Analysis"</span></span>
-<span id="cb15-3"><a></a><span class="fu">format</span><span class="kw">:</span></span>
-<span id="cb15-4"><a></a><span class="at">  </span><span class="fu">html</span><span class="kw">:</span><span class="at"> default</span></span>
-<span id="cb15-5"><a></a><span class="at">  </span><span class="fu">pdf</span><span class="kw">:</span><span class="at"> default</span></span>
-<span id="cb15-6"><a></a><span class="at">  </span><span class="fu">docx</span><span class="kw">:</span><span class="at"> default</span></span>
-<span id="cb15-7"><a></a><span class="pp">---</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<section id="rendering-one-command-any-format" class="slide level2">
+<h2>Rendering: one command, any format</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb8"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb8-1"><a></a><span class="ex">quarto</span> render report.qmd              <span class="co"># the format named in the YAML</span></span>
+<span id="cb8-2"><a></a><span class="ex">quarto</span> render report.qmd <span class="at">--to</span> pdf     <span class="co"># PDF (needs TinyTeX installed once)</span></span>
+<span id="cb8-3"><a></a><span class="ex">quarto</span> preview report.qmd             <span class="co"># live preview on every save</span></span>
+<span id="cb8-4"><a></a><span class="ex">quarto</span> render                         <span class="co"># a whole project or website</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<ul>
+<li><p>In <strong>Positron</strong>: the Preview button, or <code>Cmd/Ctrl + Shift + K</code></p></li>
+<li><p>List several formats in the YAML and render them all from one source:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb9"><pre class="sourceCode numberSource yaml number-lines code-with-copy"><code class="sourceCode yaml"><span id="cb9-1"><a></a><span class="fu">format</span><span class="kw">:</span></span>
+<span id="cb9-2"><a></a><span class="at">  </span><span class="fu">html</span><span class="kw">:</span><span class="at"> default</span></span>
+<span id="cb9-3"><a></a><span class="at">  </span><span class="fu">pdf</span><span class="kw">:</span><span class="at"> default</span></span>
+<span id="cb9-4"><a></a><span class="at">  </span><span class="fu">docx</span><span class="kw">:</span><span class="at"> default</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div></li>
+</ul>
 <table class="caption-top">
 <thead>
 <tr class="header">
@@ -540,7 +446,7 @@ Bill Cresko
 <tbody>
 <tr class="odd">
 <td><strong>Documents</strong></td>
-<td>HTML, PDF (via LaTeX), Word (<code>.docx</code>), Markdown</td>
+<td>HTML, PDF (via LaTeX), Word</td>
 </tr>
 <tr class="even">
 <td><strong>Presentations</strong></td>
@@ -555,229 +461,75 @@ Bill Cresko
 </section>
 <section id="callouts-and-cross-references" class="slide level2">
 <h2>Callouts and cross-references</h2>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb16"><pre class="sourceCode numberSource markdown number-lines code-with-copy"><code class="sourceCode markdown"><span id="cb16-1"><a></a>::: {.callout-tip title="Pro tip"}</span>
-<span id="cb16-2"><a></a>Callouts come in five types: note, tip, warning, important, caution.</span>
-<span id="cb16-3"><a></a>:::</span>
-<span id="cb16-4"><a></a></span>
-<span id="cb16-5"><a></a><span class="al">![Scaffold under SEM](images/scaffold.png)</span>{#fig-sem width=60%}</span>
-<span id="cb16-6"><a></a></span>
-<span id="cb16-7"><a></a>As shown in @fig-sem, the pores are uniform.</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<ul>
-<li class="fragment">A <strong>callout</strong> is a colored box - great for tips, warnings, and definitions (you’ve seen many in these slides)</li>
-<li class="fragment"><strong>Cross-references</strong>: label a figure <code>#fig-...</code>, a table <code>#tbl-...</code>, or an equation <code>#eq-...</code>, then refer to it with <code>@fig-...</code> - Quarto numbers them automatically</li>
-<li class="fragment">Full syntax reference: the course book’s <a href="../book/chapters/18-quarto-documents.html">Quarto chapter</a></li>
-</ul>
-</section>
-<section id="cross-referencing-everything" class="slide level2">
-<h2>Cross-referencing everything</h2>
-<p>Every labelled element can be referenced from the text, and the numbers update automatically each time you render:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb10"><pre class="sourceCode numberSource markdown number-lines code-with-copy"><code class="sourceCode markdown"><span id="cb10-1"><a></a>::: {.callout-tip title="Pro tip"}</span>
+<span id="cb10-2"><a></a>Five callout types: note, tip, warning, important, caution.</span>
+<span id="cb10-3"><a></a>:::</span>
+<span id="cb10-4"><a></a></span>
+<span id="cb10-5"><a></a><span class="al">![Scaffold under SEM](images/scaffold.png)</span>{#fig-sem width=60%}</span>
+<span id="cb10-6"><a></a></span>
+<span id="cb10-7"><a></a>As shown in @fig-sem, the pores are uniform.</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Label it once, reference it with <code>@</code>, and Quarto numbers everything on every render:</p>
 <table class="caption-top">
 <colgroup>
 <col style="width: 17%">
-<col style="width: 53%">
-<col style="width: 29%">
+<col style="width: 59%">
+<col style="width: 23%">
 </colgroup>
 <thead>
 <tr class="header">
 <th style="text-align: left;">Type</th>
-<th style="text-align: left;">Where the label goes</th>
-<th style="text-align: left;">Reference syntax</th>
+<th style="text-align: left;">Label</th>
+<th style="text-align: left;">Reference</th>
 </tr>
 </thead>
 <tbody>
 <tr class="odd">
-<td style="text-align: left;">Figures</td>
-<td style="text-align: left;"><code>#| label: fig-name</code> (code chunk) or <code>{#fig-name}</code> (image)</td>
+<td style="text-align: left;">Figure</td>
+<td style="text-align: left;"><code>#| label: fig-name</code> or <code>{#fig-name}</code></td>
 <td style="text-align: left;"><code>@fig-name</code></td>
 </tr>
 <tr class="even">
-<td style="text-align: left;">Tables</td>
+<td style="text-align: left;">Table</td>
 <td style="text-align: left;"><code>#| label: tbl-name</code> or <code>{#tbl-name}</code></td>
 <td style="text-align: left;"><code>@tbl-name</code></td>
 </tr>
 <tr class="odd">
-<td style="text-align: left;">Equations</td>
+<td style="text-align: left;">Equation</td>
 <td style="text-align: left;"><code>$$ ... $$ {#eq-name}</code></td>
 <td style="text-align: left;"><code>@eq-name</code></td>
 </tr>
 <tr class="even">
-<td style="text-align: left;">Sections</td>
+<td style="text-align: left;">Section</td>
 <td style="text-align: left;"><code>## Heading {#sec-name}</code></td>
 <td style="text-align: left;"><code>@sec-name</code></td>
 </tr>
 </tbody>
 </table>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb17"><pre class="sourceCode numberSource markdown number-lines code-with-copy"><code class="sourceCode markdown"><span id="cb17-1"><a></a><span class="al">![Alt text](images/your_image.png)</span>{#fig-scaffold fig-align="center" width="70%"}</span>
-<span id="cb17-2"><a></a></span>
-<span id="cb17-3"><a></a>See @fig-scaffold and @sec-methods for details.</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </section>
-<section id="quarto-markdown-formatting" class="slide level2">
-<h2>Quarto Markdown formatting</h2>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb18"><pre class="sourceCode numberSource markdown number-lines code-with-copy"><code class="sourceCode markdown"><span id="cb18-1"><a></a>*italic*</span>
-<span id="cb18-2"><a></a>**bold**</span>
-<span id="cb18-3"><a></a>$A = \pi \times r^{2}$</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<p><em>italic</em></p>
-<p><strong>bold</strong></p>
-<p><span class="math inline">\(A = \pi \times r^{2}\)</span></p>
-</section>
-<section id="quarto-markdown-lists" class="slide level2">
-<h2>Quarto Markdown lists</h2>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb19"><pre class="sourceCode numberSource markdown number-lines code-with-copy"><code class="sourceCode markdown"><span id="cb19-1"><a></a><span class="ss">* </span>Item 1</span>
-<span id="cb19-2"><a></a><span class="ss">* </span>Item 2</span>
-<span id="cb19-3"><a></a><span class="ss">    + </span>Item 2a</span>
-<span id="cb19-4"><a></a><span class="ss">    + </span>Item 2b</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<section id="mathematics-latex-between-dollar-signs" class="slide level2">
+<h2>Mathematics: LaTeX between dollar signs</h2>
 <ul>
-<li>Item 1</li>
-<li>Item 2
-<ul>
-<li>Item 2a</li>
-<li>Item 2b</li>
-</ul></li>
+<li><p>Single <code>$</code> for <strong>inline</strong> math, double <code>$$</code> for <strong>display</strong> math on its own line:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb11"><pre class="sourceCode numberSource markdown number-lines code-with-copy"><code class="sourceCode markdown"><span id="cb11-1"><a></a>The area, $A = \pi r^2$, appears inline, whereas</span>
+<span id="cb11-2"><a></a></span>
+<span id="cb11-3"><a></a>$$Pr(Y=r) = \frac{e^{-\mu}\mu^r}{r!}$$</span>
+<span id="cb11-4"><a></a></span>
+<span id="cb11-5"><a></a>gets its own centered line.</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>The area, <span class="math inline">\(A = \pi r^2\)</span>, appears inline, whereas <span class="math display">\[Pr(Y=r) = \frac{e^{-\mu}\mu^r}{r!}\]</span> gets its own centered line.</p></li>
+<li><p>Works identically in HTML, PDF, Word, and slides</p></li>
 </ul>
 </section>
-<section id="quarto-markdown-lists-1" class="slide level2">
-<h2>Quarto Markdown lists</h2>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb20"><pre class="sourceCode numberSource markdown number-lines code-with-copy"><code class="sourceCode markdown"><span id="cb20-1"><a></a><span class="ss">1. </span>Item 1</span>
-<span id="cb20-2"><a></a><span class="ss">2. </span>Item 2</span>
-<span id="cb20-3"><a></a><span class="ss">3. </span>Item 3</span>
-<span id="cb20-4"><a></a><span class="ss">    + </span>Item 3a</span>
-<span id="cb20-5"><a></a><span class="ss">    + </span>Item 3b</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<ol type="1">
-<li>Item 1</li>
-<li>Item 2</li>
-<li>Item 3
-<ul>
-<li>Item 3a</li>
-<li>Item 3b</li>
-</ul></li>
-</ol>
-</section>
-<section id="typesetting-mathematics" class="slide level2">
-<h2>Typesetting Mathematics</h2>
-<ul>
-<li><p>Since ‘tex’ is embedded in Quarto Markdown you can typeset mathematics easily using LaTeX (https://en.wikibooks.org/wiki/LaTeX)</p></li>
-<li><p>Essentially, just surround your mathematics in $ symbols</p></li>
-<li><p>$$ centers the expressions</p></li>
-</ul>
-</section>
-<section id="typeset-mathematics" class="slide level2">
-<h2>Typeset mathematics</h2>
-<p>Poisson Sampling Equation</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb21"><pre class="sourceCode numberSource markdown number-lines code-with-copy"><code class="sourceCode markdown"><span id="cb21-1"><a></a>$$\large Pr(Y=r) = \frac{e^{-\mu}\mu^r}{r!}$$</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<p><span class="math display">\[\large Pr(Y=r) = \frac{e^{-\mu}\mu^r}{r!}\]</span></p>
-</section>
-<section id="differential-equations" class="slide level2">
-<h2>Differential Equations</h2>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb22"><pre class="sourceCode numberSource markdown number-lines code-with-copy"><code class="sourceCode markdown"><span id="cb22-1"><a></a>$$\iint xy^2\,dx\,dy =\frac{1}{6}x^2y^3$$</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<p><span class="math display">\[\iint xy^2\,dx\,dy =\frac{1}{6}x^2y^3\]</span></p>
-</section>
-<section id="in-line-versus-fenced" class="slide level2">
-<h2>In-line versus fenced</h2>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb23"><pre class="sourceCode numberSource markdown number-lines code-with-copy"><code class="sourceCode markdown"><span id="cb23-1"><a></a>This equation, $y=\frac{1}{2}$, is included inline</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<p>This equation, <span class="math inline">\(y=\frac{1}{2}\)</span>, is included inline</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb24"><pre class="sourceCode numberSource markdown number-lines code-with-copy"><code class="sourceCode markdown"><span id="cb24-1"><a></a>Whereas this equation, $$y=\frac{1}{2}$$, is put on a separate line</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<p>Whereas this equation <span class="math display">\[y=\frac{1}{2}\]</span> is put on a separate line</p>
-</section>
-<section id="matrix-formulations" class="slide level2">
-<h2>Matrix formulations</h2>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb25"><pre class="sourceCode numberSource markdown number-lines code-with-copy"><code class="sourceCode markdown"><span id="cb25-1"><a></a>$$  \begin{matrix}</span>
-<span id="cb25-2"><a></a>        -2 &amp; 1 &amp; 0 &amp; 0 &amp; \cdots &amp; 0  <span class="sc">\\</span></span>
-<span id="cb25-3"><a></a>        1 &amp; -2 &amp; 1 &amp; 0 &amp; \cdots &amp; 0  <span class="sc">\\</span></span>
-<span id="cb25-4"><a></a>        0 &amp; 1 &amp; -2 &amp; 1 &amp; \cdots &amp; 0  <span class="sc">\\</span></span>
-<span id="cb25-5"><a></a>        0 &amp; 0 &amp; 1 &amp; -2 &amp; \ddots &amp; \vdots <span class="sc">\\</span></span>
-<span id="cb25-6"><a></a>        \vdots &amp; \vdots &amp; \vdots &amp; \ddots &amp; \ddots &amp; 1  <span class="sc">\\</span></span>
-<span id="cb25-7"><a></a>        0 &amp; 0 &amp; 0 &amp; \cdots &amp; 1 &amp; -2</span>
-<span id="cb25-8"><a></a>    \end{matrix} $$</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<p><span class="math display">\[  \begin{matrix}
-        -2 &amp; 1 &amp; 0 &amp; 0 &amp; \cdots &amp; 0  \\
-        1 &amp; -2 &amp; 1 &amp; 0 &amp; \cdots &amp; 0  \\
-        0 &amp; 1 &amp; -2 &amp; 1 &amp; \cdots &amp; 0  \\
-        0 &amp; 0 &amp; 1 &amp; -2 &amp; \ddots &amp; \vdots \\
-        \vdots &amp; \vdots &amp; \vdots &amp; \ddots &amp; \ddots &amp; 1  \\
-        0 &amp; 0 &amp; 0 &amp; \cdots &amp; 1 &amp; -2
-    \end{matrix} \]</span></p>
-</section>
-<section id="quarto-markdown-is-very-flexible" class="slide level2">
-<h2>Quarto Markdown is very flexible</h2>
-<ul>
-<li>You can use Quarto templates and open as a new Quarto Markdown file</li>
-<li>Better yet there are extensions that add functionality
-<ul>
-<li>books</li>
-<li>journal articles</li>
-<li>slide shows (these slides!)</li>
-<li>interactive exercises</li>
-</ul></li>
-</ul>
-</section>
-<section id="more-on-quarto-markdown" class="slide level2">
-<h2>More on Quarto Markdown</h2>
-<ul>
-<li>https://quarto.org/docs/authoring/</li>
-<li>https://quarto.org/docs/reference/</li>
-<li>Lots more fun stuff you can do!</li>
-</ul>
-</section>
-<section class="slide level2">
-
-</section></section>
-<section>
-<section id="vibe-coding-with-the-help-of-large-language-models-llms" class="title-slide slide level1 center">
-<h1><code>Vibe coding</code> with the <strong><em>help</em></strong> of Large Language Models (LLMs)</h1>
-
-</section>
-<section id="what-is-vibe-coding" class="slide level2">
-<h2>What is “vibe coding”?</h2>
-<ul>
-<li class="fragment">A <strong>large language model (LLM)</strong> predicts the most <em>plausible</em> next text - including code</li>
-<li class="fragment"><strong>Vibe coding</strong> = describe what you want, accept what comes back, run it, paste the error, repeat - <em>without reading the code</em></li>
-<li class="fragment">Fun for a weekend project; a problem for science:
-<ul>
-<li class="fragment">you have to <strong>defend</strong> every result</li>
-<li class="fragment">scientific bugs are usually <strong>silent</strong> (wrong number, no crash)</li>
-<li class="fragment">you stop <strong>learning</strong></li>
-</ul></li>
-<li class="fragment">Our version: keep the speed, drop the blindness - <strong>the assistant writes, you read, a tiny test decides</strong></li>
-</ul>
-</section>
-<section id="the-tools---three-flavors" class="slide level2">
-<h2>The tools - three flavors</h2>
-<table class="caption-top">
-<colgroup>
-<col style="width: 12%">
-<col style="width: 55%">
-<col style="width: 17%">
-<col style="width: 14%">
-</colgroup>
-<thead>
-<tr class="header">
-<th>Flavor</th>
-<th>Examples</th>
-<th>Sees</th>
-<th>Can run things?</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td><strong>Chat</strong></td>
-<td>ChatGPT, Claude, Gemini, <strong>UO Microsoft Copilot Chat</strong></td>
-<td>only what you paste</td>
-<td>no</td>
-</tr>
-<tr class="even">
-<td><strong>In-editor</strong></td>
-<td><strong>GitHub Copilot</strong> (VS Code), <strong>Positron Assistant</strong></td>
-<td>your open files, console</td>
-<td>no</td>
-</tr>
-<tr class="odd">
-<td><strong>Agentic</strong></td>
-<td>Claude Code, Copilot agent mode</td>
-<td>your whole project</td>
-<td><strong>yes</strong> - edits files, runs commands</td>
-</tr>
-</tbody>
-</table>
+<section id="numbered-equations-are-cross-references-too" class="slide level2">
+<h2>Numbered equations are cross-references too</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb12"><pre class="sourceCode numberSource markdown number-lines code-with-copy"><code class="sourceCode markdown"><span id="cb12-1"><a></a>$$</span>
+<span id="cb12-2"><a></a>\mathrm{SE} = \frac{s}{\sqrt{n}}</span>
+<span id="cb12-3"><a></a>$$ {#eq-se}</span>
+<span id="cb12-4"><a></a></span>
+<span id="cb12-5"><a></a>The standard error (@eq-se) shrinks with sample size.</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p><span id="eq-se"><span class="math display">\[
+\mathrm{SE} = \frac{s}{\sqrt{n}}
+\tag{1}\]</span></span></p>
+<p>The standard error (<a href="#/eq-se" class="quarto-xref">Equation&nbsp;1</a>) shrinks with sample size.</p>
 <div class="callout callout-tip callout-titled callout-style-default">
 <div class="callout-body">
 <div class="callout-title">
@@ -787,14 +539,114 @@ Bill Cresko
 <p><strong>Tip</strong></p>
 </div>
 <div class="callout-content">
+<p>Every Greek letter, operator, matrix, and aligned multi-line derivation you will ever need: <a href="../book/chapters/17-latex-basics.html">Ch. 17</a> and <a href="../book/chapters/appendix-G-latex.html">App. G</a>. You’ll see matrices and aligned equations live in the manuscript demo.</p>
+</div>
+</div>
+</div>
+</section>
+<section id="citations-a-.bib-file-and-key" class="slide level2">
+<h2>Citations: a <code>.bib</code> file and <code>@key</code></h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb13"><pre class="sourceCode numberSource bibtex number-lines code-with-copy"><code class="sourceCode bibtex"><span id="cb13-1"><a></a><span class="va">@article</span>{<span class="ot">knuth1984literate</span>,</span>
+<span id="cb13-2"><a></a>  <span class="dt">author</span>  = {Knuth, Donald E.},</span>
+<span id="cb13-3"><a></a>  <span class="dt">title</span>   = {Literate Programming},</span>
+<span id="cb13-4"><a></a>  <span class="dt">journal</span> = {The Computer Journal},</span>
+<span id="cb13-5"><a></a>  <span class="dt">year</span>    = {1984}</span>
+<span id="cb13-6"><a></a>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb14"><pre class="sourceCode numberSource markdown number-lines code-with-copy"><code class="sourceCode markdown"><span id="cb14-1"><a></a><span class="co">---</span></span>
+<span id="cb14-2"><a></a><span class="an">bibliography:</span><span class="co"> references.bib</span></span>
+<span id="cb14-3"><a></a><span class="an">csl:</span><span class="co"> nature.csl        # optional: any journal's citation style</span></span>
+<span id="cb14-4"><a></a><span class="co">---</span></span>
+<span id="cb14-5"><a></a></span>
+<span id="cb14-6"><a></a>Knuth introduced literate programming <span class="co">[</span><span class="ot">@knuth1984literate</span><span class="co">]</span>.</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <ul>
-<li><strong>Microsoft Copilot Chat</strong> signed in with your <strong>UO account</strong> is covered by UO’s data agreement</li>
-<li><strong>GitHub Copilot</strong> is free for verified students via the <a href="https://education.github.com/pack">Student Developer Pack</a></li>
-<li>Start with chat; try agents only with everything committed in Git (Week 10)</li>
+<li>Zotero and Google Scholar export BibTeX entries directly</li>
+<li>Quarto formats every citation <em>and</em> builds the reference list automatically; swap the <code>.csl</code> file to re-style them all for a different journal</li>
 </ul>
+</section></section>
+<section>
+<section id="three-demos---same-skeleton-three-outputs" class="title-slide slide level1 center">
+<h1>Three demos - same skeleton, three outputs</h1>
+
+</section>
+<section id="demo-1-slides-example_slides.qmd" class="slide level2">
+<h2>Demo 1: slides (<code>example_slides.qmd</code>)</h2>
+<p><strong><code>format: revealjs</code></strong> - a deck like this one, from one <code>.qmd</code>.</p>
+<p>Watch for:</p>
+<ul>
+<li><code>##</code> = new slide, <code>#</code> = section divider</li>
+<li><code>::: incremental</code> and <code>. . .</code> to reveal content stepwise</li>
+<li>Two-column layouts, executed R chunks, stepwise code highlighting</li>
+<li>Tabsets, callouts, and math on slides</li>
+<li>Speaker notes (press <strong>S</strong>) and the overview (press <strong>O</strong>)</li>
+</ul>
+</section>
+<section id="demo-2-a-manuscript-example_manuscript.qmd" class="slide level2">
+<h2>Demo 2: a manuscript (<code>example_manuscript.qmd</code>)</h2>
+<p><strong><code>format: pdf</code></strong> - a Science/Nature-style article, LaTeX without writing LaTeX.</p>
+<p>Watch for:</p>
+<ul>
+<li>Scholarly YAML: authors, <strong>affiliations</strong>, ORCID, corresponding author, abstract, keywords</li>
+<li><code>echo: false</code> - readers see results, never code</li>
+<li>Inline and display math, <strong>numbered equations</strong>, and <code>@fig-</code>/<code>@tbl-</code>/<code>@eq-</code>/<code>@sec-</code> cross-references throughout</li>
+<li>Superscript citations from <code>example_manuscript.bib</code> + <code>nature.csl</code>, reference list built for free</li>
+<li>Companion files travel with the source: <code>.bib</code>, <code>.csl</code>, <code>title.tex</code></li>
+</ul>
+<div class="callout callout-important callout-titled callout-style-default">
+<div class="callout-body">
+<div class="callout-title">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<p><strong>Important</strong></p>
+</div>
+<div class="callout-content">
+<p>Your <strong>term project report</strong> should start from this skeleton - create the <code>.qmd</code> this week.</p>
 </div>
 </div>
 </div>
+</section>
+<section id="demo-3-a-website-example_website.zip" class="slide level2">
+<h2>Demo 3: a website (<code>example_website.zip</code>)</h2>
+<p><strong>A folder, not a file</strong> - <code>_quarto.yml</code> turns it into a project; every <code>.qmd</code> becomes a page.</p>
+<p>Watch for:</p>
+<ul>
+<li><code>_quarto.yml</code>: the navbar, theme, and <code>output-dir: docs</code></li>
+<li>An <code>about:</code> landing page template for your photo + links</li>
+<li><code>quarto preview</code> for a live local version while you edit</li>
+<li>Research / publications / CV pages - a complete academic site for a graduate student</li>
+</ul>
+<div class="callout callout-tip callout-titled callout-style-default">
+<div class="callout-body">
+<div class="callout-title">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<p><strong>Tip</strong></p>
+</div>
+<div class="callout-content">
+<p>Keep your copy. In <strong>Week 10</strong> we push exactly this folder to GitHub and flip on GitHub Pages - it becomes <code>your-username.github.io</code>, for free.</p>
+</div>
+</div>
+</div>
+</section></section>
+<section>
+<section id="ai-assisted-coding-the-principles" class="title-slide slide level1 center">
+<h1>AI-assisted coding: the principles</h1>
+
+</section>
+<section id="vibe-coding-and-why-it-fails-in-science" class="slide level2">
+<h2>“Vibe coding” and why it fails in science</h2>
+<ul>
+<li class="fragment">A <strong>large language model (LLM)</strong> predicts the most <em>plausible</em> next text - including code</li>
+<li class="fragment"><strong>Vibe coding</strong> = describe, accept, run, paste the error, repeat - <em>without reading the code</em></li>
+<li class="fragment">Fun for a weekend project; a problem for science:
+<ul>
+<li class="fragment">you have to <strong>defend</strong> every result</li>
+<li class="fragment">scientific bugs are usually <strong>silent</strong> (wrong number, no crash)</li>
+<li class="fragment">you stop <strong>learning</strong></li>
+</ul></li>
+<li class="fragment">Our version: keep the speed, drop the blindness - <strong>the assistant writes, you read, a tiny test decides</strong></li>
+</ul>
 </section>
 <section id="the-loop" class="slide level2">
 <h2>The loop</h2>
@@ -820,69 +672,24 @@ Bill Cresko
 </div>
 </div>
 </section>
-<section id="live-demo---the-prompt" class="slide level2">
-<h2>Live demo - the prompt</h2>
-<blockquote>
-<p>I am on Linux with bash. In the current directory there are files ending in <code>.fasta</code>. Write a short script that prints, for each file, the file name and the number of sequences (lines starting with <code>&gt;</code>), one per line as <code>filename&lt;TAB&gt;count</code>.</p>
-</blockquote>
-<p>Expected shape of the answer:</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb26"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb26-1"><a></a><span class="co">#!/bin/bash</span></span>
-<span id="cb26-2"><a></a><span class="co"># Count sequences in every FASTA file in the current directory</span></span>
-<span id="cb26-3"><a></a><span class="cf">for</span> f <span class="kw">in</span> <span class="pp">*</span>.fasta<span class="kw">;</span> <span class="cf">do</span></span>
-<span id="cb26-4"><a></a>    <span class="va">n</span><span class="op">=</span><span class="va">$(</span><span class="fu">grep</span> <span class="at">-c</span> <span class="st">'^&gt;'</span> <span class="st">"</span><span class="va">$f</span><span class="st">"</span><span class="va">)</span></span>
-<span id="cb26-5"><a></a>    <span class="bu">printf</span> <span class="st">'%s\t%d\n'</span> <span class="st">"</span><span class="va">$f</span><span class="st">"</span> <span class="st">"</span><span class="va">$n</span><span class="st">"</span></span>
-<span id="cb26-6"><a></a><span class="cf">done</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<section id="where-llms-fail---the-short-list" class="slide level2">
+<h2>Where LLMs fail - the short list</h2>
 <ul>
-<li>Read it: <code>for</code> over the files, <code>grep -c '^&gt;'</code> counts header lines, <code>printf</code> formats the output</li>
-<li>Is <code>"$f"</code> quoted? Is the pattern anchored with <code>^</code>?</li>
-</ul>
-</section>
-<section id="now-verify-it" class="slide level2">
-<h2>Now verify it</h2>
-<p>Build inputs where <strong>you</strong> know the answer:</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb27"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb27-1"><a></a><span class="fu">mkdir</span> ai_test <span class="kw">&amp;&amp;</span> <span class="bu">cd</span> ai_test</span>
-<span id="cb27-2"><a></a><span class="bu">printf</span> <span class="st">'&gt;seq1\nACGT\n&gt;seq2\nGGCC\n'</span> <span class="op">&gt;</span> two.fasta</span>
-<span id="cb27-3"><a></a><span class="bu">printf</span> <span class="st">'&gt;only\nACGTACGT\n'</span>          <span class="op">&gt;</span> one.fasta</span>
-<span id="cb27-4"><a></a><span class="bu">printf</span> <span class="st">''</span>                            <span class="op">&gt;</span> empty.fasta</span>
-<span id="cb27-5"><a></a><span class="fu">bash</span> count_fasta.sh</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<pre><code>empty.fasta 0
-one.fasta   1
-two.fasta   2</code></pre>
-<div class="callout callout-warning callout-titled callout-style-default">
-<div class="callout-body">
-<div class="callout-title">
-<div class="callout-icon-container">
-<i class="callout-icon"></i>
-</div>
-<p><strong>Warning</strong></p>
-</div>
-<div class="callout-content">
-<p>What if there are <strong>no</strong> <code>.fasta</code> files? <code>*.fasta</code> stays literal and <code>grep</code> errors. The assistant didn’t mention that - you only find it by testing. (<code>shopt -s nullglob</code> fixes it.)</p>
-</div>
-</div>
-</div>
-</section>
-<section id="where-llms-fail" class="slide level2">
-<h2>Where LLMs fail</h2>
-<ul>
-<li class="fragment"><strong>Hallucinated</strong> functions, packages, arguments - <code>read_fasta()</code> from a package that doesn’t exist; <code>na.ignore = TRUE</code></li>
-<li class="fragment"><strong>Outdated APIs</strong> - <code>gather()</code>/<code>spread()</code> instead of <code>pivot_longer()</code>/<code>pivot_wider()</code></li>
+<li class="fragment"><strong>Hallucinated</strong> functions, packages, and arguments - delivered with total confidence</li>
+<li class="fragment"><strong>Outdated APIs</strong> - last year’s function names in this year’s package</li>
 <li class="fragment"><strong>Subtly wrong statistics</strong> - <code>sd(x) / n</code> instead of <code>sd(x) / sqrt(n)</code>; <code>mean()</code> when you asked for <code>median()</code></li>
-<li class="fragment"><strong>Off-by-one / precedence</strong> - <code>x[1:n-1]</code> is <code>x[0:(n-1)]</code>, not “all but the last”; in Python <code>x[1:n]</code> <em>excludes</em> element <code>n</code></li>
-<li class="fragment"><strong>Mixing up R and Python</strong> - <code>x^2</code> in Python (that’s XOR), <code>df.append()</code> (removed from pandas 2.0), <code>len(x)</code> in R</li>
-<li class="fragment"><strong>Silently changing your data</strong> - drops every row with an <code>NA</code>, re-sorts and breaks an alignment</li>
-<li class="fragment"><strong>Confident nonsense</strong> - an invented file-format spec, delivered with authority</li>
-<li class="fragment"><strong>Security-sensitive code</strong> - shell commands built from pasted strings, keys in plain text</li>
+<li class="fragment"><strong>Silently changing your data</strong> - dropping every row with an <code>NA</code>, re-sorting and breaking an alignment</li>
 </ul>
+<div class="fragment">
+<p>Every failure has the same root cause - the model predicts text, it does not reason about <em>your</em> data - and the same fix: <strong>read the code, test on an input where you know the answer</strong>. <a href="../book/chapters/18-ai-assisted-coding.html">Ch. 18</a> has worked examples of each failure and a review checklist.</p>
+</div>
 </section>
-<section id="what-you-must-never-paste" class="slide level2">
-<h2>What you must never paste</h2>
+<section id="data-rules-and-the-course-policy" class="slide level2">
+<h2>Data rules and the course policy</h2>
+<p><strong>Never paste into an unsupported AI tool:</strong></p>
 <ul>
-<li class="fragment"><strong>Unpublished data or results</strong> - describe the <em>shape</em> with 3 made-up rows instead</li>
-<li class="fragment"><strong>Human-subjects data / PHI</strong> - anything under an IRB protocol or HIPAA is <strong>red</strong> data</li>
-<li class="fragment"><strong>Credentials</strong> - API keys, passwords, SSH keys, <code>.Renviron</code>; if you paste one, rotate it</li>
-<li class="fragment">Anything above <strong>green</strong> classification - unless the tool is <strong>UO-supported</strong> (Copilot Chat with your UO login)</li>
-<li class="fragment">In-editor tools send your <strong>open files</strong> as context - close data and secrets first</li>
+<li>Unpublished data or results · human-subjects data / PHI · credentials</li>
+<li>UO data classes: <strong>green</strong> (published data, your code) / <strong>amber</strong> (unpublished research, FERPA) / <strong>red</strong> (HIPAA). Unsupported tools: <strong>green only</strong>; Microsoft Copilot Chat with your UO login is covered by UO’s agreement - see <a href="https://service.uoregon.edu/TDClient/2030/Portal/KB/Article/140911/AI-Service-Offerings">UO’s AI Service Offerings</a></li>
 </ul>
 <div class="callout callout-important callout-titled callout-style-default">
 <div class="callout-body">
@@ -893,76 +700,20 @@ two.fasta   2</code></pre>
 <p><strong>Important</strong></p>
 </div>
 <div class="callout-content">
-<p>UO data classes: <strong>green</strong> (published data, your code) / <strong>amber</strong> (unpublished research, FERPA) / <strong>red</strong> (HIPAA, SSNs). Unsupported AI tools: <strong>green only</strong>. See UO’s <a href="https://service.uoregon.edu/TDClient/2030/Portal/KB/Article/140911/AI-Service-Offerings">AI Service Offerings</a>.</p>
+<p><strong>Course policy:</strong> AI may help you learn, explore, and debug. Submitted work must be your own, you must be able to <strong>explain every line</strong>, and AI help gets noted in a comment or your README. Can’t explain it? Don’t submit it.</p>
 </div>
 </div>
 </div>
-</section>
-<section id="course-policy-on-ai" class="slide level2">
-<h2>Course policy on AI</h2>
-<div class="callout callout-important callout-titled callout-style-default">
-<div class="callout-body">
-<div class="callout-title">
-<div class="callout-icon-container">
-<i class="callout-icon"></i>
-</div>
-<p><strong>Important</strong></p>
-</div>
-<div class="callout-content">
-<ul>
-<li>AI may help you <strong>learn, explore, and debug</strong> - explain concepts, explain errors, review your code</li>
-<li><strong>Submitted work must be your own</strong></li>
-<li>You must be able to <strong>explain every line</strong> you turn in - what it does, why it’s there, what breaks if you remove it</li>
-<li>Note AI help in a comment or your README</li>
-<li>If you can’t explain it, don’t submit it - we may ask you to walk through it in person</li>
-</ul>
-</div>
-</div>
-</div>
-<p>Same idea for publications: disclose the tool in your methods or README; the humans remain responsible.</p>
-</section>
-<section id="use-it-to-learn-not-to-avoid-learning" class="slide level2">
-<h2>Use it to learn, not to avoid learning</h2>
-<ul>
-<li class="fragment">Ask <strong>“why?”</strong> - “why <code>map()</code> instead of a loop?” - then check the docs (<code>?median</code>, <code>man grep</code>)</li>
-<li class="fragment">Have it <strong>quiz you</strong> - “five short exercises on joins, hidden answers, then grade mine”</li>
-<li class="fragment">Ask for the <strong>wrong version</strong> - “how would a beginner get this wrong?”</li>
-<li class="fragment"><strong>Explain your code to it</strong> - “I think this does X because Y - am I right?”</li>
-<li class="fragment">Turn <strong>off inline suggestions</strong> while learning new syntax - write it yourself first</li>
-<li class="fragment">The test: close the assistant and rewrite the core piece from memory. Can’t? You were vibe coding.</li>
-</ul>
-</section>
-<section id="read-more" class="slide level2">
-<h2>Read more</h2>
-<ul>
-<li>Course book chapter: <a href="../book/chapters/20-ai-assisted-coding.html">Coding with AI Assistants</a> - worked examples in R and bash, a review checklist, prompting template, exercises with planted bugs</li>
-<li>Try the live-demo prompt again asking for <strong>Python</strong> instead of bash (<code>pathlib.Path(".").glob("*.fasta")</code>) - does it handle the empty-directory case?</li>
-<li><a href="https://education.github.com/pack">GitHub Student Developer Pack</a> - free Copilot</li>
-<li><a href="https://service.uoregon.edu/TDClient/2030/Portal/KB/Article/140911/AI-Service-Offerings">UO AI Service Offerings</a> - which tools, which data</li>
-</ul>
-<div class="callout callout-tip callout-titled callout-style-default">
-<div class="callout-body">
-<div class="callout-title">
-<div class="callout-icon-container">
-<i class="callout-icon"></i>
-</div>
-<p><strong>Tip</strong></p>
-</div>
-<div class="callout-content">
-<p>Vendor menus and keybindings change every few months - the loop, the failure modes, and the data rules don’t.</p>
-</div>
-</div>
-</div>
+<p>Everything trimmed from today’s slides - the chat / in-editor / agentic tool comparison, live worked examples, prompting patterns, and using assistants <em>to learn</em> - is in <a href="../book/chapters/18-ai-assisted-coding.html">Ch. 18</a>.</p>
 </section>
 <section id="summary" class="slide level2">
 <h2>Summary</h2>
 <ul>
-<li><strong>Quarto</strong> turns one plain-text <code>.qmd</code> into HTML, PDF, Word, slides or a website - code, figures and the numbers <em>in your sentences</em> all regenerate on every render</li>
-<li>Chunk options (<code>#| echo</code>, <code>#| fig-cap</code>, labels) and cross-references (<code>@fig-...</code>) are the same in R and Python chunks</li>
-<li><strong>LaTeX math</strong> drops straight into your text between <code>$</code> fences</li>
-<li><strong>AI assistants</strong>: the assistant writes, <em>you read</em>, a tiny test decides - and nothing above green data classification goes into an unsupported tool</li>
-<li>Start your <strong>term project report</strong> as a <code>.qmd</code> now; it becomes the final document</li>
-<li>Next Monday (L08): <strong>Talapas</strong> - running your scripts on UO’s cluster. Check that your account works <em>before</em> class (<a href="../Exercise_Folder/Exercises_Week07.html">Ex 7</a> ends with the account check)</li>
+<li><strong>Literate programming</strong> keeps prose, code, and results in one executable document - the practical core of reproducible, <strong>FAIR</strong> science</li>
+<li><strong>Quarto</strong> renders one <code>.qmd</code> to HTML, PDF, Word, slides, or a website; chunk options, cross-references, LaTeX math, and <code>.bib</code> citations are the same everywhere</li>
+<li>The three demo files are templates for <em>your</em> work: slides for your next talk, the manuscript for your <strong>term project report</strong> (start it this week!), the website for Week 10</li>
+<li><strong>AI assistants</strong>: the assistant writes, <em>you read</em>, a tiny test decides - and nothing above green classification goes into an unsupported tool (<a href="../book/chapters/18-ai-assisted-coding.html">Ch. 18</a> for the full treatment)</li>
+<li>Next Monday (L08): <strong>Talapas</strong> - running your scripts on UO’s cluster. Check that your account works <em>before</em> class (<a href="../Exercise_Folder/Exercises_Week07.html">Ex 7</a> ends with the account check), and remember <strong>HW1 is due next Monday</strong></li>
 </ul>
 
 

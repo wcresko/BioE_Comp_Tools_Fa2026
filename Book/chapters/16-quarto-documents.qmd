@@ -77,6 +77,12 @@ This approach has profound implications for science:
 
 3. **Learning accelerates.** Well-documented analyses serve as tutorials for others (and for your future self) who want to learn your techniques.
 
+4. **Reproducibility becomes the default.** Rendering re-runs everything from raw data to final figures, so "can we regenerate this?" stops being a scramble before submission and becomes something that happens every time you press render.
+
+::: {.callout-note title="Literate programming is FAIR practice"}
+Funders increasingly require that research outputs be **FAIR** — **F**indable, **A**ccessible, **I**nteroperable, and **R**eusable [@wilkinson2016fair] — and a literate document delivers each letter in practice. Plain-text `.qmd` sources and tidy data tables are open formats that every tool can read (*interoperable*); the methods travel inside the document instead of drifting in a separate file (*reusable*); and the whole bundle — source, data, and environment — can be deposited in a public repository with a persistent identifier (*findable* and *accessible*; @sec-git-github). @sec-appendix-data-formats works through the principles and a minimal FAIR checklist; Chapter 1 describes the funding policies behind them.
+:::
+
 ## Markdown: The Foundation {#sec-markdown}
 
 **Markdown** is a lightweight markup language that lets you add formatting to plain text. Created by John Gruber in 2004, it's designed to be readable in its raw form while rendering to beautifully formatted documents.
@@ -1027,6 +1033,78 @@ format:
 
 Run `quarto pandoc -o custom-reference.docx --print-default-data-file reference.docx` to obtain a starting template, edit its styles in Word, and point `reference-doc` at the result.
 
+## Presentations with RevealJS {#sec-quarto-presentations}
+
+Set `format: revealjs` and the same machinery — Markdown, chunks, callouts, math, cross-references — produces a browser-based slide deck instead of a page. The course's lecture slides are built exactly this way.
+
+```yaml
+---
+title: "My Research in Six Slides"
+author: "Your Name"
+format:
+  revealjs:
+    theme: default        # simple, serif, moon, solarized, dark, ...
+    slide-number: true
+    footer: "Lab meeting - November 2026"
+    incremental: false    # true = every list reveals point by point
+    chalkboard: true      # draw on your slides while presenting
+---
+```
+
+The structure rules are simple: every level-2 heading (`##`) starts a new slide, and a level-1 heading (`#`) makes a section-divider slide. Beyond that, a handful of presentation-specific tools cover most of what a scientific talk needs:
+
+**Revealing content stepwise.** Wrap a list in `::: {.incremental}` to step through it with the arrow key, or put three spaced dots on their own line (`. . .`) to pause *anything* mid-slide. Any block with the `.fragment` class appears on a keypress.
+
+**Columns.** A `:::: columns` div containing two `::: {.column width="45%"}` divs puts text beside a figure, or two figures side by side — the most common slide layout in a research talk.
+
+**Executed code on slides.** Chunks run at render time exactly as in documents, so a figure on a slide is regenerated from data on every render. Two chunk options earn their keep in decks: `output-location: slide` puts a chunk's figure on its own slide, and `code-line-numbers: "1-2|4|6"` highlights groups of lines one keypress at a time — ideal for walking an audience through code.
+
+**Speaker notes.** A `::: {.notes}` div at the end of a slide is invisible to the audience; press **S** while presenting for the speaker view with notes and a timer. Press **O** for a zoomed-out overview of the whole deck, **F** for fullscreen.
+
+The same source also renders to PowerPoint (`quarto render deck.qmd --to pptx`) or LaTeX Beamer (`--to beamer`) when a conference insists; simple layouts survive the trip best.
+
+::: {.callout-tip title="A deck to take apart"}
+The Week 7 example `example_slides.qmd` on the course [Example Files page](https://wcresko.github.io/BioE_Comp_Tools_Fa2026/Examples.html#week-7) demonstrates all of the above in twelve heavily commented slides. Render it, press **S** and **O** to try the presenter tools, then change the theme in the YAML and render again.
+:::
+
+## Scholarly Manuscripts {#sec-quarto-manuscripts}
+
+A journal manuscript is a Quarto document with three extra ingredients: scholarly front matter, a citation style, and the discipline of `echo: false`.
+
+**Scholarly front matter.** Authors can be structured objects rather than plain strings, carrying affiliations, ORCID iDs, and the corresponding-author flag; `abstract` and `keywords` complete the title page:
+
+```yaml
+---
+title: "Matrix stiffness tunes gene expression in the gut"
+author:
+  - name: Avery J. Rivers
+    orcid: 0000-0002-1825-0097
+    corresponding: true
+    email: arivers@uoregon.edu
+    affiliations:
+      - ref: kc
+affiliations:
+  - id: kc
+    name: University of Oregon
+    department: Knight Campus for Accelerating Scientific Impact
+abstract: |
+  One paragraph, 150-200 words, no citations.
+keywords: [extracellular matrix, mechanotransduction]
+---
+```
+
+**Results, never code.** Set `echo: false` document-wide (under `execute:` in the YAML): readers of a manuscript see figures, tables, and numbers — all still regenerated from the embedded code on every render, with inline code keeping the values in your sentences honest (@sec-quarto-inline-code).
+
+**Citations in the journal's style.** Name a `.bib` file and a CSL style file in the YAML (@sec-quarto-citations) and every citation and the reference list are formatted for that journal — `nature.csl` gives numbered superscripts, `apa.csl` gives author-year, and the [CSL repository](https://github.com/citation-style-language/styles) has a file for essentially every journal. Changing journals means changing one line, not re-typing references.
+
+**Everything numbered and cross-referenced.** Figures, tables, display equations (`$$ ... $$ {#eq-...}`), and sections all take labels and `@`-references (@sec-cross-references), so "Equation 2" and "Figure 3" renumber themselves when reviewers ask you to reorder.
+
+Two PDF-specific notes. First, journals often want line numbers on submissions — add `\usepackage{lineno}` and `\linenumbers` through `include-in-header`. Second, Quarto's default PDF template prints author *names* but silently drops *affiliations*; the fix is either a small `template-partials` file that rebuilds the title block, or a ready-made journal format extension (`quarto add quarto-journals/nature` and friends — see the [journal formats gallery](https://quarto.org/docs/journals/)).
+
+::: {.callout-tip title="A manuscript to take apart - and to build on"}
+The Week 7 example `example_manuscript.qmd` on the course [Example Files page](https://wcresko.github.io/BioE_Comp_Tools_Fa2026/Examples.html#week-7) is a complete Science/Nature-style article: scholarly front matter, lorem-ipsum sections, inline and display LaTeX, numbered equations, cross-references everywhere, superscript citations from its companion `example_manuscript.bib` and `nature.csl`, and a commented `title.tex` partial that restores affiliations on the PDF title page. It is the intended skeleton for your **term project report** — copy it, keep the companion files beside it, and replace the lorem ipsum with your science.
+:::
+
 ## Project Organization {#sec-quarto-projects}
 
 For multi-document projects (like this book), use a `_quarto.yml` file:
@@ -1050,6 +1128,38 @@ format:
   html:
     theme: cosmo
 ```
+
+## Websites {#sec-quarto-websites}
+
+A Quarto **website** is a project whose pages share a navigation bar: set `type: website` in `_quarto.yml`, and every `.qmd` in the folder becomes a page of the site. This is how the course website — and a typical personal academic site — is built.
+
+```yaml
+project:
+  type: website
+  output-dir: docs        # render into docs/ for GitHub Pages
+
+website:
+  title: "Avery Rivers"
+  navbar:
+    left:
+      - href: index.qmd
+        text: Home
+      - research.qmd
+      - publications.qmd
+      - cv.qmd
+
+format:
+  html:
+    theme: flatly
+```
+
+Two conveniences do most of the work. **About pages**: adding an `about:` block (template `trestles`, `jolla`, `solana`, ...) to `index.qmd` lays out a landing page with your photo, a bio, and link buttons to GitHub, Google Scholar, and email — no HTML required. **Live preview**: `quarto preview` run inside the folder serves the site locally and re-renders every time you save, so you edit with the result in view; `quarto render` writes the finished site into `output-dir`.
+
+A rendered website is just a folder of HTML — the missing step is hosting, and that is Week 10: push the folder to GitHub and serve it with GitHub Pages (@sec-github-pages), either from `docs/` on the main branch or with `quarto publish gh-pages`.
+
+::: {.callout-tip title="A site to make your own"}
+The Week 7 example `example_website.zip` on the course [Example Files page](https://wcresko.github.io/BioE_Comp_Tools_Fa2026/Examples.html#week-7) is a complete four-page academic site for a fictional graduate student — home/about, research, publications, CV — pre-configured with `output-dir: docs` for GitHub Pages. Unzip it, run `quarto preview` inside it, replace Avery's details with yours, and keep it: it goes live in Week 10.
+:::
 
 ## Best Practices {#sec-quarto-best-practices}
 
@@ -1128,6 +1238,7 @@ Quarto transforms how we communicate scientific work:
 - **Callouts, tabsets, and divs** structure a document with the same `:::` fence syntax
 - **Multiple formats** serve different audiences from one source
 - **Cross-references and citations** create professional, navigable documents from `@`-keys and a `.bib` file
+- **The same toolkit scales up**: `format: revealjs` for talks, scholarly front matter plus a CSL style for journal manuscripts, and website projects for your academic presence on the web
 
 The investment in learning Quarto pays dividends every time you write a report, prepare a presentation, or publish research. Your future self (and your collaborators) will thank you for the reproducibility.
 
@@ -1137,6 +1248,9 @@ The investment in learning Quarto pays dividends every time you write a report, 
 - [Quarto Gallery](https://quarto.org/docs/gallery/) — Examples and templates
 - [R Markdown Cookbook](https://bookdown.org/yihui/rmarkdown-cookbook/) — Many techniques apply to Quarto
 - [Markdown Guide](https://www.markdownguide.org/) — Comprehensive Markdown reference
+- [Quarto: RevealJS presentations](https://quarto.org/docs/presentations/revealjs/) — Every slide feature, with examples
+- [Quarto: Websites](https://quarto.org/docs/websites/) — Site structure, navigation, and about pages
+- [Quarto: Journal formats](https://quarto.org/docs/journals/) — Ready-made article formats for many publishers
 
 ## Exercises {#sec-quarto-exercises .unnumbered}
 
@@ -1178,4 +1292,12 @@ The investment in learning Quarto pays dividends every time you write a report, 
 3. Refer to both tables and to one figure from the text with `@`
 4. Create a `references.bib` with two entries, add `bibliography:` to the YAML, and cite both sources (one in brackets, one in running text)
 5. Render and check that the numbering and reference list are generated automatically
+
+**Exercise 6: One Toolkit, Three Outputs**
+
+1. Download the three Week 7 examples from the course [Example Files page](https://wcresko.github.io/BioE_Comp_Tools_Fa2026/Examples.html#week-7) — the slide deck, the manuscript with its companion files, and the website zip
+2. Render `example_slides.qmd`, then change the `theme:` and add one new slide containing an executed code chunk
+3. In the manuscript, add one reference to the `.bib` file and cite it, add one numbered equation and reference it from the text, and re-render (to PDF with TinyTeX, otherwise to HTML)
+4. Unzip the website, run `quarto preview` inside the folder, and replace the fictional student's name, photo, and research blurbs with your own
+5. Keep the personalized site — it becomes your live GitHub Pages site in Week 10 (@sec-github-pages)
 :::

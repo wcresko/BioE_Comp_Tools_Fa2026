@@ -1,0 +1,30 @@
+% ------------------------------------------------------------------
+% title.tex - a Quarto "template partial" for the default PDF format.
+% Quarto's built-in PDF template prints author names but silently
+% drops affiliations; journal-article extensions (quarto-journals/*)
+% normally supply a richer title block. This small file does the same
+% job: names with superscript numbers, the numbered affiliation list,
+% and a corresponding-author line. You should not need to edit it.
+% ------------------------------------------------------------------
+$if(title)$
+\title{$title$$if(thanks)$\thanks{$thanks$}$endif$}
+$endif$
+$if(subtitle)$
+\usepackage{etoolbox}
+\makeatletter
+\providecommand{\subtitle}[1]{%
+  \apptocmd{\@title}{\par {\large #1 \par}}{}{}
+}
+\makeatother
+\subtitle{$subtitle$}
+$endif$
+\author{%
+$for(by-author)$$it.name.literal$$if(it.affiliations)$\textsuperscript{$for(it.affiliations)$$it.number$$sep$,$endfor$$if(it.attributes.corresponding)$,$endif$$if(it.attributes.corresponding)$*$endif$}$endif$$sep$ \and $endfor$%
+\\[0.75em]
+\begin{minipage}{0.9\textwidth}\centering\small
+$for(by-affiliation)$%
+\textsuperscript{$it.number$}$if(it.department)$$it.department$, $endif$$it.name$$if(it.city)$, $it.city$$endif$$if(it.region)$, $it.region$$endif$\\
+$endfor$%
+$for(by-author)$$if(it.attributes.corresponding)$\textsuperscript{*}Correspondence: \href{mailto:$it.email$}{$it.email$}\\$endif$$endfor$%
+\end{minipage}}
+\date{$date$}
