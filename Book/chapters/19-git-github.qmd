@@ -302,11 +302,14 @@ $ git remote -v
 origin  https://github.com/username/repository.git (fetch)
 origin  https://github.com/username/repository.git (push)
 
+# Make sure your branch is named 'main' before the first push
+$ git branch -M main
+
 # Push your commits to GitHub
 $ git push -u origin main
 ```
 
-The `-u` flag sets up tracking, so future pushes only need `git push`.
+The `-u` flag sets up tracking, so future pushes only need `git push`. The `git branch -M main` line renames your current branch to `main`; it is harmless if the branch already has that name, and it rescues you when an older Git created the branch as `master` (the `init.defaultBranch` setting in @sec-git-configuration makes `main` the default for every future repository). GitHub takes the first branch you push as the repository's **default branch**, so pushing `main` first keeps the two sides in agreement; if a repository ever ends up with both a `master` and a `main`, change the default under **Settings → Branches** on GitHub.
 
 ### Push and Pull {#sec-push-and-pull}
 
@@ -335,6 +338,8 @@ $ git fetch origin
 $ git log --oneline main..origin/main
 $ git merge origin/main
 ```
+
+The easiest way to *watch* `pull` do its job---no collaborator required---is a round trip through GitHub's web editor: open a file on your repository's page, click the pencil icon, make a small edit, and commit it there. Your laptop does not have that commit yet; `git pull` brings it down, and `git log --oneline` then shows both histories woven into one. This is also the habit that keeps one project in sync across two machines (say, your laptop and Talapas): always `pull` before you start work, always `push` when you stop.
 
 `git pull` is exactly `git fetch` followed by `git merge`. Use `fetch` when you want to see what collaborators have changed before it touches your working directory—for example, when you are in the middle of something and are not sure whether the incoming changes will conflict with yours.
 
@@ -541,6 +546,9 @@ venv/
 # Output files
 results/temp/*
 *.log
+
+# Quarto's working folder (regenerated on every render)
+.quarto/
 
 # System files
 .DS_Store
@@ -861,10 +869,24 @@ For a comprehensive reference of Git commands and workflows, see @sec-appendix-g
 ## Running Example: Your Course Website {#sec-git-website-example}
 
 ::: {.callout-note title="Running example"}
-This section ties the chapter together with the Week 10 class activity: turning the course's template repository into a website of your own, published with GitHub Pages. It uses nothing beyond what this chapter has already covered---templates (@sec-starting-from-a-template-repository), the basic workflow (@sec-git-workflow), and Pages (@sec-github-pages).
+This section ties the chapter together with the Week 8 class activity: putting the Quarto website you built in @sec-quarto-documents under version control and publishing it with GitHub Pages. It uses nothing beyond what this chapter has already covered---`git init` (@sec-git-init-locally), the basic workflow (@sec-git-workflow), connecting to a remote (@sec-connecting-local-to-remote), and Pages (@sec-github-pages).
 :::
 
-The course provides a template website repository at <https://github.com/wcresko/academic_website_template>: a small Quarto website project whose pages are ordinary `.qmd` files. The workflow from template to live site exercises every Git skill in this chapter once, in order.
+**Route 1: your own website, from scratch.** This is the in-class route: you already have a website project (the personalized `example_website` from the Quarto chapter), and it becomes a repository and then a live site.
+
+```bash
+$ cd ~/projects/my_website
+$ quarto render                 # writes the site into docs/ (output-dir: docs)
+$ touch docs/.nojekyll          # tell GitHub Pages to serve the files as-is
+$ git init
+$ git add .
+$ git commit -m "First commit: my academic website"
+$ git branch -M main
+```
+
+On GitHub, create a new, **empty** repository (no README, no license---those would start a history that conflicts with yours), then connect and push exactly as in @sec-connecting-local-to-remote (`git remote add origin ...`, `git push -u origin main`). Finally turn on Pages: **Settings → Pages → Deploy from a branch → `main`, `/docs`**. A minute later the site is live at `https://yourname.github.io/my_website/`.
+
+**Route 2: start from the course template.** The course also provides a template website repository at <https://github.com/wcresko/academic_website_template>: a small Quarto website project whose pages are ordinary `.qmd` files. The workflow from template to live site exercises the same Git skills in the other direction---the repository starts on GitHub and comes down to your machine.
 
 1. **Create your copy.** Log in to GitHub (this matters---the button does not appear otherwise), open the template repository, and click the green **Use this template** button, then **Create a new repository**. Pick your account as the owner and give it a name. Because this is a template rather than a fork, your new repository starts with the template's files but a fresh history (@tbl-fork-vs-template).
 2. **Clone it.** On your new repository's page, use the green **Code** button to copy the repository's URL, then, in a terminal, `cd` to wherever you keep projects and clone it:

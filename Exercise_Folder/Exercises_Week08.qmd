@@ -1,16 +1,17 @@
 ---
-title: "Week 8 Exercises - First Steps on Talapas"
+title: "Week 8 Exercises - Git and GitHub"
 ---
 
-Short, **ungraded** practice tasks - about 35 minutes, all on Talapas. Companion reading: [Ch. 19](../book/chapters/19-hpc-talapas.html) and [Ch. 20](../book/chapters/20-parallel-computing.html); reference: [App. H](../book/chapters/appendix-H-slurm.html). You need your Talapas account working (last week's final task) - if it is not, that is task 0: contact me. **HW2 goes out this week** (due Monday, November 30): the full loop - analyze locally, write it up in Quarto, record your environment, run it on Talapas. This week's tasks and next week's are its on-ramp.
+Short, **ungraded** practice tasks - about 40 minutes. Companion reading: [Ch. 19](../book/chapters/19-git-github.html); reference: [App. H](../book/chapters/appendix-H-git.html). **HW2 goes out this week** (due Monday, November 30): analyze the data, write it up in Quarto, record your environment, and push the repository to GitHub - these tasks are its on-ramp, and version-controlling your term project from today is the best possible practice.
 
-1.  Log in to Open OnDemand at <https://ondemand.talapas.uoregon.edu> with your Duck ID and open the **file explorer**. What is the path of your home directory?
-2.  Open a **shell** from OnDemand (or `ssh yourduckid@login.talapas.uoregon.edu`) and run `hostname` and `pwd`.
-3.  Run `groups` - which PIRG(s) are you in?
-4.  Recreate your course skeleton on the cluster: `mkdir -p ~/comptools/{data,scripts,results}`.
-5.  Transfer `Stickle_RNAseq.tsv` to `~/comptools/data` (OnDemand's file explorer upload button, or `scp` from your laptop). Confirm with `wc -l`.
-6.  Run `module avail R` (press `q` to exit the list), then `module load` an R version and start R on the login node just long enough to run `R.version.string` and quit.
-7.  Write a minimal Slurm script `scripts/hello.sbatch` that just prints `hostname` and `date`: start from the batch-script template in the book ([Ch. 19](../book/chapters/19-hpc-talapas.html)), keep the `--job-name`, `--partition`, `--account` and `--time` lines, and drop the rest (including `--output`, so task 8's log gets the default `slurm-*.out` name).
-8.  Submit it with `sbatch scripts/hello.sbatch`, watch the queue with `squeue -u $USER`, and when it finishes, `cat` the `slurm-*.out` file. Which node did it run on?
-9.  Run `sinfo` and identify one regular partition and the GPU partition.
-10. From the shell, run your Week 3 grep pipeline on the dataset - identical commands, bigger computer. That is the point of the shell. (Next week: putting your *own* software - conda environments - on the cluster.)
+1.  Check that Git is installed (`git --version`), then introduce yourself: `git config --global user.name "..."` and `git config --global user.email "..."` (use the email of your GitHub account), and set `git config --global init.defaultBranch main`.
+2.  Turn your course folder into a repository: `cd ~/projects/comptools && git init`. Run `git status` and read what it says.
+3.  Create a `.gitignore` that excludes `data/` (large files do not belong in Git), the `.quarto/` working folder, and any `.DS_Store` files.
+4.  Stage and commit: `git add .` then `git commit -m "First commit: course project skeleton"`.
+5.  Make an account at <https://github.com> if you do not have one, and create a new, empty repository named `comptools`.
+6.  Connect and push, following GitHub's "push an existing repository" instructions (`git remote add origin ...`, `git branch -M main`, `git push -u origin main`). Refresh the page - your files should appear. (First push failing with `Authentication failed`? Run `gh auth login` - see the lecture's authentication slide.)
+7.  Edit your `README.md` locally, then - *before* staging - run `git diff` to see exactly what changed. Commit, push, and find the change in the **History** view on GitHub.
+8.  Now edit the README *on GitHub* (the pencil icon), commit there, and `git pull` locally. Look at `git log --oneline` - you should see both commits, each with its short **hash**. Pick any two hashes and compare them: `git diff <older> <newer>`.
+9.  Create a branch (`git switch -c experiment`), change a file, commit, switch back to `main`, and merge it.
+10. Deliberately break something: delete a tracked file with `rm`, then rescue it with `git restore <file>`. This is the safety net that makes the rest of the course's habits pay off.
+11. **Capstone**: render your project's Quarto report into `docs/`, commit and push, then enable GitHub Pages (Settings → Pages → branch `main`, folder `/docs`). Open the live URL - that link *is* your reproducible project, ready for the December 11 submission.

@@ -1,17 +1,18 @@
 ---
-title: "Week 10 Exercises - Git and GitHub"
+title: "Week 10 Exercises - First Steps on Talapas"
 ---
 
-Short, **ungraded** practice tasks - about 30 minutes. Companion reading: [Ch. 21](../book/chapters/21-git-github.html); reference: [App. I](../book/chapters/appendix-I-git.html). Version-controlling your term project as you finish it is the best possible practice.
+Short, **ungraded** practice tasks - about 40 minutes, all on Talapas. Companion reading: [Ch. 20](../book/chapters/20-hpc-talapas.html) and [Ch. 21](../book/chapters/21-parallel-computing.html); reference: [App. I](../book/chapters/appendix-I-slurm.html). You need your Talapas account working (the account check at the end of [Ex 7](Exercises_Week07.qmd)) - if it is not, that is task 0: contact me. **HW2 is due today**; these tasks are the cluster leg of your term project.
 
-1.  Check that Git is installed (`git --version`), then introduce yourself: `git config --global user.name "..."` and `git config --global user.email "..."` (use the email of your GitHub account).
-2.  Turn your course folder into a repository: `cd ~/projects/comptools && git init`. Run `git status` and read what it says.
-3.  Create a `.gitignore` that excludes `data/` (large files do not belong in Git) and any `.DS_Store` files.
-4.  Stage and commit: `git add .` then `git commit -m "First commit: course project skeleton"`.
-5.  Make an account at <https://github.com> if you do not have one, and create a new, empty repository named `comptools`.
-6.  Connect and push, following GitHub's "push an existing repository" instructions (`git remote add origin ...`, `git push -u origin main`). Refresh the page - your files should appear.
-7.  Edit your `README.md` locally, commit the change, and push again. Find the change in the **History** view on GitHub.
-8.  Now edit the README *on GitHub* (the pencil icon), commit there, and `git pull` locally. Look at `git log --oneline` - you should see both commits.
-9.  Create a branch (`git switch -c experiment`), change a file, commit, switch back to `main`, and merge it.
-10. Deliberately break something: delete a tracked file with `rm`, then rescue it with `git restore <file>`. This is the safety net that makes the rest of the course's habits pay off.
-11. **Capstone**: render your project's Quarto report into `docs/`, commit and push, then enable GitHub Pages (Settings → Pages → branch `main`, folder `/docs`). Open the live URL - that link *is* your reproducible project, ready for the December 11 submission.
+1.  Log in to Open OnDemand at <https://ondemand.talapas.uoregon.edu> with your Duck ID and open the **file explorer**. What is the path of your home directory?
+2.  Open a **shell** from OnDemand (or `ssh yourduckid@login.talapas.uoregon.edu`) and run `hostname` and `pwd`.
+3.  Run `groups` - which PIRG(s) are you in?
+4.  Recreate your course skeleton on the cluster: `mkdir -p ~/comptools/{data,scripts,results}`.
+5.  Transfer `Stickle_RNAseq.tsv` to `~/comptools/data` (OnDemand's file explorer upload button, or `scp` from your laptop). Confirm with `wc -l`.
+6.  Run `module avail R` (press `q` to exit the list), then `module load` an R version and start R on the login node just long enough to run `R.version.string` and quit.
+7.  Write a minimal Slurm script `scripts/hello.sbatch` that just prints `hostname` and `date`: start from the batch-script template in the book ([Ch. 20](../book/chapters/20-hpc-talapas.html)), keep the `--job-name`, `--partition`, `--account` and `--time` lines, and drop the rest (including `--output`, so task 8's log gets the default `slurm-*.out` name).
+8.  Submit it with `sbatch scripts/hello.sbatch`, watch the queue with `squeue -u $USER`, and when it finishes, `cat` the `slurm-*.out` file. Which node did it run on?
+9.  Run `sinfo` and identify one regular partition and the GPU partition.
+10. From the shell, run your Week 3 grep pipeline on the dataset - identical commands, bigger computer. That is the point of the shell.
+11. Bring your *own* software: `git clone` your project repository onto the cluster (that is why it lives on GitHub), or transfer the `environment.yml` you exported in Week 9. Then `module spider miniconda`, `module load` it, and `conda env create -f environment.yml`.
+12. `conda activate rnaseq` and check `which python3` - the same environment as your laptop, built from one text file. Then prove it travels into batch jobs: edit `scripts/hello.sbatch` to `module load` miniconda, `conda activate rnaseq`, and run `python3 -c "import pandas as pd; print(pd.__version__)"`, and resubmit. The pandas version in the log is your environment running on a compute node - the full loop, closed.

@@ -1,16 +1,15 @@
 ---
-title: "Week 9 Exercises - Software Environments, Laptop to Talapas"
+title: "Week 9 Exercises - Software Environments"
 ---
 
-Short, **ungraded** practice tasks - about 40 minutes, half on your laptop and half on Talapas. Companion reading: the environments sections of [Ch. 12](../book/chapters/12-python-programming.html#sec-py-venv) and [Ch. 19](../book/chapters/19-hpc-talapas.html#sec-software-layers). These tasks set up the toolchain your term project should finish inside.
+Short, **ungraded** practice tasks - about 35 minutes, all on your laptop. Companion reading: the environments sections of [Ch. 12](../book/chapters/12-python-programming.html#sec-py-venv) and [Ch. 20](../book/chapters/20-hpc-talapas.html#sec-software-layers). These tasks set up the toolchain your term project should finish inside - and next week the same environment travels to Talapas.
 
 1.  Make your first **conda environment** on your laptop (no conda yet? Install **Miniforge** - the link and the why are in [Ch. 12](../book/chapters/12-python-programming.html#sec-py-venv)): `conda create -n rnaseq python=3.12 pandas matplotlib`, then `conda activate rnaseq`.
 2.  Run `which python3` before and after `conda activate rnaseq` - where does it point each time, and why?
 3.  Install a *compiled* tool that pip could never give you: `conda install -c bioconda samtools`, then `samtools --version`. That is the conda difference.
 4.  Record the environment: `conda env export --from-history > environment.yml`. Open the file and skim what it captured - why is `--from-history` shorter than a full export?
-5.  Transfer `environment.yml` to Talapas (OnDemand upload or `scp`), then `module spider miniconda`, `module load` it, and run `conda env create -f environment.yml`.
-6.  `conda activate rnaseq` on Talapas and check `which python3` - you now have the *same* environment in both places, built from one text file.
-7.  Prove it travels into batch jobs: take last week's `hello.sbatch`, add `module load` miniconda, `conda activate rnaseq`, and `python3 -c "import pandas as pd; print(pd.__version__)"`, and resubmit. The pandas version in the log is your environment, running on a compute node.
-8.  A taste of `venv` (deactivate conda first): `python3 -m venv ~/scratch_env && source ~/scratch_env/bin/activate`, `pip install requests`, `pip freeze`. How does the record (`pip freeze`) compare to `environment.yml`?
-9.  A taste of `renv`: in a scratch R project run `renv::init()`, install one package, `renv::snapshot()`, and read the `renv.lock` it wrote. Same idea, R dialect.
-10. **For your term project**: create the project's own environment now, export its `environment.yml`, and keep it next to the project code. All remaining project computing happens inside it - and next week that folder goes under version control.
+5.  The real test of the record: `conda deactivate`, remove the environment with `conda env remove -n rnaseq`, then rebuild it with `conda env create -f environment.yml` and activate it again. The environment is disposable; the text file is the asset.
+6.  Reproducibility = code + environment, versioned together: `git add environment.yml && git commit -m "Add project environment"` in the repository you made last week, and push. (Next week you will `git clone` this straight onto Talapas.)
+7.  A taste of `venv` (deactivate conda first): `python3 -m venv ~/scratch_env && source ~/scratch_env/bin/activate`, `pip install requests`, `pip freeze`. How does the record (`pip freeze`) compare to `environment.yml`?
+8.  A taste of `renv`: in a scratch R project run `renv::init()`, install one package, `renv::snapshot()`, and read the `renv.lock` it wrote. Same idea, R dialect.
+9.  **For your term project**: create the project's own environment now, export its `environment.yml`, and commit it next to the project code. All remaining project computing happens inside it - and next week it travels with you to Talapas.
