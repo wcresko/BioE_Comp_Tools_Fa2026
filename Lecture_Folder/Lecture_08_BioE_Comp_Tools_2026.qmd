@@ -32,9 +32,10 @@ The course book goes deeper on everything in this lecture. Read before or after 
 
 - Git and GitHub
   - hands-on git: `init`, `add`, `commit`, `push` and `pull`
-  - `seeing the history: git status`, `git log`
+  - seeing the history: `git status`, `git log`, `git diff`
   - branches and pull requests to explore after class
 - Publishing websites with GitHub Pages
+- Reminder: **HW1 is due tonight** on Canvas; **HW2 goes out today** (due Nov 30)
 
 ::: callout-note
 ## On your own this week
@@ -46,18 +47,25 @@ The course book goes deeper on everything in this lecture. Read before or after 
 - It covers today's whole arc a second time, at a gentler pace
 :::
 
-## Before anything else - do you have Git?
+## Do you have Git?
 
-1.  Open a terminal and run `git --version`.
-2.  A version number = you're ready. An error = install Git now, and keep up with the slides while it runs:
+- Open a terminal and run `git --version`.
+
+  - A version number means you're ready.
+
+  - An error = install Git now, and keep up with the slides while it runs
+
+<!-- -->
 
 - Download the installer for **any operating system** at [**git-scm.com/downloads**](https://git-scm.com/downloads), and accept the defaults
-- macOS shortcut: `xcode-select --install` in the terminal does it too
-- Inside WSL/Ubuntu: `sudo apt-get install git`
+  - macOS shortcut: `xcode-select --install` in the terminal does it too
+  - Inside WSL/Ubuntu: `sudo apt-get install git`
 
-## Configure Git - introduce yourself
+## Configure Git 
 
-Git stamps every commit with an author, so tell it who you are (once per computer):
+- Git stamps every commit with an author, so tell it who you are
+
+- You only need to do this once per computer, and you can update later on
 
 ``` bash
 # Set your name and email
@@ -78,17 +86,23 @@ git config --list
 
 ## Creating a GitHub Account
 
-**Do this right now** - the verification email can arrive while we keep moving. The steps:
+- Go to [github.com](https://github.com) and click "Sign up"
 
-1.  Go to [github.com](https://github.com)
-2.  Click "Sign up"
-3.  Choose a username - professional and memorable; it becomes part of your public URL (`username.github.io`), so think "future CV", not "xXgamerXx"
-4.  Add your university email (you can add others later)
-5.  Verify your account from the email they send
-6.  Then apply for the **GitHub Student Developer Pack**:
-    - Free GitHub Pro while you're a student
-    - Access to development tools
-    - Apply at [education.github.com](https://education.github.com)
+- Choose a username
+
+  - professional and memorable; it becomes part of your public URL (`username.github.io`)
+
+  - so think `future_CV`, not `rat_farts_2000`
+
+- Add your university email (you can add others later)
+
+- Verify your account from the email they send
+
+- Then apply for the **GitHub Student Developer Pack**:
+
+  - Free GitHub Pro while you're a student
+  - Access to development tools
+  - Apply at [education.github.com](https://education.github.com)
 
 # Using Git and GitHub
 
@@ -111,35 +125,27 @@ git config --list
 
 ## GitHub for Scientific Collaboration
 
-### Perfect for Research Projects:
-
 - **Reproducibility**: the complete history of how every figure was made - "code available at github.com/yourlab/..." is what journals and funders increasingly require
 - **Collaboration**: labmates and collaborators work on the same analysis - no more emailing `script_final_v3_REALLY.R` around
 - **Lab continuity**: when a student graduates, the analysis stays - with the history of why each choice was made
 - **Documentation**: README files, wikis, and GitHub Pages
 - **Issues**: track bugs, ideas, and to-dos right next to the code
-- **Releases + DOIs**: tag the exact version used in a manuscript; linking Zenodo turns a release into a citable DOI
-- **Reuse**: most published pipelines live on GitHub - clone them, read them, build on them
+- **Releases + DOIs**: tag the exact version used in a manuscript and linking Zenodo turns a release into a citable DOI
+- **Reuse**: most published pipelines live on GitHub - clone them, read them, and build on them
 
-## Git Workflow Concept
+## Git Workflow Concept {.center}
 
 ![Git workflow: working directory, staging area, local and remote repositories](../images/Lec09_img001.svg){fig-align="center" width="100%"}
 
-- **Track Changes**: Every modification is recorded
-- **Collaboration**: Multiple people can work simultaneously
-- **Backup**: Your code is safe in multiple places
-- **Experimentation**: Try new things without breaking working code
+## Git Branching and Collaboration {.center}
 
-## Git Branching and Collaboration
-
-![Branching and merging](../images/Lec09_img002.svg){fig-align="center" width="100%"}
-
-- Today we stay on one branch, `main`
-- The commands for branching and merging are in the *For later* slides at the end and in [Ch. 19](../book/chapters/19-git-github.html)
+![](../images/Lec09_img002.svg){fig-align="center" width="100%"}
 
 ## Authenticating to GitHub
 
-Pushing needs more than your password - GitHub stopped accepting passwords from the command line in 2021, and the first `git push` is where everyone gets stuck. We'll all use the **GitHub CLI** (`gh`), the easiest route:
+- Pushing needs more than your password - GitHub stopped accepting passwords from the command line in 2021, and the first `git push` is where everyone gets stuck.
+
+- We'll all use the **GitHub CLI** (`gh`), the easiest route:
 
 ``` bash
 # 1. Install the CLI
@@ -147,6 +153,7 @@ Pushing needs more than your password - GitHub stopped accepting passwords from 
 brew install gh                  # macOS
 winget install --id GitHub.cli   # Windows
 sudo apt-get install gh          # Ubuntu / WSL
+# (no package manager? installers for every OS at cli.github.com)
 
 # 2. Log in - one time only
 
@@ -167,21 +174,21 @@ gh auth status                   # "Logged in to github.com as USERNAME"
 ```
 
 ::: callout-tip
-Done once, done forever on this machine. The alternatives - SSH keys (which also log you in to Talapas in Week 10) and credential managers - are in [Ch. 19](../book/chapters/19-git-github.html#sec-git-auth).
+- Done once, done forever on this machine.
+
+- The alternatives - SSH keys (which also log you in to Talapas in Week 10) and credential managers - are in [Ch. 19](../book/chapters/19-git-github.html#sec-git-auth).
 :::
 
 # Creating repositories
 
-## Walkthrough: a new repository, from your laptop to GitHub
-
-We'll do this live, together - a brand-new repository on your computer, then the same repository on GitHub, then the two connected:
+## A new repository, from your laptop to GitHub
 
 ``` bash
 # 1. Make a project and put it under version control
 
 mkdir ~/projects/git_practice && cd ~/projects/git_practice
 git init                      # creates the hidden .git/ folder
-git status                    # read what it says - always
+git status                    # read what it says
 
 # 2. Create a few files worth tracking
 
@@ -189,6 +196,11 @@ echo "# My first repository" > README.md
 echo 'print("hello, git")' > analysis.py
 echo "lab notes, day 1" > notes.txt
 
+```
+
+## Stage and commit it
+
+``` bash
 # 3. Stage - three ways to say what goes into the commit
 
 git add README.md             # one file, by name
@@ -201,11 +213,7 @@ git commit -m "First commit: README, analysis script, notes"
 git status                    # "working tree clean" - everything is recorded
 ```
 
-::: callout-tip
-Fall behind? Keep watching - every step of today's class is in [Ex 8](../Exercise_Folder/Exercises_Week08.qmd) to redo tonight at your own pace.
-:::
-
-## Best Practices: commits
+## Best Practices for Commits
 
 ### Messages - the history is for readers (including future-you)
 
@@ -285,10 +293,12 @@ git push -u origin main       # -u: remember this pairing for future pushes
 ```
 
 ::: callout-note
-**Why `branch -M main`?** Older Git creates the first branch as `master` (harmless if yours is already `main`) - and GitHub takes the **first branch you push** as the repository's default, so push `main` first and the two sides agree.
+- **Why `branch -M main`?** Older Git creates the first branch as `master` (harmless if yours is already `main`)
+
+- GitHub takes the **first branch you push** as the repository's default, so push `main` first and the two sides agree.
 :::
 
-## The round trip: `pull`
+## Syncing back to your computer: `pull`
 
 Your repository now lives in **two places** - so finish the loop:
 
@@ -300,25 +310,38 @@ Your repository now lives in **two places** - so finish the loop:
 
 git pull
 
-# 3. Proof - both commits, one history
+# 3. Proof - both commits, one history, each with its short hash
 
-git log --oneline
+git log --oneline             # e.g.  f8c21aa  Add line from the web
+                              #       7d4e8c2  First commit: README, ...
+
+# 4. And exactly what changed between any two commits, by their hashes:
+
+git diff 7d4e8c2 f8c21aa
 ```
 
 - `push` and `pull` are the same verb in opposite directions - this is also how you'll move between laptop and Talapas in Week 10
 - **Daily rhythm** from here on: `git pull` → edit → `git add .` → `git commit -m "..."` → `git push`
 
 ::: callout-tip
-Lost or confused? `git status` always tells you the next command. And worst case: your work is on GitHub - delete the folder and `git clone` it back.
+- Lost or confused? `git status` always tells you the next command.
+
+- And worst case: your work is on GitHub - delete the folder and `git clone` it back.
 :::
 
 ## Why `.gitignore`? Not everything belongs in history
 
-- Git never forgets: every version of every tracked file stays in the repository **forever** - perfect for code, terrible for bulk files
-- Much of a project folder doesn't need tracking: raw data (it never changes - record *where it lives* instead), outputs you can regenerate, editor and system droppings (`.DS_Store`, `.Rhistory`), package caches
-- GitHub enforces this economy: a file over **100 MB is rejected** outright (warnings start at 50 MB), and a repository should stay **under 1 GB** - 5 GB at the outside
+- Git never forgets so that every version of every tracked file stays in the repository **forever** - perfect for code, terrible for bulk files
+- Much of a project folder doesn't need tracking:
+  - raw data (it never changes - record *where it lives* instead)
+  - outputs you can regenerate
+  - editor and system droppings (`.DS_Store`, `.Rhistory`), package caches
+- GitHub enforces this economy
+  - a file over **100 MB is rejected** outright (warnings start at 50 MB)
+  - a repository should stay **under 1 GB** - 5 GB at the outside
 - The fix is a `.gitignore` file: a list of patterns Git pretends not to see
-- Write it **first**, before `git add .` - ignoring a file that is already committed does not remove it from the history
+- Write it **first**, before `git add .`
+- Ignoring a file that is already committed does not remove it from the history
 
 ## .gitignore File
 
@@ -379,17 +402,24 @@ project/
 
 # GitHub Pages
 
-## GitHub Pages: host your research website for free
+## GitHub Pages lets you host websites for free
 
 ![From Quarto source to a live website](../images/Lec09_img003.svg){fig-align="center" width="100%"}
 
-- Any repository can serve a website: **Settings → Pages → Deploy from a branch → `main`, `/docs`** - live at `https://username.github.io/repo_name`
-- Quarto fits perfectly: `output-dir: docs` in `_quarto.yml` means `quarto render` fills `docs/` and a push publishes it (`quarto publish gh-pages` is the one-command alternative)
-- Which is exactly what we do next, live
+- Any repository can serve a website
+  - **Settings → Pages → Deploy from a branch → `main`, `/docs`**
+  - Live at `https://username.github.io/repo_name`
+- Quarto fits perfectly
+  - `output-dir: docs` in `_quarto.yml` means `quarto render` fills `docs/`
+  - a push publishes it (`quarto publish gh-pages` is the one-command alternative)
 
-## Finale: last week's website goes live
+## Let's take last week's website live
 
-In L07 you built `example_website` - a real four-page Quarto site (home, research, publications, CV) with your details in it. A website is just a folder of HTML files; GitHub Pages will serve that folder to the world. Step one is getting the folder rendered and under version control:
+- In L07 you built `example_website` - a real four-page Quarto site (home, research, publications, CV) with your details in it
+
+- A website is just a folder of HTML files; GitHub Pages will serve that folder to the world.
+
+- Step one is getting the folder rendered and under version control:
 
 ``` bash
 cd ~/projects/my_website        # your website project from last week
@@ -411,9 +441,7 @@ git commit -m "First commit: my academic website"
 git branch -M main
 ```
 
-*(No website from last week? Grab `example_website.zip` from the [Examples page](../Examples.html#week-7), unzip it, put your name in `_quarto.yml` - two minutes, then rejoin.)*
-
-## Finale: flip the switch
+## Flip the switch to make it live
 
 ``` bash
 # 3. On github.com: New repository -> my_website -> EMPTY again
@@ -429,42 +457,31 @@ git push -u origin main
 7.  Updating the site from here on is just the daily rhythm: edit a `.qmd` → `quarto render` → `git add .` → `git commit` → `git push` - live about a minute later
 
 ::: callout-tip
-That URL is real, permanent, and free - put it in your email signature. It is also the exact mechanism your term project report will use.
+- That URL is real, permanent, and free - put it in your email signature.
+
+- It is also the mechanism that your term project report will use.
 :::
 
 ## Start now: publish your personal website
 
-The finale you just watched is *your* homework - the personal academic site you started building last week becomes real this week:
-
-1.  Finish personalizing it: your name, your research, your CV pages (started in L07; no copy? `example_website.zip` on the [Examples page](../Examples.html#week-7))
+1.  Finish personalizing it: your name, your research, your CV pages
 2.  `quarto render` → `touch docs/.nojekyll` → `git init` → commit - exactly today's finale, on your own machine
 3.  Push it to a new repository and flip on **Pages** - your site, at your URL, in your email signature by Friday
 4.  From then on, every improvement is just render → commit → push
 
 ::: callout-tip
-The same publish loop ends **HW2** (goes out today, due Monday, November 30: analysis → Quarto report → pushed to GitHub) and the **term project** (due Friday, December 11, with a README like the [example](../Examples.html#week-8)). One mechanism, three deliverables.
+- The same publish loop ends **HW2** (goes out today, due Monday, November 30: analysis → Quarto report → pushed to GitHub)
+
+- The same loop ends the **term project** too (due Friday, December 11, with a README like the [example](../Examples.html#week-8)).
 :::
 
-## Where is my site's URL - and can I change it?
+## Summary
 
-**Finding it:**
-
-- **Settings → Pages** shows *"Your site is live at https://USERNAME.github.io/REPO_NAME"* with a **Visit site** button once the deployment finishes
-- The pattern is always `USERNAME.github.io/REPO_NAME` - the repository's name is the last part of the URL, so name repositories accordingly
-- The **Actions** tab shows every "pages build and deployment" - green check = your newest push is what's live
-
-**Nicer names:**
-
-- Name a repository exactly **`USERNAME.github.io`** and its site lives at the bare root, `https://USERNAME.github.io` - the classic home for your personal site
-- A fully custom domain (`www.yourname.org`; \$10-20/year at any registrar): **Settings → Pages → Custom domain**, add the DNS record your registrar asks for (a `CNAME` pointing at `USERNAME.github.io`), and tick **Enforce HTTPS**
-- With Quarto, keep a file named `CNAME` (containing just the domain) in the published folder - list it under `resources:` in `_quarto.yml` so every render re-creates it
-
-## Summary - and where we are in the arc
-
-- **Git** records every step; **GitHub** backs it up, shares it, and (with **Pages**) publishes it
+- **Git** records every step through `git add` and `git commit`
+- **GitHub** backs it up, shares it, and (with **Pages**) publishes it
 - The arc so far: shell pipelines → R/Python scripts → data frames and figures → Quarto documents → a published, reproducible project
-- Still to come: **environments that travel** (next Monday, L09) and **Talapas at scale** (L10) - the last two pieces of the loop
-- Every tool here is free, open, and the daily standard in computational science
+- Still to come: **environments that travel** (L09) and **Talapas at scale** (L10) - the last two pieces of the loop
+- Reminder - every tool here is free, open, and the daily standard in computational science
 
 # For later - on your own
 
