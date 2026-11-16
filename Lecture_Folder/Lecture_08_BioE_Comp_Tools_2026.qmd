@@ -31,7 +31,8 @@ The course book goes deeper on everything in this lecture. Read before or after 
 ## Goals for today
 
 - Git and GitHub
-  - hands-on: `init`, `add`, `commit`, `push` and `pull`
+  - hands-on git: `init`, `add`, `commit`, `push` and `pull`
+  - `seeing the history: git status`, `git log`
   - branches and pull requests to explore after class
 - Publishing websites with GitHub Pages
 
@@ -45,23 +46,14 @@ The course book goes deeper on everything in this lecture. Read before or after 
 - It covers today's whole arc a second time, at a gentler pace
 :::
 
-## Before anything else - do these two things right now
+## Before anything else - do you have Git?
 
-1.  Open a terminal and run `git --version`. A version number = you're ready. An error = install Git now, and keep up with the slides while it runs:
+1.  Open a terminal and run `git --version`.
+2.  A version number = you're ready. An error = install Git now, and keep up with the slides while it runs:
 
-``` bash
-git --version
-
-# macOS: this one command triggers Apple's installer
-xcode-select --install          # (or: brew install git)
-
-# Windows: download the installer from git-scm.com, accept the defaults
-# (inside WSL/Ubuntu instead: sudo apt-get install git)
-```
-
-2.  **No GitHub account yet?** Start the signup *this minute* at [github.com](https://github.com) - the next slides walk through the steps. The verification email will arrive while I talk; finish it when it does.
-
-Both done? Perfect - you'll push code to the internet within 25 minutes.
+- Download the installer for **any operating system** at [**git-scm.com/downloads**](https://git-scm.com/downloads), and accept the defaults
+- macOS shortcut: `xcode-select --install` in the terminal does it too
+- Inside WSL/Ubuntu: `sudo apt-get install git`
 
 ## Configure Git - introduce yourself
 
@@ -84,11 +76,9 @@ git config --global init.defaultBranch main
 git config --list
 ```
 
-# GitHub
-
 ## Creating a GitHub Account
 
-You started this a minute ago - finish the email verification when it lands. The steps:
+**Do this right now** - the verification email can arrive while we keep moving. The steps:
 
 1.  Go to [github.com](https://github.com)
 2.  Click "Sign up"
@@ -99,6 +89,8 @@ You started this a minute ago - finish the email verification when it lands. The
     - Free GitHub Pro while you're a student
     - Access to development tools
     - Apply at [education.github.com](https://education.github.com)
+
+# Using Git and GitHub
 
 ## Git and GitHub
 
@@ -156,14 +148,18 @@ brew install gh                  # macOS
 winget install --id GitHub.cli   # Windows
 sudo apt-get install gh          # Ubuntu / WSL
 
-# 2. Log in - one time only; answer the prompts like this:
+# 2. Log in - one time only
 
 gh auth login
-#  ? Where do you use GitHub?            -> GitHub.com
-#  ? Preferred protocol?                 -> HTTPS
-#  ? Authenticate Git with credentials?  -> Yes
-#  ? How would you like to authenticate? -> Login with a web browser
-#  ...copy the one-time code it prints, paste it in the browser that opens
+
+# gh now asks four questions in the terminal; pick these answers:
+#   "Where do you use GitHub?"            answer: GitHub.com
+#   "Preferred protocol?"                 answer: HTTPS
+#   "Authenticate Git with credentials?"  answer: Yes
+#   "How would you like to authenticate?" answer: Login with a web browser
+#
+# It then prints a one-time code: copy it, press Enter, and paste the
+# code into the browser window that opens. That's the whole login.
 
 # 3. Confirm it worked
 
@@ -173,6 +169,8 @@ gh auth status                   # "Logged in to github.com as USERNAME"
 ::: callout-tip
 Done once, done forever on this machine. The alternatives - SSH keys (which also log you in to Talapas in Week 10) and credential managers - are in [Ch. 19](../book/chapters/19-git-github.html#sec-git-auth).
 :::
+
+# Creating repositories
 
 ## Walkthrough: a new repository, from your laptop to GitHub
 
@@ -206,6 +204,20 @@ git status                    # "working tree clean" - everything is recorded
 ::: callout-tip
 Fall behind? Keep watching - every step of today's class is in [Ex 8](../Exercise_Folder/Exercises_Week08.qmd) to redo tonight at your own pace.
 :::
+
+## Best Practices: commits
+
+### Messages - the history is for readers (including future-you)
+
+- First line short (\~50 characters) and imperative: "Add violin plot", not "Added some stuff"
+- Say *why*, not just what - the diff already shows the what
+- Bad: `stuff`, `final`, `final2`, `fixed it` · Good: `Normalize counts before PCA`
+
+### Habits
+
+- Commit **early and often** - one logical change per commit, so the history reads like a lab notebook and any single step can be undone
+- `git status` and `git diff` before every commit - know exactly what you are recording
+- **Pull before you start, push when you stop** - the habit that keeps two machines (or two people) out of trouble
 
 ## Viewing Commit History
 
@@ -256,12 +268,16 @@ git diff 7d4e8c2 3f9a1b5
 
 ## Walkthrough: connect it to GitHub
 
-``` bash
-# 3. On github.com: New repository -> name it git_practice
-#    IMPORTANT: leave it EMPTY - no README, no license, no .gitignore
-#    (those would create a history that conflicts with yours)
+First, make the repository's empty home on GitHub - we'll click through this together:
 
-# 4. Connect and push (GitHub shows these exact lines after step 3)
+- On [github.com](https://github.com): **+** (top right) → **New repository**
+- Name it `git_practice`
+- **Leave it completely EMPTY** - no README, no license, no .gitignore (those would start a history that conflicts with yours)
+- Click **Create repository** - the next page shows a *"...or push an existing repository from the command line"* box
+- **Copy YOUR repository's URL from that box** (it contains *your* username - don't type mine from the screen)
+
+``` bash
+# Connect and push - the same lines GitHub just showed you
 
 git remote add origin https://github.com/USERNAME/git_practice.git
 git branch -M main            # make sure your branch is named 'main'
@@ -295,6 +311,14 @@ git log --oneline
 ::: callout-tip
 Lost or confused? `git status` always tells you the next command. And worst case: your work is on GitHub - delete the folder and `git clone` it back.
 :::
+
+## Why `.gitignore`? Not everything belongs in history
+
+- Git never forgets: every version of every tracked file stays in the repository **forever** - perfect for code, terrible for bulk files
+- Much of a project folder doesn't need tracking: raw data (it never changes - record *where it lives* instead), outputs you can regenerate, editor and system droppings (`.DS_Store`, `.Rhistory`), package caches
+- GitHub enforces this economy: a file over **100 MB is rejected** outright (warnings start at 50 MB), and a repository should stay **under 1 GB** - 5 GB at the outside
+- The fix is a `.gitignore` file: a list of patterns Git pretends not to see
+- Write it **first**, before `git add .` - ignoring a file that is already committed does not remove it from the history
 
 ## .gitignore File
 
@@ -336,20 +360,6 @@ results/temp/*
 # System files
 .DS_Store
 ```
-
-## Best Practices: commits
-
-### Messages - the history is for readers (including future-you)
-
-- First line short (~50 characters) and imperative: "Add violin plot", not "Added some stuff"
-- Say *why*, not just what - the diff already shows the what
-- Bad: `stuff`, `final`, `final2`, `fixed it` · Good: `Normalize counts before PCA`
-
-### Habits
-
-- Commit **early and often** - one logical change per commit, so the history reads like a lab notebook and any single step can be undone
-- `git status` and `git diff` before every commit - know exactly what you are recording
-- **Pull before you start, push when you stop** - the habit that keeps two machines (or two people) out of trouble
 
 ## Best Practices: what belongs in a repository
 
@@ -422,15 +432,32 @@ git push -u origin main
 That URL is real, permanent, and free - put it in your email signature. It is also the exact mechanism your term project report will use.
 :::
 
-## Start now: publish your term project
+## Start now: publish your personal website
 
-1.  `git init` your project folder (data excluded via `.gitignore`), commit, and push it to a GitHub repository
-2.  Render your Quarto report and enable **Pages** on the `docs/` folder - your analysis is now a live website
-3.  Add a `README.md` that says what the project is, where the data live, and how to reproduce the results (the [example README](../Examples.html#week-8) is the model)
+The finale you just watched is *your* homework - the personal academic site you started building last week becomes real this week:
+
+1.  Finish personalizing it: your name, your research, your CV pages (started in L07; no copy? `example_website.zip` on the [Examples page](../Examples.html#week-7))
+2.  `quarto render` → `touch docs/.nojekyll` → `git init` → commit - exactly today's finale, on your own machine
+3.  Push it to a new repository and flip on **Pages** - your site, at your URL, in your email signature by Friday
+4.  From then on, every improvement is just render → commit → push
 
 ::: callout-tip
-This is exactly the shape of a modern reproducible paper: a repository anyone can clone, a report anyone can read, and a history of how it got there. **HW2 goes out today** (due Monday, November 30) and ends the same way - your analysis pushed to GitHub. Final projects are due **Friday, December 11**.
+The same publish loop ends **HW2** (goes out today, due Monday, November 30: analysis → Quarto report → pushed to GitHub) and the **term project** (due Friday, December 11, with a README like the [example](../Examples.html#week-8)). One mechanism, three deliverables.
 :::
+
+## Where is my site's URL - and can I change it?
+
+**Finding it:**
+
+- **Settings → Pages** shows *"Your site is live at https://USERNAME.github.io/REPO_NAME"* with a **Visit site** button once the deployment finishes
+- The pattern is always `USERNAME.github.io/REPO_NAME` - the repository's name is the last part of the URL, so name repositories accordingly
+- The **Actions** tab shows every "pages build and deployment" - green check = your newest push is what's live
+
+**Nicer names:**
+
+- Name a repository exactly **`USERNAME.github.io`** and its site lives at the bare root, `https://USERNAME.github.io` - the classic home for your personal site
+- A fully custom domain (`www.yourname.org`; \$10-20/year at any registrar): **Settings → Pages → Custom domain**, add the DNS record your registrar asks for (a `CNAME` pointing at `USERNAME.github.io`), and tick **Enforce HTTPS**
+- With Quarto, keep a file named `CNAME` (containing just the domain) in the published folder - list it under `resources:` in `_quarto.yml` so every render re-creates it
 
 ## Summary - and where we are in the arc
 
