@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>Week 9 Exercises - Software Environments, Laptop to Talapas – Comp Tools Bioengineers F26</title>
+<title>Week 9 Exercises - Software Environments – Comp Tools Bioengineers F26</title>
 <style>
 /* Default styles provided by pandoc.
 ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
@@ -151,7 +151,7 @@ ul.task-list li input[type="checkbox"] {
 
 <header id="title-block-header" class="quarto-title-block default">
 <div class="quarto-title">
-<h1 class="title">Week 9 Exercises - Software Environments, Laptop to Talapas</h1>
+<h1 class="title">Week 9 Exercises - Software Environments</h1>
 </div>
 
 
@@ -168,18 +168,17 @@ ul.task-list li input[type="checkbox"] {
 </header>
 
 
-<p>Short, <strong>ungraded</strong> practice tasks - about 40 minutes, half on your laptop and half on Talapas. Companion reading: the environments sections of <a href="../book/chapters/12-python-programming.html#sec-py-venv">Ch. 12</a> and <a href="../book/chapters/19-hpc-talapas.html#sec-software-layers">Ch. 19</a>. These tasks set up the toolchain your term project should finish inside.</p>
+<p>Short, <strong>ungraded</strong> practice tasks - about 35 minutes, all on your laptop. Companion reading: the environments sections of <a href="../book/chapters/12-python-programming.html#sec-py-venv">Ch. 12</a> and <a href="../book/chapters/20-hpc-talapas.html#sec-software-layers">Ch. 20</a>. These tasks set up the toolchain your term project should finish inside - and next week the same environment travels to Talapas.</p>
 <ol type="1">
 <li>Make your first <strong>conda environment</strong> on your laptop (no conda yet? Install <strong>Miniforge</strong> - the link and the why are in <a href="../book/chapters/12-python-programming.html#sec-py-venv">Ch. 12</a>): <code>conda create -n rnaseq python=3.12 pandas matplotlib</code>, then <code>conda activate rnaseq</code>.</li>
 <li>Run <code>which python3</code> before and after <code>conda activate rnaseq</code> - where does it point each time, and why?</li>
 <li>Install a <em>compiled</em> tool that pip could never give you: <code>conda install -c bioconda samtools</code>, then <code>samtools --version</code>. That is the conda difference.</li>
 <li>Record the environment: <code>conda env export --from-history &gt; environment.yml</code>. Open the file and skim what it captured - why is <code>--from-history</code> shorter than a full export?</li>
-<li>Transfer <code>environment.yml</code> to Talapas (OnDemand upload or <code>scp</code>), then <code>module spider miniconda</code>, <code>module load</code> it, and run <code>conda env create -f environment.yml</code>.</li>
-<li><code>conda activate rnaseq</code> on Talapas and check <code>which python3</code> - you now have the <em>same</em> environment in both places, built from one text file.</li>
-<li>Prove it travels into batch jobs: take last week’s <code>hello.sbatch</code>, add <code>module load</code> miniconda, <code>conda activate rnaseq</code>, and <code>python3 -c "import pandas as pd; print(pd.__version__)"</code>, and resubmit. The pandas version in the log is your environment, running on a compute node.</li>
+<li>The real test of the record: <code>conda deactivate</code>, remove the environment with <code>conda env remove -n rnaseq</code>, then rebuild it with <code>conda env create -f environment.yml</code> and activate it again. The environment is disposable; the text file is the asset.</li>
+<li>Reproducibility = code + environment, versioned together: <code>git add environment.yml &amp;&amp; git commit -m "Add project environment"</code> in the repository you made last week, and push. (Next week you will <code>git clone</code> this straight onto Talapas.)</li>
 <li>A taste of <code>venv</code> (deactivate conda first): <code>python3 -m venv ~/scratch_env &amp;&amp; source ~/scratch_env/bin/activate</code>, <code>pip install requests</code>, <code>pip freeze</code>. How does the record (<code>pip freeze</code>) compare to <code>environment.yml</code>?</li>
 <li>A taste of <code>renv</code>: in a scratch R project run <code>renv::init()</code>, install one package, <code>renv::snapshot()</code>, and read the <code>renv.lock</code> it wrote. Same idea, R dialect.</li>
-<li><strong>For your term project</strong>: create the project’s own environment now, export its <code>environment.yml</code>, and keep it next to the project code. All remaining project computing happens inside it - and next week that folder goes under version control.</li>
+<li><strong>For your term project</strong>: create the project’s own environment now, export its <code>environment.yml</code>, and commit it next to the project code. All remaining project computing happens inside it - and next week it travels with you to Talapas.</li>
 </ol>
 
 

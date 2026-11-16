@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>Week 8 Exercises - First Steps on Talapas – Comp Tools Bioengineers F26</title>
+<title>Week 8 Exercises - Git and GitHub – Comp Tools Bioengineers F26</title>
 <style>
 /* Default styles provided by pandoc.
 ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
@@ -151,7 +151,7 @@ ul.task-list li input[type="checkbox"] {
 
 <header id="title-block-header" class="quarto-title-block default">
 <div class="quarto-title">
-<h1 class="title">Week 8 Exercises - First Steps on Talapas</h1>
+<h1 class="title">Week 8 Exercises - Git and GitHub</h1>
 </div>
 
 
@@ -168,18 +168,19 @@ ul.task-list li input[type="checkbox"] {
 </header>
 
 
-<p>Short, <strong>ungraded</strong> practice tasks - about 35 minutes, all on Talapas. Companion reading: <a href="../book/chapters/19-hpc-talapas.html">Ch. 19</a> and <a href="../book/chapters/20-parallel-computing.html">Ch. 20</a>; reference: <a href="../book/chapters/appendix-H-slurm.html">App. H</a>. You need your Talapas account working (last week’s final task) - if it is not, that is task 0: contact me. <strong>HW2 goes out this week</strong> (due Monday, November 30): the full loop - analyze locally, write it up in Quarto, record your environment, run it on Talapas. This week’s tasks and next week’s are its on-ramp.</p>
+<p>Short, <strong>ungraded</strong> practice tasks - about 40 minutes. Companion reading: <a href="../book/chapters/19-git-github.html">Ch. 19</a>; reference: <a href="../book/chapters/appendix-H-git.html">App. H</a>. <strong>HW2 goes out this week</strong> (due Monday, November 30): analyze the data, write it up in Quarto, record your environment, and push the repository to GitHub - these tasks are its on-ramp, and version-controlling your term project from today is the best possible practice.</p>
 <ol type="1">
-<li>Log in to Open OnDemand at <a href="https://ondemand.talapas.uoregon.edu" class="uri">https://ondemand.talapas.uoregon.edu</a> with your Duck ID and open the <strong>file explorer</strong>. What is the path of your home directory?</li>
-<li>Open a <strong>shell</strong> from OnDemand (or <code>ssh yourduckid@login.talapas.uoregon.edu</code>) and run <code>hostname</code> and <code>pwd</code>.</li>
-<li>Run <code>groups</code> - which PIRG(s) are you in?</li>
-<li>Recreate your course skeleton on the cluster: <code>mkdir -p ~/comptools/{data,scripts,results}</code>.</li>
-<li>Transfer <code>Stickle_RNAseq.tsv</code> to <code>~/comptools/data</code> (OnDemand’s file explorer upload button, or <code>scp</code> from your laptop). Confirm with <code>wc -l</code>.</li>
-<li>Run <code>module avail R</code> (press <code>q</code> to exit the list), then <code>module load</code> an R version and start R on the login node just long enough to run <code>R.version.string</code> and quit.</li>
-<li>Write a minimal Slurm script <code>scripts/hello.sbatch</code> that just prints <code>hostname</code> and <code>date</code>: start from the batch-script template in the book (<a href="../book/chapters/19-hpc-talapas.html">Ch. 19</a>), keep the <code>--job-name</code>, <code>--partition</code>, <code>--account</code> and <code>--time</code> lines, and drop the rest (including <code>--output</code>, so task 8’s log gets the default <code>slurm-*.out</code> name).</li>
-<li>Submit it with <code>sbatch scripts/hello.sbatch</code>, watch the queue with <code>squeue -u $USER</code>, and when it finishes, <code>cat</code> the <code>slurm-*.out</code> file. Which node did it run on?</li>
-<li>Run <code>sinfo</code> and identify one regular partition and the GPU partition.</li>
-<li>From the shell, run your Week 3 grep pipeline on the dataset - identical commands, bigger computer. That is the point of the shell. (Next week: putting your <em>own</em> software - conda environments - on the cluster.)</li>
+<li>Check that Git is installed (<code>git --version</code>), then introduce yourself: <code>git config --global user.name "..."</code> and <code>git config --global user.email "..."</code> (use the email of your GitHub account), and set <code>git config --global init.defaultBranch main</code>.</li>
+<li>Turn your course folder into a repository: <code>cd ~/projects/comptools &amp;&amp; git init</code>. Run <code>git status</code> and read what it says.</li>
+<li>Create a <code>.gitignore</code> that excludes <code>data/</code> (large files do not belong in Git), the <code>.quarto/</code> working folder, and any <code>.DS_Store</code> files.</li>
+<li>Stage and commit: <code>git add .</code> then <code>git commit -m "First commit: course project skeleton"</code>.</li>
+<li>Make an account at <a href="https://github.com" class="uri">https://github.com</a> if you do not have one, and create a new, empty repository named <code>comptools</code>.</li>
+<li>Connect and push, following GitHub’s “push an existing repository” instructions (<code>git remote add origin ...</code>, <code>git branch -M main</code>, <code>git push -u origin main</code>). Refresh the page - your files should appear. (First push failing with <code>Authentication failed</code>? Run <code>gh auth login</code> - see the lecture’s authentication slide.)</li>
+<li>Edit your <code>README.md</code> locally, then - <em>before</em> staging - run <code>git diff</code> to see exactly what changed. Commit, push, and find the change in the <strong>History</strong> view on GitHub.</li>
+<li>Now edit the README <em>on GitHub</em> (the pencil icon), commit there, and <code>git pull</code> locally. Look at <code>git log --oneline</code> - you should see both commits, each with its short <strong>hash</strong>. Pick any two hashes and compare them: <code>git diff &lt;older&gt; &lt;newer&gt;</code>.</li>
+<li>Create a branch (<code>git switch -c experiment</code>), change a file, commit, switch back to <code>main</code>, and merge it.</li>
+<li>Deliberately break something: delete a tracked file with <code>rm</code>, then rescue it with <code>git restore &lt;file&gt;</code>. This is the safety net that makes the rest of the course’s habits pay off.</li>
+<li><strong>Capstone</strong>: render your project’s Quarto report into <code>docs/</code>, commit and push, then enable GitHub Pages (Settings → Pages → branch <code>main</code>, folder <code>/docs</code>). Open the live URL - that link <em>is</em> your reproducible project, ready for the December 11 submission.</li>
 </ol>
 
 
