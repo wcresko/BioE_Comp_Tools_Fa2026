@@ -5,22 +5,25 @@ title: "Homework 2 - Computational Tools for Bioengineers 2026"
 ## Due: Submit your work via Canvas by the end of the day (midnight) on Monday, November 30th, 2026.
 
 ::: callout-note
-**Assigned Monday, November 16, 2026** - and posted early so you can plan ahead. Parts 1 and 2 use material you already have (Weeks 5-7); Part 3 uses the Week 8 lecture (Git and GitHub); Part 4 uses the Week 9 lecture on software environments (Nov 23). Do the parts in order as the lectures land, and the whole assignment stays comfortable.
+- Parts 1 and 2 use material you already have (Weeks 5-7)
+
+- Part 3 uses the Week 8 lecture (Git and GitHub)
+
+- Your Final Project will use a similar framework
 :::
 
 ## Learning Objectives
 
 By completing this homework, you will demonstrate that you can:
 
--   Write a complete, re-runnable analysis script in R or Python that reads, reshapes, summarizes and visualizes a real dataset
--   Author a **Quarto report** in which the prose, code, figures and even the numbers in your sentences regenerate from the data on every render
--   Put the whole project under **version control** with Git, with a meaningful commit history and a README, and publish it to **GitHub**
--   Create and **record** a software environment (`environment.yml`), rebuild it from that record, and show your analysis runs inside it
--   Assemble all of the above into one repository that another scientist could clone and re-run from scratch
+- Write a complete, re-runnable analysis script in R or Python that reads, reshapes, summarizes and visualizes a real dataset
+- Author a **Quarto report** in which the prose, code, figures and even the numbers in your sentences regenerate from the data on every render
+- Put the whole project under **version control** with Git, with a meaningful commit history and a README, and publish it to **GitHub**
+- Assemble all of the above into one repository that another scientist could clone and re-run from scratch
 
 ## Background
 
-This is the full loop of modern computational science, in miniature: analyze locally, document reproducibly, record the environment, and publish it so it travels. (The last piece - scaling it to Talapas - arrives in Week 10 and belongs to your term project.) You will use the course stickleback RNA-seq dataset (`Stickle_RNAseq.tsv`: 80 fish, 2 host genotypes × 2 microbiota treatments, 600 genes). Everything you need appeared in Lectures 05-09, the Week 6 companion notebooks, and Exercises 6-9 - this assignment asks you to put the pieces together *yourself*. The term project (due December 11) follows exactly this shape, so treat HW2 as its dress rehearsal.
+This is the full loop of modern computational science, in miniature: analyze locally, document reproducibly, record the environment, and publish it so it travels. (The last piece - scaling it to Talapas - arrives in Week 10 and belongs to your term project.) You will use the course stickleback RNA-seq dataset (`Stickle_RNAseq.tsv`: 80 fish, 2 host genotypes × 2 microbiota treatments, 600 genes). Everything you need appeared in Lectures 05-08, the Week 6 companion notebooks, and Exercises 6-8. This assignment asks you to put the pieces together *yourself*. The term project (due December 11) follows exactly this shape, but we will run the scripts on Talapas, so treat HW2 as its dress rehearsal.
 
 ## Part 1: The analysis script
 
@@ -37,9 +40,8 @@ Your script must run top to bottom with `Rscript` / `python3` from the project r
 3.  Write a per-group summary table (mean, median and sd of counts per genotype × microbiota group, for your four genes) to `results/`
 4.  Compute the mean and variance of every one of the 600 genes and write that table to `results/`
 5.  Save **two figures** to `results/` as SVG *and* 300-dpi PNG:
-    -   the faceted violin-plus-points panel of your four genes (the Lecture 06 "destination figure")
-    -   the mean-variance plot of all 600 genes, on log scales, with the variance-equals-mean line
-6.  Fail politely: check that the input file exists and exit with a non-zero status if not
+    - the faceted violin-plus-points panel of your four genes (the Lecture 06 "destination figure")
+    - the mean-variance plot of all 600 genes, on log scales, with the variance-equals-mean line
 
 ## Part 2: The Quarto report
 
@@ -47,11 +49,11 @@ Your script must run top to bottom with `Rscript` / `python3` from the project r
 
 Write a short (1-2 page) report around your analysis, with:
 
--   A YAML header (title, your name, `format: html`) and a `setup` chunk
--   **Inline code** so the fish count, gene count, and your four gene names in the prose come from the data, not your keyboard
--   Both figures as **labelled chunks** with captions, each **cross-referenced** from the text (`@fig-...`)
--   One displayed **LaTeX equation** (for example, the standard error or the Poisson mass function you are comparing the mean-variance plot against)
--   A short *Methods* paragraph stating where the analysis ran and naming the two things that make it reproducible: `environment.yml` and the Git history of your GitHub repository (give its URL here)
+- A YAML header (title, your name, `format: html`) and a `setup` chunk
+- **Inline code** so the fish count, gene count, and your four gene names in the prose come from the data, not your keyboard
+- Both figures as **labelled chunks** with captions, each **cross-referenced** from the text (`@fig-...`)
+- One displayed **LaTeX equation** (for example, the standard error or the Poisson mass function you are comparing the mean-variance plot against)
+- A short *Methods* paragraph stating where the analysis ran and naming your GitHub repository (give its URL here)
 
 ### Task 2.2: Render it cleanly
 
@@ -61,7 +63,7 @@ Restart R/Python, clear everything, and render from scratch. A report that only 
 
 ### Task 3.1: Make the project a repository
 
-`git init` your project folder **before** you write much code, and commit as you work - at least five meaningful commits with messages that say *why*, not just *what*. Add a `.gitignore` that excludes `data/` (large raw files do not belong in Git; your script and README say where the data come from).
+`git init` your project folder **before** you write much code, and commit as you work - at least five meaningful commits with messages that say *why*, not just *what*. Add a `.gitignore` that excludes `data/` (large raw files do not belong in Git. Your script and README say where the data come from).
 
 ### Task 3.2: Publish it
 
@@ -69,25 +71,9 @@ Create a repository on GitHub, connect it, and push. Add a `README.md` modeled o
 
 *(Stretch goal, not graded: render your report into `docs/`, push, and flip on GitHub Pages - your HW2 as a live website, exactly as we did in Lecture 08.)*
 
-## Part 4: The environment that makes it travel
-
-### Task 4.1: Create and record the environment (laptop)
-
-Create a conda environment containing exactly what your script needs, and record it portably:
-
-``` bash
-conda env export --from-history | sed '/prefix:/d' > environment.yml
-```
-
-### Task 4.2: Prove it rebuilds
-
-The test of the record is the rebuild: remove the environment (`conda env remove -n ...`), recreate it with `conda env create -f environment.yml`, activate it, re-run your Part 1 script inside it, and re-render the report. Commit `environment.yml` to the repository - code and environment, versioned together. (In Week 10 you will rebuild this same file on Talapas for your term project.)
-
-*(Using R for Part 1? You may instead pin your packages with `renv` and commit `renv.lock` - say so in your Methods paragraph. The conda route is still required for Task 4.1, with your four favorite Python packages, so you have practiced it.)*
-
 ## What to submit (one zip on Canvas)
 
-```
+```         
 hw2_yourname/
 ├── report.qmd  +  report.html      # Part 2, with your GitHub URL in Methods
 ├── README.md                       # Part 3
@@ -98,8 +84,4 @@ hw2_yourname/
 
 Also paste your **GitHub repository URL** into the Canvas submission comment.
 
-**What we grade (30% of course grade):** the script runs top-to-bottom (8%); the report renders cleanly with working inline code and cross-references (8%); the GitHub repository has a sensible `.gitignore`, a real commit history and a README another scientist could follow (7%); the environment record rebuilds and the analysis runs inside it (5%); organization and professionalism (2%).
-
-::: callout-tip
-Stuck? Ex 6-9 walk through every individual step; the Week 6 companion notebooks and working scripts on the [Examples page](../Examples.qmd#week-6) cover Part 1; and office hours are Friday 11:00-12:00 in the KC2 Computational Suite.
-:::
+**What I will grade (30% of course grade):** the script runs top-to-bottom (8%); the report renders cleanly with working inline code and cross-references (8%); the GitHub repository has a sensible `.gitignore`, a real commit history and a README another scientist could follow (7%); the environment record rebuilds and the analysis runs inside it (5%); organization and professionalism (2%).
